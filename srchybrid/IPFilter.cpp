@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -67,7 +67,7 @@ static int __cdecl CmpSIPFilterByStartAddr(const void* p1, const void* p2)
 
 CString CIPFilter::GetDefaultFilePath() const
 {
-	return thePrefs.GetConfigDir() + DFLT_IPFILTER_FILENAME;
+	return thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + DFLT_IPFILTER_FILENAME;
 }
 
 int CIPFilter::LoadFromDefaultFile(bool bShowResponse)
@@ -104,7 +104,7 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 			eFileType = FilterDat;
 		else
 		{
-			_setmode(fileno(readFile), _O_BINARY);
+			VERIFY( _setmode(fileno(readFile), _O_BINARY) != -1 );
 			static const BYTE _aucP2Bheader[] = "\xFF\xFF\xFF\xFFP2B";
 			BYTE aucHeader[sizeof _aucP2Bheader - 1];
 			if (fread(aucHeader, sizeof aucHeader, 1, readFile) == 1)
@@ -113,8 +113,8 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 					eFileType = PeerGuardian2;
 				else
 				{
-					fseek(readFile, 0, SEEK_SET);
-					_setmode(fileno(readFile), _O_TEXT); // ugly!
+					(void)fseek(readFile, 0, SEEK_SET);
+					VERIFY( _setmode(fileno(readFile), _O_TEXT) != -1 ); // ugly!
 				}
 			}
 		}
@@ -317,7 +317,7 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 
 void CIPFilter::SaveToDefaultFile()
 {
-	CString strFilePath = thePrefs.GetConfigDir() + DFLT_IPFILTER_FILENAME;
+	CString strFilePath = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + DFLT_IPFILTER_FILENAME;
 	FILE* fp = _tfsopen(strFilePath, _T("wt"), _SH_DENYWR);
 	if (fp != NULL)
 	{
@@ -503,7 +503,7 @@ void CIPFilter::UpdateIPFilterURL()
 	CString sbuffer;
 	CString strURL = thePrefs.GetUpdateURLIPFilter();
 	TCHAR szTempFilePath[_MAX_PATH];
-	_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
+	_tmakepath(szTempFilePath, NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T("tmp"));
 
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = GetResString(IDS_DWL_IPFILTERFILE);
@@ -535,7 +535,7 @@ void CIPFilter::UpdateIPFilterURL()
 		if (zfile)
 		{
 			CString strTempUnzipFilePath;
-			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
 			strTempUnzipFilePath.ReleaseBuffer();
 			if (zfile->Extract(strTempUnzipFilePath))
 			{
@@ -566,7 +566,7 @@ void CIPFilter::UpdateIPFilterURL()
 			bIsZipFile = true;
 
 			CString strTempUnzipFilePath;
-			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
 			strTempUnzipFilePath.ReleaseBuffer();
 
 			// add filename and extension of uncompressed file to temporary file
@@ -835,6 +835,6 @@ void CIPFilter::AddFromFile2(LPCTSTR pszFilePath)
 
 CString CIPFilter::GetDefaultStaticFilePath() const
 {
-	return thePrefs.GetConfigDir() + DFLT_STATIC_IPFILTER_FILENAME;
+	return thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + DFLT_STATIC_IPFILTER_FILENAME;
 }
 // <== Static IP Filter - Stulle

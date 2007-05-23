@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -60,7 +60,8 @@ CTrayDialog::CTrayDialog(UINT uIDD,CWnd* pParent /*=NULL*/)
 	m_nDefaultMenuItem = 0;
 	m_hPrevIconDelete = NULL;
     m_bCurIconDelete = false;
-	m_bdoubleclicked = false;
+	m_bLButtonDblClk = false;
+	m_bLButtonDown = false;
 	m_uSingleClickTimer = 0;
 	m_bMaximized = false; //MORPH - Added, Static Tray Icon
 }
@@ -217,19 +218,25 @@ LRESULT CTrayDialog::OnTrayNotify(WPARAM wParam, LPARAM lParam)
 			break;
 
 		case WM_LBUTTONUP:
-			if (m_bdoubleclicked)
+			// Handle the WM_LBUTTONUP only if we know that there was also an according
+			// WM_LBUTTONDOWN or WM_LBUTTONDBLCLK on our tray bar icon. If we would handle
+			// WM_LBUTTONUP without checking this, we may get a single WM_LBUTTONUP message
+			// whereby the according WM_LBUTTONDOWN message was meant for some other tray bar
+			// icon.
+			if (m_bLButtonDblClk)
 			{
 				KillSingleClickTimer();
 				RestoreWindow();
-				m_bdoubleclicked = false;
+				m_bLButtonDblClk = false;
 			}
-			else
+			else if (m_bLButtonDown)
 			{
 				if (m_uSingleClickTimer == 0)
 				{
 					if (!IsWindowVisible())
 						m_uSingleClickTimer = SetTimer(IDT_SINGLE_CLICK, 300, NULL);
 				}
+				m_bLButtonDown = false;
 			}
 			break;
 
@@ -245,7 +252,7 @@ LRESULT CTrayDialog::OnTrayNotify(WPARAM wParam, LPARAM lParam)
 			KillSingleClickTimer();
 			GetCursorPos(&pt);
 			//ClientToScreen(&pt);
-			OnTrayRButtonUp(pt);//bond006: systray menu gets stuck (bugfix)
+			OnTrayRButtonUp(pt);
 			break;
 
 		case WM_RBUTTONDBLCLK:
@@ -331,6 +338,7 @@ void CTrayDialog::OnTrayRButtonUp(CPoint /*pt*/)
 
 void CTrayDialog::OnTrayLButtonDown(CPoint /*pt*/)
 {
+	m_bLButtonDown = true;
 }
 
 void CTrayDialog::OnTrayLButtonUp(CPoint /*pt*/)
@@ -339,7 +347,7 @@ void CTrayDialog::OnTrayLButtonUp(CPoint /*pt*/)
 
 void CTrayDialog::OnTrayLButtonDblClk(CPoint /*pt*/)
 {
-	m_bdoubleclicked = true;
+	m_bLButtonDblClk = true;
 }
 
 void CTrayDialog::OnTrayRButtonDblClk(CPoint /*pt*/)

@@ -841,7 +841,7 @@ void CPreparedHyperText::AppendKeyWord(const CString& sText, COLORREF iColor){
 //CLinePartInfo
 
  CLinePartInfo::CLinePartInfo(int iBegin, uint16 iEnd, CHyperLink* pHyperLink, CKeyWord* pKeyWord){
-	m_xBegin = iBegin;
+	m_xBegin = (uint16)iBegin;
 	m_xEnd = iEnd;
 	m_pHyperLink = pHyperLink;
 	m_pKeyWord = pKeyWord;
@@ -1434,7 +1434,7 @@ void CHyperTextCtrl::UpdateSize(bool bRepaint){
 					}
 					else{
 						pl.m_xBegin =  it->End() + 1;
-						CLinePartInfo pln(i, it->End(), &*it);
+						CLinePartInfo pln((uint16)i, (uint16)it->End(), &*it);
 						li.push_back(pln);
 						i = pl.m_xBegin;
 						it++;
@@ -1454,7 +1454,7 @@ void CHyperTextCtrl::UpdateSize(bool bRepaint){
 					}
 					else{
 						pl.m_xBegin =  ht->End() + 1;
-						CLinePartInfo pln(i, ht->End(),0, &*ht);
+						CLinePartInfo pln((uint16)i, (uint16)ht->End(),0, &*ht);
 						li.push_back(pln);
 						i = pl.m_xBegin;
 						ht++;
@@ -1632,7 +1632,7 @@ void CHyperTextCtrl::UpdateVisLines(){
 				rcBounds.top = ypos;
 				rcBounds.bottom = ypos+m_iLineHeight;
 
-				vl.push_back(CVisPart(*jt, rcBounds, Offset, Len, NULL, NULL));
+				vl.push_back(CVisPart(*jt, rcBounds, Offset, (uint16)Len, NULL, NULL));
 			}
 
 			if(XPos > rcClient.Width())
@@ -1748,7 +1748,7 @@ void CHyperTextCtrl::SetColors() {
 void CHyperTextCtrl::LoadHandCursor() 
 {
 	CString windir; 
-	GetWindowsDirectory(windir.GetBuffer(MAX_PATH), MAX_PATH);
+	(void)GetWindowsDirectory(windir.GetBuffer(MAX_PATH), MAX_PATH);
 	windir.ReleaseBuffer();
 	windir += _T("\\winhlp32.exe");
 	HMODULE hModule = LoadLibrary(windir);

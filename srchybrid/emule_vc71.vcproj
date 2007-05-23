@@ -12,14 +12,15 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\debug"
-			IntermediateDirectory=".\debug"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
 			DeleteExtensionsOnClean="*.obj;*.ilk;*.pdb;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.bat;*.asm;$(TargetPath)">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/Wall"
 				Optimization="0"
 				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;UPNP_STATIC_LIB"
@@ -36,11 +37,11 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="version.lib winmm.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib Iphlpapi.lib upnplib\win32project\Debug\upnplib.lib pthreads\pthreads\debug\pthreadVC2_D.lib"
+				AdditionalDependencies="version.lib winmm.lib ADSIId.lib crypt32.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\id3libD.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib Iphlpapi.lib upnplib\win32project\Debug\upnplib.lib pthreads\pthreads\debug\pthreadVC2_D.lib"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				IgnoreDefaultLibraryNames=""
-				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
+				DelayLoadDLLs=""
 				GenerateDebugInformation="TRUE"
 				SubSystem="2"
 				TargetMachine="1"/>
@@ -72,8 +73,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\release"
-			IntermediateDirectory=".\release"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="1"
 			CharacterSet="1"
@@ -81,6 +82,7 @@
 			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/Wall"
 				Optimization="3"
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
@@ -126,6 +128,68 @@
 			<Tool
 				Name="VCResourceCompilerTool"
 				PreprocessorDefinitions="NDEBUG;_UNICODE;UNICODE"
+				Culture="1033"
+				AdditionalIncludeDirectories="$(IntDir)"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
+		<Configuration
+			Name="Debug (MSLU)|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="1"
+			UseOfMFC="1"
+			CharacterSet="1"
+			DeleteExtensionsOnClean="*.obj;*.ilk;*.pdb;*.tlb;*.tli;*.tlh;*.tmp;*.rsp;*.bat;*.asm;$(TargetPath)">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/Wall"
+				Optimization="0"
+				AdditionalIncludeDirectories=".,..;..\id3lib\include"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;SUPPORT_LARGE_FILES"
+				MinimalRebuild="TRUE"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				BufferSecurityCheck="TRUE"
+				EnableFunctionLevelLinking="TRUE"
+				TreatWChar_tAsBuiltInType="TRUE"
+				ForceConformanceInForLoopScope="TRUE"
+				UsePrecompiledHeader="3"
+				WarningLevel="4"
+				DebugInformationFormat="3"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLinkerTool"
+				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib gdiplus.lib ADSIId.lib crypt32.lib ..\zlib\debug\zlib.lib ..\crypto51\debug\cryptlib.lib ..\id3lib\libprj\debug\id3lib.lib .\CxImage\debug\cximage.lib ..\png\debug\png.lib ..\ResizableLib\DebugUnicode\ResizableLib.lib"
+				LinkIncremental="2"
+				SuppressStartupBanner="TRUE"
+				IgnoreDefaultLibraryNames="kernel32.lib;advapi32.lib;user32.lib;gdi32.lib;shell32.lib;comdlg32.lib;version.lib;mpr.lib;rasapi32.lib;winmm.lib;winspool.lib;vfw32.lib;secur32.lib;oleacc.lib;oledlg.lib;sensapi.lib"
+				DelayLoadDLLs="oleacc.dll;gdiplus.dll;ws2_32.dll"
+				GenerateDebugInformation="TRUE"
+				SubSystem="2"
+				TargetMachine="1"/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="FALSE"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG;_UNICODE;UNICODE"
 				Culture="1033"
 				AdditionalIncludeDirectories="$(IntDir)"/>
 			<Tool
@@ -375,6 +439,14 @@
 						Outputs="$(IntDir)\$(InputName).obj"/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="Debug (MSLU)|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml.exe /c /Cx /coff /Fo $(IntDir)\ &quot;$(InputPath)&quot;
+"
+						Outputs="$(IntDir)\$(InputName).obj"/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Beta|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
@@ -399,6 +471,12 @@
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug (MSLU)|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						UsePrecompiledHeader="0"/>
@@ -437,6 +515,16 @@
 						Description="Performing Custom Build Step"
 						CommandLine=""
 						Outputs=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug (MSLU)|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="$(InputFileName)"
+						CommandLine="bison --no-lines --defines --output &quot;$(InputDir)$(InputName).cpp&quot; &quot;$(InputFileName)&quot;
+"
+						Outputs="$(ProjectDir)\$(InputName).cpp; $(ProjectDir)\$(InputName).hpp"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Release|Win32">
@@ -496,6 +584,12 @@
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="Debug (MSLU)|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Beta|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -505,12 +599,40 @@
 			<File
 				RelativePath="Scanner.l">
 				<FileConfiguration
-					Name="Debug|Win32">
+					Name="Debug|Win32"
+					ExcludedFromBuild="TRUE">
 					<Tool
 						Name="VCCustomBuildTool"
-						Description="Performing Custom Build Step"
-						CommandLine=""
-						Outputs=""/>
+						Description="$(InputFileName)"
+						CommandLine="flex -L -8 -o&quot;$(ProjectDir)$(InputName).cpp&quot; &quot;-S$(ProjectDir)flex.skl&quot; &quot;$(InputPath)&quot;
+"
+						Outputs="$(ProjectDir)$(InputName).cpp"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCustomBuildTool"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug (MSLU)|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="$(InputFileName)"
+						CommandLine="flex -L -8 -o&quot;$(ProjectDir)$(InputName).cpp&quot; &quot;-S$(ProjectDir)flex.skl&quot; &quot;$(InputPath)&quot;
+"
+						Outputs="$(ProjectDir)$(InputName).cpp"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32"
+					ExcludedFromBuild="TRUE">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="$(InputFileName)"
+						CommandLine="flex -L -8 -o&quot;$(ProjectDir)$(InputName).cpp&quot; &quot;-S$(ProjectDir)flex.skl&quot; &quot;$(InputPath)&quot;
+"
+						Outputs="$(ProjectDir)$(InputName).cpp"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -562,6 +684,14 @@
 						Outputs="$(IntDir)\$(InputName).obj"/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="Debug (MSLU)|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml.exe /c /Cx /coff /Fo $(IntDir)\ &quot;$(InputPath)&quot;
+"
+						Outputs="$(IntDir)\$(InputName).obj"/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Beta|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
@@ -606,6 +736,12 @@
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
 				<FileConfiguration
+					Name="Debug (MSLU)|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
+				<FileConfiguration
 					Name="Beta|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
@@ -635,6 +771,9 @@
 			</File>
 			<File
 				RelativePath=".\UPnP_IGDControlPoint.cpp">
+			</File>
+			<File
+				RelativePath=".\UPnPFinder.cpp">
 			</File>
 			<File
 				RelativePath="URLClient.cpp">
@@ -675,6 +814,9 @@
 			<Filter
 				Name="Kademlia"
 				Filter="">
+				<File
+					RelativePath="kademlia\io\BufferedFileIO.cpp">
+				</File>
 				<File
 					RelativePath="kademlia\io\ByteIO.cpp">
 				</File>
@@ -790,13 +932,13 @@
 				RelativePath="CollectionFile.h">
 			</File>
 			<File
-				RelativePath="CommentListCtrl.h">
-			</File>
-			<File
 				RelativePath="CorruptionBlackBox.h">
 			</File>
 			<File
 				RelativePath="DeadSourceList.h">
+			</File>
+			<File
+				RelativePath="Debug_FileSize.h">
 			</File>
 			<File
 				RelativePath="DebugHelpers.h">
@@ -814,10 +956,19 @@
 				RelativePath="Emule.h">
 			</File>
 			<File
+				RelativePath=".\EncryptedDatagramSocket.h">
+			</File>
+			<File
+				RelativePath=".\EncryptedStreamSocket.h">
+			</File>
+			<File
 				RelativePath="Exceptions.h">
 			</File>
 			<File
 				RelativePath="fakecheck.h">
+			</File>
+			<File
+				RelativePath="fileformat.h">
 			</File>
 			<File
 				RelativePath=".\FileProcessing.h">
@@ -880,6 +1031,9 @@
 				RelativePath="Mdump.h">
 			</File>
 			<File
+				RelativePath="MediaInfo.h">
+			</File>
+			<File
 				RelativePath="MMServer.h">
 			</File>
 			<File
@@ -929,6 +1083,9 @@
 			</File>
 			<File
 				RelativePath="Quantize.h">
+			</File>
+			<File
+				RelativePath="RARFile.h">
 			</File>
 			<File
 				RelativePath="Resource.h">
@@ -1021,10 +1178,16 @@
 				RelativePath=".\UPnP_IGDControlPoint.h">
 			</File>
 			<File
+				RelativePath=".\UPnPFinder.h">
+			</File>
+			<File
 				RelativePath="URLClient.h">
 			</File>
 			<File
 				RelativePath="Version.h">
+			</File>
+			<File
+				RelativePath=".\VistaDefines.h">
 			</File>
 			<File
 				RelativePath=".\WebCache\WebCache.h">
@@ -1062,6 +1225,9 @@
 			<Filter
 				Name="Kademlia"
 				Filter="">
+				<File
+					RelativePath="kademlia\io\BufferedFileIO.h">
+				</File>
 				<File
 					RelativePath="kademlia\io\ByteIO.h">
 				</File>
@@ -1156,6 +1322,9 @@
 				RelativePath="AddSourceDlg.cpp">
 			</File>
 			<File
+				RelativePath=".\ArchivePreviewDlg.cpp">
+			</File>
+			<File
 				RelativePath="BarShader.cpp">
 			</File>
 			<File
@@ -1201,6 +1370,9 @@
 				RelativePath="CommentDialogLst.cpp">
 			</File>
 			<File
+				RelativePath=".\CommentListCtrl.cpp">
+			</File>
+			<File
 				RelativePath="CreditsDlg.cpp">
 			</File>
 			<File
@@ -1226,6 +1398,9 @@
 			</File>
 			<File
 				RelativePath="ED2kLinkDlg.cpp">
+			</File>
+			<File
+				RelativePath=".\EditDelayed.cpp">
 			</File>
 			<File
 				RelativePath="EditX.cpp">
@@ -1357,6 +1532,9 @@
 				RelativePath="PPgIRC.cpp">
 			</File>
 			<File
+				RelativePath=".\PPgMessages.cpp">
+			</File>
+			<File
 				RelativePath="PPgMorph.cpp">
 			</File>
 			<File
@@ -1408,6 +1586,9 @@
 				RelativePath="RichEditCtrlX.cpp">
 			</File>
 			<File
+				RelativePath=".\RichEditStream.cpp">
+			</File>
+			<File
 				RelativePath="SearchDlg.cpp">
 			</File>
 			<File
@@ -1433,6 +1614,9 @@
 			</File>
 			<File
 				RelativePath=".\SlideBar.cpp">
+			</File>
+			<File
+				RelativePath=".\SmileySelector.cpp">
 			</File>
 			<File
 				RelativePath="SplashScreen.cpp">
@@ -1592,6 +1776,9 @@
 				RelativePath="AfxBeginMsgMapTemplate.h">
 			</File>
 			<File
+				RelativePath=".\ArchivePreviewDlg.h">
+			</File>
+			<File
 				RelativePath="BarShader.h">
 			</File>
 			<File
@@ -1637,6 +1824,9 @@
 				RelativePath="CommentDialogLst.h">
 			</File>
 			<File
+				RelativePath=".\CommentListCtrl.h">
+			</File>
+			<File
 				RelativePath="CreditsDlg.h">
 			</File>
 			<File
@@ -1665,6 +1855,9 @@
 			</File>
 			<File
 				RelativePath="ED2kLinkDlg.h">
+			</File>
+			<File
+				RelativePath=".\EditDelayed.h">
 			</File>
 			<File
 				RelativePath="EditX.h">
@@ -1811,6 +2004,9 @@
 				RelativePath="PPgIRC.h">
 			</File>
 			<File
+				RelativePath=".\PPgMessages.h">
+			</File>
+			<File
 				RelativePath="PPgMorph.h">
 			</File>
 			<File
@@ -1859,6 +2055,9 @@
 				RelativePath="RichEditCtrlX.h">
 			</File>
 			<File
+				RelativePath=".\RichEditStream.h">
+			</File>
+			<File
 				RelativePath="Scanner.h">
 			</File>
 			<File
@@ -1893,6 +2092,9 @@
 			</File>
 			<File
 				RelativePath=".\SlideBar.h">
+			</File>
+			<File
+				RelativePath=".\SmileySelector.h">
 			</File>
 			<File
 				RelativePath="SplashScreen.h">

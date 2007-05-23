@@ -140,7 +140,8 @@ int yyerrorf(LPCTSTR errstr, ...);
 #pragma warning(disable:4065) // switch statement contains 'default' but no 'case' labels
 #pragma warning(disable:4102) // 'yyerrlab1' : unreferenced label
 #pragma warning(disable:4127) // conditional expression is constant
-#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4242) // conversion from <type1> to <type1>, possible loss of data
+#pragma warning(disable:4244) // conversion from <type1> to <type2>, possible loss of data
 #pragma warning(disable:4702) // unreachable code
 
 
@@ -431,13 +432,13 @@ static const yysigned_char yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const unsigned short int yyrline[] =
 {
-       0,    57,    57,    78,    87,   104,   109,   121,   126,   136,
-     146,   156,   161,   167,   173,   179,   184,   192,   197,   201,
-     206,   211,   215,   219,   223,   227,   231,   236,   241,   246,
-     253,   256,   258,   261,   263,   266,   268,   271,   273,   276,
-     278,   281,   283,   286,   288,   291,   293,   296,   298,   301,
-     303,   306,   308,   311,   313,   317,   319,   321,   323,   325,
-     327
+       0,    58,    58,    79,    88,   105,   110,   122,   127,   137,
+     147,   157,   162,   168,   174,   180,   185,   193,   198,   202,
+     207,   212,   216,   220,   224,   228,   232,   237,   242,   247,
+     254,   257,   259,   262,   264,   267,   269,   272,   274,   277,
+     279,   282,   284,   287,   289,   292,   294,   297,   299,   302,
+     304,   307,   309,   312,   314,   318,   320,   322,   324,   326,
+     328
 };
 #endif
 

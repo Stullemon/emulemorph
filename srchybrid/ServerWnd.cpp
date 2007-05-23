@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -56,8 +56,8 @@
 static char THIS_FILE[]=__FILE__;
 #endif
 
-#define	SVWND_SPLITTER_YOFF		10
-#define	SVWND_SPLITTER_HEIGHT	5
+#define	SVWND_SPLITTER_YOFF		6
+#define	SVWND_SPLITTER_HEIGHT	4
 
 #define	SERVERMET_STRINGS_PROFILE	_T("AC_ServerMetURLs.dat")
 #define SZ_DEBUG_LOG_TITLE			GetResString(IDS_VERBOSE_TITLE)
@@ -106,7 +106,6 @@ CServerWnd::CServerWnd(CWnd* pParent /*=NULL*/)
 	morphlog = new CHTRichEditCtrl;
 	//MORPH END   - Added by SiRoB, Morph Log
 	m_pacServerMetURL=NULL;
-	m_uLangID = MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT);
 	icon_srvlist = NULL;
 	memset(&m_cfDef, 0, sizeof m_cfDef);
 	memset(&m_cfBold, 0, sizeof m_cfBold);
@@ -143,6 +142,7 @@ BOOL CServerWnd::OnInitDialog()
 	CResizableDialog::OnInitDialog();
 
 	// using ES_NOHIDESEL is actually not needed, but it helps to get around a tricky window update problem!
+	// If that style is not specified there are troubles with right clicking into the control for the very first time!?
 #define	LOG_PANE_RICHEDIT_STYLES WS_CHILD | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL | ES_MULTILINE | ES_READONLY | ES_NOHIDESEL
 	CRect rect;
 
@@ -374,7 +374,7 @@ BOOL CServerWnd::OnInitDialog()
 		m_pacServerMetURL = new CCustomAutoComplete();
 		m_pacServerMetURL->AddRef();
 		if (m_pacServerMetURL->Bind(::GetDlgItem(m_hWnd, IDC_SERVERMETURL), ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST | ACO_FILTERPREFIXES ))
-			m_pacServerMetURL->LoadList(thePrefs.GetConfigDir() + SERVERMET_STRINGS_PROFILE);
+			m_pacServerMetURL->LoadList(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + SERVERMET_STRINGS_PROFILE);
 		if (theApp.m_fontSymbol.m_hObject){
 			GetDlgItem(IDC_DD)->SetFont(&theApp.m_fontSymbol);
 			GetDlgItem(IDC_DD)->SetWindowText(_T("6")); // show a down-arrow
@@ -392,6 +392,7 @@ BOOL CServerWnd::OnInitDialog()
 	rcSpl.top = 55+NEWSOFFSET;
 	rcSpl.bottom = rcSpl.top + SVWND_SPLITTER_HEIGHT;
 	m_wndSplitter.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_SERVER);
+	m_wndSplitter.SetDrawBorder(true);
 	InitSplitter();
 
 	//MORPH START - Added by SiRoB, XML News [O²]
@@ -427,8 +428,7 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL)
 		m_pacServerMetURL->AddItem(strURL, 0);
 
 	CString strTempFilename;
-	strTempFilename.Format(_T("%stemp-%d-server.met"), thePrefs.GetConfigDir(), ::GetTickCount());
-
+	strTempFilename.Format(_T("%stemp-%d-server.met"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), ::GetTickCount());
 
 	// try to download server.met
 	Log(GetResString(IDS_DOWNLOADING_SERVERMET_FROM), strURL);
@@ -445,7 +445,7 @@ bool CServerWnd::UpdateServerMetFromURL(CString strURL)
 	serverlistctrl.Hide();
 	serverlistctrl.AddServerMetToList(strTempFilename);
 	serverlistctrl.Visable();
-	_tremove(strTempFilename);
+	(void)_tremove(strTempFilename);
 	return true;
 }
 
@@ -479,8 +479,6 @@ void CServerWnd::Localize()
 {
 	serverlistctrl.Localize();
 
-	if (thePrefs.GetLanguageID() != m_uLangID){
-		m_uLangID = thePrefs.GetLanguageID();
 	    GetDlgItem(IDC_SERVLIST_TEXT)->SetWindowText(GetResString(IDS_SV_SERVERLIST));
 	    m_ctrlNewServerFrm.SetWindowText(GetResString(IDS_SV_NEWSERVER));
 	    GetDlgItem(IDC_SSTATIC4)->SetWindowText(GetResString(IDS_SV_ADDRESS));
@@ -530,7 +528,6 @@ void CServerWnd::Localize()
 		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		StatusSelector.SetItem(PaneMorphLog, &item);
 		//MORPH END   - Added by SiRoB, Morph Log
-	}
 
 	UpdateLogTabSelection();
 	UpdateControlsState();
@@ -539,12 +536,12 @@ void CServerWnd::Localize()
 void CServerWnd::OnBnClickedAddserver()
 {
 	CString serveraddr;
-	if (!GetDlgItem(IDC_IPADDRESS)->GetWindowTextLength()){
+	GetDlgItem(IDC_IPADDRESS)->GetWindowText(serveraddr);
+	serveraddr.Trim();
+	if (serveraddr.IsEmpty()) {
 		AfxMessageBox(GetResString(IDS_SRV_ADDR));
 		return;
 	}
-	else
-		GetDlgItem(IDC_IPADDRESS)->GetWindowText(serveraddr);
 
 	uint16 uPort = 0;
 	if (_tcsncmp(serveraddr, _T("ed2k://"), 7) == 0){
@@ -675,6 +672,7 @@ void CServerWnd::OnBnClickedUpdateServerMetFromUrl()
 {
 	CString strURL;
 	GetDlgItem(IDC_SERVERMETURL)->GetWindowText(strURL);
+	strURL.Trim();
 	if (strURL.IsEmpty())
 	{
 		if (thePrefs.addresses_list.IsEmpty())
@@ -921,7 +919,7 @@ BOOL CServerWnd::SaveServerMetStrings()
 {
 	if (m_pacServerMetURL== NULL)
 		return FALSE;
-	return m_pacServerMetURL->SaveList(thePrefs.GetConfigDir() + SERVERMET_STRINGS_PROFILE);
+	return m_pacServerMetURL->SaveList(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + SERVERMET_STRINGS_PROFILE);
 }
 
 void CServerWnd::ShowNetworkInfo()
@@ -1281,7 +1279,6 @@ LRESULT CServerWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam)
 				}
 			}
 			break;
-
 	}
 
 	return CResizableDialog::DefWindowProc(message, wParam, lParam);
@@ -1316,7 +1313,7 @@ void CServerWnd::ListFeeds()
 	char buffer[1024];
 	int lenBuf = 1024;
 
-	FILE* readFile= _tfsopen(CString(thePrefs.GetConfigDir())+_T("XMLNews.dat"), _T("r"), _SH_DENYWR);
+	FILE* readFile= _tfsopen(CString(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR))+_T("XMLNews.dat"), _T("r"), _SH_DENYWR);
 	if (readFile!=NULL)
 	{
 		GetDlgItem(IDC_FEEDLIST)->EnableWindow();
@@ -1357,9 +1354,9 @@ void CServerWnd::DownloadFeed()
 	// Get the URL to download
 	CString strURL = aFeedUrls.GetAt(numero);
 	TCHAR szTempFilePath[_MAX_PATH]; 
-	_stprintf(szTempFilePath, _T("%s%d.xml.tmp"),thePrefs.GetFeedsDir(), numero);
+	_stprintf(szTempFilePath, _T("%s%d.xml.tmp"),thePrefs.GetMuleDirectory(EMULE_FEEDSDIR), numero);
 	TCHAR szFilePath[_MAX_PATH]; 
-	_stprintf(szFilePath, _T("%s%d.xml"),thePrefs.GetFeedsDir(), numero);
+	_stprintf(szFilePath, _T("%s%d.xml"),thePrefs.GetMuleDirectory(EMULE_FEEDSDIR), numero);
 	
 	// Start the download dialog and retrieve the file
 	CHttpDownloadDlg dlgDownload;
@@ -1402,9 +1399,9 @@ void CServerWnd::DownloadAllFeeds()
 		CString strURL = aFeedUrls.GetAt(i);
 
 		TCHAR szTempFilePath[_MAX_PATH]; 
-		_stprintf(szTempFilePath, _T("%s%d.xml.tmp"),thePrefs.GetFeedsDir(), i);
+		_stprintf(szTempFilePath, _T("%s%d.xml.tmp"),thePrefs.GetMuleDirectory(EMULE_FEEDSDIR), i);
 		TCHAR szFilePath[_MAX_PATH]; 
-		_stprintf(szFilePath, _T("%s%d.xml"),thePrefs.GetFeedsDir(), i);
+		_stprintf(szFilePath, _T("%s%d.xml"),thePrefs.GetMuleDirectory(EMULE_FEEDSDIR), i);
 
 		// Start the download dialog and retrieve the file
 		CHttpDownloadDlg dlgDownload;
@@ -1585,7 +1582,7 @@ void CServerWnd::OnFeedListSelChange()
 {
 	GetDlgItem(IDC_FEEDUPDATE)->EnableWindow();
 	CString strTempFilename;
-	strTempFilename.Format(_T("%s%d.xml"),thePrefs.GetFeedsDir(),m_feedlist.GetCurSel());
+	strTempFilename.Format(_T("%s%d.xml"),thePrefs.GetMuleDirectory(EMULE_FEEDSDIR),m_feedlist.GetCurSel());
 	ParseNewsFile(strTempFilename);
 }
 //MORPH END - Added by SiRoB, XML News [O²]
@@ -1715,8 +1712,8 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 					// corresponding number of the entrys in the ComboBox.
 					for (int j=sel; j < names.GetSize (); j++) {
 						CString Source, Dest;
-						Source.Format(_T("%s%d.xml"),thePrefs.GetFeedsDir(),j+1);
-						Dest.Format(_T("%s%d.xml"),thePrefs.GetFeedsDir(),j);
+						Source.Format(_T("%s%d.xml"),thePrefs.GetMuleDirectory(EMULE_FEEDSDIR),j+1);
+						Dest.Format(_T("%s%d.xml"),thePrefs.GetMuleDirectory(EMULE_FEEDSDIR),j);
 						DeleteFile (Dest);
 						_trename(Source, Dest);
 					}
@@ -1733,7 +1730,7 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 		} break;
 		case MP_DELETEALLFEEDS: {
 			// Delete the file and reload the feeds for the ComboBox
-			DeleteFile (CString(thePrefs.GetConfigDir())+_T("XMLNews.dat"));
+			DeleteFile (CString(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR))+_T("XMLNews.dat"));
 			ListFeeds ();
 			return true;
 		} break;
@@ -1754,7 +1751,7 @@ BOOL CServerWnd::OnCommand(WPARAM wParam, LPARAM lParam) {
 // ...
 // There's no "," sign allowed in the name!
 void CServerWnd::ReadXMLList (CStringList& _names, CStringList& _urls) {
-	FILE* readfile = _tfsopen(CString(thePrefs.GetConfigDir())+_T("XMLNews.dat"), _T("r"), _SH_DENYWR);
+	FILE* readfile = _tfsopen(CString(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR))+_T("XMLNews.dat"), _T("r"), _SH_DENYWR);
 	if (readfile == NULL) return; 
 	while (!feof (readfile)) {
 		// Read the current line
@@ -1783,7 +1780,7 @@ void CServerWnd::ReadXMLList (CStringList& _names, CStringList& _urls) {
 // Rewrite the XMLNews.dat file.
 // Filter all "," characters if some exist
 void CServerWnd::WriteXMLList (CStringList& _names, CStringList& _urls) {
-	FILE* writefile = _tfsopen(CString(thePrefs.GetConfigDir())+_T("XMLNews.dat"), _T("w"), _SH_DENYWR);
+	FILE* writefile = _tfsopen(CString(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR))+_T("XMLNews.dat"), _T("w"), _SH_DENYWR);
 	if (writefile == NULL) return; 
 	POSITION posnames = _names.GetHeadPosition ();
 	POSITION posurls = _urls.GetHeadPosition ();

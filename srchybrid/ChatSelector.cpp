@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -40,6 +40,11 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define	STATUS_MSG_COLOR		RGB(255,0,0)		// red
+#define	SENT_TARGET_MSG_COLOR	RGB(0,192,0)		// bright green
+#define	RECV_SOURCE_MSG_COLOR	RGB(0,128,255)		// bright cyan/blue
+
+#define	TIME_STAMP_FORMAT		_T("[%H:%M] ")
 
 #define URLINDICATOR	_T("http:|www.|.de |.net |.com |.org |.to |.tk |.cc |.fr |ftp:|ed2k:|https:|ftp.|.info|.biz|.uk|.eu|.es|.tv|.cn|.tw|.ws|.nu|.jp")
 
@@ -70,17 +75,12 @@ BEGIN_MESSAGE_MAP(CChatSelector, CClosableTabCtrl)
 	ON_WM_DESTROY()
 	ON_WM_TIMER()
 	ON_WM_SYSCOLORCHANGE()
-	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnTcnSelchangeChatsel)
-	ON_BN_CLICKED(IDC_CCLOSE, OnBnClickedCclose)
-	ON_BN_CLICKED(IDC_CSEND, OnBnClickedCsend)
-	ON_WM_CONTEXTMENU() // context-fix
+	ON_NOTIFY_REFLECT(TCN_SELCHANGE, OnTcnSelChangeChatSel)
+	ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
 CChatSelector::CChatSelector()
 {
-	m_hwndCloseBtn = NULL;
-	m_hwndMessageBox = NULL;
-	m_hwndSendBtn = NULL;
 	m_lastemptyicon = false;
 	m_blinkstate = false;
 	m_Timer = 0;
@@ -91,19 +91,11 @@ CChatSelector::~CChatSelector()
 {
 }
 
-void CChatSelector::Init()
+void CChatSelector::Init(CChatWnd *pParent)
 {
-	m_hwndCloseBtn = GetParent()->GetDlgItem(IDC_CCLOSE)->m_hWnd;
-	::SetParent(m_hwndCloseBtn, m_hWnd);
-
-	m_hwndSendBtn = GetParent()->GetDlgItem(IDC_CSEND)->m_hWnd;
-	::SetParent(m_hwndSendBtn, m_hWnd);
-
-	m_hwndMessageBox = GetParent()->GetDlgItem(IDC_CMESSAGE)->m_hWnd;
-	::SetParent(m_hwndMessageBox, m_hWnd);
+	m_pParent = pParent;
 
 	ModifyStyle(0, WS_CLIPCHILDREN);
-
 	SetAllIcons();
 
 	VERIFY( (m_Timer = SetTimer(20, 1500, 0)) != NULL );
@@ -142,7 +134,7 @@ void CChatSelector::UpdateFonts(CFont* pFont)
 CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 {
      if (show)
-        ::SetFocus(m_hwndMessageBox);
+		m_pParent->m_wndMessage.SetFocus();
 	if (GetTabByClient(client) != -1){
 		if (show){
 			SetCurSel(GetTabByClient(client));
@@ -158,18 +150,27 @@ CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 	CRect rcChat;
 	GetChatSize(rcChat);
 	if (GetItemCount() == 0)
-		rcChat.top += 20;
-	chatitem->log->Create(WS_CHILD | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VSCROLL | ES_MULTILINE | ES_READONLY, rcChat, this, (UINT)-1);
+		rcChat.top += 19; // add the height of the tab which is not yet there
+	// using ES_NOHIDESEL is actually not needed, but it helps to get around a tricky window update problem!
+	// If that style is not specified there are troubles with right clicking into the control for the very first time!?
+	chatitem->log->Create(WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_VSCROLL | ES_MULTILINE | ES_READONLY | ES_NOHIDESEL, rcChat, this, (UINT)-1);
 	chatitem->log->ModifyStyleEx(0, WS_EX_STATICEDGE, SWP_FRAMECHANGED);
 	chatitem->log->SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
 	chatitem->log->SetEventMask(chatitem->log->GetEventMask() | ENM_LINK);
 	chatitem->log->SetFont(&theApp.m_fontHyperText);
 	chatitem->log->SetProfileSkinKey(_T("Chat"));
 	chatitem->log->ApplySkin();
+	chatitem->log->EnableSmileys(thePrefs.GetMessageEnableSmileys());
 
-	CTime theTime = CTime::GetCurrentTime();
-	CString sessions = GetResString(IDS_CHAT_START) + client->GetUserName() + CString(_T(" - ")) + theTime.Format(_T("%c")) + _T("\n");
-	chatitem->log->AppendKeyWord(sessions, RGB(255,0,0));
+	PARAFORMAT pf = {0};
+	pf.cbSize = sizeof pf;
+	pf.dwMask = PFM_OFFSET;
+	pf.dxOffset = 150;
+	chatitem->log->SetParaFormat(pf);
+
+	if (thePrefs.GetIRCAddTimeStamp())
+		AddTimeStamp(chatitem);
+	chatitem->log->AppendKeyWord(GetResString(IDS_CHAT_START) + client->GetUserName() + _T("\n"), STATUS_MSG_COLOR);
 	client->SetChatState(MS_CHATTING);
 
 	CString name;
@@ -201,6 +202,16 @@ int CChatSelector::GetTabByClient(CUpDownClient* client)
 			return i;
 	}
 	return -1;
+}
+
+CChatItem* CChatSelector::GetItemByIndex(int index)
+{
+	TCITEM item;
+	item.mask = TCIF_PARAM;
+	if (GetItem(index, &item)==FALSE)
+		return NULL;
+
+    return (CChatItem*)item.lParam;
 }
 
 CChatItem* CChatSelector::GetItemByClient(CUpDownClient* client)
@@ -261,9 +272,9 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, const CString& message
 		ci = StartSession(sender, false);
 		isNewChatWindow = true; 
 	}
-	if (thePrefs.GetIRCAddTimestamp())
+	if (thePrefs.GetIRCAddTimeStamp())
 		AddTimeStamp(ci);
-	ci->log->AppendKeyWord(sender->GetUserName(), RGB(50,200,250));
+	ci->log->AppendKeyWord(sender->GetUserName(), RECV_SOURCE_MSG_COLOR);
 	ci->log->AppendText(_T(": "));
 	ci->log->AppendText(message + _T("\n"));
 	int iTabItem = GetTabByClient(sender);
@@ -303,7 +314,7 @@ bool CChatSelector::SendMessage(const CString& rstrMessage)
 	if (ci->client->GetChatState() == MS_CONNECTING)
 		return false;
 
-	if (thePrefs.GetIRCAddTimestamp())
+	if (thePrefs.GetIRCAddTimeStamp())
 		AddTimeStamp(ci);
 	if (ci->client->socket && ci->client->socket->IsConnected())
 	{
@@ -313,13 +324,13 @@ bool CChatSelector::SendMessage(const CString& rstrMessage)
 		theStats.AddUpDataOverheadOther(packet->size);
 		ci->client->socket->SendPacket(packet, true, true);
 
-		ci->log->AppendKeyWord(thePrefs.GetUserNick(), RGB(1,180,20));
+		ci->log->AppendKeyWord(thePrefs.GetUserNick(), SENT_TARGET_MSG_COLOR);
 		ci->log->AppendText(_T(": "));
 		ci->log->AppendText(rstrMessage + _T("\n"));
 	}
 	else
 	{
-		ci->log->AppendKeyWord(_T("*** ") + GetResString(IDS_CONNECTING), RGB(255,0,0));
+		ci->log->AppendKeyWord(_T("*** ") + GetResString(IDS_CONNECTING), STATUS_MSG_COLOR);
 		ci->strMessagePending = rstrMessage;
 		ci->client->SetChatState(MS_CONNECTING);
 		//MORPH START - Changed by SiRoB, Ignore Max Connection -Patch-
@@ -341,17 +352,17 @@ void CChatSelector::ConnectingResult(CUpDownClient* sender, bool success)
 	ci->client->SetChatState(MS_CHATTING);
 	if (!success){
 		if (!ci->strMessagePending.IsEmpty()){
-			ci->log->AppendKeyWord(_T(" ") + GetResString(IDS_FAILED) + _T("\n"), RGB(255,0,0));
+			ci->log->AppendKeyWord(_T(" ") + GetResString(IDS_FAILED) + _T("\n"), STATUS_MSG_COLOR);
 			ci->strMessagePending.Empty();
 		}
 		else{
-			if (thePrefs.GetIRCAddTimestamp())
+			if (thePrefs.GetIRCAddTimeStamp())
 				AddTimeStamp(ci);
-			ci->log->AppendKeyWord(GetResString(IDS_CHATDISCONNECTED) + _T("\n"), RGB(255,0,0));
+			ci->log->AppendKeyWord(GetResString(IDS_CHATDISCONNECTED) + _T("\n"), STATUS_MSG_COLOR);
 		}
 	}
 	else if (!ci->strMessagePending.IsEmpty()){
-		ci->log->AppendKeyWord(_T(" ok\n"), RGB(255,0,0));
+		ci->log->AppendKeyWord(_T(" ok\n"), STATUS_MSG_COLOR);
 		
 		CSafeMemFile data;
 		data.WriteString(ci->strMessagePending, ci->client->GetUnicodeSupport());
@@ -359,18 +370,18 @@ void CChatSelector::ConnectingResult(CUpDownClient* sender, bool success)
 		theStats.AddUpDataOverheadOther(packet->size);
 		ci->client->socket->SendPacket(packet, true, true);
 
-		if (thePrefs.GetIRCAddTimestamp())
+		if (thePrefs.GetIRCAddTimeStamp())
 			AddTimeStamp(ci);
-		ci->log->AppendKeyWord(thePrefs.GetUserNick(), RGB(1,180,20));
+		ci->log->AppendKeyWord(thePrefs.GetUserNick(), SENT_TARGET_MSG_COLOR);
 		ci->log->AppendText(_T(": "));
 		ci->log->AppendText(ci->strMessagePending + _T("\n"));
 		
 		ci->strMessagePending.Empty();
 	}
 	else{
-		if (thePrefs.GetIRCAddTimestamp())
+		if (thePrefs.GetIRCAddTimeStamp())
 			AddTimeStamp(ci);
-		ci->log->AppendKeyWord(_T("*** Connected\n"), RGB(255,0,0));
+		ci->log->AppendKeyWord(_T("*** Connected\n"), STATUS_MSG_COLOR);
 	}
 }
 
@@ -441,7 +452,7 @@ void CChatSelector::ShowChat()
 
 	// show current chat window
 	ci->log->ShowWindow(SW_SHOW);
-	::SetFocus(m_hwndMessageBox);
+	m_pParent->m_wndMessage.SetFocus();
 
 	TCITEM item;
 	item.mask = TCIF_IMAGE;
@@ -461,7 +472,7 @@ void CChatSelector::ShowChat()
 	ci->notify = false;
 }
 
-void CChatSelector::OnTcnSelchangeChatsel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CChatSelector::OnTcnSelChangeChatSel(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	ShowChat();
 	*pResult = 0;
@@ -518,46 +529,18 @@ void CChatSelector::EndSession(CUpDownClient* client)
 
 void CChatSelector::GetChatSize(CRect& rcChat)
 {
-	CRect rcClose, rcSend, rcMessage;
-	::GetWindowRect(m_hwndCloseBtn, &rcClose);
-	::GetWindowRect(m_hwndSendBtn, &rcSend);
-	::GetWindowRect(m_hwndMessageBox, &rcMessage);
-
-	int iTop = rcClose.Height() > rcSend.Height() ? rcClose.Height() : rcSend.Height();
-	if (iTop < rcMessage.Height())
-		iTop = rcMessage.Height();
-	
 	CRect rcClient;
 	GetClientRect(&rcClient);
 	AdjustRect(FALSE, rcClient);
-	rcChat.left = rcClient.left + 7;
-	rcChat.top = rcClient.top + 7;
-	rcChat.right = rcChat.left + rcClient.right - 18;
-	rcChat.bottom = rcChat.top + rcClient.Height() - 7 - iTop - 14;
+	rcChat.left = rcClient.left + 4;
+	rcChat.top = rcClient.top + 4;
+	rcChat.right = rcClient.right - 4;
+	rcChat.bottom = rcClient.bottom - 4;
 }
 
 void CChatSelector::OnSize(UINT nType, int cx, int cy)
 {
 	CClosableTabCtrl::OnSize(nType, cx, cy);
-
-	CRect rect;
-	GetClientRect(&rect);
-	AdjustRect(FALSE, rect);
-
-	CRect rClose;
-	::GetWindowRect(m_hwndCloseBtn, &rClose);
-	::SetWindowPos(m_hwndCloseBtn, NULL, rect.right-7-rClose.Width(), rect.bottom-7-rClose.Height(),
-				   rClose.Width(), rClose.Height(), SWP_NOZORDER);
-	
-	CRect rSend;
-	::GetWindowRect(m_hwndSendBtn, &rSend);
-	::SetWindowPos(m_hwndSendBtn, NULL, rect.right-7-rClose.Width()-7-rSend.Width(), rect.bottom-7-rSend.Height(),
-				   rSend.Width(), rSend.Height(), SWP_NOZORDER);
-	
-	CRect rMessage;
-	::GetWindowRect(m_hwndMessageBox, &rMessage);
-	::SetWindowPos(m_hwndMessageBox, NULL, rect.left+7, rect.bottom-9-rMessage.Height(), 
-				   rect.right-7-rClose.Width()-7-rSend.Width()-21, rMessage.Height(), SWP_NOZORDER);
 
 	CRect rcChat;
 	GetChatSize(rcChat);
@@ -568,59 +551,6 @@ void CChatSelector::OnSize(UINT nType, int cx, int cy)
 	while (GetItem(i++, &item)){
 		CChatItem* ci = (CChatItem*)item.lParam;
 		ci->log->SetWindowPos(NULL, rcChat.left, rcChat.top, rcChat.Width(), rcChat.Height(), SWP_NOZORDER);
-	}
-}
-
-void CChatSelector::OnBnClickedCclose()
-{
-	EndSession();
-}
-
-void CChatSelector::OnBnClickedCsend()
-{
-	CString strMessage;
-	::GetWindowText(m_hwndMessageBox, strMessage.GetBuffer(MAX_CLIENT_MSG_LEN), MAX_CLIENT_MSG_LEN+1);
-	strMessage.ReleaseBuffer();
-	strMessage.Trim();
-	if (!strMessage.IsEmpty())
-	{
-		if (SendMessage(strMessage))
-			::SetWindowText(m_hwndMessageBox, _T(""));
-	}
-
-	::SetFocus(m_hwndMessageBox);
-}
-
-BOOL CChatSelector::PreTranslateMessage(MSG* pMsg)
-{
-	if (pMsg->message == WM_KEYDOWN)
-	{
-		if (pMsg->wParam == VK_RETURN){
-			if (pMsg->hwnd == m_hwndMessageBox)
-				OnBnClickedCsend();
-		}
-
-		if (pMsg->hwnd == m_hwndMessageBox && (pMsg->wParam == VK_UP || pMsg->wParam == VK_DOWN)){
-			theApp.emuledlg->chatwnd->ScrollHistory(pMsg->wParam == VK_DOWN);
-			return TRUE;
-		}
-	}
-	return CClosableTabCtrl::PreTranslateMessage(pMsg);
-}
-
-void CChatSelector::Localize(void)
-{
-	if (m_hWnd)
-	{
-		if (m_hwndSendBtn)
-			::SetWindowText(m_hwndSendBtn, GetResString(IDS_CW_SEND));
-		else
-			GetParent()->GetDlgItem(IDC_CSEND)->SetWindowText(GetResString(IDS_CW_SEND));
-
-		if (m_hwndCloseBtn)
-			::SetWindowText(m_hwndCloseBtn, GetResString(IDS_CW_CLOSE));
-		else
-			GetParent()->GetDlgItem(IDC_CCLOSE)->SetWindowText(GetResString(IDS_CW_CLOSE));
 	}
 }
 
@@ -654,7 +584,7 @@ bool CChatSelector::IsSpam(CString strMessage, CUpDownClient* client)
 
 void CChatSelector::AddTimeStamp(CChatItem* ci)
 {
-	ci->log->AppendText(CTime::GetCurrentTime().Format(_T("[%X] ")));
+	ci->log->AppendText(CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT));
 }
 
 void CChatSelector::OnDestroy()
@@ -670,11 +600,7 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 {
 	switch (wParam){
 		case MP_DETAIL:{
-			//Xman
-			//WiZaRd::Context-FiX
-			//const CChatItem* ci = GetCurrentChatItem();
-			const CChatItem* ci = m_contextItem;
-			//Xman end
+			const CChatItem* ci = GetItemByIndex(m_iContextIndex);
 			if (ci) {
 				CClientDetailDialog dialog(ci->client);
 				dialog.DoModal();
@@ -682,11 +608,7 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		}
 		case MP_ADDFRIEND:{
-			//MORPH WiZaRd::Context-FiX START
-			//const CChatItem* ci = GetCurrentChatItem();
-			const CChatItem* ci = m_contextItem;
-			//MORPH WiZaRd::Context-FiX END
-
+			const CChatItem* ci = GetItemByIndex(m_iContextIndex);
 			if (ci) {
 				CFriend* fr = theApp.friendlist->SearchFriend(ci->client->GetUserHash(), 0, 0);
 				if (!fr)
@@ -695,11 +617,7 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		}
 		case MP_REMOVEFRIEND:{
-			//WiZaRd::Context-FiX START
-			//const CChatItem* ci = GetCurrentChatItem();
-			const CChatItem* ci = m_contextItem;
-			//WiZaRd::Context-FiX END
-
+			const CChatItem* ci = GetItemByIndex(m_iContextIndex);
 			if (ci) {
 				CFriend* fr = theApp.friendlist->SearchFriend(ci->client->GetUserHash(), 0, 0);
 				if (fr)
@@ -708,44 +626,41 @@ BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 			return TRUE;
 		}
 		case MP_REMOVE:{
-			//WiZaRd::Context-FiX START
-            /*
-			const CChatItem* ci = GetCurrentChatItem();
-			*/
-			const CChatItem* ci = m_contextItem;
-			//WiZaRd::Context-FiX END
-
+			const CChatItem* ci = GetItemByIndex(m_iContextIndex);
 			if (ci)
 				EndSession(ci->client);
 			return TRUE;
 		}
 	}
 	return CClosableTabCtrl::OnCommand(wParam, lParam);
-} // context fix
+}
 
-// This does not work! This offers context menu entries which always
-// work for the selected tab item only! The offered context menu entries have to work for
-// the item which is under the cursor. Thus one can e.g. no longer use the 'Close' function
-// for other (non-selected) items.
-void CChatSelector::OnContextMenu(CWnd*, CPoint point) // context fix
+void CChatSelector::OnContextMenu(CWnd*, CPoint point)
 {
-	//MORPH WiZaRd::Context-FiX START
-	//const CChatItem* ci = GetCurrentChatItem();
-	CChatItem* ci = GetChatItemUnderMouse();
-	m_contextItem = ci;
-	//MORPH WiZaRd::Context-FiX END
+	TCHITTESTINFO hti = {0};
+	::GetCursorPos(&hti.pt);
+	ScreenToClient(&hti.pt);
 
+
+	m_iContextIndex=this->HitTest(&hti);
+	if (m_iContextIndex==-1)
+		return;
+
+	TCITEM item;
+	item.mask = TCIF_PARAM;
+	GetItem(m_iContextIndex, &item);
+
+	const CChatItem* ci = (CChatItem*)item.lParam;
 	if (ci == NULL)
 		return;
+
 	CFriend* pFriend = theApp.friendlist->SearchFriend(ci->client->GetUserHash(), 0, 0);
 
 	CTitleMenu menu;
 	menu.CreatePopupMenu();
 	menu.AddMenuTitle(GetResString(IDS_CLIENT), true);
 
-	menu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE), _T("DELETE")); //MORPH - Changed by SiRoB, to display a cross icon
 	menu.AppendMenu(MF_STRING, MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("CLIENTDETAILS"));
-	menu.SetDefaultItem(MP_DETAIL);
 
 	GetCurrentChatItem();
 	if (pFriend == NULL)
@@ -753,23 +668,20 @@ void CChatSelector::OnContextMenu(CWnd*, CPoint point) // context fix
 	else
 		menu.AppendMenu(MF_STRING, MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND), _T("DELETEFRIEND"));
 	
+	menu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE));
+
 	m_ptCtxMenu = point;
 	ScreenToClient(&m_ptCtxMenu);
 	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
-//MORPH WiZaRd::Context-FiX START
-CChatItem* CChatSelector::GetChatItemUnderMouse()
+void CChatSelector::EnableSmileys(bool bEnable)
 {
-	CPoint pt;
-	GetCursorPos(&pt);
-	ScreenToClient(&pt);
-	int i = GetTabUnderPoint(pt);
-	CChatItem* item = NULL;
+	for (int i = 0; i < GetItemCount(); i++){
 	TCITEM cur_item;
 	cur_item.mask = TCIF_PARAM;
-	if (GetItem(i, &cur_item))
-		item = (CChatItem*)cur_item.lParam;
-	return item;
+		if (GetItem(i, &cur_item) && ((CChatItem*)cur_item.lParam)->log)
+			((CChatItem*)cur_item.lParam)->log->EnableSmileys(bEnable);
+	}
 }
-//MORPH WiZaRd::Context-FiX END
+

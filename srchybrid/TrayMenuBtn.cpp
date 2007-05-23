@@ -1,6 +1,3 @@
-// TrayMenuBtn.cpp : implementation file
-//
-
 #include "stdafx.h"
 #include "TrayMenuBtn.h"
 
@@ -14,6 +11,12 @@ static char THIS_FILE[] = __FILE__;
 /////////////////////////////////////////////////////////////////////////////
 // CTrayMenuBtn
 
+BEGIN_MESSAGE_MAP(CTrayMenuBtn, CWnd)
+	ON_WM_MOUSEMOVE()
+	ON_WM_LBUTTONUP()
+	ON_WM_PAINT()
+END_MESSAGE_MAP()
+
 CTrayMenuBtn::CTrayMenuBtn()
 {
 	m_bBold = false;
@@ -21,51 +24,40 @@ CTrayMenuBtn::CTrayMenuBtn()
 	m_bNoHover = false;
 	m_bUseIcon = false;
 	m_bParentCapture = false;
-	m_hIcon = NULL;
 	m_nBtnID = rand();
 	m_sIcon.cx = 0;
 	m_sIcon.cy = 0;
-	m_strText = "";
+	m_hIcon = NULL;
+	(void)m_strText;
+	(void)m_cfFont;
 }
 
 CTrayMenuBtn::~CTrayMenuBtn()
 {
-	if(m_hIcon)
+	if (m_hIcon)
 		DestroyIcon(m_hIcon);
 }
-
-
-BEGIN_MESSAGE_MAP(CTrayMenuBtn, CWnd)
-	//{{AFX_MSG_MAP(CTrayMenuBtn)
-	ON_WM_MOUSEMOVE()
-	ON_WM_LBUTTONUP()
-	ON_WM_PAINT()
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
-/////////////////////////////////////////////////////////////////////////////
-// CTrayMenuBtn message handlers
 
 void CTrayMenuBtn::OnMouseMove(UINT nFlags, CPoint point) 
 {
 	CRect rClient;
 	GetClientRect(rClient);
 
-	if(point.x >= rClient.left && point.x <= rClient.right &&
+	if (point.x >= rClient.left && point.x <= rClient.right &&
 		point.y >= rClient.top && point.y <= rClient.bottom)
 	{
 		SetCapture();
 
-		if(!m_bNoHover)
+		if (!m_bNoHover)
 			m_bMouseOver = true;
 		Invalidate();
 	}
 	else
 	{
-		if(m_bParentCapture)
+		if (m_bParentCapture)
 		{
 			CWnd *pParent = GetParent();
-			if(pParent)
+			if (pParent)
 				pParent->SetCapture();
 			else
 				ReleaseCapture();
@@ -85,12 +77,12 @@ void CTrayMenuBtn::OnLButtonUp(UINT nFlags, CPoint point)
 	CRect rClient;
 	GetClientRect(rClient);
 
-	if(point.x >= rClient.left && point.x <= rClient.right &&
+	if (point.x >= rClient.left && point.x <= rClient.right &&
 		point.y >= rClient.top && point.y <= rClient.bottom)
 	{
 		CWnd *pParent = GetParent();
-		if(pParent)
-			pParent->PostMessage(WM_COMMAND, MAKEWPARAM(m_nBtnID,BN_CLICKED), (long)m_hWnd);
+		if (pParent)
+			pParent->PostMessage(WM_COMMAND, MAKEWPARAM(m_nBtnID, BN_CLICKED), (long)m_hWnd);
 	}
 	else
 	{
@@ -115,12 +107,12 @@ void CTrayMenuBtn::OnPaint()
 	MemBMP.CreateCompatibleBitmap(&dc, rClient.Width(), rClient.Height());
 	pOldBMP = MemDC.SelectObject(&MemBMP);
 	CFont *pOldFONT = NULL;
-	if(m_cfFont.GetSafeHandle())
+	if (m_cfFont.GetSafeHandle())
 		pOldFONT = MemDC.SelectObject(&m_cfFont);
 
 	BOOL bEnabled = IsWindowEnabled();
 
-	if(m_bMouseOver && bEnabled)
+	if (m_bMouseOver && bEnabled)
 	{	
 		FillRect(MemDC.m_hDC, rClient, GetSysColorBrush(COLOR_HIGHLIGHT));
 		MemDC.SetTextColor(GetSysColor(COLOR_HIGHLIGHTTEXT));
@@ -132,23 +124,21 @@ void CTrayMenuBtn::OnPaint()
 	}
 
 	int iLeftOffset = 0;
-	if(m_bUseIcon)
+	if (m_bUseIcon)
 	{		
-		MemDC.DrawState(CPoint(2,rClient.Height()/2-m_sIcon.cy/2),CSize(16,16),m_hIcon,DST_ICON|DSS_NORMAL,(CBrush*)NULL);
+		MemDC.DrawState(CPoint(2, rClient.Height()/2 - m_sIcon.cy/2), CSize(16, 16), m_hIcon, DST_ICON | DSS_NORMAL, (CBrush *)NULL);
 		iLeftOffset = m_sIcon.cx + 4;
 	}
 
 	MemDC.SetBkMode(TRANSPARENT);
-	CRect rText(0,0,0,0);
-	MemDC.DrawText(m_strText, rText, DT_CALCRECT|DT_SINGLELINE|DT_LEFT);
-	//CPoint pt((rClient.Width()>>1)-(rText.Width()>>1),(rClient.Height()>>1)-(rText.Height()>>1));
-	CPoint pt(rClient.left+2+iLeftOffset, rClient.Height()/2-rText.Height()/2);
-	CPoint sz(rText.Width(),rText.Height());
+	CRect rText(0, 0, 0, 0);
+	MemDC.DrawText(m_strText, rText, DT_CALCRECT | DT_SINGLELINE | DT_LEFT);
+	CPoint pt(rClient.left + 2 + iLeftOffset, rClient.Height()/2 - rText.Height()/2);
+	CPoint sz(rText.Width(), rText.Height());
 	MemDC.DrawState(pt, sz, m_strText, DST_TEXT | (bEnabled ? DSS_NORMAL : DSS_DISABLED), 
-						FALSE, m_strText.GetLength(), (CBrush*)NULL);  			
-
-	dc.BitBlt(0,0,rClient.Width(),rClient.Height(),&MemDC,0,0,SRCCOPY);
+					FALSE, m_strText.GetLength(), (CBrush*)NULL);
+	dc.BitBlt(0, 0, rClient.Width(), rClient.Height(), &MemDC, 0, 0, SRCCOPY);
 	MemDC.SelectObject(pOldBMP);
-	if(pOldFONT)
+	if (pOldFONT)
 		MemDC.SelectObject(pOldFONT);
 }

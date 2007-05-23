@@ -40,6 +40,7 @@ public:
 	int	SetStyle(int nStyle = SPS_VERTICAL);
 	void SetRange(int nMin, int nMax);
 	void SetRange(int nSubtraction, int nAddition, int nRoot);
+	void SetDrawBorder(bool bEnable = true);
 
 	static void ChangePos(CWnd* pWnd, int dx, int dy);
 	static void ChangeWidth(CWnd* pWnd, int dx, DWORD dwFlag = CW_LEFTALIGN);
@@ -53,14 +54,15 @@ protected:
 	int		m_nX, m_nY;
 	int		m_nMin, m_nMax;
 	int		m_nSavePos;		// Save point on the lbutton down message
+	bool	m_bDrawBorder;
 
 	void MoveWindowTo(CPoint pt);
 	virtual void DrawLine(CDC* pDC, int x, int y);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnPaint();
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg BOOL OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message);
 	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+	afx_msg void OnPaint();
 };

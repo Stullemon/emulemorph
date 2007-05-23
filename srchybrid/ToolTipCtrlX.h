@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -25,15 +25,19 @@ public:
 
 	void SetCol1DrawTextFlags(DWORD dwFlags);
 	void SetCol2DrawTextFlags(DWORD dwFlags);
+	void SetFileIconToolTip(bool bEnable)		{m_bShowFileIcon = bEnable;}
 
 protected:
 	bool m_bCol1Bold;
+	bool m_bShowFileIcon;
 	CRect m_rcScreen;
 	int m_iScreenWidth4;
 	COLORREF m_crTooltipBkColor;
+	COLORREF m_crTooltipTextColor;
 	DWORD m_dwCol1DrawTextFlags;
 	DWORD m_dwCol2DrawTextFlags;
 	CFont m_fontBold;
+	CFont m_fontNormal;
 
 	void ResetSystemMetrics();
 
@@ -42,4 +46,5 @@ protected:
 	afx_msg void OnNMThemeChanged(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
+	afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);
 };

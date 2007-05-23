@@ -45,6 +45,13 @@ public:
 		w1iClientsKnown
 	};
 
+	enum EWnd2Icon {
+		w2iUploading = 0,
+		w2iDownloading,
+		w2iOnQueue,
+		w2iClientsKnown
+	};
+
 	enum EWnd2 {
 		wnd2Downloading = 0,
 		wnd2Uploading = 1,
@@ -65,6 +72,7 @@ public:
 	void SwitchUploadList();
 	void ResetTransToolbar(bool bShowToolbar, bool bResetLists = true);
 	void SetToolTipsDelay(DWORD dwDelay);
+	void OnDisableList();
 
 	// khaos::categorymod+
 	int		GetActiveCategory()			{ return m_dlTab.GetCurSel(); }
@@ -107,7 +115,7 @@ protected:
 	void	DoSplitResize(int delta);
 	void	SetAllIcons();
 	void	SetWnd1Icons();
-	void	SetWnd2Icon();
+	void	SetWnd2Icons();
 	void	UpdateTabToolTips() {UpdateTabToolTips(-1);}
 	void	UpdateTabToolTips(int tab);
 	CString	GetTabStatistic(int tab);
@@ -120,7 +128,8 @@ protected:
 	void EditCatTabLabel(int index,CString newlabel);
 	void EditCatTabLabel(int index);
 	void	ShowList(uint32 dwListIDC);
-	void	ChangeDlIcon(EWnd1Icon iIcon);
+	void	SetWnd1Icon(EWnd1Icon iIcon);
+	void	SetWnd2Icon(EWnd2Icon iIcon);
 	void	ShowSplitWindow(bool bReDraw = false);
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);

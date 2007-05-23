@@ -23,6 +23,7 @@
 #include <io.h>
 #include <share.h>
 #include <Mmsystem.h>
+#include <atlimage.h>
 #include "secrunasuser.h" // yonatan - moved up... // MORPH - Modified by Commander, WebCache 1.2e
 #include "emule.h"
 #include "opcodes.h"
@@ -73,6 +74,9 @@
 #include "Collection.h"
 #include "LangIDs.h"
 #include "HelpIDs.h"
+#ifdef USE_OFFICIAL_UPNP
+#include "UPnPFinder.h"
+#endif
 #include "fakecheck.h" //MORPH - Added by SiRoB
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 #include "Ini2.h"
@@ -83,6 +87,7 @@
 CLogFile theLog;
 CLogFile theVerboseLog;
 bool g_bLowColorDesktop = false;
+bool g_bGdiPlusInstalled = false;
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -96,7 +101,6 @@ static char THIS_FILE[] = __FILE__;
 ///////////////////////////////////////////////////////////////////////////////
 // MSLU (Microsoft Layer for Unicode) support - UnicoWS
 // 
-HMODULE g_hUnicoWS = NULL;
 bool g_bUnicoWS = false;
 
 void ShowUnicowsError()
@@ -138,15 +142,15 @@ extern "C" HMODULE __stdcall ExplicitPreLoadUnicows()
 #endif
 
 	// Pre-Load UnicoWS -- needed for proper initialization of MFC/C-RTL
-	HMODULE g_hUnicoWS = LoadLibraryA("unicows.dll");
-	if (g_hUnicoWS == NULL)
+	HMODULE hUnicoWS = LoadLibraryA("unicows.dll");
+	if (hUnicoWS == NULL)
 	{
 		ShowUnicowsError();
 		exit(1);
 	}
 
 	g_bUnicoWS = true;
-	return g_hUnicoWS;
+	return hUnicoWS;
 }
 
 // NOTE: Do *NOT* change the name of this function. It *HAS* to be named "_PfnLoadUnicows" !
@@ -217,10 +221,19 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_dwPublicIP = 0;
 	m_bAutoStart = false;
 
+	// NOTE: Do *NOT* forget to specify /DELAYLOAD:gdiplus.dll as link parameter.
+	HMODULE hLib = LoadLibrary(_T("gdiplus.dll"));
+	if (hLib != NULL) {
+		g_bGdiPlusInstalled = GetProcAddress(hLib, "GdiplusStartup") != NULL;
+		FreeLibrary(hLib);
+	}
 	m_ullComCtrlVer = MAKEDLLVERULL(4,0,0,0);
 	m_hSystemImageList = NULL;
 	m_sizSmallSystemIcon.cx = 16;
 	m_sizSmallSystemIcon.cy = 16;
+	m_hBigSystemImageList = NULL;
+	m_sizBigSystemIcon.cx = 32;
+	m_sizBigSystemIcon.cy = 32;
 	m_iDfltImageListColorFlags = ILC_COLOR;
 
 // MOD Note: Do not change this part - Merkur
@@ -242,7 +255,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-	m_strCurVersionLong += _T(" upnp5");
+	m_strCurVersionLong += _T(" alpha1");
 #endif
 
 	// create the protocol version number
@@ -348,19 +361,8 @@ BOOL CemuleApp::InitInstance()
 	// output all ASSERT messages to debug device
 	_CrtSetReportMode(_CRT_ASSERT, _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_REPORT_MODE) | _CRTDBG_MODE_DEBUG);
 #endif
-
-	TCHAR szAppDir[MAX_PATH];
-	VERIFY( GetModuleFileName(m_hInstance, szAppDir, ARRSIZE(szAppDir)) );
-	VERIFY( PathRemoveFileSpec(szAppDir) );
-	
-	TCHAR szConfigDir[MAX_PATH];
-	PathCombine(szConfigDir, szAppDir, CONFIGFOLDER);
-	::CreateDirectory(szConfigDir, NULL);
-	
-	TCHAR szPrefFilePath[MAX_PATH];
-	PathCombine(szPrefFilePath, szAppDir, CONFIGFOLDER _T("preferences.ini"));
 	free((void*)m_pszProfileName);
-	m_pszProfileName = _tcsdup(szPrefFilePath);
+	m_pszProfileName = _tcsdup(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("preferences.ini"));
 
 
 #ifdef _DEBUG
@@ -408,9 +410,13 @@ BOOL CemuleApp::InitInstance()
 	if (ProcessCommandline())
 		return false;
 
-	extern bool CheckThreadLocale();
-	if (!CheckThreadLocale())
-		return false;
+	// Should not be needed any longer as Unicode eMule was already released since quite some
+	// time. Right now, that warning (if it gets triggered) is indeed just annoying and I
+	// guess nobody ever understood that warning text nor for what it was really used for.
+	// So, just use the default code page.
+	//extern bool CheckThreadLocale();
+	//if (!CheckThreadLocale())
+	//	return false;
 
 	///////////////////////////////////////////////////////////////////////////
 	// Common Controls initialization
@@ -447,6 +453,8 @@ BOOL CemuleApp::InitInstance()
 
 	m_sizSmallSystemIcon.cx = GetSystemMetrics(SM_CXSMICON);
 	m_sizSmallSystemIcon.cy = GetSystemMetrics(SM_CYSMICON);
+	m_sizBigSystemIcon.cx = GetSystemMetrics(SM_CXICON);
+	m_sizBigSystemIcon.cy = GetSystemMetrics(SM_CYICON);
 	UpdateDesktopColorDepth();
 
 	CWinApp::InitInstance();
@@ -507,10 +515,10 @@ BOOL CemuleApp::InitInstance()
 	//MORPH END   - Added by IceCream, high process priority
 
 #ifdef _DEBUG
-	_sntprintf(_szCrtDebugReportFilePath, ARRSIZE(_szCrtDebugReportFilePath), _T("%s%s"), thePrefs.GetLogDir(), APP_CRT_DEBUG_LOG_FILE);
+	_sntprintf(_szCrtDebugReportFilePath, _countof(_szCrtDebugReportFilePath) - 1, _T("%s%s"), thePrefs.GetMuleDirectory(EMULE_LOGDIR, false), APP_CRT_DEBUG_LOG_FILE);
 #endif
-	VERIFY( theLog.SetFilePath(thePrefs.GetLogDir() + _T("eMule.log")) );
-	VERIFY( theVerboseLog.SetFilePath(thePrefs.GetLogDir() + _T("eMule_Verbose.log")) );
+	VERIFY( theLog.SetFilePath(thePrefs.GetMuleDirectory(EMULE_LOGDIR, thePrefs.GetLog2Disk()) + _T("eMule.log")) );
+	VERIFY( theVerboseLog.SetFilePath(thePrefs.GetMuleDirectory(EMULE_LOGDIR, false) + _T("eMule_Verbose.log")) );
 	theLog.SetMaxFileSize(thePrefs.GetMaxLogFileSize());
 	theLog.SetFileFormat(thePrefs.GetLogFileFormat());
 	theVerboseLog.SetMaxFileSize(thePrefs.GetMaxLogFileSize());
@@ -597,6 +605,11 @@ BOOL CemuleApp::InitInstance()
 			//MORPH END   - Changed by SiRoB, [MoNKi: -Random Ports-]
 		}
 	}
+
+#ifdef USE_OFFICIAL_UPNP
+	// UPnP Port forwarding
+	m_pUPnPFinder = new CUPnPFinder();
+#endif
 
 	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	if((m_UPnP_IGDControlPoint != NULL && thePrefs.IsUPnPEnabled()) || thePrefs.GetUpnpDetect()>0){  //leuk_he add startupwizard auto detect
@@ -711,7 +724,7 @@ int CrtDebugReportCB(int reportType, char* message, int* returnValue)
 	if (fp){
 		time_t tNow = time(NULL);
 		TCHAR szTime[40];
-		_tcsftime(szTime, ARRSIZE(szTime), _T("%H:%M:%S"), localtime(&tNow));
+		_tcsftime(szTime, _countof(szTime), _T("%H:%M:%S"), localtime(&tNow));
 		_ftprintf(fp, _T("%s  %u  %hs"), szTime, reportType, message);
 		fclose(fp);
 	}
@@ -747,30 +760,21 @@ bool CemuleApp::ProcessCommandline()
 		LPCTSTR pszParam = __targv[i];
 		if (pszParam[0] == _T('-') || pszParam[0] == _T('/')){
 			pszParam++;
-		// MORPH START prevent startup on "emule exit" dos command
-		}
-		//MORPH END prevent startup on "emule exit" dos command
     	//MORPH START leuk_he:run as ntservice v1..
 		if (_tcscmp(pszParam, _T("install"))==0)  {CmdInstallService();bExitParam = true; }
         if (_tcscmp(pszParam, _T("uninstall"))==0){CmdRemoveService();bExitParam = true; }
 		if (_tcscmp(pszParam, _T("AsAService"))==0){OnStartAsService();} // NTservice entry point registation.
 		//MORPH END leuk_he:run as ntservice v1..
 #ifdef _DEBUG
-			if (_tcscmp(pszParam, _T("assertfile")) == 0)
+			if (_tcsicmp(pszParam, _T("assertfile")) == 0)
 				_CrtSetReportHook(CrtDebugReportCB);
 #endif
-			if (_tcscmp(pszParam, _T("ignoreinstances")) == 0)
+			if (_tcsicmp(pszParam, _T("ignoreinstances")) == 0)
 				bIgnoreRunningInstances = true;
 
-			if (_tcscmp(pszParam, _T("AutoStart")) == 0)
+			if (_tcsicmp(pszParam, _T("AutoStart")) == 0)
 				m_bAutoStart = true;
-			// MORPH START prevent startup on "emule exit" dos command
-			if (_tcscmp(pszParam, _T("exit")) == 0)
-				bExitParam = true;
-		/*	remove
 		}
-		*/
-	// MORPH END prevent startup on "emule exit" dos command
 	}
 
 	CCommandLineInfo cmdInfo;
@@ -849,10 +853,12 @@ bool CemuleApp::ProcessCommandline()
 			else if (IsServiceRunningMutexActive()) 
 				PassLinkToWebService(sendstruct.dwData,*command);
                 // MORPH leuk_he:run as ntservice v1.. END
-			// MORPH START prevent startup on "emule exit" dos command
-			if (bExitParam)
-				  return true;
-		  // MORPH  END prevent startup on "emule exit"
+			// Don't start if we were invoked with 'exit' command.
+			if (command->CompareNoCase(_T("exit")) == 0) {
+				delete command;
+				return true;
+			}
+			delete command;
 		}
     }
 	else // MORPH leuk_he:run as ntservice v1.. Start
@@ -1074,7 +1080,7 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 		return;
 
 	static const TCHAR _szFileName[] = _T("onlinesig.dat");
-	CString strFullPath = thePrefs.GetAppDir();
+	CString strFullPath =  thePrefs.GetMuleDirectory(EMULE_CONFIGBASEDIR);
 	strFullPath += _szFileName;
 
 	// The 'onlinesig.dat' is potentially read by other applications at more or less frequent intervals.
@@ -1090,7 +1096,7 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 	if (!file.Open(strFullPath, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite | CFile::typeBinary, &fexp)){
 		CString strError = GetResString(IDS_ERROR_SAVEFILE) + _T(" ") + CString(_szFileName);
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		fexp.GetErrorMessage(szError, ARRSIZE(szError));
+		fexp.GetErrorMessage(szError, _countof(szError));
 		strError += _T(" - ");
 		strError += szError;
 		LogError(LOG_STATUSBAR, _T("%s"), strError);
@@ -1155,7 +1161,7 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 	{
 		CString strError = GetResString(IDS_ERROR_SAVEFILE) + _T(" ") + CString(_szFileName);
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		ex->GetErrorMessage(szError, ARRSIZE(szError));
+		ex->GetErrorMessage(szError, _countof(szError));
 		strError += _T(" - ");
 		strError += szError;
 		LogError(LOG_STATUSBAR, _T("%s"), strError);
@@ -1277,11 +1283,11 @@ bool CemuleApp::ShowWebHelp(UINT uTopic)
 	strHelpURL.Format(_T("%s/home/perl/help.cgi?l=%u"), thePrefs.GetHomepageBaseURL(), nWebLanguage); 
 	if (nWebTopic)
 		strHelpURL.AppendFormat(_T("&topic_id=%u&rm=show_topic"), nWebTopic);
-	ShellExecute(NULL, NULL, strHelpURL, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+	ShellExecute(NULL, NULL, strHelpURL, NULL, thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR), SW_SHOWDEFAULT);
 	return true;
 }
 
-int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -1 */)
+int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -1 */, bool bNormalsSize)
 {
 	//TODO: This has to be MBCS aware..
 	DWORD dwFileAttributes;
@@ -1311,20 +1317,40 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 
 	// Search extension in "ext->idx" cache.
 	LPVOID vData;
-	if (!m_aExtToSysImgIdx.Lookup(pszCacheExt, vData)){
-		// Get index for the system's small icon image list
-		SHFILEINFO sfi;
-		DWORD dwResult = SHGetFileInfo(pszFilePath, dwFileAttributes, &sfi, sizeof(sfi),
-									   SHGFI_USEFILEATTRIBUTES | SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
-		if (dwResult == 0)
-			return 0;
-		ASSERT( m_hSystemImageList == NULL || m_hSystemImageList == (HIMAGELIST)dwResult );
-		m_hSystemImageList = (HIMAGELIST)dwResult;
+	if (bNormalsSize){
+		if (!m_aBigExtToSysImgIdx.Lookup(pszCacheExt, vData)){
+			// Get index for the system's small icon image list
+			SHFILEINFO sfi;
+			DWORD dwResult = SHGetFileInfo(pszFilePath, dwFileAttributes, &sfi, sizeof(sfi),
+										SHGFI_USEFILEATTRIBUTES | SHGFI_SYSICONINDEX);
+			if (dwResult == 0)
+				return 0;
+			ASSERT( m_hBigSystemImageList == NULL || m_hBigSystemImageList == (HIMAGELIST)dwResult );
+			m_hBigSystemImageList = (HIMAGELIST)dwResult;
 
-		// Store icon index in local cache
-		m_aExtToSysImgIdx.SetAt(pszCacheExt, (LPVOID)sfi.iIcon);
-		return sfi.iIcon;
+			// Store icon index in local cache
+			m_aBigExtToSysImgIdx.SetAt(pszCacheExt, (LPVOID)sfi.iIcon);
+			return sfi.iIcon;
+		}
 	}
+	else{
+		if (!m_aExtToSysImgIdx.Lookup(pszCacheExt, vData)){
+			// Get index for the system's small icon image list
+			SHFILEINFO sfi;
+			DWORD dwResult = SHGetFileInfo(pszFilePath, dwFileAttributes, &sfi, sizeof(sfi),
+										   SHGFI_USEFILEATTRIBUTES | SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
+			if (dwResult == 0)
+				return 0;
+			ASSERT( m_hSystemImageList == NULL || m_hSystemImageList == (HIMAGELIST)dwResult );
+			m_hSystemImageList = (HIMAGELIST)dwResult;
+
+			// Store icon index in local cache
+			m_aExtToSysImgIdx.SetAt(pszCacheExt, (LPVOID)sfi.iIcon);
+			return sfi.iIcon;
+		}
+	}
+
+
 	// Return already cached value
 	// Elandal: Assumes sizeof(void*) == sizeof(int)
 	return (int)vData;
@@ -1496,15 +1522,15 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 	{
 		// load icon resource file specification from skin profile
 		TCHAR szSkinResource[MAX_PATH];
-		GetPrivateProfileString(_T("Icons"), lpszResourceName, _T(""), szSkinResource, ARRSIZE(szSkinResource), pszSkinProfile);
+		GetPrivateProfileString(_T("Icons"), lpszResourceName, _T(""), szSkinResource, _countof(szSkinResource), pszSkinProfile);
 		if (szSkinResource[0] != _T('\0'))
 		{
 			// expand any optional available environment strings
 			TCHAR szExpSkinRes[MAX_PATH];
-			if (ExpandEnvironmentStrings(szSkinResource, szExpSkinRes, ARRSIZE(szExpSkinRes)) != 0)
+			if (ExpandEnvironmentStrings(szSkinResource, szExpSkinRes, _countof(szExpSkinRes)) != 0)
 			{
-				_tcsncpy(szSkinResource, szExpSkinRes, ARRSIZE(szSkinResource));
-				szSkinResource[ARRSIZE(szSkinResource)-1] = _T('\0');
+				_tcsncpy(szSkinResource, szExpSkinRes, _countof(szSkinResource));
+				szSkinResource[_countof(szSkinResource)-1] = _T('\0');
 			}
 
 			// create absolute path to icon resource file
@@ -1512,15 +1538,15 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 			if (PathIsRelative(szSkinResource))
 			{
 				TCHAR szSkinResFolder[MAX_PATH];
-				_tcsncpy(szSkinResFolder, pszSkinProfile, ARRSIZE(szSkinResFolder));
-				szSkinResFolder[ARRSIZE(szSkinResFolder)-1] = _T('\0');
+				_tcsncpy(szSkinResFolder, pszSkinProfile, _countof(szSkinResFolder));
+				szSkinResFolder[_countof(szSkinResFolder)-1] = _T('\0');
 				PathRemoveFileSpec(szSkinResFolder);
-				_tmakepath(szFullResPath, NULL, szSkinResFolder, szSkinResource, NULL);
+				_tmakepathlimit(szFullResPath, NULL, szSkinResFolder, szSkinResource, NULL);
 			}
 			else
 			{
-				_tcsncpy(szFullResPath, szSkinResource, ARRSIZE(szFullResPath));
-				szFullResPath[ARRSIZE(szFullResPath)-1] = _T('\0');
+				_tcsncpy(szFullResPath, szSkinResource, _countof(szFullResPath));
+				szFullResPath[_countof(szFullResPath)-1] = _T('\0');
 			}
 
 			// check for optional icon index or resource identifier within the icon resource file
@@ -1578,7 +1604,7 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 							}
 						}
 
-						for (int i = 0; i < ARRSIZE(aIconsLarge); i++)
+						for (int i = 0; i < _countof(aIconsLarge); i++)
 						{
 							if (aIconsLarge[i] != NULL)
 								VERIFY( DestroyIcon(aIconsLarge[i]) );
@@ -1596,6 +1622,17 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 				// If the ICO file contains a 16x16 icon, 'LoadImage' will though return a 32x32 icon,
 				// if LR_DEFAULTSIZE is specified! -> always specify the requested size!
 				hIcon = (HICON)::LoadImage(NULL, szFullResPath, IMAGE_ICON, cx, cy, uFlags | LR_LOADFROMFILE);
+				if (hIcon == NULL && GetLastError() != ERROR_PATH_NOT_FOUND && g_bGdiPlusInstalled)
+				{
+					ULONG_PTR gdiplusToken = 0;
+					Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+					if (Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL) == Gdiplus::Ok)
+					{
+						Gdiplus::Bitmap bmp(szFullResPath);
+						bmp.GetHICON(&hIcon);
+					}
+					Gdiplus::GdiplusShutdown(gdiplusToken);
+				}
 			}
 		}
 	}
@@ -1624,15 +1661,15 @@ HBITMAP CemuleApp::LoadImage(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) 
 	{
 		// load resource file specification from skin profile
 		TCHAR szSkinResource[MAX_PATH];
-		GetPrivateProfileString(_T("Bitmaps"), lpszResourceName, _T(""), szSkinResource, ARRSIZE(szSkinResource), pszSkinProfile);
+		GetPrivateProfileString(_T("Bitmaps"), lpszResourceName, _T(""), szSkinResource, _countof(szSkinResource), pszSkinProfile);
 		if (szSkinResource[0] != _T('\0'))
 		{
 			// expand any optional available environment strings
 			TCHAR szExpSkinRes[MAX_PATH];
-			if (ExpandEnvironmentStrings(szSkinResource, szExpSkinRes, ARRSIZE(szExpSkinRes)) != 0)
+			if (ExpandEnvironmentStrings(szSkinResource, szExpSkinRes, _countof(szExpSkinRes)) != 0)
 			{
-				_tcsncpy(szSkinResource, szExpSkinRes, ARRSIZE(szSkinResource));
-				szSkinResource[ARRSIZE(szSkinResource)-1] = _T('\0');
+				_tcsncpy(szSkinResource, szExpSkinRes, _countof(szSkinResource));
+				szSkinResource[_countof(szSkinResource)-1] = _T('\0');
 			}
 
 			// create absolute path to resource file
@@ -1640,15 +1677,15 @@ HBITMAP CemuleApp::LoadImage(LPCTSTR lpszResourceName, LPCTSTR pszResourceType) 
 			if (PathIsRelative(szSkinResource))
 			{
 				TCHAR szSkinResFolder[MAX_PATH];
-				_tcsncpy(szSkinResFolder, pszSkinProfile, ARRSIZE(szSkinResFolder));
-				szSkinResFolder[ARRSIZE(szSkinResFolder)-1] = _T('\0');
+				_tcsncpy(szSkinResFolder, pszSkinProfile, _countof(szSkinResFolder));
+				szSkinResFolder[_countof(szSkinResFolder)-1] = _T('\0');
 				PathRemoveFileSpec(szSkinResFolder);
-				_tmakepath(szFullResPath, NULL, szSkinResFolder, szSkinResource, NULL);
+				_tmakepathlimit(szFullResPath, NULL, szSkinResFolder, szSkinResource, NULL);
 			}
 			else
 			{
-				_tcsncpy(szFullResPath, szSkinResource, ARRSIZE(szFullResPath));
-				szFullResPath[ARRSIZE(szFullResPath)-1] = _T('\0');
+				_tcsncpy(szFullResPath, szSkinResource, _countof(szFullResPath));
+				szFullResPath[_countof(szFullResPath)-1] = _T('\0');
 			}
 
 			CEnBitmap bmp;
@@ -1670,15 +1707,15 @@ CString CemuleApp::GetSkinFileItem(LPCTSTR lpszResourceName, LPCTSTR pszResource
 	{
 		// load resource file specification from skin profile
 		TCHAR szSkinResource[MAX_PATH];
-		GetPrivateProfileString(pszResourceType, lpszResourceName, _T(""), szSkinResource, ARRSIZE(szSkinResource), pszSkinProfile);
+		GetPrivateProfileString(pszResourceType, lpszResourceName, _T(""), szSkinResource, _countof(szSkinResource), pszSkinProfile);
 		if (szSkinResource[0] != _T('\0'))
 		{
 			// expand any optional available environment strings
 			TCHAR szExpSkinRes[MAX_PATH];
-			if (ExpandEnvironmentStrings(szSkinResource, szExpSkinRes, ARRSIZE(szExpSkinRes)) != 0)
+			if (ExpandEnvironmentStrings(szSkinResource, szExpSkinRes, _countof(szExpSkinRes)) != 0)
 			{
-				_tcsncpy(szSkinResource, szExpSkinRes, ARRSIZE(szSkinResource));
-				szSkinResource[ARRSIZE(szSkinResource)-1] = _T('\0');
+				_tcsncpy(szSkinResource, szExpSkinRes, _countof(szSkinResource));
+				szSkinResource[_countof(szSkinResource)-1] = _T('\0');
 			}
 
 			// create absolute path to resource file
@@ -1686,15 +1723,15 @@ CString CemuleApp::GetSkinFileItem(LPCTSTR lpszResourceName, LPCTSTR pszResource
 			if (PathIsRelative(szSkinResource))
 			{
 				TCHAR szSkinResFolder[MAX_PATH];
-				_tcsncpy(szSkinResFolder, pszSkinProfile, ARRSIZE(szSkinResFolder));
-				szSkinResFolder[ARRSIZE(szSkinResFolder)-1] = _T('\0');
+				_tcsncpy(szSkinResFolder, pszSkinProfile, _countof(szSkinResFolder));
+				szSkinResFolder[_countof(szSkinResFolder)-1] = _T('\0');
 				PathRemoveFileSpec(szSkinResFolder);
-				_tmakepath(szFullResPath, NULL, szSkinResFolder, szSkinResource, NULL);
+				_tmakepathlimit(szFullResPath, NULL, szSkinResFolder, szSkinResource, NULL);
 			}
 			else
 			{
-				_tcsncpy(szFullResPath, szSkinResource, ARRSIZE(szFullResPath));
-				szFullResPath[ARRSIZE(szFullResPath)-1] = _T('\0');
+				_tcsncpy(szFullResPath, szSkinResource, _countof(szFullResPath));
+				szFullResPath[_countof(szFullResPath)-1] = _T('\0');
 			}
 
 			return szFullResPath;
@@ -1709,7 +1746,7 @@ bool CemuleApp::LoadSkinColor(LPCTSTR pszKey, COLORREF& crColor) const
 	if (pszSkinProfile != NULL && pszSkinProfile[0] != _T('\0'))
 	{
 		TCHAR szColor[MAX_PATH];
-		GetPrivateProfileString(_T("Colors"), pszKey, _T(""), szColor, ARRSIZE(szColor), pszSkinProfile);
+		GetPrivateProfileString(_T("Colors"), pszKey, _T(""), szColor, _countof(szColor), pszSkinProfile);
 		if (szColor[0] != _T('\0'))
 		{
 			UINT red, grn, blu;
@@ -1755,24 +1792,27 @@ CTempIconLoader::~CTempIconLoader()
 		VERIFY( DestroyIcon(m_hIcon) );
 }
 
-void CemuleApp::AddEd2kLinksToDownload(CString strlink, int cat)
+void CemuleApp::AddEd2kLinksToDownload(CString strLinks, int cat)
 {
 	int curPos = 0;
-	CString resToken = strlink.Tokenize(_T("\t\n\r"), curPos);
-	while (resToken != _T(""))
+	CString strTok = strLinks.Tokenize(_T(" \t\r\n"), curPos); // tokenize by whitespaces
+	while (!strTok.IsEmpty())
 	{
-		if (resToken.Right(1) != _T("/"))
-			resToken += _T("/");
+		if (strTok.Right(1) != _T("/"))
+			strTok += _T("/");
 		try
 		{
-			CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(resToken.Trim());
+			CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(strTok);
 			if (pLink)
 			{
 				if (pLink->GetKind() == CED2KLink::kFile)
 				{
 					//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+					/*
+					downloadqueue->AddFileLinkToDownload(pLink->GetFileLink(), cat);
+					*/
 					// pFileLink IS NOT A LEAK, DO NOT DELETE.
-					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(resToken.Trim());
+					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(strTok.Trim());
 					downloadqueue->AddFileLinkToDownload(pFileLink, cat, true);
 					//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 				}
@@ -1787,10 +1827,11 @@ void CemuleApp::AddEd2kLinksToDownload(CString strlink, int cat)
 		catch(CString error)
 		{
 			TCHAR szBuffer[200];
-			_sntprintf(szBuffer, ARRSIZE(szBuffer), GetResString(IDS_ERR_INVALIDLINK), error);
+			_sntprintf(szBuffer, _countof(szBuffer), GetResString(IDS_ERR_INVALIDLINK), error);
+			szBuffer[_countof(szBuffer) - 1] = _T('\0');
 			LogError(LOG_STATUSBAR, GetResString(IDS_ERR_LINKERROR), szBuffer);
 		}
-		resToken = strlink.Tokenize(_T("\t\n\r"), curPos);
+		strTok = strLinks.Tokenize(_T(" \t\r\n"), curPos); // tokenize by whitespaces
 	}
 }
 
@@ -1806,19 +1847,31 @@ void CemuleApp::SearchClipboard()
 	if (strLinks.Compare(m_strLastClipboardContents) == 0)
 		return;
 
-	if (strLinks.Left(13).CompareNoCase(_T("ed2k://|file|")) == 0)
+	// Do not alter (trim) 'strLinks' and then copy back to 'm_strLastClipboardContents'! The
+	// next clipboard content compare would fail because of the modified string.
+	LPCTSTR pszTrimmedLinks = strLinks;
+	while (_istspace((_TUCHAR)*pszTrimmedLinks)) // Skip leading whitespaces
+		pszTrimmedLinks++;
+	if (_tcsncmp(pszTrimmedLinks, _T("ed2k://|file|"), 13) == 0)
 	{
 		m_bGuardClipboardPrompt = true;
-		if (AfxMessageBox(GetResString(IDS_ED2KLINKFIX) + _T("\r\n\r\n") + GetResString(IDS_ADDDOWNLOADSFROMCB)+_T("\r\n") + strLinks, MB_YESNO | MB_TOPMOST) == IDYES)
+
+		// Don't feed too long strings into the MessageBox function, it may freak out..
+		CString strLinksDisplay;
+		if (strLinks.GetLength() > 512)
+			strLinksDisplay = strLinks.Left(512) + _T("...");
+		else
+			strLinksDisplay = strLinks;
+		if (AfxMessageBox(GetResString(IDS_ADDDOWNLOADSFROMCB) + _T("\r\n") + strLinksDisplay, MB_YESNO | MB_TOPMOST) == IDYES)
 			//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
 			/*
-			AddEd2kLinksToDownload(strLinks, 0);
+			AddEd2kLinksToDownload(pszTrimmedLinks, 0);
 			*/
-			AddEd2kLinksToDownload(strLinks, -1);
+			AddEd2kLinksToDownload(pszTrimmedLinks, -1);
 			/**/
 			//MORPH END  - Changed by SiRoB, Selection category support khaos::categorymod+
 	}
-	m_strLastClipboardContents = strLinks;
+	m_strLastClipboardContents = strLinks; // Save the unmodified(!) clipboard contents
 	m_bGuardClipboardPrompt = false;
 }
 
@@ -1846,7 +1899,7 @@ bool CemuleApp::IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen)
 				LPCSTR pszText = (LPCSTR)GlobalLock(hText);
 				if (pszText != NULL)
 				{
-					while (*pszText == ' ' || *pszText == '\t' || *pszText == '\r' || *pszText == '\n')
+					while (isspace((unsigned char)*pszText))
 						pszText++;
 					bFoundLink = (strncmp(pszText, pszLinkType, iLinkTypeLen) == 0);
 					GlobalUnlock(hText);
@@ -1862,13 +1915,13 @@ bool CemuleApp::IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen)
 bool CemuleApp::IsEd2kFileLinkInClipboard()
 {
 	static const CHAR _szEd2kFileLink[] = "ed2k://|file|"; // Use the ANSI string
-	return IsEd2kLinkInClipboard(_szEd2kFileLink, ARRSIZE(_szEd2kFileLink)-1);
+	return IsEd2kLinkInClipboard(_szEd2kFileLink, _countof(_szEd2kFileLink)-1);
 }
 
 bool CemuleApp::IsEd2kServerLinkInClipboard()
 {
 	static const CHAR _szEd2kServerLink[] = "ed2k://|server|"; // Use the ANSI string
-	return IsEd2kLinkInClipboard(_szEd2kServerLink, ARRSIZE(_szEd2kServerLink)-1);
+	return IsEd2kLinkInClipboard(_szEd2kServerLink, _countof(_szEd2kServerLink)-1);
 }
 
 // Elandal:ThreadSafeLogging -->
@@ -1880,16 +1933,17 @@ void CemuleApp::QueueDebugLogLine(bool bAddToStatusbar, LPCTSTR line, ...)
 	m_queueLock.Lock();
 
 	TCHAR bufferline[1000];
-
 	va_list argptr;
 	va_start(argptr, line);
-	_vsntprintf(bufferline, ARRSIZE(bufferline), line, argptr);
+	int iLen = _vsntprintf(bufferline, _countof(bufferline), line, argptr);
 	va_end(argptr);
-
-	SLogItem* newItem = new SLogItem;
-	newItem->uFlags = LOG_DEBUG | (bAddToStatusbar ? LOG_STATUSBAR : 0);
-	newItem->line = bufferline;
-	m_QueueDebugLog.AddTail(newItem);
+	if (iLen > 0)
+	{
+		SLogItem* newItem = new SLogItem;
+		newItem->uFlags = LOG_DEBUG | (bAddToStatusbar ? LOG_STATUSBAR : 0);
+		newItem->line.SetString(bufferline, iLen);
+		m_QueueDebugLog.AddTail(newItem);
+	}
 
 	m_queueLock.Unlock();
 }
@@ -1899,16 +1953,17 @@ void CemuleApp::QueueLogLine(bool bAddToStatusbar, LPCTSTR line, ...)
 	m_queueLock.Lock();
 
 	TCHAR bufferline[1000];
-
 	va_list argptr;
 	va_start(argptr, line);
-	_vsntprintf(bufferline, ARRSIZE(bufferline), line, argptr);
+	int iLen = _vsntprintf(bufferline, _countof(bufferline), line, argptr);
 	va_end(argptr);
-
-	SLogItem* newItem = new SLogItem;
-	newItem->uFlags = bAddToStatusbar ? LOG_STATUSBAR : 0;
-	newItem->line = bufferline;
-	m_QueueLog.AddTail(newItem);
+	if (iLen > 0)
+	{
+		SLogItem* newItem = new SLogItem;
+		newItem->uFlags = bAddToStatusbar ? LOG_STATUSBAR : 0;
+		newItem->line.SetString(bufferline, iLen);
+		m_QueueLog.AddTail(newItem);
+	}
 
 	m_queueLock.Unlock();
 }
@@ -1921,16 +1976,17 @@ void CemuleApp::QueueDebugLogLineEx(UINT uFlags, LPCTSTR line, ...)
 	m_queueLock.Lock();
 
 	TCHAR bufferline[1000];
-
 	va_list argptr;
 	va_start(argptr, line);
-	_vsntprintf(bufferline, ARRSIZE(bufferline), line, argptr);
+	int iLen = _vsntprintf(bufferline, _countof(bufferline), line, argptr);
 	va_end(argptr);
-
-	SLogItem* newItem = new SLogItem;
-	newItem->uFlags = uFlags | LOG_DEBUG;
-	newItem->line = bufferline;
-	m_QueueDebugLog.AddTail(newItem);
+	if (iLen > 0)
+	{
+		SLogItem* newItem = new SLogItem;
+		newItem->uFlags = uFlags | LOG_DEBUG;
+		newItem->line.SetString(bufferline, iLen);
+		m_QueueDebugLog.AddTail(newItem);
+	}
 
 	m_queueLock.Unlock();
 }
@@ -1940,16 +1996,17 @@ void CemuleApp::QueueLogLineEx(UINT uFlags, LPCTSTR line, ...)
 	m_queueLock.Lock();
 
 	TCHAR bufferline[1000];
-
 	va_list argptr;
 	va_start(argptr, line);
-	_vsntprintf(bufferline, ARRSIZE(bufferline), line, argptr);
+	int iLen = _vsntprintf(bufferline, _countof(bufferline), line, argptr);
 	va_end(argptr);
-
-	SLogItem* newItem = new SLogItem;
-	newItem->uFlags = uFlags;
-	newItem->line = bufferline;
-	m_QueueLog.AddTail(newItem);
+	if (iLen > 0)
+	{
+		SLogItem* newItem = new SLogItem;
+		newItem->uFlags = uFlags;
+		newItem->line.SetString(bufferline, iLen);
+		m_QueueLog.AddTail(newItem);
+	}
 
 	m_queueLock.Unlock();
 }
@@ -2009,7 +2066,12 @@ void CemuleApp::CreateAllFonts()
 	///////////////////////////////////////////////////////////////////////////
 	// Symbol font
 	//
-	VERIFY( m_fontSymbol.CreatePointFont(10 * 10, _T("Marlett")) );
+	//VERIFY( m_fontSymbol.CreatePointFont(10 * 10, _T("Marlett")) );
+	// Creating that font with 'SYMBOL_CHARSET' should be safer (seen in ATL/MFC code). Though
+	// it seems that it does not solve the problem with '6' and '9' characters which are
+	// shown for some ppl.
+	m_fontSymbol.CreateFont(GetSystemMetrics(SM_CYMENUCHECK), 0, 0, 0,
+		FW_NORMAL, 0, 0, 0, SYMBOL_CHARSET, 0, 0, 0, 0, _T("Marlett"));
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -2022,6 +2084,11 @@ void CemuleApp::CreateAllFonts()
 	LPLOGFONT plfLog = thePrefs.GetLogFont();
 	if (plfLog!=NULL && plfLog->lfFaceName[0]!=_T('\0'))
 		m_fontLog.CreateFontIndirect(plfLog);
+
+	///////////////////////////////////////////////////////////////////////////
+	// Font used for Message and IRC edit control, default font, just a little larger
+	//
+	m_fontChatEdit.CreatePointFont(11 * 10, _T("MS Shell Dlg"));
 
 	// Why can't this font set via the font dialog??
 //	HFONT hFontMono = CreateFont(10, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, _T("Lucida Console"));
@@ -2073,17 +2140,37 @@ void CemuleApp::UpdateDesktopColorDepth()
 
 	if (g_bLowColorDesktop)
 	{
+		// If we have 4- or 8-bit desktop color depth, Windows will (by design) load only 
+		// the 16 color versions of icons. Thus we force all image lists also to 4-bit format.
 		m_iDfltImageListColorFlags = ILC_COLOR4;
 	}
 	else
 	{
+		// Get current desktop color depth and derive the image list format from it
 		m_iDfltImageListColorFlags = GetAppImageListColorFlag();
-		// don't use 32bit color resources if not supported by commctl
-		if (m_iDfltImageListColorFlags == ILC_COLOR32 && m_ullComCtrlVer < MAKEDLLVERULL(6,0,0,0))
+
+		// Don't use 32-bit image lists if not supported by COMCTL32.DLL
+		if (m_iDfltImageListColorFlags == ILC_COLOR32 && m_ullComCtrlVer < MAKEDLLVERULL(6,0,0,0)) {
+			// We fall back to 16-bit image lists because we do not provide 24-bit
+			// versions of icons any longer (due to resource size restrictions for Win98). We
+			// could also fall back to 24-bit image lists here but the difference is minimal
+			// and considered to be not worth the additinoal memory consumption.
+			//
+			// Though, do not fall back to 8-bit image lists because this would let Windows
+			// reduce the color resolution to the standard 256 color window system palette.
+			// We need a 16-bit or 24-bit image list to hold all our 256 color icons (which
+			// are not pre-quantized to standard 256 color windows system palette) without
+			// loosing any colors.
 			m_iDfltImageListColorFlags = ILC_COLOR16;
-		// don't use >8bit color resources with OSs with restricted memory for GDI resources
-		if (afxData.bWin95)
+		}
+
+		// Don't use >8-bit image lists with OSs with restricted memory for GDI resources
+		if (afxData.bWin95) {
+			// NOTE: ILC_COLOR8 leads to converting all icons to the standard windows system
+			// 256 color palette. Thus this option leads to loosing some color resolution.
+			// Though there is no other chance with Win98 because of the 64K GDI limit.
 			m_iDfltImageListColorFlags = ILC_COLOR8;
+		}
 	}
 
 	// Doesn't help..
@@ -2113,6 +2200,7 @@ BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType)
 		else if (dwCtrlType == CTRL_SHUTDOWN_EVENT)	pszCtrlType = _T("CTRL_SHUTDOWN_EVENT");
 		else {
 			_sntprintf(szCtrlType, _countof(szCtrlType), _T("0x%08x"), dwCtrlType);
+			szCtrlType[_countof(szCtrlType) - 1] = _T('\0');
 			pszCtrlType = szCtrlType;
 		}
 		theVerboseLog.Logf(_T("%hs: CtrlType=%s"), __FUNCTION__, pszCtrlType);
@@ -2164,8 +2252,8 @@ BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType)
 void CemuleApp::AddIncomingFolderIcon(){
 	CString desktopFile, exePath;
 	
-	desktopFile = CString(thePrefs.GetIncomingDir()) + _T("\\Desktop.ini");
-	exePath = thePrefs.GetAppDir() + CString(theApp.m_pszExeName) + _T(".exe");
+	desktopFile = CString(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR)) + _T("\\Desktop.ini");
+	exePath = thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR) + CString(theApp.m_pszExeName) + _T(".exe");
 
 	CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
 	
@@ -2173,7 +2261,7 @@ void CemuleApp::AddIncomingFolderIcon(){
 	desktopIni.WriteInt(_T("IconIndex"),1);
 
 	SetFileAttributes(desktopFile, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN);
-	PathMakeSystemFolder(thePrefs.GetIncomingDir());
+	PathMakeSystemFolder(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR));
 }
 
 void CemuleApp::RemoveIncomingFolderIcon()
@@ -2181,7 +2269,7 @@ void CemuleApp::RemoveIncomingFolderIcon()
 	if(!IsCustomIncomingFolderIcon()){
 		CString desktopFile;
 	
-		desktopFile = CString(thePrefs.GetIncomingDir()) + _T("\\Desktop.ini");
+		desktopFile = CString(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR)) + _T("\\Desktop.ini");
 
 		CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
 	
@@ -2195,7 +2283,7 @@ void CemuleApp::RemoveIncomingFolderIcon()
 void CemuleApp::AddTempFolderIcon(){
  CString desktopFile, exePath;
 
-  exePath = thePrefs.GetAppDir() + CString(theApp.m_pszExeName) + _T(".exe");
+  exePath = thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR) + CString(theApp.m_pszExeName) + _T(".exe");
   for (int i=0;i<thePrefs.tempdir.GetCount();i++) { // leuk_he: multiple temp dirs
 
         desktopFile = CString(thePrefs.GetTempDir(i)) + _T("\\Desktop.ini");
@@ -2224,7 +2312,7 @@ void CemuleApp::RemoveTempFolderIcon(){
 BOOL CemuleApp::IsCustomIncomingFolderIcon(){
 	CString desktopFile;
 	
-	desktopFile = CString(thePrefs.GetIncomingDir()) + _T("\\Desktop.ini");
+	desktopFile = CString(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR)) + _T("\\Desktop.ini");
 
 	if(CFileFind().FindFile(desktopFile) == TRUE){
 		CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
@@ -2233,7 +2321,7 @@ BOOL CemuleApp::IsCustomIncomingFolderIcon(){
 		int iconIndex;
 		iconFile = desktopIni.GetString(_T("IconFile"), _T(""), _T(".ShellClassInfo"));
 		iconIndex = desktopIni.GetInt(_T("IconIndex"),0,_T(".ShellClassInfo"));
-		exePath = thePrefs.GetAppDir() + CString(theApp.m_pszExeName) + _T(".exe");
+		exePath = thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR) + CString(theApp.m_pszExeName) + _T(".exe");
 		
 		iconFile.MakeLower();
 		exePath.MakeLower();

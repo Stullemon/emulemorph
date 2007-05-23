@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -63,6 +63,8 @@ BEGIN_MESSAGE_MAP(CPPgSecurity, CPropertyPage)
 	ON_BN_CLICKED(IDC_ENABLEOBFUSCATION, OnObfuscatedRequestedChange)
 	ON_BN_CLICKED(IDC_ONLYOBFUSCATED, OnSettingsChange)
 	ON_BN_CLICKED(IDC_DISABLEOBFUSCATION, OnObfuscatedDisabledChange)
+	ON_BN_CLICKED(IDC_SEARCHSPAMFILTER, OnSettingsChange)
+	
 END_MESSAGE_MAP()
 
 CPPgSecurity::CPPgSecurity()
@@ -102,7 +104,8 @@ void CPPgSecurity::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_USESECIDENT,0);
 
-	if (thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_)
+	if ((thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_ || thePrefs.GetWindowsVersion() == _WINVER_2003_)
+		&& thePrefs.m_nCurrentUserDirMode == 2)
 		GetDlgItem(IDC_RUNASUSER)->EnableWindow(TRUE);
 	else
 		GetDlgItem(IDC_RUNASUSER)->EnableWindow(FALSE);
@@ -137,6 +140,11 @@ void CPPgSecurity::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_ONLYOBFUSCATED,0);
 
+	if (thePrefs.IsSearchSpamFilterEnabled())
+		CheckDlgButton(IDC_SEARCHSPAMFILTER,1);
+	else
+		CheckDlgButton(IDC_SEARCHSPAMFILTER,0);
+
 	ASSERT( vsfaEverybody == 0 );
 	ASSERT( vsfaFriends == 1 );
 	ASSERT( vsfaNobody == 2 );
@@ -159,7 +167,7 @@ BOOL CPPgSecurity::OnInitDialog()
 			m_pacIPFilterURL = new CCustomAutoComplete();
 			m_pacIPFilterURL->AddRef();
 			if (m_pacIPFilterURL->Bind(::GetDlgItem(m_hWnd, IDC_UPDATEURL), ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST | ACO_FILTERPREFIXES ))
-				m_pacIPFilterURL->LoadList(thePrefs.GetConfigDir() + IPFILTERUPDATEURL_STRINGS_PROFILE);
+				m_pacIPFilterURL->LoadList(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + IPFILTERUPDATEURL_STRINGS_PROFILE);
 		}
 		SetDlgItemText(IDC_UPDATEURL,m_pacIPFilterURL->GetItem(0));
 		if (theApp.m_fontSymbol.m_hObject){
@@ -200,6 +208,8 @@ BOOL CPPgSecurity::OnApply()
 	thePrefs.m_bCryptLayerRequested = IsDlgButtonChecked(IDC_ENABLEOBFUSCATION) != 0;
 	thePrefs.m_bCryptLayerRequired = IsDlgButtonChecked(IDC_ONLYOBFUSCATED) != 0;
 	thePrefs.m_bCryptLayerSupported = IsDlgButtonChecked(IDC_DISABLEOBFUSCATION) == 0;
+
+	thePrefs.m_bEnableSearchResultFilter = IsDlgButtonChecked(IDC_SEARCHSPAMFILTER) != 0;
 
 
 	if (IsDlgButtonChecked(IDC_SEESHARE1))
@@ -242,6 +252,8 @@ void CPPgSecurity::Localize(void)
 		GetDlgItem(IDC_ENABLEOBFUSCATION)->SetWindowText(GetResString(IDS_ENABLEOBFUSCATION));
 		GetDlgItem(IDC_SEC_OBFUSCATIONBOX)->SetWindowText(GetResString(IDS_PROTOCOLOBFUSCATION));
 
+		GetDlgItem(IDC_SEARCHSPAMFILTER)->SetWindowText(GetResString(IDS_SEARCHSPAMFILTER));
+
         // MORPH START leuk_he tooltipped
 		SetTool(IDC_FILTERLEVEL,IDC_STATIC_FILTERLEVE_TIP);
 		SetTool(IDC_FILTERSERVERBYIPFILTER,IDC_FILTERSERVERBYIPFILTE_TIP);
@@ -273,7 +285,7 @@ void CPPgSecurity::OnReloadIPFilter()
 void CPPgSecurity::OnEditIPFilter()
 {
 	ShellExecute(NULL, _T("open"), thePrefs.GetTxtEditor(),
-		_T("\"") + thePrefs.GetConfigDir() + DFLT_IPFILTER_FILENAME _T("\""), NULL, SW_SHOW);
+		_T("\"") + thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + DFLT_IPFILTER_FILENAME _T("\""), NULL, SW_SHOW);
 }
 
 void CPPgSecurity::OnLoadIPFFromURL()
@@ -288,7 +300,7 @@ void CPPgSecurity::OnLoadIPFFromURL()
 			m_pacIPFilterURL->AddItem(url, 0);
 
 		CString strTempFilePath;
-		_tmakepath(strTempFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T("tmp"));
+		_tmakepathlimit(strTempFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T("tmp"));
 		strTempFilePath.ReleaseBuffer();
 
 		CHttpDownloadDlg dlgDownload;
@@ -297,7 +309,7 @@ void CPPgSecurity::OnLoadIPFFromURL()
 		dlgDownload.m_sFileToDownloadInto = strTempFilePath;
 		if (dlgDownload.DoModal() != IDOK)
 		{
-			_tremove(strTempFilePath);
+			(void)_tremove(strTempFilePath);
 			CString strError=GetResString(IDS_DWLIPFILTERFAILED);
 			if (!dlgDownload.GetError().IsEmpty())
 				strError += _T("\r\n\r\n") + dlgDownload.GetError();
@@ -321,7 +333,7 @@ void CPPgSecurity::OnLoadIPFFromURL()
 			if (zfile)
 			{
 				CString strTempUnzipFilePath;
-				_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+				_tmakepathlimit(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
 				strTempUnzipFilePath.ReleaseBuffer();
 
 				if (zfile->Extract(strTempUnzipFilePath))
@@ -364,7 +376,7 @@ void CPPgSecurity::OnLoadIPFFromURL()
 					&& (strFile.CompareNoCase(_T("ipfilter.dat")) == 0 || strFile.CompareNoCase(_T("guarding.p2p")) == 0))
 				{
 					CString strTempUnzipFilePath;
-					_tmakepath(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+					_tmakepathlimit(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
 					strTempUnzipFilePath.ReleaseBuffer();
 					if (rar.Extract(strTempUnzipFilePath))
 					{
@@ -409,7 +421,7 @@ void CPPgSecurity::OnLoadIPFFromURL()
 				bIsArchiveFile = true;
 
 				CString strTempUnzipFilePath;
-				_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+				_tmakepathlimit(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
 				strTempUnzipFilePath.ReleaseBuffer();
 
 				// add filename and extension of uncompressed file to temporary file
@@ -472,8 +484,8 @@ void CPPgSecurity::OnLoadIPFFromURL()
 
 			if (bValidIPFilterFile)
 		{
-			_tremove(theApp.ipfilter->GetDefaultFilePath());
-			_trename(strTempFilePath, theApp.ipfilter->GetDefaultFilePath());
+				(void)_tremove(theApp.ipfilter->GetDefaultFilePath());
+				VERIFY( _trename(strTempFilePath, theApp.ipfilter->GetDefaultFilePath()) == 0 );
 				bHaveNewFilterFile = true;
 			}
 			else
@@ -508,7 +520,7 @@ void CPPgSecurity::DeleteDDB()
 {
 	if (m_pacIPFilterURL)
 	{
-		m_pacIPFilterURL->SaveList(thePrefs.GetConfigDir() + IPFILTERUPDATEURL_STRINGS_PROFILE);
+		m_pacIPFilterURL->SaveList(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + IPFILTERUPDATEURL_STRINGS_PROFILE);
 		m_pacIPFilterURL->Unbind();
 		m_pacIPFilterURL->Release();
 		m_pacIPFilterURL = NULL;

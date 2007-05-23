@@ -37,7 +37,6 @@ protected:
 	afx_msg void OnLvnColumnClickIPFilter(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnKeyDownIPFilter(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedAppend();
-	afx_msg void OnBnClickedCopy();
 	afx_msg void OnBnClickedDelete();
 	afx_msg void OnBnClickedSave();
 	afx_msg void OnCopyIPFilter();

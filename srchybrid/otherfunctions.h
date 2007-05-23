@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -127,7 +127,7 @@ uint32 DecodeBase32(LPCTSTR pszInput, CAICHHash& Hash);
 ///////////////////////////////////////////////////////////////////////////////
 // File/Path string helpers
 //
-void MakeFoldername(TCHAR* path);
+void MakeFoldername(CString &path);
 CString RemoveFileExtension(const CString& rstrFilePath);
 int CompareDirectories(const CString& rstrDir1, const CString& rstrDir2);
 CString StringLimit(CString in, UINT length);
@@ -149,6 +149,9 @@ int		GetPathDriveNumber(CString path);
 EFileType	GetFileTypeEx(CKnownFile* kfile, bool checkextention=true, bool checkfileheader=true, bool nocached=false);
 CString		GetFiletypeName(EFileType ftype);
 int			IsExtentionTypeof(EFileType type, CString ext);
+LPCTSTR		_tcsistr(LPCTSTR pszString, LPCTSTR pszPattern);
+uint32		LevenshteinDistance(const CString& str1, const CString& str2);
+bool		_tmakepathlimit(TCHAR *path, const TCHAR *drive, const TCHAR *dir, const TCHAR *fname, const TCHAR *ext);
 
 ///////////////////////////////////////////////////////////////////////////////
 // GUI helpers
@@ -242,8 +245,11 @@ int GetMaxWindowsTCPConnections();
 #define _WINVER_ME_		0x5A04
 #define _WINVER_2K_		0x0005
 #define _WINVER_XP_		0x0105
+#define _WINVER_2003_	0x0205
+#define _WINVER_VISTA_	0x0006
 WORD DetectWinVersion();
 int			IsRunningXPSP2();
+int			IsRunningXPSP2OrHigher();
 uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory);
 ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath);
 int GetAppImageListColorFlag();
@@ -339,6 +345,7 @@ __inline int CompareOptLocaleStringNoCase(LPCTSTR psz1, LPCTSTR psz2)
 		return 1;
 	return 0;
 }
+
 
 
 ///////////////////////////////////////////////////////////////////////////////

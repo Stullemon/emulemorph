@@ -23,7 +23,7 @@ m_dwLastTimeSaved = ::GetTickCount() + (rand() * 30000 / RAND_MAX) - 15000 - RES
 CSourceSaver::CSourceData::CSourceData(CUpDownClient* client, const TCHAR* exp) 
 {
 	// khaos::kmod+ Modified to Save Source Exchange Version
-	nSrcExchangeVer = client->GetSourceExchangeVersion();
+	nSrcExchangeVer = client->GetSourceExchange1Version();
 	// khaos::kmod-
 	if(nSrcExchangeVer > 2)
 		sourceID = client->GetUserIDHybrid();
@@ -161,7 +161,7 @@ void CSourceSaver::AddSourcesToDownload(CPartFile* file, SourceList* sources)
 		CUpDownClient* newclient; 
 		//MORPH START - Changed by SiRoB, SLS keep only for rar files, reduce Saved Source and life time
 		//newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, 0, 0);
-		if( cur_src->nSrcExchangeVer == 3 )
+		if( cur_src->nSrcExchangeVer >= 3 )
 				newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, cur_src->serverip, cur_src->serverport, false);
 		else
 				newclient = new CUpDownClient(file, cur_src->sourcePort, cur_src->sourceID, cur_src->serverip, cur_src->serverport, true);
@@ -202,7 +202,7 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 			srcstosave.AddHead(sourcedata);
 			continue;
 		}
-		if ((UINT)srcstosave.GetCount() < maxSourcesToSave || (cur_src->GetAvailablePartCount() > srcstosave.GetTail()->partsavailable) || (cur_src->GetSourceExchangeVersion() > srcstosave.GetTail()->nSrcExchangeVer)) {
+		if ((UINT)srcstosave.GetCount() < maxSourcesToSave || (cur_src->GetAvailablePartCount() > srcstosave.GetTail()->partsavailable) || (cur_src->GetSourceExchange1Version() > srcstosave.GetTail()->nSrcExchangeVer)) {
 			if ((UINT)srcstosave.GetCount() == maxSourcesToSave)
 				delete srcstosave.RemoveTail();
 			ASSERT((UINT)srcstosave.GetCount() < maxSourcesToSave);
@@ -211,12 +211,12 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 				CSourceData* cur_srctosave = srcstosave.GetAt(pos2);
 				// khaos::kmod+ Source Exchange Version
 				if (file->GetAvailableSrcCount() > (maxSourcesToSave*2) &&
-					cur_srctosave->nSrcExchangeVer > cur_src->GetSourceExchangeVersion())
+					cur_srctosave->nSrcExchangeVer > cur_src->GetSourceExchange1Version())
 				{
 					bInserted = true;
 				}
 				else if (file->GetAvailableSrcCount() > (maxSourcesToSave*2) && 
-							cur_srctosave->nSrcExchangeVer == cur_src->GetSourceExchangeVersion() &&
+							cur_srctosave->nSrcExchangeVer == cur_src->GetSourceExchange1Version() &&
 							cur_srctosave->partsavailable > cur_src->GetAvailablePartCount())
 				{
 					bInserted = true;

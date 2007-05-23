@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -33,6 +33,25 @@ enum ENotifierSoundType{
 	ntfstSoundFile = 1,
 	ntfstSpeech = 2
 };
+
+enum EDefaultDirectory{
+	EMULE_CONFIGDIR = 0,
+	EMULE_TEMPDIR = 1,
+	EMULE_INCOMINGDIR = 2,
+	EMULE_LOGDIR = 3,
+	EMULE_ADDLANGDIR = 4, // directories with languages installed by the eMule (parent: EMULE_EXPANSIONDIR)
+	EMULE_INSTLANGDIR = 5, // directories with languages installed by the user or installer (parent: EMULE_EXECUTEABLEDIR)
+	EMULE_WEBSERVERDIR = 6,
+	EMULE_SKINDIR = 7,
+	EMULE_DATABASEDIR = 8, // the parent directory of the incoming/temp folder
+	EMULE_CONFIGBASEDIR = 9, // the parent directory of the config folder 
+	EMULE_EXECUTEABLEDIR = 10, // assumed to be not writeable (!)
+	EMULE_TOOLBARDIR = 11,
+	EMULE_EXPANSIONDIR = 12, // this is a base directory accessable for all users for things eMule installs
+	EMULE_WAPSERVERDIR = 13, // Wapserver [emulEspaña]
+	EMULE_FEEDSDIR = 14 // MORPH - Added, XML News [O²]
+};
+
 
 enum EToolbarLabelType;
 enum ELogFileFormat;
@@ -105,11 +124,10 @@ struct CategorySelectionCriteria_Struct{
 #pragma pack()
 // khaos::categorymod-
 
-#pragma pack(1)
 struct Category_Struct{
-	TCHAR	incomingpath[MAX_PATH];
-	TCHAR	title[64];
-	TCHAR	comment[255];
+	CString	strIncomingPath;
+	CString	strTitle;
+	CString	strComment;
 	DWORD	color;
 	UINT	prio;
 	// khaos::kmod+ Category Advanced A4AF Mode
@@ -123,18 +141,15 @@ struct Category_Struct{
 	//MORPH - Removed by SiRoB, Due to Khaos Categorie
 	/*
 	CString autocat;
-	bool	ac_regexpeval;
-	*/
-	BOOL    downloadInAlphabeticalOrder; // ZZ:DownloadManager
-	/*
+	CString	regexp;
 	int		filter;
 	bool	filterNeg;
 	bool	care4all;
-
-	CString	regexp;
+	bool	ac_regexpeval;
 	*/
+	bool	downloadInAlphabeticalOrder; // ZZ:DownloadManager
 };
-#pragma pack()
+
 
 class CPreferences
 {
@@ -162,7 +177,7 @@ public:
 	static	bool	reconnect;
 	static	bool	m_bUseServerPriorities;
 	static	bool	m_bUseUserSortedServerList;
-	static	TCHAR	incomingdir[MAX_PATH];
+	static	CString	m_strIncomingDir;
 	static	CStringArray	tempdir;
 	static	bool	ICH;
 	static	bool	m_bAutoUpdateServerList;
@@ -183,6 +198,7 @@ public:
 	static	UINT	maxsourceperfile;
 	static	UINT	trafficOMeterInterval;
 	static	UINT	statsInterval;
+	static	bool	m_bFillGraphs;
 	static	uchar	userhash[16];
 	static	WINDOWPLACEMENT EmuleWindowPlacement;
 	static	int		maxGraphDownloadRate;
@@ -357,7 +373,7 @@ public:
 	// Save new preferences for PPgStats
 	static	UINT	statsConnectionsGraphRatio; // This will store the divisor, i.e. for 1:3 it will be 3, for 1:20 it will be 20.
 	// Save the expanded branches of the stats tree
-	static	TCHAR	statsExpandedTreeItems[256];
+	static	CString	m_strStatsExpandedTreeItems;
 
 	static	UINT	statsSaveInterval;
 	static  bool	m_bShowVerticalHourMarkers;
@@ -404,26 +420,28 @@ public:
 	static	ENotifierSoundType notifierSoundType;
 	static	CString	notifierSoundFile;
 
-	static	TCHAR	m_sircserver[50];
-	static	TCHAR	m_sircnick[30];
-	static	TCHAR	m_sircchannamefilter[50];
-	static	bool	m_bircaddtimestamp;
-	static	bool	m_bircusechanfilter;
-	static	UINT	m_iircchanneluserfilter;
-	static	TCHAR	m_sircperformstring[255];
-	static	bool	m_bircuseperform;
-	static	bool	m_birclistonconnect;
-	static	bool	m_bircacceptlinks;
-	static	bool	m_bircacceptlinksfriends;
-	static	bool	m_bircsoundevents;
-	static	bool	m_bircignoremiscmessage;
-	static	bool	m_bircignorejoinmessage;
-	static	bool	m_bircignorepartmessage;
-	static	bool	m_bircignorequitmessage;
-	static	bool	m_bircignoreemuleprotoaddfriend;
-	static	bool	m_bircallowemuleprotoaddfriend;
-	static	bool	m_bircignoreemuleprotosendlink;
-	static	bool	m_birchelpchannel;
+	static	CString	m_strIRCServer;
+	static	CString	m_strIRCNick;
+	static	CString	m_strIRCChannelFilter;
+	static	bool	m_bIRCAddTimeStamp;
+	static	bool	m_bIRCUseChannelFilter;
+	static	UINT	m_uIRCChannelUserFilter;
+	static	CString	m_strIRCPerformString;
+	static	bool	m_bIRCUsePerform;
+	static	bool	m_bIRCGetChannelsOnConnect;
+	static	bool	m_bIRCAcceptLinks;
+	static	bool	m_bIRCAcceptLinksFriendsOnly;
+	static	bool	m_bIRCPlaySoundEvents;
+	static	bool	m_bIRCIgnoreMiscMessages;
+	static	bool	m_bIRCIgnoreJoinMessages;
+	static	bool	m_bIRCIgnorePartMessages;
+	static	bool	m_bIRCIgnoreQuitMessages;
+	static	bool	m_bIRCIgnoreEmuleAddFriendMsgs;
+	static	bool	m_bIRCAllowEmuleAddFriend;
+	static	bool	m_bIRCIgnoreEmuleSendLinkMsgs;
+	static	bool	m_bIRCJoinHelpChannel;
+	static	bool	m_bIRCEnableSmileys;
+	static	bool	m_bMessageEnableSmileys;
 
 	static	bool	m_bRemove2bin;
 	static	bool	m_bShowCopyEd2kLinkCmd;
@@ -488,7 +506,7 @@ public:
 	static	UINT	versioncheckdays;
 	static	bool	showRatesInTitle;
 
-	static	TCHAR	TxtEditor[MAX_PATH];
+	static	CString	m_strTxtEditor;
 	static	CString	m_strVideoPlayer;
 	static	CString	m_strVideoPlayerArgs;
 	static	bool	moviePreviewBackup;
@@ -527,8 +545,8 @@ public:
 	static	CString	messageFilter;
 	static	CString	commentFilter;
 	static	CString	filenameCleanups;
-	static	TCHAR	datetimeformat[64];
-	static	TCHAR	datetimeformat4log[64];
+	static	CString	m_strDateTimeFormat;
+	static	CString	m_strDateTimeFormat4Log;
 	static	LOGFONT m_lfHyperText;
 	static	LOGFONT m_lfLogText;
 	static	COLORREF m_crLogError;
@@ -547,22 +565,21 @@ public:
 	static	bool	m_bAdjustNTFSDaylightFileTime;
 	static  bool    m_bAllocFull;
 
+
 	// Web Server [kuchin]
 	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
 	static	bool	m_bIonixWebsrv;
 	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
-	static	TCHAR	m_sWebPassword[256];
-	static	TCHAR	m_sWebLowPassword[256];
+	static	CString	m_strWebPassword;
+	static	CString	m_strWebLowPassword;
 	static	uint16	m_nWebPort;
 	static	bool	m_bWebEnabled;
 	static	bool	m_bWebUseGzip;
 	static	int		m_nWebPageRefresh;
 	static	bool	m_bWebLowEnabled;
-	static	TCHAR	m_sWebResDir[MAX_PATH];
 	static	int		m_iWebTimeoutMins;
 	static	int		m_iWebFileUploadSizeLimitMB;
-
-	static	TCHAR	m_sTemplateFile[MAX_PATH];
+	static	CString	m_strTemplateFile;
 	static	ProxySettings proxy; // deadlake PROXYSUPPORT
 	static  bool	m_bAllowAdminHiLevFunc;
 	static	CUIntArray m_aAllowedRemoteAccessIPs;
@@ -583,7 +600,7 @@ public:
 	static	bool	m_bAdvancedSpamfilter;
 	static	bool	m_bUseSecureIdent;
 	// mobilemule
-	static	TCHAR	m_sMMPassword[256];
+	static	CString	m_strMMPassword;
 	static	bool	m_bMMEnabled;
 	static	uint16	m_nMMPort;
 
@@ -784,8 +801,6 @@ public:
 	static sint64   m_iSlotdelayms;  //leuk_he temporary tunne UWB
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 
-	static bool		m_bSolidGraph; //MORPH - Added by SiRoB, New Graph
-
     //Commander - Added: Invisible Mode [TPT] - Start
     static bool		m_bInvisibleMode;		
 	static UINT		m_iInvisibleModeHotKeyModifier;
@@ -875,13 +890,20 @@ public:
 	static CString	m_strNotifierMailSender;
 	static CString	m_strNotifierMailReceiver;
 
-	// encryption / obfuscation
+	// encryption / obfuscation / verification
 	static bool		m_bCryptLayerRequested;
 	static bool		m_bCryptLayerSupported;
 	static bool		m_bCryptLayerRequired;
+	static uint8	m_byCryptTCPPaddingLength;
+	static uint32   m_dwKadUDPKey;
+
+	// Spam
+	static bool		m_bEnableSearchResultFilter;
+
+	static BOOL		m_bIsRunningAeroGlass;
+
+
 	static bool		m_bCryptLayerRequiredStrictServer; // MORPH lh require obfuscated server connection 
-
-
 
 	// MORPH START - Added by Commander, WebCache 1.2f
 	static	bool	m_bHighIdPossible; // JP detect fake HighID (from netfinity)
@@ -943,8 +965,8 @@ public:
 
 	static bool m_bStaticIcon; //MORPH - Added, Static Tray Icon
 
-
 	static int m_iServiceStartupMode; // MORPH leuk_he:run as ntservice v1..
+
 	enum Table
 	{
 		tableDownload, 
@@ -990,20 +1012,14 @@ public:
 	static	void	Init();
 	static	void	Uninit();
 
-	static	const CString& GetAppDir()				{return appdir;}
-	static	LPCTSTR GetIncomingDir()				{return incomingdir;}
 	static	LPCTSTR GetTempDir(int id = 0)				{return (LPCTSTR)tempdir.GetAt((id < tempdir.GetCount()) ? id : 0);}
 	static	int		GetTempDirCount()					{return tempdir.GetCount();}
 	static	bool	CanFSHandleLargeFiles();
-	static	const CString& GetConfigDir()			{return configdir;}
 	static	LPCTSTR GetConfigFile();
-	static	const CString& GetWebServerDir()		{return m_strWebServerDir;}
 	static	const CString& GetFileCommentsFilePath(){return m_strFileCommentsFilePath;}
-	static	const CString& GetLogDir()				{return m_strLogDir;}
-
-	//MORPH START - Added by SiRoB, XML News [O²]
-	static	const CString& GetFeedsDir()			{return m_strFeedsDir;} // Added by N_OxYdE: XML News
-	//MORPH END   - Added by SiRoB, XML News [O²]
+	static	CString	GetMuleDirectory(EDefaultDirectory eDirectory, bool bCreate = true);
+	static	void	SetMuleDirectory(EDefaultDirectory eDirectory, CString strNewDir);
+	static	void	ChangeUserDirMode(int nNewMode);
 
 	// SLUGFILLER: SafeHash remove - global form of IsTempFile unnececery
 	//static	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName);
@@ -1067,6 +1083,8 @@ public:
 	static	void	SetTrafficOMeterInterval(UINT in)	{trafficOMeterInterval=in;}
 	static	UINT	GetStatsInterval()					{return statsInterval;}
 	static	void	SetStatsInterval(UINT in)			{statsInterval=in;}
+	static	bool	GetFillGraphs()						{return m_bFillGraphs;}
+	static	void	SetFillGraphs(bool bFill)			{m_bFillGraphs = bFill;}
 
 	// -khaos--+++> Many, many, many, many methods.
 	static	void	SaveStats(int bBackUp = 0);
@@ -1319,8 +1337,8 @@ public:
 	static	void	SetStatsMax(UINT in)				{statsMax = in;}
 	static	void	SetStatsConnectionsGraphRatio(UINT in) {statsConnectionsGraphRatio = in;}
 	static	UINT	GetStatsConnectionsGraphRatio()		{return statsConnectionsGraphRatio;}
-	static	void	SetExpandedTreeItems(CString in)			{ _stprintf(statsExpandedTreeItems,_T("%s"),in); }
-	static	CString GetExpandedTreeItems()						{ return statsExpandedTreeItems; }
+	static	void	SetExpandedTreeItems(CString in)	{m_strStatsExpandedTreeItems = in;}
+	static	const CString &GetExpandedTreeItems()		{return m_strStatsExpandedTreeItems;}
 
 	static	uint64	GetTotalDownloaded()		{return totalDownloadedBytes;}
 	static	uint64	GetTotalUploaded()			{return totalUploadedBytes;}
@@ -1351,7 +1369,6 @@ public:
 	static	void	SetLanguageID(WORD lid);
 	static	void	GetLanguages(CWordArray& aLanguageIDs);
 	static	void	SetLanguage();
-	static	const CString& GetLangDir()					{return m_strLangDir;}
 	static	bool	IsLanguageSupported(LANGID lidSelected, bool bUpdateBefore);
 	static	CString GetLangDLLNameByID(LANGID lidSelected);
 	static	void	InitThreadLocale();
@@ -1394,9 +1411,6 @@ public:
 	static	const CString& GetSkinProfile()				{return m_strSkinProfile;}
 	static	void	SetSkinProfile(LPCTSTR pszProfile)	{m_strSkinProfile = pszProfile; }
 
-	static	const CString& GetSkinProfileDir()			{return m_strSkinProfileDir;}
-	static	void	SetSkinProfileDir(LPCTSTR pszDir)	{m_strSkinProfileDir = pszDir; }
-
 	static	UINT	GetStatsAverageMinutes()			{return statsAverageMinutes;}
 	static	void	SetStatsAverageMinutes(UINT in)	{statsAverageMinutes=in;}
 
@@ -1415,28 +1429,32 @@ public:
 	static	bool	GetEnableMiniMule()					{return m_bEnableMiniMule;}
 	static	bool	GetRTLWindowsLayout()				{return m_bRTLWindowsLayout;}
 
-	static	CString GetIRCNick()						{return m_sircnick;}
-	static	void	SetIRCNick(LPCTSTR in_nick)			{_tcscpy(m_sircnick, in_nick);}
-	static	CString GetIRCServer()						{return m_sircserver;}
-	static	bool	GetIRCAddTimestamp()				{return m_bircaddtimestamp;}
-	static	CString GetIRCChanNameFilter()				{return m_sircchannamefilter;}
-	static	bool	GetIRCUseChanFilter()				{return m_bircusechanfilter;}
-	static	UINT	GetIRCChannelUserFilter()			{return m_iircchanneluserfilter;}
-	static	CString GetIrcPerformString()				{return m_sircperformstring;}
-	static	bool	GetIrcUsePerform()					{return m_bircuseperform;}
-	static	bool	GetIRCListOnConnect()				{return m_birclistonconnect;}
-	static	bool	GetIrcAcceptLinks()					{return m_bircacceptlinks;}
-	static	bool	GetIrcAcceptLinksFriends()			{return m_bircacceptlinksfriends;}
-	static	bool	GetIrcSoundEvents()					{return m_bircsoundevents;}
-	static	bool	GetIrcIgnoreMiscMessage()			{return m_bircignoremiscmessage;}
-	static	bool	GetIrcIgnoreJoinMessage()			{return m_bircignorejoinmessage;}
-	static	bool	GetIrcIgnorePartMessage()			{return m_bircignorepartmessage;}
-	static	bool	GetIrcIgnoreQuitMessage()			{return m_bircignorequitmessage;}
-	static	bool	GetIrcIgnoreEmuleProtoAddFriend()	{return m_bircignoreemuleprotoaddfriend;}
-	static	bool	GetIrcAllowEmuleProtoAddFriend()	{return m_bircallowemuleprotoaddfriend;}
-	static	bool	GetIrcIgnoreEmuleProtoSendLink()	{return m_bircignoreemuleprotosendlink;}
-	static	bool	GetIrcHelpChannel()					{return m_birchelpchannel;}
+	static	CString GetIRCNick()						{return m_strIRCNick;}
+	static	void	SetIRCNick(LPCTSTR pszNick)			{m_strIRCNick = pszNick;}
+	static	CString GetIRCServer()						{return m_strIRCServer;}
+	static	bool	GetIRCAddTimeStamp()				{return m_bIRCAddTimeStamp;}
+	static	bool	GetIRCUseChannelFilter()			{return m_bIRCUseChannelFilter;}
+	static	CString GetIRCChannelFilter()				{return m_strIRCChannelFilter;}
+	static	UINT	GetIRCChannelUserFilter()			{return m_uIRCChannelUserFilter;}
+	static	bool	GetIRCUsePerform()					{return m_bIRCUsePerform;}
+	static	CString GetIRCPerformString()				{return m_strIRCPerformString;}
+	static	bool	GetIRCJoinHelpChannel()				{return m_bIRCJoinHelpChannel;}
+	static	bool	GetIRCGetChannelsOnConnect()		{return m_bIRCGetChannelsOnConnect;}
+	static	bool	GetIRCPlaySoundEvents()				{return m_bIRCPlaySoundEvents;}
+	static	bool	GetIRCIgnoreMiscMessages()			{return m_bIRCIgnoreMiscMessages;}
+	static	bool	GetIRCIgnoreJoinMessages()			{return m_bIRCIgnoreJoinMessages;}
+	static	bool	GetIRCIgnorePartMessages()			{return m_bIRCIgnorePartMessages;}
+	static	bool	GetIRCIgnoreQuitMessages()			{return m_bIRCIgnoreQuitMessages;}
+	static	bool	GetIRCIgnoreEmuleAddFriendMsgs()	{return m_bIRCIgnoreEmuleAddFriendMsgs;}
+	static	bool	GetIRCIgnoreEmuleSendLinkMsgs()		{return m_bIRCIgnoreEmuleSendLinkMsgs;}
+	static	bool	GetIRCAllowEmuleAddFriend()			{return m_bIRCAllowEmuleAddFriend;}
+	static	bool	GetIRCAcceptLinks()					{return m_bIRCAcceptLinks;}
+	static	bool	GetIRCAcceptLinksFriendsOnly()		{return m_bIRCAcceptLinksFriendsOnly;}
+	static	bool	GetIRCEnableSmileys()				{return m_bIRCEnableSmileys;}
+	static	bool	GetMessageEnableSmileys()			{return m_bMessageEnableSmileys;}
+
 	static	WORD	GetWindowsVersion();
+	static  bool	IsRunningAeroGlassTheme();
 	static	bool	GetStartMinimized()					{return startMinimized;}
 	static	void	SetStartMinimized( bool instartMinimized) {startMinimized = instartMinimized;}
 	static	bool	GetAutoStart()						{return m_bAutoStart;}
@@ -1475,7 +1493,7 @@ public:
 	static	bool	UseCreditSystem()					{return m_bCreditSystem;}
 	static	void	SetCreditSystem(bool m_bInCreditSystem)	{m_bCreditSystem = m_bInCreditSystem;}
 
-	static	TCHAR*	GetTxtEditor()						{return TxtEditor;}
+	static	const CString& GetTxtEditor()				{return m_strTxtEditor;}
 	static	const CString& GetVideoPlayer()				{return m_strVideoPlayer;}
 	static	const CString& GetVideoPlayerArgs()			{return m_strVideoPlayerArgs;}
 
@@ -1527,7 +1545,7 @@ public:
 	static	void	SetYourHostname(LPCTSTR pszHostname){m_strYourHostname = pszHostname;}
 	static	bool	IsCheckDiskspaceEnabled()			{return checkDiskspace;}
 	static	UINT	GetMinFreeDiskSpace()				{return m_uMinFreeDiskSpace;}
-	static	bool	GetSparsePartFiles()				{return m_bSparsePartFiles;}
+	static	bool	GetSparsePartFiles();
 	static	void	SetSparsePartFiles(bool bEnable)	{m_bSparsePartFiles = bEnable;}
 
 	static	void	SetMaxUpload(UINT in);
@@ -1551,8 +1569,8 @@ public:
 
 	static	bool	ShowRatesOnTitle()		{ return showRatesInTitle;}
 	static	void	LoadCats();
-	static	CString GetDateTimeFormat()		{ return CString(datetimeformat);}
-	static	CString GetDateTimeFormat4Log() { return CString(datetimeformat4log);}
+	static	const CString& GetDateTimeFormat()			{return m_strDateTimeFormat;}
+	static	const CString& GetDateTimeFormat4Log()		{return m_strDateTimeFormat4Log;}
 
 	// Download Categories (Ornis)
 	static	int		AddCat(Category_Struct* cat) { catMap.Add(cat); return catMap.GetCount()-1;}
@@ -1566,8 +1584,8 @@ public:
 	static	void	SetCatFilterNeg(int index, bool val);
 	*/
 	static	Category_Struct* GetCategory(int index) { if (index>=0 && index<catMap.GetCount()) return catMap.GetAt(index); else return NULL;}
-	static	TCHAR*	GetCatPath(int index)				{return catMap.GetAt(index)->incomingpath;}
-	static	DWORD	GetCatColor(int index)				{if (index>=0 && index<catMap.GetCount()) return catMap.GetAt(index)->color; else return 0;}
+	static	const CString &GetCatPath(int index)		{return catMap.GetAt(index)->strIncomingPath;}
+	static	DWORD	GetCatColor(int index);
 
 	static	bool	GetPreviewOnIconDblClk() { return m_bPreviewOnIconDblClk; }
 	static	bool	ShowRatingIndicator()	{ return indicateratings;}
@@ -1592,7 +1610,7 @@ public:
 	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
 	static	bool	UseIonixWebsrv()						{ return m_bIonixWebsrv; }
 	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
-	static	CString GetWSPass()								{ return CString(m_sWebPassword); }
+	static	const CString& GetWSPass()					{return m_strWebPassword;}
 	static	void	SetWSPass(CString strNewPass);
 	static	bool	GetWSIsEnabled()						{ return m_bWebEnabled; }
 	static	void	SetWSIsEnabled(bool bEnable)			{ m_bWebEnabled=bEnable; }
@@ -1602,7 +1620,7 @@ public:
 	static	void	SetWebPageRefresh(int nRefresh)			{ m_nWebPageRefresh=nRefresh; }
 	static	bool	GetWSIsLowUserEnabled()					{ return m_bWebLowEnabled; }
 	static	void	SetWSIsLowUserEnabled(bool in)			{ m_bWebLowEnabled=in; }
-	static	CString GetWSLowPass()							{ return CString(m_sWebLowPassword); }
+	static	const CString& GetWSLowPass()				{return m_strWebLowPassword;}
 	static	int		GetWebTimeoutMins()						{ return m_iWebTimeoutMins;}
 	static  bool	GetWebAdminAllowedHiLevFunc()			{ return m_bAllowAdminHiLevFunc; }
 	static	void	SetWSLowPass(CString strNewPass);
@@ -1621,15 +1639,15 @@ public:
 	static	UINT	GetMsgSessionsMax()					{return maxmsgsessions;}
 	static	bool	IsSecureIdentEnabled()					{ return m_bUseSecureIdent;} // use clientcredits->CryptoAvailable() to check if crypting is really available and not this function
 	static	bool	IsAdvSpamfilterEnabled()				{ return m_bAdvancedSpamfilter;}
-	static	CString GetTemplate()							{ return CString(m_sTemplateFile);}
-	static	void	SetTemplate(CString in)					{ _stprintf(m_sTemplateFile,_T("%s"),in);}
-	static	bool	GetNetworkKademlia()					{ return networkkademlia;}
+	static	const CString& GetTemplate()				{return m_strTemplateFile;}
+	static	void	SetTemplate(CString in)				{m_strTemplateFile = in;}
+	static	bool	GetNetworkKademlia()				{return networkkademlia && udpport > 0;}
 	static	void	SetNetworkKademlia(bool val);
 	static	bool	GetNetworkED2K()						{ return networked2k;}
 	static	void	SetNetworkED2K(bool val)				{ networked2k = val;}
 
 	// mobileMule
-	static	CString GetMMPass()								{ return CString(m_sMMPassword); }
+	static	const CString& GetMMPass()					{return m_strMMPassword;}
 	static	void	SetMMPass(CString strNewPass);
 	static	bool	IsMMServerEnabled()						{ return m_bMMEnabled; }
 	static	void	SetMMIsEnabled(bool bEnable)			{ m_bMMEnabled=bEnable; }
@@ -1685,8 +1703,6 @@ public:
 	static	void	SetToolbarSettings(const CString& in)		{ m_sToolbarSettings = in; }
 	static	const CString& GetToolbarBitmapSettings()			{ return m_sToolbarBitmap; }
 	static	void	SetToolbarBitmapSettings(const CString& path){ m_sToolbarBitmap = path; }
-	static	const CString& GetToolbarBitmapFolderSettings()		{ return m_sToolbarBitmapFolder; }
-	static	void	SetToolbarBitmapFolderSettings(const CString& path){ m_sToolbarBitmapFolder = path; }
 	static	EToolbarLabelType GetToolbarLabelSettings()			{ return m_nToolbarLabels; }
 	static	void	SetToolbarLabelSettings(EToolbarLabelType eLabelType) { m_nToolbarLabels = eLabelType; }
 	static	bool	GetReBarToolbar()							{ return m_bReBarToolbar; }
@@ -1747,6 +1763,7 @@ public:
 	static	bool	GetLogFileSaving()					{return m_bVerbose && m_bLogFileSaving;}
     static	bool	GetLogA4AF()    					{return m_bVerbose && m_bLogA4AF;} // ZZ:DownloadManager
 	static	bool	GetLogUlDlEvents()					{return m_bVerbose && m_bLogUlDlEvents;}
+	static	bool	GetLogKadSecurityEvents()			{return m_bVerbose && true;}
 	static	bool	GetLogWebCacheEvents()				{return m_bVerbose && m_bLogWebCacheEvents;}//JP log webcache events
 	static	bool	GetLogICHEvents()					{return m_bVerbose && m_bLogICHEvents;}//JP log ICH events
 	static	bool	GetUseDebugDevice()					{return m_bUseDebugDevice;}
@@ -1791,7 +1808,13 @@ public:
 	static bool		IsClientCryptLayerRequired()		{return IsClientCryptLayerRequested() && m_bCryptLayerRequired;}
 	static bool		IsClientCryptLayerRequiredStrict()	{return false;} // not even incoming test connections will be answered
 	static bool		IsServerCryptLayerUDPEnabled()		{return IsClientCryptLayerSupported();}
-	static bool		IsServerCryptLayerTCPRequested()	{return IsClientCryptLayerSupported() && (IsClientCryptLayerRequested() ||m_bCryptLayerRequiredStrictServer);} // MORPH lh require obfuscated server connection  automatic assume requested encryption
+	static bool		IsServerCryptLayerTCPRequested()	{return IsClientCryptLayerRequested();}
+	static uint32	GetKadUDPKey()						{return m_dwKadUDPKey;}
+	static uint8	GetCryptTCPPaddingLength()			{return m_byCryptTCPPaddingLength;}
+
+	// Spamfilter
+	static bool		IsSearchSpamFilterEnabled()			{return m_bEnableSearchResultFilter;}
+
 	static bool     IsServerCryptLayerRequiredStrict()  {return IsClientCryptLayerSupported() && m_bCryptLayerRequiredStrictServer;} // MORPH lh require obfuscated server connection 
 	
 
@@ -1951,8 +1974,6 @@ public:
 	static	void	SetDontRemoveStaticServers (bool _b)	  { m_bDontRemoveStaticServers = _b; }
 	// [end] Mighty Knife
 
-	static bool	IsSolidGraph()	{ return m_bSolidGraph;} //MORPH - Added by SiRoB, New Graph
-
 	// khaos::categorymod+
 	static	bool	ShowValidSrcsOnly()		{ return m_bValidSrcsOnly; }
 	static	bool	ShowCatNameInDownList()	{ return m_bShowCatNames; }
@@ -2002,18 +2023,13 @@ public:
 
 
 protected:
-	static	CString appdir;
-	static	CString configdir;
-	static	CString m_strWebServerDir;
-	static	CString m_strLangDir;
 	static	CString m_strFileCommentsFilePath;
-	static	CString m_strLogDir;
-	//MORPH START - Added by SiRoB, XML News [O²]
-	static	CString m_strFeedsDir; // Added by N_OxYdE: XML News
-	//MORPH END   - Added by SiRoB, XML News [O²]
 	static	Preferences_Ext_Struct* prefsExt;
 	static	WORD m_wWinVer;
 	static	CArray<Category_Struct*,Category_Struct*> catMap;
+	static	CString	m_astrDefaultDirs[13];
+	static	bool	m_abDefaultDirsCreated[13];
+	static	int		m_nCurrentUserDirMode; // Only for PPgTweaks
 	
 	static void	CreateUserHash();
 	static void	SetStandartValues();
@@ -2021,6 +2037,7 @@ protected:
 	static void LoadPreferences();
 	static void SavePreferences();
 	static CString GetHomepageBaseURLForLevel(int nLevel);
+	static CString	GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCreate = true);
 public:
 	//MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
 	static	bool	IsUPnPEnabled()						{ return m_bUPnPNat; }
@@ -2073,7 +2090,6 @@ public:
 	static void		SetWapServerEnabled(bool on)	{ m_bWapEnabled=on; }
 	static uint16	GetWapPort()					{ return m_nWapPort; }
 	static void		SetWapPort(uint16 uPort)		{ m_nWapPort=uPort; }
-	static const CString& GetWapServerDir() 		{return m_strWapServerDir;}
 	static int		GetWapGraphWidth()				{ return m_iWapGraphWidth; }
 	static int		GetWapGraphHeight()				{ return m_iWapGraphHeight; }
 	static void		SetWapGraphWidth(int width)		{ m_iWapGraphWidth=width; }

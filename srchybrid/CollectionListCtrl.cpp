@@ -164,13 +164,18 @@ CCollectionListCtrl::~CCollectionListCtrl()
 void CCollectionListCtrl::Init(CString strNameAdd)
 {
 	SetName(_T("CollectionListCtrl") + strNameAdd);
-	ModifyStyle(LVS_SINGLESEL,0);
-	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+
+	ASSERT( GetStyle() & LVS_SHAREIMAGELISTS );
+	SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)theApp.GetSystemImageList());
+	
+	ASSERT( (GetStyle() & LVS_SINGLESEL) == 0 );
+	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_INFOTIP);
+
 	InsertColumn(colName,GetResString(IDS_DL_FILENAME),LVCFMT_LEFT,250);
 	InsertColumn(colSize,GetResString(IDS_DL_SIZE),LVCFMT_LEFT,100);
 	InsertColumn(colHash,GetResString(IDS_FILEHASH),LVCFMT_LEFT,250);
-	LoadSettings();
 
+	LoadSettings();
 	SetSortArrow();
 	SortItems(SortProc, MAKELONG(GetSortItem(), (GetSortAscending() ? 0:1)));
 }
@@ -234,7 +239,8 @@ void CCollectionListCtrl::AddFileToList(CAbstractFile* pAbstractFile)
 		return;
 	}
 
-	iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,GetItemCount(),NULL,0,0,0,(LPARAM)pAbstractFile);
+	int iImage = theApp.GetFileTypeSystemImageIdx(pAbstractFile->GetFileName());
+	iItem = InsertItem(LVIF_TEXT | LVIF_PARAM | (iImage > 0 ? LVIF_IMAGE : 0), GetItemCount(), NULL, 0, 0, iImage, (LPARAM)pAbstractFile);
 	if (iItem != -1)
 	{
 		SetItemText(iItem,colName,pAbstractFile->GetFileName());

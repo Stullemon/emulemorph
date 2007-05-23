@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -451,6 +451,7 @@ CED2KLink::LinkType CED2KFileLink::GetKind() const
 CED2KLink* CED2KLink::CreateLinkFromUrl(const TCHAR* uri)
 {
 	CString strURI(uri);
+	strURI.Trim(); // This function is used for various sources, trim the string again.
 	int iPos = 0;
 	CString strTok = GetNextString(strURI, _T("|"), iPos);
 	if (strTok == _T("ed2k://"))

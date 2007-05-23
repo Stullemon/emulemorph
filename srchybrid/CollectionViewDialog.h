@@ -14,13 +14,10 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
 #include "afxcmn.h"
 #include "CollectionListCtrl.h"
 #include "ResizableLib\ResizableDialog.h"
-
-// CCollectionViewDialog dialog
 
 class CCollection;
 
@@ -32,27 +29,12 @@ public:
 	CCollectionViewDialog(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CCollectionViewDialog();
 
-	void SetCollection(CCollection* pCollection);
-	virtual BOOL OnInitDialog(void);
-
 	// Dialog Data
 	enum { IDD = IDD_COLLECTIONVIEWDIALOG };
 
+	void SetCollection(CCollection* pCollection);
+
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-	DECLARE_MESSAGE_MAP()
-private:
-	void DownloadSelected(void);
-
-	CCollectionListCtrl m_CollectionViewList;
-	CCollection* m_pCollection;
-	HICON	m_icoWnd;
-	HICON	m_icoColl;
-
-	afx_msg void OnNMDblclkCollectionvewlist(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnBnClickedViewcollectiondl();
-	afx_msg void OnBnClickedOk();
 	CButton m_AddNewCatagory;
 	CStatic m_CollectionViewListLabel;
 	CStatic m_CollectionViewListIcon;
@@ -60,4 +42,18 @@ private:
 	CButton m_CollectionExit;
 	CEdit m_CollectionViewAuthor;
 	CEdit m_CollectionViewAuthorKey;
+	CCollectionListCtrl m_CollectionViewList;
+	CCollection* m_pCollection;
+	HICON m_icoWnd;
+	HICON m_icoColl;
+
+	void DownloadSelected(void);
+
+	virtual BOOL OnInitDialog(void);
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnNMDblClkCollectionList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedViewCollection();
+	afx_msg void OnBnClickedOk();
 };

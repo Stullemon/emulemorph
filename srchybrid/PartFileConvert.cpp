@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -392,7 +392,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 		while (bWorking)
 		{
 			bWorking = finder.FindNextFile();
-			_tunlink(finder.GetFilePath());
+			VERIFY( _tunlink(finder.GetFilePath()) == 0 );
 		}
 
 		if (pfconverting->partmettype==PMT_SPLITTED)
@@ -451,9 +451,7 @@ void CPartFileConvert::ShowGUI(){
 		
 		// init gui
 		m_convertgui->pb_current.SetRange(0,100);
-		m_convertgui->joblist.SetExtendedStyle(LVS_EX_FULLROWSELECT);
-		m_convertgui->joblist.ModifyStyle(LVS_SINGLESEL,0);
-
+		m_convertgui->joblist.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
 		if (!pfconverting==NULL)  { 
 			UpdateGUI(pfconverting);

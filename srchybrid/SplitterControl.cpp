@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -46,6 +46,8 @@ CSplitterControl::CSplitterControl()
 
 	// Min and Max range of the splitter.
 	m_nMin = m_nMax = -1;
+
+	m_bDrawBorder = false;
 }
 
 CSplitterControl::~CSplitterControl()
@@ -61,9 +63,9 @@ void CSplitterControl::Create(DWORD dwStyle, const CRect &rect, CWnd *pParent, U
 	m_nType = (rc.Width() < rc.Height()) ? SPS_VERTICAL : SPS_HORIZONTAL;
 	
 	if (m_nType == SPS_VERTICAL)
-		rc.right = rc.left + 5;
+		rc.right = rc.left + 4;
 	else // SPS_HORIZONTAL
-		rc.bottom = rc.top + 5;
+		rc.bottom = rc.top + 4;
 	
 	CStatic::Create(_T(""), dwStyle, rc, pParent, nID);
 	
@@ -89,15 +91,23 @@ int CSplitterControl::GetStyle()
 	return m_nType;
 }
 
+void CSplitterControl::SetDrawBorder(bool bEnable)
+{
+	m_bDrawBorder = bEnable;
+}
+
 void CSplitterControl::OnPaint() 
 {
-	CPaintDC dc(this); // device context for painting
-
-	CRect rcClient;
-	GetClientRect(rcClient);
-	dc.FillSolidRect(rcClient, ::GetSysColor(COLOR_3DFACE));	
-	dc.Draw3dRect(rcClient, GetSysColor(COLOR_BTNHIGHLIGHT), GetSysColor(COLOR_BTNSHADOW));
-
+	if (m_bDrawBorder)
+	{
+		CPaintDC dc(this); // device context for painting
+		CRect rcClient;
+		GetClientRect(rcClient);
+		dc.FillSolidRect(rcClient, GetSysColor(COLOR_3DFACE));
+		dc.Draw3dRect(rcClient, GetSysColor(COLOR_BTNHIGHLIGHT), GetSysColor(COLOR_BTNSHADOW));
+	}
+	else
+		CStatic::OnPaint();
 }
 
 void CSplitterControl::OnMouseMove(UINT nFlags, CPoint point)
@@ -187,12 +197,15 @@ void CSplitterControl::OnLButtonUp(UINT nFlags, CPoint point)
 			else
 				delta = m_nY - m_nSavePos;
 			
-			SPC_NMHDR nmsp;
-			nmsp.hdr.hwndFrom = m_hWnd;
-			nmsp.hdr.idFrom = GetDlgCtrlID();
-			nmsp.hdr.code = UM_SPN_SIZED;
-			nmsp.delta = delta;
-			pOwner->SendMessage(WM_NOTIFY, nmsp.hdr.idFrom, (LPARAM)&nmsp);
+			if (delta != 0)
+			{
+				SPC_NMHDR nmsp;
+				nmsp.hdr.hwndFrom = m_hWnd;
+				nmsp.hdr.idFrom = GetDlgCtrlID();
+				nmsp.hdr.code = UM_SPN_SIZED;
+				nmsp.delta = delta;
+				pOwner->SendMessage(WM_NOTIFY, nmsp.hdr.idFrom, (LPARAM)&nmsp);
+			}
 		}
 	}
 

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -251,7 +251,7 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 
 		case CS_OFFICIAL:
 		default:{
-			if (GetDownloadedTotal() < 1000000){
+			if (GetDownloadedTotal() < 1048576){
 				result = 1.0F;
 				break;
 			}
@@ -259,13 +259,21 @@ float CClientCredits::GetScoreRatio(uint32 dwForIP) /*const*/
 				result = 10.0F;
 			else
 				result = (float)(((double)GetDownloadedTotal()*2.0)/(double)GetUploadedTotal());
+	
+			// exponential calcualtion of the max multiplicator based on uploaded data (9.2MB = 3.34, 100MB = 10.0)
 			float result2 = 0.0F;
-	result2 = (float)(GetDownloadedTotal()/1048576.0);
+			result2 = (float)(GetDownloadedTotal()/1048576.0);
 			result2 += 2.0F;
-	result2 = (float)sqrt(result2);
+			result2 = (float)sqrt(result2);
 
-			if (result > result2)
-				result = result2;
+			// linear calcualtion of the max multiplicator based on uploaded data for the first chunk (1MB = 1.01, 9.2MB = 3.34)
+			float result3 = 10.0F;
+			if (GetDownloadedTotal() < 9646899){
+				result3 = (((float)(GetDownloadedTotal() - 1048576) / 8598323.0F) * 2.34F) + 1.0F;
+			}
+
+			// take the smallest result
+			result = min(result, min(result2, result3));
 
 			if (result < 1.0F){
 				result = 1.0F;
@@ -370,7 +378,7 @@ CClientCreditsList::~CClientCreditsList()
 // Moonlight: SUQWT: Change the file import 0.30c format.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 void CClientCreditsList::LoadList()
 {
-	CString strFileName = thePrefs.GetConfigDir() + CLIENTS_MET_FILENAME;
+	CString strFileName = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + CLIENTS_MET_FILENAME;
 	const int iOpenFlags = CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite;
 	CSafeBufferedFile file;
 	CFileException fexp;
@@ -389,15 +397,15 @@ void CClientCreditsList::LoadList()
 	int	countFile = 0;
 
 	//SUQWTv2.met must have bigger number than original clients.met to have higher prio
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir());
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), thePrefs.GetConfigDir());
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".MSUQWT"), thePrefs.GetConfigDir());//Pawcio
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir());
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), thePrefs.GetConfigDir());
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir()+_T("Backup\\"));
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir()+_T("Backup\\"));
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetConfigDir()+_T("Backup2\\"));
-	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetConfigDir()+_T("Backup2\\"));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".MSUQWT"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));//Pawcio
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met.bak"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)+_T("Backup\\"));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)+_T("Backup\\"));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)+_T("Backup2\\"));
+	loadFileName[countFile++].Format(_T("%s") CLIENTS_MET_FILENAME _T(".SUQWTv2.met"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)+_T("Backup2\\"));
 	//totalLoadFile = 9;
 	uint8 prioOrderfile[totalLoadFile];
 
@@ -480,7 +488,7 @@ void CClientCreditsList::LoadList()
 			CString strBakFileName;
 			//Morph start - modify by AndCycle, backup loaded file
 			/*
-			strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), thePrefs.GetConfigDir());
+			strBakFileName.Format(_T("%s") CLIENTS_MET_FILENAME _T(".bak"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 			*/
 			strBakFileName.Format(_T("%s") _T(".bak"), strFileName);
 			//Morph end - modify by AndCycle, backup loaded file
@@ -645,7 +653,7 @@ void CClientCreditsList::SaveList()
 		AddDebugLogLine(false, _T("Saving clients credit list file \"%s\""), CLIENTS_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount();
 
-	CString name = thePrefs.GetConfigDir() + CLIENTS_MET_FILENAME;
+	CString name = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + CLIENTS_MET_FILENAME;
 	CFile file;// no buffering needed here since we swap out the entire array
 	CFileException fexp;
 	if (!file.Open(name, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
@@ -708,7 +716,7 @@ void CClientCreditsList::SaveList()
 		//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 		if (m_bSaveUploadQueueWaitTime)
 		{
-			CString nameSUQWT = thePrefs.GetConfigDir() + CString(CLIENTS_MET_FILENAME) + _T(".SUQWTv2.met"); 
+			CString nameSUQWT = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + CString(CLIENTS_MET_FILENAME) + _T(".SUQWTv2.met"); 
 			if (!file.Open(nameSUQWT, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 				CString strError(GetResString(IDS_ERR_FAILED_CREDITSAVE));
 				TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -841,7 +849,7 @@ void CClientCreditsList::InitalizeCrypting()
 		return;
 	// check if keyfile is there
 	bool bCreateNewKey = false;
-	HANDLE hKeyFile = ::CreateFile(thePrefs.GetConfigDir() + _T("cryptkey.dat"), GENERIC_READ, FILE_SHARE_READ, NULL,
+	HANDLE hKeyFile = ::CreateFile(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("cryptkey.dat"), GENERIC_READ, FILE_SHARE_READ, NULL,
 										OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hKeyFile != INVALID_HANDLE_VALUE)
 	{
@@ -857,7 +865,7 @@ void CClientCreditsList::InitalizeCrypting()
 	// load key
 	try{
 		// load private key
-		FileSource filesource(CStringA(thePrefs.GetConfigDir() + _T("cryptkey.dat")), true,new Base64Decoder);
+		FileSource filesource(CStringA(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("cryptkey.dat")), true,new Base64Decoder);
 		m_pSignkey = new RSASSA_PKCS1v15_SHA_Signer(filesource);
 		// calculate and store public key
 		RSASSA_PKCS1v15_SHA_Verifier pubkey(*m_pSignkey);
@@ -883,7 +891,7 @@ bool CClientCreditsList::CreateKeyPair()
 		InvertibleRSAFunction privkey;
 		privkey.Initialize(rng,RSAKEYSIZE);
 
-		Base64Encoder privkeysink(new FileSink(CStringA(thePrefs.GetConfigDir() + _T("cryptkey.dat"))));
+		Base64Encoder privkeysink(new FileSink(CStringA(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("cryptkey.dat"))));
 		privkey.DEREncode(privkeysink);
 		privkeysink.MessageEnd();
 

@@ -184,9 +184,13 @@ bool CSecRunAsUser::SetDirectoryPermissions(){
 
 	// set special permission for emule account on needed folders
 	bool bSucceeded = true;
-	bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetAppDir(), FULLACCESS);
-	bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetConfigDir(), FULLACCESS);
-	bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetIncomingDir(), FULLACCESS);
+
+
+	// verify permissions on the most important folders. Keep in mind that this is mainly for WinXP-PublicUser-Installs,
+	// and is not really needed for MultiUser or Vista Setups
+	bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetMuleDirectory(EMULE_CONFIGBASEDIR), FULLACCESS);
+	bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR), FULLACCESS);
+	bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), FULLACCESS);
 	for (int i=0;i<thePrefs.GetTempDirCount();i++)
 		bSucceeded = bSucceeded && SetObjectPermission(thePrefs.GetTempDir(i), FULLACCESS);
 

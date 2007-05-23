@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -14,8 +14,6 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-
 /*
 	Edit Control with Combined Reset and Column Selector Button (as seen on Thunderbird)
 	TODO:
@@ -23,10 +21,6 @@
 		- maybe save filter settings (?)
 		- maybe keyboard shortcuts
 */
-
-
-
-
 #include "stdafx.h"
 #include "EditDelayed.h"
 #include "UserMsgs.h"
@@ -62,7 +56,7 @@ CEditDelayed::CEditDelayed()
 	m_uTimerResult = 0;
 	m_dwLastModified = 0;
 	m_bShuttingDown = false;
-	m_bShowRestButton = false;
+	m_bShowResetButton = false;
 	m_bShowsColumnText = false;
 }
 
@@ -139,26 +133,26 @@ void CEditDelayed::OnEnChange()
 		ASSERT( GetFocus() != this );
 		DoDelayedEvalute();
 	}
-	if (GetWindowTextLength() == 0 && m_bShowRestButton){
+	if (GetWindowTextLength() == 0 && m_bShowResetButton) {
 		m_iwReset.ShowIcon(0);
-		m_bShowRestButton = false;
+		m_bShowResetButton = false;
 		SetEditRect(true);
 		m_iwReset.ShowWindow(SW_HIDE);
 	}
-	else if (GetWindowTextLength() > 0 && !m_bShowRestButton){
-		m_bShowRestButton = true;
+	else if (GetWindowTextLength() > 0 && !m_bShowResetButton) {
+		m_bShowResetButton = true;
 		SetEditRect(true);
 		m_iwReset.ShowWindow(SW_SHOW);
 	}
-
 }
 
 void CEditDelayed::DoDelayedEvalute(bool bForce)
 {
 	if (m_bShowsColumnText){
-		ASSERT( false );
+		ASSERT(0);
 		return;
 	}
+
 	// Fire 'evaluate' event only, if content really has changed.
 	CString strContent;
 	GetWindowText(strContent);
@@ -168,8 +162,8 @@ void CEditDelayed::DoDelayedEvalute(bool bForce)
 	GetParent()->SendMessage(UM_DELAYED_EVALUATE, (WPARAM)m_nCurrentColumnIdx, (LPARAM)(LPCTSTR)m_strLastEvaluatedContent);
 }
 
-void CEditDelayed::OnInit(CHeaderCtrl* pColumnHeader){
-
+void CEditDelayed::OnInit(CHeaderCtrl* pColumnHeader)
+{
 	SetEditRect(false);
 	CRect rectWindow;
 	GetClientRect(rectWindow);
@@ -179,28 +173,28 @@ void CEditDelayed::OnInit(CHeaderCtrl* pColumnHeader){
 	m_nCurrentColumnIdx = 0;
 
 	CImageList* pImageList = new CImageList();
-	pImageList->Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	pImageList->Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
 	pImageList->SetBkColor(CLR_NONE);
 	if (pColumnHeader != NULL)
 		pImageList->Add(CTempIconLoader(_T("SEARCHEDIT")));
 	else
 		pImageList->Add(CTempIconLoader(_T("KADNODESEARCH")));
 	m_iwColumn.SetImageList(pImageList);
-	m_iwColumn.Create(_T(""), WS_CHILD | WS_VISIBLE, CRect(0, 0, ICON_LEFTSPACE, rectWindow.bottom) , this, 1 );
+	m_iwColumn.Create(_T(""), WS_CHILD | WS_VISIBLE, CRect(0, 0, ICON_LEFTSPACE, rectWindow.bottom), this, 1);
 	
 	pImageList = new CImageList();
-	pImageList->Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
+	pImageList->Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
 	pImageList->SetBkColor(CLR_NONE);
 	pImageList->Add(CTempIconLoader(_T("FILTERCLEAR1")));
 	pImageList->Add(CTempIconLoader(_T("FILTERCLEAR2")));
 	m_iwReset.SetImageList(pImageList);
-	m_iwReset.Create(_T(""), WS_CHILD , CRect(0, 0, ICON_LEFTSPACE, rectWindow.bottom) , this, 1 );
+	m_iwReset.Create(_T(""), WS_CHILD , CRect(0, 0, ICON_LEFTSPACE, rectWindow.bottom), this, 1);
 
 	ShowColumnText(true);
-
 }
 
-void CEditDelayed::SetEditRect(bool bUpdateResetButtonPos, bool bUpdateColumnButton){
+void CEditDelayed::SetEditRect(bool bUpdateResetButtonPos, bool bUpdateColumnButton)
+{
 	ASSERT( GetStyle() & ES_MULTILINE );
 	
 	CRect editRect;
@@ -208,40 +202,40 @@ void CEditDelayed::SetEditRect(bool bUpdateResetButtonPos, bool bUpdateColumnBut
 
 	editRect.left += ICON_LEFTSPACE;
 
-	if (m_bShowRestButton)
+	if (m_bShowResetButton)
 		editRect.right -= 20;
 	SetRect(&editRect);
 	
-	if (m_bShowRestButton && bUpdateResetButtonPos){
-		m_iwReset.MoveWindow(editRect.right+1, 0, 16, editRect.bottom);
-	}
-	if (bUpdateColumnButton){
+	if (m_bShowResetButton && bUpdateResetButtonPos)
+		m_iwReset.MoveWindow(editRect.right + 1, 0, 16, editRect.bottom);
+	if (bUpdateColumnButton)
 		m_iwColumn.MoveWindow(0, 0, ICON_LEFTSPACE, editRect.bottom);
-	}
-
-
 }
 
-void CEditDelayed::OnLButtonDown(UINT nFlags, CPoint point){
-	if (m_pctrlColumnHeader != NULL){
-		if (point.x <= ICON_LEFTSPACE){
-			// contruct a popup menu out of the columnheader for the filter setting
+void CEditDelayed::OnLButtonDown(UINT nFlags, CPoint point)
+{
+	if (m_pctrlColumnHeader != NULL)
+	{
+		if (point.x <= ICON_LEFTSPACE)
+		{
+			// construct a popup menu out of the columnheader for the filter setting
 			CMenu menu;
 			menu.CreatePopupMenu();
 
 			HDITEM hdi;
-			TCHAR  lpBuffer[256];
+			TCHAR szBuffer[256];
 			hdi.mask = HDI_TEXT | HDI_WIDTH;
-			hdi.pszText = lpBuffer;
-			hdi.cchTextMax = 256;
+			hdi.pszText = szBuffer;
+			hdi.cchTextMax = _countof(szBuffer);
 			int nCount = m_pctrlColumnHeader->GetItemCount();
 			int nIdx;
-			for (int i=0; i < nCount ;i++){
+			for (int i = 0; i < nCount ;i++) {
 				nIdx = m_pctrlColumnHeader->OrderToIndex(i);
 				m_pctrlColumnHeader->GetItem(nIdx, &hdi);
 				if (hdi.cxy > 0) // ignore hidden columns
-					menu.AppendMenu(MF_STRING | (m_nCurrentColumnIdx == nIdx) ? MF_CHECKED : MF_UNCHECKED, MP_FILTERCOLUMNS + nIdx, CString(hdi.pszText));
+					menu.AppendMenu(MF_STRING | ((m_nCurrentColumnIdx == nIdx) ? MF_CHECKED : MF_UNCHECKED), MP_FILTERCOLUMNS + nIdx, hdi.pszText);
 			}
+
 			// draw the menu on a fixed position so it doesnt hides the inputtext
 			CRect editRect;
 			GetClientRect(&editRect);
@@ -251,9 +245,10 @@ void CEditDelayed::OnLButtonDown(UINT nFlags, CPoint point){
 			return;
 		}
 	}
+
 	CRect editRect;
 	GetClientRect(&editRect);
-	if (m_pointMousePos.x > editRect.right-ICON_LEFTSPACE && m_bShowRestButton){
+	if (m_pointMousePos.x > editRect.right - ICON_LEFTSPACE && m_bShowResetButton) {
 		m_iwReset.ShowIcon(1);
 		SetCapture();
 		return;
@@ -262,32 +257,37 @@ void CEditDelayed::OnLButtonDown(UINT nFlags, CPoint point){
 	CEdit::OnLButtonDown(nFlags, point);
 }
 
-void CEditDelayed::OnLButtonUp(UINT nFlags, CPoint point){
-	if (m_bShowRestButton){
+void CEditDelayed::OnLButtonUp(UINT nFlags, CPoint point)
+{
+	if (m_bShowResetButton)
+	{
 		m_iwReset.ShowIcon(0);
 		ReleaseCapture();
+		
 		CRect editRect;
 		GetClientRect(&editRect);
-		if (m_pointMousePos.x > editRect.right-ICON_LEFTSPACE){
+		if (m_pointMousePos.x > editRect.right - ICON_LEFTSPACE)
+		{
 			SetWindowText(_T(""));
 			DoDelayedEvalute();
-			m_bShowRestButton = false;
+			m_bShowResetButton = false;
 			SetEditRect(true);
 			m_iwReset.ShowWindow(SW_HIDE);
 			SetFocus();
 			return;
 		}
 	}
-
 	CEdit::OnLButtonUp(nFlags, point);
 }
 
-BOOL CEditDelayed::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message){
+BOOL CEditDelayed::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
+{
 	// show an arrow when hovering over any selfmade buttons instead of the caret
-	if (nHitTest == HTCLIENT){
+	if (nHitTest == HTCLIENT)
+	{
 		CRect editRect;
 		GetClientRect(&editRect);
-		if (m_pointMousePos.x <= ICON_LEFTSPACE || (m_pointMousePos.x > editRect.right-ICON_LEFTSPACE && m_bShowRestButton) ){
+		if (m_pointMousePos.x <= ICON_LEFTSPACE || (m_pointMousePos.x > editRect.right - ICON_LEFTSPACE && m_bShowResetButton)) {
 			::SetCursor(m_hCursor);
 			return TRUE;
 		}
@@ -295,45 +295,48 @@ BOOL CEditDelayed::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message){
 	return CEdit::OnSetCursor(pWnd, nHitTest, message);
 }
 
-void CEditDelayed::OnMouseMove(UINT nFlags, CPoint point){
+void CEditDelayed::OnMouseMove(UINT nFlags, CPoint point)
+{
 	m_pointMousePos = point;
 	CEdit::OnMouseMove(nFlags, point);
 }
 
 // show the title of the column selected for filtering if the control is empty and has no focus
-void CEditDelayed::ShowColumnText(bool bShow){
-	if (bShow){
-		if (GetWindowTextLength() != 0 && !m_bShowsColumnText){
-			ASSERT( false );
+void CEditDelayed::ShowColumnText(bool bShow)
+{
+	if (bShow)
+	{
+		if (GetWindowTextLength() != 0 && !m_bShowsColumnText) {
+			ASSERT(0);
 			return;
 		}
+
 		m_bShowsColumnText = true;
-		if (m_pctrlColumnHeader != NULL){
+		if (m_pctrlColumnHeader != NULL)
+		{
 			HDITEM hdi;
-			TCHAR  lpBuffer[256];
+			TCHAR szBuffer[256];
 			hdi.mask = HDI_TEXT | HDI_WIDTH;
-			hdi.pszText = lpBuffer;
-			hdi.cchTextMax = 256;
-			if (m_pctrlColumnHeader->GetItem(m_nCurrentColumnIdx, &hdi)){
-				SetWindowText(hdi.pszText);	
-			}
+			hdi.pszText = szBuffer;
+			hdi.cchTextMax = _countof(szBuffer);
+			if (m_pctrlColumnHeader->GetItem(m_nCurrentColumnIdx, &hdi))
+				SetWindowText(hdi.pszText);
 		}
 		else
 			SetWindowText(m_strAlternateText);
 	}
-	else if (!bShow && m_bShowsColumnText){
+	else if (!bShow && m_bShowsColumnText)
+	{
 		m_bShowsColumnText = false;
 		SetWindowText(_T(""));
 	}
-
 }
 
 HBRUSH CEditDelayed::CtlColor(CDC* pDC, UINT)
 {
-    // Use gray text color when showing the column text so it doesn't gets confused with typed in text 
+    // Use gray text color when showing the column text so it doesn't gets confused with typed in text
 	HBRUSH hbr = ::GetSysColorBrush(COLOR_WINDOW);
-	if (m_bShowsColumnText)
-		pDC->SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
+	pDC->SetTextColor(::GetSysColor(m_bShowsColumnText ? COLOR_GRAYTEXT : COLOR_WINDOWTEXT));
 	pDC->SetBkColor(::GetSysColor(COLOR_WINDOW));
 	return hbr;
 }
@@ -341,9 +344,10 @@ HBRUSH CEditDelayed::CtlColor(CDC* pDC, UINT)
 BOOL CEditDelayed::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 {
 	wParam = LOWORD(wParam);
-
-	if (wParam >= MP_FILTERCOLUMNS && wParam <= MP_FILTERCOLUMNS + 50) {
-		if (m_nCurrentColumnIdx != (int)wParam - MP_FILTERCOLUMNS){
+	if (wParam >= MP_FILTERCOLUMNS && wParam <= MP_FILTERCOLUMNS + 50)
+	{
+		if (m_nCurrentColumnIdx != (int)wParam - MP_FILTERCOLUMNS)
+		{
 			m_nCurrentColumnIdx = wParam - MP_FILTERCOLUMNS;
 			if (m_bShowsColumnText)
 				ShowColumnText(true);
@@ -351,12 +355,12 @@ BOOL CEditDelayed::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				DoDelayedEvalute(true);
 		}
 	}
-
-	return true;
+	return TRUE;
 }
 
-void CEditDelayed::OnSize(UINT nType, int cx, int cy){
-	CEdit::OnSize( nType, cx, cy );
+void CEditDelayed::OnSize(UINT nType, int cx, int cy)
+{
+	CEdit::OnSize(nType, cx, cy);
 	SetEditRect(true, true);
 }
 
@@ -364,41 +368,41 @@ void CEditDelayed::OnSize(UINT nType, int cx, int cy){
 /////////////////////////////////////////////////////////////////////////////
 // CIconWnd
 
-
-CIconWnd::CIconWnd(){
-	m_pImageList = NULL;
-	m_nCurrentIcon = 0;
-}
-
-CIconWnd::~CIconWnd(){
-	if (m_pImageList != NULL)
-		m_pImageList->DeleteImageList();
-	delete m_pImageList;
-}
-
 BEGIN_MESSAGE_MAP(CIconWnd, CStatic)
 	ON_WM_PAINT()
 	ON_WM_ERASEBKGND()
 END_MESSAGE_MAP()
 
+CIconWnd::CIconWnd()
+{
+	m_pImageList = NULL;
+	m_nCurrentIcon = 0;
+}
 
-void CIconWnd::OnPaint() {
-	CPaintDC dc( this );
+CIconWnd::~CIconWnd()
+{
+	delete m_pImageList;
+}
+
+void CIconWnd::OnPaint()
+{
+	CPaintDC dc(this);
 	CRect rect;
-	GetClientRect( &rect );
-	dc.FillSolidRect( rect, GetSysColor(COLOR_WINDOW) );
+	GetClientRect(&rect);
+	dc.FillSolidRect(rect, GetSysColor(COLOR_WINDOW));
 	m_pImageList->Draw(&dc, m_nCurrentIcon, CPoint(2, (rect.bottom - 16) / 2), ILD_NORMAL);
 }
 
-BOOL CIconWnd::OnEraseBkgnd( CDC* ) {
+BOOL CIconWnd::OnEraseBkgnd(CDC*)
+{
 	return TRUE;
 }
 
-void CIconWnd::ShowIcon(int nIconNumber){
+void CIconWnd::ShowIcon(int nIconNumber)
+{
 	if (nIconNumber == m_nCurrentIcon)
 		return;
 	m_nCurrentIcon = nIconNumber;
 	Invalidate();
 	UpdateWindow();
 }
-

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -286,7 +286,7 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 
 	SetIcon(m_icnWnd = theApp.LoadIcon(_T("Wizard")), FALSE);
 
-	if (::DetectWinVersion()==_WINVER_95_ || ::DetectWinVersion()==_WINVER_98_ || ::DetectWinVersion()==_WINVER_ME_){
+	if (thePrefs.GetWindowsVersion() ==_WINVER_95_ || thePrefs.GetWindowsVersion() ==_WINVER_98_ || thePrefs.GetWindowsVersion() ==_WINVER_ME_){
 		CheckRadioButton(IDC_WIZ_XP_RADIO, IDC_WIZ_ME_RADIO, IDC_WIZ_ME_RADIO);
 		m_iOS = 1;
 	}
@@ -303,7 +303,7 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 	m_provider.InsertColumn(0, GetResString(IDS_PW_CONNECTION), LVCFMT_LEFT, 150);
 	m_provider.InsertColumn(1, GetResString(IDS_WIZ_DOWN), LVCFMT_LEFT, 85);
 	m_provider.InsertColumn(2, GetResString(IDS_WIZ_UP), LVCFMT_LEFT, 85);
-	m_provider.SetExtendedStyle(m_provider.GetExtendedStyle() | LVS_EX_FULLROWSELECT);
+	m_provider.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
 	m_provider.InsertItem(0, GetResString(IDS_UNKNOWN));m_provider.SetItemText(0,1,_T(""));m_provider.SetItemText(0,2,_T(""));
 	m_provider.InsertItem(1, GetResString(IDS_WIZARD_CUSTOM));m_provider.SetItemText(1,1,GetResString(IDS_WIZARD_ENTERBELOW));m_provider.SetItemText(1,2,GetResString(IDS_WIZARD_ENTERBELOW));

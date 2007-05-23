@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -125,6 +125,7 @@ CSearchResultsWnd::CSearchResultsWnd(CWnd* /*pParent*/)
 
 CSearchResultsWnd::~CSearchResultsWnd()
 {
+	m_ctlSearchListHeader.Detach();
 	delete m_btnSearchListMenu;
 	if (globsearch)
 		delete searchpacket;
@@ -137,6 +138,7 @@ void CSearchResultsWnd::OnInitialUpdate()
 	CResizableFormView::OnInitialUpdate();
 	InitWindowStyles(this);
 	theApp.searchlist->SetOutputWnd(&searchlistctrl);
+	m_ctlSearchListHeader.Attach(searchlistctrl.GetHeaderCtrl()->Detach());
 	searchlistctrl.Init(theApp.searchlist);
 	searchlistctrl.SetName(_T("SearchListCtrl"));
 
@@ -152,7 +154,7 @@ void CSearchResultsWnd::OnInitialUpdate()
 	m_btnSearchListMenu->SetExtendedStyle(m_btnSearchListMenu->GetExtendedStyle() & ~TBSTYLE_EX_MIXEDBUTTONS);
 	m_btnSearchListMenu->RecalcLayout(true);
 
-	m_ctlFilter.OnInit(searchlistctrl.GetHeaderCtrl());
+	m_ctlFilter.OnInit(&m_ctlSearchListHeader);
 
 	SetAllIcons();
 	Localize();
@@ -269,6 +271,7 @@ void CSearchResultsWnd::OnTimer(UINT nIDEvent)
     
 			if (toask)
 			{
+				bool bRequestSent = false;
 				if (toask->SupportsLargeFilesUDP() && (toask->GetUDPFlags() & SRV_UDPFLG_EXT_GETFILES))
 				{
 					CSafeMemFile data(50);
@@ -282,6 +285,7 @@ void CSearchResultsWnd::OnTimer(UINT nIDEvent)
 					memcpy(pExtSearchPacket->pBuffer+(uint32)data.GetLength(), searchpacket->pBuffer, searchpacket->size);
 					theStats.AddUpDataOverheadServer(pExtSearchPacket->size);
 					theApp.serverconnect->SendUDPPacket(pExtSearchPacket, toask, true);
+					bRequestSent = true;
 					if (thePrefs.GetDebugServerUDPLevel() > 0)
 						Debug(_T(">>> Sending %s  to server %-21s (%3u of %3u)\n"),  _T("OP__GlobSearchReq3"), ipstr(toask->GetAddress(), toask->GetPort()), servercount, theApp.serverlist->GetServerCount());
 
@@ -294,6 +298,7 @@ void CSearchResultsWnd::OnTimer(UINT nIDEvent)
 							Debug(_T(">>> Sending %s  to server %-21s (%3u of %3u)\n"), _T("OP__GlobSearchReq2"), ipstr(toask->GetAddress(), toask->GetPort()), servercount, theApp.serverlist->GetServerCount());
 						theStats.AddUpDataOverheadServer(searchpacket->size);
 						theApp.serverconnect->SendUDPPacket(searchpacket, toask, false);
+						bRequestSent = true;
 					}
 					else{
 						if (thePrefs.GetDebugServerUDPLevel() > 0)
@@ -308,12 +313,15 @@ void CSearchResultsWnd::OnTimer(UINT nIDEvent)
 							Debug(_T(">>> Sending %s  to server %-21s (%3u of %3u)\n"), _T("OP__GlobSearchReq1"), ipstr(toask->GetAddress(), toask->GetPort()), servercount, theApp.serverlist->GetServerCount());
 				theStats.AddUpDataOverheadServer(searchpacket->size);
 			    theApp.serverconnect->SendUDPPacket(searchpacket,toask,false);
+						bRequestSent = true;
 		    }
 					else{
 						if (thePrefs.GetDebugServerUDPLevel() > 0)
 							Debug(_T(">>> Skipped UDP search on server %-21s (%3u of %3u): No large file support\n"), ipstr(toask->GetAddress(), toask->GetPort()), servercount, theApp.serverlist->GetServerCount());
 					}
 				}
+				if (bRequestSent)
+					theApp.searchlist->SentUDPRequestNotification(m_nEd2kSearchID, toask->GetIP());
 			}
 		    else
 				CancelEd2kSearch();
@@ -1277,7 +1285,7 @@ bool CSearchResultsWnd::DoNewEd2kSearch(SSearchParams* pParams)
 		strResultType.Empty();
 	m_nEd2kSearchID++;
 	pParams->dwSearchID = m_nEd2kSearchID;
-	theApp.searchlist->NewSearch(&searchlistctrl, strResultType, m_nEd2kSearchID, pParams->eType);
+	theApp.searchlist->NewSearch(&searchlistctrl, strResultType, m_nEd2kSearchID, pParams->eType, pParams->strExpression);
 	canceld = false;
 
 	if (m_uTimerLocalServer){
@@ -1390,7 +1398,7 @@ bool CSearchResultsWnd::DoNewKadSearch(SSearchParams* pParams)
 	CStringA strResultType = pParams->strFileType;
 	if (strResultType == ED2KFTSTR_PROGRAM)
 		strResultType.Empty();
-	theApp.searchlist->NewSearch(&searchlistctrl, strResultType, pParams->dwSearchID, pParams->eType);
+	theApp.searchlist->NewSearch(&searchlistctrl, strResultType, pParams->dwSearchID, pParams->eType, pParams->strExpression);
 	CreateNewTab(pParams);
 	return true;
 }
@@ -1596,14 +1604,14 @@ void CSearchResultsWnd::UpdateCatTabs()
 	for (int ix=0;ix<thePrefs.GetCatCount();ix++){
 	//MORPH START - Changed by SiRoB, Selection category support
 	/*
-		CString label=(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->title;
+		CString label=(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->strTitle;
 		label.Replace(_T("&"),_T("&&"));
 		m_cattabs.InsertItem(ix,label);
 	}
 	if (oldsel>=m_cattabs.GetItemCount() || oldsel==-1)
 		oldsel=0;
 	*/
-		CString label=thePrefs.GetCategory(ix)->title;
+		CString label=thePrefs.GetCategory(ix)->strTitle;
 		label.Replace(_T("&"),_T("&&"));
 		m_cattabs.InsertItem(ix,label);
 	}
@@ -1708,11 +1716,31 @@ bool CSearchResultsWnd::CanSearchRelatedFiles() const
 		&& theApp.serverconnect->GetCurrentServer()->GetRelatedSearchSupport();
 }
 
-void CSearchResultsWnd::SearchRelatedFiles(const CAbstractFile* file)
+void CSearchResultsWnd::SearchRelatedFiles(CPtrList& listFiles)
 {
 	SSearchParams* pParams = new SSearchParams;
-	pParams->strExpression = _T("related::") + md4str(file->GetFileHash());
-	pParams->strSpecialTitle = GetResString(IDS_RELATED) + _T(": ") + file->GetFileName();
+	pParams->strExpression = _T("related");
+	POSITION pos = listFiles.GetHeadPosition();
+	if (pos == NULL){
+		delete pParams;
+		ASSERT( false );
+		return;
+	}
+
+	CString strNames;
+	while (pos != NULL){
+		CAbstractFile* pFile = (CAbstractFile*)listFiles.GetNext(pos);
+		if (pFile->IsKindOf(RUNTIME_CLASS(CAbstractFile))){
+			pParams->strExpression += _T("::") + md4str(pFile->GetFileHash());
+			if (!strNames.IsEmpty())
+				strNames += _T(", ");
+			strNames += pFile->GetFileName();
+		}
+		else
+			ASSERT( false );
+	}
+
+	pParams->strSpecialTitle = GetResString(IDS_RELATED) + _T(": ") + strNames;
 	if (pParams->strSpecialTitle.GetLength() > 50)
 		pParams->strSpecialTitle = pParams->strSpecialTitle.Left(50) + _T("...");
 	StartSearch(pParams);
@@ -1744,14 +1772,23 @@ BOOL CSearchResultsSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 
 void CSearchResultsSelector::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
+	if (point.x == -1 || point.y == -1) {
+		if (!SetDefaultContextMenuPos())
+			return;
+		point = m_ptCtxMenu;
+		ClientToScreen(&point);
+	}
+	else {
+		m_ptCtxMenu = point;
+		ScreenToClient(&m_ptCtxMenu);
+	}
+
 	CTitleMenu menu;
 	menu.CreatePopupMenu();
 	menu.AddMenuTitle(GetResString(IDS_SW_RESULT));
 	menu.AppendMenu(MF_STRING, MP_RESTORESEARCHPARAMS, GetResString(IDS_RESTORESEARCHPARAMS));
 	menu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE));
 	menu.SetDefaultItem(MP_RESTORESEARCHPARAMS);
-	m_ptCtxMenu = point;
-	ScreenToClient(&m_ptCtxMenu);
 	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
@@ -1759,6 +1796,7 @@ LRESULT CSearchResultsWnd::OnChangeFilter(WPARAM wParam, LPARAM lParam)
 {
 	CWaitCursor curWait; // this may take a while
 
+	bool bColumnDiff = (m_nFilterColumn != (uint32)wParam);
 	m_nFilterColumn = (uint32)wParam;
 
 	CStringArray astrFilter;
@@ -1781,7 +1819,7 @@ LRESULT CSearchResultsWnd::OnChangeFilter(WPARAM wParam, LPARAM lParam)
 		}
 	}
 
-	if (!bFilterDiff)
+	if (!bColumnDiff && !bFilterDiff)
 		return 0;
 	m_astrFilter.RemoveAll();
 	m_astrFilter.Append(astrFilter);

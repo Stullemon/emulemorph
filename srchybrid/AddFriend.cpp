@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -70,7 +70,7 @@ BOOL CAddFriend::OnInitDialog()
 		SetDlgItemInt(IDC_IP, m_pShowFriend->m_dwLastUsedIP, FALSE);
 		SetDlgItemInt(IDC_PORT, m_pShowFriend->m_nLastUsedPort, FALSE);
 		SetDlgItemText(IDC_USERNAME, m_pShowFriend->m_strName);
-		if (m_pShowFriend->m_dwHasHash)
+		if (m_pShowFriend->HasUserhash())
 			SetDlgItemText(IDC_USERHASH, md4str(m_pShowFriend->m_abyUserhash));
 		else
 			SetDlgItemText(IDC_USERHASH, _T(""));

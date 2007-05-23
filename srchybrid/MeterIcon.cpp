@@ -58,7 +58,7 @@ HICON CMeterIcon::CreateMeterIcon(const int *pBarData)
 	iiNewIcon.fIcon = true;	// set that it is an icon
 
 	// create DC's
-	HDC hScreenDC = ::GetDC(NULL);
+	HDC hScreenDC = ::GetDC(HWND_DESKTOP);
 	HDC hIconDC = CreateCompatibleDC(hScreenDC);
 	HDC hMaskDC = CreateCompatibleDC(hScreenDC);
 

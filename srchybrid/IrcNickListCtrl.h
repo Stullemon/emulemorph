@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -16,40 +16,50 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
-#include "./MuleListCtrl.h"
+#include "MuleListCtrl.h"
 
-struct Nick;
+struct Channel;
+
+struct Nick
+{
+	CString m_sNick;
+	CString m_sModes;
+	int m_iLevel;
+};
 
 class CIrcNickListCtrl : public CMuleListCtrl
 {
-		DECLARE_DYNAMIC(CIrcNickListCtrl)
+	DECLARE_DYNAMIC(CIrcNickListCtrl)
 
-	public:
-		CIrcNickListCtrl();
-		void Init();
-		Nick* FindNickByName(CString sChannel, CString sName);
-		Nick* NewNick(CString sChannel, CString sNick);
-		void RefreshNickList( CString sChannel );
-		bool RemoveNick( CString sChannel, CString sNick );
-		void DeleteAllNick( CString sChannel );
-		void DeleteNickInAll ( CString sNice, CString sMessage );
-		bool ChangeNick( CString sChannel, CString sOldnick, CString sNewnick );
-		bool ChangeNickMode( CString sChannel, CString sNice, CString sMode );
-		void ChangeAllNick( CString sOldnick, CString sNewnick );
-		void UpdateNickCount();
-		void Localize();
-		CString m_sUserModeSettings;
-		CString m_sUserModeSymbols;
-	protected:
-		friend class CIrcWnd;
-		int		m_iSortIndex;
-		bool	m_bSortOrder;
-		static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-		DECLARE_MESSAGE_MAP()
-		afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
-		afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-		afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
-		virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam );
-	private:
-		CIrcWnd* m_pParent;
+public:
+	CIrcNickListCtrl();
+
+	void Init();
+	Nick* FindNickByName(const CString& sChannel, const CString& sName);
+	Nick* FindNickByName(const Channel* pChannel, const CString& sName);
+	Nick* NewNick(const CString& sChannel, const CString& sNick);
+	void RefreshNickList(const CString& sChannel);
+	bool RemoveNick(const CString& sChannel, const CString& sNick);
+	void DeleteAllNick(const CString& sChannel);
+	void DeleteNickInAll (const CString& sNice, const CString& sMessage);
+	bool ChangeNick(const CString& sChannel, const CString& sOldnick, const CString& sNewnick);
+	bool ChangeNickMode(const CString& sChannel, const CString& sNice, const CString& sMode);
+	bool ChangeAllNick(const CString& sOldnick, const CString& sNewnick);
+	void UpdateNickCount();
+	void Localize();
+	CString m_sUserModeSettings;
+	CString m_sUserModeSymbols;
+
+protected:
+	friend class CIrcWnd;
+	CIrcWnd* m_pParent;
+
+	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnNMDblClk(NMHDR *pNMHDR, LRESULT *pResult);
 };

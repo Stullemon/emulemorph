@@ -1233,17 +1233,64 @@ void CSearch::AddFileID(const CUInt128& uID)
 	m_listFileIDs.push_back(uID);
 }
 
-void CSearch::PreparePacketForTags( CByteIO *byIO, CKnownFile *pFile)
+static int GetMetaDataWords(CStringArray& rastrWords, const CString& rstrData)
+{
+	// Create a list of the 'words' found in 'data'. This is similar but though not equal
+	// to the 'CSearchManager::GetWords' function which needs to follow some other rules.
+	int iPos = 0;
+	CString strWord = rstrData.Tokenize(_aszInvKadKeywordChars, iPos);
+	while (!strWord.IsEmpty())
+	{
+		rastrWords.Add(strWord);
+		strWord = rstrData.Tokenize(_aszInvKadKeywordChars, iPos);
+	}
+	return rastrWords.GetSize();
+}
+
+static bool IsRedundantMetaData(const CStringArray& rastrFileNameWords, const CString& rstrMetaData)
+{
+	// Verify if the meta data string 'rstrMetaData' is already contained within the filename.
+	if (rstrMetaData.IsEmpty())
+		return true;
+
+	int iMetaDataWords = 0;
+	int iFoundInFileName = 0;
+	int iPos = 0;
+	CString strMetaDataWord(rstrMetaData.Tokenize(_aszInvKadKeywordChars, iPos));
+	while (!strMetaDataWord.IsEmpty())
+	{
+		iMetaDataWords++;
+		for (int i = 0; i < rastrFileNameWords.GetSize(); i++)
+		{
+			if (rastrFileNameWords.GetAt(i).CompareNoCase(strMetaDataWord) == 0)
+			{
+				iFoundInFileName++;
+				break;
+			}
+		}
+		if (iFoundInFileName < iMetaDataWords)
+			return false;
+		strMetaDataWord = rstrMetaData.Tokenize(_aszInvKadKeywordChars, iPos);
+	}
+
+	if (iMetaDataWords == 0)
+		return true;
+	if (iFoundInFileName == iMetaDataWords)
+		return true;
+	return false;
+}
+
+void CSearch::PreparePacketForTags(CByteIO *byIO, CKnownFile *pFile)
 {
 	// We are going to publish a keyword, setup the tag list.
 	TagList listTag;
 	try
 	{
-		if( pFile && byIO )
+		if (pFile && byIO)
 		{
 			// Name, Size
 			listTag.push_back(new CKadTagStr(TAG_FILENAME, pFile->GetFileName()));
-			if(pFile->GetFileSize() > OLD_MAX_EMULE_FILE_SIZE)
+			if (pFile->GetFileSize() > OLD_MAX_EMULE_FILE_SIZE)
 			{
 				byte byValue[8];
 				*((uint64*)byValue) = pFile->GetFileSize();
@@ -1261,17 +1308,19 @@ void CSearch::PreparePacketForTags( CByteIO *byIO, CKnownFile *pFile)
 				listTag.push_back(new CKadTagStr(TAG_FILETYPE, strED2KFileType));
 
 			// file format (filename extension)
-			int iExt = pFile->GetFileName().ReverseFind(_T('.'));
-			if (iExt != -1)
-			{
-				CString strExt(pFile->GetFileName().Mid(iExt));
-				if (!strExt.IsEmpty())
-				{
-					strExt = strExt.Mid(1);
-					if (!strExt.IsEmpty())
-						listTag.push_back(new CKadTagStr(TAG_FILEFORMAT, strExt));
-				}
-			}
+			// 21-Sep-2006 []: TAG_FILEFORMAT is no longer explicitly published nor stored as
+			// it is already part of the filename.
+			//int iExt = pFile->GetFileName().ReverseFind(_T('.'));
+			//if (iExt != -1)
+			//{
+			//	CString strExt(pFile->GetFileName().Mid(iExt));
+			//	if (!strExt.IsEmpty())
+			//	{
+			//		strExt = strExt.Mid(1);
+			//		if (!strExt.IsEmpty())
+			//			listTag.push_back(new CKadTagStr(TAG_FILEFORMAT, strExt));
+			//	}
+			//}
 
 			// additional meta data (Artist, Album, Codec, Length, ...)
 			// only send verified meta data to nodes
@@ -1283,14 +1332,15 @@ void CSearch::PreparePacketForTags( CByteIO *byIO, CKnownFile *pFile)
 					uint8 uType;
 				}
 				_aMetaTags[] =
-				    {
-				        { FT_MEDIA_ARTIST,  2 },
-				        { FT_MEDIA_ALBUM,   2 },
-				        { FT_MEDIA_TITLE,   2 },
-				        { FT_MEDIA_LENGTH,  3 },
-				        { FT_MEDIA_BITRATE, 3 },
-				        { FT_MEDIA_CODEC,   2 }
-				    };
+				{
+				    { FT_MEDIA_ARTIST,  2 },
+				    { FT_MEDIA_ALBUM,   2 },
+				    { FT_MEDIA_TITLE,   2 },
+				    { FT_MEDIA_LENGTH,  3 },
+				    { FT_MEDIA_BITRATE, 3 },
+				    { FT_MEDIA_CODEC,   2 }
+				};
+				CStringArray astrFileNameWords;
 				for (int iIndex = 0; iIndex < ARRSIZE(_aMetaTags); iIndex++)
 				{
 					const ::CTag* pTag = pFile->GetTag(_aMetaTags[iIndex].uName, _aMetaTags[iIndex].uType);
@@ -1306,7 +1356,21 @@ void CSearch::PreparePacketForTags( CByteIO *byIO, CKnownFile *pFile)
 						szKadTagName[0] = (char)pTag->GetNameID();
 						szKadTagName[1] = '\0';
 						if (pTag->IsStr())
-							listTag.push_back(new CKadTagStr(szKadTagName, pTag->GetStr()));
+						{
+							bool bIsRedundant = false;
+							if (   pTag->GetNameID() == FT_MEDIA_ARTIST
+								|| pTag->GetNameID() == FT_MEDIA_ALBUM
+								|| pTag->GetNameID() == FT_MEDIA_TITLE)
+							{
+								if (astrFileNameWords.GetSize() == 0)
+									GetMetaDataWords(astrFileNameWords, pFile->GetFileName());
+								bIsRedundant = IsRedundantMetaData(astrFileNameWords, pTag->GetStr());
+								//if (bIsRedundant)
+								//	TRACE(_T("Skipping meta data tag \"%s\" for file \"%s\"\n"), pTag->GetStr(), pFile->GetFileName());
+							}
+							if (!bIsRedundant)
+								listTag.push_back(new CKadTagStr(szKadTagName, pTag->GetStr()));
+						}
 						else
 							listTag.push_back(new CKadTagUInt(szKadTagName, pTag->GetInt()));
 					}

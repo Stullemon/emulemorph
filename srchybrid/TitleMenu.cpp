@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -93,7 +93,7 @@ void CTitleMenu::AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu)
 	if (lpszTitle != NULL)
 	{
 		m_strTitle = lpszTitle;
-		m_strTitle.Replace(_T("&"), _T(""));
+		m_strTitle.Remove(_T('&'));
 		CMenu::InsertMenu(0, MF_BYPOSITION | MF_OWNERDRAW | MF_STRING | MF_DISABLED, MP_TITLE);
 	}
 	if (bIsIconMenu)
@@ -102,7 +102,7 @@ void CTitleMenu::AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu)
 
 void CTitleMenu::EnableIcons()
 {
-	if (thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_)
+	if (thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_ || thePrefs.GetWindowsVersion() == _WINVER_2003_ || thePrefs.GetWindowsVersion() == _WINVER_VISTA_)
 	{
 		m_bIconMenu = true;
 		m_ImageList.DeleteImageList();
@@ -125,7 +125,7 @@ void CTitleMenu::MeasureItem(LPMEASUREITEMSTRUCT mi)
 	if (mi->itemID == MP_TITLE)
 	{
 		CDC dc;
-		dc.Attach(::GetDC(NULL));
+		dc.Attach(::GetDC(HWND_DESKTOP));
 		HFONT hfontOld = (HFONT)SelectObject(dc.m_hDC, (HFONT)theApp.m_fontDefaultBold);
 		CSize size = dc.GetTextExtent(m_strTitle);
 		::SelectObject(dc.m_hDC, hfontOld);
@@ -229,7 +229,8 @@ BOOL CTitleMenu::InsertMenu(UINT nPosition, UINT nFlags, UINT_PTR nIDNewItem, LP
 
 void CTitleMenu::SetMenuBitmap(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR /*lpszNewItem*/, LPCTSTR lpszIconName)
 {
-	if (!m_bIconMenu || (nFlags & MF_SEPARATOR) != 0 || !(thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_)) {
+	if (!m_bIconMenu || (nFlags & MF_SEPARATOR) != 0 ||
+		!(thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_ || thePrefs.GetWindowsVersion() == _WINVER_2003_ || thePrefs.GetWindowsVersion() == _WINVER_VISTA_)) {
 		if (m_bIconMenu && lpszIconName != NULL)
 			ASSERT(0);
 		return;

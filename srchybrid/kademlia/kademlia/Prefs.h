@@ -79,6 +79,7 @@ namespace Kademlia
 			void SetPublish(bool bVal);
 			bool GetFindBuddy();
 			void SetFindBuddy(bool bVal = true);
+			uint16 GetUDPVerifyKey(uint32 dwTargetIP) const;
 		private:
 			void Init(LPCTSTR szFilename);
 			void Reset();

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -184,23 +184,22 @@ void CDirectoryTreeCtrl::OnTvnGetdispinfo(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CDirectoryTreeCtrl::Init(void)
 {
+	// Win98: Explicitly set to Unicode to receive Unicode notifications.
 	SendMessage(CCM_SETUNICODEFORMAT, TRUE);
 
 	ShowWindow(SW_HIDE);
 	DeleteAllItems();
 
-	ModifyStyle( 0, TVS_CHECKBOXES );
-
 	// START: added by FoRcHa /////////////
 	WORD wWinVer = thePrefs.GetWindowsVersion();	// maybe causes problems on 98 & nt4
-	if(wWinVer == _WINVER_2K_ || wWinVer == _WINVER_XP_ || wWinVer == _WINVER_ME_)		
+	if (wWinVer != _WINVER_95_ && wWinVer != _WINVER_NT4_)
 	{
 		SHFILEINFO shFinfo;
 		HIMAGELIST hImgList = NULL;
 
 		// Get the system image list using a "path" which is available on all systems. [patch by bluecow]
 		hImgList = (HIMAGELIST)SHGetFileInfo(_T("."), 0, &shFinfo, sizeof(shFinfo),
-												SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
+											 SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
 		if(!hImgList)
 		{
 			TRACE(_T("Cannot retrieve the Handle of SystemImageList!"));
@@ -225,10 +224,10 @@ void CDirectoryTreeCtrl::Init(void)
 		drive[ARRSIZE(drive) - 1] = _T('\0');
 
 		switch(drive[0]){
-			case _T('a'):
-			case _T('A'):
-			case _T('b'):
-			case _T('B'):
+		case _T('a'):
+		case _T('A'):
+		case _T('b'):
+		case _T('B'):
 			// Skip floppy disk
 			break;
 		default:
@@ -252,10 +251,10 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 	
 	// START: changed by FoRcHa /////
 	WORD wWinVer = thePrefs.GetWindowsVersion();
-	if(wWinVer == _WINVER_2K_ || wWinVer == _WINVER_XP_ || wWinVer == _WINVER_ME_)		
+	if (wWinVer != _WINVER_95_ && wWinVer != _WINVER_NT4_)
 	{
 		itInsert.item.mask = TVIF_CHILDREN | TVIF_HANDLE | TVIF_TEXT |
-							TVIF_STATE | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
+							 TVIF_STATE | TVIF_IMAGE | TVIF_SELECTEDIMAGE;
 		itInsert.item.stateMask = TVIS_BOLD | TVIS_STATEIMAGEMASK;
 	}
 	else
@@ -279,7 +278,7 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 	itInsert.hParent = hRoot;
 	
 	// START: added by FoRcHa ////////////////
-	if(wWinVer == _WINVER_2K_ || wWinVer == _WINVER_XP_ || wWinVer == _WINVER_ME_)		
+	if (wWinVer != _WINVER_95_ && wWinVer != _WINVER_NT4_)
 	{
 		CString strTemp = strDir;
 		if(strTemp.Right(1) != _T("\\"))
@@ -466,7 +465,7 @@ void CDirectoryTreeCtrl::AddShare(CString strDir)
 	if (strDir.Right(1) != _T('\\'))
 		strDir += _T('\\');
 	
-	if (IsShared(strDir) || !strDir.CompareNoCase(thePrefs.GetConfigDir()))
+	if (IsShared(strDir) || !strDir.CompareNoCase(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)))
 		return;
 
 	m_lstShared.AddTail(strDir);
@@ -520,7 +519,10 @@ void CDirectoryTreeCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			}
 		}
 		else
-			ClientToScreen(&(ptMenu = (0, 0)));
+		{
+			ptMenu.SetPoint(0, 0);
+			ClientToScreen(&ptMenu);
+		}
 	}
 
 	HTREEITEM hItem = HitTest(point);

@@ -38,6 +38,7 @@ public:
 	void SaveCurHeight();
 	void UpdateBackground();
 	void PressMuleButton(int nID);
+	BOOL GetMaxSize(LPSIZE pSize) const;
 
 	static int GetDefaultLabelType() { return (int)LabelsBelow; }
 

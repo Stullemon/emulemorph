@@ -655,6 +655,9 @@
 				RelativePath=".\UPnP_IGDControlPoint.cpp">
 			</File>
 			<File
+				RelativePath=".\UPnPFinder.cpp">
+			</File>
+			<File
 				RelativePath="URLClient.cpp">
 			</File>
 			<File
@@ -1054,10 +1057,16 @@
 				RelativePath=".\UPnP_IGDControlPoint.h">
 			</File>
 			<File
+				RelativePath=".\UPnPFinder.h">
+			</File>
+			<File
 				RelativePath="URLClient.h">
 			</File>
 			<File
 				RelativePath="Version.h">
+			</File>
+			<File
+				RelativePath=".\VistaDefines.h">
 			</File>
 			<File
 				RelativePath=".\WebCache\WebCache.h">
@@ -1487,6 +1496,9 @@
 			</File>
 			<File
 				RelativePath=".\SlideBar.cpp">
+			</File>
+			<File
+				RelativePath=".\SmileySelector.cpp">
 			</File>
 			<File
 				RelativePath="SplashScreen.cpp">
@@ -1969,6 +1981,9 @@
 			</File>
 			<File
 				RelativePath=".\SlideBar.h">
+			</File>
+			<File
+				RelativePath=".\SmileySelector.h">
 			</File>
 			<File
 				RelativePath="SplashScreen.h">

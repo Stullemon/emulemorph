@@ -8,9 +8,9 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.7 $
+* $Revision: 1.8 $
 * $Modtime:$
-* $Author: pindakaasmod $
+* $Author: stulleamgym $
 *
 * Revision History:
 *	$History:$
@@ -833,10 +833,14 @@ BOOL CTreePropSheet::OnInitDialog()
 		if (GetParent())
 			GetParent()->ScreenToClient(rect);
 		MoveWindow(rect);
+		// Need to center window again to reflect the missing caption bar (noticeable on 640x480 resolutions)
+		CenterWindow();
 	}
 
-	// finally create tht tree control
-	const DWORD	dwTreeStyle = TVS_SHOWSELALWAYS/*|TVS_TRACKSELECT*/|TVS_HASLINES/*|TVS_LINESATROOT*/|TVS_HASBUTTONS;
+	// finally create the tree control
+	//const DWORD	dwTreeStyle = TVS_SHOWSELALWAYS/*|TVS_TRACKSELECT*/|TVS_HASLINES/*|TVS_LINESATROOT*/|TVS_HASBUTTONS;
+	// As long as we don't use sub pages we apply the 'TVS_FULLROWSELECT' style for a little more user convinience.
+	const DWORD	dwTreeStyle = TVS_SHOWSELALWAYS | TVS_FULLROWSELECT;
 	m_pwndPageTree = CreatePageTreeObject();
 	if (!m_pwndPageTree)
 	{
@@ -873,6 +877,9 @@ BOOL CTreePropSheet::OnInitDialog()
 	}
 	#endif
 	
+	// Win98: Explicitly set to Unicode to receive Unicode notifications.
+	m_pwndPageTree->SendMessage(CCM_SETUNICODEFORMAT, TRUE);
+
 	m_pwndPageTree->SetItemHeight(m_pwndPageTree->GetItemHeight() + 6);
 
 	if (m_bTreeImages)

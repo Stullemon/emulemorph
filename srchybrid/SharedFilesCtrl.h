@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -26,6 +26,7 @@
 class CSharedFileList;
 class CKnownFile;
 class CDirectoryItem;
+class CToolTipCtrlX;
 
 class CSharedFilesCtrl : public CMuleListCtrl, public CListCtrlItemWalk
 {
@@ -64,6 +65,7 @@ protected:
 	CImageList	m_ImageList;
 	CDirectoryItem*	m_pDirectoryFilter;
 	volatile uint32 nAICHHashing;
+	CToolTipCtrlX*	m_pToolTip;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 	void		OpenFile(const CKnownFile* file);
@@ -81,6 +83,7 @@ protected:
 	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
 
 	// Mighty Knife: CRC32-Tag
 	CFileProcessingThread m_FileProcessingThread;

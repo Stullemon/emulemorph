@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -114,6 +114,10 @@ struct SMediaInfo
 		(void)strFileFormat;
 		(void)strMimeType;
 		ulFileSize = (uint64)0;
+		fFileLengthSec = 0.0;
+		bFileLengthEstimated = false;
+		(void)strTitle;
+		(void)strAuthor;
 
 		iVideoStreams = 0;
 		(void)strVideoFormat;
@@ -137,6 +141,10 @@ struct SMediaInfo
 		strFileFormat = strm.strFileFormat;
 		strMimeType = strm.strMimeType;
 		ulFileSize = strm.ulFileSize;
+		fFileLengthSec = strm.fFileLengthSec;
+		bFileLengthEstimated = strm.bFileLengthEstimated;
+		strTitle = strm.strTitle;
+		strAuthor = strm.strAuthor;
 
 		iVideoStreams = strm.iVideoStreams;
 		strVideoFormat = strm.strVideoFormat;
@@ -167,10 +175,31 @@ struct SMediaInfo
 		}
 	}
 
+	void InitFileLength()
+	{
+		if (fFileLengthSec == 0)
+		{
+			if (fVideoLengthSec > 0.0)
+			{
+				fFileLengthSec = fVideoLengthSec;
+				bFileLengthEstimated = bVideoLengthEstimated;
+			}
+			else if (fAudioLengthSec > 0.0)
+			{
+				fFileLengthSec = fAudioLengthSec;
+				bFileLengthEstimated = bAudioLengthEstimated;
+			}
+		}
+	}
+
 	CString			strFileName;
 	CString			strFileFormat;
 	CString			strMimeType;
 	EMFileSize		ulFileSize;
+	double			fFileLengthSec;
+	bool			bFileLengthEstimated;
+	CString			strTitle;
+	CString			strAuthor;
 
 	int				iVideoStreams;
 	CString			strVideoFormat;
@@ -195,6 +224,7 @@ struct SMediaInfo
 bool GetMimeType(LPCTSTR pszFilePath, CString& rstrMimeType);
 bool GetDRM(LPCTSTR pszFilePath);
 BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFullInfo = false);
+BOOL GetRMHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsRM, bool bFullInfo = false);
 CString GetWaveFormatTagName(UINT uWavFmtTag, CString& rstrComment);
 CString GetWaveFormatTagName(UINT wFormatTag);
 BOOL IsEqualFOURCC(FOURCC fccA, FOURCC fccB);

@@ -72,7 +72,7 @@ BOOL CSelCategoryDlg::OnInitDialog()
 	// If there are more categories, add them to the list.
 	if (thePrefs.GetCatCount() > 1)
 		for (int i=1; i < thePrefs.GetCatCount(); i++)
-					((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(thePrefs.GetCategory(i)->title);
+					((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(thePrefs.GetCategory(i)->strTitle);
 
 	// Select the category that is currently visible in the transfer dialog as default, or 0 if they are
 	// not using "New Downloads Default To Active Category"
@@ -91,7 +91,7 @@ void CSelCategoryDlg::OnOK()
 	m_cancel = false; //MORPH - Added by SiRoB
 	int	comboIndex = ((CComboBox*)GetDlgItem(IDC_CATCOMBO))->GetCurSel();
 
-	CString* catTitle = new CString(thePrefs.GetCategory(comboIndex)->title);
+	CString* catTitle = new CString(thePrefs.GetCategory(comboIndex)->strTitle);
 	catTitle->Trim();
 
 	CString	comboText;
@@ -102,7 +102,7 @@ void CSelCategoryDlg::OnOK()
 		m_Return = comboIndex;
 	else {
 		m_bCreatedNew = true;
-		m_Return = theApp.emuledlg->transferwnd->AddCategory(comboText, thePrefs.GetIncomingDir(), _T(""),_T(""));
+		m_Return = theApp.emuledlg->transferwnd->AddCategory(comboText, thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR), _T(""),_T(""));
 	}
 
 	delete catTitle;

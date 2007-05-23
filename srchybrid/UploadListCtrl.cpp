@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -66,6 +66,7 @@ CUploadListCtrl::CUploadListCtrl()
 void CUploadListCtrl::Init()
 {
 	SetName(_T("UploadListCtrl"));
+
 	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
 	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy,theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
 	SetImageList(&ilDummyImageList, LVSIL_SMALL);
@@ -1139,7 +1140,6 @@ void CUploadListCtrl::OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult)
 void CUploadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLVGETINFOTIP pGetInfoTip = reinterpret_cast<LPNMLVGETINFOTIP>(pNMHDR);
-
 	if (pGetInfoTip->iSubItem == 0)
 	{
 		LVHITTESTINFO hti = {0};
@@ -1147,8 +1147,8 @@ void CUploadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 		ScreenToClient(&hti.pt);
 		if (SubItemHitTest(&hti) == -1 || hti.iItem != pGetInfoTip->iItem || hti.iSubItem != 0){
 			// don' show the default label tip for the main item, if the mouse is not over the main item
-			if ((pGetInfoTip->dwFlags & LVGIT_UNFOLDED) == 0 && pGetInfoTip->cchTextMax > 0 && pGetInfoTip->pszText[0] != '\0')
-				pGetInfoTip->pszText[0] = '\0';
+			if ((pGetInfoTip->dwFlags & LVGIT_UNFOLDED) == 0 && pGetInfoTip->cchTextMax > 0 && pGetInfoTip->pszText[0] != _T('\0'))
+				pGetInfoTip->pszText[0] = _T('\0');
 			return;
 		}
 

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -167,12 +167,12 @@ CString GetWaveFormatTagName(UINT uWavFmtTag, CString& rstrComment)
 		{ 0x0112, "VIVO_SIREN", "Vivo Software" },
 		{ 0x0123, "DIGITAL_G723", "Digital Equipment Corporation" },
 		{ 0x0125, "SANYO_LD_ADPCM", "Sanyo Electric Co., Ltd." },
-		{ 0x0130, "SIPROLAB_ACEPLNET", "Sipro Lab Telecom Inc." },
-		{ 0x0131, "SIPROLAB_ACELP4800", "Sipro Lab Telecom Inc." },
-		{ 0x0132, "SIPROLAB_ACELP8V3", "Sipro Lab Telecom Inc." },
-		{ 0x0133, "SIPROLAB_G729", "Sipro Lab Telecom Inc." },
-		{ 0x0134, "SIPROLAB_G729A", "Sipro Lab Telecom Inc." },
-		{ 0x0135, "SIPROLAB_KELVIN", "Sipro Lab Telecom Inc." },
+		{ 0x0130, "Sipro ACEPLNET", "" },
+		{ 0x0131, "Sipro ACELP4800", "" },
+		{ 0x0132, "Sipro ACELP8V3", "" },
+		{ 0x0133, "Sipro G729", "" },
+		{ 0x0134, "Sipro G729A", "" },
+		{ 0x0135, "Sipro KELVIN", "" },
 		{ 0x0140, "G726ADPCM", "Dictaphone Corporation" },
 		{ 0x0150, "QUALCOMM_PUREVOICE", "Qualcomm, Inc." },
 		{ 0x0151, "QUALCOMM_HALFRATE", "Qualcomm, Inc." },
@@ -209,7 +209,14 @@ CString GetWaveFormatTagName(UINT uWavFmtTag, CString& rstrComment)
 		{ 0x1100, "LH_CODEC", "Lernout & Hauspie" },
 		{ 0x1400, "NORRIS", "Norris Communications, Inc." },
 		{ 0x1500, "SOUNDSPACE_MUSICOMPRESS", "AT&T Labs, Inc." },
-		{ 0x2000, "DVM (AC3-Digital)", "FAST Multimedia AG" }
+		{ 0x2000, "AC3", "Dolby AC3" },
+		{ 0x2001, "DTS", "Digital Theater Systems" },
+		{ 0x2002, "Real Audio 1", "RealAudio 1/2 14.4" },
+		{ 0x2003, "Real Audio 1", "RealAudio 1/2 28.8" },
+		{ 0x2004, "Real Audio 2", "RealAudio G2/8 Cook (low bitrate)" },
+		{ 0x2005, "Real Audio 3", "RealAudio 3/4/5 Music (DNET)" },
+		{ 0x2006, "AAC", "RealAudio 10 AAC (RAAC)" },
+		{ 0x2007, "AAC+", "RealAudio 10 AAC+ (RACP)" }
 	};
 
 	USES_CONVERSION;
@@ -869,6 +876,7 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 	else
 		mi->strFileFormat = _T("RIFF");
 
+	mi->InitFileLength();
 	bResult = TRUE;
 
 cleanup:
@@ -880,6 +888,564 @@ inv_format:
 
 inv_format_errno:
 	goto cleanup;
+}
+
+#pragma pack(push,1)
+typedef struct {
+	DWORD	id;
+	DWORD	size;
+} SRmChunkHdr;
+
+typedef struct {
+	DWORD   file_version;
+	DWORD   num_headers;
+} SRmRMF;
+
+typedef struct {
+	DWORD   max_bit_rate;
+	DWORD   avg_bit_rate;
+	DWORD   max_packet_size;
+	DWORD   avg_packet_size;
+	DWORD   num_packets;
+	DWORD   duration;
+	DWORD   preroll;
+	DWORD   index_offset;
+	DWORD   data_offset;
+	WORD    num_streams;
+	WORD    flags;
+} SRmPROP;
+
+typedef struct {
+	WORD    stream_number;
+	DWORD   max_bit_rate;
+	DWORD   avg_bit_rate;
+	DWORD   max_packet_size;
+	DWORD   avg_packet_size;
+	DWORD   start_time;
+	DWORD   preroll;
+	DWORD	duration;
+	//BYTE                       stream_name_size;    
+	//BYTE[stream_name_size]     stream_name;    
+	//BYTE                       mime_type_size;    
+	//BYTE[mime_type_size]       mime_type;    
+	//DWORD                      type_specific_len;    
+	//BYTE[type_specific_len]    type_specific_data;
+} SRmMDPR;
+#pragma pack(pop)
+
+struct SRmFileProp {
+	SRmFileProp()
+	{}
+	SRmFileProp(const CStringA& rstrName, const CStringA& rstrValue)
+		: strName(rstrName), strValue(rstrValue)
+	{}
+
+	SRmFileProp& operator=(const SRmFileProp& r)
+	{
+		strName = r.strName;
+		strValue = r.strValue;
+		return *this;
+	}
+	CStringA strName;
+	CStringA strValue;
+};
+
+CStringA GetFOURCCString(DWORD fcc)
+{
+	char szFourcc[5];
+	szFourcc[0] = ((LPCSTR)&fcc)[0];
+	szFourcc[1] = ((LPCSTR)&fcc)[1];
+	szFourcc[2] = ((LPCSTR)&fcc)[2];
+	szFourcc[3] = ((LPCSTR)&fcc)[3];
+	szFourcc[4] = '\0';
+
+	// Strip trailing spaces
+	int i = 3;
+	while (i >= 0)
+	{
+		if (szFourcc[i] == ' ')
+			szFourcc[i] = '\0';
+		else if (szFourcc[i] != '\0')
+			break;
+		i--;
+	}
+
+	// Convert to lower case
+	/*if (bToLower)
+	{
+		while (i >= 0)
+		{
+			szFourcc[i] = (char)tolower((unsigned char)szFourcc[i]);
+			i--;
+		}
+	}*/
+
+	return szFourcc;
+}
+
+struct SRmCodec {
+	LPCSTR	pszID;
+	LPCTSTR pszName;
+	LPCTSTR pszDesc;
+} g_aRealMediaCodecs[] = {
+{ "14.4", _T("RealAudio 1"),           _T("Real Audio 1 (14.4)") },
+{ "14_4", _T("RealAudio 1"),           _T("Real Audio 1 (14.4)") },
+{ "28.8", _T("RealAudio 2"),           _T("Real Audio 2 (28.8)") },
+{ "28_8", _T("RealAudio 2"),           _T("Real Audio 2 (28.8)") },
+{ "RV10", _T("RealVideo 1"),           _T("RealVideo 5") },
+{ "RV13", _T("RealVideo 1"),           _T("RealVideo 5") },
+{ "RV20", _T("RealVideo 2"),           _T("RealVideo G2") },
+{ "RV30", _T("RealVideo 3"),           _T("RealVideo 8") },
+{ "RV40", _T("RealVideo 4"),           _T("RealVideo 9") },
+{ "atrc", _T("RealAudio Atrac3"),      _T("Real & Sony Atrac3 Codec") },
+{ "cook", _T("RealAudio 5"),           _T("Real Audio G2/7 Cook (low bitrate)") },
+{ "dnet", _T("RealAudio 3"),           _T("Real Audio 3/4/5 Music (DNET)") },
+{ "lpcJ", _T("RealAudio 2"),           _T("Real Audio 1 (14.4)") },
+{ "raac", _T("AAC"),                   _T("Real Audio 10 AAC (RAAC)") },
+{ "racp", _T("AAC+"),                  _T("Real Audio 10 AAC+ (RACP)") },
+{ "ralf", _T("RealAudio Lossless"),    _T("Real Audio Lossless Format") },
+{ "rtrc", _T("RealAudio 8"),           _T("Real Audio 8 (RTRC)") },
+{ "rv10", _T("RealVideo 1"),           _T("RealVideo 5") },
+{ "rv20", _T("RealVideo 2"),           _T("RealVideo G2") },
+{ "rv30", _T("RealVideo 3"),           _T("RealVideo 8") },
+{ "rv40", _T("RealVideo 4"),           _T("RealVideo 9") },
+{ "sipr", _T("RealAudio 4"),           _T("Real Audio 4 (Sipro)") },
+};
+
+static int __cdecl CmpRealMediaCodec(const void *p1, const void *p2)
+{
+	const SRmCodec *pCodec1 = (const SRmCodec *)p1;
+	const SRmCodec *pCodec2 = (const SRmCodec *)p2;
+	return strncmp(pCodec1->pszID, pCodec2->pszID, 4);
+}
+
+CString GetRealMediaCodecInfo(LPCSTR pszCodecID, bool bFullInfo = false)
+{
+	CString strInfo(GetFOURCCString(*(DWORD *)pszCodecID));
+	SRmCodec CodecSearch;
+	CodecSearch.pszID = pszCodecID;
+	SRmCodec *pCodecFound = (SRmCodec *)bsearch(&CodecSearch, g_aRealMediaCodecs, _countof(g_aRealMediaCodecs), sizeof(g_aRealMediaCodecs[0]), CmpRealMediaCodec);
+	if (pCodecFound)
+	{
+		strInfo += _T(" (");
+		strInfo += pCodecFound->pszName;
+		if (bFullInfo && pCodecFound->pszDesc)
+		{
+			strInfo += _T(", ");
+			strInfo += pCodecFound->pszDesc;
+		}
+		strInfo += _T(")");
+	}
+	return strInfo;
+}
+
+BOOL GetRMHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsRM, bool bFullInfo)
+{
+	ASSERT( !bFullInfo || mi->strInfo.m_hWnd != NULL );
+
+	bool bResult = false;
+	CSafeBufferedFile file;
+	if (!file.Open(pszFileName, CFile::modeRead | CFile::osSequentialScan | CFile::typeBinary))
+		return false;
+	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+
+	bool bReadPROP = false;
+	bool bReadMDPR_Video = false;
+	bool bReadMDPR_Audio = false;
+	bool bReadMDPR_File = false;
+	bool bReadCONT = false;
+	UINT nFileBitrate = 0;
+	CString strCopyright;
+	CString strComment;
+	CArray<SRmFileProp> aFileProps;
+	try
+	{
+		ULONGLONG ullCurFilePos = 0;
+		ULONGLONG ullChunkStartFilePos = ullCurFilePos;
+		ULONGLONG ullChunkEndFilePos;
+
+		SRmChunkHdr rmChunkHdr;
+		file.Read(&rmChunkHdr, sizeof(rmChunkHdr));
+		DWORD dwID = _byteswap_ulong(rmChunkHdr.id);
+		if (dwID != '.RMF')
+			return false;
+		DWORD dwSize = _byteswap_ulong(rmChunkHdr.size);
+		if (dwSize < sizeof(rmChunkHdr))
+			return false;
+		ullChunkEndFilePos = ullChunkStartFilePos + dwSize;
+		dwSize -= sizeof(rmChunkHdr);
+		if (dwSize == 0)
+			return false;
+
+		WORD wVersion;
+		file.Read(&wVersion, sizeof(wVersion));
+		wVersion = _byteswap_ushort(wVersion);
+		if (wVersion >= 2)
+			return false;
+
+		SRmRMF rmRMF;
+		file.Read(&rmRMF, sizeof(rmRMF));
+
+		rbIsRM = true;
+		mi->strFileFormat = _T("Real Media");
+
+		bool bBrokenFile = false;
+		while (!bBrokenFile && (!bReadCONT || !bReadPROP || !bReadMDPR_Video || !bReadMDPR_Audio || (bFullInfo && !bReadMDPR_File)))
+		{
+			ullCurFilePos = file.GetPosition();
+			if (ullCurFilePos > ullChunkEndFilePos)
+				break; // expect broken DATA-chunk headers created by 'mplayer'
+			if (ullCurFilePos < ullChunkEndFilePos)
+				ullCurFilePos = file.Seek(ullChunkEndFilePos - ullCurFilePos, CFile::current);
+
+			ullChunkStartFilePos = ullCurFilePos;
+
+			file.Read(&rmChunkHdr, sizeof(rmChunkHdr));
+			dwID = _byteswap_ulong(rmChunkHdr.id);
+			dwSize = _byteswap_ulong(rmChunkHdr.size);
+			TRACE("%08x: id=%.4s  size=%u\n", (DWORD)ullCurFilePos, &rmChunkHdr.id, dwSize);
+			if (dwSize < sizeof(rmChunkHdr))
+				break; // expect broken DATA-chunk headers created by 'mplayer'
+			ullChunkEndFilePos = ullChunkStartFilePos + dwSize;
+			dwSize -= sizeof(rmChunkHdr);
+			if (dwSize > 0)
+			{
+				switch (dwID)
+				{
+					case 'PROP': { // Properties Header
+						WORD wVersion;
+						file.Read(&wVersion, sizeof(wVersion));
+						wVersion = _byteswap_ushort(wVersion);
+						if (wVersion == 0)
+						{
+							SRmPROP rmPROP;
+							file.Read(&rmPROP, sizeof(rmPROP));
+							nFileBitrate = _byteswap_ulong(rmPROP.avg_bit_rate);
+							mi->fFileLengthSec = (_byteswap_ulong(rmPROP.duration) + 500.0) / 1000.0;
+							bReadPROP = true;
+						}
+						break;
+					}
+					case 'MDPR': { // Media Properties Header
+						WORD wVersion;
+						file.Read(&wVersion, sizeof(wVersion));
+						wVersion = _byteswap_ushort(wVersion);
+						if (wVersion == 0)
+						{
+							SRmMDPR rmMDPR;
+							file.Read(&rmMDPR, sizeof(rmMDPR));
+
+							// Read 'Stream Name'
+							BYTE ucLen;
+							CStringA strStreamName;
+							file.Read(&ucLen, sizeof(ucLen));
+							file.Read(strStreamName.GetBuffer(ucLen), ucLen);
+							strStreamName.ReleaseBuffer(ucLen);
+
+							// Read 'MIME Type'
+							CStringA strMimeType;
+							file.Read(&ucLen, sizeof(ucLen));
+							file.Read(strMimeType.GetBuffer(ucLen), ucLen);
+							strMimeType.ReleaseBuffer(ucLen);
+
+							DWORD dwTypeDataLen;
+							file.Read(&dwTypeDataLen, sizeof(dwTypeDataLen));
+							dwTypeDataLen = _byteswap_ulong(dwTypeDataLen);
+
+							if (strMimeType == "video/x-pn-realvideo")
+							{
+								mi->iVideoStreams++;
+								if (mi->iVideoStreams == 1)
+								{
+									mi->video.dwBitRate = _byteswap_ulong(rmMDPR.avg_bit_rate);
+									mi->fVideoLengthSec = _byteswap_ulong(rmMDPR.duration) / 1000.0;
+
+									if (dwTypeDataLen >= 22+2 && dwTypeDataLen < 8192)
+									{
+										BYTE *pucTypeData = new BYTE[dwTypeDataLen];
+										try {
+											file.Read(pucTypeData, dwTypeDataLen);
+											if (_byteswap_ulong(*(DWORD *)(pucTypeData + 4)) == 'VIDO')
+											{
+												mi->strVideoFormat = GetRealMediaCodecInfo((LPCSTR)(pucTypeData + 8));
+												mi->video.bmiHeader.biCompression = *(DWORD *)(pucTypeData + 8);
+												mi->video.bmiHeader.biWidth = _byteswap_ushort(*(WORD *)(pucTypeData + 12));
+												mi->video.bmiHeader.biHeight = _byteswap_ushort(*(WORD *)(pucTypeData + 14));
+												mi->fVideoAspectRatio = (float)abs(mi->video.bmiHeader.biWidth) / (float)abs(mi->video.bmiHeader.biHeight);
+												mi->fVideoFrameRate = _byteswap_ushort(*(WORD *)(pucTypeData + 22));
+												bReadMDPR_Video = true;
+											}
+										}
+										catch (CException* ex) {
+											ex->Delete();
+											delete[] pucTypeData;
+											break;
+										}
+										delete[] pucTypeData;
+									}
+								}
+							}
+							else if (strMimeType == "audio/x-pn-realaudio")
+							{
+								mi->iAudioStreams++;
+								if (mi->iAudioStreams == 1)
+								{
+									mi->audio.nAvgBytesPerSec = _byteswap_ulong(rmMDPR.avg_bit_rate) / 8;
+									mi->fAudioLengthSec = _byteswap_ulong(rmMDPR.duration) / 1000.0;
+									
+									if (dwTypeDataLen >= 4+2 && dwTypeDataLen < 8192)
+									{
+										BYTE *pucTypeData = new BYTE[dwTypeDataLen];
+										try {
+											file.Read(pucTypeData, dwTypeDataLen);
+											DWORD dwFourCC = _byteswap_ulong(*(DWORD *)(pucTypeData + 0));
+											WORD wVer = _byteswap_ushort(*(WORD *)(pucTypeData + 4));
+											if (dwFourCC == '.ra\xFD')
+											{
+												if (wVer == 3)
+												{
+													if (dwTypeDataLen >= 8+2)
+													{
+														mi->audio.nSamplesPerSec = 8000;
+														mi->audio.nChannels = _byteswap_ushort(*(WORD *)(pucTypeData + 8));
+														mi->strAudioFormat = _T(".ra3");
+														bReadMDPR_Audio = true;
+													}
+												}
+												else if (wVer == 4) // RealAudio G2, RealAudio 8
+												{
+													if (dwTypeDataLen >= 62+4)
+													{
+														mi->audio.nSamplesPerSec = _byteswap_ushort(*(WORD *)(pucTypeData + 48));
+														mi->audio.nChannels = _byteswap_ushort(*(WORD *)(pucTypeData + 54));
+														if (strncmp((LPCSTR)(pucTypeData + 62), "sipr", 4) == 0)
+															mi->audio.wFormatTag = 0x0130;
+														else if (strncmp((LPCSTR)(pucTypeData + 62), "cook", 4) == 0)
+															mi->audio.wFormatTag = 0x2004;
+														mi->strAudioFormat = GetRealMediaCodecInfo((LPCSTR)(pucTypeData + 62));
+														bReadMDPR_Audio = true;
+													}
+												}
+												else if (wVer == 5)
+												{
+													if (dwTypeDataLen >= 66+4)
+													{
+														mi->audio.nSamplesPerSec = _byteswap_ulong(*(DWORD *)(pucTypeData + 48));
+														mi->audio.nChannels = _byteswap_ushort(*(WORD *)(pucTypeData + 60));
+														if (strncmp((LPCSTR)(pucTypeData + 62), "sipr", 4) == 0)
+															mi->audio.wFormatTag = 0x0130;
+														else if (strncmp((LPCSTR)(pucTypeData + 62), "cook", 4) == 0)
+															mi->audio.wFormatTag = 0x2004;
+														mi->strAudioFormat = GetRealMediaCodecInfo((LPCSTR)(pucTypeData + 66));
+														bReadMDPR_Audio = true;
+													}
+												}
+											}
+										}
+										catch (CException* ex) {
+											ex->Delete();
+											delete[] pucTypeData;
+											break;
+										}
+										delete[] pucTypeData;
+									}
+								}
+							}
+							else if (bFullInfo && strcmp(strMimeType, "logical-fileinfo") == 0)
+							{
+								DWORD dwLogStreamLen;
+								file.Read(&dwLogStreamLen, sizeof(dwLogStreamLen));
+								dwLogStreamLen = _byteswap_ulong(dwLogStreamLen);
+
+								WORD wVersion;
+								file.Read(&wVersion, sizeof(wVersion));
+								wVersion = _byteswap_ushort(wVersion);
+								if (wVersion == 0)
+								{
+									WORD wStreams;
+									file.Read(&wStreams, sizeof(wStreams));
+									wStreams = _byteswap_ushort(wStreams);
+
+									// Skip 'Physical Stream Numbers'
+									file.Seek(wStreams * sizeof(WORD), CFile::current);
+
+									// Skip 'Data Offsets'
+									file.Seek(wStreams * sizeof(DWORD), CFile::current);
+
+									WORD wRules;
+									file.Read(&wRules, sizeof(wRules));
+									wRules = _byteswap_ushort(wRules);
+
+									// Skip 'Rule to Physical Stream Number Map'
+									file.Seek(wRules * sizeof(WORD), CFile::current);
+
+									WORD wProperties;
+									file.Read(&wProperties, sizeof(wProperties));
+									wProperties = _byteswap_ushort(wProperties);
+
+									while (wProperties)
+									{
+										DWORD dwPropSize;
+										file.Read(&dwPropSize, sizeof(dwPropSize));
+										dwPropSize = _byteswap_ulong(dwPropSize);
+
+										WORD wPropVersion;
+										file.Read(&wPropVersion, sizeof(wPropVersion));
+										wPropVersion = _byteswap_ushort(wPropVersion);
+
+										if (wPropVersion == 0)
+										{
+											BYTE ucLen;
+											CStringA strPropNameA;
+											file.Read(&ucLen, sizeof(ucLen));
+											file.Read(strPropNameA.GetBuffer(ucLen), ucLen);
+											strPropNameA.ReleaseBuffer(ucLen);
+
+											DWORD dwPropType;
+											file.Read(&dwPropType, sizeof(dwPropType));
+											dwPropType = _byteswap_ulong(dwPropType);
+
+											WORD wPropValueLen;
+											file.Read(&wPropValueLen, sizeof(wPropValueLen));
+											wPropValueLen = _byteswap_ushort(wPropValueLen);
+
+											CStringA strPropValueA;
+											if (dwPropType == 0 && wPropValueLen == sizeof(DWORD))
+											{
+												DWORD dwPropValue;
+												file.Read(&dwPropValue, sizeof(dwPropValue));
+												dwPropValue = _byteswap_ulong(dwPropValue);
+												strPropValueA.Format("%u", dwPropValue);
+											}
+											else if (dwPropType == 2)
+											{
+												LPSTR pszA = strPropValueA.GetBuffer(wPropValueLen);
+												file.Read(pszA, wPropValueLen);
+												if (wPropValueLen > 0 && pszA[wPropValueLen - 1] == '\0')
+													wPropValueLen--;
+												strPropValueA.ReleaseBuffer(wPropValueLen);
+											}
+											else
+											{
+												file.Seek(wPropValueLen, CFile::current);
+												strPropValueA.Format("<%u bytes>", wPropValueLen);
+											}
+
+											aFileProps.Add(SRmFileProp(strPropNameA, strPropValueA));
+											TRACE("Prop: %s, typ=%u, size=%u, value=%s\n", strPropNameA, dwPropType, wPropValueLen, (LPCSTR)strPropValueA);
+										}
+										else
+											file.Seek(dwPropSize - sizeof(DWORD) - sizeof(WORD), CFile::current);
+
+										wProperties--;
+									}
+									bReadMDPR_File = true;
+								}
+							}
+						}
+						break;
+					}
+					case 'CONT': { // Content Description Header
+						WORD wVersion;
+						file.Read(&wVersion, sizeof(wVersion));
+						wVersion = _byteswap_ushort(wVersion);
+						if (wVersion == 0)
+						{
+							WORD wLen;
+							CStringA strA;
+							file.Read(&wLen, sizeof(wLen));
+							wLen = _byteswap_ushort(wLen);
+							file.Read(strA.GetBuffer(wLen), wLen);
+							strA.ReleaseBuffer(wLen);
+							mi->strTitle = strA;
+
+							file.Read(&wLen, sizeof(wLen));
+							wLen = _byteswap_ushort(wLen);
+							file.Read(strA.GetBuffer(wLen), wLen);
+							strA.ReleaseBuffer(wLen);
+							mi->strAuthor = strA;
+
+							file.Read(&wLen, sizeof(wLen));
+							wLen = _byteswap_ushort(wLen);
+							file.Read(strA.GetBuffer(wLen), wLen);
+							strA.ReleaseBuffer(wLen);
+							strCopyright = strA;
+
+							file.Read(&wLen, sizeof(wLen));
+							wLen = _byteswap_ushort(wLen);
+							file.Read(strA.GetBuffer(wLen), wLen);
+							strA.ReleaseBuffer(wLen);
+							strComment = strA;
+							bReadCONT = true;
+						}
+						break;
+					}
+					
+					case 'DATA':
+					case 'INDX':
+					case 'RMMD':
+					case 'RMJE':
+						// Expect broken DATA-chunk headers created by 'mplayer'. Thus catch
+						// all valid tags just to have chance to detect the broken ones.
+						break;
+					
+					default:
+						// Expect broken DATA-chunk headers created by 'mplayer'. Stop reading
+						// the file on first broken chunk header.
+						bBrokenFile = true;
+						break;
+				}
+			}
+		}
+	}
+	catch(CException *ex)
+	{
+		ex->Delete();
+	}
+
+	// Expect broken DATA-chunk headers created by 'mplayer'. A broken DATA-chunk header
+	// may not be a fatal error. We may have already successfully read the media properties
+	// headers. Therefore we indicate 'success' if we read at least some valid headers.
+	bResult = bReadCONT || bReadPROP || bReadMDPR_Video || bReadMDPR_Audio;
+	if (bResult)
+	{
+		mi->InitFileLength();
+		if (   bFullInfo
+			&& mi->strInfo.m_hWnd
+			&& (   nFileBitrate
+			    || !mi->strTitle.IsEmpty() 
+				|| !mi->strAuthor.IsEmpty()
+				|| !strCopyright.IsEmpty()
+				|| !strComment.IsEmpty()
+				|| aFileProps.GetSize()))
+		{
+			if (!mi->strInfo.IsEmpty())
+				mi->strInfo << _T("\n");
+			mi->OutputFileName();
+			mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfBold);
+			mi->strInfo << GetResString(IDS_FD_GENERAL) << _T("\n");
+
+			if (nFileBitrate) {
+				CString strBitrate;
+				strBitrate.Format(_T("%u %s"), (UINT)((nFileBitrate + 500.0) / 1000.0), GetResString(IDS_KBITSSEC));
+				mi->strInfo << _T("   ") << GetResString(IDS_BITRATE) << _T(":\t") << strBitrate << _T("\n");
+			}
+			if (!mi->strTitle.IsEmpty())
+				mi->strInfo << _T("   ") << GetResString(IDS_TITLE) << _T(":\t") << mi->strTitle << _T("\n");
+			if (!mi->strAuthor.IsEmpty())
+				mi->strInfo << _T("   ") << GetResString(IDS_AUTHOR) << _T(":\t") << mi->strAuthor << _T("\n");
+			if (!strCopyright.IsEmpty())
+				mi->strInfo << _T("   ") << _T("Copyright") << _T(":\t") << strCopyright << _T("\n");
+			if (!strComment.IsEmpty())
+				mi->strInfo << _T("   ") << GetResString(IDS_COMMENT) << _T(":\t") << strComment << _T("\n");
+			for (int i = 0; i < aFileProps.GetSize(); i++) {
+				if (!aFileProps[i].strValue.IsEmpty())
+					mi->strInfo << _T("   ") << CString(aFileProps[i].strName) << _T(":\t") << CString(aFileProps[i].strValue) << _T("\n");
+			}
+		}
+	}
+
+	return bResult;
 }
 
 bool GetMimeType(LPCTSTR pszFilePath, CString& rstrMimeType)

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -414,7 +414,7 @@ void CSharedFileList::FindSharedFiles()
 	CString tempDir;
 	CString ltempDir;
 	
-	tempDir=thePrefs.GetIncomingDir();
+	tempDir = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 	if (tempDir.Right(1)!=_T("\\"))
 		tempDir+=_T("\\");
 	AddFilesFromDirectory(tempDir);
@@ -708,13 +708,13 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 	// SLUGFILLER: SafeHash
 	//Borschtsch
 	bool dontadd = true;
-	if (!CompareDirectories(thePrefs.GetIncomingDir(), file->GetPath()))
+	if (!CompareDirectories(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR), file->GetPath()))
 		dontadd = false;
 	if (dontadd) {
 		for (int i = 0; i < thePrefs.GetCatCount(); i++) {
 			Category_Struct* pCatStruct = thePrefs.GetCategory(i);
 			if (pCatStruct != NULL){
-				if (CompareDirectories(pCatStruct->incomingpath, file->GetPath()))
+				if (CompareDirectories(pCatStruct->strIncomingPath, file->GetPath()))
 					continue;
 				dontadd = false;
 				break;
@@ -1398,7 +1398,7 @@ int CAddFileThread::Run()
 	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 	
 	CString strFilePath;
-	_tmakepath(strFilePath.GetBuffer(MAX_PATH), NULL, m_strDirectory, m_strFilename, NULL);
+	_tmakepathlimit(strFilePath.GetBuffer(MAX_PATH), NULL, m_strDirectory, m_strFilename, NULL);
 	strFilePath.ReleaseBuffer();
 	if (m_partfile)
 		Log(GetResString(IDS_HASHINGFILE) + _T(" \"%s\" \"%s\""), m_partfile->GetFileName(), strFilePath);

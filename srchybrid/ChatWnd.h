@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -20,6 +20,9 @@
 #include "FriendListCtrl.h"
 #include "SplitterControl.h"
 #include "IconStatic.h"
+#include "ToolBarCtrlX.h"
+
+class CSmileySelector;
 
 class CChatWnd : public CResizableDialog
 {
@@ -29,40 +32,42 @@ public:
 	CChatWnd(CWnd* pParent = NULL);   // standard constructor
 	virtual ~CChatWnd();
 
-	void ScrollHistory(bool down);
-	CChatSelector chatselector;
-
 // Dialog Data
 	enum { IDD = IDD_CHAT };
+
 	void StartSession(CUpDownClient* client);
 	void Localize();
 	void UpdateFriendlistCount(UINT count);
+	void ScrollHistory(bool down);
+	void EnableSmileys(bool bEnable)						{ chatselector.EnableSmileys(bEnable); }
 
 	CFriendListCtrl m_FriendListCtrl;
+	CChatSelector chatselector;
 
 	// MORPH (CB) Friendnote START
 	CEdit m_FriendNote;
 	// MORPH (CB) Friendnote END
 
-private:
-	void ShowFriendMsgDetails(CFriend* pFriend); // [TPT] - New friend message window
-	CIconStatic m_cUserInfo;
-
 protected:
-	CEdit inputtext;
+	friend class CChatSelector;
 	HICON icon_friend;
 	HICON icon_msg;
-	CSplitterControl m_wndSplitterchat;
+	CSplitterControl m_wndSplitterHorz;
+	CIconStatic m_cUserInfo;
+	CToolBarCtrlX m_wndFormat;
+	CEdit m_wndMessage;
+	CButton m_wndSend;
+	CButton m_wndClose;
+	CSmileySelector *m_pwndSmileySel;
 
 	void SetAllIcons();
 	void DoResize(int delta);
+	void ShowFriendMsgDetails(CFriend* pFriend);
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support	
 	virtual BOOL OnInitDialog(); 
-	// MORPH START - Added by Commander, Friendlinks [emulEspaña]
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	// MORPH END   - Added by Commander, Friendlinks [emulEspaña]
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
@@ -70,9 +75,12 @@ protected:
 	afx_msg void OnSysColorChange();
 	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-	afx_msg void OnLvnItemActivateFrlist(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMClickFrlist(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnStnDblclickFriendsicon();
+	afx_msg void OnLvnItemActivateFriendList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNMClickFriendList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnStnDblClickFriendIcon();
+	afx_msg void OnBnClickedSmiley();
+	afx_msg void OnBnClickedClose();
+	afx_msg void OnBnClickedSend();
 
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 public:

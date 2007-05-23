@@ -17,6 +17,7 @@
 
 class CIrcMain;
 class CAsyncProxySocketLayer;
+
 class CIrcSocket : public CAsyncSocketEx
 {
 public:
@@ -25,11 +26,13 @@ public:
 
 	BOOL Create(UINT uSocketPort = 0, int iSocketType = SOCK_STREAM,
 		        long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT |	FD_CONNECT | FD_CLOSE,
-		        LPCSTR lpszSocketAddress = NULL );
+		        LPCSTR lpszSocketAddress = NULL);
 	void Connect();
-	int SendString(CString sMessage);
+	int SendString(const CString& sMessage);
+
 	virtual void OnConnect(int iErrorCode);
 	virtual void OnReceive(int iErrorCode);
+	virtual void OnSend(int iErrorCode);
 	virtual void OnClose(int iErrorCode);
 	virtual void RemoveAllLayers();
 

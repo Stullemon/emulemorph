@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -766,7 +766,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_CancelTransfer", client);
 					theStats.AddDownDataOverheadFileRequest(size);
-					theApp.uploadqueue->RemoveFromUploadQueue(client, _T("Remote client canceled transfer."));
+					theApp.uploadqueue->RemoveFromUploadQueue(client, _T("Remote client cancelled transfer."));
 					break;
 				}
 				case OP_END_OF_DOWNLOAD:
@@ -1038,7 +1038,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						// add incoming folders
                        	for (int iCat = 0; iCat < thePrefs.GetCatCount(); iCat++)
 						{
-							strDir = thePrefs.GetCategory(iCat)->incomingpath;
+							strDir = thePrefs.GetCategory(iCat)->strIncomingPath;
 							PathRemoveBackslash(strDir.GetBuffer());
 							strDir.ReleaseBuffer();
 							bool bFoundFolder=false;
@@ -1509,19 +1509,24 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 								break;
 							}
 							//We still send the source packet seperately.. 
-							//We could send it within this packet.. If agreeded, I will fix it..
+							case OP_REQUESTSOURCES2:
 							case OP_REQUESTSOURCES:
 							{
 								if (thePrefs.GetDebugClientTCPLevel() > 0)
-									DebugRecv("OP_MPReqSources", client, packet);
+									DebugRecv(opcode_in == OP_REQUESTSOURCES2 ? "OP_MPReqSources2" : "OP_MPReqSources", client, packet);
 
 								if (thePrefs.GetDebugSourceExchange())
 									AddDebugLogLine(false, _T("SXRecv: Client source request; %s, File=\"%s\""), client->DbgGetClientInfo(), reqfile->GetFileName());
 
+								uint8 byRequestedVersion = 0;
+								uint16 byRequestedOptions = 0;
+								if (opcode_in == OP_REQUESTSOURCES2){ // SX2 requests contains additional data
+									byRequestedVersion = data_in.ReadUInt8();
+									byRequestedOptions = data_in.ReadUInt16();
+								}
 								//Although this shouldn't happen, it's a just in case to any Mods that mess with version numbers.
-								if (client->GetSourceExchangeVersion() > 1)
+								if (byRequestedVersion > 0 || client->GetSourceExchange1Version() > 1)
 								{
-									//data_out.WriteUInt8(OP_ANSWERSOURCES);
 									DWORD dwTimePassed = ::GetTickCount() - client->GetLastSrcReqTime() + CONNECTION_LATENCY;
 									bool bNeverAskedBefore = client->GetLastSrcReqTime() == 0;
 									if( 
@@ -1535,11 +1540,11 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 										) 
 									{
 										client->SetLastSrcReqTime();
-										Packet* tosend = reqfile->CreateSrcInfoPacket(client);
+										Packet* tosend = reqfile->CreateSrcInfoPacket(client, byRequestedVersion, byRequestedOptions);
 										if(tosend)
 										{
 											if (thePrefs.GetDebugClientTCPLevel() > 0)
-												DebugSend("OP__AnswerSources", client, reqfile->GetFileHash());
+												DebugSend("OP__RequestSources", client, reqfile->GetFileHash());
 											theStats.AddUpDataOverheadSourceExchange(tosend->size);
 											SendPacket(tosend, true);
 										}
@@ -1893,24 +1898,36 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					break;
 				}
   				case OP_REQUESTSOURCES:
+				case OP_REQUESTSOURCES2:
 				{
+					CSafeMemFile data(packet, size);
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
-						DebugRecv("OP_RequestSources", client, (size >= 16) ? packet : NULL);
+						DebugRecv(opcode == OP_REQUESTSOURCES2 ? "OP_MPReqSources2" : "OP_MPReqSources", client, (size >= 16) ? packet : NULL);
+					
 					theStats.AddDownDataOverheadSourceExchange(uRawSize);
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
 
-					if (client->GetSourceExchangeVersion() > 1)
+					uint8 byRequestedVersion = 0;
+					uint16 byRequestedOptions = 0;
+					if (opcode == OP_REQUESTSOURCES2){ // SX2 requests contains additional data
+						byRequestedVersion = data.ReadUInt8();
+						byRequestedOptions = data.ReadUInt16();
+					}
+					//Although this shouldn't happen, it's a just in case to any Mods that mess with version numbers.
+					if (byRequestedVersion > 0 || client->GetSourceExchange1Version() > 1)
 					{
-						if(size != 16)
+						if (size < 16)
 							throw GetResString(IDS_ERR_BADSIZE);
 
 						if (thePrefs.GetDebugSourceExchange())
 							AddDebugLogLine(false, _T("SXRecv: Client source request; %s, %s"), client->DbgGetClientInfo(), DbgGetFileInfo(packet));
 
 						//first check shared file list, then download list
+						uchar ucHash[16];
+						data.ReadHash16(ucHash);
 						CKnownFile* reqfile;
-						if ((reqfile = theApp.sharedfiles->GetFileByID(packet)) != NULL ||
-							(reqfile = theApp.downloadqueue->GetFileByID(packet)) != NULL)
+						if ((reqfile = theApp.sharedfiles->GetFileByID(ucHash)) != NULL ||
+							(reqfile = theApp.downloadqueue->GetFileByID(ucHash)) != NULL)
 						{
 							// There are some clients which do not follow the correct protocol procedure of sending
 							// the sequence OP_REQUESTFILENAME, OP_SETREQFILEID, OP_REQUESTSOURCES. If those clients
@@ -1933,7 +1950,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							) 
 							{
 								client->SetLastSrcReqTime();
-								Packet* tosend = reqfile->CreateSrcInfoPacket(client);
+								Packet* tosend = reqfile->CreateSrcInfoPacket(client, byRequestedVersion, byRequestedOptions);
 								if(tosend)
 								{
 									if (thePrefs.GetDebugClientTCPLevel() > 0)
@@ -1944,7 +1961,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							}
 						}
 						else
-							client->CheckFailedFileIdReqs(packet);
+							client->CheckFailedFileIdReqs(ucHash);
 					}
 					break;
 				}
@@ -1959,15 +1976,38 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					uchar hash[16];
 					data.ReadHash16(hash);
 					CKnownFile* file = theApp.downloadqueue->GetFileByID(hash);
-					if(file)
-					{
-						if (file->IsPartFile())
-						{
+					if (file){
+						if (file->IsPartFile()){
 							//set the client's answer time
 							client->SetLastSrcAnswerTime();
 							//and set the file's last answer time
 							((CPartFile*)file)->SetLastAnsweredTime();
-							((CPartFile*)file)->AddClientSources(&data, client->GetSourceExchangeVersion(), client);
+							((CPartFile*)file)->AddClientSources(&data, client->GetSourceExchange1Version(), false, client);
+						}
+					}
+					else
+						client->CheckFailedFileIdReqs(hash);
+					break;
+				}
+ 				case OP_ANSWERSOURCES2:
+				{
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_AnswerSources2", client, (size >= 17) ? packet : NULL);
+					theStats.AddDownDataOverheadSourceExchange(uRawSize);
+					client->CheckHandshakeFinished();
+
+					CSafeMemFile data(packet, size);
+					uint8 byVersion = data.ReadUInt8();
+					uchar hash[16];
+					data.ReadHash16(hash);
+					CKnownFile* file = theApp.downloadqueue->GetFileByID(hash);
+					if (file){
+						if (file->IsPartFile()){
+							//set the client's answer time
+							client->SetLastSrcAnswerTime();
+							//and set the file's last answer time
+							((CPartFile*)file)->SetLastAnsweredTime();
+							((CPartFile*)file)->AddClientSources(&data, byVersion, true, client);
 						}
 					}
 					else
@@ -2196,9 +2236,9 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						Packet* response = new Packet(OP_FILENOTFOUND,0,OP_EMULEPROT);
 						theStats.AddUpDataOverheadFileRequest(response->size);
 						if (sender != NULL)
-							theApp.clientudp->SendPacket(response, destip, destport, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash());
+							theApp.clientudp->SendPacket(response, destip, destport, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash(), false, 0);
 						else
-							theApp.clientudp->SendPacket(response, destip, destport, false, NULL);
+							theApp.clientudp->SendPacket(response, destip, destport, false, NULL, false, 0);
 						break;
 					}
 
@@ -2244,7 +2284,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							Packet* response = new Packet(&data_out, OP_EMULEPROT);
 							response->opcode = OP_REASKACK;
 							theStats.AddUpDataOverheadFileRequest(response->size);
-							theApp.clientudp->SendPacket(response, destip, destport, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash());
+							theApp.clientudp->SendPacket(response, destip, destport, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash(), false, 0);
 						}
 						else
 						{
@@ -2266,7 +2306,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 									DebugSend("OP__QueueFull", NULL);
 								Packet* response = new Packet(OP_QUEUEFULL,0,OP_EMULEPROT);
 								theStats.AddUpDataOverheadFileRequest(response->size);
-								theApp.clientudp->SendPacket(response, destip, destport, false, NULL);
+								theApp.clientudp->SendPacket(response, destip, destport, false, NULL, false, 0);
 							}
 						}
 						else{

@@ -229,7 +229,7 @@ void CMMServer::ProcessFileListRequest(CMMSocket* sender, CMMPacket* packet){
 	int nCount = thePrefs.GetCatCount();
 	packet->WriteByte((uint8)nCount);
 	for (int i = 0; i != nCount; i++){
-		packet->WriteString(thePrefs.GetCategory(i)->title);
+		packet->WriteString(thePrefs.GetCategory(i)->strTitle);
 	}
 
 	nCount = (theApp.downloadqueue->GetFileCount() > m_nMaxDownloads)? m_nMaxDownloads : theApp.downloadqueue->GetFileCount();
@@ -273,7 +273,7 @@ void CMMServer::ProcessFinishedListRequest(CMMSocket* sender){
 	int nCount = thePrefs.GetCatCount();
 	packet->WriteByte((uint8)nCount);
 	for (int i = 0; i != nCount; i++){
-		packet->WriteString(thePrefs.GetCategory(i)->title);
+		packet->WriteString(thePrefs.GetCategory(i)->strTitle);
 	}
 
 	nCount = (m_SentFinishedList.GetCount() > 30)? 30 : m_SentFinishedList.GetCount();
@@ -456,16 +456,16 @@ void  CMMServer::ProcessSearchRequest(CMMData* data, CMMSocket* sender){
 	m_byPendingCommand = MMT_SEARCH;
 	m_pPendingCommandSocket = sender;
 
-	theApp.searchlist->NewSearch(NULL, Params.strFileType, MMS_SEARCHID, Params.eType, true);
+	theApp.searchlist->NewSearch(NULL, Params.strFileType, MMS_SEARCHID, Params.eType, Params.strExpression, true);
 	Packet* searchpacket = new Packet(&searchdata);
 	searchpacket->opcode = OP_SEARCHREQUEST;
 	theStats.AddUpDataOverheadServer(searchpacket->size);
 	theApp.serverconnect->SendPacket(searchpacket,true);
 	char buffer[500];
-	_snprintf(buffer, _countof(buffer), "HTTP/1.1 200 OK\r\nConnection: Close\r\nContent-Type: %s\r\n", GetContentType());
-	sender->Send(buffer,strlen(buffer));
+	int iBuffLen = _snprintf(buffer, _countof(buffer), "HTTP/1.1 200 OK\r\nConnection: Close\r\nContent-Type: %s\r\n", GetContentType());
+	if (iBuffLen > 0)
+		sender->Send(buffer,iBuffLen);
 }
-
 
 void  CMMServer::ProcessChangeLimitRequest(CMMData* data, CMMSocket* sender){
 	uint16 nNewUpload = data->ReadShort();

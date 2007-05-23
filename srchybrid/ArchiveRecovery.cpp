@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -240,6 +240,10 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, archiveScan
 			
 			// if only read directory, return now
 			if (zipOutput==NULL) {
+				if (aitp == NULL) {
+					ASSERT(0); // FIXME
+					return false;
+				}
 				aitp->ai->bZipCentralDir=true;
 				return true;
 			}
@@ -1631,7 +1635,7 @@ uint16 CArchiveRecovery::readUInt16(CFile *input)
 {
 	uint16 retVal = 0;
 	BYTE b[2];
-	if (input->Read(&b, 2) > 0)
+	if (input->Read(b, 2) > 0)
 		retVal = (b[1] << 8) + b[0];
 	return retVal;
 }
@@ -1640,7 +1644,7 @@ uint32 CArchiveRecovery::readUInt32(CFile *input)
 {
 	uint32 retVal = 0;
 	BYTE b[4];
-	if (input->Read(&b, 4) > 0)
+	if (input->Read(b, 4) > 0)
 		retVal = (b[3] << 24) + (b[2] << 16) + (b[1] << 8) + b[0];
 	return retVal;
 }
@@ -1660,7 +1664,7 @@ void CArchiveRecovery::writeUInt16(CFile *output, uint16 val)
 	BYTE b[2];
 	b[0] = (BYTE)(val & 0x000000ff);
 	b[1] = (BYTE)((val & 0x0000ff00) >>  8);
-	output->Write(&b, 2);
+	output->Write(b, 2);
 }
 
 void CArchiveRecovery::writeUInt32(CFile *output, uint32 val)
@@ -1670,7 +1674,7 @@ void CArchiveRecovery::writeUInt32(CFile *output, uint32 val)
 	b[1] = (BYTE)((val & 0x0000ff00) >>  8);
 	b[2] = (BYTE)((val & 0x00ff0000) >> 16);
 	b[3] = (BYTE)((val & 0xff000000) >> 24);
-	output->Write(&b, 4);
+	output->Write(b, 4);
 }
 
 void CArchiveRecovery::ProcessProgress(archiveScannerThreadParams_s* aitp, UINT64 pos) {

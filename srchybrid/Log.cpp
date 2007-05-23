@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -198,8 +198,8 @@ void AddLogTextV(UINT uFlags, EDebugLogPriority dlpPriority, LPCTSTR pszLine, va
 		return;	
 
 	TCHAR szLogLine[1000];
-	if (_vsntprintf(szLogLine, ARRSIZE(szLogLine), pszLine, argptr) == -1)
-		szLogLine[ARRSIZE(szLogLine) - 1] = _T('\0');
+	_vsntprintf(szLogLine, _countof(szLogLine), pszLine, argptr);
+	szLogLine[_countof(szLogLine) - 1] = _T('\0');
 	
 	if (theApp.emuledlg)
 		theApp.emuledlg->AddLogText(uFlags, szLogLine);
@@ -208,8 +208,8 @@ void AddLogTextV(UINT uFlags, EDebugLogPriority dlpPriority, LPCTSTR pszLine, va
 		TRACE(_T("App Log: %s\n"), szLogLine);
 
 		TCHAR szFullLogLine[1060];
-		int iLen = _sntprintf(szFullLogLine, ARRSIZE(szFullLogLine), _T("%s: %s\r\n"), CTime::GetCurrentTime().Format(thePrefs.GetDateTimeFormat4Log()), szLogLine);
-		if (iLen >= 0)
+		int iLen = _sntprintf(szFullLogLine, _countof(szFullLogLine), _T("%s: %s\r\n"), CTime::GetCurrentTime().Format(thePrefs.GetDateTimeFormat4Log()), szLogLine);
+		if (iLen > 0)
 		{
 			if (!(uFlags & LOG_DEBUG))
 			{
@@ -348,12 +348,12 @@ bool CLogFile::Open()
 				if (wBOM == 0xFEFF && m_eFileFormat == Unicode)
 				{
 					// log file already in Unicode format
-					fseek(m_fp, 0, SEEK_END); // actually not needed because file is opened in 'Append' mode..
+					(void)fseek(m_fp, 0, SEEK_END); // actually not needed because file is opened in 'Append' mode..
 				}
 				else if (wBOM != 0xFEFF && m_eFileFormat != Unicode)
 				{
 					// log file already in UTF-8 format
-					fseek(m_fp, 0, SEEK_END); // actually not needed because file is opened in 'Append' mode..
+					(void)fseek(m_fp, 0, SEEK_END); // actually not needed because file is opened in 'Append' mode..
 				}
 				else
 				{
@@ -468,10 +468,13 @@ bool CLogFile::Logf(LPCTSTR pszFmt, ...)
 	va_start(argp, pszFmt);
 
 	TCHAR szMsg[1024];
-	_vsntprintf(szMsg, ARRSIZE(szMsg), pszFmt, argp);
+	_vsntprintf(szMsg, _countof(szMsg), pszFmt, argp);
+	szMsg[_countof(szMsg) - 1] = _T('\0');
 
 	TCHAR szFullMsg[1060];
-	int iLen = _sntprintf(szFullMsg, ARRSIZE(szFullMsg), _T("%s: %s\r\n"), CTime::GetCurrentTime().Format(thePrefs.GetDateTimeFormat4Log()), szMsg);
+	int iLen = _sntprintf(szFullMsg, _countof(szFullMsg), _T("%s: %s\r\n"), CTime::GetCurrentTime().Format(thePrefs.GetDateTimeFormat4Log()), szMsg);
+	if (iLen <= 0)
+		return false;
 	va_end(argp);
 	return Log(szFullMsg, iLen);
 }
@@ -482,7 +485,7 @@ void CLogFile::StartNewLogFile()
 	Close();
 
 	TCHAR szDateLogStarted[40];
-	_tcsftime(szDateLogStarted, ARRSIZE(szDateLogStarted), _T("%Y.%m.%d %H.%M.%S"), localtime(&tStarted));
+	_tcsftime(szDateLogStarted, _countof(szDateLogStarted), _T("%Y.%m.%d %H.%M.%S"), localtime(&tStarted));
 
 	TCHAR szDrv[_MAX_DRIVE];
 	TCHAR szDir[_MAX_DIR];
@@ -496,10 +499,10 @@ void CLogFile::StartNewLogFile()
 	strLogBakNam += szDateLogStarted;
 
 	TCHAR szLogBakFilePath[MAX_PATH];
-	_tmakepath(szLogBakFilePath, szDrv, szDir, strLogBakNam, szExt);
+	_tmakepathlimit(szLogBakFilePath, szDrv, szDir, strLogBakNam, szExt);
 
 	if (_trename(m_strFilePath, szLogBakFilePath) != 0)
-		_tremove(m_strFilePath);
+		VERIFY( _tremove(m_strFilePath) == 0 );
 
 	Open();
 }

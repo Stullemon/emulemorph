@@ -789,11 +789,25 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* pI
 	{
 		if (pSearchTerm->m_pTag->m_type == 2) // meta tags with string values
 		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
+			if (pSearchTerm->m_pTag->m_name.Compare(TAG_FILEFORMAT) == 0)
 			{
-				const CKadTag* pTag = *itTagList;
-				if (pTag->IsStr() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetStr().CompareNoCase(pSearchTerm->m_pTag->GetStr()) == 0;
+				// 21-Sep-2006 []: Special handling for TAG_FILEFORMAT which is already part
+				// of the filename and thus does not need to get published nor stored explicitly,
+				int iExt = pItem->m_fileName.ReverseFind(_T('.'));
+				if (iExt != -1)
+				{
+					if (wcsicmp((LPCWSTR)pItem->m_fileName + iExt + 1, pSearchTerm->m_pTag->GetStr()) == 0)
+						return true;
+				}
+			}
+			else
+			{
+				for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
+				{
+					const CKadTag* pTag = *itTagList;
+					if (pTag->IsStr() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
+						return pTag->GetStr().CompareNoCase(pSearchTerm->m_pTag->GetStr()) == 0;
+				}
 			}
 		}
 	}

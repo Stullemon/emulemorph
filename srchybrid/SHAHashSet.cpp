@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -624,7 +624,7 @@ bool CAICHHashSet::SaveHashSet(){
 		return false;
 	}
 
-	CString fullpath=thePrefs.GetConfigDir();
+	CString fullpath = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR);
 	fullpath.Append(KNOWN2_MET_FILENAME);
 	CSafeFile file;
 	CFileException fexp;
@@ -687,7 +687,7 @@ bool CAICHHashSet::SaveHashSet(){
 		}
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 		if(thePrefs.GetLogICHEvents()) //JP log ICH events
-		theApp.QueueDebugLogLine(false, _T("Sucessfully saved eMuleAC Hashset, %u Hashs + 1 Masterhash written"), nHashCount);
+		theApp.QueueDebugLogLine(false, _T("Successfully saved eMuleAC Hashset, %u Hashs + 1 Masterhash written"), nHashCount);
 	    file.Flush();
 	    file.Close();
 	}
@@ -716,7 +716,7 @@ bool CAICHHashSet::LoadHashSet(){
 		ASSERT( false );
 		return false;
 	}
-	CString fullpath=thePrefs.GetConfigDir();
+	CString fullpath = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR);
 	fullpath.Append(KNOWN2_MET_FILENAME);
 	CSafeFile file;
 	CFileException fexp;

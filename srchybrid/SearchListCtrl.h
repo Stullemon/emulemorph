@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -98,7 +98,7 @@ protected:
 	void	DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
 	void	DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
 
-	static int Compare(const CSearchFile* item1, const CSearchFile* item2, LPARAM lParamSort);
+	static int Compare(const CSearchFile* item1, const CSearchFile* item2, LPARAM lParamSort, bool bSortMod);
 	static int CompareChild(const CSearchFile* file1, const CSearchFile* file2, LPARAM lParamSort);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 

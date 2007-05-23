@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -181,9 +181,9 @@ CPartFile::CPartFile(CString edonkeylink, UINT cat)
 			throw GetResString(IDS_ERR_NOTAFILELINK);
 		InitializeFromLink(pFileLink,cat);
 	} catch (CString error) {
-		TCHAR buffer[200];
-		_stprintf(buffer, GetResString(IDS_ERR_INVALIDLINK), error);
-		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_LINKERROR), buffer);
+		CString strMsg;
+		strMsg.Format(GetResString(IDS_ERR_INVALIDLINK), error);
+		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_LINKERROR), strMsg);
 		SetStatus(PS_ERROR);
 	}
 	delete pLink;
@@ -225,9 +225,9 @@ void CPartFile::InitializeFromLink(CED2KFileLink* fileLink, UINT cat)
 			SetStatus(PS_ERROR);
 	}
 	catch(CString error){
-		TCHAR buffer[200];
-		_stprintf(buffer, GetResString(IDS_ERR_INVALIDLINK), error);
-		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_LINKERROR), buffer);
+		CString strMsg;
+		strMsg.Format(GetResString(IDS_ERR_INVALIDLINK), error);
+		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_LINKERROR), strMsg);
 		SetStatus(PS_ERROR);
 	}
 }
@@ -656,19 +656,19 @@ uint8 CPartFile::ImportShareazaTempfile(LPCTSTR in_directory,LPCTSTR in_filename
 		BYTE pED2K[16];
 
 		ar >> bSHA1;
-		if ( bSHA1 ) ar.Read( &pSHA1, sizeof(pSHA1) );
+		if ( bSHA1 ) ar.Read( pSHA1, sizeof(pSHA1) );
 		if ( nVersion >= 31 ) ar >> Trusted;
 
 		ar >> bTiger;
-		if ( bTiger ) ar.Read( &pTiger, sizeof(pTiger) );
+		if ( bTiger ) ar.Read( pTiger, sizeof(pTiger) );
 		if ( nVersion >= 31 ) ar >> Trusted;
 
 		if ( nVersion >= 22 ) ar >> bMD5;
-		if ( bMD5 ) ar.Read( &pMD5, sizeof(pMD5) );
+		if ( bMD5 ) ar.Read( pMD5, sizeof(pMD5) );
 		if ( nVersion >= 31 ) ar >> Trusted;
 
 		if ( nVersion >= 13 ) ar >> bED2K;
-		if ( bED2K ) ar.Read( &pED2K, sizeof(pED2K) );
+		if ( bED2K ) ar.Read( pED2K, sizeof(pED2K) );
 		if ( nVersion >= 31 ) ar >> Trusted;
 
 		ar.Close();
@@ -761,7 +761,7 @@ uint8 CPartFile::ImportShareazaTempfile(LPCTSTR in_directory,LPCTSTR in_filename
 			ar >> nCount;
 
 			BYTE pMD4[16];
-			ar.Read( &pMD4, sizeof(pMD4) ); // read the hash again
+			ar.Read( pMD4, sizeof(pMD4) ); // read the hash again
 
 			// read the hashset
 			for (DWORD i = 0; i < nCount; i++){
@@ -912,7 +912,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 				uchar gethash[16];
 				metFile.Seek(2, CFile::begin);
 				LoadDateFromFile(&metFile);
-				metFile.Read(&gethash, 16);
+				metFile.Read(gethash, 16);
 				md4cpy(m_abyFileHash, gethash);
 			}
 		}
@@ -2680,10 +2680,13 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 		percentcompleted = 100.0F;
 		completedsize = m_nFileSize;
 	}
-	else if (theApp.m_brushBackwardDiagonal.m_hObject && eVirtualState == PS_INSUFFICIENT || status == PS_ERROR)
+	else if (eVirtualState == PS_INSUFFICIENT || status == PS_ERROR)
 	{
 		int iOldBkColor = dc->SetBkColor(RGB(255, 255, 0));
+		if (theApp.m_brushBackwardDiagonal.m_hObject)
 		dc->FillRect(rect, &theApp.m_brushBackwardDiagonal);
+		else
+			dc->FillSolidRect(rect, RGB(255, 255, 0));
 		dc->SetBkColor(iOldBkColor);
 
 		UpdateCompletedInfos();
@@ -3487,9 +3490,9 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 
 			if ((thePrefs.IsClientCryptLayerRequested() && (byCryptOptions & 0x01/*supported*/) > 0 && (byCryptOptions & 0x80) == 0)
 				|| (thePrefs.IsClientCryptLayerSupported() && (byCryptOptions & 0x02/*requested*/) > 0 && (byCryptOptions & 0x80) == 0))
-				DebugLogWarning(_T("Server didn't provide UserhHash for source %u, even if it was expected to (or local obfuscationsettings changed during serverconnect"), userid);
+				DebugLogWarning(_T("Server didn't provide UserHash for source %u, even if it was expected to (or local obfuscationsettings changed during serverconnect"), userid);
 			else if (!thePrefs.IsClientCryptLayerRequested() && (byCryptOptions & 0x02/*requested*/) == 0 && (byCryptOptions & 0x80) != 0)
-				DebugLogWarning(_T("Server provided UserhHash for source %u, even if it wasn't expected to (or local obfuscationsettings changed during serverconnect"), userid);
+				DebugLogWarning(_T("Server provided UserHash for source %u, even if it wasn't expected to (or local obfuscationsettings changed during serverconnect"), userid);
 		}
 		
 		// since we may received multiple search source UDP results we have to "consume" all data of that packet
@@ -4318,12 +4321,12 @@ BOOL CPartFile::PerformFileComplete()
 	CString strNewname;
 	CString indir;
 
-	if (PathFileExists( thePrefs.GetCategory(GetCategory())->incomingpath)) {
-		indir=thePrefs.GetCategory(GetCategory())->incomingpath;
+	if (PathFileExists(thePrefs.GetCategory(GetCategory())->strIncomingPath)){
+		indir = thePrefs.GetCategory(GetCategory())->strIncomingPath;
 		strNewname.Format(_T("%s\\%s"), indir, newfilename);
 	}
 	else{
-		indir=thePrefs.GetIncomingDir();
+		indir = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 		strNewname.Format(_T("%s\\%s"), indir, newfilename);
 	}
 
@@ -5291,31 +5294,66 @@ void CPartFile::UpdateAvailablePartsCount()
 	availablePartsCount = availablecounter;
 }
 
-Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
+Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient, uint8 byRequestedVersion, uint16 nRequestedOptions) const
 {
-	//We need to find where the dangling pointers are before uncommenting this..
-	if(!IsPartFile())
-		return CKnownFile::CreateSrcInfoPacket(forClient);
+	if (!IsPartFile() || srclist.IsEmpty())
+		return CKnownFile::CreateSrcInfoPacket(forClient, byRequestedVersion, nRequestedOptions);
 
-	if (forClient->GetRequestFile() != this)
+	if (md4cmp(forClient->GetUploadFileID(), GetFileHash()) != 0) {
+		// should never happen
+		DEBUG_ONLY( DebugLogError(_T("*** %hs - client (%s) upload file \"%s\" does not match file \"%s\""), __FUNCTION__, forClient->DbgGetClientInfo(), DbgGetFileInfo(forClient->GetUploadFileID()), GetFileName()) );
+		ASSERT(0);
 		return NULL;
+	}
 
-	if ( !(GetStatus() == PS_READY || GetStatus() == PS_EMPTY))
+	// check whether client has either no download status at all or a download status which is valid for this file
+	if (!(forClient->GetUpPartCount() == 0 && forClient->GetUpPartStatus() == NULL)
+		&& !(forClient->GetUpPartCount() == GetPartCount() && forClient->GetUpPartStatus() != NULL))
+	{
+		// should never happen
+		DEBUG_ONLY( DebugLogError(_T("*** %hs - part count (%u) of client (%s) does not match part count (%u) of file \"%s\""), __FUNCTION__, forClient->GetUpPartCount(), forClient->DbgGetClientInfo(), GetPartCount(), GetFileName()) );
+		ASSERT(0);
 		return NULL;
+	}
 
-	if (srclist.IsEmpty())
+	if (!(GetStatus() == PS_READY || GetStatus() == PS_EMPTY))
 		return NULL;
 
 	CSafeMemFile data(1024);
-	UINT nCount = 0;
+	
+	uint8 byUsedVersion;
+	bool bIsSX2Packet;
+	if (forClient->SupportsSourceExchange2() && byRequestedVersion > 0){
+		// the client uses SourceExchange2 and requested the highest version he knows
+		// and we send the highest version we know, but of course not higher than his request
+		byUsedVersion = min(byRequestedVersion, (uint8)SOURCEEXCHANGE2_VERSION);
+		bIsSX2Packet = true;
+		data.WriteUInt8(byUsedVersion);
 
+		// we don't support any special SX2 options yet, reserved for later use
+		if (nRequestedOptions != 0)
+			DebugLogWarning(_T("Client requested unknown options for SourceExchange2: %u (%s)"), nRequestedOptions, forClient->DbgGetClientInfo());
+	}
+	else{
+		byUsedVersion = forClient->GetSourceExchange1Version();
+		bIsSX2Packet = false;
+		if (forClient->SupportsSourceExchange2())
+			DebugLogWarning(_T("Client which announced to support SX2 sent SX1 packet instead (%s)"), forClient->DbgGetClientInfo());
+	}
+
+	UINT nCount = 0;
 	data.WriteHash16(m_abyFileHash);
 	data.WriteUInt16((uint16)nCount);
+	
 	bool bNeeded;
+	const uint8* reqstatus = forClient->GetUpPartStatus();
 	for (POSITION pos = srclist.GetHeadPosition();pos != 0;){
 		bNeeded = false;
 		const CUpDownClient* cur_src = srclist.GetNext(pos);
 		// MORPH START - Added by Commander, WebCache 1.2e
+		/*
+		if (cur_src->HasLowID() || !cur_src->IsValidSource())
+		*/
 		if (cur_src->HasLowID() || !cur_src->IsValidSource() || cur_src->IsProxy()) // Superlexx - webcache
 		// MORPH END - Added by Commander, WebCache 1.2e
 			continue;
@@ -5330,9 +5368,8 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 		*/
 		if (srcstatus && !bNeeded){ // Superlexx - webcache
 			if (cur_src->GetPartCount() == GetPartCount()){
-				const uint8* reqstatus = forClient->GetPartStatus();
 				if (reqstatus){
-					ASSERT( forClient->GetPartCount() == GetPartCount() );
+					ASSERT( forClient->GetUpPartCount() == GetPartCount() );
 					// only send sources which have needed parts for this client
 					for (UINT x = 0; x < GetPartCount(); x++){
 						//MORPH - Changed by SiRoB, ICS merged into partstatus
@@ -5369,7 +5406,7 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 		if( bNeeded ){
 			nCount++;
 			uint32 dwID;
-			if (forClient->GetSourceExchangeVersion() >= 3)
+			if (byUsedVersion >= 3)
 				dwID = cur_src->GetUserIDHybrid();
 			else
 				dwID = ntohl(cur_src->GetUserIDHybrid());
@@ -5377,9 +5414,9 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 			data.WriteUInt16(cur_src->GetUserPort());
 			data.WriteUInt32(cur_src->GetServerIP());
 			data.WriteUInt16(cur_src->GetServerPort());
-			if (forClient->GetSourceExchangeVersion() >= 2)
+			if (byUsedVersion >= 2)
 				data.WriteHash16(cur_src->GetUserHash());
-			if (forClient->GetSourceExchangeVersion() >= 4){
+			if (byUsedVersion >= 4){
 				// CryptSettings - SourceExchange V4
 				// 5 Reserved (!)
 				// 1 CryptLayer Required
@@ -5397,76 +5434,94 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 	}
 	if (!nCount)
 		return 0;
-	data.Seek(16, SEEK_SET);
+	data.Seek(bIsSX2Packet ? 17 : 16, SEEK_SET);
 	data.WriteUInt16((uint16)nCount);
 
 	Packet* result = new Packet(&data, OP_EMULEPROT);
-	result->opcode = OP_ANSWERSOURCES;
-	// 16+2+501*(4+2+4+2+16+1) = 14547 bytes max.
+	result->opcode = bIsSX2Packet ? OP_ANSWERSOURCES2 : OP_ANSWERSOURCES;
+	// (1+)16+2+501*(4+2+4+2+16+1) = 14547 (14548) bytes max.
 	if ( result->size > 354 )
 		result->PackPacket();
 	if ( thePrefs.GetDebugSourceExchange() )
-		AddDebugLogLine(false, _T("SXSend: Client source response; Count=%u, %s, File=\"%s\""), nCount, forClient->DbgGetClientInfo(), GetFileName());
+		AddDebugLogLine(false, _T("SXSend: Client source response SX2=%s, Version=%u; Count=%u, %s, File=\"%s\""), bIsSX2Packet ? _T("Yes") : _T("No"), byUsedVersion, nCount, forClient->DbgGetClientInfo(), GetFileName());
 	return result;
 }
 
-void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 uClientSXVersion, const CUpDownClient* pClient)
+void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 uClientSXVersion, bool bSourceExchange2, const CUpDownClient* pClient)
 {
 	if (stopped)
 		return;
 
-	UINT nCount = sources->ReadUInt16();
+	UINT nCount = 0;
 
 	if (thePrefs.GetDebugSourceExchange()){
 		CString strDbgClientInfo;
 		if (pClient)
 			strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
-		AddDebugLogLine(false, _T("SXRecv: Client source response; Count=%u, %sFile=\"%s\""), nCount, strDbgClientInfo, GetFileName());
+		AddDebugLogLine(false, _T("SXRecv: Client source response; SX2=%s, Ver=%u, %sFile=\"%s\""), bSourceExchange2 ? _T("Yes") : _T("No"), uClientSXVersion, strDbgClientInfo, GetFileName());
 	}
 
-	// Check if the data size matches the 'nCount' for v1 or v2 and eventually correct the source
-	// exchange version while reading the packet data. Otherwise we could experience a higher
-	// chance in dealing with wrong source data, userhashs and finally duplicate sources.
 	UINT uPacketSXVersion = 0;
-	UINT uDataSize = (UINT)(sources->GetLength() - sources->GetPosition());
-	//Checks if version 1 packet is correct size
-	if (nCount*(4+2+4+2) == uDataSize)
-	{
-		// Received v1 packet: Check if remote client supports at least v1
-		if (uClientSXVersion < 1) {
-			if (thePrefs.GetVerbose()) {
-				CString strDbgClientInfo;
-				if (pClient)
-					strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
-				DebugLogWarning(_T("Received invalid SX packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
+	if (!bSourceExchange2){
+		// for SX1 (deprecated):
+		// Check if the data size matches the 'nCount' for v1 or v2 and eventually correct the source
+		// exchange version while reading the packet data. Otherwise we could experience a higher
+		// chance in dealing with wrong source data, userhashs and finally duplicate sources.
+		nCount = sources->ReadUInt16();
+		UINT uDataSize = (UINT)(sources->GetLength() - sources->GetPosition());
+		//Checks if version 1 packet is correct size
+		if (nCount*(4+2+4+2) == uDataSize)
+		{
+			// Received v1 packet: Check if remote client supports at least v1
+			if (uClientSXVersion < 1) {
+				if (thePrefs.GetVerbose()) {
+					CString strDbgClientInfo;
+					if (pClient)
+						strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
+					DebugLogWarning(_T("Received invalid SX packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
+				}
+				return;
+		}
+			uPacketSXVersion = 1;
+		}
+		//Checks if version 2&3 packet is correct size
+		else if (nCount*(4+2+4+2+16) == uDataSize)
+		{
+			// Received v2,v3 packet: Check if remote client supports at least v2
+			if (uClientSXVersion < 2) {
+				if (thePrefs.GetVerbose()) {
+					CString strDbgClientInfo;
+					if (pClient)
+						strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
+					DebugLogWarning(_T("Received invalid SX packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
+				}
+				return;
+		}
+			if (uClientSXVersion == 2)
+				uPacketSXVersion = 2;
+			else
+				uPacketSXVersion = 3;
+		}
+		// v4 packets
+		else if (nCount*(4+2+4+2+16+1) == uDataSize)
+		{
+			// Received v4 packet: Check if remote client supports at least v4
+			if (uClientSXVersion < 4) {
+				if (thePrefs.GetVerbose()) {
+					CString strDbgClientInfo;
+					if (pClient)
+						strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
+					DebugLogWarning(_T("Received invalid SX packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
+				}
+				return;
 			}
-			return;
-	}
-		uPacketSXVersion = 1;
-	}
-	//Checks if version 2&3 packet is correct size
-	else if (nCount*(4+2+4+2+16) == uDataSize)
-	{
-		// Received v2,v3 packet: Check if remote client supports at least v2
-		if (uClientSXVersion < 2) {
-			if (thePrefs.GetVerbose()) {
-				CString strDbgClientInfo;
-				if (pClient)
-					strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
-				DebugLogWarning(_T("Received invalid SX packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
-			}
-			return;
-	}
-		if (uClientSXVersion == 2)
-			uPacketSXVersion = 2;
+			uPacketSXVersion = 4;
+		}
 		else
-			uPacketSXVersion = 3;
-	}
-	// v4 packets
-	else if (nCount*(4+2+4+2+16+1) == uDataSize)
-	{
-		// Received v4 packet: Check if remote client supports at least v4
-		if (uClientSXVersion < 4) {
+		{
+			// If v5+ inserts additional data (like v2), the above code will correctly filter those packets.
+			// If v5+ appends additional data after <count>(<Sources>)[count], we are in trouble with the 
+			// above code. Though a client which does not understand v5+ should never receive such a packet.
 			if (thePrefs.GetVerbose()) {
 				CString strDbgClientInfo;
 				if (pClient)
@@ -5475,22 +5530,53 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 uClientSXVersion, 
 			}
 			return;
 		}
-		uPacketSXVersion = 4;
+		ASSERT( uPacketSXVersion != 0 );
 	}
-	else
-	{
-		// If v5+ inserts additional data (like v2), the above code will correctly filter those packets.
-		// If v5+ appends additional data after <count>(<Sources>)[count], we are in trouble with the 
-		// above code. Though a client which does not understand v5+ should never receive such a packet.
-		if (thePrefs.GetVerbose()) {
-			CString strDbgClientInfo;
-			if (pClient)
-				strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
-			DebugLogWarning(_T("Received invalid SX packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
+	else{
+		// for SX2:
+		// We only check if the version is known by us and do a quick sanitize check on known version
+		// other then SX1, the packet will be ignored if any error appears, sicne it can't be a "misunderstanding" anymore
+		if (uClientSXVersion > SOURCEEXCHANGE2_VERSION || uClientSXVersion == 0){
+			if (thePrefs.GetVerbose()) {
+				CString strDbgClientInfo;
+				if (pClient)
+					strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
+
+				DebugLogWarning(_T("Received invalid SX2 packet - Version unknown (v%u), %sFile=\"%s\""), uClientSXVersion, strDbgClientInfo, GetFileName());
+			}
+			return;
 		}
-		return;
+		// all known versions use the first 2 bytes as count and unknown version are already filtered above
+		nCount = sources->ReadUInt16();
+		UINT uDataSize = (UINT)(sources->GetLength() - sources->GetPosition());	
+		bool bError = false;
+		switch (uClientSXVersion){
+			case 1:
+				bError = nCount*(4+2+4+2) != uDataSize;
+				break;
+			case 2:
+			case 3:
+				bError = nCount*(4+2+4+2+16) != uDataSize;
+				break;
+			case 4:
+				bError = nCount*(4+2+4+2+16+1) != uDataSize;
+				break;
+			default:
+				ASSERT( false );
+		}
+
+		if (bError){
+			ASSERT( false );
+			if (thePrefs.GetVerbose()) {
+				CString strDbgClientInfo;
+				if (pClient)
+					strDbgClientInfo.Format(_T("%s, "), pClient->DbgGetClientInfo());
+				DebugLogWarning(_T("Received invalid/corrupt SX2 packet (v%u, count=%u, size=%u), %sFile=\"%s\""), uClientSXVersion, nCount, uDataSize, strDbgClientInfo, GetFileName());
+			}
+			return;
+		}
+		uPacketSXVersion = uClientSXVersion;
 	}
-	ASSERT( uPacketSXVersion != 0 );
 
 	for (UINT i = 0; i < nCount; i++)
 	{
@@ -5603,8 +5689,8 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 uClientSXVersion, 
 				newsource->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
 				newsource->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
 				newsource->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
-				if (thePrefs.GetDebugSourceExchange()) // remove this log later
-					AddDebugLogLine(false, _T("Received CryptLayer aware (%u) source from V4 Sourceexchange (%s)"), byCryptOptions, newsource->DbgGetClientInfo());
+				//if (thePrefs.GetDebugSourceExchange()) // remove this log later
+				//	AddDebugLogLine(false, _T("Received CryptLayer aware (%u) source from V4 Sourceexchange (%s)"), byCryptOptions, newsource->DbgGetClientInfo());
 			}
 			newsource->SetSourceFrom(SF_SOURCE_EXCHANGE);
 			theApp.downloadqueue->CheckAndAddSource(this,newsource);
@@ -7115,15 +7201,15 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 
 CString CPartFile::GetInfoSummary() const
 {
+	if (!IsPartFile())
+		return CKnownFile::GetInfoSummary();
+
 	CString Sbuffer, lsc, compl, buffer, lastdwl;
 
-	if (IsPartFile()) {
-		lsc.Format(_T("%s"), CastItoXBytes(GetCompletedSize(), false, false));
-		compl.Format(_T("%s"), CastItoXBytes(GetFileSize(), false, false));
-		buffer.Format(_T("%s/%s"),lsc,compl);
-		compl.Format(_T("%s: %s (%.1f%%)\n"),GetResString(IDS_DL_TRANSFCOMPL),buffer,GetPercentCompleted());
-	} else
-		compl=_T("\n");
+	lsc.Format(_T("%s"), CastItoXBytes(GetCompletedSize(), false, false));
+	compl.Format(_T("%s"), CastItoXBytes(GetFileSize(), false, false));
+	buffer.Format(_T("%s/%s"),lsc,compl);
+	compl.Format(_T("%s: %s (%.1f%%)\n"),GetResString(IDS_DL_TRANSFCOMPL),buffer,GetPercentCompleted());
 
 	if (lastseencomplete == NULL)
 		lsc.Format(_T("%s"), GetResString(IDS_NEVER));
@@ -7133,8 +7219,8 @@ CString CPartFile::GetInfoSummary() const
 	float availability = 0.0F;
 	if (GetPartCount() != 0)
 		availability = (float)(GetAvailablePartCount() * 100.0 / GetPartCount());
+	
 	CString avail;
-	if (IsPartFile())
 		avail.Format(GetResString(IDS_AVAIL), GetPartCount(), GetAvailablePartCount(), availability);
 
 	if (GetCFileDate() != NULL)
@@ -7143,7 +7229,6 @@ CString CPartFile::GetInfoSummary() const
 		lastdwl = GetResString(IDS_NEVER);
 	
 	CString sourcesinfo;
-	if (IsPartFile())
 		sourcesinfo.Format(GetResString(IDS_DL_SOURCES) + _T(": ") + GetResString(IDS_SOURCESINFO) + _T('\n'), GetSourceCount(), GetValidSourcesCount(), GetSrcStatisticsValue(DS_NONEEDEDPARTS), GetSrcA4AFCount());
 		
 	// always show space on disk
@@ -7155,12 +7240,11 @@ CString CPartFile::GetInfoSummary() const
 	else 
 		status.Format(_T("%s\n"),getPartfileStatus());
 
-	//TODO: don't show the part.met filename for completed files..
 	CString info;
-	info.Format(GetResString(IDS_DL_FILENAME) + _T(": %s\n")
+	info.Format(_T("%s\n")
 		+ GetResString(IDS_FD_HASH) + _T(" %s\n")
-		+ GetResString(IDS_FD_SIZE) + _T(" %s  %s\n")
-		+ GetResString(IDS_FD_MET)+ _T(" %s\n\n")
+		+ GetResString(IDS_FD_SIZE) + _T(" %s  %s\n<br_head>\n")
+		+ GetResString(IDS_FD_MET)+ _T(" %s\n")
 		+ GetResString(IDS_STATUS) + _T(": ") + status
 		+ _T("%s")
 		+sourcesinfo
@@ -7224,19 +7308,32 @@ void CPartFile::GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, voi
 	CKnownFile::GrabbingFinished(imgResults, nFramesGrabbed, pSender);
 }
 
-void CPartFile::GetSizeToTransferAndNeededSpace(uint64& rui64SizeToTransfer, uint64& rui64NeededSpace) const
+void CPartFile::GetLeftToTransferAndAdditionalNeededSpace(uint64 &rui64LeftToTransfer, 
+														  uint64 &rui64AdditionalNeededSpace) const
 {
-	bool bNormalFile = IsNormalFile();
+	uint64 uSizeLastGap = 0;
 	for (POSITION pos = gaplist.GetHeadPosition();pos != 0;)
 	{
 		const Gap_Struct* cur_gap = gaplist.GetNext(pos);
 		uint64 uGapSize = cur_gap->end - cur_gap->start;
-		rui64SizeToTransfer += uGapSize;
-		if (bNormalFile && cur_gap->end == GetFileSize() - (uint64)1)
-			rui64NeededSpace = uGapSize;
+		rui64LeftToTransfer += uGapSize;
+		if (cur_gap->end == GetFileSize() - (uint64)1)
+			uSizeLastGap = uGapSize;
 	}
-	if (!bNormalFile)
-		rui64NeededSpace = rui64SizeToTransfer;
+
+	if (IsNormalFile())
+	{
+		// File is not NTFS-Compressed nor NTFS-Sparse
+		if (GetFileSize() == GetRealFileSize()) // already fully allocated?
+			rui64AdditionalNeededSpace = 0;
+		else
+			rui64AdditionalNeededSpace = uSizeLastGap;
+	}
+	else
+	{
+		// File is NTFS-Compressed or NTFS-Sparse
+		rui64AdditionalNeededSpace = rui64LeftToTransfer;
+	}
 }
 
 void CPartFile::SetLastAnsweredTimeTimeout()
@@ -7526,7 +7623,7 @@ void CPartFile::RequestAICHRecovery(UINT nPart)
 	}
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 	if(thePrefs.GetLogICHEvents()) //JP log ICH events
-	AddDebugLogLine(DLP_DEFAULT, false, _T("Requesting AICH Hash (%s) form client %s"),cAICHClients? _T("HighId"):_T("LowID"), pClient->DbgGetClientInfo());
+	AddDebugLogLine(DLP_DEFAULT, false, _T("Requesting AICH Hash (%s) from client %s"),cAICHClients? _T("HighId"):_T("LowID"), pClient->DbgGetClientInfo());
 	pClient->SendAICHRequest(this, (uint16)nPart);
 }
 

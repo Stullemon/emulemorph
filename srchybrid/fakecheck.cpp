@@ -169,7 +169,7 @@ void CFakecheck::DownloadFakeList()
 	CString sbuffer;
 	CString strURL = thePrefs.GetUpdateURLFakeList();
 	TCHAR szTempFilePath[_MAX_PATH];
-	_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_FAKECHECK_FILENAME, _T("tmp"));
+	_tmakepath(szTempFilePath, NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_FAKECHECK_FILENAME, _T("tmp"));
 
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = GetResString(IDS_DOWNFAKECHECKFILE);
@@ -201,7 +201,7 @@ void CFakecheck::DownloadFakeList()
 		if (zfile)
 		{
 			CString strTempUnzipFilePath;
-			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_FAKECHECK_FILENAME, _T(".unzip.tmp"));
+			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_FAKECHECK_FILENAME, _T(".unzip.tmp"));
 			strTempUnzipFilePath.ReleaseBuffer();
 			if (zfile->Extract(strTempUnzipFilePath))
 			{
@@ -244,5 +244,5 @@ void CFakecheck::DownloadFakeList()
 }
 CString CFakecheck::GetDefaultFilePath() const
 {
-	return thePrefs.GetConfigDir() + DFLT_FAKECHECK_FILENAME;
+	return thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + DFLT_FAKECHECK_FILENAME;
 }

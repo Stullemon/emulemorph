@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -105,6 +105,7 @@ public:
 	int ShowPreferences(UINT uStartPageID = (UINT)-1);
 	bool IsPreferencesDlgOpen() const;
 	bool IsTrayIconToFlash()	{ return m_iMsgIcon!=0; }
+	void SetToolTipsDelay(UINT uDelay);
 
 	virtual void TrayMinimizeToTrayChange();
 	virtual void RestoreWindow();
@@ -154,6 +155,9 @@ protected:
 	CMenu			m_menuDownloadCtrl;
 	char			m_acVCDNSBuffer[MAXGETHOSTSTRUCT];
 	bool			m_iMsgBlinkState;
+#ifdef USE_OFFICIAL_UPNP
+	bool			m_bConnectRequestDelayedForUPnP;
+#endif
 	//MORPH START - Added by SiRoB, Version check
 	char			m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
 	//MORPH END   - Added by SiRoB, Version check
@@ -175,6 +179,13 @@ protected:
 	// Startup Timer
 	UINT_PTR m_hTimer;
 	static void CALLBACK StartupTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
+
+#ifdef USE_OFFICIAL_UPNP
+	// UPnP TimeOutTimer
+	UINT_PTR m_hUPnPTimeOutTimer;
+	static void CALLBACK UPnPTimeOutTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
+#endif
+
 	public://MORPH leuk_he:run as ntservice v1.. 
 	void StartConnection();
 	void CloseConnection();
@@ -284,6 +295,12 @@ protected:
 
 	// Terminal Services
 	afx_msg LRESULT OnConsoleThreadEvent(WPARAM wParam, LPARAM lParam);
+
+#ifdef USE_OFFICIAL_UPNP
+	// UPnP
+	afx_msg LRESULT OnUPnPResult(WPARAM wParam, LPARAM lParam);
+#endif
+
 //Commander - Added: Invisible Mode [TPT] - Start	
 public:
 	BOOL	RegisterInvisibleHotKey();

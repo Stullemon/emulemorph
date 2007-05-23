@@ -18,27 +18,30 @@ class CIrcWnd;
 class CIrcSocket;
 class CIrcMain
 {
-	public:
-		CIrcMain(void);
-		~CIrcMain(void);
-		void ParseMessage( CString sMessage );
-		void PreParseMessage( CStringA sBuffer );
-		void SendLogin();
-		void Connect();
-		void Disconnect( bool bIsShuttingDown = false);
-		void SetConnectStatus( bool bConnected );
-		void SetIRCWnd(CIrcWnd* pwndIRC);
-		int SendString( CString sSend );
-		void ParsePerform();
-		void ProcessLink( CString sED2KLink );
-		uint32 SetVerify();
-		CString GetNick();
-	private:
-		CIrcSocket* m_pIRCSocket;
-		CIrcWnd* m_pwndIRC;
-		CString m_sPreParseBuffer;
-		CString m_sUser;
-		CString m_sNick;
-		CString m_sVersion;
-		uint32 m_uVerify;
+public:
+	CIrcMain(void);
+	~CIrcMain(void);
+
+	void ParseMessage(CString sMessage);
+	void PreParseMessage(const char *pszBufferA);
+	void SendLogin();
+	void Connect();
+	void Disconnect(bool bIsShuttingDown = false);
+	void SetConnectStatus(bool bConnected);
+	void SetIRCWnd(CIrcWnd *pwndIRC);
+	int SendString(CString sSend);
+	void ParsePerform();
+	void ProcessLink(CString sED2KLink);
+	uint32 SetVerify();
+	CString GetNick();
+
+protected:
+	CIrcSocket *m_pIRCSocket;
+	CIrcWnd *m_pwndIRC;
+	CStringA m_sPreParseBufferA;
+	CString m_sUser;
+	CString m_sNick;
+	CString m_sVersion;
+	uint32	m_uVerify;
+	uint32	m_dwLastRequest;
 };

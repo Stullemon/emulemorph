@@ -1523,7 +1523,7 @@ CString CPPToolTip::SearchBeginOfTag(CString & str, int & nIndex)
 	CString sText = _T("");
 //	BOOL bTagFound = FALSE;
 	
-	for (nIndex; nIndex < str.GetLength(); nIndex ++)
+	for (/*nIndex*/; nIndex < str.GetLength(); nIndex ++)
 	{
 		switch (str.GetAt(nIndex))
 		{
@@ -1554,7 +1554,7 @@ CString CPPToolTip::SearchBeginOfTag(CString & str, int & nIndex)
 
 void CPPToolTip::SearchEndOfTag(CString & str, int & nIndex)
 {
-	for (nIndex; nIndex < str.GetLength(); nIndex ++)
+	for (/*nIndex*/; nIndex < str.GetLength(); nIndex ++)
 	{
 		switch (str.GetAt(nIndex))
 		{
@@ -1570,7 +1570,7 @@ CString CPPToolTip::GetNameOfTag(CString & str, int & nIndex)
 {
 	CString sText = _T("");
 	
-	for (nIndex; nIndex < str.GetLength(); nIndex ++)
+	for (/*nIndex*/; nIndex < str.GetLength(); nIndex ++)
 	{
 		switch (str.GetAt(nIndex))
 		{
@@ -1607,7 +1607,7 @@ CString CPPToolTip::GetPropertiesOfTag(CString & str, int & nIndex)
 {
 	CString sText = _T("");
 	
-	for (nIndex; nIndex < str.GetLength(); nIndex ++)
+	for (/*nIndex*/; nIndex < str.GetLength(); nIndex ++)
 	{
 		switch (str.GetAt(nIndex))
 		{
@@ -1638,7 +1638,7 @@ CString CPPToolTip::GetStringValue(CString & str, int & nIndex)
 	CString sText = _T("");
 	BOOL bValueFound = FALSE;
 	
-	for (nIndex; nIndex < str.GetLength(); nIndex ++)
+	for (/*nIndex*/; nIndex < str.GetLength(); nIndex ++)
 	{
 		switch (str.GetAt(nIndex))
 		{

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -288,14 +288,15 @@ void CSearchDlg::UpdateSearch(CSearchFile* pSearchFile)
 	if(m_pwndResults)
 		m_pwndResults->searchlistctrl.UpdateSearch(pSearchFile);
 }
+
 bool CSearchDlg::CanSearchRelatedFiles() const
 {
 	return m_pwndResults->CanSearchRelatedFiles();
 }
 
-void CSearchDlg::SearchRelatedFiles(const CAbstractFile* file)
+void CSearchDlg::SearchRelatedFiles(CPtrList& listFiles)
 {
-	m_pwndResults->SearchRelatedFiles(file);
+	m_pwndResults->SearchRelatedFiles(listFiles);
 }
 
 BOOL CSearchDlg::PreTranslateMessage(MSG* pMsg)

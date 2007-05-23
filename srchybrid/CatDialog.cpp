@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -46,16 +46,17 @@ BOOL CCatDialog::OnInitDialog(){
 	InitWindowStyles(this);
 	SetIcon(theApp.LoadIcon(_T("CATEGORY"),16,16),FALSE);
 	Localize();
+	m_ctlColor.SetDefaultColor(GetSysColor(COLOR_BTNTEXT));
 	UpdateData();
-	m_bCancelled=false;
 
 	return true;
 }
 
-void CCatDialog::UpdateData(){
-	GetDlgItem(IDC_TITLE)->SetWindowText(m_myCat->title);
-	GetDlgItem(IDC_INCOMING)->SetWindowText(m_myCat->incomingpath);
-	GetDlgItem(IDC_COMMENT)->SetWindowText(m_myCat->comment);
+void CCatDialog::UpdateData()
+{
+	GetDlgItem(IDC_TITLE)->SetWindowText(m_myCat->strTitle);
+	GetDlgItem(IDC_INCOMING)->SetWindowText(m_myCat->strIncomingPath);
+	GetDlgItem(IDC_COMMENT)->SetWindowText(m_myCat->strComment);
 
 	COLORREF selcolor=m_myCat->color;
 	newcolor=m_myCat->color;
@@ -120,7 +121,6 @@ void CCatDialog::DoDataExchange(CDataExchange* pDX)
 BEGIN_MESSAGE_MAP(CCatDialog, CDialog)
 	ON_BN_CLICKED(IDC_BROWSE, OnBnClickedBrowse)
 	ON_BN_CLICKED(IDOK, OnBnClickedOk)
-	ON_BN_CLICKED(IDCANCEL, OnBnClickedCancel)
 	ON_MESSAGE(UM_CPN_SELENDOK, OnSelChange) //CPN_SELCHANGE
 END_MESSAGE_MAP()
 
@@ -196,41 +196,40 @@ void CCatDialog::Localize(){
 void CCatDialog::OnBnClickedBrowse()
 {	
 	TCHAR buffer[MAX_PATH] = {0};
-	GetDlgItemText(IDC_INCOMING, buffer, ARRSIZE(buffer));
+	GetDlgItemText(IDC_INCOMING, buffer, _countof(buffer));
 	if(SelectDir(GetSafeHwnd(), buffer,GetResString(IDS_SELECT_INCOMINGDIR)))
 		GetDlgItem(IDC_INCOMING)->SetWindowText(buffer);
 }
 
 void CCatDialog::OnBnClickedOk()
 {
-	CString oldpath = m_myCat->incomingpath;
-
+	CString oldpath = m_myCat->strIncomingPath;
 	if (GetDlgItem(IDC_TITLE)->GetWindowTextLength()>0)
-		GetDlgItem(IDC_TITLE)->GetWindowText(m_myCat->title, ARRSIZE(m_myCat->title));
+		GetDlgItem(IDC_TITLE)->GetWindowText(m_myCat->strTitle);
 
 	if (GetDlgItem(IDC_INCOMING)->GetWindowTextLength()>2)
-		GetDlgItem(IDC_INCOMING)->GetWindowText(m_myCat->incomingpath, ARRSIZE(m_myCat->incomingpath));
+		GetDlgItem(IDC_INCOMING)->GetWindowText(m_myCat->strIncomingPath);
+	
+	GetDlgItem(IDC_COMMENT)->GetWindowText(m_myCat->strComment);
 
-	GetDlgItem(IDC_COMMENT)->GetWindowText(m_myCat->comment, ARRSIZE(m_myCat->comment));
-
-	MakeFoldername(m_myCat->incomingpath);
+	MakeFoldername(m_myCat->strIncomingPath);
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 	/*
-	if (!thePrefs.IsShareableDirectory(m_myCat->incomingpath)){
-		_sntprintf(m_myCat->incomingpath, ARRSIZE(m_myCat->incomingpath), _T("%s"), thePrefs.GetIncomingDir());
-		MakeFoldername(m_myCat->incomingpath);
+	if (!thePrefs.IsShareableDirectory(m_myCat->strIncomingPath)){
+		m_myCat->strIncomingPath = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
+		MakeFoldername(m_myCat->strIncomingPath);
 	}
 	*/
 
-	if (!PathFileExists(m_myCat->incomingpath)){
-		if (!::CreateDirectory(m_myCat->incomingpath, 0)){
+	if (!PathFileExists(m_myCat->strIncomingPath)){
+		if (!::CreateDirectory(m_myCat->strIncomingPath, 0)){
 			AfxMessageBox(GetResString(IDS_ERR_BADFOLDER));
-			_tcscpy(m_myCat->incomingpath,oldpath);
+			m_myCat->strIncomingPath = oldpath;
 			return;
 		}
 	}
 
-	if (CString(m_myCat->incomingpath).CompareNoCase(oldpath)!=0)
+	if (m_myCat->strIncomingPath.CompareNoCase(oldpath)!=0)
 		theApp.sharedfiles->Reload();
 
 	m_myCat->color=newcolor;
@@ -280,16 +279,10 @@ void CCatDialog::OnBnClickedOk()
 	OnOK();
 }
 
-void CCatDialog::OnBnClickedCancel()
-{
-	m_bCancelled = true;
-	OnCancel();
-}
-
 LONG CCatDialog::OnSelChange(UINT lParam, LONG /*wParam*/)
 {
 	if (lParam == CLR_DEFAULT)
-		newcolor = 0;		
+		newcolor = (DWORD)-1;
 	else
 		newcolor = m_ctlColor.GetColor();
 	return TRUE;

@@ -208,7 +208,7 @@ BOOL CZIPFile::LocateCentralDirectory()
 		 != pLoc->nDirectoryOffset ) return FALSE;
 	
 	BYTE* pDirectory = new BYTE[ pLoc->nDirectorySize ];
-	ReadFile( m_hFile, pDirectory, pLoc->nDirectorySize, &nBuffer, NULL );
+	VERIFY( ReadFile(m_hFile, pDirectory, pLoc->nDirectorySize, &nBuffer, NULL) );
 	
 	if ( nBuffer == pLoc->nDirectorySize )
 	{
@@ -326,7 +326,7 @@ BOOL CZIPFile::SeekToFile(File* pFile)
 	ZIP_LOCAL_FILE pLocal;
 	DWORD nRead = 0;
 	
-	ReadFile( m_hFile, &pLocal, sizeof(pLocal), &nRead, NULL );
+	VERIFY( ReadFile(m_hFile, &pLocal, sizeof(pLocal), &nRead, NULL) );
 	if ( nRead != sizeof(pLocal) ) return FALSE;
 	
 	if ( pLocal.nSignature != 0x04034b50 ) return FALSE;
@@ -443,7 +443,7 @@ BOOL CZIPFile::File::Extract(LPCTSTR pszFile)
 				pStream.next_in		= pBufferIn;
 				
 				DWORD nRead = 0;
-				ReadFile( m_pZIP->m_hFile, pBufferIn, pStream.avail_in, &nRead, NULL );
+				VERIFY( ReadFile(m_pZIP->m_hFile, pBufferIn, pStream.avail_in, &nRead, NULL) );
 				if ( nRead != pStream.avail_in ) break;
 				nCompressed += nRead;
 			}
@@ -476,7 +476,7 @@ BOOL CZIPFile::File::Extract(LPCTSTR pszFile)
 			DWORD nChunk = (DWORD)min( m_nSize - nUncompressed, BUFFER_OUT_SIZE );
 			DWORD nProcess = 0;
 			
-			ReadFile( m_pZIP->m_hFile, pBufferOut, nChunk, &nProcess, NULL );
+			VERIFY( ReadFile(m_pZIP->m_hFile, pBufferOut, nChunk, &nProcess, NULL) );
 			if ( nChunk != nProcess ) break;
 			WriteFile( hFile, pBufferOut, nChunk, &nProcess, NULL );
 			if ( nChunk != nProcess ) break;

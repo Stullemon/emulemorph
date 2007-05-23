@@ -196,6 +196,7 @@
 #define	MP_SHOW_FILESIZE_DFLT	10356
 #define	MP_SHOW_FILESIZE_KBYTE	10357
 #define	MP_SHOW_FILESIZE_MBYTE	10358
+#define MP_MARKASSPAM			10359
 
 // khaos::categorymod+
 #define MP_CAT_SHOWHIDEPAUSED	10360
@@ -276,7 +277,6 @@
 #define	MP_PREVIEW_APP_MAX		(MP_PREVIEW_APP_MIN+49)
 #define MP_FILTERCOLUMNS		11300	// reserve 50 entries for filter columsn
 
-#define Irc_Version				"(SMIRCv00.69)"
 #define Irc_Join				10240
 #define Irc_Close				10241
 #define Irc_Priv				10242

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -69,7 +69,7 @@ int CAICHSyncThread::Run()
 	
 	// we collect all masterhashs which we find in the known2.met and store them in a list
 	CList<CAICHHash> liKnown2Hashs;
-	CString fullpath=thePrefs.GetConfigDir();
+	CString fullpath = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR);
 	fullpath.Append(KNOWN2_MET_FILENAME);
 	
 	CFileException fexp;
@@ -284,9 +284,9 @@ bool CAICHSyncThread::ConvertToKnown2ToKnown264(CSafeFile* pTargetFile){
 	// changing hashcount from uint16 to uint32
 
 	// there still exists a lock on known2_64.met and it should be not opened at this point
-	CString oldfullpath=thePrefs.GetConfigDir();
+	CString oldfullpath = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR);
 	oldfullpath.Append(OLD_KNOWN2_MET_FILENAME);
-	CString newfullpath=thePrefs.GetConfigDir();
+	CString newfullpath = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR);
 	newfullpath.Append(KNOWN2_MET_FILENAME);
 
 	if (PathFileExists(newfullpath) || !PathFileExists(oldfullpath)){

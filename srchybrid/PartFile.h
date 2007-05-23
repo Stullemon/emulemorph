@@ -1,4 +1,4 @@
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -159,7 +159,7 @@ public:
 	bool	IsNormalFile() const { return (m_dwFileAttributes & (FILE_ATTRIBUTE_COMPRESSED | FILE_ATTRIBUTE_SPARSE_FILE)) == 0; }
 	const bool	IsAllocating() const { return m_AllocateThread != NULL; }
 	EMFileSize	GetRealFileSize() const;
-	void	GetSizeToTransferAndNeededSpace(uint64& pui64SizeToTransfer, uint64& pui32NeededSpace) const;
+	void	GetLeftToTransferAndAdditionalNeededSpace(uint64 &ui64LeftToTransfer, uint64 &pui32AdditionalNeededSpace) const;
 	uint64	GetNeededSpace() const;
 
 	// last file modification time (NT's version of UTC), to be used for stats only!
@@ -290,8 +290,8 @@ public:
 	void	ResumeFile(bool resort = true);
 	void	ResumeFileInsufficient();
 
-	virtual Packet* CreateSrcInfoPacket(const CUpDownClient* forClient) const;
-	void	AddClientSources(CSafeMemFile* sources, uint8 sourceexchangeversion, const CUpDownClient* pClient = NULL);
+	virtual Packet* CreateSrcInfoPacket(const CUpDownClient* forClient, uint8 byRequestedVersion, uint16 nRequestedOptions) const;
+	void	AddClientSources(CSafeMemFile* sources, uint8 sourceexchangeversion, bool bSourceExchange2, const CUpDownClient* pClient = NULL);
 
 	UINT	GetAvailablePartCount() const { return availablePartsCount; }
 	void	UpdateAvailablePartsCount();

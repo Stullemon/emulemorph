@@ -34,7 +34,8 @@ static LPCSTR _pszLexBuff;
 static bool _bKeepQuotedStrings;
 
 #pragma warning(disable:4127) // conditional expression is constant
-#pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
+#pragma warning(disable:4242) // conversion from <type1> to <type1>, possible loss of data
+#pragma warning(disable:4244) // conversion from <type1> to <type2>, possible loss of data
 %}
 
 %option noyywrap
@@ -137,6 +138,14 @@ number			{num1}|{num2}
 <NUMBER,SIZE,LENGTH>"<>"		{ return TOK_OPR_NE; }
 
 "ed2k://|file|"[^|]+"|"[0-9]+"|"[a-fA-F0-9]{32}"|/"	{
+	//
+	// NOTE: There is no need to explicitly handle the
+	//
+	//	"ed2k::"[a-fA-F0-9]{32}
+	//
+	// pattern with a separate token. It would be even wrong! "ed2k::<hash>" is to be handled
+	// as any other string term. It even can get combined with other search terms and operators
+	// within one search tree.
 					CString strError;
 					try
 					{
@@ -164,11 +173,6 @@ number			{num1}|{num2}
 					yyerror(strError);
 					yyterminate();
 					/*NOT REACHED*/
-				}
-
-"ed2k::"[a-fA-F0-9]{32}	{
-					yylval.pstr = new CStringA(yytext);
-					return TOK_ED2K_LINK;
 				}
 
 <NUMBER>{number}[kmg]? {
@@ -321,6 +325,11 @@ number			{num1}|{num2}
 <INITIAL,STRING>"\""	{
 					int l = 128;
 					char* psz = (char*)malloc(l);
+					if (psz == NULL) {
+						yyerror(_T("Less memory for string"));
+						yyterminate();
+						/*NOT REACHED*/
+					}
 					int i = 0;
 					int c;
 					while ((c = yyinput()) != '\"')
@@ -398,13 +407,15 @@ number			{num1}|{num2}
 							if ((unsigned char)c >= 0x80 && IsDBCSLeadByte(yytext[0])){
 								psz[i++] = (unsigned char)c;
 								if (i >= l){
-									psz = (char*)realloc(psz, l += 128);
-									if (psz == NULL){
+									char* pszNew = (char*)realloc(psz, l += 128);
+									if (pszNew == NULL){
+										free(psz);
 										yyerror(_T("Less memory for string"));
 										yyterminate();
 										/*NOT REACHED*/
 										break;
 									}
+									psz = pszNew;
 								}
 								c = yyinput();
 							}
@@ -413,13 +424,15 @@ number			{num1}|{num2}
 
 						psz[i++] = (unsigned char)c;
 						if (i >= l){
-							psz = (char*)realloc(psz, l += 128);
-							if (psz == NULL){
+							char* pszNew = (char*)realloc(psz, l += 128);
+							if (pszNew == NULL){
+								free(psz);
 								yyerror(_T("Less memory for string"));
 								yyterminate();
 								/*NOT REACHED*/
 								break;
 							}
+							psz = pszNew;
 						}
 					}
 					psz[i] = '\0';

@@ -15,12 +15,11 @@ static HINSTANCE _hLangDLL = NULL;
 
 CString GetResString(UINT uStringID, WORD wLanguageID)
 {
-	
 	CString resString;
 	if (_hLangDLL)
-		resString.LoadString(_hLangDLL, uStringID, wLanguageID);
+		(void)resString.LoadString(_hLangDLL, uStringID, wLanguageID);
 	if (resString.IsEmpty())
-		resString.LoadString(GetModuleHandle(NULL), uStringID, LANGID_EN_US);
+		(void)resString.LoadString(GetModuleHandle(NULL), uStringID, LANGID_EN_US);
 	return resString;
 }
 
@@ -101,7 +100,9 @@ static SLanguage _aLanguages[] =
 	{LANGID_EN_US,	_T("english"),		TRUE,	_T("en_US"),	1252,	_T("windows-1252")},	// English
 	{LANGID_ES_ES_T,_T("spanish"),		FALSE,	_T("es_ES_T"),	1252,	_T("windows-1252")},	// Spanish (Castilian)
 	{LANGID_ES_AS,  _T("spanish"),		FALSE,	_T("es_AS"),	1252,	_T("windows-1252")},	// Asturian
+	{LANGID_VA_ES,  _T(""),				FALSE,	_T("va_ES"),	1252,	_T("windows-1252")},	// Valencian
 	{LANGID_ET_EE,	_T(""),				FALSE,	_T("et_EE"),	1257,	_T("windows-1257")},	// Estonian
+	{LANGID_FA_IR,	_T("farsi"),		FALSE,	_T("fa_IR"),	1256,	_T("windows-1256")},	// Farsi
 	{LANGID_FI_FI,	_T("finnish"),		FALSE,	_T("fi_FI"),	1252,	_T("windows-1252")},	// Finnish
 	{LANGID_FR_FR,	_T("french"),		FALSE,	_T("fr_FR"),	1252,	_T("windows-1252")},	// French (France)
 	{LANGID_FR_BR,	_T("french"),		FALSE,	_T("fr_BR"),	1252,	_T("windows-1252")},	// French (Breton)
@@ -133,7 +134,7 @@ static SLanguage _aLanguages[] =
 	{0, NULL, 0, 0}
 };
 
-static void InitLanguages(const CString& rstrLangDir, bool bReInit = false)
+static void InitLanguages(const CString& rstrLangDir1, const CString& rstrLangDir2, bool bReInit = false)
 {
 	static BOOL _bInitialized = FALSE;
 	if (_bInitialized && !bReInit)
@@ -141,7 +142,8 @@ static void InitLanguages(const CString& rstrLangDir, bool bReInit = false)
 	_bInitialized = TRUE;
 
 	CFileFind ff;
-	bool bEnd = !ff.FindFile(rstrLangDir + _T("*.dll"), 0);
+	bool bEnd = !ff.FindFile(rstrLangDir1 + _T("*.dll"), 0);
+	bool bFirstDir = rstrLangDir1.CompareNoCase(rstrLangDir2) != 0;
 	while (!bEnd)
 	{
 		bEnd = !ff.FindNextFile();
@@ -160,6 +162,12 @@ static void InitLanguages(const CString& rstrLangDir, bool bReInit = false)
 				pLangs++;
 			}
 		}
+		if (bEnd && bFirstDir){
+			ff.Close();
+			bEnd = !ff.FindFile(rstrLangDir2 + _T("*.dll"), 0);
+			bFirstDir = false;
+		}
+
 	}
 	ff.Close();
 }
@@ -217,18 +225,10 @@ static bool CheckLangDLLVersion(const CString& rstrLangDLL)
 		}
 	}
 
-	// no messagebox anymore since we just offer the user to download the new one
-	/*if (!bResult){
-		CString strError;
-		// Don't try to load a localized version of that string! ;)
-		strError.Format(_T("Language DLL \"%s\" is not for this eMule version. Please update the language DLL!"), rstrLangDLL);
-		AfxMessageBox(strError, MB_ICONSTOP);
-	}*/
-
 	return bResult;
 }
 
-static bool LoadLangLib(const CString& rstrLangDir, LANGID lid)
+static bool LoadLangLib(const CString& rstrLangDir1, const CString& rstrLangDir2, LANGID lid)
 {
 	const SLanguage* pLangs = _aLanguages;
 	if (pLangs){
@@ -242,13 +242,23 @@ static bool LoadLangLib(const CString& rstrLangDir, LANGID lid)
 					bLoadedLib = true;
 				}
 				else{
-					CString strLangDLL = rstrLangDir;
+					CString strLangDLL = rstrLangDir1;
 					strLangDLL += pLangs->pszISOLocale;
 					strLangDLL += _T(".dll");
 					if (CheckLangDLLVersion(strLangDLL)){
 						_hLangDLL = LoadLibrary(strLangDLL);
 						if (_hLangDLL)
 							bLoadedLib = true;
+					}
+					if (rstrLangDir1.CompareNoCase(rstrLangDir2) != 0){
+						strLangDLL = rstrLangDir2;
+						strLangDLL += pLangs->pszISOLocale;
+						strLangDLL += _T(".dll");
+						if (CheckLangDLLVersion(strLangDLL)){
+							_hLangDLL = LoadLibrary(strLangDLL);
+							if (_hLangDLL)
+								bLoadedLib = true;
+						}
 					}
 				}
 				if (bLoadedLib)
@@ -263,20 +273,20 @@ static bool LoadLangLib(const CString& rstrLangDir, LANGID lid)
 
 void CPreferences::SetLanguage()
 {
-	InitLanguages(GetLangDir());
+	InitLanguages(GetMuleDirectory(EMULE_INSTLANGDIR), GetMuleDirectory(EMULE_ADDLANGDIR, false));
 
 	bool bFoundLang = false;
 	if (m_wLanguageID)
-		bFoundLang = LoadLangLib(GetLangDir(), m_wLanguageID);
+		bFoundLang = LoadLangLib(GetMuleDirectory(EMULE_INSTLANGDIR), GetMuleDirectory(EMULE_ADDLANGDIR, false), m_wLanguageID);
 
 	if (!bFoundLang){
 		LANGID lidLocale = (LANGID)::GetThreadLocale();
 		//LANGID lidLocalePri = PRIMARYLANGID(::GetThreadLocale());
 		//LANGID lidLocaleSub = SUBLANGID(::GetThreadLocale());
 
-		bFoundLang = LoadLangLib(GetLangDir(), lidLocale);
+		bFoundLang = LoadLangLib(GetMuleDirectory(EMULE_INSTLANGDIR), GetMuleDirectory(EMULE_ADDLANGDIR, false), lidLocale);
 		if (!bFoundLang){
-			LoadLangLib(GetLangDir(), LANGID_EN_US);
+			LoadLangLib(GetMuleDirectory(EMULE_INSTLANGDIR), GetMuleDirectory(EMULE_ADDLANGDIR, false), LANGID_EN_US);
 			m_wLanguageID = LANGID_EN_US;
 			CString strLngEnglish = GetResString(IDS_MB_LANGUAGEINFO);
 			AfxMessageBox(strLngEnglish, MB_ICONASTERISK);
@@ -287,7 +297,7 @@ void CPreferences::SetLanguage()
 
 	// if loading a string fails, set language to English
 	if (GetResString(IDS_MB_LANGUAGEINFO).IsEmpty()) {
-		LoadLangLib(GetLangDir(), LANGID_EN_US);
+		LoadLangLib(GetMuleDirectory(EMULE_INSTLANGDIR), GetMuleDirectory(EMULE_ADDLANGDIR, false), LANGID_EN_US);
 		m_wLanguageID = LANGID_EN_US;
 	}
 
@@ -295,13 +305,14 @@ void CPreferences::SetLanguage()
 }
 
 bool CPreferences::IsLanguageSupported(LANGID lidSelected, bool bUpdateBefore){
-	InitLanguages(GetLangDir(), bUpdateBefore);
+	InitLanguages(GetMuleDirectory(EMULE_INSTLANGDIR), GetMuleDirectory(EMULE_ADDLANGDIR, false), bUpdateBefore);
 	if (lidSelected == LANGID_EN_US)
 		return true;
 	const SLanguage* pLang = _aLanguages;
 	for (;pLang->lid;pLang++){
 		if (pLang->lid == lidSelected && pLang->bSupported){
-			return CheckLangDLLVersion(GetLangDir()+CString(pLang->pszISOLocale) + _T(".dll"));
+			bool bResult = CheckLangDLLVersion(GetMuleDirectory(EMULE_INSTLANGDIR) + CString(pLang->pszISOLocale) + _T(".dll"));
+			return bResult || CheckLangDLLVersion(GetMuleDirectory(EMULE_ADDLANGDIR, false) + CString(pLang->pszISOLocale) + _T(".dll"));
 		}
 	}
 	return false; 

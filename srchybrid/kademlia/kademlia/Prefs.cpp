@@ -40,6 +40,7 @@ there client on the eMule forum..
 #include "../../SafeFile.h"
 #include "../../serverlist.h"
 #include "../../Log.h"
+#include "../../MD5Sum.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -99,10 +100,17 @@ void CPrefs::ReadFile()
 			m_uIP = file.ReadUInt32();
 			file.ReadUInt16();
 			file.ReadUInt128(&m_uClientID);
+			// get rid of invalid kad IDs which may have been stored by older versions
+			if (m_uClientID == 0)
+				m_uClientID.SetValueRandom();
 			file.Close();
 		}
 	}
-	//TODO: Make this catch an CFileException..
+	catch (CException *ex)
+	{
+		ASSERT(0);
+		ex->Delete();
+	}
 	catch (...)
 	{
 		TRACE("Exception in CPrefs::readFile\n");
@@ -125,7 +133,11 @@ void CPrefs::WriteFile()
 			file.Close();
 		}
 	}
-	//TODO: Make this catch an CFileException
+	catch (CException *ex)
+	{
+		ASSERT(0);
+		ex->Delete();
+	}
 	catch (...)
 	{
 		TRACE("Exception in CPrefs::writeFile\n");
@@ -256,14 +268,17 @@ void CPrefs::GetKadID(CUInt128 *puID) const
 {
 	puID->SetValue(m_uClientID);
 }
+
 void CPrefs::GetKadID(CString *psID) const
 {
 	m_uClientID.ToHexString(psID);
 }
+
 void CPrefs::SetKadID(const CUInt128 &puID)
 {
 	m_uClientID = puID;
 }
+
 CUInt128 CPrefs::GetKadID() const
 {
 	return m_uClientID;
@@ -273,14 +288,17 @@ void CPrefs::GetClientHash(CUInt128 *puID) const
 {
 	puID->SetValue(m_uClientHash);
 }
+
 void CPrefs::GetClientHash(CString *psID) const
 {
 	m_uClientHash.ToHexString(psID);
 }
+
 void CPrefs::SetClientHash(const CUInt128 &puID)
 {
 	m_uClientHash = puID;
 }
+
 CUInt128 CPrefs::GetClientHash() const
 {
 	return m_uClientHash;
@@ -405,4 +423,12 @@ void CPrefs::SetPublish(bool bVal)
 void CPrefs::SetFindBuddy(bool bVal)
 {
 	m_bFindBuddy = bVal;
+}
+
+uint16 CPrefs::GetUDPVerifyKey(uint32 dwTargetIP) const {
+	uint64 ui64Buffer = thePrefs.GetKadUDPKey();
+	ui64Buffer <<= 32;
+	ui64Buffer |= dwTargetIP;
+	MD5Sum md5((uchar*)&ui64Buffer, 8);
+	return ((uint16)(PeekUInt32(md5.GetRawHash() + 0) ^ PeekUInt32(md5.GetRawHash() + 4) ^ PeekUInt32(md5.GetRawHash() + 8) ^ PeekUInt32(md5.GetRawHash() + 12)) % 0xFFFE) + 1; 
 }

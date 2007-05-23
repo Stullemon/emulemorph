@@ -63,13 +63,14 @@ CDownloadClientsCtrl::CDownloadClientsCtrl()
 void CDownloadClientsCtrl::Init()
 {
 	SetName(_T("DownloadClientsCtrl"));
+
 	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
 	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy,theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
 	SetImageList(&ilDummyImageList, LVSIL_SMALL);
 	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
 	ilDummyImageList.Detach();
 
-	SetExtendedStyle(LVS_EX_FULLROWSELECT);
+	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
 	InsertColumn(0,	GetResString(IDS_QL_USERNAME), LVCFMT_LEFT, 165);
 	InsertColumn(1,	GetResString(IDS_CD_CSOFT), LVCFMT_LEFT, 90); 

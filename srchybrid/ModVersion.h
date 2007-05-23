@@ -19,8 +19,8 @@
 
 //MORPH START - Added by SiRoB, [-modname-]
 //START - This part should not be changed in anyway
-#define MOD_VERSION_MJR		9
-#define MOD_VERSION_MIN		6
+#define MOD_VERSION_MJR		10
+#define MOD_VERSION_MIN		0
 #define MOD_VERSION_BUILD   0
 #define	MOD_VERSION			_T("MorphXT")
 #define	MOD_VERSION_LONG	_T("MorphXT v")

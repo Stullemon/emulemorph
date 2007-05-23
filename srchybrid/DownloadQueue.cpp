@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -404,7 +404,7 @@ void CDownloadQueue::AddFileLinkToDownload(CED2KFileLink* pLink, int theCat, boo
 	if (partfile)
 	{
 		if (pLink->HasValidSources())
-			partfile->AddClientSources(pLink->SourcesList,1);
+			partfile->AddClientSources(pLink->SourcesList,1,false);
 		if (pLink->HasValidAICHHash() ){
 			if ( !(partfile->GetAICHHashset()->HasValidMasterHash() && partfile->GetAICHHashset()->GetMasterHash() == pLink->GetAICHHash())){
 				partfile->GetAICHHashset()->SetMasterHash(pLink->GetAICHHash(), AICH_VERIFIED);
@@ -518,7 +518,7 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 		if (partfile)
 		{
 			if (pLink->HasValidSources())
-				partfile->AddClientSources(pLink->SourcesList,1);
+			partfile->AddClientSources(pLink->SourcesList, 1, false);
 			if (pLink->HasValidAICHHash() ){
 				if ( !(partfile->GetAICHHashset()->HasValidMasterHash() && partfile->GetAICHHashset()->GetMasterHash() == pLink->GetAICHHash())){
 					partfile->GetAICHHashset()->SetMasterHash(pLink->GetAICHHash(), AICH_VERIFIED);
@@ -740,7 +740,7 @@ bool CDownloadQueue::ApplyFilterMask(CString sFullName, UINT nCat)
 
 				if (iEnd == -1 || (iLT != -1 && iLT < iEnd) || iGT < iEnd)
 				{
-				AddDebugLogLine(false, _T("Category '%s' has invalid Category Mask String."), thePrefs.GetCategory(nCat)->title);
+				AddDebugLogLine(false, _T("Category '%s' has invalid Category Mask String."), thePrefs.GetCategory(nCat)->strTitle);
 					break; // Move on to next category.
 				}
 				if (iStart == iEnd)
@@ -1818,7 +1818,7 @@ void CDownloadQueue::CheckDiskspace(bool bNotEnoughSpaceLeft)
 	}
 }
 
-void CDownloadQueue::GetDownloadStats(SDownloadStats& results)
+void CDownloadQueue::GetDownloadSourcesStats(SDownloadStats& results)
 {
 	memset(&results, 0, sizeof results);
 	for (POSITION pos = filelist.GetHeadPosition(); pos != 0; )
@@ -2254,31 +2254,27 @@ void CDownloadQueue::SendLocalSrcRequest(CPartFile* sender){
 	m_localServerReqQueue.AddTail(sender);
 }
 
-void CDownloadQueue::GetDownloadStats(int results[],
-									  uint64& rui64TotFileSize,
-									  uint64& rui64TotBytesLeftToTransfer,
-									  uint64& rui64TotNeededSpace)
+int CDownloadQueue::GetDownloadFilesStats(uint64 &rui64TotalFileSize,
+									      uint64 &rui64TotalLeftToTransfer,
+									      uint64 &rui64TotalAdditionalNeededSpace)
 {
-	results[0] = 0;
-	results[1] = 0;
-	results[2] = 0;
+	int iActiveFiles = 0;
 	for (POSITION pos = filelist.GetHeadPosition();pos != 0; )
 	{
 		const CPartFile* cur_file = filelist.GetNext(pos);
 		UINT uState = cur_file->GetStatus();
 		if (uState == PS_READY || uState == PS_EMPTY)
 		{
-			uint64 ui64SizeToTransfer = 0;
-			uint64 ui64NeededSpace = 0;
-			cur_file->GetSizeToTransferAndNeededSpace(ui64SizeToTransfer, ui64NeededSpace);
-			rui64TotFileSize += (uint64)cur_file->GetFileSize();
-			rui64TotBytesLeftToTransfer += ui64SizeToTransfer;
-			rui64TotNeededSpace += ui64NeededSpace;
-			results[2]++;
+			uint64 ui64LeftToTransfer = 0;
+			uint64 ui64AdditionalNeededSpace = 0;
+			cur_file->GetLeftToTransferAndAdditionalNeededSpace(ui64LeftToTransfer, ui64AdditionalNeededSpace);
+			rui64TotalFileSize += (uint64)cur_file->GetFileSize();
+			rui64TotalLeftToTransfer += ui64LeftToTransfer;
+			rui64TotalAdditionalNeededSpace += ui64AdditionalNeededSpace;
+			iActiveFiles++;
 		}
-		results[0] += cur_file->GetSourceCount();
-		results[1] += cur_file->GetTransferringSrcCount();
 	}
+	return iActiveFiles;
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -2464,7 +2460,7 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 
 void CDownloadQueue::ExportPartMetFilesOverview() const
 {
-	CString strFileListPath = thePrefs.GetAppDir() + _T("downloads.txt");
+	CString strFileListPath = thePrefs.GetMuleDirectory(EMULE_DATABASEDIR) + _T("downloads.txt");
 	
 	CString strTmpFileListPath = strFileListPath;
 	PathRenameExtension(strTmpFileListPath.GetBuffer(MAX_PATH), _T(".tmp"));
@@ -2475,7 +2471,7 @@ void CDownloadQueue::ExportPartMetFilesOverview() const
 	if (!file.Open(strTmpFileListPath, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary | CFile::shareDenyWrite, &fexp))
 	{
 		// MORPH START: some vista stuff.. c:\program files\emule is not writeable. so write in config dir. 
-		strFileListPath= thePrefs.GetConfigDir() + _T("downloads.txt");
+		strFileListPath= thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("downloads.txt");
 		PathRenameExtension(strTmpFileListPath.GetBuffer(MAX_PATH), _T(".tmp"));
     	strTmpFileListPath.ReleaseBuffer();
 		if (!file.Open(strTmpFileListPath, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary | CFile::shareDenyWrite, &fexp))

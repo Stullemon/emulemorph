@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -14,34 +14,36 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
-#include "./MuleListCtrl.h"
+#include "MuleListCtrl.h"
+
+struct ChannelName;
 
 class CIrcChannelListCtrl : public CMuleListCtrl
 {
-		DECLARE_DYNAMIC(CIrcChannelListCtrl)
-	public:
-		CIrcChannelListCtrl();
-		virtual ~CIrcChannelListCtrl();
-		void ResetServerChannelList( bool bShutdown = false );
-		void AddChannelToList( CString sName, CString sUser, CString sDescription );
-		void JoinChannels();
-		void Localize();
-		void Init();
-		virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+	DECLARE_DYNAMIC(CIrcChannelListCtrl)
+public:
+	CIrcChannelListCtrl();
+	virtual ~CIrcChannelListCtrl();
 
-	protected:
-		friend class CIrcWnd;
-		static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-		DECLARE_MESSAGE_MAP()
-		afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
-		afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-		afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
-		virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam );
-		CIrcWnd* m_pParent;
-		int m_iSortIndex;
-		bool m_bSortOrder;
-	private:
-		CPtrList m_ptrlistChannel;
+	void ResetServerChannelList(bool bShutdown = false);
+	bool AddChannelToList(const CString& sName, const CString& sUser, const CString& sDescription);
+	void JoinChannels();
+	void Localize();
+	void Init();
+
+protected:
+	friend class CIrcWnd;
+	CTypedPtrList<CPtrList, ChannelName*> m_lstChannelNames;
+	CIrcWnd* m_pParent;
+
+	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
+	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam );
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnNMDblClk(NMHDR *pNMHDR, LRESULT *pResult);
 };

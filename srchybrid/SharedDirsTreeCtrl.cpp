@@ -118,6 +118,7 @@ CSharedDirsTreeCtrl::~CSharedDirsTreeCtrl()
 void CSharedDirsTreeCtrl::Initalize(CSharedFilesCtrl* pSharedFilesCtrl){
 	m_pSharedFilesCtrl = pSharedFilesCtrl;
 	
+	// Win98: Explicitly set to Unicode to receive Unicode notifications.
 	SendMessage(CCM_SETUNICODEFORMAT, TRUE);
 
 	//WORD wWinVer = thePrefs.GetWindowsVersion();
@@ -145,7 +146,7 @@ void CSharedDirsTreeCtrl::SetAllIcons()
 	iml.Add(CTempIconLoader(_T("CATEGORY")));		// Cats
 	iml.Add(CTempIconLoader(_T("HARDDISK")));		// All Dirs
 	
-	CString strTempDir = thePrefs.GetIncomingDir();
+	CString strTempDir = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 	if (strTempDir.Right(1) != "\\"){
 		strTempDir += "\\";
 	}
@@ -338,7 +339,7 @@ void CSharedDirsTreeCtrl::FilterTreeReloadTree(){
 				//MORPH END   - Added, SharedView Ed2kType [Avi3]
 				break;
 			case SDI_INCOMING:{
-				CString strMainIncDir = thePrefs.GetIncomingDir();
+				CString strMainIncDir = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 				if (strMainIncDir.Right(1) == "\\"){
 					strMainIncDir = strMainIncDir.Left(strMainIncDir.GetLength()-1);
 				}
@@ -347,8 +348,8 @@ void CSharedDirsTreeCtrl::FilterTreeReloadTree(){
 					for (int i = 0; i < thePrefs.GetCatCount(); i++){
 						Category_Struct* pCatStruct = thePrefs.GetCategory(i);
 						if (pCatStruct != NULL){
-							CString strCatIncomingPath = pCatStruct->incomingpath;
-							if (strCatIncomingPath.Right(1) == "\\"){
+							CString strCatIncomingPath = pCatStruct->strIncomingPath;
+							if (strCatIncomingPath.Right(1) == _T("\\")){
 								strCatIncomingPath = strCatIncomingPath.Left(strCatIncomingPath.GetLength()-1);
 							}
 							if (!strCatIncomingPath.IsEmpty() && strCatIncomingPath.CompareNoCase(strMainIncDir) != 0
@@ -376,7 +377,7 @@ void CSharedDirsTreeCtrl::FilterTreeReloadTree(){
 						if (pCatStruct != NULL){
 							//temp dir
 							CDirectoryItem* pCatTemp = new CDirectoryItem(CString(""), 0, SDI_TEMP, i);
-							pCatTemp->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE, CString(pCatStruct->title), 3, 3, 0, 0, (LPARAM)pCatTemp, pCurrent->m_htItem, TVI_LAST);
+							pCatTemp->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE, pCatStruct->strTitle, 3, 3, 0, 0, (LPARAM)pCatTemp, pCurrent->m_htItem, TVI_LAST);
 							pCurrent->liSubDirectories.AddTail(pCatTemp);
 
 						}
@@ -1099,14 +1100,14 @@ void CSharedDirsTreeCtrl::Reload(bool bForce){
 			bChanged = true;
 
 		// check for changes in categories incoming dirs
-		CString strMainIncDir = thePrefs.GetIncomingDir();
+		CString strMainIncDir = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 		if (strMainIncDir.Right(1) == _T("\\"))
 			strMainIncDir = strMainIncDir.Left(strMainIncDir.GetLength()-1);
 		CStringList strliFound;
 		for (int i = 0; i < thePrefs.GetCatCount(); i++){
 			Category_Struct* pCatStruct = thePrefs.GetCategory(i);
 			if (pCatStruct != NULL){
-				CString strCatIncomingPath = pCatStruct->incomingpath;
+				CString strCatIncomingPath = pCatStruct->strIncomingPath;
 				if (strCatIncomingPath.Right(1) == _T("\\"))
 					strCatIncomingPath = strCatIncomingPath.Left(strCatIncomingPath.GetLength()-1);
 

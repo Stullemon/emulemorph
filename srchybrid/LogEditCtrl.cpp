@@ -395,7 +395,7 @@ void CLogEditCtrl::Reset(){
 		Invalidate();
 }
 
-void CLogEditCtrl::OnContextMenu(CWnd* pWnd, CPoint point){
+void CLogEditCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point){
 	int iSelStart, iSelEnd;
 	GetSel(iSelStart, iSelEnd);
 	int iTextLen = GetWindowTextLength();
@@ -413,7 +413,7 @@ void CLogEditCtrl::OnContextMenu(CWnd* pWnd, CPoint point){
 	m_LogMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
-BOOL CLogEditCtrl::OnCommand(WPARAM wParam, LPARAM lParam){
+BOOL CLogEditCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/){
 	switch (wParam) {
 	case MP_COPYSELECTED:
 		CopySelectedItems();
@@ -512,7 +512,7 @@ void CLogEditCtrl::OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags)
 	CEdit::OnKeyDown(nChar, nRepCnt, nFlags);
 }
 
-HBRUSH CLogEditCtrl::CtlColor(CDC* pDC, UINT nCtlColor)
+HBRUSH CLogEditCtrl::CtlColor(CDC* pDC, UINT /*nCtlColor*/)
 {
 	if (m_crForeground != CLR_DEFAULT)
 		pDC->SetTextColor(m_crForeground);

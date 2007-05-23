@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -52,6 +52,9 @@ class CAbstractFile;
 class CUpDownClient;
 class CPeerCacheFinder;
 class CFirewallOpener;
+#ifdef USE_OFFICIAL_UPNP
+class CUPnPFinder;
+#endif
 
 struct SLogItem;
 class CFakecheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
@@ -92,6 +95,9 @@ public:
 	CMMServer*			mmserver;
 	CPeerCacheFinder*	m_pPeerCache;
 	CFirewallOpener*	m_pFirewallOpener;
+#ifdef USE_OFFICIAL_UPNP
+	CUPnPFinder*		m_pUPnPFinder;
+#endif
 
 	CFakecheck*			FakeCheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	CPPgBackup*			ppgbackup; //EastShare - Added by Pretender, TBH-AutoBackup
@@ -104,6 +110,7 @@ public:
 	CFont				m_fontDefaultBold;
 	CFont				m_fontSymbol;
 	CFont				m_fontLog;
+	CFont				m_fontChatEdit;
 	CBrush				m_brushBackwardDiagonal;
 	static const UINT	m_nVersionMjr;
 	static const UINT	m_nVersionMin;
@@ -138,6 +145,7 @@ public:
 // Implementierung
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
+	virtual BOOL IsIdleMessage(MSG *pMsg);
 
 	// ed2k link functions
 	void		AddEd2kLinksToDownload(CString strLinks, int cat);
@@ -165,9 +173,11 @@ public:
 	void		OnlineSig();
 	void		UpdateReceivedBytes(uint32 bytesToAdd);
 	void		UpdateSentBytes(uint32 bytesToAdd, bool sentToFriend = false);
-	int			GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength = -1);
+	int			GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength = -1, bool bNormalsSize = false);
 	HIMAGELIST	GetSystemImageList() { return m_hSystemImageList; }
+	HIMAGELIST	GetBigSystemImageList() { return m_hBigSystemImageList; }
 	CSize		GetSmallSytemIconSize() { return m_sizSmallSystemIcon; }
+	CSize		GetBigSytemIconSize() { return m_sizBigSystemIcon; }
 	void		CreateBackwardDiagonalBrush();
 	void		CreateAllFonts();
 	bool		IsPortchangeAllowed();
@@ -222,6 +232,10 @@ protected:
 	HIMAGELIST m_hSystemImageList;
 	CMapStringToPtr m_aExtToSysImgIdx;
 	CSize m_sizSmallSystemIcon;
+
+	HIMAGELIST m_hBigSystemImageList;
+	CMapStringToPtr m_aBigExtToSysImgIdx;
+	CSize m_sizBigSystemIcon;
 
 	bool		m_bGuardClipboardPrompt;
 	CString		m_strLastClipboardContents;

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -17,6 +17,7 @@
 #pragma once
 #include "ClosableTabCtrl.h"
 
+class CChatWnd;
 class CHTRichEditCtrl;
 class CUpDownClient;
 
@@ -50,12 +51,12 @@ public:
 	CChatSelector();
 	virtual	~CChatSelector();
 
-	void		Init();
-	void		Localize(void);
+	void		Init(CChatWnd *pParent);
 	CChatItem*	StartSession(CUpDownClient* client, bool show = true);
 	void		EndSession(CUpDownClient* client = 0);
 	int			GetTabByClient(CUpDownClient* client);
 	CChatItem*	GetItemByClient(CUpDownClient* client);
+	CChatItem*	GetItemByIndex(int index);
 	void		ProcessMessage(CUpDownClient* sender, const CString& message);
 	bool		SendMessage(const CString& rstrMessage);
 	void		DeleteAllItems();
@@ -65,41 +66,33 @@ public:
 	void		UpdateFonts(CFont* pFont);
 	CChatItem*	GetCurrentChatItem();
 	BOOL		RemoveItem(int nItem) { return DeleteItem(nItem); }
+	void		EnableSmileys(bool bEnable);
 
 protected:
-	DECLARE_MESSAGE_MAP()
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnDestroy();
-	afx_msg void OnTimer(UINT_PTR nIDEvent);
-	afx_msg void OnTcnSelchangeChatsel(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnBnClickedCsend();
-	afx_msg void OnBnClickedCclose();
-	afx_msg void OnSysColorChange();
-	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
-
-	virtual BOOL PreTranslateMessage(MSG* pMsg);
-	virtual int InsertItem(int nItem, TCITEM* pTabCtrlItem);
-	virtual BOOL DeleteItem(int nItem);
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam); 
+	CChatWnd	*m_pParent;
+	UINT_PTR	m_Timer;
+	bool		m_blinkstate;
+	bool		m_lastemptyicon;
+	CImageList	m_imlChat;
+	int			m_iContextIndex;
 
 	void AddTimeStamp(CChatItem*);
 	bool IsSpam(CString strMessage, CUpDownClient* client);
 	void SetAllIcons();
 	void GetChatSize(CRect& rcChat);
 
-private:
-	UINT_PTR m_Timer;
-	bool m_blinkstate;
-	bool m_lastemptyicon;
-	HWND m_hwndMessageBox;
-	HWND m_hwndCloseBtn;
-	HWND m_hwndSendBtn;
-	CImageList m_imlChat;
+	virtual int InsertItem(int nItem, TCITEM* pTabCtrlItem);
+	virtual BOOL DeleteItem(int nItem);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
-//MORPH WiZaRd::Context-FiX START
-public:
-	CChatItem* GetChatItemUnderMouse(); 
-private:
-	CChatItem* m_contextItem;
-//MORPH WiZaRd::Context-FiX END
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	afx_msg void OnDestroy();
+	afx_msg void OnTimer(UINT_PTR nIDEvent);
+	afx_msg void OnTcnSelChangeChatSel(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnBnClickedCsend();
+	afx_msg void OnBnClickedCclose();
+	afx_msg void OnBnClickedSmiley();
+	afx_msg void OnSysColorChange();
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 };

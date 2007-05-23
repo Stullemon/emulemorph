@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -115,13 +115,9 @@ void CPPgDisplay::LoadSettings(void)
 	CheckDlgButton(IDC_SHOWDWLPERCENT,(UINT)thePrefs.GetUseDwlPercentage() );
 	CheckDlgButton(IDC_CLEARCOMPL, (uint8)thePrefs.GetRemoveFinishedDownloads());
 	CheckDlgButton(IDC_SHOWTRANSTOOLBAR, (uint8)thePrefs.IsTransToolbarEnabled());
-
 	CheckDlgButton(IDC_DISABLEHIST, (uint8)thePrefs.GetUseAutocompletion());
 
-	CString strBuffer;
-	strBuffer.Format(_T("%u"), thePrefs.m_iToolDelayTime);
-	GetDlgItem(IDC_TOOLTIPDELAY)->SetWindowText(strBuffer);
-
+	SetDlgItemInt(IDC_TOOLTIPDELAY, thePrefs.m_iToolDelayTime, FALSE);
 }
 
 BOOL CPPgDisplay::OnInitDialog()
@@ -168,44 +164,24 @@ BOOL CPPgDisplay::OnApply()
 	else
 		thePrefs.showRatesInTitle= false;
 
-	bool flag = thePrefs.m_bDisableKnownClientList;
+	thePrefs.ShowCatTabInfos(IsDlgButtonChecked(IDC_SHOWCATINFO) != 0);
+	if (!thePrefs.ShowCatTabInfos())
+		theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 
+	bool bListDisabled = false;
 	bool bResetToolbar = false;
-	bResetToolbar |= (IsDlgButtonChecked(IDC_DISABLEKNOWNLIST) != 0) != thePrefs.m_bDisableKnownClientList;
-	if(IsDlgButtonChecked(IDC_DISABLEKNOWNLIST))
-		thePrefs.m_bDisableKnownClientList = true;
-	else
-		thePrefs.m_bDisableKnownClientList = false;
-
-	thePrefs.ShowCatTabInfos(IsDlgButtonChecked(IDC_SHOWCATINFO)!=0);
-	if (!thePrefs.ShowCatTabInfos()) theApp.emuledlg->transferwnd->UpdateCatTabTitles();
-
-
-	if( flag != thePrefs.m_bDisableKnownClientList){
-		if( !flag ){
-			theApp.emuledlg->transferwnd->clientlistctrl.DeleteAllItems();
-			theApp.emuledlg->transferwnd->SwitchUploadList();
-		}
-		else
-			theApp.emuledlg->transferwnd->clientlistctrl.ShowKnownClients();
+	if (thePrefs.m_bDisableKnownClientList != (IsDlgButtonChecked(IDC_DISABLEKNOWNLIST) != 0)) {
+		thePrefs.m_bDisableKnownClientList = (IsDlgButtonChecked(IDC_DISABLEKNOWNLIST) != 0);
+		if (thePrefs.m_bDisableKnownClientList)
+			bListDisabled = true;
+		bResetToolbar = true;
 	}
 
-	flag = thePrefs.m_bDisableQueueList;
-
-
-	bResetToolbar |= (IsDlgButtonChecked(IDC_DISABLEQUEUELIST) != 0) != thePrefs.m_bDisableQueueList;
-	if(IsDlgButtonChecked(IDC_DISABLEQUEUELIST))
-		thePrefs.m_bDisableQueueList = true;
-	else
-		thePrefs.m_bDisableQueueList = false;
-
-	if( flag != thePrefs.m_bDisableQueueList){
-		if( !flag ){
-			theApp.emuledlg->transferwnd->queuelistctrl.DeleteAllItems();
-			theApp.emuledlg->transferwnd->SwitchUploadList();
-		}
-		else
-			theApp.emuledlg->transferwnd->queuelistctrl.ShowQueueClients();
+	if (thePrefs.m_bDisableQueueList != (IsDlgButtonChecked(IDC_DISABLEQUEUELIST) != 0)) {
+		thePrefs.m_bDisableQueueList = (IsDlgButtonChecked(IDC_DISABLEQUEUELIST) != 0);
+		if (thePrefs.m_bDisableQueueList)
+			bListDisabled = true;
+		bResetToolbar = true;
 	}
 
 	GetDlgItem(IDC_TOOLTIPDELAY)->GetWindowText(buffer,20);
@@ -213,14 +189,16 @@ BOOL CPPgDisplay::OnApply()
 		thePrefs.m_iToolDelayTime = 32;
 	else
 		thePrefs.m_iToolDelayTime = _tstoi(buffer);
+	theApp.emuledlg->SetToolTipsDelay(thePrefs.GetToolTipDelay()*1000);
+
 	// MORPH START leuk_he tooltipped
 	m_Tip.SetDelayTime(TTDT_INITIAL,thePrefs.m_iToolDelayTime*1000);
 	// MORPH END leuk_he tooltipped
 	
-	theApp.emuledlg->transferwnd->SetToolTipsDelay(thePrefs.GetToolTipDelay()*1000);
-	theApp.emuledlg->searchwnd->SetToolTipsDelay(thePrefs.GetToolTipDelay()*1000);
 	theApp.emuledlg->transferwnd->downloadlistctrl.SetStyle();
 
+	if (bListDisabled)
+		theApp.emuledlg->transferwnd->OnDisableList();
 	if ((IsDlgButtonChecked(IDC_SHOWTRANSTOOLBAR) != 0) != thePrefs.IsTransToolbarEnabled()){
 		thePrefs.m_bWinaTransToolbar = !thePrefs.m_bWinaTransToolbar;
 		theApp.emuledlg->transferwnd->ResetTransToolbar(thePrefs.m_bWinaTransToolbar);
@@ -233,15 +211,16 @@ BOOL CPPgDisplay::OnApply()
 
 	if (mintotray_old != thePrefs.mintotray)
 		theApp.emuledlg->TrayMinimizeToTrayChange();
-	if (!thePrefs.ShowRatesOnTitle()) {
-		//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+	if (!thePrefs.ShowRatesOnTitle())
+	//MORPH START - Changed by SiRoB, [itsonlyme: -modname-]
+	{
 		/*
-		_stprintf(buffer,_T("eMule v%s"),theApp.m_strCurVersionLong);
+		theApp.emuledlg->SetWindowText(_T("eMule v") + theApp.m_strCurVersionLong);
 		*/
 		_stprintf(buffer,_T("eMule v%s [%s]"),theApp.m_strCurVersionLong,theApp.m_strModLongVersion);
-		//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 		theApp.emuledlg->SetWindowText(buffer);
 	}
+	//MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 
 
 	SetModified(FALSE);
@@ -394,7 +373,8 @@ void CPPgDisplay::OnBnClickedSelectHypertextFont()
 	_pThis = NULL;
 }
 
-void CPPgDisplay::OnBtnClickedResetHist() {
+void CPPgDisplay::OnBtnClickedResetHist()
+{
 	theApp.emuledlg->searchwnd->ResetHistory();
 	theApp.emuledlg->serverwnd->ResetHistory();
 }

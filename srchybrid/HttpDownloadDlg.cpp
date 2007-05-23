@@ -417,13 +417,14 @@ void CHttpDownloadDlg::PlayAnimation()
 
 void CHttpDownloadDlg::HandleThreadErrorWithLastError(CString strIDError, DWORD dwLastError)
 {
-	//Form the error string to report
-	CString sError;
-	if (dwLastError)
-		sError.Format(_T("%d"), dwLastError);
+	if (dwLastError == 0)
+		dwLastError = GetLastError();
+	CString strLastError;
+	if (dwLastError >= INTERNET_ERROR_BASE && dwLastError <= INTERNET_ERROR_LAST)
+		GetModuleErrorString(dwLastError, strLastError, _T("wininet"));
 	else
-		sError.Format(_T("%d"), ::GetLastError());
-	m_sError.Format(strIDError, sError);
+		GetSystemErrorString(dwLastError, strLastError);
+	m_sError.Format(strIDError, _T(" ") + strLastError);
 
 	//Delete the file being downloaded to if it is present
 	m_FileToWrite.Close();

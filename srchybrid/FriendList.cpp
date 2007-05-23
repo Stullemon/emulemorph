@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -51,7 +51,7 @@ CFriendList::~CFriendList()
 }
 
 bool CFriendList::LoadList(){
-	CString strFileName = thePrefs.GetConfigDir() + EMFRIENDS_MET_FILENAME;
+	CString strFileName = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + EMFRIENDS_MET_FILENAME;
 	CSafeBufferedFile file;
 	CFileException fexp;
 	if (!file.Open(strFileName, CFile::modeRead | CFile::osSequentialScan | CFile::typeBinary | CFile::shareDenyWrite, &fexp)){
@@ -101,7 +101,7 @@ void CFriendList::SaveList(){
 		AddDebugLogLine(false, _T("Saving friends list file \"%s\""), EMFRIENDS_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount();
 
-	CString strFileName = thePrefs.GetConfigDir() + EMFRIENDS_MET_FILENAME;
+	CString strFileName = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + EMFRIENDS_MET_FILENAME;
 	CSafeBufferedFile file;
 	CFileException fexp;
 	if (!file.Open(strFileName, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary | CFile::shareDenyWrite, &fexp)){
@@ -146,13 +146,13 @@ CFriend* CFriendList::SearchFriend(const uchar* abyUserHash, uint32 dwIP, uint16
 		CFriend* cur_friend = m_listFriends.GetNext(pos);
 		// to avoid that unwanted clients become a friend, we have to distinguish between friends with
 		// a userhash and of friends which are identified by IP+port only.
-		if (cur_friend->m_dwHasHash){
+		if (abyUserHash != NULL && cur_friend->HasUserhash()){
 			// check for a friend which has the same userhash as the specified one
 			if (!md4cmp(cur_friend->m_abyUserhash, abyUserHash))
 				return cur_friend;
 		}
 		else{
-			if (cur_friend->m_dwLastUsedIP == dwIP && cur_friend->m_nLastUsedPort == nPort)
+			if (cur_friend->m_dwLastUsedIP == dwIP && dwIP != 0 && cur_friend->m_nLastUsedPort == nPort && nPort != 0)
 				return cur_friend;
 		}
 	}
@@ -182,7 +182,7 @@ bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 
 	// TODO: check if this can be switched to a hybridID so clients with *.*.*.0 can be added..
 	if (IsLowID(dwLastUsedIP) && dwHasHash==0)
 		return false;
-	if( dwLastUsedIP && IsAlreadyFriend(dwLastUsedIP, nLastUsedPort))
+	if (SearchFriend(abyUserhash, dwLastUsedIP, nLastUsedPort) != NULL)
 		return false;
 	CFriend* Record = new CFriend( abyUserhash, dwLastSeen, dwLastUsedIP, nLastUsedPort, dwLastChatted, pszName, dwHasHash );
 	m_listFriends.AddTail(Record);
@@ -202,16 +202,15 @@ bool CFriendList::AddFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 
 		#endif
 	}
 	// [end] Mighty Knife
-
 	return true;
 }
 
-// Added for the friends function in the IRC..
-bool CFriendList::IsAlreadyFriend(uint32 dwLastUsedIP, uint32 nLastUsedPort) const
+
+bool CFriendList::IsAlreadyFriend(CString strUserHash) const
 {
 	for (POSITION pos = m_listFriends.GetHeadPosition();pos != 0;){
 		const CFriend* cur_friend = m_listFriends.GetNext(pos);
-		if (cur_friend->m_dwLastUsedIP == dwLastUsedIP && cur_friend->m_nLastUsedPort == nLastUsedPort)
+		if (cur_friend->HasUserhash() && strUserHash.Compare(md4str(cur_friend->m_abyUserhash)) == 0)
 			return true;
 	}
 	return false;
@@ -223,6 +222,9 @@ bool CFriendList::AddFriend(CUpDownClient* toadd){
 	// client must have an IP (HighID) or a hash
 	if (toadd->HasLowID() && !toadd->HasValidHash())
 		return false;
+	if (SearchFriend(toadd->GetUserHash(), toadd->GetIP(), toadd->GetUserPort()) != NULL)
+		return false;
+
 	CFriend* NewFriend = new CFriend(toadd);
 	toadd->m_Friend = NewFriend;
 	m_listFriends.AddTail(NewFriend);

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -174,7 +174,7 @@ void CUpDownClient::Init()
 	m_dwLastBlockReceived = 0;
 	m_byDataCompVer = 0;
 	m_byUDPVer = 0;
-	m_bySourceExchangeVer = 0;
+	m_bySourceExchange1Ver = 0;
 	m_byAcceptCommentVer = 0;
 	m_byExtendedRequestsVer = 0;
 	m_nRemoteQueueRank = 0;
@@ -291,6 +291,7 @@ void CUpDownClient::Init()
 	m_fRequestsCryptLayer = 0;
 	m_fSupportsCryptLayer = 0;
 	m_fRequiresCryptLayer = 0;
+	m_fSupportsSourceEx2 = 0;
 
 	m_fFailedDownload = 0; //MORPH - Added by SiRoB, Fix Connection Collision
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
@@ -349,10 +350,11 @@ CUpDownClient::~CUpDownClient(){
 		m_fAICHRequested = FALSE;
 		CAICHHashSet::ClientAICHRequestFailed(this);
 	}
+	if (m_Friend)
+        m_Friend->SetLinkedClient(NULL);
 
 	theApp.clientlist->RemoveClient(this, _T("Destructing client object"));
-	if (m_Friend)
-		m_Friend->SetLinkedClient(NULL);
+
 	if (socket){
 		socket->client = 0;
 		socket->Safe_Delete();
@@ -500,7 +502,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("!FREEANGEL!")) ||
 			StrStrI(m_strModVersion,_T("          ")) ||
 			m_strModVersion.IsEmpty() == false && StrStrI(m_strClientSoftware,_T("edonkey"))||
-			((GetVersion()>589) && (GetSourceExchangeVersion()>0) && (GetClientSoft()==51)) //LSD, edonkey user with eMule property
+			((GetVersion()>589) && (GetSourceExchange1Version()>0) && (GetClientSoft()==51)) //LSD, edonkey user with eMule property
 			)
 		{
 			old_m_strClientSoftware = m_strClientSoftware;
@@ -561,7 +563,7 @@ void CUpDownClient::ClearHelloProperties()
 	m_byUDPVer = 0;
 	m_byDataCompVer = 0;
 	m_byEmuleVersion = 0;
-	m_bySourceExchangeVer = 0;
+	m_bySourceExchange1Ver = 0;
 	m_byAcceptCommentVer = 0;
 	m_byExtendedRequestsVer = 0;
 	m_byCompatibleClient = 0;
@@ -580,6 +582,7 @@ void CUpDownClient::ClearHelloProperties()
 	m_fRequestsCryptLayer = 0;
 	m_fSupportsCryptLayer = 0;
 	m_fRequiresCryptLayer = 0;
+	m_fSupportsSourceEx2 = 0;
 }
 
 bool CUpDownClient::ProcessHelloPacket(const uchar* pachPacket, uint32 nSize)
@@ -838,7 +841,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				//  4 UDP version
 				//  4 Data compression version
 				//  4 Secure Ident
-				//  4 Source Exchange
+				//  4 Source Exchange - deprecated
 				//  4 Ext. Requests
 				//  4 Comments
 				//	1 PeerChache supported
@@ -851,7 +854,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_byUDPVer				= (uint8)((temptag.GetInt() >> 24) & 0x0f);
 					m_byDataCompVer			= (uint8)((temptag.GetInt() >> 20) & 0x0f);
 					m_bySupportSecIdent		= (uint8)((temptag.GetInt() >> 16) & 0x0f);
-					m_bySourceExchangeVer	= (uint8)((temptag.GetInt() >> 12) & 0x0f);
+					m_bySourceExchange1Ver	= (uint8)((temptag.GetInt() >> 12) & 0x0f);
 					m_byExtendedRequestsVer	= (uint8)((temptag.GetInt() >>  8) & 0x0f);
 					m_byAcceptCommentVer	= (uint8)((temptag.GetInt() >>  4) & 0x0f);
 					m_fPeerCache			= (temptag.GetInt() >>  3) & 0x01;
@@ -862,7 +865,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					if (bDbgInfo){
 						m_strHelloInfo.AppendFormat(_T("\n  PeerCache=%u  UDPVer=%u  DataComp=%u  SecIdent=%u  SrcExchg=%u")
 												_T("  ExtReq=%u  Commnt=%u  Preview=%u  NoViewFiles=%u  Unicode=%u"), 
-												m_fPeerCache, m_byUDPVer, m_byDataCompVer, m_bySupportSecIdent, m_bySourceExchangeVer, 
+													m_fPeerCache, m_byUDPVer, m_byDataCompVer, m_bySupportSecIdent, m_bySourceExchange1Ver, 
 												m_byExtendedRequestsVer, m_byAcceptCommentVer, m_fSupportsPreview, m_fNoViewSharedFiles, m_bUnicodeSupport);
 					}
 				}
@@ -878,7 +881,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 
 			case CT_EMULE_MISCOPTIONS2:
-				//	22 Reserved
+				//	21 Reserved
+				//	 1 Supports SourceExachnge2 Packets, ignores SX1 Packet Version
 				//	 1 Requires CryptLayer
 				//	 1 Requests CryptLayer
 				//	 1 Supports CryptLayer
@@ -887,6 +891,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				//   1 Large Files (includes support for 64bit tags)
 				//   4 Kad Version
 				if (temptag.IsInt()) {
+					m_fSupportsSourceEx2	= (temptag.GetInt() >>  10) & 0x01;
 					m_fRequiresCryptLayer	= (temptag.GetInt() >>  9) & 0x01;
 					m_fRequestsCryptLayer	= (temptag.GetInt() >>  8) & 0x01;
 					m_fSupportsCryptLayer	= (temptag.GetInt() >>  7) & 0x01;
@@ -896,7 +901,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_byKadVersion			= (uint8)((temptag.GetInt() >>  0) & 0x0f);
 					dwEmuleTags |= 8;
 					if (bDbgInfo)
-						m_strHelloInfo.AppendFormat(_T("\n  KadVersion=%u, LargeFiles=%u ExtMultiPacket=%u CryptLayerSupport=%u CryptLayerRequest=%u CryptLayerRequires=%u"), m_byKadVersion, m_fSupportsLargeFiles, m_fExtMultiPacket, m_fSupportsCryptLayer, m_fRequestsCryptLayer, m_fRequiresCryptLayer);
+						m_strHelloInfo.AppendFormat(_T("\n  KadVersion=%u, LargeFiles=%u ExtMultiPacket=%u CryptLayerSupport=%u CryptLayerRequest=%u CryptLayerRequires=%u m_fSupportsSourceEx2=%u"), m_byKadVersion, m_fSupportsLargeFiles, m_fExtMultiPacket, m_fSupportsCryptLayer, m_fRequestsCryptLayer, m_fRequiresCryptLayer, m_fSupportsSourceEx2);
 					m_fRequestsCryptLayer &= m_fSupportsCryptLayer;
 					m_fRequiresCryptLayer &= m_fRequestsCryptLayer;
 
@@ -1230,7 +1235,7 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 			m_byUDPVer = 1;
 
 		if(m_byEmuleVersion < 0x25 && m_byEmuleVersion > 0x21)
-			m_bySourceExchangeVer = 1;
+			m_bySourceExchange1Ver = 1;
 
 		if(m_byEmuleVersion == 0x24)
 			m_byAcceptCommentVer = 1;
@@ -1318,7 +1323,7 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 				// Bits 31- 8: 0 - reserved
 				// Bits  7- 0: source exchange protocol version
 				if (temptag.IsInt()) {
-					m_bySourceExchangeVer = (uint8)temptag.GetInt();
+					m_bySourceExchange1Ver = (uint8)temptag.GetInt();
 					if (bDbgInfo)
 						m_strMuleInfo.AppendFormat(_T("\n  SrcExch=%u"), (UINT)temptag.GetInt());
 				}
@@ -1483,7 +1488,7 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 		}
 	}
 	if( m_byDataCompVer == 0 ){
-		m_bySourceExchangeVer = 0;
+		m_bySourceExchange1Ver = 0;
 		m_byExtendedRequestsVer = 0;
 		m_byAcceptCommentVer = 0;
 		m_nUDPPort = 0;
@@ -1598,7 +1603,11 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	const UINT uUdpVer				= 4;
 	const UINT uDataCompVer			= 1;
 	const UINT uSupportSecIdent		= theApp.clientcredits->CryptoAvailable() ? 3 : 0;
-	const UINT uSourceExchangeVer	= 4;
+	// ***
+	// deprecated - will be set back to 3 with the next release (to allow the new version to spread first),
+	// due to a bug in earlier eMule version. Use SupportsSourceEx2 and new opcodes instead
+	const UINT uSourceExchange1Ver	= 4;
+	// ***
 	const UINT uExtendedRequestsVer	= 2;
 	const UINT uAcceptCommentVer	= 1;
 	const UINT uNoViewSharedFiles	= (thePrefs.CanSeeShares() == vsfaNobody) ? 1 : 0; // for backward compatibility this has to be a 'negative' flag
@@ -1613,7 +1622,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 				(uUdpVer				<< 24) |
 				(uDataCompVer			<< 20) |
 				(uSupportSecIdent		<< 16) |
-				(uSourceExchangeVer		<< 12) |
+				(uSourceExchange1Ver	<< 12) |
 				(uExtendedRequestsVer	<<  8) |
 				(uAcceptCommentVer		<<  4) |
 				(uPeerCache				<<  3) |
@@ -1631,9 +1640,11 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	const UINT uSupportsCryptLayer	= thePrefs.IsClientCryptLayerSupported() ? 1 : 0;
 	const UINT uRequestsCryptLayer	= thePrefs.IsClientCryptLayerRequested() ? 1 : 0;
 	const UINT uRequiresCryptLayer	= thePrefs.IsClientCryptLayerRequired() ? 1 : 0;
+	const UINT uSupportsSourceEx2	= 1;
 
 	CTag tagMisOptions2(CT_EMULE_MISCOPTIONS2, 
 //				(RESERVED				     ) 
+				(uSupportsSourceEx2		<< 10) |
 				(uRequiresCryptLayer	<<  9) |
 				(uRequestsCryptLayer	<<  8) |
 				(uSupportsCryptLayer	<<  7) |
@@ -2159,7 +2170,8 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 							Packet* packet = new Packet(&bio, OP_KADEMLIAHEADER);
 							packet->opcode = KADEMLIA_CALLBACK_REQ;
 							theStats.AddUpDataOverheadKad(packet->size);
-							theApp.clientudp->SendPacket(packet, GetBuddyIP(), GetBuddyPort(), false, NULL);  // kad doesnt supports obfuscation yet
+						// FIXME: We dont know which kadversion the buddy has, so we need to send unencrypted
+						theApp.clientudp->SendPacket(packet, GetBuddyIP(), GetBuddyPort(), false, NULL, true, 0);
 							SetDownloadState(DS_WAITCALLBACKKAD);
 						}
 						else
@@ -3041,7 +3053,7 @@ void CUpDownClient::AssertValid() const
 	(void)m_nUDPPort;
 	(void)m_nKadPort;
 	(void)m_byUDPVer;
-	(void)m_bySourceExchangeVer;
+	(void)m_bySourceExchange1Ver;
 	(void)m_byAcceptCommentVer;
 	(void)m_byExtendedRequestsVer;
 	CHECK_BOOL(m_bFriendSlot);

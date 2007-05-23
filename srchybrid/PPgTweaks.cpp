@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -112,7 +112,9 @@ CPPgTweaks::CPPgTweaks()
     m_bA4AFSaveCpu = false;
 	m_iExtractMetaData = 0;
 	m_bAutoArchDisable=true;
+	m_iShareeMule = 0;
 
+	bShowedWarning = false;
 	m_bInitializedTreeOpts = false;
 	m_htiTCPGroup = NULL;
 	m_htiMaxCon5Sec = NULL;
@@ -170,6 +172,10 @@ CPPgTweaks::CPPgTweaks()
 	m_htiLogA4AF = NULL;
 	m_htiExtractMetaData = NULL;
 	m_htiAutoArch = NULL;
+	m_htiShareeMule = NULL;
+	m_htiShareeMuleMultiUser = NULL;
+	m_htiShareeMulePublicUser = NULL;
+	m_htiShareeMuleOldStyle = NULL;
 
 	// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	m_bLogUPnP = false;
@@ -258,6 +264,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		int iImgConnection = 8;
 		int iImgA4AF = 8;
 		int iImgMetaData = 8;
+		int iImgShareeMule = 8;
 		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
 			iImgBackup = piml->Add(CTempIconLoader(_T("Harddisk")));
@@ -266,6 +273,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 			iImgConnection=	piml->Add(CTempIconLoader(_T("connection")));
             iImgA4AF =		piml->Add(CTempIconLoader(_T("Download")));
             iImgMetaData =	piml->Add(CTempIconLoader(_T("MediaInfo")));
+			iImgShareeMule =piml->Add(CTempIconLoader(_T("viewfiles")));
 		}
 
 		/////////////////////////////////////////////////////////////////////////////
@@ -370,6 +378,16 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
         m_htiDynUpNumberOfPings = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_NUMBEROFPINGS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
 		m_ctrlTreeOptions.AddEditBox(m_htiDynUpNumberOfPings, RUNTIME_CLASS(CNumTreeOptionsEdit));
 
+		/////////////////////////////////////////////////////////////////////////////
+		// eMule Shared User
+		//
+		m_htiShareeMule = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SHAREEMULELABEL), iImgShareeMule, TVI_ROOT);
+		m_htiShareeMuleMultiUser = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SHAREEMULEMULTI), m_htiShareeMule, m_iCommitFiles == 0);
+		m_htiShareeMulePublicUser = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SHAREEMULEPUBLIC), m_htiShareeMule, m_iCommitFiles == 1);
+		m_htiShareeMuleOldStyle = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SHAREEMULEOLD), m_htiShareeMule, m_iCommitFiles == 2);
+
+		
+
 		//MORPH START leuk_he Advanced official preferences.
 		m_hti_advanced = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_ADVANCEDPREFS), iImgLog, TVI_ROOT);
 		m_hti_bMiniMuleAutoClose=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MINIMULEAUTOCLOSE),m_hti_advanced,bMiniMuleAutoClose);
@@ -450,6 +468,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.Expand(m_htiDynUp, TVE_EXPAND);
         m_ctrlTreeOptions.Expand(m_htiDynUpPingToleranceGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiExtractMetaData, TVE_EXPAND);
+		m_ctrlTreeOptions.Expand(m_htiShareeMule, TVE_EXPAND);
 		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
         m_bInitializedTreeOpts = true;
 	}
@@ -477,7 +496,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 	/* Moved to PPgEmulespana
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFirewallStartup, m_bFirewallStartup);
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiFirewallStartup, thePrefs.GetWindowsVersion() == _WINVER_XP_);
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiFirewallStartup, thePrefs.GetWindowsVersion() == _WINVER_XP_ && IsRunningXPSP2() == 0);
 	*/
 	// End emulEspaña
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFilterLANIPs, m_bFilterLANIPs);
@@ -491,6 +510,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	// File related group
 	//
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiSparsePartFiles, m_bSparsePartFiles);
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiSparsePartFiles, thePrefs.GetWindowsVersion() != _WINVER_VISTA_);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFullAlloc, m_bFullAlloc);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCheckDiskspace, m_bCheckDiskspace);
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiMinFreeDiskSpace, m_fMinFreeDiskSpaceMB);
@@ -602,6 +622,13 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if(m_hti_DebugSearchResultDetailLevel) DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_DebugSearchResultDetailLevel,m_iDebugSearchResultDetailLevel); //TODO: check string for ip
     // MORPH END  leuk_he Advanced official preferences.
 
+	/////////////////////////////////////////////////////////////////////////////
+	// eMule Shared User
+	//
+	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiShareeMule, m_iShareeMule);
+	m_ctrlTreeOptions.SetRadioButtonEnable(m_htiShareeMulePublicUser, thePrefs.GetWindowsVersion() == _WINVER_VISTA_);
+	m_ctrlTreeOptions.SetRadioButtonEnable(m_htiShareeMuleMultiUser, thePrefs.GetWindowsVersion() != _WINVER_95_ 
+		&&thePrefs.GetWindowsVersion() != _WINVER_NT4_);
 }
 
 BOOL CPPgTweaks::OnInitDialog()
@@ -646,7 +673,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	else 
 		m_dwBindAddr = 0;
    //MORPH END leuk_he bindaddr 
-	m_bSparsePartFiles = thePrefs.m_bSparsePartFiles;
+	m_bSparsePartFiles = thePrefs.GetSparsePartFiles();
 	m_bFullAlloc= thePrefs.m_bAllocFull;
 	m_bCheckDiskspace = thePrefs.checkDiskspace;
 	m_fMinFreeDiskSpaceMB = (float)(thePrefs.m_uMinFreeDiskSpace / (1024.0 * 1024.0));
@@ -667,6 +694,9 @@ BOOL CPPgTweaks::OnInitDialog()
     m_iDynUpGoingUpDivider = thePrefs.GetDynUpGoingUpDivider();
     m_iDynUpGoingDownDivider = thePrefs.GetDynUpGoingDownDivider();
     m_iDynUpNumberOfPings = thePrefs.GetDynUpNumberOfPings();
+
+
+	m_iShareeMule = thePrefs.m_nCurrentUserDirMode;
 
     m_bA4AFSaveCpu = thePrefs.GetA4AFSaveCpu();
 
@@ -783,8 +813,8 @@ BOOL CPPgTweaks::OnApply()
 
 		//reset path
 		// Mighty Knife: log files are places in the "log" folder
-		VERIFY( theLog.SetFilePath(thePrefs.GetLogDir() + _T("eMule.log")) );
-		VERIFY( theVerboseLog.SetFilePath(thePrefs.GetLogDir() + _T("eMule_Verbose.log")) );
+		VERIFY( theLog.SetFilePath(thePrefs.GetMuleDirectory(EMULE_LOGDIR) + _T("eMule.log")) );
+		VERIFY( theVerboseLog.SetFilePath(thePrefs.GetMuleDirectory(EMULE_LOGDIR) + _T("eMule_Verbose.log")) );
 		// [end] Mighty Knife
 
 		//open log again
@@ -868,6 +898,9 @@ BOOL CPPgTweaks::OnApply()
     thePrefs.m_iDynUpNumberOfPings = m_iDynUpNumberOfPings;
 	thePrefs.m_bAutomaticArcPreviewStart = !m_bAutoArchDisable;
 
+
+	thePrefs.ChangeUserDirMode(m_iShareeMule);
+
     thePrefs.m_bA4AFSaveCpu = m_bA4AFSaveCpu;
 	//MORPH START leuk_he Advanced official preferences.
 	thePrefs.bMiniMuleAutoClose=bMiniMuleAutoClose;
@@ -891,8 +924,8 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bRTLWindowsLayout=m_bRTLWindowsLayout;
 	thePrefs.m_bPreviewOnIconDblClk=m_bPreviewOnIconDblClk;
 	thePrefs.sInternetSecurityZone=sInternetSecurityZone;
-	_tcsncpy(thePrefs.TxtEditor,sTxtEditor,MAX_PATH);
-	_tcsncpy(thePrefs.datetimeformat,sdatetimeformat,63); // 63 or 64?
+	thePrefs.m_strTxtEditor=sTxtEditor;
+	thePrefs.m_strDateTimeFormat=sdatetimeformat;
 	thePrefs.nServerUDPPort=(uint16) iServerUDPPort; 
 	thePrefs.m_bRemove2bin=m_bRemoveFilesToBin;
 	thePrefs.m_bHighresTimer=m_bHighresTimer;
@@ -1014,6 +1047,11 @@ void CPPgTweaks::Localize(void)
 	if (m_htiA4AFSaveCpu) m_ctrlTreeOptions.SetItemText(m_htiA4AFSaveCpu, GetResString(IDS_A4AF_SAVE_CPU));
         if (m_htiFullAlloc) m_ctrlTreeOptions.SetItemText(m_htiFullAlloc, GetResString(IDS_FULLALLOC));
 		if (m_htiAutoArch) m_ctrlTreeOptions.SetItemText(m_htiAutoArch, GetResString(IDS_DISABLE_AUTOARCHPREV));
+		if (m_htiShareeMule) m_ctrlTreeOptions.SetItemText(m_htiShareeMule, GetResString(IDS_SHAREEMULELABEL));
+		if (m_htiShareeMuleMultiUser) m_ctrlTreeOptions.SetItemText(m_htiShareeMuleMultiUser, GetResString(IDS_SHAREEMULEMULTI));
+		if (m_htiShareeMulePublicUser) m_ctrlTreeOptions.SetItemText(m_htiShareeMulePublicUser, GetResString(IDS_SHAREEMULEPUBLIC));
+		if (m_htiShareeMuleOldStyle) m_ctrlTreeOptions.SetItemText(m_htiShareeMuleOldStyle, GetResString(IDS_SHAREEMULEOLD));
+
 
         CString temp;
 		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize, false, false));
@@ -1157,6 +1195,10 @@ void CPPgTweaks::OnDestroy()
 	m_htiExtractMetaDataNever = NULL;
 	m_htiExtractMetaDataID3Lib = NULL;
 	m_htiAutoArch = NULL;
+	m_htiShareeMule = NULL;
+	m_htiShareeMuleMultiUser = NULL;
+	m_htiShareeMulePublicUser = NULL;
+	m_htiShareeMuleOldStyle = NULL;
 	//m_htiExtractMetaDataMediaDet = NULL;
     
     CPropertyPage::OnDestroy();
@@ -1185,6 +1227,21 @@ LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 				if (m_htiLogWebCacheEvents)		m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogWebCacheEvents, bCheck);//jp log webcache events
 				if (m_htiLogICHEvents)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogICHEvents, bCheck);//JP log ICH events
 				//MORPH END   - Added by SiRoB, WebCache 1.2f
+			}
+		}
+		else if ((m_htiShareeMuleMultiUser && pton->hItem == m_htiShareeMuleMultiUser)
+			|| (m_htiShareeMulePublicUser && pton->hItem == m_htiShareeMulePublicUser)
+			|| (m_htiShareeMuleOldStyle && pton->hItem == m_htiShareeMuleOldStyle))
+		{
+			if (m_htiShareeMule && !bShowedWarning){
+				HTREEITEM tmp;
+				int nIndex;
+				m_ctrlTreeOptions.GetRadioButton(m_htiShareeMule, nIndex, tmp);
+				if (nIndex != thePrefs.m_nCurrentUserDirMode){
+					// TODO offer cancel option
+					AfxMessageBox(GetResString(IDS_SHAREEMULEWARNING), MB_ICONINFORMATION | MB_OK);
+					bShowedWarning = true;
+				}
 			}
 		}
 		SetModified();

@@ -94,8 +94,8 @@ protected:
 	CRect	m_rectPlot;
 	CDC     m_dcGrid;
 	CDC     m_dcPlot;
-	CBitmap*m_pbitmapOldGrid;
-	CBitmap*m_pbitmapOldPlot;
+	CBitmap m_bitmapOldGrid;
+	CBitmap m_bitmapOldPlot;
 	CBitmap m_bitmapGrid;
 	CBitmap m_bitmapPlot;
 

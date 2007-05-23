@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -16,7 +16,6 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include <afxinet.h>
-
 #include "emule.h"
 #include "enbitmap.h"
 #include "OtherFunctions.h"
@@ -40,9 +39,9 @@ class CDlgPageWizard : public CPropertyPageEx
 {
 	DECLARE_DYNCREATE(CDlgPageWizard)
 
-// Construction
 public:
 	CDlgPageWizard();
+
 	CDlgPageWizard(UINT nIDTemplate, LPCTSTR pszCaption = NULL, LPCTSTR pszHeaderTitle = NULL, LPCTSTR pszHeaderSubTitle = NULL)
 		: CPropertyPageEx(nIDTemplate)
 	{
@@ -63,22 +62,14 @@ public:
 			m_psp.dwSize = sizeof(m_psp);
 		}
 	}
-	~CDlgPageWizard(){}
 
-// Dialog Data
-
-
-// Overrides
-public:
-	virtual BOOL OnSetActive();
-protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-
-// Implementation
 protected:
 	CString m_strCaption;
-	DECLARE_MESSAGE_MAP()
 
+	virtual BOOL OnSetActive();
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+	DECLARE_MESSAGE_MAP()
 };
 
 IMPLEMENT_DYNCREATE(CDlgPageWizard, CPropertyPageEx)
@@ -281,6 +272,8 @@ public:
 	uint16 GetTCPPort();
 	uint16 GetUDPPort();
 
+	bool*	m_pbUDPDisabled;
+
 // Dialog Data
 	enum { IDD = IDD_WIZ1_PORTS };
 
@@ -303,6 +296,7 @@ END_MESSAGE_MAP()
 CPPgWiz1Ports::CPPgWiz1Ports()
 	: CDlgPageWizard(CPPgWiz1Ports::IDD)
 {
+	m_pbUDPDisabled = NULL;
 }
 
 CPPgWiz1Ports::~CPPgWiz1Ports()
@@ -333,9 +327,8 @@ uint16 CPPgWiz1Ports::GetTCPPort() {
 
 uint16 CPPgWiz1Ports::GetUDPPort() {
 	uint16 udp=0;
-	CString buffer;
-
 	if (IsDlgButtonChecked(IDC_UDPDISABLE)==0) {
+		CString buffer;
 		GetDlgItem(IDC_UDP)->GetWindowText(buffer);
 		udp = (uint16)_tstoi(buffer);
 	}
@@ -430,6 +423,9 @@ void CPPgWiz1Ports::OnEnChangeUDPDisable()
 	}
 	else
 		GetDlgItem(IDC_UDP)->SetWindowText(lastudp);
+	
+	if (m_pbUDPDisabled != NULL)
+		*m_pbUDPDisabled = disabled;
 	
 	OnPortChange();
 }
@@ -583,10 +579,13 @@ public:
 	int m_iSafeServerConnect;
 	int m_iKademlia;
 	int m_iED2K;
+
+	bool* m_pbUDPDisabled;
 	int m_iReqObfus; // // MORPH lh require obfuscated server connection
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	virtual BOOL OnSetActive();
 
 	DECLARE_MESSAGE_MAP()
 };
@@ -602,6 +601,7 @@ CPPgWiz1Server::CPPgWiz1Server()
 	m_iSafeServerConnect = 0;
 	m_iKademlia = 1;
 	m_iED2K = 1;
+	m_pbUDPDisabled = NULL;
 	m_iReqObfus = 1; // // MORPH lh require obfuscated server connection
 }
 
@@ -627,6 +627,22 @@ BOOL CPPgWiz1Server::OnInitDialog()
 	GetDlgItem(IDC_WIZARD_ED2K)->SetWindowText(GetResString(IDS_WIZARD_ED2K));
 	GetDlgItem(IDC_WIZARDREQUIREOBFUSCATED)->SetWindowText(GetResString(IDS_WIZARDREQUIREOBFUSCATED)); //// MORPH lh require obfuscated server connection
 	return TRUE;
+}
+
+BOOL CPPgWiz1Server::OnSetActive(){
+	if (m_pbUDPDisabled != NULL){
+		m_iKademlia = *m_pbUDPDisabled ? 0 : m_iKademlia;
+		if (*m_pbUDPDisabled){
+			CheckDlgButton(IDC_SHOWOVERHEAD, 0);
+			GetDlgItem(IDC_WIZARD_NETWORK_KADEMLIA)->EnableWindow(FALSE);
+		}
+		else{
+			CheckDlgButton(IDC_SHOWOVERHEAD, m_iKademlia);
+			GetDlgItem(IDC_WIZARD_NETWORK_KADEMLIA)->EnableWindow(TRUE);
+		}
+
+	}
+	return CDlgPageWizard::OnSetActive();
 }
 
 // MORPH START startup wizard
@@ -887,6 +903,11 @@ int FirstTimeWizard() //lh ftw
 	page6.m_iSafeServerConnect = 0;
 	page6.m_iKademlia = 1;
 	page6.m_iED2K = 1;
+
+	bool bUDPDisabled = thePrefs.GetUDPPort() == 0;
+	page3.m_pbUDPDisabled = &bUDPDisabled;
+	page6.m_pbUDPDisabled = &bUDPDisabled;
+
 	page6b.m_iShowLessControls = thePrefs.IsLessControls(); // MORPH START show less controls
     page6b.m_iShowMoreControls = thePrefs.IsExtControlsEnabled(); // MORPH startup wizard
 
@@ -949,3 +970,4 @@ int FirstTimeWizard() //lh ftw
 	*/
 	return page6b.m_iRunNetworkWizard + 2* page6b.m_iRunImportTool ; // MORPH  startup wizard (1= run net, 2= run improt , 3 = both) 
 }
+

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -85,7 +85,7 @@ CKademliaWnd::~CKademliaWnd()
 BOOL CKademliaWnd::SaveAllSettings()
 {
 	if (m_pacONBSIPs)
-		m_pacONBSIPs->SaveList(thePrefs.GetConfigDir() + ONBOOTSTRAP_STRINGS_PROFILE);
+		m_pacONBSIPs->SaveList(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + ONBOOTSTRAP_STRINGS_PROFILE);
 
 	return TRUE;
 }
@@ -124,7 +124,7 @@ BOOL CKademliaWnd::OnInitDialog()
 		m_pacONBSIPs = new CCustomAutoComplete();
 		m_pacONBSIPs->AddRef();
 		if (m_pacONBSIPs->Bind(::GetDlgItem(m_hWnd, IDC_BOOTSTRAPIP), ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST | ACO_FILTERPREFIXES ))
-			m_pacONBSIPs->LoadList(thePrefs.GetConfigDir() + ONBOOTSTRAP_STRINGS_PROFILE);
+			m_pacONBSIPs->LoadList(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + ONBOOTSTRAP_STRINGS_PROFILE);
 	}
 
 	CheckDlgButton(IDC_RADCLIENTS,1);

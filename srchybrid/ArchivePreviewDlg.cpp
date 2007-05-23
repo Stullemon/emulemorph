@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -180,13 +180,14 @@ BOOL CArchivePreviewDlg::OnInitDialog()
 	AddAnchor(IDC_INFO_STATUS, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_ARCHPROGRESS, BOTTOM_LEFT, BOTTOM_RIGHT);
 
+	// Win98: Explicitly set to Unicode to receive Unicode notifications.
 	m_ContentList.SendMessage(CCM_SETUNICODEFORMAT, TRUE);
 	// To support full sorting of the archive entries list we'd need a seperate list which
 	// is holding the unified archive entries for all different supported archive formats so
 	// that the ListView's sortproc can get valid 'lParam' values which are pointing to those
 	// entries. This could be done, but for now we just let the default ListView sort
 	// functionality sort the archive entries by filename (the content of the first column).
-	m_ContentList.ModifyStyle(0, LVS_SORTASCENDING);
+	ASSERT( m_ContentList.GetStyle() & LVS_SORTASCENDING );
 	ASSERT( m_ContentList.GetStyle() & LVS_SHAREIMAGELISTS );
 	m_ContentList.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)theApp.GetSystemImageList());
 	m_ContentList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_INFOTIP);

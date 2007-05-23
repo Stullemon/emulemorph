@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -572,8 +572,9 @@ LRESULT CFileInfoDialog::OnMediaInfoResult(WPARAM, LPARAM lParam)
 	bool bDiffAudioLanguage = false;
 	for (int i = 0; i < paMediaInfo->GetSize(); i++)
 	{
-		const SMediaInfo& mi = paMediaInfo->GetAt(i);
+		SMediaInfo& mi = paMediaInfo->GetAt(i);
 
+		mi.InitFileLength();
 		uTotalFileSize += (uint64)mi.ulFileSize;
 		if (i == 0)
 		{
@@ -586,6 +587,10 @@ LRESULT CFileInfoDialog::OnMediaInfoResult(WPARAM, LPARAM lParam)
 
 			if (ami.strMimeType != mi.strMimeType)
 				ami.strMimeType.Empty();
+
+			ami.fFileLengthSec += mi.fFileLengthSec;
+			if (mi.bFileLengthEstimated)
+				ami.bFileLengthEstimated = true;
 
 			ami.fVideoLengthSec += mi.fVideoLengthSec;
 			if (mi.bVideoLengthEstimated)
@@ -665,15 +670,10 @@ LRESULT CFileInfoDialog::OnMediaInfoResult(WPARAM, LPARAM lParam)
 
 	if (uTotalFileSize)
 		SetDlgItemText(IDC_FILESIZE, CastItoXBytes(uTotalFileSize, false, false));
-	if (ami.fVideoLengthSec) {
-		CString strLength(CastSecondsToHM((time_t)ami.fVideoLengthSec));
-		if (ami.bVideoLengthEstimated)
-			strLength += _T(" (")+GetResString(IDS_ESTIMATED)+ _T(")");
-		SetDlgItemText(IDC_LENGTH, strLength);
-	}
-	else if (ami.fAudioLengthSec) {
-		CString strLength(CastSecondsToHM((time_t)ami.fAudioLengthSec));
-		if (ami.bAudioLengthEstimated)
+	
+	if (ami.fFileLengthSec) {
+		CString strLength(CastSecondsToHM((time_t)ami.fFileLengthSec));
+		if (ami.bFileLengthEstimated)
 			strLength += _T(" (")+GetResString(IDS_ESTIMATED)+ _T(")");
 		SetDlgItemText(IDC_LENGTH, strLength);
 	}
@@ -804,6 +804,42 @@ void CGetMediaInfoThread::WarnAboutWrongFileExtension(SMediaInfo* mi, LPCTSTR ps
 	mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfDef);
 }
 
+wchar_t *ID3_GetStringW(const ID3_Frame *frame, ID3_FieldID fldName)
+{
+	// ID3LIB BUG: Use the Unicode support of id3lib only if the tag is already 
+	// in Unicode format, thus avoiding couple of bugs with character conversion in 
+	// id3lib to get triggered.
+	ID3_Field* fld;
+	if (NULL != frame && NULL != (fld = frame->GetField(fldName)) 
+		&& fld->GetEncoding() == ID3TE_UTF16)
+	{
+		unicode_t *text = NULL;
+		size_t nText = fld->Size();
+		text = new unicode_t[nText/sizeof(unicode_t) + 1];
+		fld->Get(text, nText/sizeof(unicode_t));
+		text[nText/sizeof(unicode_t)] = L'\0';
+		for (unsigned int i = 0; i < nText/sizeof(unicode_t); i++)
+			text[i] = _byteswap_ushort(text[i]);
+		return (wchar_t*)text;
+	}
+
+	char *text = ID3_GetString(frame, fldName);
+	CStringW wstr(text);
+	delete[] text;
+	wchar_t *pwsz = new wchar_t[wstr.GetLength() + 1];
+	wcscpy(pwsz, wstr);
+	return pwsz;
+}
+
+wchar_t *ID3_GetStringW(const ID3_Frame *frame, ID3_FieldID fldName, size_t nIndex)
+{
+	// Do not use 'ID3_FieldImpl::Get(unicode_t *buffer, size_t maxLength, size_t itemNum)'.
+	// That function is broken in id3lib (the bug is in 'GetRawUnicodeTextItem')
+	if (nIndex == 0)
+		return ID3_GetStringW(frame, fldName);
+	return NULL;
+}
+
 bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool bSingleFile)
 {
 	if (!pFile)
@@ -882,15 +918,49 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 		return false;
 
 	////////////////////////////////////////////////////////////////////////////
+	// Check for RM file
+	//
+	bool bIsRM = false;
+	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RM"), 1))
+	{
+		try
+		{
+			if (GetRMHeaders(pFile->GetFilePath(), mi, bIsRM, true))
+			{
+				if (bIsRM && (_tcscmp(szExt, _T(".rm")) != 0 && _tcscmp(szExt, _T(".rmvb")) != 0 && _tcscmp(szExt, _T(".ra")) != 0))
+					WarnAboutWrongFileExtension(mi, pFile->GetFileName(), _T("rm rmvb ra"));
+				return true;
+			}
+		}
+		catch(...)
+		{
+			ASSERT(0);
+		}
+	}
+
+	if (!IsWindow(hWndOwner))
+		return false;
+
+	////////////////////////////////////////////////////////////////////////////
 	// Check for MPEG Audio file
 	//
 	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_ID3LIB"), 1) &&
-		(_tcscmp(szExt, _T(".mp3"))==0 || _tcscmp(szExt, _T(".mp2"))==0 || _tcscmp(szExt, _T(".mp1"))==0 || _tcscmp(szExt, _T(".mpa"))==0)) 	{
+		(_tcscmp(szExt, _T(".mp3"))==0 || _tcscmp(szExt, _T(".mp2"))==0 || _tcscmp(szExt, _T(".mp1"))==0 || _tcscmp(szExt, _T(".mpa"))==0))
+	{
 		try
 		{
-			USES_CONVERSION;
+			// ID3LIB BUG: If there are ID3v2 _and_ ID3v1 tags available, id3lib
+			// destroys (actually corrupts) the Unicode strings from ID3v2 tags due to
+			// converting Unicode to ASCII and then convertion back from ASCII to Unicode.
+			// To prevent this, we force the reading of ID3v2 tags only, in case there are 
+			// also ID3v1 tags available.
 			ID3_Tag myTag;
-			myTag.Link(T2CA(pFile->GetFilePath()));
+			CStringA strFilePathA(pFile->GetFilePath());
+			size_t id3Size = myTag.Link(strFilePathA, ID3TT_ID3V2);
+			if (id3Size == 0) {
+				myTag.Clear();
+				myTag.Link(strFilePathA, ID3TT_ID3V1);
+			}
 
 			const Mp3_Headerinfo* mp3info;
 			mp3info = myTag.GetMp3HeaderInfo();
@@ -985,7 +1055,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 						mi->strInfo << _T("   ") << GetResString(IDS_LENGTH) << _T(":\t") << strLength;
 						if (pFile->IsPartFile()){
 							mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfRed);
-							mi->strInfo << _T(" (estimated)");
+							mi->strInfo << _T(" (") + GetResString(IDS_ESTIMATED)+ _T(")");
 							mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfDef);
 						}
 						mi->strInfo << "\n";
@@ -1059,7 +1129,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				case ID3FID_ENCODERSETTINGS:
 				case ID3FID_YEAR:
 				{
-					char *sText = ID3_GetString(frame, ID3FN_TEXT);
+					wchar_t *sText = ID3_GetStringW(frame, ID3FN_TEXT);
 					CString strText(sText);
 					strText.Trim();
 					strFidInfo << strText;
@@ -1068,8 +1138,8 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				}
 				case ID3FID_BPM:
 				{
-					char *sText = ID3_GetString(frame, ID3FN_TEXT);
-					long lLength = atol(sText);
+					wchar_t *sText = ID3_GetStringW(frame, ID3FN_TEXT);
+					long lLength = _wtol(sText);
 					if (lLength) // check for != "0"
 						strFidInfo << sText;
 					delete [] sText;
@@ -1077,8 +1147,8 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				}
 				case ID3FID_SONGLEN:
 				{
-					char *sText = ID3_GetString(frame, ID3FN_TEXT);
-					long lLength = atol(sText) / 1000;
+					wchar_t *sText = ID3_GetStringW(frame, ID3FN_TEXT);
+					long lLength = _wtol(sText) / 1000;
 					if (lLength)
 					{
 						CString strLength;
@@ -1090,9 +1160,9 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				}
 				case ID3FID_USERTEXT:
 				{
-					char
-					*sText = ID3_GetString(frame, ID3FN_TEXT),
-					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION);
+					wchar_t
+					*sText = ID3_GetStringW(frame, ID3FN_TEXT),
+					*sDesc = ID3_GetStringW(frame, ID3FN_DESCRIPTION);
 					CString strText(sText);
 					strText.Trim();
 					if (!strText.IsEmpty())
@@ -1113,10 +1183,10 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				case ID3FID_COMMENT:
 				case ID3FID_UNSYNCEDLYRICS:
 				{
-					char
-					*sText = ID3_GetString(frame, ID3FN_TEXT),
-					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION),
-					*sLang = ID3_GetString(frame, ID3FN_LANGUAGE);
+					wchar_t
+					*sText = ID3_GetStringW(frame, ID3FN_TEXT),
+					*sDesc = ID3_GetStringW(frame, ID3FN_DESCRIPTION),
+					*sLang = ID3_GetStringW(frame, ID3FN_LANGUAGE);
 					CString strText(sText);
 					strText.Trim();
 					if (!strText.IsEmpty())
@@ -1151,7 +1221,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				case ID3FID_WWWPAYMENT:
 				case ID3FID_WWWRADIOPAGE:
 				{
-					char *sURL = ID3_GetString(frame, ID3FN_URL);
+					wchar_t *sURL = ID3_GetStringW(frame, ID3FN_URL);
 					CString strURL(sURL);
 					strURL.Trim();
 					strFidInfo << strURL;
@@ -1160,9 +1230,9 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				}
 				case ID3FID_WWWUSER:
 				{
-					char
-					*sURL = ID3_GetString(frame, ID3FN_URL),
-					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION);
+					wchar_t
+					*sURL = ID3_GetStringW(frame, ID3FN_URL),
+					*sDesc = ID3_GetStringW(frame, ID3FN_DESCRIPTION);
 					CString strURL(sURL);
 					strURL.Trim();
 					if (!strURL.IsEmpty())
@@ -1185,7 +1255,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 					size_t nItems = frame->GetField(ID3FN_TEXT)->GetNumTextItems();
 					for (size_t nIndex = 0; nIndex < nItems; nIndex++)
 					{
-						char *sPeople = ID3_GetString(frame, ID3FN_TEXT, nIndex);
+						wchar_t *sPeople = ID3_GetStringW(frame, ID3FN_TEXT, nIndex);
 						strFidInfo << sPeople;
 						delete [] sPeople;
 						if (nIndex + 1 < nItems)
@@ -1195,10 +1265,10 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				}
 				case ID3FID_PICTURE:
 				{
-					char
-					*sMimeType = ID3_GetString(frame, ID3FN_MIMETYPE),
-					*sDesc	   = ID3_GetString(frame, ID3FN_DESCRIPTION),
-					*sFormat   = ID3_GetString(frame, ID3FN_IMAGEFORMAT);
+					wchar_t
+					*sMimeType = ID3_GetStringW(frame, ID3FN_MIMETYPE),
+					*sDesc	   = ID3_GetStringW(frame, ID3FN_DESCRIPTION),
+					*sFormat   = ID3_GetStringW(frame, ID3FN_IMAGEFORMAT);
 					size_t
 					nPicType   = frame->GetField(ID3FN_PICTURETYPE)->Get(),
 					nDataSize  = frame->GetField(ID3FN_DATA)->Size();
@@ -1211,10 +1281,10 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				}
 				case ID3FID_GENERALOBJECT:
 				{
-					char
-					*sMimeType = ID3_GetString(frame, ID3FN_MIMETYPE),
-					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION),
-					*sFileName = ID3_GetString(frame, ID3FN_FILENAME);
+					wchar_t
+					*sMimeType = ID3_GetStringW(frame, ID3FN_MIMETYPE),
+					*sDesc = ID3_GetStringW(frame, ID3FN_DESCRIPTION),
+					*sFileName = ID3_GetStringW(frame, ID3FN_FILENAME);
 					size_t
 					nDataSize = frame->GetField(ID3FN_DATA)->Size();
 					strFidInfo << _T("(") << sDesc << _T(")[")
@@ -1226,7 +1296,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				}
 				case ID3FID_UNIQUEFILEID:
 				{
-					char *sOwner = ID3_GetString(frame, ID3FN_OWNER);
+					wchar_t *sOwner = ID3_GetStringW(frame, ID3FN_OWNER);
 					size_t nDataSize = frame->GetField(ID3FN_DATA)->Size();
 					strFidInfo << sOwner << _T(", ") << nDataSize << _T(" bytes");
 					delete [] sOwner;
@@ -1240,7 +1310,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				}
 				case ID3FID_POPULARIMETER:
 				{
-					char *sEmail = ID3_GetString(frame, ID3FN_EMAIL);
+					wchar_t *sEmail = ID3_GetStringW(frame, ID3FN_EMAIL);
 					size_t
 					nCounter = frame->GetField(ID3FN_COUNTER)->Get(),
 					nRating = frame->GetField(ID3FN_RATING)->Get();
@@ -1251,7 +1321,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				case ID3FID_CRYPTOREG:
 				case ID3FID_GROUPINGREG:
 				{
-					char *sOwner = ID3_GetString(frame, ID3FN_OWNER);
+					wchar_t *sOwner = ID3_GetStringW(frame, ID3FN_OWNER);
 					size_t
 					nSymbol = frame->GetField(ID3FN_ID)->Get(),
 					nDataSize = frame->GetField(ID3FN_DATA)->Size();
@@ -1260,9 +1330,9 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				}
 				case ID3FID_SYNCEDLYRICS:
 				{
-					char
-					*sDesc = ID3_GetString(frame, ID3FN_DESCRIPTION),
-					*sLang = ID3_GetString(frame, ID3FN_LANGUAGE);
+					wchar_t
+					*sDesc = ID3_GetStringW(frame, ID3FN_DESCRIPTION),
+					*sLang = ID3_GetStringW(frame, ID3FN_LANGUAGE);
 					size_t
 					//nTimestamp = frame->GetField(ID3FN_TIMESTAMPFORMAT)->Get(),
 					nRating = frame->GetField(ID3FN_CONTENTTYPE)->Get();
@@ -1315,7 +1385,14 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 
 				if (!strFidInfo.IsEmpty())
 				{
-					mi->strInfo << _T("   ") << A2CT(desc) << _T(":\t") << strFidInfo.GetText() << _T("\n");
+					mi->strInfo << _T("   ") << CString(desc) << _T(":");
+					int iPos = 0;
+					CString strFidInfoLine = strFidInfo.GetText().Tokenize(_T("\r\n"), iPos);
+					while (!strFidInfoLine.IsEmpty())
+					{
+						mi->strInfo << _T("\t") << strFidInfoLine << _T("\r\n");
+						strFidInfoLine = strFidInfo.GetText().Tokenize(_T("\r\n"), iPos);
+					}
 				}
 			}
 			delete iter;
@@ -1325,8 +1402,10 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 			ASSERT(0);
 		}
 
-		if (bFoundHeader)
+		if (bFoundHeader) {
+			mi->InitFileLength();
 			return true;
+		}
 	}
 
 	if (!IsWindow(hWndOwner))
@@ -1374,8 +1453,8 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 							if (!str.IsEmpty())
 							{
 								// minor bug in MediaInfo lib.. some file extension lists have a ')' character in there..
-								str.Replace(_T(")"), _T(""));
-								str.Replace(_T("("), _T(""));
+								str.Remove(_T(')'));
+								str.Remove(_T('('));
 
 								str.MakeLower();
 								bool bFoundExt = false;
@@ -1778,11 +1857,16 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 							}
 						}
 
-						if (bFoundHeader)
+						if (bFoundHeader) {
+							mi->InitFileLength();
 							return true;
+						}
 					}
 				}
-				else {
+				else
+				{
+					EED2KFileType eED2KFileType = GetED2KFileTypeID(pFile->GetFilePath());
+					if (eED2KFileType == ED2KFT_AUDIO || eED2KFileType == ED2KFT_VIDEO)
 					bGiveMediaInfoLibHint = true;
 				}
 			}
@@ -1881,7 +1965,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 													mi->strInfo << _T("   ") << GetResString(IDS_LENGTH) << _T(":\t") << strLength;
 													if (pFile->IsPartFile()){
 														mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfRed);
-														mi->strInfo << _T(" (estimated)");
+														mi->strInfo << _T(" (") + GetResString(IDS_ESTIMATED)+ _T(")");
 														mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfDef);
 													}
 													mi->strInfo << _T("\n");
@@ -1980,7 +2064,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 													mi->strInfo << _T("   ") << GetResString(IDS_LENGTH) << _T(":\t") << strLength;
 													if (pFile->IsPartFile()){
 														mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfRed);
-														mi->strInfo << _T(" (estimated)");
+														mi->strInfo << _T(" (") + GetResString(IDS_ESTIMATED)+ _T(")");
 														mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfDef);
 													}
 													mi->strInfo << _T("\n");
@@ -2008,7 +2092,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 												mi->strInfo << _T("   ") << GetResString(IDS_LENGTH) << _T(":\t") << strLength;
 												if (pFile->IsPartFile()) {
 													mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfRed);
-													mi->strInfo << _T(" (estimated)");
+													mi->strInfo << _T(" (") + GetResString(IDS_ESTIMATED)+ _T(")");
 													mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfDef);
 												}
 												mi->strInfo << _T("\n");
@@ -2018,6 +2102,8 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 									}
 								}
 							}
+							if (bFoundHeader)
+								mi->InitFileLength();
 						}
 					}
 					else{
@@ -2059,25 +2145,21 @@ void CFileInfoDialog::DoDataExchange(CDataExchange* pDX)
 
 void CFileInfoDialog::Localize()
 {
+	GetDlgItem(IDC_GENERAL)->SetWindowText(GetResString(IDS_FD_GENERAL));
 	GetDlgItem(IDC_FD_XI1)->SetWindowText(GetResString(IDS_FD_SIZE));
 	GetDlgItem(IDC_FD_XI2)->SetWindowText(GetResString(IDS_LENGTH)+_T(":"));
 	GetDlgItem(IDC_FD_XI3)->SetWindowText(GetResString(IDS_VIDEO));
 	GetDlgItem(IDC_FD_XI4)->SetWindowText(GetResString(IDS_AUDIO));
-
 	GetDlgItem(IDC_FD_XI5)->SetWindowText(GetResString(IDS_CODEC)+_T(":"));
 	GetDlgItem(IDC_FD_XI6)->SetWindowText(GetResString(IDS_CODEC)+_T(":"));
-
 	GetDlgItem(IDC_FD_XI7)->SetWindowText(GetResString(IDS_BITRATE)+_T(":"));
 	GetDlgItem(IDC_FD_XI8)->SetWindowText(GetResString(IDS_BITRATE)+_T(":"));
-
 	GetDlgItem(IDC_FD_XI9)->SetWindowText(GetResString(IDS_WIDTH)+_T(" x ")+GetResString(IDS_HEIGHT)+_T(":"));
 	GetDlgItem(IDC_FD_XI13)->SetWindowText(GetResString(IDS_FPS)+_T(":"));
 	GetDlgItem(IDC_FD_XI10)->SetWindowText(GetResString(IDS_CHANNELS)+_T(":"));
 	GetDlgItem(IDC_FD_XI12)->SetWindowText(GetResString(IDS_SAMPLERATE)+_T(":"));
-
 	GetDlgItem(IDC_STATICFI)->SetWindowText(GetResString(IDS_FILEFORMAT)+_T(":"));
 	GetDlgItem(IDC_FD_XI14)->SetWindowText(GetResString(IDS_ASPECTRATIO)+_T(":"));
-
 	GetDlgItem(IDC_STATIC_LANGUAGE)->SetWindowText(GetResString(IDS_PW_LANG)+_T(":"));	
 }
 

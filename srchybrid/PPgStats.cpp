@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -35,13 +35,13 @@ IMPLEMENT_DYNAMIC(CPPgStats, CPropertyPage)
 
 BEGIN_MESSAGE_MAP(CPPgStats, CPropertyPage)
 	ON_WM_HSCROLL()
-	ON_CBN_SELCHANGE(IDC_COLORSELECTOR, OnCbnSelchangeColorselector)
+	ON_CBN_SELCHANGE(IDC_COLORSELECTOR, OnCbnSelChangeColorSelector)
     ON_MESSAGE(UM_CPN_SELCHANGE, OnColorPopupSelChange)
-	ON_CBN_SELCHANGE(IDC_CRATIO, OnCbnSelchangeCRatio)
+	ON_CBN_SELCHANGE(IDC_CRATIO, OnCbnSelChangeCRatio)
 	ON_EN_CHANGE(IDC_CGRAPHSCALE, OnEnChangeCGraphScale)
 	ON_WM_HELPINFO()
 	ON_WM_DESTROY()
-	ON_BN_CLICKED(IDC_SOLIDGRAPH, OnBnClickedSolidGraph) //MORPH - Added by SiRoB, New Graph
+	ON_BN_CLICKED(IDC_FILL_GRAPHS, OnBnClickedFillGraphs)
 END_MESSAGE_MAP()
 
 CPPgStats::CPPgStats()
@@ -53,6 +53,7 @@ CPPgStats::CPPgStats()
 	m_iStatsColors = 0;
 	m_pdwStatsColors = NULL;
 	m_bModified = FALSE;
+	m_bFillGraphs = false;
 }
 
 CPPgStats::~CPPgStats()
@@ -97,7 +98,6 @@ BOOL CPPgStats::OnInitDialog()
 	m_ctlStatsUpdate.SetTicFreq(10);
 	m_ctlStatsUpdate.SetPageSize(10);
 
-
 	m_ctlGraphsAvgTime.SetRange(0, 99);
 	m_ctlGraphsAvgTime.SetPos(thePrefs.GetStatsAverageMinutes() - 1);
 	for (int i = 10; i < 100; i += 10)
@@ -107,6 +107,8 @@ BOOL CPPgStats::OnInitDialog()
 	m_iGraphsUpdate = thePrefs.GetTrafficOMeterInterval();
 	m_iGraphsAvgTime = thePrefs.GetStatsInterval();
 	m_iStatsUpdate = thePrefs.GetStatsAverageMinutes();
+
+	CheckDlgButton(IDC_FILL_GRAPHS, thePrefs.GetFillGraphs());
 
 	// Set the Connections Statistics Y-Axis Scale
 	SetDlgItemInt(IDC_CGRAPHSCALE, thePrefs.GetStatsMax(), FALSE);
@@ -121,13 +123,6 @@ BOOL CPPgStats::OnInitDialog()
 	m_cratio.AddString(_T("1:20"));
 	int n = thePrefs.GetStatsConnectionsGraphRatio();
 	m_cratio.SetCurSel((n==10)?5:((n==20)?6:n-1));
-	// <-----khaos-
-	//MORPH START - Added by SiRoB, New Graph
-	if(thePrefs.IsSolidGraph())
-		CheckDlgButton(IDC_SOLIDGRAPH,1);
-	else
-		CheckDlgButton(IDC_SOLIDGRAPH,0);
-	//MORPH END   - Added by SiRoB, New Graph
 
 	m_iStatsColors = thePrefs.GetNumStatsColors();
 	m_pdwStatsColors = new DWORD[m_iStatsColors];
@@ -166,7 +161,7 @@ BOOL CPPgStats::OnApply()
 		}
 
 		TCHAR buffer[20];
-		GetDlgItem(IDC_CGRAPHSCALE)->GetWindowText(buffer, ARRSIZE(buffer));
+		GetDlgItem(IDC_CGRAPHSCALE)->GetWindowText(buffer, _countof(buffer));
 		UINT statsMax = _tstoi(buffer);
 		if (statsMax > thePrefs.GetMaxConnections() + 5)
 		{
@@ -174,7 +169,8 @@ BOOL CPPgStats::OnApply()
 				thePrefs.SetStatsMax(thePrefs.GetMaxConnections() + 5);
 				bInvalidateGraphs = true;
 			}
-			_sntprintf(buffer, ARRSIZE(buffer), _T("%d"), thePrefs.GetStatsMax());
+			_sntprintf(buffer, _countof(buffer), _T("%d"), thePrefs.GetStatsMax());
+			buffer[_countof(buffer) - 1] = _T('\0');
 			GetDlgItem(IDC_CGRAPHSCALE)->SetWindowText(buffer);
 		}
 		else
@@ -191,13 +187,11 @@ BOOL CPPgStats::OnApply()
 			thePrefs.SetStatsConnectionsGraphRatio(uRatio); 
 			bInvalidateGraphs = true;
 		}
-		//MORPH START - Added by SiRoB, New Graph
-		bool bSolidGraph = IsDlgButtonChecked(IDC_SOLIDGRAPH)!=0;
-		if(thePrefs.IsSolidGraph() != bSolidGraph){
-			thePrefs.m_bSolidGraph = bSolidGraph;
+
+		if (thePrefs.GetFillGraphs() != (IsDlgButtonChecked(IDC_FILL_GRAPHS) == BST_CHECKED)){
+			thePrefs.SetFillGraphs(!thePrefs.GetFillGraphs());
 			bInvalidateGraphs = true;
 		}
-		//MORPH END   - Added by SiRoB, New Graph
 	
 		if (bInvalidateGraphs){
 			theApp.emuledlg->statisticswnd->UpdateConnectionsGraph(); // Set new Y upper bound and Y ratio for active connections.
@@ -221,9 +215,7 @@ void CPPgStats::Localize(void)
 		GetDlgItem(IDC_STATIC_CGRAPHRATIO)->SetWindowText(GetResString(IDS_PPGSTATS_ACRATIO));
 		SetWindowText(GetResString(IDS_STATSSETUPINFO));
 		GetDlgItem(IDC_PREFCOLORS)->SetWindowText(GetResString(IDS_COLORS));
-	
-		GetDlgItem(IDC_SOLIDGRAPH)->SetWindowText(GetResString(IDS_SOLIDGRAPH)); //MORPH - Added by SiRoB, New Graph
-        GetDlgItem(IDC_GRAPHOPTIONS)->SetWindowText(GetResString(IDS_GRAPHOPTIONS));
+		SetDlgItemText(IDC_FILL_GRAPHS, GetResString(IDS_FILLGRAPHS) );
 
 		m_colors.ResetContent();
 		int iItem;
@@ -251,7 +243,7 @@ void CPPgStats::Localize(void)
 		m_ctlColor.DefaultText = NULL;
 
 		m_colors.SetCurSel(0);
-		OnCbnSelchangeColorselector();
+		OnCbnSelChangeColorSelector();
 		ShowInterval();
 	}
 }
@@ -310,7 +302,7 @@ void CPPgStats::ShowInterval()
 	GetDlgItem(IDC_SLIDERINFO3)->SetWindowText(strLabel);
 }
 
-void CPPgStats::OnCbnSelchangeColorselector()
+void CPPgStats::OnCbnSelChangeColorSelector()
 {
 	int iSel = m_colors.GetCurSel();
 	if (iSel >= 0)
@@ -338,6 +330,11 @@ LONG CPPgStats::OnColorPopupSelChange(UINT /*lParam*/, LONG /*wParam*/)
 		}
 	}
 	return TRUE;
+}
+
+void CPPgStats::OnBnClickedFillGraphs()
+{
+	SetModified();
 }
 
 void CPPgStats::OnHelp()

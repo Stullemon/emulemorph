@@ -38,7 +38,8 @@ protected:
 	bool* m_pbMinimizeToTray;
     bool m_bCurIconDelete;
     HICON m_hPrevIconDelete;
-	bool m_bdoubleclicked;
+	bool m_bLButtonDblClk;
+	bool m_bLButtonDown;
 	BOOL m_bTrayIconVisible;
 	NOTIFYICONDATA m_nidIconData;
 	CMenu m_mnuTrayMenu;

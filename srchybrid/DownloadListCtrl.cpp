@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -119,6 +119,7 @@ CDownloadListCtrl::~CDownloadListCtrl()
 void CDownloadListCtrl::Init()
 {
 	SetName(_T("DownloadListCtrl"));
+
 	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
 	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy, theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
 	SetImageList(&ilDummyImageList, LVSIL_SMALL);
@@ -126,10 +127,11 @@ void CDownloadListCtrl::Init()
 	ilDummyImageList.Detach();
 
 	SetStyle();
-	ModifyStyle(LVS_SINGLESEL,0);
+	ASSERT( (GetStyle() & LVS_SINGLESEL) == 0 );
 	if (!theApp.IsRunningAsService()) { // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
 	CToolTipCtrl* tooltip = GetToolTips();
 		if (tooltip){
+		m_tooltip->SetFileIconToolTip(true);
 			m_tooltip->SubclassWindow(*tooltip);
 			tooltip->ModifyStyle(0, TTS_NOPREFIX);
 			tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
@@ -818,7 +820,7 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 				if (!thePrefs.ShowCatNameInDownList())
 					buffer.Format(_T("%u"), lpPartFile->GetCategory());
 				else
-					buffer.Format(_T("%s"), thePrefs.GetCategory(lpPartFile->GetCategory())->title);
+					buffer.Format(_T("%s"), thePrefs.GetCategory(lpPartFile->GetCategory())->strTitle);
 				dc->DrawText(buffer, buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
 				break;
 			}
@@ -1591,8 +1593,7 @@ void CDownloadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	int tree_start=0;
 	int tree_end=0;
 
-	//offset was 4, now it's the standard 2 spaces
-	int iTreeOffset = dc.GetTextExtent(_T(" "), 1 ).cx*2;
+	int iTreeOffset = 6;
 	CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
 	int iCount = pHeaderCtrl->GetItemCount();
 	cur_rec.right = cur_rec.left;
@@ -2066,7 +2067,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			m_FileMenu.EnableMenuItem(thePrefs.GetShowCopyEd2kLinkCmd() ? MP_GETED2KLINK : MP_SHOWED2KLINK, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem(MP_PASTE, theApp.IsEd2kFileLinkInClipboard() ? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem(MP_FIND, GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED);
-			m_FileMenu.EnableMenuItem(MP_SEARCHRELATED, iSelectedItems == 1 && theApp.emuledlg->searchwnd->CanSearchRelatedFiles() ? MF_ENABLED : MF_GRAYED);
+			m_FileMenu.EnableMenuItem(MP_SEARCHRELATED, theApp.emuledlg->searchwnd->CanSearchRelatedFiles() ? MF_ENABLED : MF_GRAYED);
 
 			//MORPH START - Added by SiRoB, Show Share Permissions
 			m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
@@ -2117,12 +2118,12 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 					//MORPH START - Changed By SiRoB, Khaos Category
 					/*
 					if (i>0) {
-						label=thePrefs.GetCategory(i)->title;
+						label=thePrefs.GetCategory(i)->strTitle;
 						label.Replace(_T("&"), _T("&&") );
 					}
 					CatsMenu.AppendMenu(MF_STRING,MP_ASSIGNCAT+i, (i==0)?GetResString(IDS_CAT_UNASSIGN):label);
 					*/
-					label=thePrefs.GetCategory(i)->title;
+					label=thePrefs.GetCategory(i)->strTitle;
 					label.Replace(_T("&"), _T("&&") );
 					CatsMenu.AppendMenu(MF_STRING,MP_ASSIGNCAT+i,label);
 					//MORPH END   - Changed By SiRoB, Khaos Category
@@ -2616,9 +2617,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					break;
 				}
 				case MP_SEARCHRELATED:
-					if (selectedCount > 1)
-						break;
-					theApp.emuledlg->searchwnd->SearchRelatedFiles(file);
+					theApp.emuledlg->searchwnd->SearchRelatedFiles(selectedList);
 					theApp.emuledlg->SetActiveDialog(theApp.emuledlg->searchwnd);
 					break;
 				case MP_OPEN:
@@ -3135,7 +3134,7 @@ void CDownloadListCtrl::SetStyle()
 	if (thePrefs.IsDoubleClickEnabled())
 		SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 	else
-		SetExtendedStyle(LVS_EX_ONECLICKACTIVATE | LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
+		SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP | LVS_EX_ONECLICKACTIVATE);
 }
 
 void CDownloadListCtrl::OnListModified(NMHDR* pNMHDR, LRESULT* /*pResult*/)
@@ -3943,8 +3942,8 @@ void CDownloadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 		ScreenToClient(&hti.pt);
 		if (SubItemHitTest(&hti) == -1 || hti.iItem != pGetInfoTip->iItem || hti.iSubItem != 0){
 			// don' show the default label tip for the main item, if the mouse is not over the main item
-			if ((pGetInfoTip->dwFlags & LVGIT_UNFOLDED) == 0 && pGetInfoTip->cchTextMax > 0 && pGetInfoTip->pszText[0] != '\0')
-				pGetInfoTip->pszText[0] = '\0';
+			if ((pGetInfoTip->dwFlags & LVGIT_UNFOLDED) == 0 && pGetInfoTip->cchTextMax > 0 && pGetInfoTip->pszText[0] != _T('\0'))
+				pGetInfoTip->pszText[0] = _T('\0');
 			return;
 		}
 

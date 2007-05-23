@@ -957,7 +957,7 @@ HICON CButtonST::CreateGrayscaleIcon(HICON hIcon)
 	bRetValue = ::GetIconInfo(hIcon, &csII);
 	if (bRetValue == FALSE)	return NULL;
 
-	hMainDC = ::GetDC(NULL);
+	hMainDC = ::GetDC(HWND_DESKTOP);
 	hMemDC1 = ::CreateCompatibleDC(hMainDC);
 	hMemDC2 = ::CreateCompatibleDC(hMainDC);
 	if (hMainDC == NULL || hMemDC1 == NULL || hMemDC2 == NULL)	return NULL;

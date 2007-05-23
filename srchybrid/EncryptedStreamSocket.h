@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -16,10 +16,10 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 /* This class supports obfuscation and encryption for a eMule tcp connection.
-   Right now only basic obfusication is supported, but this can be expanded, as their is a
+   Right now only basic obfuscation is supported, but this can be expanded, as their is a
    dedicated handshake to negotiate the encryption method used.
 
-   Please note, even if obfusication uses encryption methods, it does not fulfill cryptographic standards since it
+   Please note, even if obfuscation uses encryption methods, it does not fulfill cryptographic standards since it
    doesn't use secret (and for rc4 important: unique) keys
 */
 
@@ -85,7 +85,7 @@ public:
 	virtual ~CEncryptedStreamSocket();
 
 	void	SetConnectionEncryption(bool bEnabled, const uchar* pTargetClientHash, bool bServerConnection);
-	uint32	GetRealReceivedBytes() const		{ return m_nObfusicationBytesReceived; } // indicates how many bytes were received including obfusication so that the parent knows if the receive limit was reached
+	uint32	GetRealReceivedBytes() const		{ return m_nObfuscationBytesReceived; } // indicates how many bytes were received including obfusication so that the parent knows if the receive limit was reached
 	bool	IsObfusicating() const				{ return m_StreamCryptState == ECS_ENCRYPTING && m_EncryptionMethod == ENM_OBFUSCATION; }
 	
 	bool	IsServerCryptEnabledConnection() const { return m_bServerCrypt; }	
@@ -104,7 +104,7 @@ protected:
 	bool			IsEncryptionLayerReady();
 	uint8			GetSemiRandomNotProtocolMarker() const;
 	
-	uint32	m_nObfusicationBytesReceived;
+	uint32	m_nObfuscationBytesReceived;
 	EStreamCryptState	m_StreamCryptState;
 	EEncryptionMethods  m_EncryptionMethod;
 	bool	m_bFullReceive;

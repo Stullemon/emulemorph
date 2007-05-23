@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -189,13 +189,13 @@ BOOL CPPgGeneral::OnInitDialog()
 			_tcscpy(szLang,_T("Maltese") );
 		else if (ret==0 && aLanguageIDs[i]==LANGID_ES_AS )
 			_tcscpy(szLang,_T("Asturian") );
+		else if (ret==0 && aLanguageIDs[i]==LANGID_VA_ES )
+			_tcscpy(szLang,_T("Valencian") );
 
 		m_language.SetItemData(m_language.AddString(szLang), aLanguageIDs[i]);
 	}
 
 	UpdateEd2kLinkFixCtrl();
-
-	GetDlgItem(IDC_ONLINESIG)->ShowWindow( thePrefs.IsExtControlsEnabled()?SW_SHOW:SW_HIDE );
 
 	CSliderCtrl *sliderUpdate = (CSliderCtrl*)GetDlgItem(IDC_CHECKDAYS);
 	sliderUpdate->SetRange(2, 7, true);
@@ -451,9 +451,7 @@ void CPPgGeneral::OnLangChange()
 				strUrl.Format(MIRRORS_URL, nRand, CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld);
 				strUrl += thePrefs.GetLangDLLNameByID(byNewLang);
 				// safeto
-				CString strFilename = thePrefs.GetLangDir();
-				if (!PathFileExists(strFilename))
-					CreateDirectory(strFilename,0);
+				CString strFilename = thePrefs.GetMuleDirectory(EMULE_ADDLANGDIR, true);
 				strFilename.Append(thePrefs.GetLangDLLNameByID(byNewLang));
 				// start
 				CHttpDownloadDlg dlgDownload;

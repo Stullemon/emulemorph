@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -96,6 +96,9 @@ CMuleToolbarCtrl::~CMuleToolbarCtrl()
 void CMuleToolbarCtrl::Init(void)
 {
 	m_astrToolbarPaths.RemoveAll();
+
+	// Win98: Explicitly set to Unicode to receive Unicode notifications.
+	SendMessage(CCM_SETUNICODEFORMAT, TRUE);
 
 	ModifyStyle(0, TBSTYLE_FLAT | TBSTYLE_ALTDRAG | CCS_ADJUSTABLE | TBSTYLE_TRANSPARENT | TBSTYLE_TOOLTIPS | CCS_NODIVIDER);
 	if (thePrefs.GetUseReBarToolbar())
@@ -260,13 +263,15 @@ void CMuleToolbarCtrl::SetAllButtonsStrings()
 	else
 		buffer = GetResString(IDS_MAIN_BTN_CONNECT);
 
-	_sntprintf(TBStrings[0], ARRSIZE(TBStrings[0]), _T("%s"), buffer);
+	_sntprintf(TBStrings[0], _countof(TBStrings[0]), _T("%s"), buffer);
+	TBStrings[0][_countof(TBStrings[0]) - 1] = _T('\0');
 	tbi.pszText = TBStrings[0];
 	SetButtonInfo(IDC_TOOLBARBUTTON+0, &tbi);
 
 	for (int i = 1; i < m_buttoncount; i++)
 	{
-		_sntprintf(TBStrings[i], ARRSIZE(TBStrings[0]), _T("%s"), GetResString(TBStringIDs[i-1]));
+		_sntprintf(TBStrings[i], _countof(TBStrings[0]), _T("%s"), GetResString(TBStringIDs[i-1]));
+		TBStrings[i][_countof(TBStrings[0]) - 1] = _T('\0');
 		tbi.pszText = TBStrings[i];
 		SetButtonInfo(IDC_TOOLBARBUTTON+i, &tbi);
 	}
@@ -411,13 +416,13 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	}
 	m_astrToolbarPaths.Add(_T("")); // dummy entry for 'Default' menu item
 	int i = 1;
-	if (!thePrefs.GetToolbarBitmapFolderSettings().IsEmpty())
+	if (!thePrefs.GetMuleDirectory(EMULE_TOOLBARDIR).IsEmpty())
 	{
 		CStringArray astrToolbarFiles;
-		for (int f = 0; f < ARRSIZE(_apszTBFiles); f++)
+		for (int f = 0; f < _countof(_apszTBFiles); f++)
 		{
 			WIN32_FIND_DATA FileData;
-			HANDLE hSearch = FindFirstFile(thePrefs.GetToolbarBitmapFolderSettings() + CString(_T("\\")) + _apszTBFiles[f], &FileData);
+			HANDLE hSearch = FindFirstFile(thePrefs.GetMuleDirectory(EMULE_TOOLBARDIR) + CString(_T("\\")) + _apszTBFiles[f], &FileData);
 			if (hSearch != INVALID_HANDLE_VALUE)
 			{
 				do {
@@ -441,7 +446,7 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 				else
 					bitmapBaseName = bitmapFileName;
 				menuBitmaps.AppendMenu(MF_STRING, MP_TOOLBARBITMAP + i, bitmapBaseName);
-				m_astrToolbarPaths.Add(thePrefs.GetToolbarBitmapFolderSettings() + CString(_T("\\")) + bitmapFileName);
+				m_astrToolbarPaths.Add(thePrefs.GetMuleDirectory(EMULE_TOOLBARDIR) + CString(_T("\\")) + bitmapFileName);
 				if (!checked && currentBitmapSettings.CompareNoCase(m_astrToolbarPaths[i]) == 0)
 				{
 					menuBitmaps.CheckMenuItem(MP_TOOLBARBITMAP + i, MF_CHECKED);
@@ -483,13 +488,13 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	}
 	m_astrSkinPaths.Add(_T("")); // dummy entry for 'Default' menu item
 	i = 1;
-	if (!thePrefs.GetSkinProfileDir().IsEmpty())
+	if (!thePrefs.GetMuleDirectory(EMULE_SKINDIR, false).IsEmpty())
 	{
 		CStringArray astrSkinFiles;
-		for (int f = 0; f < ARRSIZE(_apszSkinFiles); f++)
+		for (int f = 0; f < _countof(_apszSkinFiles); f++)
 		{
 			WIN32_FIND_DATA FileData;
-			HANDLE hSearch = FindFirstFile(thePrefs.GetSkinProfileDir() + CString(_T("\\")) + _apszSkinFiles[f], &FileData);
+			HANDLE hSearch = FindFirstFile(thePrefs.GetMuleDirectory(EMULE_SKINDIR, false) + CString(_T("\\")) + _apszSkinFiles[f], &FileData);
 			if (hSearch != INVALID_HANDLE_VALUE)
 			{
 				do {
@@ -513,7 +518,7 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 				else
 					skinBaseName = skinFileName;
 				menuSkins.AppendMenu(MF_STRING, MP_SKIN_PROFILE + i, skinBaseName);
-				m_astrSkinPaths.Add(thePrefs.GetSkinProfileDir() + CString(_T("\\")) + skinFileName);
+				m_astrSkinPaths.Add(thePrefs.GetMuleDirectory(EMULE_SKINDIR, false) + CString(_T("\\")) + skinFileName);
 				if (!checked && currentSkin.CompareNoCase(m_astrSkinPaths[i]) == 0)
 				{
 					menuSkins.CheckMenuItem(MP_SKIN_PROFILE + i, MF_CHECKED);
@@ -586,7 +591,7 @@ void CMuleToolbarCtrl::OnTbnQueryInsert(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 void CMuleToolbarCtrl::OnTbnGetButtonInfo(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMTOOLBAR pNMTB = reinterpret_cast<LPNMTOOLBAR>(pNMHDR);
-	if (pNMTB->iItem >= ARRSIZE(TBButtons))
+	if (pNMTB->iItem >= _countof(TBButtons))
 	{
 		*pResult = FALSE;
 	}
@@ -689,9 +694,10 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 	{
 		case MP_SELECTTOOLBARBITMAPDIR:{
 			TCHAR buffer[MAX_PATH];
-			_sntprintf(buffer,ARRSIZE(buffer),_T("%s"), thePrefs.GetToolbarBitmapFolderSettings());
+			_sntprintf(buffer, _countof(buffer), _T("%s"), thePrefs.GetMuleDirectory(EMULE_TOOLBARDIR));
+			buffer[_countof(buffer) - 1] = _T('\0');
 			if(SelectDir(m_hWnd, buffer, GetResString(IDS_SELECTTOOLBARBITMAPDIR)))
-				thePrefs.SetToolbarBitmapFolderSettings(buffer);
+				thePrefs.SetMuleDirectory(EMULE_TOOLBARDIR, buffer);
 			break;
 		}
 		case MP_CUSTOMIZETOOLBAR:
@@ -703,13 +709,13 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			// we could also load "*.jpg" here, but because of the typical non solid background of JPGs this
 			// doesn't make sense here.
 			CString strFilter=GetResString(IDS_LOADFILTER_EMTOOLBAR)+ _T(" (");
-			for (int f = 0; f < ARRSIZE(_apszTBFiles); f++){
+			for (int f = 0; f < _countof(_apszTBFiles); f++){
 				if (f > 0)
 					strFilter += _T(';');
 				strFilter += _apszTBFiles[f];
 			}
 			strFilter += _T(")|");
-			for (int f = 0; f < ARRSIZE(_apszTBFiles); f++){
+			for (int f = 0; f < _countof(_apszTBFiles); f++){
 				if (f > 0)
 					strFilter += _T(';');
 				strFilter += _apszTBFiles[f];
@@ -759,21 +765,22 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 
 		case MP_SELECT_SKIN_DIR:{
 			TCHAR buffer[MAX_PATH];
-			_sntprintf(buffer,ARRSIZE(buffer),_T("%s"), thePrefs.GetSkinProfileDir());
+			_sntprintf(buffer, _countof(buffer), _T("%s"), thePrefs.GetMuleDirectory(EMULE_SKINDIR, false));
+			buffer[_countof(buffer) - 1] = _T('\0');
 			if(SelectDir(m_hWnd, buffer, GetResString(IDS_SELSKINPROFILEDIR)))
-				thePrefs.SetSkinProfileDir(buffer);
+				thePrefs.SetMuleDirectory(EMULE_SKINDIR, buffer);
 			break;
 		}
 		case MP_SELECT_SKIN_FILE:
 		{
 			CString strFilter=GetResString(IDS_LOADFILTER_EMSKINFILES) + _T(" (");
-			for (int f = 0; f < ARRSIZE(_apszSkinFiles); f++){
+			for (int f = 0; f < _countof(_apszSkinFiles); f++){
 				if (f > 0)
 					strFilter += _T(';');
 				strFilter += _apszSkinFiles[f];
 			}
 			strFilter += _T(")|");
-			for (int f = 0; f < ARRSIZE(_apszSkinFiles); f++){
+			for (int f = 0; f < _countof(_apszSkinFiles); f++){
 				if (f > 0)
 					strFilter += _T(';');
 				strFilter += _apszSkinFiles[f];
@@ -901,7 +908,7 @@ void CMuleToolbarCtrl::Refresh()
 			theApp.emuledlg->ircwnd,
 			theApp.emuledlg->statisticswnd
 		};
-		for (int i = 0; i < ARRSIZE(wnds); i++)
+		for (int i = 0; i < _countof(wnds); i++)
 		{
 			wnds[i]->SetWindowPos(NULL, rClientRect.left, rClientRect.top, rClientRect.Width(), rClientRect.Height(), SWP_NOZORDER);
 			theApp.emuledlg->RemoveAnchor(wnds[i]->m_hWnd);
@@ -1084,7 +1091,7 @@ void CMuleToolbarCtrl::Dump()
 		TBBUTTONINFO tbi = {0};
 		tbi.cbSize = sizeof(tbi);
 		tbi.dwMask |= TBIF_BYINDEX | TBIF_COMMAND | TBIF_IMAGE | TBIF_LPARAM | TBIF_SIZE | TBIF_STATE | TBIF_STYLE | TBIF_TEXT;
-		tbi.cchText = ARRSIZE(szLabel);
+		tbi.cchText = _countof(szLabel);
 		tbi.pszText = szLabel;
 		GetButtonInfo(i, &tbi);
 		TRACE(" %2d ", tbi.cx);
@@ -1099,6 +1106,25 @@ void CMuleToolbarCtrl::AutoSize()
 #ifdef _DEBUG
 	//Dump();
 #endif
+}
+
+BOOL CMuleToolbarCtrl::GetMaxSize(LPSIZE pSize) const
+{
+	BOOL bResult = CToolBarCtrl::GetMaxSize(pSize);
+	if (theApp.m_ullComCtrlVer <= MAKEDLLVERULL(5,81,0,0))
+	{
+		int iWidth = 0;
+		int iButtons = GetButtonCount();
+		for (int i = 0; i < iButtons; i++)
+		{
+			CRect rcButton;
+			if (GetItemRect(i, &rcButton))
+				iWidth += rcButton.Width();
+		}
+		if (iWidth > pSize->cx)
+			pSize->cx = iWidth;
+	}
+	return bResult;
 }
 
 void CMuleToolbarCtrl::SaveCurHeight()

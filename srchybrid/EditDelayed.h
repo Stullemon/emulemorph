@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -17,35 +17,43 @@
 
 #pragma once
 
+//////////////////////////////////////////////////////////////////////////////
+// CIconWnd
+
 class CIconWnd : public CStatic
 {
-// Construction/destruction
 public:
 	CIconWnd();
 	virtual ~CIconWnd();
+
 	void	SetImageList(CImageList* pImageList)	{ m_pImageList = pImageList; }
 	void	ShowIcon(int nIconNumber);
 
 protected:
+	int m_nCurrentIcon;
+	CImageList*	m_pImageList;
+
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnPaint();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
-	DECLARE_MESSAGE_MAP()
-
-	int m_nCurrentIcon;
-
-private:
-	CImageList*	m_pImageList;
 };
+
+
+//////////////////////////////////////////////////////////////////////////////
+// CEditDelayed
 
 class CEditDelayed : public CEdit
 {
 public:
 	CEditDelayed();
+
 	void	OnInit(CHeaderCtrl* pColumnHeader);
-	void	SetAlternateText(CString strText)	{ m_strAlternateText = strText; } // when not using pColumnHeader this text will be shown when the control is empty and has no focus
+
+	 // when not using pColumnHeader this text will be shown when the control is empty and has no focus
+	void	SetAlternateText(const CString& rstrText)	{ m_strAlternateText = rstrText; }
 
 protected:
-	bool m_bShuttingDown;
+	bool		m_bShuttingDown;
 	UINT_PTR	m_uTimerResult;
 	DWORD		m_dwLastModified;
 	CString		m_strLastEvaluatedContent;
@@ -53,17 +61,15 @@ protected:
 	CIconWnd	m_iwColumn;
 	HCURSOR		m_hCursor;
 	CPoint		m_pointMousePos;
-	bool		m_bShowRestButton;
+	bool		m_bShowResetButton;
 	bool		m_bShowsColumnText;
 	int			m_nCurrentColumnIdx;
 	CString		m_strAlternateText;
-	
-	CHeaderCtrl* m_pctrlColumnHeader; 
+	CHeaderCtrl* m_pctrlColumnHeader;
 
 	void	DoDelayedEvalute(bool bForce = false);
 	void	SetEditRect(bool bUpdateResetButtonPos, bool bUpdateColumnButton = false);
 	void	ShowColumnText(bool bShow);
-	void	SetWindowText(LPCTSTR lpszString)		{ CEdit::SetWindowText(lpszString); } // doesn't supports SetText from other controls
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSetFocus(CWnd* pOldWnd);
@@ -78,5 +84,4 @@ protected:
 	afx_msg HBRUSH CtlColor(CDC* pDC, UINT nCtlColor); 
 	afx_msg	BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSize(UINT nType, int cx, int cy);
-
 };

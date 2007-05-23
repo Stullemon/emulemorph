@@ -236,13 +236,15 @@ STDMETHODIMP CCustomAutoComplete::QueryInterface(REFIID riid, void** ppvObject)
 //
 //	IEnumString implementation
 //
-STDMETHODIMP CCustomAutoComplete::Next(ULONG celt, LPOLESTR* rgelt, ULONG* pceltFetched)
+STDMETHODIMP CCustomAutoComplete::Next(ULONG celt, LPOLESTR *rgelt, ULONG *pceltFetched)
 {
 	USES_CONVERSION;
 	HRESULT hr = S_FALSE;
 
 	if (!celt)
 		celt = 1;
+	if (pceltFetched)
+		*pceltFetched = 0;
 	ULONG i;
 	for (i = 0; i < celt; i++)
 	{
@@ -253,7 +255,7 @@ STDMETHODIMP CCustomAutoComplete::Next(ULONG celt, LPOLESTR* rgelt, ULONG* pcelt
 		wcscpy(rgelt[i], T2CW(m_asList[m_nCurrentElement]));
 
 		if (pceltFetched)
-			*pceltFetched++;
+			(*pceltFetched)++;
 		
 		m_nCurrentElement++;
 	}

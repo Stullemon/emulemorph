@@ -51,10 +51,13 @@ CVisualStylesXP::~CVisualStylesXP(void)
 
 void* CVisualStylesXP::GetProc(LPCSTR szProc, void* pfnFail)
 {
-	void* pRet = pfnFail;
-	if (m_hThemeDll != NULL)
-		pRet = GetProcAddress(m_hThemeDll, szProc);
-	return pRet;
+	void* pRes = pfnFail;
+	if (m_hThemeDll != NULL){
+		void* pRet = GetProcAddress(m_hThemeDll, szProc);
+		if (pRet != NULL)
+			pRes = pRet;
+	}
+	return pRes;
 }
 
 HTHEME CVisualStylesXP::OpenThemeData(HWND hwnd, LPCWSTR pszClassList)

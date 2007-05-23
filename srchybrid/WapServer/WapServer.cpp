@@ -105,7 +105,7 @@ void CWapServer::ReloadTemplates()
 
 	CString sFile;
 	if (thePrefs.GetWapTemplate()==_T("") || thePrefs.GetWapTemplate().MakeLower()==_T("emule_wap.tmpl"))
-		sFile= thePrefs.GetAppDir() + CString(_T("eMule_Wap.tmpl"));
+		sFile= thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR) + CString(_T("eMule_Wap.tmpl"));
 	else sFile=thePrefs.GetWapTemplate();
 
 	CStdioFile file;
@@ -270,7 +270,7 @@ void CWapServer::ProcessFileReq(WapThreadData Data) {
 
 	if (filename.GetAt(0)==_T('\\')) filename.Delete(0);
 
-	filename=thePrefs.GetWapServerDir()+filename;
+	filename=thePrefs.GetMuleDirectory(EMULE_WAPSERVERDIR)+filename;
 
 	if(filename.Right(11).CompareNoCase(_T("script.wmls"))==0){
 		SendScriptFile(Data);
@@ -3681,9 +3681,9 @@ void CWapServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 		if(preselect==i)
 			tempBuf3.Format(_T("<select name=\"cat\" ivalue=\"%i\">"),pos);
 		if(jump)
-			tempBuf2.Format(_T("<option value=\"%i\" onpick=\"./script.wmls#GotoCat('%i','[URL]')\">%s</option>"),i,i, (i==0)?_GetPlainResString(IDS_ALL):thePrefs.GetCategory(i)->title );
+			tempBuf2.Format(_T("<option value=\"%i\" onpick=\"./script.wmls#GotoCat('%i','[URL]')\">%s</option>"),i,i, (i==0)?_GetPlainResString(IDS_ALL):thePrefs.GetCategory(i)->strTitle );
 		else
-			tempBuf2.Format(_T("<option value=\"%i\">%s</option>"),i, (i==0)?_GetPlainResString(IDS_ALL):thePrefs.GetCategory(i)->title );
+			tempBuf2.Format(_T("<option value=\"%i\">%s</option>"),i, (i==0)?_GetPlainResString(IDS_ALL):thePrefs.GetCategory(i)->strTitle );
 		tempBuf.Append(tempBuf2);
 	}
 	if (extraCats) {

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -145,7 +145,9 @@ CPreferencesDlg::CPreferencesDlg()
 
 //MORPH START - Preferences groups [ePlus/Sirob]
 /*
-	SetTreeViewMode(TRUE, TRUE, TRUE);
+	// The height of the option dialog is already too large for 640x480. To show as much as
+	// possible we do not show a page caption (which is an decorative element only anyway).
+	SetTreeViewMode(TRUE, GetSystemMetrics(SM_CYSCREEN) >= 600, TRUE);
 	SetTreeWidth(170);
 */
 	m_nActiveWnd = 0;

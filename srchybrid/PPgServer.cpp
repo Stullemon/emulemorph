@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -127,6 +127,8 @@ void CPPgServer::Localize(void)
 	if (m_hWnd)
 	{
 		SetWindowText(GetResString(IDS_PW_SERVER));
+		GetDlgItem(IDC_LBL_UPDATE_SERVERS)->SetWindowText(GetResString(IDS_SV_UPDATE));
+		GetDlgItem(IDC_LBL_MISC)->SetWindowText(GetResString(IDS_PW_MISC));
 		GetDlgItem(IDC_REMOVEDEAD)->SetWindowText(GetResString(IDS_PW_RDEAD));
 		GetDlgItem(IDC_RETRIES_LBL)->SetWindowText(GetResString(IDS_PW_RETRIES));
 		GetDlgItem(IDC_UPDATESERVERCONNECT)->SetWindowText(GetResString(IDS_PW_USC));
@@ -160,7 +162,7 @@ void CPPgServer::Localize(void)
 
 void CPPgServer::OnBnClickedEditadr()
 {
-	ShellExecute(NULL, _T("open"), thePrefs.GetTxtEditor(), _T("\"") + thePrefs.GetConfigDir() + _T("addresses.dat\""), NULL, SW_SHOW); 
+	ShellExecute(NULL, _T("open"), thePrefs.GetTxtEditor(), _T("\"") + thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("addresses.dat\""), NULL, SW_SHOW); 
 }
 
 void CPPgServer::OnHelp()

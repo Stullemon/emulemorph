@@ -1,6 +1,6 @@
 // parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -151,12 +151,16 @@ CSearchFile::CSearchFile(const CSearchFile* copyfrom)
 	m_list_childcount = 0;
 	m_bPreviewPossible = false;
 	m_eKnown = copyfrom->m_eKnown;
+	m_strNameWithoutKeywords = copyfrom->GetNameWithoutKeyword();
+	m_bServerUDPAnswer = copyfrom->m_bServerUDPAnswer;
+	m_nSpamRating = copyfrom->GetSpamRating();
 }
 
 CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8, 
-						 uint32 nSearchID, uint32 nServerIP, uint16 nServerPort, LPCTSTR pszDirectory, bool bKademlia)
+						 uint32 nSearchID, uint32 nServerIP, uint16 nServerPort, LPCTSTR pszDirectory, bool bKademlia, bool bServerUDPAnswer)
 {
 	m_bKademlia = bKademlia;
+	m_bServerUDPAnswer = bServerUDPAnswer;
 	m_nSearchID = nSearchID;
 	in_data->ReadHash16(m_abyFileHash);
 	m_nClientID = in_data->ReadUInt32();
@@ -265,17 +269,19 @@ CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8,
 	m_nClientServerIP = nServerIP;
 	m_nClientServerPort = nServerPort;
 	if (m_nClientServerIP && m_nClientServerPort){
-		SServer server(m_nClientServerIP, m_nClientServerPort);
+		SServer server(m_nClientServerIP, m_nClientServerPort, bServerUDPAnswer);
 		server.m_uAvail = GetIntTagValue(FT_SOURCES);
 		AddServer(server);
 	}
 	m_pszDirectory = pszDirectory ? _tcsdup(pszDirectory) : NULL;
+
 	m_pszIsFake = theApp.FakeCheck->IsFake(m_abyFileHash,GetFileSize()) ? _tcsdup(theApp.FakeCheck->GetLastHit()) : NULL;; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	m_list_bExpanded = false;
 	m_list_parent = NULL;
 	m_list_childcount = 0;
 	m_bPreviewPossible = false;
 	m_eKnown = NotDetermined;
+	m_nSpamRating = 0;
 }
 
 CSearchFile::~CSearchFile()
@@ -405,4 +411,8 @@ int CSearchFile::IsComplete(UINT uSources, UINT uCompleteSources) const
 time_t CSearchFile::GetLastSeenComplete() const
 {
 	return GetIntTagValue(FT_LASTSEENCOMPLETE);
+}
+
+bool CSearchFile::IsConsideredSpam() const{
+	return GetSpamRating() >= SEARCH_SPAM_THRESHOLD;
 }

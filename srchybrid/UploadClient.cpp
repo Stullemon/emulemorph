@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -529,11 +529,7 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		// the first 15 min downloadtime counts as 15 min waitingtime and you get a 15 min bonus while you are in the first 15 min :)
 		// (to avoid 20 sec downloads) after this the score won't raise anymore 
 		fBaseValue = (float)(m_dwUploadTime-GetWaitStartTime());
-//Morph Start- modifed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-		// Moonlight: SUQWT - I'm exploiting negative overflows to adjust wait start times. Overflows should not be an issue as long
-		// as queue turnover rate is faster than 49 days.
-		// ASSERT ( m_dwUploadTime-GetWaitStartTime() >= 0 ); //oct 28, 02: changed this from "> 0" to ">= 0"//original commented out
-//Morph End- modifed by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)		
+		//ASSERT ( m_dwUploadTime-GetWaitStartTime() >= 0 ); //oct 28, 02: changed this from "> 0" to ">= 0" -> // 02-Okt-2006 []: ">=0" is always true!
 		fBaseValue += (float)(::GetTickCount() - m_dwUploadTime > 900000)? 900000:1800000;
 		fBaseValue /= 1000;
 	}
@@ -953,7 +949,6 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 				strError.Format(_T("Failed to upload to PeerCache - missing socket; %s"), DbgGetClientInfo());
 				throw strError;
 			}
-			USES_CONVERSION;
 			CSafeMemFile dataHttp(10240);
 			if (m_iHttpSendState == 0)
 			{
@@ -970,9 +965,9 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 				//---
 				//MORPH START - Added by SiRoB, [-modname-]
 				/*
-				str.AppendFormat("Server: eMule/%s\r\n", T2CA(theApp.m_strCurVersionLong));
+				str.AppendFormat("Server: eMule/%s\r\n", CStringA(theApp.m_strCurVersionLong));
 				*/
-				str.AppendFormat("Server: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(theApp.m_strModVersion));
+				str.AppendFormat("Server: eMule/%s %s\r\n", CStringA(theApp.m_strCurVersionLong), CStringA(theApp.m_strModVersion));
 				//MORPH END   - Added by SiRoB, [-modname-]
 				str.AppendFormat("\r\n");
 				dataHttp.Write((LPCSTR)str, str.GetLength());

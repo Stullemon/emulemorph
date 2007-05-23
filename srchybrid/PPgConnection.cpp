@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -175,6 +175,8 @@ void CPPgConnection::OnEnChangeUDPDisable()
 		GetDlgItem(IDC_UDPPORT)->GetWindowText(buffer,20);
 		tempVal = (uint16)_tstoi(buffer);
 	}
+	else
+		buffer[0] = _T('\0');
 
 	if (IsDlgButtonChecked(IDC_UDPDISABLE) || (!IsDlgButtonChecked(IDC_UDPDISABLE) && tempVal == 0))
 	{
@@ -184,6 +186,12 @@ void CPPgConnection::OnEnChangeUDPDisable()
 		strBuffer.Format(_T("%d"), tempVal);
 		GetDlgItem(IDC_UDPPORT)->SetWindowText(strBuffer);
 	}
+
+	if (thePrefs.networkkademlia && !IsDlgButtonChecked(IDC_UDPDISABLE) != 0) // don't use GetNetworkKademlia here
+		CheckDlgButton(IDC_NETWORK_KADEMLIA, 1);
+	else
+		CheckDlgButton(IDC_NETWORK_KADEMLIA, 0);
+	GetDlgItem(IDC_NETWORK_KADEMLIA)->EnableWindow(IsDlgButtonChecked(IDC_UDPDISABLE) == 0);
 
 	guardian=false;
 }
@@ -289,10 +297,11 @@ void CPPgConnection::LoadSettings(void)
 		else
 			CheckDlgButton(IDC_AUTOCONNECT,0);
 
-		if (thePrefs.networkkademlia)
+		if (thePrefs.GetNetworkKademlia())
 			CheckDlgButton(IDC_NETWORK_KADEMLIA,1);
 		else
 			CheckDlgButton(IDC_NETWORK_KADEMLIA,0);
+		GetDlgItem(IDC_NETWORK_KADEMLIA)->EnableWindow(thePrefs.GetUDPPort() > 0);
 
 		if (thePrefs.networked2k)
 			CheckDlgButton(IDC_NETWORK_ED2K,1);
@@ -300,10 +309,10 @@ void CPPgConnection::LoadSettings(void)
 			CheckDlgButton(IDC_NETWORK_ED2K,0);
 
 		// don't try on XP SP2 or higher, not needed there anymore
-		if (IsRunningXPSP2() == 0 && theApp.m_pFirewallOpener->DoesFWConnectionExist())
-			GetDlgItem(IDC_OPENPORTS)->EnableWindow(true);
+		if (thePrefs.GetWindowsVersion() == _WINVER_XP_ && IsRunningXPSP2() == 0 && theApp.m_pFirewallOpener->DoesFWConnectionExist())
+			GetDlgItem(IDC_OPENPORTS)->ShowWindow(SW_SHOW);
 		else
-			GetDlgItem(IDC_OPENPORTS)->EnableWindow(false);
+			GetDlgItem(IDC_OPENPORTS)->ShowWindow(SW_HIDE);
 
 		//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
 		CString rndText;

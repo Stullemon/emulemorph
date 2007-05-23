@@ -96,6 +96,8 @@ namespace Kademlia
 			void Process_KADEMLIA_FINDBUDDY_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_FINDBUDDY_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_CALLBACK_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP);
+			void Process_KADEMLIA2_PING (uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_PONG (uint32 uIP, uint16 uUDPPort);
 
 			void AddTrackedPacket(uint32 dwIP, uint8 byOpcode);
 			bool IsOnTrackList(uint32 dwIP, uint8 byOpcode, bool bDontRemove = false);

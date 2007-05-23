@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -79,12 +79,12 @@ void CServerList::AutoUpdate()
 	CString servermetbackup;
 	CString servermet;
 	CString strURLToDownload; 
-	servermetdownload.Format(_T("%sserver_met.download"), thePrefs.GetConfigDir());
-	servermetbackup.Format(_T("%sserver_met.old"), thePrefs.GetConfigDir());
-	servermet.Format(_T("%s") SERVER_MET_FILENAME, thePrefs.GetConfigDir());
-	_tremove(servermetbackup);
-	_tremove(servermetdownload);
-	_trename(servermet,servermetbackup);
+	servermetdownload.Format(_T("%sserver_met.download"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
+	servermetbackup.Format(_T("%sserver_met.old"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
+	servermet.Format(_T("%s") SERVER_MET_FILENAME, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
+	(void)_tremove(servermetbackup);
+	(void)_tremove(servermetdownload);
+	(void)_trename(servermet, servermetbackup);
 	
 	POSITION Pos = thePrefs.addresses_list.GetHeadPosition(); 
 	while (!bDownloaded && Pos != NULL)
@@ -101,12 +101,12 @@ void CServerList::AutoUpdate()
 	}
 
 	if (bDownloaded){
-		_trename(servermet, servermetdownload);
-		_trename(servermetbackup, servermet);
+		(void)_trename(servermet, servermetdownload);
+		(void)_trename(servermetbackup, servermet);
 	}
 	else{
-		_tremove(servermet);
-		_trename(servermetbackup, servermet);
+		(void)_tremove(servermet);
+		(void)_trename(servermetbackup, servermet);
 	}
 }
 
@@ -118,18 +118,18 @@ bool CServerList::Init()
 	
 	// Load Metfile
 	CString strPath;
-	strPath.Format(_T("%s") SERVER_MET_FILENAME, thePrefs.GetConfigDir());
+	strPath.Format(_T("%s") SERVER_MET_FILENAME, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 	bool bRes = AddServerMetToList(strPath, false);
 	if (thePrefs.GetAutoUpdateServerList())
 	{
-		strPath.Format(_T("%sserver_met.download"), thePrefs.GetConfigDir());
+		strPath.Format(_T("%sserver_met.download"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 		bool bRes2 = AddServerMetToList(strPath, true);
 		if( !bRes && bRes2 )
 			bRes = true;
 	}
 
 	// insert static servers from textfile
-	strPath.Format(_T("%sstaticservers.dat"), thePrefs.GetConfigDir());
+	strPath.Format(_T("%sstaticservers.dat"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 	AddServersFromTextFile(strPath);
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	if (thePrefs.IsAutoUPdateIPFilterEnabled())
@@ -699,7 +699,7 @@ bool CServerList::SaveServermetToFile()
 	if (thePrefs.GetLogFileSaving())
 		AddDebugLogLine(false, _T("Saving servers list file \"%s\""), SERVER_MET_FILENAME);
 	m_nLastSaved = ::GetTickCount(); 
-	CString newservermet(thePrefs.GetConfigDir());
+	CString newservermet(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 	newservermet += SERVER_MET_FILENAME _T(".new");
 	CSafeBufferedFile servermet;
 	CFileException fexp;
@@ -879,8 +879,8 @@ bool CServerList::SaveServermetToFile()
 		}
 		servermet.Close();
 
-		CString curservermet(thePrefs.GetConfigDir());
-		CString oldservermet(thePrefs.GetConfigDir());
+		CString curservermet(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
+		CString oldservermet(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 		curservermet += SERVER_MET_FILENAME;
 		oldservermet += _T("server_met.old");
 		
@@ -949,8 +949,8 @@ void CServerList::AddServersFromTextFile(const CString& strFilename)
 	
 		// fetch name
 		CString strName = strLine;
-		strName.Replace(_T("\r"), _T(""));
-		strName.Replace(_T("\n"), _T(""));
+		strName.Remove(_T('\r'));
+		strName.Remove(_T('\n'));
 
 		// create server object and add it to the list
 		CServer* nsrv = new CServer((uint16)_tstoi(strPort), strHost);
@@ -979,7 +979,7 @@ bool CServerList::SaveStaticServers()
 {
 	bool bResult = false;
 
-	FILE* fpStaticServers = _tfsopen(thePrefs.GetConfigDir() + _T("staticservers.dat"), _T("w"), _SH_DENYWR);
+	FILE* fpStaticServers = _tfsopen(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("staticservers.dat"), _T("w"), _SH_DENYWR);
 	if (fpStaticServers == NULL) {
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERROR_SSF));
 		return bResult;

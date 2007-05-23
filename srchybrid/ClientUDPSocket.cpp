@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -36,6 +36,7 @@
 #include "IPFilter.h"
 #include "Log.h"
 #include "EncryptedDatagramSocket.h"
+#include "./kademlia/kademlia/prefs.h"
 
 #include "FirewallOpener.h" // emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
 
@@ -87,7 +88,9 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 	if (!(theApp.ipfilter->IsFiltered(sockAddr.sin_addr.S_un.S_addr) || theApp.clientlist->IsBannedClient(sockAddr.sin_addr.S_un.S_addr)))
 	{
 		BYTE* pBuffer;
-		int nPacketLen = DecryptReceivedClient(buffer, nRealLen, &pBuffer, sockAddr.sin_addr.S_un.S_addr);
+		uint16 nReceiverVerifyKey;
+		uint16 nSenderVerifyKey;
+		int nPacketLen = DecryptReceivedClient(buffer, nRealLen, &pBuffer, sockAddr.sin_addr.S_un.S_addr, &nReceiverVerifyKey, &nSenderVerifyKey);
 		if (nPacketLen >= 1)
 		{
 			CString strError;
@@ -109,9 +112,17 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 						if (nPacketLen >= 2)
 						{
 							uint32 nNewSize = nPacketLen*10+300;
-							byte* unpack = new byte[nNewSize];
-							uLongf unpackedsize = nNewSize-2;
-							int iZLibResult = uncompress(unpack+2, &unpackedsize, pBuffer+2, nPacketLen-2);
+							BYTE* unpack = NULL;
+							uLongf unpackedsize = 0;
+							int iZLibResult = 0;
+							do {
+								delete[] unpack;
+								unpack = new BYTE[nNewSize];
+								unpackedsize = nNewSize-2;
+								iZLibResult = uncompress(unpack+2, &unpackedsize, pBuffer+2, nPacketLen-2);
+								nNewSize *= 2; // size for the next try if needed
+							} while (iZLibResult == Z_BUF_ERROR && nNewSize < 250000);
+
 							if (iZLibResult == Z_OK)
 							{
 								unpack[0] = OP_KADEMLIAHEADER;
@@ -319,9 +330,9 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 				Packet* response = new Packet(OP_FILENOTFOUND,0,OP_EMULEPROT);
 				theStats.AddUpDataOverheadFileRequest(response->size);
 				if (sender != NULL)
-					SendPacket(response, ip, port, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash());
+					SendPacket(response, ip, port, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash(), false, 0);
 				else
-					SendPacket(response, ip, port, false, NULL);
+					SendPacket(response, ip, port, false, NULL, false, 0);
 				break;
 			}
 			if (sender)
@@ -369,7 +380,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 					Packet* response = new Packet(&data_out, OP_EMULEPROT);
 					response->opcode = OP_REASKACK;
 					theStats.AddUpDataOverheadFileRequest(response->size);
-					SendPacket(response, ip, port, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash());
+					SendPacket(response, ip, port, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash(), false, 0);
 				}
 				else
 				{
@@ -394,7 +405,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 							DebugSend("OP__QueueFull", NULL);
 						Packet* response = new Packet(OP_QUEUEFULL,0,OP_EMULEPROT);
 						theStats.AddUpDataOverheadFileRequest(response->size);
-						SendPacket(response, ip, port, false, NULL); // we cannot answer this one encrypted since we dont know this client
+						SendPacket(response, ip, port, false, NULL, false, 0); // we cannot answer this one encrypted since we dont know this client
 					}
 				}
 				else{
@@ -591,7 +602,7 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, ui
 
 					Packet* response = new Packet(OP_FILENOTFOUND,0,OP_EMULEPROT);
 					theStats.AddUpDataOverheadFileRequest(response->size);
-					SendPacket(response, ip, port, false, NULL);
+					SendPacket(response, ip, port, false, NULL, false, 0);
 					break;
 				}
 				bool bSenderMultipleIpUnknown = false;
@@ -623,7 +634,7 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, ui
 						Packet* response = new Packet(&data_out, OP_EMULEPROT);
 						response->opcode = OP_REASKACK;
 						theStats.AddUpDataOverheadFileRequest(response->size);
-						theApp.clientudp->SendPacket(response, ip, port, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash());
+						theApp.clientudp->SendPacket(response, ip, port, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash(), false, 0);
 					}
 					else
 					{
@@ -647,7 +658,7 @@ bool CClientUDPSocket::ProcessWebCachePacket(const BYTE* packet, uint32 size, ui
 								DebugSend("OP__QueueFull", NULL);
 							Packet* response = new Packet(OP_QUEUEFULL,0,OP_EMULEPROT);
 							theStats.AddUpDataOverheadFileRequest(response->size);
-							SendPacket(response, ip, port, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash());
+							SendPacket(response, ip, port, sender->ShouldReceiveCryptUDPPackets(), sender->GetUserHash(), false, 0);
 						}
 					}
 					else {
@@ -705,9 +716,9 @@ SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend,
 			memcpy(sendbuffer,cur_packet->packet->GetUDPHeader(),2);
 			memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
 
-			if (cur_packet->bEncrypt && theApp.GetPublicIP() > 0){
-				nLen = EncryptSendClient(&sendbuffer, nLen, cur_packet->achTargetClientHash);
-				DEBUG_ONLY(  DebugLog(_T("Sent obfuscated UDP packet to clientIP: %s"), ipstr( cur_packet->dwIP)) );
+			if (cur_packet->bEncrypt && (theApp.GetPublicIP() > 0 || cur_packet->bKad)){
+				nLen = EncryptSendClient(&sendbuffer, nLen, cur_packet->pachTargetClientHashORKadID, cur_packet->bKad,  cur_packet->nReceiverVerifyKey, (cur_packet->bKad ? Kademlia::CKademlia::GetPrefs()->GetUDPVerifyKey(cur_packet->dwIP) : (uint16)0));
+				DEBUG_ONLY(  DebugLog(_T("Sent obfuscated UDP packet to clientIP: %s, Kad: %s, ReceiverKey: %u"), ipstr(cur_packet->dwIP), cur_packet->bKad ? _T("Yes") : _T("No"), cur_packet->nReceiverVerifyKey) );
 			}
 
             if (!SendTo((char*)sendbuffer, nLen, cur_packet->dwIP, cur_packet->nPort)){
@@ -757,17 +768,20 @@ int CClientUDPSocket::SendTo(char* lpBuf,int nBufLen,uint32 dwIP, uint16 nPort){
 	return 0;
 }
 
-bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort, bool bEncrypt, const uchar* pachTargetClientHash){
+bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort, bool bEncrypt, const uchar* pachTargetClientHashORKadID, bool bKad, uint16 nReceiverVerifyKey){
 	UDPPack* newpending = new UDPPack;
 	newpending->dwIP = dwIP;
 	newpending->nPort = nPort;
 	newpending->packet = packet;
 	newpending->dwTime = GetTickCount();
-	newpending->bEncrypt = bEncrypt && pachTargetClientHash != NULL;
+	newpending->bEncrypt = bEncrypt && pachTargetClientHashORKadID != NULL;
+	newpending->bKad = bKad;
+	newpending->nReceiverVerifyKey = nReceiverVerifyKey;
+
 	if (newpending->bEncrypt)
-		md4cpy(newpending->achTargetClientHash, pachTargetClientHash);
+		md4cpy(newpending->pachTargetClientHashORKadID, pachTargetClientHashORKadID);
 	else
-		md4clr(newpending->achTargetClientHash);
+		md4clr(newpending->pachTargetClientHashORKadID);
 // ZZ:UploadBandWithThrottler (UDP) -->
     sendLocker.Lock();
 	controlpacket_queue.AddTail(newpending);

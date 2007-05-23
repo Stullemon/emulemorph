@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -114,7 +114,7 @@ void CPeerCacheFinder::Init(uint32 dwLastSearch, bool bLastSearchSuccess, bool b
 	else{
 		if (bLastSearchSuccess){ // sanitycheck
 			bool bOK = false;
-			for (int i = 0; i != ARRSIZE(anPeerCachPorts); i++){
+			for (int i = 0; i < _countof(anPeerCachPorts); i++){
 				if(anPeerCachPorts[i] == nPort)
 					bOK = true;
 			}
@@ -481,7 +481,7 @@ bool CPCValditeThread::Valdite(){
 
 	CInternetSession session;
 	CInternetFile* file = NULL;
-	for (int i = 0; i != ARRSIZE(anPeerCachPorts); i++){
+	for (int i = 0; i < _countof(anPeerCachPorts); i++){
 		try
 		{
 			// try to connect to the URL
@@ -500,7 +500,7 @@ bool CPCValditeThread::Valdite(){
 			strError.Trim(_T(" \r\n"));
 			pException->Delete();
 			DEBUG_ONLY(theApp.QueueDebugLogLine(false, _T("PeerCache: Failed to retrieve .p2pinfo file on Port %u - %s"),anPeerCachPorts[i], strError));
-			if (i == (ARRSIZE(anPeerCachPorts)-1)){ // was last try
+			if (i == (_countof(anPeerCachPorts)-1)){ // was last try
 				DEBUG_ONLY(theApp.QueueDebugLogLine(false, _T("PeerCache: Failed to retrieve .p2pinfo file, cache disabled"),anPeerCachPorts[i]));
 				return false;
 			}
@@ -677,7 +677,7 @@ bool CPCValditeThread::Valdite(){
 				using namespace CryptoPP;
 				Integer e, m, n;
 				e = 3;
-				n.Decode(achVerify_Key, ARRSIZE(achVerify_Key));
+				n.Decode(achVerify_Key, _countof(achVerify_Key));
 
 				uchar aucSignature[SIGNATURELENGTH];
 				for (int i = 0; i != SIGNATURELENGTH; i++)

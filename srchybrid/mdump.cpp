@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -30,7 +30,7 @@ void CMiniDumper::Enable(LPCTSTR pszAppName, bool bShowErrors)
 {
 	// if this assert fires then you have two instances of CMiniDumper which is not allowed
 	ASSERT( m_szAppName[0] == _T('\0') );
-	_tcsncpy(m_szAppName, pszAppName, ARRSIZE(m_szAppName));
+	_tcsncpy(m_szAppName, pszAppName, _countof(m_szAppName));
 
 	MINIDUMPWRITEDUMP pfnMiniDumpWriteDump = NULL;
 	HMODULE hDbgHelpDll = GetDebugHelperDll((FARPROC*)&pfnMiniDumpWriteDump, bShowErrors);
@@ -84,17 +84,22 @@ LONG CMiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS* pExceptionInfo)
 			if (MessageBox(NULL, _T("eMule crashed :-(\r\n\r\nA diagnostic file can be created which will help the author to resolve this problem. This file will be saved on your Disk (and not sent).\r\n\r\nDo you want to create this file now?"), m_szAppName, MB_ICONSTOP | MB_YESNO) == IDYES)
 			{
 				// Create full path for DUMP file
-				TCHAR szDumpPath[_MAX_PATH] = {0};
-				GetModuleFileName(NULL, szDumpPath, ARRSIZE(szDumpPath));
+				TCHAR szDumpPath[MAX_PATH] = {0};
+				size_t uDumpPathLen = GetModuleFileName(NULL, szDumpPath, _countof(szDumpPath) - 1);
 				LPTSTR pszFileName = _tcsrchr(szDumpPath, _T('\\'));
 				if (pszFileName) {
 					pszFileName++;
 					*pszFileName = _T('\0');
 				}
 
-				// Replace spaces and dots in file name.
 				TCHAR szBaseName[_MAX_PATH] = {0};
-				_tcsncat(szBaseName, m_szAppName, ARRSIZE(szBaseName) - 1);
+				_tcsncpy(szBaseName, m_szAppName, _countof(szBaseName) - 1);
+				size_t uBaseNameLen = _tcslen(szBaseName);
+
+				time_t tNow = time(NULL);
+				_tcsftime(szBaseName + uBaseNameLen, _countof(szBaseName) - uBaseNameLen - 1, _T("_%Y%m%d-%H%M%S"), localtime(&tNow));
+
+				// Replace spaces and dots in file name.
 				LPTSTR psz = szBaseName;
 				while (*psz != _T('\0')) {
 					if (*psz == _T('.'))
@@ -103,8 +108,12 @@ LONG CMiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS* pExceptionInfo)
 						*psz = _T('_');
 					psz++;
 				}
-				_tcsncat(szDumpPath, szBaseName, ARRSIZE(szDumpPath) - 1);
-				_tcsncat(szDumpPath, _T(".dmp"), ARRSIZE(szDumpPath) - 1);
+				if (uDumpPathLen < _countof(szDumpPath) - 1) {
+					_tcsncat(szDumpPath, szBaseName, _countof(szDumpPath) - uDumpPathLen - 1);
+					uDumpPathLen = _tcslen(szDumpPath);
+					if (uDumpPathLen < _countof(szDumpPath) - 1)
+						_tcsncat(szDumpPath, _T(".dmp"), _countof(szDumpPath) - uDumpPathLen - 1);
+				}
 
 				HANDLE hFile = CreateFile(szDumpPath, GENERIC_WRITE, FILE_SHARE_WRITE, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 				if (hFile != INVALID_HANDLE_VALUE)
@@ -120,23 +129,23 @@ LONG CMiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS* pExceptionInfo)
 						// Do *NOT* localize that string (in fact, do not use MFC to load it)!
 						//MORPH START - Changed by SiRoB
 						/*
-						_sntprintf(szResult, ARRSIZE(szResult), _T("Saved dump file to \"%s\".\r\n\r\nPlease send this file together with a detailed bug report to dumps@emule-project.net !\r\n\r\nThank you for helping to improve eMule."), szDumpPath);
+						_sntprintf(szResult, _countof(szResult)-1, _T("Saved dump file to \"%s\".\r\n\r\nPlease send this file together with a detailed bug report to dumps@emule-project.net !\r\n\r\nThank you for helping to improve eMule."), szDumpPath);
 						*/
-						_sntprintf(szResult, ARRSIZE(szResult), _T("Saved dump file to \"%s\".\r\n\r\nPlease provide this file together with a DETAILED bug report to some Morph dev !\r\n\r\nThank you for helping to improve eMule."), szDumpPath);
+						_sntprintf(szResult, _countof(szResult)-1, _T("Saved dump file to \"%s\".\r\n\r\nPlease provide this file together with a DETAILED bug report to some Morph dev !\r\n\r\nThank you for helping to improve eMule."), szDumpPath);
 						//MORPH END  - Changed by SiRoB
 						lRetValue = EXCEPTION_EXECUTE_HANDLER;
 					}
 					else
 					{
 						// Do *NOT* localize that string (in fact, do not use MFC to load it)!
-						_sntprintf(szResult, ARRSIZE(szResult), _T("Failed to save dump file to \"%s\".\r\n\r\nError: %u"), szDumpPath, GetLastError());
+						_sntprintf(szResult, _countof(szResult) - 1, _T("Failed to save dump file to \"%s\".\r\n\r\nError: %u"), szDumpPath, GetLastError());
 					}
 					CloseHandle(hFile);
 				}
 				else
 				{
 					// Do *NOT* localize that string (in fact, do not use MFC to load it)!
-					_sntprintf(szResult, ARRSIZE(szResult), _T("Failed to create dump file \"%s\".\r\n\r\nError: %u"), szDumpPath, GetLastError());
+					_sntprintf(szResult, _countof(szResult) - 1, _T("Failed to create dump file \"%s\".\r\n\r\nError: %u"), szDumpPath, GetLastError());
 				}
 			}
 		}

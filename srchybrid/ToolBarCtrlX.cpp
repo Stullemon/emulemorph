@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -149,7 +149,7 @@ void CToolBarCtrlX::AdjustFont(int iMaxPointSize, CSize sizButton)
 		LOGFONT lf = {0};
 		if (pFont->GetLogFont(&lf) > 0)
 		{
-			HDC hDC = ::GetDC(NULL);
+			HDC hDC = ::GetDC(HWND_DESKTOP);
 			int iPointSize = -MulDiv(lf.lfHeight, 72, GetDeviceCaps(hDC, LOGPIXELSY));
 			::ReleaseDC(NULL, hDC);
 			if (iPointSize > iMaxPointSize)

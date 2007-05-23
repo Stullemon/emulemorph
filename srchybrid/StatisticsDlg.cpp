@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -150,30 +150,40 @@ BOOL CStatisticsDlg::OnInitDialog()
 		GetDlgItem(IDC_BNMENU)->SetWindowText(_T("6")); // show a down-arrow
 	}
 
+	// Win98: Explicitly set to Unicode to receive Unicode notifications.
+	stattree.SendMessage(CCM_SETUNICODEFORMAT, TRUE);
 	CreateMyTree();
 
 	// Setup download-scope
-	CRect rect;
-	GetDlgItem(IDC_SCOPE_D)->GetWindowRect(rect) ;
+	CRect rcDown;
+	GetDlgItem(IDC_SCOPE_D)->GetWindowRect(rcDown);
 	GetDlgItem(IDC_SCOPE_D)->DestroyWindow();
-	ScreenToClient(rect) ;
-	m_DownloadOMeter.Create(WS_VISIBLE | WS_CHILD, rect, this, IDC_SCOPE_D);
+	ScreenToClient(rcDown);
+	m_DownloadOMeter.Create(WS_VISIBLE | WS_CHILD, rcDown, this, IDC_SCOPE_D);
 	SetARange(true,thePrefs.GetMaxGraphDownloadRate());
 	m_DownloadOMeter.SetYUnits(GetResString(IDS_KBYTESPERSEC));
 	
 	// Setup upload-scope
-	GetDlgItem(IDC_SCOPE_U)->GetWindowRect(rect) ;
+	CRect rcUp;
+	GetDlgItem(IDC_SCOPE_U)->GetWindowRect(rcUp);
 	GetDlgItem(IDC_SCOPE_U)->DestroyWindow();
-	ScreenToClient(rect) ;
-	m_UploadOMeter.Create(WS_VISIBLE | WS_CHILD, rect, this, IDC_SCOPE_U);
+	ScreenToClient(rcUp);
+	// compensate rounding errors due to dialog units, make each of the 3 panes with same height
+	rcUp.top = rcDown.bottom + 4;
+	rcUp.bottom = rcUp.top + rcDown.Height();
+	m_UploadOMeter.Create(WS_VISIBLE | WS_CHILD, rcUp, this, IDC_SCOPE_U);
 	SetARange(false, thePrefs.GetMaxGraphUploadRate(true));
 	m_UploadOMeter.SetYUnits(GetResString(IDS_KBYTESPERSEC));
 	
 	// Setup additional graph-scope
-	GetDlgItem(IDC_STATSSCOPE)->GetWindowRect(rect) ;
+	CRect rcConn;
+	GetDlgItem(IDC_STATSSCOPE)->GetWindowRect(rcConn);
 	GetDlgItem(IDC_STATSSCOPE)->DestroyWindow();
-	ScreenToClient(rect) ;
-	m_Statistics.Create(WS_VISIBLE | WS_CHILD, rect, this, IDC_STATSSCOPE);
+	ScreenToClient(rcConn);
+	// compensate rounding errors due to dialog units, make each of the 3 panes with same height
+	rcConn.top = rcUp.bottom + 4;
+	rcConn.bottom = rcConn.top + rcDown.Height();
+	m_Statistics.Create(WS_VISIBLE | WS_CHILD, rcConn, this, IDC_STATSSCOPE);
 	m_Statistics.SetRanges(0, thePrefs.GetStatsMax()) ;
 	m_Statistics.autofitYscale=false;
 	// Set the trend ratio of the Active Connections trend in the Connection Statistics scope.
@@ -198,7 +208,7 @@ BOOL CStatisticsDlg::OnInitDialog()
 	EnableWindow( TRUE );
 
 	m_ilastMaxConnReached = 0;
-	CRect rcW,rcSpl,rcTree,rcDown,rcUp,rcStat;
+	CRect rcW,rcSpl,rcTree,rcStat;
 	
 	GetWindowRect(rcW);
 	ScreenToClient(rcW);
@@ -213,9 +223,11 @@ BOOL CStatisticsDlg::OnInitDialog()
 	ScreenToClient(rcStat);
 		
 	//vertical splitter
-	rcSpl.left=rcTree.right+1; rcSpl.right=rcSpl.left+4; rcSpl.top=rcW.top+2; rcSpl.bottom=rcW.bottom-5;
+	rcSpl.left = rcTree.right;
+	rcSpl.right = rcSpl.left + 4;
+	rcSpl.top = rcW.top + 2;
+	rcSpl.bottom = rcW.bottom - 5;
 	m_wndSplitterstat.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT);
-
 	int PosStatVinitX = rcSpl.left;
 	int PosStatVnewX = thePrefs.GetSplitterbarPositionStat()*rcW.Width()/100;
 	int maxX = rcW.right-13;
@@ -226,20 +238,15 @@ BOOL CStatisticsDlg::OnInitDialog()
 		PosStatVnewX = minX;
 	rcSpl.left = PosStatVnewX;
 	rcSpl.right = PosStatVnewX+4;
-
 	m_wndSplitterstat.MoveWindow(rcSpl);
 
 	//HR splitter
 	rcSpl.left=rcDown.left;
 	rcSpl.right=rcDown.right;
-	rcSpl.top=rcDown.bottom+1;
+	rcSpl.top = rcDown.bottom;
 	rcSpl.bottom=rcSpl.top+4; 
 	m_wndSplitterstat_HR.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT_HR);
-
-	/* statistic fix 
-	/*
 	int PosStatVinitZ = rcSpl.top;
-	*/
 	int PosStatVnewZ = thePrefs.GetSplitterbarPositionStat_HR()*rcW.Height()/100;
 	int maxZ = rcW.bottom-14;
 	int minZ = 0;
@@ -249,34 +256,16 @@ BOOL CStatisticsDlg::OnInitDialog()
 		PosStatVnewZ = minZ;
 	rcSpl.top = PosStatVnewZ;
 	rcSpl.bottom = PosStatVnewZ+4;
-
 	m_wndSplitterstat_HR.MoveWindow(rcSpl);
-
-	// MORPH START leuk_he statistic fix bluesonicboy
-    //   Init. Pos. fix - Set Download Scope relative to this splitter, right and left are set
-    //   top will always be 0. Also set Upload Scope top position bottom will be set later.
-     if(rcSpl.top) 
-		 rcDown.bottom = rcSpl.top - 1;
-     else            
-		 rcDown.bottom = 0;
-      m_DownloadOMeter.MoveWindow(rcDown);
-      rcUp.top = rcSpl.bottom + 1;
-	  // MORPH END leuk_he statistic fix bluesonicboy
-
 
 	//HL splitter
 	rcSpl.left=rcUp.left;
 	rcSpl.right=rcUp.right;
-	rcSpl.top=rcUp.bottom+1;
+	rcSpl.top = rcUp.bottom;
 	rcSpl.bottom=rcSpl.top+4;
 	m_wndSplitterstat_HL.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT_HL);
-
-	/* statistic fix 
-	/*
 	int PosStatVinitY = rcSpl.top;
-	*/
 	int PosStatVnewY = thePrefs.GetSplitterbarPositionStat_HL()*rcW.Height()/100;
-	
 	int maxY = rcW.bottom-9;
 	int minY = 10;
 	if (thePrefs.GetSplitterbarPositionStat_HL() > 90)
@@ -285,27 +274,11 @@ BOOL CStatisticsDlg::OnInitDialog()
 		PosStatVnewY = minY;
 	rcSpl.top = PosStatVnewY;
 	rcSpl.bottom = PosStatVnewY+4;
-
 	m_wndSplitterstat_HL.MoveWindow(rcSpl);
 
-	//MORPH START leuk_he statistic fix bluesonicboy
-    //  Init. Pos. fix - Set Upload Scope bottom relative to this splitter, right and left are set.
-     //                                      Also set Connection Scope Top relative to this splitter; bottom, right and left are set.
-        if(rcSpl.top) rcUp.bottom = rcSpl.top - 1;
-          else            rcUp.bottom = 0;
-        if(rcUp.top > rcUp.bottom) rcUp.top = rcUp.bottom;
-        m_UploadOMeter.MoveWindow(rcUp);
-        rcStat.top = rcSpl.bottom + 1;
-        if(rcStat.top > rcStat.bottom) rcStat.top = rcStat.bottom;
-        m_Statistics.MoveWindow(rcStat);
-
 	DoResize_V(PosStatVnewX - PosStatVinitX);
-	/* statistic fix 
 	DoResize_HL(PosStatVnewY - PosStatVinitY);
 	DoResize_HR(PosStatVnewZ - PosStatVinitZ);
-	*/ 
-    //MORPH END leuk_he statistic fix bluesonicboy
-
 
 	Localize();
 	ShowStatistics(true);
@@ -485,11 +458,10 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
   
 			if (rcW.Width()>0) 
 			{
-				rcSpl.left=rctree.right+1;
+					rcSpl.left = rctree.right;
 				rcSpl.right=rcSpl.left+4;
 				rcSpl.top=rcW.top+2;
-				rcSpl.bottom=rcW.bottom-6;
-    
+					rcSpl.bottom = rcW.bottom - 5;
 				m_wndSplitterstat.MoveWindow(rcSpl,true);
 			}
 		}
@@ -508,11 +480,10 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
   
 			if (rcW.Height()>0) 
 			{
-				rcSpl.left=rcUp.left+2;
-				rcSpl.right=rcUp.right-2;
-				rcSpl.top=rcUp.bottom+1;
-				rcSpl.bottom=rcUp.bottom+5;
-    
+					rcSpl.left = rcUp.left;
+					rcSpl.right = rcUp.right;
+					rcSpl.top = rcUp.bottom;
+					rcSpl.bottom = rcUp.bottom + 4;
 				m_wndSplitterstat_HL.MoveWindow(rcSpl,true);
 			}
 		}
@@ -530,11 +501,10 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
   
 			if (rcW.Height()>0) 
 			{
-				rcSpl.left=rcDown.left+2;
-				rcSpl.right=rcDown.right-2;
-				rcSpl.top=rcDown.bottom+1;
-				rcSpl.bottom=rcDown.bottom+5;
-    
+					rcSpl.left = rcDown.left;
+					rcSpl.right = rcDown.right;
+					rcSpl.top = rcDown.bottom;
+					rcSpl.bottom = rcDown.bottom + 4;
 				m_wndSplitterstat_HR.MoveWindow(rcSpl,true);
 			}
 		}
@@ -583,7 +553,10 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 					ScreenToClient(rcTree);
 					ScreenToClient(rcDown);
 					long splitposstat=thePrefs.GetSplitterbarPositionStat()*rcW.Width()/100;
-					rcSpl.left=splitposstat; rcSpl.right=rcSpl.left+4; rcSpl.top=rcW.top+2; rcSpl.bottom=rcW.bottom-5;
+					rcSpl.left = splitposstat; 
+					rcSpl.right = rcSpl.left + 4; 
+					rcSpl.top = rcW.top + 2; 
+					rcSpl.bottom = rcW.bottom - 5;
     				m_wndSplitterstat.MoveWindow(rcSpl,true);
 					m_wndSplitterstat.SetRange(rcW.left+11, rcW.right-11);
 				}
@@ -602,7 +575,10 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 					long splitposstat=thePrefs.GetSplitterbarPositionStat()*rcW.Width()/100;
 					long splitposstat_HR=thePrefs.GetSplitterbarPositionStat_HR()*rcW.Height()/100;
 					long splitposstat_HL=thePrefs.GetSplitterbarPositionStat_HL()*rcW.Height()/100;
-					rcSpl.left=splitposstat+7; rcSpl.right=rcW.right-14; rcSpl.top=splitposstat_HR; rcSpl.bottom=rcSpl.top+4;
+					rcSpl.left = splitposstat + 7;
+					rcSpl.right = rcW.right - 14; 
+					rcSpl.top = splitposstat_HR; 
+					rcSpl.bottom = rcSpl.top + 4;
 					m_wndSplitterstat_HR.MoveWindow(rcSpl,true);
 					m_wndSplitterstat_HR.SetRange(rcW.top+3, splitposstat_HL-4);
 				}
@@ -621,7 +597,10 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 					long splitposstat=thePrefs.GetSplitterbarPositionStat()*rcW.Width()/100;
 					long splitposstat_HR=thePrefs.GetSplitterbarPositionStat_HR()*rcW.Height()/100;
 					long splitposstat_HL=thePrefs.GetSplitterbarPositionStat_HL()*rcW.Height()/100;
-					rcSpl.left=splitposstat+7; rcSpl.right=rcW.right-14; rcSpl.top=splitposstat_HL; rcSpl.bottom=rcSpl.top+4;
+					rcSpl.left = splitposstat + 7; 
+					rcSpl.right = rcW.right - 14; 
+					rcSpl.top = splitposstat_HL; 
+					rcSpl.bottom = rcSpl.top + 4;
 					m_wndSplitterstat_HL.MoveWindow(rcSpl,true);
 					m_wndSplitterstat_HL.SetRange(splitposstat_HR+14, rcW.bottom-7);
 				}
@@ -641,6 +620,11 @@ void CStatisticsDlg::RepaintMeters()
 	m_DownloadOMeter.SetPlotColor(thePrefs.GetStatsColor(4) ,2) ;	// Download session
 	m_DownloadOMeter.SetPlotColor(thePrefs.GetStatsColor(3) ,1) ;	// Download average
 	m_DownloadOMeter.SetPlotColor(thePrefs.GetStatsColor(2) ,0) ;	// Download current
+	//MORPH START - Removed, stick to previous solid graphs
+	/*
+	m_DownloadOMeter.SetBarsPlot(thePrefs.GetFillGraphs(), 2);
+	*/
+	//MORPH END   - Removed, stick to previous solid graphs
 
 	m_UploadOMeter.SetBackgroundColor(thePrefs.GetStatsColor(0)) ;
 	m_UploadOMeter.SetGridColor(thePrefs.GetStatsColor(1)) ;			// Grid
@@ -650,13 +634,23 @@ void CStatisticsDlg::RepaintMeters()
 	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(14) ,1);		// Upload current (excl. overhead)
 	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(13) ,3);		// Upload friend slots
 	m_UploadOMeter.SetPlotColor(thePrefs.GetStatsColor(15) ,2);		//MORPH - Changed by SiRoB, powershare display
+	//MORPH START - Removed, stick to previous solid graphs
+	/*
+	m_UploadOMeter.SetBarsPlot(thePrefs.GetFillGraphs(), 2);
+	*/
+	//MORPH END   - Removed, stick to previous solid graphs
 
 	m_Statistics.SetBackgroundColor(thePrefs.GetStatsColor(0)) ;
 	m_Statistics.SetGridColor(thePrefs.GetStatsColor(1)) ;
-	m_Statistics.SetPlotColor( thePrefs.GetStatsColor(8),0) ;
-	m_Statistics.SetPlotColor( thePrefs.GetStatsColor(10),1) ;
-	m_Statistics.SetPlotColor( thePrefs.GetStatsColor(9),2) ;
-	m_Statistics.SetPlotColor( thePrefs.GetStatsColor(12),3) ;
+	m_Statistics.SetPlotColor( thePrefs.GetStatsColor(8),0) ;	// Active Connections
+	m_Statistics.SetPlotColor( thePrefs.GetStatsColor(10),1) ;	// Active Uploads
+	m_Statistics.SetPlotColor( thePrefs.GetStatsColor(9),2) ;	// Total Uploads
+	m_Statistics.SetPlotColor( thePrefs.GetStatsColor(12),3) ;	// Active Downloads
+	//MORPH START - Removed, stick to previous solid graphs
+	/*
+	m_Statistics.SetBarsPlot(thePrefs.GetFillGraphs(), 0);
+	*/
+	//MORPH END   - Removed, stick to previous solid graphs
 
 	m_DownloadOMeter.SetYUnits(GetResString(IDS_ST_DOWNLOAD));
 	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_SESSION),2);			// Download session
@@ -669,7 +663,7 @@ void CStatisticsDlg::RepaintMeters()
 	Buffer.Format(_T(" (%u %s)"),thePrefs.m_iDownloadDataRateAverageTime/1000,GetResString(IDS_SECS));
 	m_DownloadOMeter.SetLegendLabel(GetResString(IDS_ST_CURRENT)+Buffer,0);			// Download current
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
-	m_DownloadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),0);
+	m_DownloadOMeter.SetBarsPlot(thePrefs.GetFillGraphs(),0);
 
 	m_UploadOMeter.SetYUnits(GetResString(IDS_ST_UPLOAD));
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_SESSION),5);				// Upload session
@@ -682,9 +676,9 @@ void CStatisticsDlg::RepaintMeters()
 	Buffer.Format(_T(" (%u %s)"),thePrefs.m_iUploadDataRateAverageTime/1000,GetResString(IDS_SECS));
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULCURRENT)+Buffer,0);			// Upload current
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
-	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),0);
+	m_UploadOMeter.SetBarsPlot(thePrefs.GetFillGraphs(),0);
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULSLOTSNOOVERHEAD),1);	// Upload current (excl. overhead)
-	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),1);
+	m_UploadOMeter.SetBarsPlot(thePrefs.GetFillGraphs(),1);
 	//MORPH - Changed by SiRoB, Upload SPlitting Class
 	#ifdef _UNICODE
 	#define symbol _T("\x221E")
@@ -695,21 +689,20 @@ void CStatisticsDlg::RepaintMeters()
 		                                thePrefs.GetGlobalDataRateFriend()?CastItoXBytes(thePrefs.GetGlobalDataRateFriend(),false,true):symbol,
 										thePrefs.GetMaxGlobalDataRateFriend());
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULFRIEND)+Buffer,3);			// Upload friend slots
-	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),3);
+	m_UploadOMeter.SetBarsPlot(thePrefs.GetFillGraphs(),3);
 	Buffer.Format(_T(" (%s | %s | %u%%)"),thePrefs.GetMaxClientDataRatePowerShare()?CastItoXBytes(thePrefs.GetMaxClientDataRatePowerShare(),false,true):symbol,
 		                                thePrefs.GetGlobalDataRatePowerShare()?CastItoXBytes(thePrefs.GetGlobalDataRatePowerShare(),false,true):symbol,
 										thePrefs.GetMaxGlobalDataRatePowerShare());
 	m_UploadOMeter.SetLegendLabel(GetResString(IDS_ST_ULPOWERSHARE)+Buffer,2);			// Upload powershare slots
-	m_UploadOMeter.SetBarsPlot(thePrefs.IsSolidGraph(),2);
+	m_UploadOMeter.SetBarsPlot(thePrefs.GetFillGraphs(),2);
 	//MORPH END  - Changed by SiRoB, Upload SPlitting Class
 	
 	m_Statistics.SetYUnits(GetResString(IDS_FSTAT_CONNECTION));
 	Buffer.Format(_T("%s (1:%u)"), GetResString(IDS_ST_ACTIVEC), thePrefs.GetStatsConnectionsGraphRatio());
-	m_Statistics.SetLegendLabel(Buffer,0);
-	m_Statistics.SetBarsPlot(thePrefs.IsSolidGraph(),0);//Commander - Added: Draw Active Connections Graph solid
-	m_Statistics.SetLegendLabel(GetResString(IDS_ST_ACTIVEU_ZZ),1);
-	m_Statistics.SetLegendLabel(GetResString(IDS_SP_TOTALUL),2);
-	m_Statistics.SetLegendLabel(GetResString(IDS_ST_ACTIVED),3);
+	m_Statistics.SetLegendLabel(Buffer, 0);										// Active Connections
+	m_Statistics.SetLegendLabel(GetResString(IDS_ST_ACTIVEU_ZZ), 1);			// Active Uploads
+	m_Statistics.SetLegendLabel(GetResString(IDS_SP_TOTALUL), 2);				// Total Uploads
+	m_Statistics.SetLegendLabel(GetResString(IDS_ST_ACTIVED), 3);				// Active Downloads
 }
 
 void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
@@ -741,7 +734,7 @@ void CStatisticsDlg::SetCurrentRate(float uploadrate, float downloadrate)
 
 	// Connections
 	CDownloadQueue::SDownloadStats myStats;
-	theApp.downloadqueue->GetDownloadStats(myStats);
+	theApp.downloadqueue->GetDownloadSourcesStats(myStats);
 	m_dPlotDataMore[0]=theApp.listensocket->GetActiveConnections();
 	m_dPlotDataMore[1]=theApp.uploadqueue->GetActiveUploadsCount();
 	m_dPlotDataMore[2]=theApp.uploadqueue->GetUploadQueueLength();
@@ -841,7 +834,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 			uint64	DownOHTotal = 0;
 			uint64	DownOHTotalPackets = 0;
 			CDownloadQueue::SDownloadStats myStats;
-			theApp.downloadqueue->GetDownloadStats(myStats);
+			theApp.downloadqueue->GetDownloadSourcesStats(myStats);
 			//MORPH START - Added by Commander, Show failed WC sessions
 			uint32  failedWCSessions =				thePrefs.ses_WEBCACHEREQUESTS - thePrefs.ses_successfull_WCDOWNLOADS;
 			double  percentWCSessions =				0;
@@ -2413,7 +2406,7 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					if (forceUpdate || stattree.IsExpanded(time_aap_hdown[mx])) 
 					{
 						CDownloadQueue::SDownloadStats myStats;
-						theApp.downloadqueue->GetDownloadStats(myStats);
+						theApp.downloadqueue->GetDownloadSourcesStats(myStats);
 						// Downloaded Data
 						cbuffer.Format(GetResString(IDS_STATS_DDATA),CastItoXBytes( (uint64)(theStats.sessionReceivedBytes+thePrefs.GetTotalDownloaded()) * avgModifier[mx], false, false ));
 						stattree.SetItemText(time_aap_down[mx][0], cbuffer);
@@ -3220,39 +3213,36 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 
 	if (forceUpdate || stattree.IsExpanded(h_total_downloads)) 
 	{			
-		// diskspace stats [emule+]
-		int myRateStats[3];
-		uint64 ui64TotFileSize=0; 
-		uint64 ui64TotBytesLeftToTransfer=0;
-		uint64 ui64TotNeededSpace=0;
-		theApp.downloadqueue->GetDownloadStats(myRateStats, 
-											   ui64TotFileSize, ui64TotBytesLeftToTransfer, ui64TotNeededSpace);
+		uint64 ui64TotalFileSize = 0;
+		uint64 ui64TotalLeftToTransfer = 0;
+		uint64 ui64TotalAdditionalNeededSpace = 0;
+		int iActiveFiles = theApp.downloadqueue->GetDownloadFilesStats(ui64TotalFileSize, ui64TotalLeftToTransfer, ui64TotalAdditionalNeededSpace);
 
-		cbuffer.Format(GetResString(IDS_DWTOT_NR),myRateStats[2]); 
+		cbuffer.Format(GetResString(IDS_DWTOT_NR), iActiveFiles);
 		stattree.SetItemText(h_total_num_of_dls, cbuffer);
 
-		cbuffer.Format(GetResString(IDS_DWTOT_TSD),CastItoXBytes(ui64TotFileSize, false, false)); 
+		cbuffer.Format(GetResString(IDS_DWTOT_TSD), CastItoXBytes(ui64TotalFileSize, false, false));
 		stattree.SetItemText(h_total_size_of_dls, cbuffer);
 
-		uint64 ui64BytesTransferred = (ui64TotFileSize - ui64TotBytesLeftToTransfer);
-		float fPercent = 0.0f;
-		if(ui64TotFileSize != 0)
-			fPercent = (float)((ui64BytesTransferred*100)/(ui64TotFileSize)); //kuchin
-		cbuffer.Format(GetResString(IDS_DWTOT_TCS),CastItoXBytes(ui64BytesTransferred, false, false), fPercent); 
+		uint64 ui64TotalTransferred = ui64TotalFileSize - ui64TotalLeftToTransfer;
+		double fPercent = 0.0;
+		if (ui64TotalFileSize != 0)
+			fPercent = (ui64TotalTransferred * 100.0) / ui64TotalFileSize;
+		cbuffer.Format(GetResString(IDS_DWTOT_TCS), CastItoXBytes(ui64TotalTransferred, false, false), fPercent);
 		stattree.SetItemText(h_total_size_dld, cbuffer);
 
-		cbuffer.Format(GetResString(IDS_DWTOT_TSL),CastItoXBytes(ui64TotBytesLeftToTransfer, false, false)); 
+		cbuffer.Format(GetResString(IDS_DWTOT_TSL), CastItoXBytes(ui64TotalLeftToTransfer, false, false));
 		stattree.SetItemText(h_total_size_left_to_dl, cbuffer);
 
-		cbuffer.Format(GetResString(IDS_DWTOT_TSN),CastItoXBytes(ui64TotNeededSpace, false, false)); 
+		cbuffer.Format(GetResString(IDS_DWTOT_TSN), CastItoXBytes(ui64TotalAdditionalNeededSpace, false, false));
 		stattree.SetItemText(h_total_size_needed, cbuffer);
 
 		CString buffer2;
-		uint64 ui64FreeBytes = GetFreeTempSpace(-1); //GetFreeDiskSpaceX(thePrefs.GetTempDir());
-		buffer2.Format(GetResString(IDS_DWTOT_FS), CastItoXBytes(ui64FreeBytes, false, false));
+		uint64 ui64TotalFreeSpace = GetFreeTempSpace(-1);
+		buffer2.Format(GetResString(IDS_DWTOT_FS), CastItoXBytes(ui64TotalFreeSpace, false, false));
 
-		if (ui64TotNeededSpace > ui64FreeBytes)
-			cbuffer.Format(GetResString(IDS_NEEDFREEDISKSPACE),buffer2,CastItoXBytes(ui64TotNeededSpace - ui64FreeBytes, false, false));
+		if (ui64TotalAdditionalNeededSpace > ui64TotalFreeSpace)
+			cbuffer.Format(GetResString(IDS_NEEDFREEDISKSPACE), buffer2, CastItoXBytes(ui64TotalAdditionalNeededSpace - ui64TotalFreeSpace, false, false));
 		else
 			cbuffer=buffer2;
 		stattree.SetItemText(h_total_size_left_on_drive, cbuffer);
@@ -3455,10 +3445,10 @@ void CStatisticsDlg::CreateMyTree()
 	for(int i = 0; i<6; i++) 
 		up_S[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_up_session); //MORPH - Added by Yun.SF3, ZZ Upload System
 	  hup_scb= stattree.InsertItem(GetResString(IDS_CLIENTS),up_S[0]);							// Clients Section
-	for(int i = 0; i<ARRSIZE(up_scb); i++) 
+	for(int i = 0; i<_countof(up_scb); i++) 
 		up_scb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hup_scb);
 	  hup_spb= stattree.InsertItem(GetResString(IDS_PORT),up_S[0]);								// Ports Section
-	for(int i = 0; i<ARRSIZE(up_spb); i++) 
+	for(int i = 0; i<_countof(up_spb); i++) 
 		up_spb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hup_spb);
 	  hup_ssb= stattree.InsertItem(GetResString(IDS_STATS_DATASOURCE),up_S[0]);					// Data Source Section
 	for(int i = 0; i<2; i++) 
@@ -3466,15 +3456,15 @@ void CStatisticsDlg::CreateMyTree()
 	for(int i = 0; i<4; i++) 
 		up_ssessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), up_S[5]); //MORPH - Added by Yun.SF3, ZZ Upload System
 	hup_soh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_up_session);					// Upline Overhead (Session)
-	for(int i = 0; i<ARRSIZE(up_soh); i++) 
+	for(int i = 0; i<_countof(up_soh); i++) 
 		up_soh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hup_soh);
 	h_up_total= stattree.InsertItem(GetResString(IDS_STATS_CUMULATIVE),9,9, h_upload);		// Cumulative Section (Uploads)
 	up_T[0]= stattree.InsertItem(GetResString(IDS_FSTAT_WAITING),h_up_total);				// Uploaded Data (Total)
 	  hup_tcb= stattree.InsertItem(GetResString(IDS_CLIENTS),up_T[0]);							// Clients Section
-	for(int i = 0; i<ARRSIZE(up_tcb); i++) 
+	for(int i = 0; i<_countof(up_tcb); i++) 
 		up_tcb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hup_tcb);
 	  hup_tpb= stattree.InsertItem(GetResString(IDS_PORT),up_T[0]);								// Ports Section
-	for(int i = 0; i<ARRSIZE(up_tpb); i++) 
+	for(int i = 0; i<_countof(up_tpb); i++) 
 		up_tpb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hup_tpb);
 	  hup_tsb= stattree.InsertItem(GetResString(IDS_STATS_DATASOURCE),up_T[0]);					// Data Source Section
 	for(int i = 0; i<2; i++) 
@@ -3483,39 +3473,39 @@ void CStatisticsDlg::CreateMyTree()
 	for(int i = 0; i<4; i++) 
 		up_tsessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), up_T[1]);
 	hup_toh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_up_total);						// Upline Overhead (Total)
-	for(int i = 0; i<ARRSIZE(up_toh); i++) 
+	for(int i = 0; i<_countof(up_toh); i++) 
 		up_toh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hup_toh);
 	h_download = stattree.InsertItem(GetResString(IDS_TW_DOWNLOADS), 7,7,h_transfer);	// Downloads Section
 	h_down_session= stattree.InsertItem(GetResString(IDS_STATS_SESSION),8,8, h_download);	// Session Section (Downloads)
 	for(int i = 0; i<8; i++) 
 		down_S[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_down_session);
 	  hdown_scb= stattree.InsertItem(GetResString(IDS_CLIENTS),down_S[0]);						// Clients Section
-	for(int i = 0; i<ARRSIZE(down_scb); i++) 
+	for(int i = 0; i<_countof(down_scb); i++) 
 		down_scb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_scb);
 	  hdown_spb= stattree.InsertItem(GetResString(IDS_PORT),down_S[0]);							// Ports Section
-	for(int i = 0; i<ARRSIZE(down_spb); i++) 
+	for(int i = 0; i<_countof(down_spb); i++) 
 		down_spb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_spb);
-	for(int i = 0; i<ARRSIZE(down_sources); i++) 
+	for(int i = 0; i<_countof(down_sources); i++) 
 		down_sources[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[3]);
 	//MORPH - Changed by SiRoB, WebCache 1.2f
 	for(int i = 0; i<6/* changed to 5 jp webcache statistics+1 */; i++) 
 		down_ssessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[4]);
 	hdown_soh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_down_session);				// Downline Overhead (Session)
-	for(int i = 0; i<ARRSIZE(down_soh); i++) 
+	for(int i = 0; i<_countof(down_soh); i++) 
 		down_soh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_soh);
 	h_down_total= stattree.InsertItem(GetResString(IDS_STATS_CUMULATIVE),9,9, h_download);	// Cumulative Section (Downloads)
 	for(int i = 0; i<6; i++)
 		down_T[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_down_total);
 	  hdown_tcb= stattree.InsertItem(GetResString(IDS_CLIENTS),down_T[0]);						// Clients Section
-	for(int i = 0; i<ARRSIZE(down_tcb); i++) 
+	for(int i = 0; i<_countof(down_tcb); i++) 
 		down_tcb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_tcb);
 	  hdown_tpb= stattree.InsertItem(GetResString(IDS_PORT),down_T[0]);							// Ports Section
-	for(int i = 0; i<ARRSIZE(down_tpb); i++) 
+	for(int i = 0; i<_countof(down_tpb); i++) 
 		down_tpb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_tpb);
 	for(int i = 0; i<4; i++)
 		down_tsessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_T[2]);
 	hdown_toh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_down_total);					// Downline Overhead (Total)
-	for(int i = 0; i<ARRSIZE(down_toh); i++) 
+	for(int i = 0; i<_countof(down_toh); i++) 
 		down_toh[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_toh);
 	h_connection = stattree.InsertItem(GetResString(IDS_FSTAT_CONNECTION),2,2);				// Connection Section
 		h_conn_session= stattree.InsertItem(GetResString(IDS_STATS_SESSION),8,8,h_connection);	// Session Section (Connection)
@@ -3564,7 +3554,7 @@ void CStatisticsDlg::CreateMyTree()
 		for(int i = 0; i<7; i++)
 			time_aap_up_dc[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_up_hd[x][0]);
 						time_aap_up_hd[x][1] = stattree.InsertItem(GetResString(IDS_PORT),time_aap_up[x][0]);								// Ports Section
-		for(int i = 0; i<ARRSIZE(time_aap_up_dp[0]); i++)
+		for(int i = 0; i<_countof(time_aap_up_dp[0]); i++)
 			time_aap_up_dp[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_up_hd[x][1]);
 						time_aap_up_hd[x][2] = stattree.InsertItem(GetResString(IDS_STATS_DATASOURCE),time_aap_up[x][0]);					// Data Source Section
 		for(int i = 0; i<2; i++)
@@ -3581,7 +3571,7 @@ void CStatisticsDlg::CreateMyTree()
 		for(int i = 0; i<9/* changed to 9 jp webcache statistics */; i++)
 			time_aap_down_dc[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_down_hd[x][0]);
 						time_aap_down_hd[x][1] = stattree.InsertItem(GetResString(IDS_PORT),time_aap_down[x][0]);								// Ports Section
-		for(int i = 0; i<ARRSIZE(time_aap_down_dp[0]); i++)
+		for(int i = 0; i<_countof(time_aap_down_dp[0]); i++)
 			time_aap_down_dp[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_down_hd[x][1]);
 		for(int i = 0; i<2; i++)
 			time_aap_down_s[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_down[x][2]);
@@ -3700,7 +3690,7 @@ void CStatisticsDlg::CreateMyTree()
 	stattree.Init();
 
 	// Initialize our client version counts
-	for (int i = 0; i < ARRSIZE(cli_lastCount); i++)
+	for (int i = 0; i < _countof(cli_lastCount); i++)
 		cli_lastCount[i] = 0;
 
 	// End Tree Setup
@@ -3723,14 +3713,16 @@ void CStatisticsDlg::OnStnDblclickStatsscope()
 
 LRESULT CStatisticsDlg::OnOscopePositionMsg(WPARAM /*wParam*/, LPARAM lParam)
 {
-	time_t m_tNow= time(NULL)-lParam;
-	
+	time_t tNow = time(NULL) - lParam;
 	TCHAR szDate[128];
+	size_t uDateLen = _tcsftime(szDate, _countof(szDate), thePrefs.GetDateTimeFormat4Log(), localtime(&tNow));
+	
 	TCHAR szAgo[64];
-	_tcsftime(szDate, ARRSIZE(szDate), thePrefs.GetDateTimeFormat4Log(), localtime(&m_tNow));
+	_sntprintf(szAgo, _countof(szAgo), _T(" ") + GetResString(IDS_TIMEBEFORE), CastSecondsToLngHM(lParam));
+	szAgo[_countof(szAgo) - 1] = _T('\0');
 
-	wsprintf(szAgo,_T(" ") + GetResString(IDS_TIMEBEFORE),CastSecondsToLngHM(lParam));
-	_tcscat(szDate,szAgo);
+	_tcsncat(szDate, szAgo, _countof(szDate) - uDateLen);
+	szDate[_countof(szDate) - 1] = _T('\0');
 
 	m_TimeToolTips->UpdateTipText(szDate,GetDlgItem(IDC_SCOPE_D));
 	m_TimeToolTips->UpdateTipText(szDate,GetDlgItem(IDC_SCOPE_U));

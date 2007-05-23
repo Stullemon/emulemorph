@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -149,10 +149,6 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 	m_str.XUnits.Format(_T("Samples"));  // can also be set with SetXUnits
 	m_str.YUnits.Format(_T("Y units"));  // can also be set with SetYUnits
 	
-	// protected bitmaps to restore the memory DC's
-	m_pbitmapOldGrid = NULL;
-	m_pbitmapOldPlot = NULL;
-	
 	// G.Hayduk: configurable number of grids init
 	// you are free to change those between contructing the object 
 	// and calling Create
@@ -168,10 +164,10 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 
 COScopeCtrl::~COScopeCtrl()
 {
-	if(m_pbitmapOldGrid != NULL)
-		m_dcGrid.SelectObject(m_pbitmapOldGrid);  
-	if(m_pbitmapOldPlot != NULL)
-		m_dcPlot.SelectObject(m_pbitmapOldPlot);  
+	if (m_bitmapOldGrid.m_hObject)
+		m_dcGrid.SelectObject(m_bitmapOldGrid.Detach());
+	if (m_bitmapOldPlot.m_hObject)
+		m_dcPlot.SelectObject(m_bitmapOldPlot.Detach());
 	delete[] m_PlotData;
 }
 
@@ -180,7 +176,8 @@ BOOL COScopeCtrl::Create(DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT
 	BOOL result;
 	static CString className = AfxRegisterWndClass(CS_DBLCLKS | CS_HREDRAW | CS_VREDRAW, AfxGetApp()->LoadStandardCursor(IDC_ARROW));
 	
-	result = CWnd::CreateEx(WS_EX_CLIENTEDGE /*| WS_EX_STATICEDGE*/, 
+	result = CWnd::CreateEx(/*WS_EX_CLIENTEDGE*/ // strong (default) border
+							WS_EX_STATICEDGE,	// lightweight border
 		className, NULL, dwStyle, 
 		rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top,
 		pParentWnd->GetSafeHwnd(), (HMENU)nID);
@@ -323,12 +320,13 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		m_dcGrid.CreateCompatibleDC(&dc);
 		m_bitmapGrid.DeleteObject();
 		m_bitmapGrid.CreateCompatibleBitmap(&dc, m_nClientWidth, m_nClientHeight);
-		m_pbitmapOldGrid = m_dcGrid.SelectObject(&m_bitmapGrid);
+		m_bitmapOldGrid.Attach(SelectObject(m_dcGrid, m_bitmapGrid));
 	}
 	
 	COLORREF crLabelBk;
 	COLORREF crLabelFg;
-	if (thePrefs.GetStraightWindowStyles()) {
+	bool bStraightGraphs = true;
+	if (bStraightGraphs) {
 		crLabelBk = GetSysColor(COLOR_BTNFACE);
 		crLabelFg = GetSysColor(COLOR_WINDOWTEXT);
 	}
@@ -389,7 +387,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	//MORPH END   - Proper scale
 
 	// draw the plot rectangle
-	if (thePrefs.GetStraightWindowStyles())
+	if (bStraightGraphs)
 	{
 		m_dcGrid.FillSolidRect(m_rectPlot.left, m_rectPlot.top, m_rectPlot.right - m_rectPlot.left + 1, m_rectPlot.bottom - m_rectPlot.top + 1, m_crBackColor);
 
@@ -454,8 +452,16 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		}
 	}
 
-	yUnitFont.CreateFont(FontPointSizeToLogUnits(8*10), 0, 900, 900, FW_NORMAL, FALSE, FALSE, 0, DEFAULT_CHARSET,
-						 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, _T("MS Shell Dlg"));
+	if (afxData.bWin95) {
+		// Win98: To get a rotated font it has to be specified as "Arial" ("MS Shell Dlg" 
+		// and "MS Sans Serif" are not created with rotation)
+		yUnitFont.CreateFont(FontPointSizeToLogUnits(8*10), 0, 900, 900, FW_NORMAL, FALSE, FALSE, 0, DEFAULT_CHARSET,
+							 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, _T("Arial"));
+	}
+	else {
+		yUnitFont.CreateFont(FontPointSizeToLogUnits(8*10), 0, 900, 900, FW_NORMAL, FALSE, FALSE, 0, DEFAULT_CHARSET,
+							 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, _T("MS Shell Dlg"));
+	}
 
 	// grab the horizontal font
 	oldFont = m_dcGrid.SelectObject(&sm_fontAxis);
@@ -501,7 +507,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	
 	CRect rText(0,0,0,0);
 	m_dcGrid.DrawText(m_str.YUnits, rText, DT_CALCRECT);
-	m_dcGrid.TextOut ((m_rectClient.left+m_rectPlot.left+4)/2-rText.Height() / 2, 
+	m_dcGrid.TextOut((m_rectClient.left + m_rectPlot.left - 8) / 2 - rText.Height() / 2,
 					 (m_rectPlot.bottom + m_rectPlot.top) / 2 - rText.Height() / 2,
 					 m_str.YUnits);
 	m_dcGrid.SelectObject(oldFont);
@@ -519,7 +525,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 			ypos += sizeLabel.cy;
 		}
 
-		if (thePrefs.GetStraightWindowStyles())
+		if (bStraightGraphs)
 		{
 			const int iLegFrmD = 1;
 			CPen penFrame(PS_SOLID, iLegFrmD, crLabelFg);
@@ -561,7 +567,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		m_dcPlot.CreateCompatibleDC(&dc);
 		m_bitmapPlot.DeleteObject();
 		m_bitmapPlot.CreateCompatibleBitmap(&dc, m_nClientWidth, m_nClientHeight);
-		m_pbitmapOldPlot = m_dcPlot.SelectObject(&m_bitmapPlot);
+		m_bitmapOldPlot.Attach(SelectObject(m_dcPlot, m_bitmapPlot));
 	}
 	
 	// make sure the plot bitmap is cleared
@@ -870,21 +876,21 @@ void COScopeCtrl::OnSize(UINT nType, int cx, int cy)
 	*/
 	// destroy and recreate the grid bitmap
 	CClientDC dc(this); 
-	if(m_pbitmapOldGrid && m_bitmapGrid.GetSafeHandle() && m_dcGrid.GetSafeHdc())
+	if (m_bitmapOldGrid.m_hObject && m_bitmapGrid.GetSafeHandle() && m_dcGrid.GetSafeHdc())
 	{
-		m_dcGrid.SelectObject(m_pbitmapOldGrid);
+		m_dcGrid.SelectObject(m_bitmapOldGrid.Detach());
 		m_bitmapGrid.DeleteObject();
 		m_bitmapGrid.CreateCompatibleBitmap(&dc, m_nClientWidth, m_nClientHeight);
-		m_pbitmapOldGrid = m_dcGrid.SelectObject(&m_bitmapGrid);
+		m_bitmapOldGrid.Attach(SelectObject(m_dcGrid, m_bitmapGrid));
 	}
 	
 	// destroy and recreate the plot bitmap
-	if(m_pbitmapOldPlot && m_bitmapPlot.GetSafeHandle() && m_dcPlot.GetSafeHdc())
+	if (m_bitmapOldPlot.m_hObject && m_bitmapPlot.GetSafeHandle() && m_dcPlot.GetSafeHdc())
 	{
-		m_dcPlot.SelectObject(m_pbitmapOldPlot);
+		m_dcPlot.SelectObject(m_bitmapOldPlot.Detach());
 		m_bitmapPlot.DeleteObject();
 		m_bitmapPlot.CreateCompatibleBitmap(&dc, m_nClientWidth, m_nClientHeight);
-		m_pbitmapOldPlot = m_dcPlot.SelectObject(&m_bitmapPlot);
+		m_bitmapOldPlot.Attach(SelectObject(m_dcPlot, m_bitmapPlot));
 	}
 	
 	InvalidateCtrl();
@@ -989,16 +995,12 @@ void COScopeCtrl::OnMouseMove(UINT nFlags, CPoint point)
 
 void COScopeCtrl::OnSysColorChange()
 {
-	if (m_pbitmapOldGrid != NULL) {
-		m_dcGrid.SelectObject(m_pbitmapOldGrid);
-		m_pbitmapOldGrid = NULL;
-	}
+	if (m_bitmapOldGrid.m_hObject)
+		m_dcGrid.SelectObject(m_bitmapOldGrid.Detach());
 	VERIFY( m_dcGrid.DeleteDC() );
 
-	if (m_pbitmapOldPlot != NULL) {
-		m_dcPlot.SelectObject(m_pbitmapOldPlot);
-		m_pbitmapOldPlot = NULL;
-	}
+	if (m_bitmapOldPlot.m_hObject)
+		m_dcPlot.SelectObject(m_bitmapOldPlot.Detach());
 	VERIFY( m_dcPlot.DeleteDC() );
 
 	CWnd::OnSysColorChange();

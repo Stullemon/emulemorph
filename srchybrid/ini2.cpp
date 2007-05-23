@@ -215,7 +215,8 @@ CString CIni::GetStringUTF8(LPCTSTR strEntry, LPCTSTR strDefault/*=NULL*/, LPCTS
 double CIni::GetDouble(LPCTSTR strEntry, double fDefault/* = 0.0*/, LPCTSTR strSection/* = NULL*/)
 {
 	TCHAR strDefault[MAX_PATH];
-	_sntprintf(strDefault, ARRSIZE(strDefault), _T("%g"), fDefault);
+	_sntprintf(strDefault, _countof(strDefault), _T("%g"), fDefault);
+	strDefault[_countof(strDefault) - 1] = _T('\0');
 	GetLPCSTR(strEntry,strSection,strDefault);
 	return _tstof(m_chBuffer);
 }
@@ -223,7 +224,8 @@ double CIni::GetDouble(LPCTSTR strEntry, double fDefault/* = 0.0*/, LPCTSTR strS
 float CIni::GetFloat(LPCTSTR strEntry,float fDefault/* = 0.0*/, LPCTSTR strSection/* = NULL*/)
 {
 	TCHAR strDefault[MAX_PATH];
-	_sntprintf(strDefault, ARRSIZE(strDefault), _T("%g"), fDefault);
+	_sntprintf(strDefault, _countof(strDefault), _T("%g"), fDefault);
+	strDefault[_countof(strDefault) - 1] = _T('\0');
 	GetLPCSTR(strEntry,strSection,strDefault);
 	return (float)_tstof(m_chBuffer);
 }
@@ -231,7 +233,8 @@ float CIni::GetFloat(LPCTSTR strEntry,float fDefault/* = 0.0*/, LPCTSTR strSecti
 int CIni::GetInt(LPCTSTR strEntry,int nDefault/* = 0*/,LPCTSTR strSection/* = NULL*/)
 {
 	TCHAR strDefault[MAX_PATH];
-	_sntprintf(strDefault, ARRSIZE(strDefault), _T("%d"), nDefault);
+	_sntprintf(strDefault, _countof(strDefault), _T("%d"), nDefault);
+	strDefault[_countof(strDefault) - 1] = _T('\0');
 	GetLPCSTR(strEntry,strSection,strDefault);
 	return _tstoi(m_chBuffer);
 }
@@ -239,18 +242,20 @@ int CIni::GetInt(LPCTSTR strEntry,int nDefault/* = 0*/,LPCTSTR strSection/* = NU
 ULONGLONG CIni::GetUInt64(LPCTSTR strEntry,ULONGLONG nDefault/* = 0*/,LPCTSTR strSection/* = NULL*/)
 {
 	TCHAR strDefault[MAX_PATH];
-	_sntprintf(strDefault, ARRSIZE(strDefault), _T("%I64u"), nDefault);
+	_sntprintf(strDefault, _countof(strDefault), _T("%I64u"), nDefault);
+	strDefault[_countof(strDefault) - 1] = _T('\0');
 	GetLPCSTR(strEntry,strSection,strDefault);
 	ULONGLONG nResult;
 	if (_stscanf(m_chBuffer, _T("%I64u"), &nResult) != 1)
-		return 0;
+		return nDefault;
 	return nResult;
 }
 
 WORD CIni::GetWORD(LPCTSTR strEntry,WORD nDefault/* = 0*/,LPCTSTR strSection/* = NULL*/)
 {
 	TCHAR strDefault[MAX_PATH];
-	_sntprintf(strDefault, ARRSIZE(strDefault), _T("%u"), nDefault);
+	_sntprintf(strDefault, _countof(strDefault), _T("%u"), nDefault);
+	strDefault[_countof(strDefault) - 1] = _T('\0');
 	GetLPCSTR(strEntry,strSection,strDefault);
 	return (WORD)_tstoi(m_chBuffer);
 }
@@ -258,7 +263,8 @@ WORD CIni::GetWORD(LPCTSTR strEntry,WORD nDefault/* = 0*/,LPCTSTR strSection/* =
 bool CIni::GetBool(LPCTSTR strEntry,bool bDefault/* = false*/,LPCTSTR strSection/* = NULL*/)
 {
 	TCHAR strDefault[MAX_PATH];
-	_sntprintf(strDefault, ARRSIZE(strDefault), _T("%d"), (int)bDefault);
+	_sntprintf(strDefault, _countof(strDefault), _T("%d"), bDefault);
+	strDefault[_countof(strDefault) - 1] = _T('\0');
 	GetLPCSTR(strEntry,strSection,strDefault);
 	return ( _tstoi(m_chBuffer) != 0 );
 }
@@ -271,7 +277,8 @@ CPoint CIni::GetPoint(LPCTSTR strEntry,	CPoint ptDefault, LPCTSTR strSection)
 	strDefault.Format(_T("(%d,%d)"),ptDefault.x, ptDefault.y);
 
 	CString strPoint = GetString(strEntry,strDefault, strSection);
-	_stscanf(strPoint,_T("(%d,%d)"), &ptReturn.x, &ptReturn.y);
+	if (_stscanf(strPoint,_T("(%d,%d)"), &ptReturn.x, &ptReturn.y) != 2)
+		return ptDefault;
 
 	return ptReturn;
 }
@@ -290,7 +297,8 @@ CRect CIni::GetRect(LPCTSTR strEntry, CRect rectDefault, LPCTSTR strSection)
 	if( 4==_stscanf(strRect,_T("%d,%d,%d,%d"),&rectDefault.left,&rectDefault.top,&rectDefault.right,&rectDefault.bottom))
 		return rectReturn;
 	//old Version found
-	_stscanf(strRect,_T("(%d,%d,%d,%d)"), &rectReturn.top,&rectReturn.left,&rectReturn.bottom,&rectReturn.right);
+	if (_stscanf(strRect,_T("(%d,%d,%d,%d)"), &rectReturn.top,&rectReturn.left,&rectReturn.bottom,&rectReturn.right) != 4)
+		return rectDefault;
 	return rectReturn;
 }
 
@@ -304,7 +312,8 @@ COLORREF CIni::GetColRef(LPCTSTR strEntry, COLORREF crDefault, LPCTSTR strSectio
 	strDefault.Format(_T("RGB(%hd,%hd,%hd)"),temp[0],temp[1],temp[2]);
 
 	CString strColRef = GetString(strEntry,strDefault,strSection);
-	_stscanf(strColRef,_T("RGB(%d,%d,%d)"), temp, temp+1, temp+2);
+	if (_stscanf(strColRef,_T("RGB(%d,%d,%d)"), temp, temp+1, temp+2) != 3)
+		return crDefault;
 
 	return RGB(temp[0],temp[1],temp[2]);
 }
@@ -330,7 +339,8 @@ void CIni::WriteDouble(LPCTSTR strEntry,double f, LPCTSTR strSection/*= NULL*/)
 	if(strSection != NULL) 
 		m_strSection = strSection;
 	TCHAR strBuffer[MAX_PATH];
-	_sntprintf(strBuffer, ARRSIZE(strBuffer), _T("%g"), f);
+	_sntprintf(strBuffer, _countof(strBuffer), _T("%g"), f);
+	strBuffer[_countof(strBuffer) - 1] = _T('\0');
 	WritePrivateProfileString(m_strSection,strEntry,strBuffer,m_strFileName);
 }
 
@@ -339,7 +349,8 @@ void CIni::WriteFloat(LPCTSTR strEntry,float f, LPCTSTR strSection/* = NULL*/)
 	if(strSection != NULL) 
 		m_strSection = strSection;
 	TCHAR strBuffer[MAX_PATH];
-	_sntprintf(strBuffer, ARRSIZE(strBuffer), _T("%g"), f);
+	_sntprintf(strBuffer, _countof(strBuffer), _T("%g"), f);
+	strBuffer[_countof(strBuffer) - 1] = _T('\0');
 	WritePrivateProfileString(m_strSection,strEntry,strBuffer,m_strFileName);
 }
 
@@ -375,7 +386,8 @@ void CIni::WriteBool(LPCTSTR strEntry,bool b, LPCTSTR strSection/* = NULL*/)
 	if(strSection != NULL) 
 		m_strSection = strSection;
 	TCHAR strBuffer[MAX_PATH];
-	_sntprintf(strBuffer, ARRSIZE(strBuffer), _T("%d"), (int)b);
+	_sntprintf(strBuffer, _countof(strBuffer), _T("%d"), (int)b);
+	strBuffer[_countof(strBuffer) - 1] = _T('\0');
 	WritePrivateProfileString(m_strSection, strEntry, strBuffer, m_strFileName);
 }
 

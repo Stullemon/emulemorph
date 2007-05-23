@@ -1,6 +1,6 @@
 // parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -346,6 +346,10 @@ CString CStatisticFile::GetEqualChanceValueString(bool detail){
 //EastShare	Start - FairPlay by AndCycle
 bool	CStatisticFile::GetFairPlay() {
 	//should only judge simple UL or is there any better replacement?
-	return (this->GetAllTimeTransferred()/fileParent->GetFileSize()) < thePrefs.GetFairPlay();
+	//Stulle: rewrote the code to ensure bug free compiling
+	double dShareFactor = ((double)GetAllTimeTransferred())/((double)fileParent->GetFileSize());
+	if(dShareFactor < thePrefs.GetFairPlay())
+		return true;
+	return false;
 }
 //EastShare	End   - FairPlay by AndCycle

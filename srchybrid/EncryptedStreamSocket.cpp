@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -28,20 +28,20 @@
 	- Handshake
 			-> The handshake is encrypted - except otherwise noted - by the Keys created above
 			-> Handshake is blocking - do not start sending an answer before the request is completly received (this includes the random bytes)
-			-> EncryptionMethod = 0 is Obfusication and the only supported right now
-		Client A: <SemiRandomNotProtocolMarker 1[Unencrypted]><RandomKeyPart 4[Unencrypted]><MagicValue 4><EncryptionMethodsSupported 1><EncryptionMethodPreferred 1><PaddingLen 1><RandomBytes PaddingLen%16>	
-		Client B: <MagicValue 4><EncryptionMethodsSelected 1><PaddingLen 1><RandomBytes PaddingLen%16>
+			-> EncryptionMethod = 0 is Obfuscation and the only supported right now
+		Client A: <SemiRandomNotProtocolMarker 1[Unencrypted]><RandomKeyPart 4[Unencrypted]><MagicValue 4><EncryptionMethodsSupported 1><EncryptionMethodPreferred 1><PaddingLen 1><RandomBytes PaddingLen%max256>	
+		Client B: <MagicValue 4><EncryptionMethodsSelected 1><PaddingLen 1><RandomBytes PaddingLen%max 256>
 			-> The basic handshake is finished here, if an additional/different EncryptionMethod was selected it may continue negotiating details for this one
 
 	- Overhead: 18-48 (~33) Bytes + 2 * IP/TCP Headers per Connection
 	
-	- Security for Basic Obfusication:
+	- Security for Basic Obfuscation:
 			- Random looking stream, very limited protection against passive eavesdropping single connections
 	
 	- Additional Comments:
 			- RandomKeyPart is needed to make multiple connections between two clients look different (but still random), since otherwise the same key
 			  would be used and RC4 would create the same output. Since the key is a MD5 hash it doesnt weakens the key if that part is known
-		    - Why DH-KeyAgreement isn't used as basic obfusication key: It doesn't offers substantial more protection against passive connection based protocol identification, it has about 200 bytes more overhead,
+		    - Why DH-KeyAgreement isn't used as basic obfuscation key: It doesn't offers substantial more protection against passive connection based protocol identification, it has about 200 bytes more overhead,
 			  needs more CPU time, we cannot say if the received data is junk, unencrypted or part of the keyagreement before the handshake is finished without loosing the complete randomness,
 			  it doesn't offers substantial protection against eavesdropping without added authentification
 
@@ -59,7 +59,7 @@ Basic Obfuscated Handshake Protocol Client <-> Server:
     - Handshake
             -> The handshake is encrypted - except otherwise noted - by the Keys created above
             -> Handshake is blocking - do not start sending an answer before the request is completly received (this includes the random bytes)
-            -> EncryptionMethod = 0 is Obfusication and the only supported right now
+            -> EncryptionMethod = 0 is Obfuscation and the only supported right now
         
         Client: <SemiRandomNotProtocolMarker 1[Unencrypted]><G^A 96 [Unencrypted]><RandomBytes 0-15 [Unencrypted]>    
         Server: <G^B 96 [Unencrypted]><MagicValue 4><EncryptionMethodsSupported 1><EncryptionMethodPreferred 1><PaddingLen 1><RandomBytes PaddingLen>
@@ -119,7 +119,7 @@ CEncryptedStreamSocket::CEncryptedStreamSocket(){
 	m_NegotiatingState = ONS_NONE;
 	m_pRC4ReceiveKey = NULL;
 	m_pRC4SendKey = NULL;
-	m_nObfusicationBytesReceived = 0;
+	m_nObfuscationBytesReceived = 0;
 	m_bFullReceive = true;
 	m_dbgbyEncryptionSupported = 0xFF;
 	m_dbgbyEncryptionRequested = 0xFF;
@@ -169,6 +169,7 @@ int CEncryptedStreamSocket::Send(const void* lpBuf, int nBufLen, int nFlags){
 		// do so now with the payload attached
 		int nRes = SendNegotiatingData(lpBuf, nBufLen, nBufLen);
 		ASSERT( nRes != SOCKET_ERROR );
+		(void)nRes;
 		return nBufLen;	// report a full send, even if we didn't for some reason - the data is know in our buffer and will be handled later
 	}
 	else if (m_NegotiatingState == ONS_BASIC_SERVER_DELAYEDSENDING)
@@ -190,21 +191,21 @@ bool CEncryptedStreamSocket::IsEncryptionLayerReady(){
 
 
 int CEncryptedStreamSocket::Receive(void* lpBuf, int nBufLen, int nFlags){
-	m_nObfusicationBytesReceived = CAsyncSocketEx::Receive(lpBuf, nBufLen, nFlags);
-	m_bFullReceive = m_nObfusicationBytesReceived == (uint32)nBufLen;
+	m_nObfuscationBytesReceived = CAsyncSocketEx::Receive(lpBuf, nBufLen, nFlags);
+	m_bFullReceive = m_nObfuscationBytesReceived == (uint32)nBufLen;
 
-	if(m_nObfusicationBytesReceived == SOCKET_ERROR || m_nObfusicationBytesReceived <= 0){
-		return m_nObfusicationBytesReceived;
+	if(m_nObfuscationBytesReceived == SOCKET_ERROR || m_nObfuscationBytesReceived <= 0){
+		return m_nObfuscationBytesReceived;
 	}
 	switch (m_StreamCryptState) {
 		case ECS_NONE: // disabled, just pass it through
-			return m_nObfusicationBytesReceived;
+			return m_nObfuscationBytesReceived;
 		case ECS_PENDING:
 		case ECS_PENDING_SERVER:
 			ASSERT( false );
 			DebugLogError(_T("CEncryptedStreamSocket Received data before sending on outgoing connection"));
 			m_StreamCryptState = ECS_NONE;
-			return m_nObfusicationBytesReceived;
+			return m_nObfuscationBytesReceived;
 		case ECS_UNKNOWN:{
 			uint32 nRead = 1;
 			// MORPH START - WebCache
@@ -225,11 +226,11 @@ int CEncryptedStreamSocket::Receive(void* lpBuf, int nBufLen, int nFlags){
 			}
 			if (!bNormalHeader){
 				StartNegotiation(false);
-				const uint32 nNegRes = Negotiate((uchar*)lpBuf + nRead, m_nObfusicationBytesReceived - nRead);
+				const uint32 nNegRes = Negotiate((uchar*)lpBuf + nRead, m_nObfuscationBytesReceived - nRead);
 				if (nNegRes == (-1))
 					return 0;
 				nRead += nNegRes;
-				if (nRead != (uint32)m_nObfusicationBytesReceived){
+				if (nRead != (uint32)m_nObfuscationBytesReceived){
 					// this means we have more data then the current negotiation step required (or there is a bug) and this should never happen
 					// (note: even if it just finished the handshake here, there still can be no data left, since the other client didnt received our response yet)
 					DebugLogError(_T("CEncryptedStreamSocket: Client %s sent more data then expected while negotiating, disconnecting (1)"), DbgGetIPString());
@@ -269,35 +270,35 @@ int CEncryptedStreamSocket::Receive(void* lpBuf, int nBufLen, int nFlags){
 						AddDebugLogLine(DLP_DEFAULT, false, _T("Incoming unencrypted firewallcheck connection permitted despite RequireEncryption setting  - %s"), DbgGetIPString() );
 				}
 
-				return m_nObfusicationBytesReceived; // buffer was unchanged, we can just pass it through
+				return m_nObfuscationBytesReceived; // buffer was unchanged, we can just pass it through
 			}
 		}
 		case ECS_ENCRYPTING:
-			// basic obfusication enabled and set, so decrypt and pass along
-			RC4Crypt((uchar*)lpBuf, (uchar*)lpBuf, m_nObfusicationBytesReceived, m_pRC4ReceiveKey);
-			return m_nObfusicationBytesReceived;
+			// basic obfuscation enabled and set, so decrypt and pass along
+			RC4Crypt((uchar*)lpBuf, (uchar*)lpBuf, m_nObfuscationBytesReceived, m_pRC4ReceiveKey);
+			return m_nObfuscationBytesReceived;
 		case ECS_NEGOTIATING:{
-			const uint32 nRead = Negotiate((uchar*)lpBuf, m_nObfusicationBytesReceived);
+			const uint32 nRead = Negotiate((uchar*)lpBuf, m_nObfuscationBytesReceived);
 			if (nRead == (-1))
 				return 0;
-			else if (nRead != (uint32)m_nObfusicationBytesReceived && m_StreamCryptState != ECS_ENCRYPTING){
+			else if (nRead != (uint32)m_nObfuscationBytesReceived && m_StreamCryptState != ECS_ENCRYPTING){
 				// this means we have more data then the current negotiation step required (or there is a bug) and this should never happen
 				DebugLogError(_T("CEncryptedStreamSocket: Client %s sent more data then expected while negotiating, disconnecting (2)"), DbgGetIPString());
 				OnError(ERR_ENCRYPTION);
 				return 0;
 			}
-			else if (nRead != (uint32)m_nObfusicationBytesReceived && m_StreamCryptState == ECS_ENCRYPTING){
+			else if (nRead != (uint32)m_nObfuscationBytesReceived && m_StreamCryptState == ECS_ENCRYPTING){
 				// we finished the handshake and if we this was an outgoing connection it is allowed (but strange and unlikely) that the client sent payload
 				DebugLogWarning(_T("CEncryptedStreamSocket: Client %s has finished the handshake but also sent payload on a outgoing connection"), DbgGetIPString());
-				memmove(lpBuf, (uchar*)lpBuf + nRead, m_nObfusicationBytesReceived - nRead);
-				return m_nObfusicationBytesReceived - nRead;
+				memmove(lpBuf, (uchar*)lpBuf + nRead, m_nObfuscationBytesReceived - nRead);
+				return m_nObfuscationBytesReceived - nRead;
 			}
 			else
 				return 0;
 		}
 		default:
 			ASSERT( false );
-			return m_nObfusicationBytesReceived;
+			return m_nObfuscationBytesReceived;
 	}
 }
 
@@ -312,7 +313,7 @@ void CEncryptedStreamSocket::SetConnectionEncryption(bool bEnabled, const uchar*
 
 	if (bEnabled && pTargetClientHash != NULL && !bServerConnection){
 		m_StreamCryptState = ECS_PENDING;
-		// create obfusication keys, see on top for key format
+		// create obfuscation keys, see on top for key format
 
 		// use the crypt random generator
 		m_nRandomKeyPart = cryptRandomGen.GenerateWord32();
@@ -366,10 +367,10 @@ void CEncryptedStreamSocket::StartNegotiation(bool bOutgoing){
 		fileRequest.WriteUInt8(bySemiRandomNotProtocolMarker);
 		fileRequest.WriteUInt32(m_nRandomKeyPart);
 		fileRequest.WriteUInt32(MAGICVALUE_SYNC);
-		const bySupportedEncryptionMethod = ENM_OBFUSCATION; // we do not support any further encryption in this version
+		const uint8 bySupportedEncryptionMethod = ENM_OBFUSCATION; // we do not support any further encryption in this version
 		fileRequest.WriteUInt8(bySupportedEncryptionMethod);
 		fileRequest.WriteUInt8(bySupportedEncryptionMethod); // so we also prefer this one
-		uint8 byPadding = (uint8)(cryptRandomGen.GenerateByte() % 16);
+		uint8 byPadding = (uint8)(cryptRandomGen.GenerateByte() % (thePrefs.GetCryptTCPPaddingLength() + 1));
 		fileRequest.WriteUInt8(byPadding);
 		for (int i = 0; i < byPadding; i++)
 			fileRequest.WriteUInt8(cryptRandomGen.GenerateByte());
@@ -385,7 +386,6 @@ void CEncryptedStreamSocket::StartNegotiation(bool bOutgoing){
 		const uint8 bySemiRandomNotProtocolMarker = GetSemiRandomNotProtocolMarker();	
 		fileRequest.WriteUInt8(bySemiRandomNotProtocolMarker);
 		
-		CryptoPP::AutoSeededRandomPool cryptRandomGen;
 		m_cryptDHA.Randomize(cryptRandomGen, DHAGREEMENT_A_BITS); // our random a
 		ASSERT( m_cryptDHA.MinEncodedSize() <= DHAGREEMENT_A_BITS / 8 );
 		CryptoPP::Integer cryptDHPrime((byte*)dh768_p, PRIMESIZE_BYTES);  // our fixed prime
@@ -427,10 +427,12 @@ int CEncryptedStreamSocket::Negotiate(const uchar* pBuffer, uint32 nLen){
 			
 			if (m_pfiReceiveBuffer == NULL){
 				BYTE* pReceiveBuffer = (BYTE*)malloc(512); // use a fixed size buffer
+				if (pReceiveBuffer == NULL)
+					AfxThrowMemoryException();
 				m_pfiReceiveBuffer = new CSafeMemFile(pReceiveBuffer, 512);
 			}
 			const uint32 nToRead =  min(nLen - nRead, m_nReceiveBytesWanted);
-			m_pfiReceiveBuffer->Write((uchar*)pBuffer + nRead, nToRead);
+			m_pfiReceiveBuffer->Write(pBuffer + nRead, nToRead);
 			nRead += nToRead;
 			m_nReceiveBytesWanted -= nToRead;
 			if (m_nReceiveBytesWanted > 0)
@@ -489,17 +491,23 @@ int CEncryptedStreamSocket::Negotiate(const uchar* pBuffer, uint32 nLen){
 						AddDebugLogLine(DLP_LOW, false, _T("CEncryptedStreamSocket: Client %s preffered unsupported encryption method (%i)"), DbgGetIPString(), m_dbgbyEncryptionRequested);
 					m_nReceiveBytesWanted = m_pfiReceiveBuffer->ReadUInt8();
 					m_NegotiatingState = ONS_BASIC_CLIENTA_PADDING;
-					if (m_nReceiveBytesWanted > 16)
-						AddDebugLogLine(DLP_LOW, false, _T("CEncryptedStreamSocket: Client %s sent more than 16 (%i) padding bytes"), DbgGetIPString(), m_nReceiveBytesWanted);
+					//if (m_nReceiveBytesWanted > 16)
+					//	AddDebugLogLine(DLP_LOW, false, _T("CEncryptedStreamSocket: Client %s sent more than 16 (%i) padding bytes"), DbgGetIPString(), m_nReceiveBytesWanted);
 					if (m_nReceiveBytesWanted > 0)
 						break;
 				case ONS_BASIC_CLIENTA_PADDING:{
 					// ignore the random bytes, send the response, set status complete
 					CSafeMemFile fileResponse(26);
 					fileResponse.WriteUInt32(MAGICVALUE_SYNC);
-					const bySelectedEncryptionMethod = ENM_OBFUSCATION; // we do not support any further encryption in this version, so no need to look which the other client preferred
+					const uint8 bySelectedEncryptionMethod = ENM_OBFUSCATION; // we do not support any further encryption in this version, so no need to look which the other client preferred
 					fileResponse.WriteUInt8(bySelectedEncryptionMethod);
-					uint8 byPadding = (uint8)(cryptRandomGen.GenerateByte() % 16);
+					
+					SOCKADDR_IN sockAddr = {0};
+					int nSockAddrLen = sizeof(sockAddr);
+					GetPeerName((SOCKADDR*)&sockAddr, &nSockAddrLen);	
+					const uint8 byPaddingLen = theApp.serverconnect->AwaitingTestFromIP(sockAddr.sin_addr.S_un.S_addr) ? 16 : (thePrefs.GetCryptTCPPaddingLength() + 1);
+					uint8 byPadding = (uint8)(cryptRandomGen.GenerateByte() % byPaddingLen);
+					
 					fileResponse.WriteUInt8(byPadding);
 					for (int i = 0; i < byPadding; i++)
 						fileResponse.WriteUInt8((uint8)rand());
@@ -528,8 +536,6 @@ int CEncryptedStreamSocket::Negotiate(const uchar* pBuffer, uint32 nLen){
 					}
 					m_nReceiveBytesWanted = m_pfiReceiveBuffer->ReadUInt8();
 					m_NegotiatingState = ONS_BASIC_CLIENTB_PADDING;
-					if (m_nReceiveBytesWanted > 16)
-						AddDebugLogLine(DLP_LOW, false, _T("CEncryptedStreamSocket: Client %s sent more than 16 (%i) padding bytes"), DbgGetIPString(), m_nReceiveBytesWanted);
 					if (m_nReceiveBytesWanted > 0)
 						break;
 				}
@@ -595,7 +601,7 @@ int CEncryptedStreamSocket::Negotiate(const uchar* pBuffer, uint32 nLen){
 					// ignore the random bytes (they are decrypted already), send the response, set status complete
 					CSafeMemFile fileResponse(26);
 					fileResponse.WriteUInt32(MAGICVALUE_SYNC);
-					const bySelectedEncryptionMethod = ENM_OBFUSCATION; // we do not support any further encryption in this version, so no need to look which the other client preferred
+					const uint8 bySelectedEncryptionMethod = ENM_OBFUSCATION; // we do not support any further encryption in this version, so no need to look which the other client preferred
 					fileResponse.WriteUInt8(bySelectedEncryptionMethod);
 					uint8 byPadding = (uint8)(cryptRandomGen.GenerateByte() % 16);
 					fileResponse.WriteUInt8(byPadding);
@@ -627,6 +633,7 @@ int CEncryptedStreamSocket::Negotiate(const uchar* pBuffer, uint32 nLen){
 		if (m_pfiReceiveBuffer != NULL)
 			free(m_pfiReceiveBuffer->Detach());
 		delete m_pfiReceiveBuffer;
+		m_pfiReceiveBuffer = NULL;
 		return (-1);
 	}
 
@@ -637,14 +644,16 @@ int CEncryptedStreamSocket::SendNegotiatingData(const void* lpBuf, uint32 nBufLe
 	ASSERT( nStartCryptFromByte <= nBufLen );
 	ASSERT( m_NegotiatingState == ONS_BASIC_SERVER_DELAYEDSENDING || !bDelaySend );
 
-	uchar* pBuffer = NULL;
+	BYTE* pBuffer = NULL;
 	bool bProcess = false;
 	if (lpBuf != NULL){
-		pBuffer =(uchar*) malloc(nBufLen);
+		pBuffer = (BYTE*)malloc(nBufLen);
+		if (pBuffer == NULL)
+			AfxThrowMemoryException();
 		if (nStartCryptFromByte > 0)
 			memcpy(pBuffer, lpBuf, nStartCryptFromByte);
 		if (nBufLen - nStartCryptFromByte > 0)
-			RC4Crypt(((uchar*)lpBuf) + nStartCryptFromByte, pBuffer + nStartCryptFromByte, nBufLen - nStartCryptFromByte, m_pRC4SendKey);
+			RC4Crypt((uchar*)lpBuf + nStartCryptFromByte, pBuffer + nStartCryptFromByte, nBufLen - nStartCryptFromByte, m_pRC4SendKey);
 		if (m_pfiSendBuffer != NULL){
 			// we already have data pending. Attach it and try to send
 			if (m_NegotiatingState == ONS_BASIC_SERVER_DELAYEDSENDING)
@@ -666,7 +675,7 @@ int CEncryptedStreamSocket::SendNegotiatingData(const void* lpBuf, uint32 nBufLe
 			return 0;							// or not
 		}
 		nBufLen = (uint32)m_pfiSendBuffer->GetLength();
-		pBuffer = (uchar*)m_pfiSendBuffer->Detach();
+		pBuffer = m_pfiSendBuffer->Detach();
 		delete m_pfiSendBuffer;
 		m_pfiSendBuffer = NULL;
 	}
@@ -706,11 +715,10 @@ uint8 CEncryptedStreamSocket::GetSemiRandomNotProtocolMarker() const{
 		switch (bySemiRandomNotProtocolMarker){ // not allowed values
 				case OP_EDONKEYPROT:
 				case OP_PACKEDPROT:
-    			case OP_EMULEPROT:
-	            // MORPH START webcache
-                //case OP_THE_LETTER_G: //// yonatan http - first byte in an http GET header   change is 1/ (2^24) .... duh
-                // MORPH END webcache
-
+				case OP_EMULEPROT:
+				// MORPH START webcache
+				//case OP_THE_LETTER_G: //// yonatan http - first byte in an http GET header   change is 1/ (2^24) .... duh
+				// MORPH END webcache
 					break;
 				default:
 					bOk = true;

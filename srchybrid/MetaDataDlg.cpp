@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -104,7 +104,7 @@ BOOL CMetaDataDlg::OnInitDialog()
 	
 	GetDlgItem(IDC_TOTAL_TAGS)->SetWindowText(GetResString(IDS_METATAGS));
 
-	m_tags.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+	m_tags.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_INFOTIP);
 	m_tags.ReadColumnStats(ARRSIZE(_aColumns), _aColumns);
 	m_tags.CreateColumns(ARRSIZE(_aColumns), _aColumns);
 

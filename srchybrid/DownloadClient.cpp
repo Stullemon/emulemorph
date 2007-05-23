@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -529,7 +529,7 @@ bool CUpDownClient::IsSourceRequestAllowed(CPartFile* partfile, bool sourceExcha
 
 	return (
 	         //if client has the correct extended protocol
-	         ExtProtocolAvailable() && GetSourceExchangeVersion() > 1 &&
+			 ExtProtocolAvailable() && (SupportsSourceExchange2() || GetSourceExchange1Version() > 1) &&
 	         //AND if we need more sources
 	         reqfile->GetMaxSourcePerFileSoft() > uSources &&
 	         //AND if...
@@ -606,7 +606,7 @@ void CUpDownClient::SendFileRequest()
 			SetRemoteQueueRank(0);
 		}
 
-		// OP_REQUESTSOURCES
+		// OP_REQUESTSOURCES // OP_REQUESTSOURCES2
 		if (IsSourceRequestAllowed())
 		{
 			if (thePrefs.GetDebugClientTCPLevel() > 0) {
@@ -616,11 +616,19 @@ void CUpDownClient::SendFileRequest()
 			    else
 				    Debug(_T("  last source request was before %s\n"), CastSecondsToHM((GetTickCount() - GetLastAskedForSources())/1000));
 			}
+			if (SupportsSourceExchange2()){
+				dataFileReq.WriteUInt8(OP_REQUESTSOURCES2);
+				dataFileReq.WriteUInt8(SOURCEEXCHANGE2_VERSION);
+				const uint16 nOptions = 0; // 16 ... Reserved
+				dataFileReq.WriteUInt16(nOptions);
+			}
+			else{
 			dataFileReq.WriteUInt8(OP_REQUESTSOURCES);
+			}
 			reqfile->SetLastAnsweredTimeTimeout();
 			SetLastAskedForSources();
 			if (thePrefs.GetDebugSourceExchange())
-				AddDebugLogLine(false, _T("SXSend: Client source request; %s, File=\"%s\""), DbgGetClientInfo(), reqfile->GetFileName());
+				AddDebugLogLine(false, _T("SXSend (%s): Client source request; %s, File=\"%s\""),SupportsSourceExchange2() ? _T("Version 2") : _T("Version 1"), DbgGetClientInfo(), reqfile->GetFileName());
         }
 
 		// OP_AICHFILEHASHREQ
@@ -701,13 +709,25 @@ void CUpDownClient::SendFileRequest()
 				    Debug(_T("  last source request was before %s\n"), CastSecondsToHM((GetTickCount() - GetLastAskedForSources())/1000));
 		    }
 			reqfile->SetLastAnsweredTimeTimeout();
-			Packet* packet = new Packet(OP_REQUESTSOURCES,16,OP_EMULEPROT);
+			
+			Packet* packet;
+			if (SupportsSourceExchange2()){
+				packet = new Packet(OP_REQUESTSOURCES2,19,OP_EMULEPROT);
+				PokeUInt8(&packet->pBuffer[0], SOURCEEXCHANGE2_VERSION);
+				const uint16 nOptions = 0; // 16 ... Reserved
+				PokeUInt16(&packet->pBuffer[1], nOptions);
+				md4cpy(&packet->pBuffer[3],reqfile->GetFileHash());
+			}
+			else{
+				packet = new Packet(OP_REQUESTSOURCES,16,OP_EMULEPROT);
 			md4cpy(packet->pBuffer,reqfile->GetFileHash());
+			}
+
 			theStats.AddUpDataOverheadSourceExchange(packet->size);
 			socket->SendPacket(packet, true, true);
 			SetLastAskedForSources();
 			if (thePrefs.GetDebugSourceExchange())
-				AddDebugLogLine(false, _T("SXSend: Client source request; %s, File=\"%s\""), DbgGetClientInfo(), reqfile->GetFileName());
+				AddDebugLogLine(false, _T("SXSend (%s): Client source request; %s, File=\"%s\""),SupportsSourceExchange2() ? _T("Version 2") : _T("Version 1"), DbgGetClientInfo(), reqfile->GetFileName());
         }
 
 		if (IsSupportingAICH())
@@ -1894,8 +1914,8 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 
 int CUpDownClient::unzip(Pending_Block_Struct* block, const BYTE* zipped, uint32 lenZipped, BYTE** unzipped, uint32* lenUnzipped, int iRecursion)
 {
-#define TRACE_UNZIP	/*TRACE*/
-
+//#define TRACE_UNZIP	TRACE
+#define TRACE_UNZIP	__noop
 	TRACE_UNZIP("unzip: Zipd=%6u Unzd=%6u Rcrs=%d", lenZipped, *lenUnzipped, iRecursion);
   	int err = Z_DATA_ERROR;
   	try
@@ -2266,7 +2286,7 @@ void CUpDownClient::UDPReaskForDownload()
 				response->opcode = OP_MULTI_FILE_REASK;
 				theStats.AddUpDataOverheadFileRequest(response->size);
 				theApp.downloadqueue->AddUDPFileReasks();
-				theApp.clientudp->SendPacket(response, GetIP(), GetUDPPort(), ShouldReceiveCryptUDPPackets(), GetUserHash());
+				theApp.clientudp->SendPacket(response, GetIP(), GetUDPPort(), ShouldReceiveCryptUDPPackets(), GetUserHash(),false,0);
 			}
 			else
 			{
@@ -2276,9 +2296,9 @@ void CUpDownClient::UDPReaskForDownload()
 				response->opcode = OP_REASKFILEPING;
 				theStats.AddUpDataOverheadFileRequest(response->size);
 				theApp.downloadqueue->AddUDPFileReasks();
-				theApp.clientudp->SendPacket(response, GetIP(), GetUDPPort(), ShouldReceiveCryptUDPPackets(), GetUserHash());
-			}
+			theApp.clientudp->SendPacket(response, GetIP(), GetUDPPort(), ShouldReceiveCryptUDPPackets(), GetUserHash(), false, 0);
 			m_nTotalUDPPackets++;
+			}
 		}
 		else if (HasLowID() && GetBuddyIP() && GetBuddyPort() && HasValidBuddyID())
 		{
@@ -2301,7 +2321,8 @@ void CUpDownClient::UDPReaskForDownload()
 			response->opcode = OP_REASKCALLBACKUDP;
 			theStats.AddUpDataOverheadFileRequest(response->size);
 			theApp.downloadqueue->AddUDPFileReasks();
-			theApp.clientudp->SendPacket(response, GetBuddyIP(), GetBuddyPort(), false, NULL);  // kad doesnt supports obfuscation yet
+			// FIXME: We dont know which kadversion the buddy has, so we need to send unencrypted
+			theApp.clientudp->SendPacket(response, GetBuddyIP(), GetBuddyPort(), false, NULL, true, 0);
 			m_nTotalUDPPackets++;
 		}
 	}
@@ -3145,7 +3166,7 @@ void CUpDownClient::ProcessAICHRequest(const uchar* packet, UINT size)
 			if (pKnownFile->GetAICHHashset()->CreatePartRecoveryData((uint64)nPart*PARTSIZE, &fileResponse)){
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 				if(thePrefs.GetLogICHEvents()) //JP log ICH events
-				AddDebugLogLine(DLP_HIGH, false, _T("AICH Packet Request: Sucessfully created and send recoverydata for %s to %s"), pKnownFile->GetFileName(), DbgGetClientInfo());
+				AddDebugLogLine(DLP_HIGH, false, _T("AICH Packet Request: Successfully created and send recoverydata for %s to %s"), pKnownFile->GetFileName(), DbgGetClientInfo());
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
 					DebugSend("OP__AichAnswer", this, pKnownFile->GetFileHash());
 				Packet* packAnswer = new Packet(&fileResponse, OP_EMULEPROT, OP_AICHANSWER);
@@ -3161,7 +3182,7 @@ void CUpDownClient::ProcessAICHRequest(const uchar* packet, UINT size)
 		else{
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 			if(thePrefs.GetLogICHEvents()) //JP log ICH events
-			AddDebugLogLine(DLP_HIGH, false, _T("AICH Packet Request: Failed to create ecoverydata - Hashset not ready or requested Hash differs from Masterhash for %s to %s"), pKnownFile->GetFileName(), DbgGetClientInfo());
+			AddDebugLogLine(DLP_HIGH, false, _T("AICH Packet Request: Failed to create recoverydata - Hashset not ready or requested Hash differs from Masterhash for %s to %s"), pKnownFile->GetFileName(), DbgGetClientInfo());
 		}
 
 	}

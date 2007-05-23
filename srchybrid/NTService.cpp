@@ -633,7 +633,7 @@ bool  InterfaceToService() {
 	if (thePrefs.GetServiceStartupMode() == 1){
 		CString LocalWs;
 		LocalWs.Format(_T("http://127.0.0.1:%d"),(int)thePrefs.GetWSPort());
-		ShellExecute(NULL, NULL,LocalWs, NULL, thePrefs.GetAppDir(), SW_SHOWDEFAULT);
+		ShellExecute(NULL, NULL,LocalWs, NULL, thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR), SW_SHOWDEFAULT);
 		return true; // no start of emule gui
 	}
 	if (thePrefs.GetServiceStartupMode() == 2){

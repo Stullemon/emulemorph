@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -390,7 +390,7 @@ HRESULT CMainFrameDropTarget::PasteText(CLIPFORMAT cfData, COleDataObject& data)
 		if ((pszUrlA = (LPCSTR)GlobalLock(hMem)) != NULL)
 		{
 			// skip white space
-			while (isspace(*pszUrlA))
+			while (isspace((unsigned char)*pszUrlA))
 				pszUrlA++;
 			
 			hrPasteResult = S_FALSE; // default: nothing was pasted
@@ -463,8 +463,7 @@ HRESULT CMainFrameDropTarget::PasteHDROP(COleDataObject &data)
 				LPCWSTR pszFileNameW = (LPCWSTR)((LPBYTE)lpDrop + lpDrop->pFiles);
 				while (*pszFileNameW != L'\0')
 				{
-					USES_CONVERSION;
-					if (FAILED(AddUrlFileContents(W2CT(pszFileNameW))))
+					if (FAILED(AddUrlFileContents(pszFileNameW)))
 						break;
 					hrPasteResult = S_OK;
 					pszFileNameW += wcslen(pszFileNameW) + 1;
@@ -475,8 +474,7 @@ HRESULT CMainFrameDropTarget::PasteHDROP(COleDataObject &data)
 				LPCSTR pszFileNameA = (LPCSTR)((LPBYTE)lpDrop + lpDrop->pFiles);
 				while (*pszFileNameA != '\0')
 				{
-					USES_CONVERSION;
-					if (FAILED(AddUrlFileContents(A2CT(pszFileNameA))))
+					if (FAILED(AddUrlFileContents(CString(pszFileNameA))))
 						break;
 					hrPasteResult = S_OK;
 					pszFileNameA += strlen(pszFileNameA) + 1;
@@ -521,7 +519,7 @@ BOOL CMainFrameDropTarget::IsSupportedDropData(COleDataObject* pDataObject)
 			if ((lpszUrl = (LPCSTR)GlobalLock(hMem)) != NULL)
 			{
 				// skip white space
-				while (isspace(*lpszUrl))
+				while (isspace((unsigned char)*lpszUrl))
 					lpszUrl++;
 				bResult = IsUrlSchemeSupportedA(lpszUrl);
 				GlobalUnlock(hMem);
@@ -617,7 +615,7 @@ BOOL CMainFrameDropTarget::OnDrop(CWnd*, COleDataObject* pDataObject, DROPEFFECT
 		}
 		else if (pDataObject->IsDataAvailable(CF_HDROP))
 		{
-			return PasteHDROP(*pDataObject);
+			return PasteHDROP(*pDataObject) == S_OK;
 		}
 		bResult = TRUE;
 	}

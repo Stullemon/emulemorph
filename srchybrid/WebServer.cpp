@@ -1097,12 +1097,9 @@ CString CWebServer::_GetHeader(ThreadData Data, long lSession)
 
 			if (IsSessionAdmin(Data,sSession)) HTTPConText+=_T(" (<a href=\"?ses=") + sSession + _T("&w=server&c=disconnect\">")+_GetPlainResString(IDS_IRC_DISCONNECT)+_T("</a>)");
 
-			_stprintf(HTTPHeader, _T("%s"), CastItoIShort(cur_server->GetUsers()));
-			HTTPHelpU = CString(HTTPHeader);
-			_stprintf(HTTPHeader, _T("%s"), CastItoIShort(cur_server->GetMaxUsers()));
-			HTTPHelpM = CString(HTTPHeader);
-			_stprintf(HTTPHeader, _T("%s"), CastItoIShort(cur_server->GetFiles()));
-			HTTPHelpF = CString(HTTPHeader);
+			HTTPHelpU = CastItoIShort(cur_server->GetUsers());
+			HTTPHelpM = CastItoIShort(cur_server->GetMaxUsers());
+			HTTPHelpF = CastItoIShort(cur_server->GetFiles());
 			if ( cur_server->GetMaxUsers() > 0 )
 				_stprintf(HTTPHeader, _T("%.1f "), (static_cast<double>(cur_server->GetUsers()) / cur_server->GetMaxUsers()) * 100.0);
 			else
@@ -2415,7 +2412,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 				CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 				while (Cat!=_T(""))
 				{
-					if (Cat==thePrefs.GetCategory(pPartFile->GetCategory())->title)
+					if (Cat==thePrefs.GetCategory(pPartFile->GetCategory())->strTitle)
 					{
 						Allowed=true;
 						break;
@@ -2506,7 +2503,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 			dFile.nFilePrio		= pPartFile->GetDownPriority();
 			int		pCat = pPartFile->GetCategory();
 
-			CString		strCategory = thePrefs.GetCategory(pCat)->title;
+			CString	strCategory = thePrefs.GetCategory(pCat)->strTitle;
 			strCategory.Replace(_T("'"),_T("\'"));
 
 			dFile.sCategory = strCategory;
@@ -2659,7 +2656,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 				CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 				while (Cat!=_T(""))
 				{
-					if (Cat==thePrefs.GetCategory(((CPartFile*)file)->GetCategory())->title)
+					if (Cat==thePrefs.GetCategory(((CPartFile*)file)->GetCategory())->strTitle)
 					{
 						bAllowed = true;
 						break;
@@ -3950,10 +3947,8 @@ CString CWebServer::_GetSharedFilesList(ThreadData Data)
 			HTTPProcessData.Replace(_T("[ShortFileName]"), _T(""));
 		if (!WSsharedColumnHidden[1])
 		{
-			_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].nFileTransferred));
-			HTTPProcessData.Replace(_T("[FileTransferred]"), CString(HTTPTempC));
-			_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].nFileAllTimeTransferred));
-			HTTPProcessData.Replace(_T("[FileAllTimeTransferred]"), _T(" (") +CString(HTTPTempC)+_T(")") );
+			HTTPProcessData.Replace(_T("[FileTransferred]"), CastItoXBytes(SharedArray[i].nFileTransferred));
+			HTTPProcessData.Replace(_T("[FileAllTimeTransferred]"), _T(" (") +CastItoXBytes(SharedArray[i].nFileAllTimeTransferred)+_T(")") );
 		}
 		else
 		{
@@ -3986,8 +3981,7 @@ CString CWebServer::_GetSharedFilesList(ThreadData Data)
 		}
 		if (!WSsharedColumnHidden[4])
 		{
-			_stprintf(HTTPTempC, _T("%s"),CastItoXBytes(SharedArray[i].m_qwFileSize));
-			HTTPProcessData.Replace(_T("[FileSize]"), CString(HTTPTempC));
+			HTTPProcessData.Replace(_T("[FileSize]"), CastItoXBytes(SharedArray[i].m_qwFileSize));
 		}
 		else
 			HTTPProcessData.Replace(_T("[FileSize]"), _T(""));
@@ -5175,7 +5169,7 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 			CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 			while (Cat!=_T(""))
 			{
-				if (Cat==thePrefs.GetCategory(i)->title)
+				if (Cat==thePrefs.GetCategory(i)->strTitle)
 				{
 					Allowed=true;
 					break;
@@ -5189,7 +5183,7 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 		}
 //MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 
-		CString strCategory = thePrefs.GetCategory(i)->title;
+		CString strCategory = thePrefs.GetCategory(i)->strTitle;
 		strCategory.Replace(_T("'"),_T("\'"));
 		tempBuf.AppendFormat( _T("<option%s value=\"%i\">%s</option>\n"), (i == preselect) ? _T(" selected") : _T(""), i, strCategory);
 	}
@@ -5224,7 +5218,7 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 			CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 			while (Cat!=_T(""))
 			{
-				if (Cat==thePrefs.GetCategory(i)->title)
+				if (Cat==thePrefs.GetCategory(i)->strTitle)
 				{
 					Allowed=true;
 					break;
@@ -5241,12 +5235,12 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 		if (i==preselect)
 		{
 			tempBuff3 = _T("checked.gif");
-			tempBuff4 = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->title;
+			tempBuff4 = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->strTitle;
 		}
 		else
 			tempBuff3 = _T("checked_no.gif");
 
-		strCategory = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->title;
+		strCategory = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->strTitle;
 		strCategory.Replace(_T("'"),_T("\\'"));
 
 		tempBuff.AppendFormat(_T("<a href=&quot;/?ses=%s&w=transfer&cat=%d&quot;><div class=menuitems><img class=menuchecked src=%s>%s&nbsp;</div></a>"),
@@ -5290,7 +5284,7 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 			CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 			while (Cat!=_T(""))
 			{
-				if (Cat==thePrefs.GetCategory(i)->title)
+				if (Cat==thePrefs.GetCategory(i)->strTitle)
 				{
 					Allowed=true;
 					break;
@@ -5315,12 +5309,12 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 		if (i==preselect)
 		{
 			tempBuff3 = _T("checked.gif");
-			tempBuff4 = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->title;
+			tempBuff4 = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->strTitle;
 		}
 		else
 			tempBuff3 = _T("checked_no.gif");
 
-		strCategory = (i == 0)? GetResString(IDS_CAT_UNASSIGN) : thePrefs.GetCategory(i)->title;
+		strCategory = (i == 0)? GetResString(IDS_CAT_UNASSIGN) : thePrefs.GetCategory(i)->strTitle;
 		strCategory.Replace(_T("'"),_T("\\'"));
 
 		tempBuff.AppendFormat(_T("<a href=&quot;/?ses=%s&w=transfer[CatSel]&op=setcat&file=%s&filecat=%d&quot;><div class=menuitems><img class=menuchecked src=%s>%s&nbsp;</div></a>"),
@@ -5468,7 +5462,7 @@ void CWebServer::ProcessFileReq(ThreadData Data) {
 	
 	filename.Replace(_T('/'),_T('\\'));
 	if (filename.GetAt(0)==_T('\\')) filename.Delete(0);
-	filename=thePrefs.GetWebServerDir()+filename;
+	filename = thePrefs.GetMuleDirectory(EMULE_WEBSERVERDIR) + filename;
 
 	CFile file;
 	if(file.Open(filename, CFile::modeRead|CFile::shareDenyWrite|CFile::typeBinary))
@@ -5629,7 +5623,7 @@ void CWebServer::SaveWebServConf()
 {
 	CString Filename;
 	
-	CString fullpath(thePrefs.GetConfigDir());
+	CString fullpath(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 	fullpath += L"Webserver.ini";
 	CIni ini(fullpath, L"Users");
 	int userno=1;
@@ -5654,7 +5648,7 @@ void CWebServer::SaveWebServConf()
 void CWebServer::LoadWebServConf()
 {
 	CString Filename;
-	Filename.Format(_T("%swebserv.conf"), thePrefs.GetConfigDir()); // convert webserv.conf
+	Filename.Format(_T("%swebserv.conf"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)); // convert webserv.conf
 
 	try
 	{
@@ -5670,7 +5664,7 @@ void CWebServer::LoadWebServConf()
 			file.Remove(Filename); // we now have a ini file.....
 		}
 		else {	// read the Webserver.ini
-			CString fullpath(thePrefs.GetConfigDir());
+			CString fullpath(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 	        fullpath += L"Webserver.ini";
 	         CIni ini(fullpath, L"Users");
          	int userno=1;

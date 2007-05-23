@@ -5,27 +5,10 @@
 
 class CTrayMenuBtn : public CWnd
 {
-// Construction
 public:
 	CTrayMenuBtn();
-
-// Attributes
-public:
-
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CTrayMenuBtn)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
 	virtual ~CTrayMenuBtn();
 
-	// Generated message map functions
-public:
 	bool	m_bBold;
 	bool	m_bMouseOver;
 	bool	m_bNoHover;
@@ -36,12 +19,10 @@ public:
 	HICON	m_hIcon;
 	CString m_strText;
 	CFont	m_cfFont;
-	
-	//{{AFX_MSG(CTrayMenuBtn)
+
+protected:
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnPaint();
-	//}}AFX_MSG
-
-	DECLARE_MESSAGE_MAP()
 };

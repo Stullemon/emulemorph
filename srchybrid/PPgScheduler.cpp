@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -73,16 +73,16 @@ BOOL CPPgScheduler::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 
-	m_list.SetExtendedStyle(LVS_EX_FULLROWSELECT);
-	m_list.ModifyStyle(LVS_SINGLESEL,0);
+	m_list.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
+	ASSERT( (m_list.GetStyle() & LVS_SINGLESEL) == 0);
 	m_list.InsertColumn(0, GetResString(IDS_TITLE) ,LVCFMT_LEFT,150,0);
 	m_list.InsertColumn(1,GetResString(IDS_S_DAYS),LVCFMT_LEFT,80,1);
 	m_list.InsertColumn(2,GetResString(IDS_STARTTIME),LVCFMT_LEFT,80,2);
 	m_time.SetFormat(_T("H:mm"));
 	m_timeTo.SetFormat(_T("H:mm"));
 
-	m_actions.SetExtendedStyle(LVS_EX_FULLROWSELECT);
-	m_actions.ModifyStyle(LVS_SINGLESEL,0);
+	m_actions.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
+	ASSERT( (m_actions.GetStyle() & LVS_SINGLESEL) == 0 );
 	m_actions.InsertColumn(0, GetResString(IDS_ACTION) ,LVCFMT_LEFT,150,0);
 	m_actions.InsertColumn(1,GetResString(IDS_VALUE),LVCFMT_LEFT,80,1);
 
@@ -373,7 +373,7 @@ void CPPgScheduler::OnNMRclickActionlist(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 			if (thePrefs.GetCatCount()>1) m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+20,GetResString(IDS_ALLUNASSIGNED));
 			m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+21,GetResString(IDS_ALL));
 			for (int i=1;i<thePrefs.GetCatCount();i++)
-				m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+22+i,thePrefs.GetCategory(i)->title );
+			m_CatActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+22+i,thePrefs.GetCategory(i)->strTitle);
 			m_ActionMenu.AppendMenu(MF_POPUP,(UINT_PTR)m_CatActionSel.m_hMenu,	GetResString(IDS_SELECTCAT));
 		} else
 			m_ActionMenu.AppendMenu(nFlag,MP_CAT_EDIT,	GetResString(IDS_EDIT));

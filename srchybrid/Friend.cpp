@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -22,6 +22,7 @@
 #include "UpDownClient.h"
 #include "Packets.h"
 #include "SafeFile.h"
+#include "clientlist.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -29,8 +30,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-const char CFriend::sm_abyNullHash[16] = {0};
 
 CFriend::CFriend(void)
 {
@@ -40,8 +39,7 @@ CFriend::CFriend(void)
 	m_dwLastChatted = 0;
 	(void)m_strName;
 	m_LinkedClient = 0;
-	md4cpy(m_abyUserhash, sm_abyNullHash);
-	m_dwHasHash = 0;
+	md4clr(m_abyUserhash);
 
     m_friendSlot = false;
 
@@ -59,12 +57,10 @@ CFriend::CFriend(const uchar* abyUserhash, uint32 dwLastSeen, uint32 dwLastUsedI
 	m_dwLastChatted = dwLastChatted;
 	if( dwHasHash && abyUserhash){
 		md4cpy(m_abyUserhash,abyUserhash);
-		m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
 	}
-	else{
-		md4cpy(m_abyUserhash, sm_abyNullHash);
-		m_dwHasHash = 0;
-	}
+	else
+		md4clr(m_abyUserhash);
+
 	m_strName = pszName;
 	m_LinkedClient = 0;
     m_friendSlot = false;
@@ -83,7 +79,7 @@ CFriend::CFriend(CUpDownClient* client){
 
 CFriend::~CFriend(void)
 {
-    if(m_LinkedClient != NULL) {
+    if(GetLinkedClient(true) != NULL) {
         m_LinkedClient->SetFriendSlot(false);
         m_LinkedClient->m_Friend = NULL;
         m_LinkedClient = NULL;
@@ -93,7 +89,6 @@ CFriend::~CFriend(void)
 void CFriend::LoadFromFile(CFileDataIO* file)
 {
 	file->ReadHash16(m_abyUserhash);
-	m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
 	m_dwLastUsedIP = file->ReadUInt32();
 	m_nLastUsedPort = file->ReadUInt16();
 	m_dwLastSeen = file->ReadUInt32();
@@ -135,8 +130,6 @@ void CFriend::LoadFromFile(CFileDataIO* file)
 
 void CFriend::WriteToFile(CFileDataIO* file)
 {
-	if (!m_dwHasHash)
-		md4cpy(m_abyUserhash, sm_abyNullHash);
 	file->WriteHash16(m_abyUserhash);
 	file->WriteUInt32(m_dwLastUsedIP);
 	file->WriteUInt16(m_nLastUsedPort);
@@ -154,6 +147,7 @@ void CFriend::WriteToFile(CFileDataIO* file)
 		nametag.WriteTagToFile(file);
 		uTagCount++;
 	}
+
 	//MORPH START - Added by SiRoB, Slot Friend
 	if(m_LinkedClient != NULL && m_LinkedClient->GetFriendSlot() || m_LinkedClient == NULL && m_friendSlot == true) {
 		CTag friendslottag(FF_FRIENDSLOT,1);
@@ -170,12 +164,14 @@ void CFriend::WriteToFile(CFileDataIO* file)
 		uTagCount++;
 	}
 	// // MORPH END CB: FriendNote END
+
 	file->Seek(uTagCountFilePos, CFile::begin);
 	file->WriteUInt32(uTagCount);
 	file->Seek(0, CFile::end);
 }
 
-bool CFriend::HasUserhash() {
+bool CFriend::HasUserhash() const
+{
     for(int counter = 0; counter < 16; counter++) {
         if(m_abyUserhash[counter] != 0) {
             return true;
@@ -186,7 +182,7 @@ bool CFriend::HasUserhash() {
 }
 
 void CFriend::SetFriendSlot(bool newValue) {
-    if(m_LinkedClient != NULL) {
+    if(GetLinkedClient() != NULL) {
         m_LinkedClient->SetFriendSlot(newValue);
     }
 
@@ -194,7 +190,7 @@ void CFriend::SetFriendSlot(bool newValue) {
 }
 
 bool CFriend::GetFriendSlot() const {
-    if(m_LinkedClient != NULL) {
+    if(GetLinkedClient() != NULL) {
         return m_LinkedClient->GetFriendSlot();
     } else {
         return m_friendSlot;
@@ -215,7 +211,6 @@ void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
             m_nLastUsedPort = linkedClient->GetUserPort();
 			/*FunnyNick*/m_strName = linkedClient->GetUserName(false); // MORPH funnynick
             md4cpy(m_abyUserhash,linkedClient->GetUserHash());
-            m_dwHasHash = md4cmp(m_abyUserhash, sm_abyNullHash) ? 1 : 0;
 
             linkedClient->m_Friend = this;
         } else if(m_LinkedClient != NULL) {
@@ -230,6 +225,14 @@ void CFriend::SetLinkedClient(CUpDownClient* linkedClient) {
 
         m_LinkedClient = linkedClient;
     }
-
-    theApp.friendlist->RefreshFriend(this);
+	theApp.friendlist->RefreshFriend(this);
 }
+
+CUpDownClient* CFriend::GetLinkedClient(bool bValidCheck) const
+{
+	if (bValidCheck && m_LinkedClient != NULL && !theApp.clientlist->IsValidClient(m_LinkedClient)){
+		ASSERT( false );
+		return NULL;
+	}
+	return m_LinkedClient; 
+};

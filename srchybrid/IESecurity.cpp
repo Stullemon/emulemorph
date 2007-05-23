@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -139,6 +139,7 @@ void DumpIID(REFIID iid, LPCTSTR pszClassName)
 ///////////////////////////////////////////////////////////////////////////////
 // InternetSecurityManager
 //
+#pragma warning(disable:4555) // expression has no effect; expected expression with side-effect (because of the 'METHOD_PROLOGUE' macro)
 
 STDMETHODIMP CMuleBrowserControlSite::XInternetSecurityManager::QueryInterface(REFIID riid, void** ppvObj)
 {
@@ -304,3 +305,5 @@ STDMETHODIMP CMuleBrowserControlSite::XServiceProvider::QueryService(REFGUID gui
 	*ppvObject = NULL;
 	return E_NOINTERFACE;
 }
+
+#pragma warning(default:4555) // expression has no effect; expected expression with side-effect (because of the 'METHOD_PROLOGUE' macro)

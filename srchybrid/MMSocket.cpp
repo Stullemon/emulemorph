@@ -385,7 +385,7 @@ void CListenMMSocket::DeleteClosedSockets(){
 			m_socket_list.RemoveAt(pos2);
 			delete cur_sock;
 	   }
-	   if (cur_sock->m_dwTimedShutdown && cur_sock->m_dwTimedShutdown < ::GetTickCount()){
+	   else if (cur_sock->m_dwTimedShutdown && cur_sock->m_dwTimedShutdown < ::GetTickCount()){
 		   cur_sock->ShutDown(SD_SEND);
 		   cur_sock->m_dwTimedShutdown = 0;
 	   }

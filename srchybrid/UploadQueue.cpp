@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -1783,8 +1783,11 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 				theApp.serverconnect->TryAnotherConnectionRequest();
 
 			theApp.listensocket->UpdateConnectionsStatus();
-			if (thePrefs.WatchClipboard4ED2KLinks())
+			if (thePrefs.WatchClipboard4ED2KLinks()) {
+				// TODO: Remove this from here. This has to be done with a clipboard chain
+				// and *not* with a timer!!
 				theApp.SearchClipboard();		
+			}
 
 			if (theApp.serverconnect->IsConnecting())
 				theApp.serverconnect->CheckForTimeout();

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -258,9 +258,17 @@ bool Packet::UnPackPacket(UINT uMaxDecompressedSize){
 		//ASSERT(0);
 		nNewSize = uMaxDecompressedSize;
 	}
-	BYTE* unpack = new BYTE[nNewSize];
-	uLongf unpackedsize = nNewSize;
-	UINT result = uncompress(unpack,&unpackedsize,(BYTE*)pBuffer,size);
+	BYTE* unpack = NULL;
+	uLongf unpackedsize = 0;
+	UINT result = 0;
+	do {
+		delete[] unpack;
+		unpack = new BYTE[nNewSize];
+		unpackedsize = nNewSize;
+		result = uncompress(unpack,&unpackedsize,(BYTE*)pBuffer,size);
+		nNewSize *= 2; // size for the next try if needed
+	} while (result == Z_BUF_ERROR && nNewSize < uMaxDecompressedSize);
+	
 	if (result == Z_OK){
 		ASSERT ( completebuffer == NULL );
 		ASSERT ( pBuffer != NULL );

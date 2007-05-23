@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -447,6 +447,6 @@ bool CFirewallOpener::ReadFromICFdat(CFile &file, CICSRuleInfo &mapping){
 }
 
 CString CFirewallOpener::GetICFdatFileName(){
-	return CString(thePrefs.GetConfigDir()+_T("ICF.dat"));
+	return CString(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)+_T("ICF.dat"));
 }
 //MORPH END   - Changed by SiRoB, [MoNKi: -Improved ICS-Firewall support-]

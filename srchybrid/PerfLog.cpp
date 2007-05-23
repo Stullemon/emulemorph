@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -25,11 +25,12 @@
 #include "Statistics.h"
 #include "emuledlg.h"
 #include "Log.h"
+#include "otherfunctions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -63,14 +64,11 @@ void CPerfLog::Startup()
 		m_eFileFormat = (ELogFileFormat)ini.GetInt(_T("FileFormat"), CSV);
 
 		// set default log file path
-		TCHAR szAppPath[MAX_PATH];
-		GetModuleFileName(NULL, szAppPath, MAX_PATH);
-		PathRemoveFileSpec(szAppPath);
-		CString strDefFilePath = szAppPath;
+		CString strDefFilePath = thePrefs.GetMuleDirectory(EMULE_CONFIGBASEDIR);
 		if (m_eFileFormat == CSV)
-			strDefFilePath += _T("\\perflog.csv");
+			strDefFilePath += _T("perflog.csv");
 		else
-			strDefFilePath += _T("\\perflog.mrtg");
+			strDefFilePath += _T("perflog.mrtg");
 
 		m_strFilePath = ini.GetString(_T("File"), strDefFilePath);
 		if (m_strFilePath.IsEmpty())
@@ -84,10 +82,10 @@ void CPerfLog::Startup()
 			_tsplitpath(m_strFilePath, drv, dir, nam, NULL);
 			m_strFilePath.Empty();
 
-			_tmakepath(m_strMRTGDataFilePath.GetBuffer(MAX_PATH), drv, dir, CString(nam) + _T("_data"), _T("mrtg"));
+			_tmakepathlimit(m_strMRTGDataFilePath.GetBuffer(MAX_PATH), drv, dir, CString(nam) + _T("_data"), _T("mrtg"));
 			m_strMRTGDataFilePath.ReleaseBuffer();
 
-			_tmakepath(m_strMRTGOverheadFilePath.GetBuffer(MAX_PATH), drv, dir, CString(nam) + _T("_overhead"), _T("mrtg"));
+			_tmakepathlimit(m_strMRTGOverheadFilePath.GetBuffer(MAX_PATH), drv, dir, CString(nam) + _T("_overhead"), _T("mrtg"));
 			m_strMRTGOverheadFilePath.ReleaseBuffer();
 		}
 
@@ -108,22 +106,22 @@ void CPerfLog::WriteSamples(UINT nCurDn, UINT nCurUp, UINT nCurDnOH, UINT nCurUp
 
 	if (m_eFileFormat == CSV)
 	{
-	time_t tNow = time(NULL);
-	char szTime[40];
-	// do not localize this date/time string!
-	strftime(szTime, ARRSIZE(szTime), "%m/%d/%Y %H:%M:%S", localtime(&tNow));
+		time_t tNow = time(NULL);
+		char szTime[40];
+		// do not localize this date/time string!
+		strftime(szTime, ARRSIZE(szTime), "%m/%d/%Y %H:%M:%S", localtime(&tNow));
 
-	FILE* fp = _tfsopen(m_strFilePath, (m_eMode == OneSample) ? _T("wt") : _T("at"), _SH_DENYWR);
-	if (fp == NULL){
+		FILE* fp = _tfsopen(m_strFilePath, (m_eMode == OneSample) ? _T("wt") : _T("at"), _SH_DENYWR);
+		if (fp == NULL){
 			LogError(false, _T("Failed to open performance log file \"%s\" - %s"), m_strFilePath, _tcserror(errno));
-		return;
+			return;
+		}
+		setvbuf(fp, NULL, _IOFBF, 16384); // ensure that all lines are written to file with one call
+		if (m_eMode == OneSample || _filelength(fileno(fp)) == 0)
+			fprintf(fp, "\"(PDH-CSV 4.0)\",\"DatDown\",\"DatUp\",\"OvrDown\",\"OvrUp\"\n");
+		fprintf(fp, "\"%s\",\"%u\",\"%u\",\"%u\",\"%u\"\n", szTime, nCurDn, nCurUp, nCurDnOH, nCurUpOH);
+		fclose(fp);
 	}
-	setvbuf(fp, NULL, _IOFBF, 16384); // ensure that all lines are written to file with one call
-	if (m_eMode == OneSample || _filelength(fileno(fp)) == 0)
-		fprintf(fp, "\"(PDH-CSV 4.0)\",\"DatDown\",\"DatUp\",\"OvrDown\",\"OvrUp\"\n");
-	fprintf(fp, "\"%s\",\"%u\",\"%u\",\"%u\",\"%u\"\n", szTime, nCurDn, nCurUp, nCurDnOH, nCurUpOH);
-	fclose(fp);
-}
 	else
 	{
 		ASSERT( m_eFileFormat == MRTG );

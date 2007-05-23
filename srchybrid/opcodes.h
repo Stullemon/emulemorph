@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -23,11 +23,13 @@
 #define KADEMLIA_VERSION1_46c			0x01 /*45b - 46c*/
 #define KADEMLIA_VERSION2_47a			0x02 /*47a*/
 #define KADEMLIA_VERSION3_47b			0x03 /*47b*/
-#define KADEMLIA_VERSION				0x04 /*47c*/
+#define KADEMLIA_VERSION				0x05
 #define PREFFILE_VERSION		0x14	//<<-- last change: reduced .dat, by using .ini
 #define PARTFILE_VERSION		0xe0
 #define PARTFILE_SPLITTEDVERSION		0xe1
 #define PARTFILE_VERSION_LARGEFILE		0xe2
+#define SOURCEEXCHANGE2_VERSION			4		// replaces the version sent in MISC_OPTIONS flag fro SX1
+
 //Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 #define CREDITFILE_VERSION_30_DYN		0x81	// Moonlight: Dynamic Transportable CreditStruct.
 #define CREDITFILE_VERSION_30_SUQWTv2	0x80	// Moonlight: SUQWT CreditStruct v2.
@@ -132,6 +134,7 @@
 #define DISKSPACERECHECKTIME	MIN2MS(15)
 #define CLIENTLIST_CLEANUP_TIME	MIN2MS(34)	// 34 min
 #define MAXPRIORITYCOLL_SIZE	10*1024		// max file size for collection file which are allowed to bypass the queue
+#define SEARCH_SPAM_THRESHOLD	60
 
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
 #define	MAXFRAGSIZE				1300
@@ -262,6 +265,8 @@
 #define OP_FILEDESC				0x61	// <len 2><NAME len>
 #define OP_REQUESTSOURCES		0x81	// <HASH 16>
 #define OP_ANSWERSOURCES		0x82	//
+#define OP_REQUESTSOURCES2		0x83	// <HASH 16><Version 1><Options 2>
+#define OP_ANSWERSOURCES2		0x84	// <Version 1>[content]
 #define OP_PUBLICKEY			0x85	// <len 1><pubkey len>
 #define OP_SIGNATURE			0x86	// v1: <len 1><signature len>  v2:<len 1><signature len><sigIPused 1>
 #define OP_SECIDENTSTATE		0x87	// <state 1><rndchallenge 4>
@@ -654,9 +659,22 @@
 #define KADEMLIA_FIREWALLED_ACK_RES		0x59	// (null)
 #define KADEMLIA_FINDBUDDY_RES	0x5A	// <TCPPORT (sender) [2]>
 
+#define KADEMLIA2_PING					0x60	// (null)
+#define KADEMLIA2_PONG					0x61	// (null)
+
 // KADEMLIA (parameter)
 #define KADEMLIA_FIND_VALUE		0x02
 #define KADEMLIA_STORE			0x04
 #define KADEMLIA_FIND_NODE		0x0B
+
+// searchspam.met Tags
+#define SP_FILEFULLNAME					0x01
+#define SP_FILEHASHSPAM					0x02
+#define SP_FILEHASHNOSPAM				0x03
+#define SP_FILESOURCEIP					0x04
+#define SP_FILESERVERIP					0x05
+#define SP_FILESIMILARNAME				0x06
+#define SP_FILESIZE						0x07
+#define SP_UDPSERVERSPAMRATIO			0x08
 
 #define MAX_GSL                         8000 //MORPH - Added by Stulle, Global Source Limit

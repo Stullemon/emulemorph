@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -179,7 +179,7 @@ CPreviewApps::CPreviewApps()
 
 CString CPreviewApps::GetDefaultAppsFile() const
 {
-	return thePrefs.GetConfigDir() + _T("PreviewApps.dat");
+	return thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("PreviewApps.dat");
 }
 
 void CPreviewApps::RemoveAllApps()
@@ -251,12 +251,12 @@ int CPreviewApps::ReadAllApps()
 								else if (strId.CompareNoCase(_T("MinSize")) == 0)
 								{
 									if (!strValue.IsEmpty())
-										_stscanf(strValue, _T("%I64u"), &ullMinCompletedSize);
+										(void)_stscanf(strValue, _T("%I64u"), &ullMinCompletedSize);
 								}
 								else if (strId.CompareNoCase(_T("MinStart")) == 0)
 								{
 									if (!strValue.IsEmpty())
-										_stscanf(strValue, _T("%I64u"), &ullMinStartOfFile);
+										(void)_stscanf(strValue, _T("%I64u"), &ullMinStartOfFile);
 								}
 							}
 							strParams = sbuffer.Tokenize(_T(";"), iPos);

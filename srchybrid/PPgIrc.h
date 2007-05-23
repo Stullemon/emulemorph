@@ -25,9 +25,10 @@ protected:
 	bool m_bEmuleAllowAddFriend;
 	bool m_bEmuleSendLink;
 	bool m_bAcceptLinks;
-	bool m_bAcceptLinksFriends;
+	bool m_bIRCAcceptLinksFriendsOnly;
 	bool m_bHelpChannel;
 	bool m_bChannelsOnConnect;
+	bool m_bIRCEnableSmileys;
 
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
 	bool m_bInitializedTreeOpts;
@@ -46,6 +47,7 @@ protected:
 	HTREEITEM m_htiAcceptLinksFriends;
 	HTREEITEM m_htiHelpChannel;
 	HTREEITEM m_htiChannelsOnConnect;
+	HTREEITEM m_htiSmileys;
 
 	void LoadSettings(void);
 	void UpdateControls();

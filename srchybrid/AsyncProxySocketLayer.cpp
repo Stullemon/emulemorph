@@ -625,14 +625,16 @@ void CAsyncProxySocketLayer::OnReceive(int nErrorCode)
 				return;
 
 			// Safety check: Don't allow buffer to grow too large
+			char *pNewStrBuffer;
 			if (    m_iStrBuffSize + iRead > 4096
-				|| (m_pStrBuffer = (char*)realloc(m_pStrBuffer, m_iStrBuffSize + iRead)) == NULL) {
+				|| (pNewStrBuffer = (char*)realloc(m_pStrBuffer, m_iStrBuffSize + iRead)) == NULL) {
 				DoLayerCallback(LAYERCALLBACK_LAYERSPECIFIC, PROXYERROR_REQUESTFAILED, 0, (LPARAM)"Invalid HTTP response - Header size exceeds limit");
 				Reset();
 				ClearBuffer();
 				TriggerEvent(FD_CONNECT, WSAECONNABORTED, TRUE);
 				return;
 			}
+			m_pStrBuffer = pNewStrBuffer;
 
 			// Append read chunk to buffer
 			memcpy(m_pStrBuffer + m_iStrBuffSize, cBuff, iRead);

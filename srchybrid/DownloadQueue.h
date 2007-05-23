@@ -1,4 +1,4 @@
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -122,8 +122,8 @@ public:
 	typedef struct{
 		int	a[23];
 	} SDownloadStats;
-	void	GetDownloadStats(SDownloadStats& results);
-	void	GetDownloadStats(int results[],uint64& pui64TotFileSize,uint64& pui64TotBytesLeftToTransfer,uint64& pui64TotNeededSpace);
+	void	GetDownloadSourcesStats(SDownloadStats& results);
+	int		GetDownloadFilesStats(uint64 &ui64TotalFileSize, uint64 &ui64TotalLeftToTransfer, uint64 &ui64TotalAdditionalNeededSpace);
 	uint32	GetDatarate() {return datarate;}
 
 	void	AddUDPFileReasks()								{m_nUDPFileReasks++;}

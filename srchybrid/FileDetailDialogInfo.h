@@ -35,6 +35,7 @@ protected:
 	bool m_bDataChanged;
 	uint32 m_timer;
 	static LPCTSTR sm_pszNotAvail;
+	bool m_bShowFileTypeWarning;
 
 	void Localize();
 	void RefreshData();
@@ -47,4 +48,5 @@ protected:
 	afx_msg void OnTimer(UINT nIDEvent);
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };

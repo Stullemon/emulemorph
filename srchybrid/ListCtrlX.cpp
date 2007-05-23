@@ -210,12 +210,13 @@ void CListCtrlX::EnableHdrCtrlSortBitmaps(BOOL bUseHdrCtrlSortBitmaps)
 {
 	if (bUseHdrCtrlSortBitmaps && theApp.m_ullComCtrlVer >= MAKEDLLVERULL(6,0,0,0))
 		m_bUseHdrCtrlSortBitmaps = TRUE;
-	else
+	else {
 #ifdef IDB_SORT_STATES
 		SetHdrImgList(IDB_SORT_STATES, LCX_SORT_STATE_IMAGE_WIDTH, LCX_SORT_STATE_IMAGE_HEIGHT, LCX_SORT_STATE_IMAGES);
 #else
-		ASSERT(0);
+		//ASSERT(0);
 #endif
+	}
 }
 
 void CListCtrlX::SetHdrImgList(UINT uResID, int cx, int cy, int iImages)
@@ -614,7 +615,7 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport)
 			LVCOLUMN lvc;
 			lvc.mask = LVCF_TEXT | LVCF_WIDTH;
 			lvc.pszText = szItem;
-			lvc.cchTextMax = ARRSIZE(szItem);
+			lvc.cchTextMax = _countof(szItem);
 			if (lv.GetColumn(iCol, &lvc) && lvc.cx > 0)
 			{
 				int iLen = _tcslen(lvc.pszText);
@@ -628,7 +629,7 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport)
 					lvi.iItem = iItem;
 					lvi.iSubItem = iCol;
 					lvi.pszText = szItem;
-					lvi.cchTextMax = ARRSIZE(szItem);
+					lvi.cchTextMax = _countof(szItem);
 					if (lv.GetItem(&lvi))
 					{
 						int iLen = _tcslen(lvi.pszText);
@@ -647,11 +648,12 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport)
 				LVCOLUMN lvc;
 				lvc.mask = LVCF_TEXT;
 				lvc.pszText = szItem;
-				lvc.cchTextMax = ARRSIZE(szItem);
+				lvc.cchTextMax = _countof(szItem);
 				if (lv.GetColumn(iCol, &lvc))
 				{
-					TCHAR szFmtItem[ARRSIZE(szItem)+32];
-					_sntprintf(szFmtItem, ARRSIZE(szFmtItem), _T("%-*s"), paiColWidths[iCol] + 2, szItem);
+					TCHAR szFmtItem[_countof(szItem)+32];
+					_sntprintf(szFmtItem, _countof(szFmtItem), _T("%-*s"), paiColWidths[iCol] + 2, szItem);
+					szFmtItem[_countof(szFmtItem) - 1] = _T('\0');
 					strLine += szFmtItem;
 				}
 			}
@@ -677,11 +679,12 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport)
 					lvi.iItem = iItem;
 					lvi.iSubItem = iCol;
 					lvi.pszText = szItem;
-					lvi.cchTextMax = ARRSIZE(szItem);
+					lvi.cchTextMax = _countof(szItem);
 					if (lv.GetItem(&lvi))
 					{
-						TCHAR szFmtItem[ARRSIZE(szItem)+32];
-						_sntprintf(szFmtItem, ARRSIZE(szFmtItem), _T("%-*s"), paiColWidths[iCol] + 2, szItem);
+						TCHAR szFmtItem[_countof(szItem)+32];
+						_sntprintf(szFmtItem, _countof(szFmtItem), _T("%-*s"), paiColWidths[iCol] + 2, szItem);
+						szFmtItem[_countof(szFmtItem) - 1] = _T('\0');
 						strLine += szFmtItem;
 					}
 				}
@@ -694,7 +697,7 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport)
 			}
 		}
 
-		delete paiColWidths;
+		delete[] paiColWidths;
 
 		if (!rstrReport.IsEmpty())
 			rstrReport += _T("\r\n");
@@ -745,7 +748,7 @@ void SetItemFocus(CListCtrl &ctl)
 		int iItem = ctl.GetNextItem(-1, LVNI_FOCUSED);
 		if (iItem == -1)
 		{
-			int iItem = ctl.GetNextItem(-1, LVNI_SELECTED);
+			iItem = ctl.GetNextItem(-1, LVNI_SELECTED);
 			if (iItem == -1)
 				iItem = 0;
 			ctl.SetItemState(iItem, LVIS_FOCUSED | LVIS_SELECTED, LVIS_FOCUSED | LVIS_SELECTED);

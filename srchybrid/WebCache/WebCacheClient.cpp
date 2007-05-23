@@ -1154,7 +1154,7 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 				packet->opcode = OP_HTTP_CACHED_BLOCK;
 				if (thePrefs.GetDebugClientUDPLevel() > 0)
 					DebugSend("OP__Http_Cached_Block (UDP)", cur_client );
-				theApp.clientudp->SendPacket(packet, cur_client->GetIP(), cur_client->GetUDPPort(), cur_client->ShouldReceiveCryptUDPPackets(), cur_client->GetUserHash());
+				theApp.clientudp->SendPacket(packet, cur_client->GetIP(), cur_client->GetUDPPort(), cur_client->ShouldReceiveCryptUDPPackets(), cur_client->GetUserHash(),false, 0);
 				WC_OHCBManager.AddRecipient(OHCBpos, cur_client);
 				nrOfSentOHCBs++;
 			}
@@ -1211,7 +1211,7 @@ void CUpDownClient::PublishWebCachedBlock( const Requested_Block_Struct* block )
 				if (thePrefs.GetDebugClientUDPLevel() > 0)
 					DebugSend("OP__Multi_Http_Cached_Block (UDP)", cur_client );
 				lastMultiOHCBPacketSent = now;
-				theApp.clientudp->SendPacket(packet, cur_client->GetIP(), cur_client->GetUDPPort(), cur_client->ShouldReceiveCryptUDPPackets(), cur_client->GetUserHash());
+				theApp.clientudp->SendPacket(packet, cur_client->GetIP(), cur_client->GetUDPPort(), cur_client->ShouldReceiveCryptUDPPackets(), cur_client->GetUserHash(),false, 0);
 			}
 			else
 			{
@@ -1457,7 +1457,7 @@ void CUpDownClient::SendOHCBsNow()
 		if (thePrefs.GetDebugClientUDPLevel() > 0)
 			DebugSend("OP__Multi_Http_Cached_Block (UDP)", this );
 		lastMultiOHCBPacketSent = now;
-		theApp.clientudp->SendPacket(packet, GetIP(), GetUDPPort(), ShouldReceiveCryptUDPPackets(), GetUserHash());
+		theApp.clientudp->SendPacket(packet, GetIP(), GetUDPPort(), ShouldReceiveCryptUDPPackets(), GetUserHash(),false, 0);
 	}
 	else if (!HasLowID() // don't try to send data to disconnected lowIDs
 			|| (socket && socket->IsConnected()))

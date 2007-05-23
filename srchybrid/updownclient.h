@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -348,7 +348,8 @@ public:
 	bool			SupportPeerCache() const { return m_fPeerCache; }
 	bool			SupportsLargeFiles() const						{ return m_fSupportsLargeFiles; }
 	bool			IsEmuleClient() const							{ return m_byEmuleVersion!=0; }
-	uint8			GetSourceExchangeVersion() const				{ return m_bySourceExchangeVer; }
+	uint8			GetSourceExchange1Version() const				{ return m_bySourceExchange1Ver; }
+	bool			SupportsSourceExchange2() const					{ return m_fSupportsSourceEx2; }
 	CClientCredits* Credits() const									{ return credits; }
 	bool			IsBanned() const;
 	const CString&	GetClientFilename() const						{ return m_strClientFilename; }
@@ -998,7 +999,7 @@ protected:
 	uint16	m_nKadPort;
 //--group to aligned int32
 	uint8	m_byUDPVer;
-	uint8	m_bySourceExchangeVer;
+	uint8	m_bySourceExchange1Ver;
 	uint8	m_byAcceptCommentVer;
 	uint8	m_byExtendedRequestsVer;
 //--group to aligned int32
@@ -1202,6 +1203,7 @@ protected:
 		 m_fRequestsCryptLayer: 1,
 	     m_fSupportsCryptLayer: 1,
 		 m_fRequiresCryptLayer: 1,
+		 m_fSupportsSourceEx2 : 1,
 		 m_fFailedDownload	  : 1; //MORPH - Added by SiRoB, Fix Connection Collision
 
 	CTypedPtrList<CPtrList, Pending_Block_Struct*>	 m_PendingBlocks_list;

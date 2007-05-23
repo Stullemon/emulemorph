@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -66,7 +66,6 @@ BEGIN_MESSAGE_MAP(CIPFilterDlg, CResizableDialog)
 	ON_WM_DESTROY()
 	ON_NOTIFY(LVN_COLUMNCLICK, IDC_IPFILTER, OnLvnColumnClickIPFilter)
 	ON_NOTIFY(LVN_KEYDOWN, IDC_IPFILTER, OnLvnKeyDownIPFilter)
-	ON_BN_CLICKED(IDC_COPY, OnBnClickedCopy)
 	ON_BN_CLICKED(IDC_REMOVE, OnBnClickedDelete)
 	ON_BN_CLICKED(IDC_APPEND, OnBnClickedAppend)
 	ON_COMMAND(MP_COPYSELECTED, OnCopyIPFilter)
@@ -170,7 +169,13 @@ void CIPFilterDlg::OnLvnColumnClickIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	m_ipfilter.UpdateSortOrder(pNMLV, ARRSIZE(_aColumns), _aColumns);
 	SortIPFilterItems();
-	m_ipfilter.Update(-1);
+	
+	// Update(-1) doesn't works on vista anymore
+	m_ipfilter.SetRedraw(FALSE);
+	for (int i = 0; i != m_ipfilter.GetItemCount(); i++)
+		m_ipfilter.Update(i);
+	m_ipfilter.SetRedraw(TRUE);
+
 	*pResult = 0;
 }
 
@@ -184,7 +189,6 @@ BOOL CIPFilterDlg::OnInitDialog()
 	AddAnchor(IDC_TOTAL_IPFILTER, BOTTOM_LEFT);
 	AddAnchor(IDC_TOTAL_IPS_LABEL, BOTTOM_LEFT);
 	AddAnchor(IDC_TOTAL_IPS, BOTTOM_LEFT);
-	AddAnchor(IDC_COPY, BOTTOM_RIGHT);
 	AddAnchor(IDC_REMOVE, BOTTOM_RIGHT);
 	AddAnchor(IDC_APPEND, BOTTOM_RIGHT);
 	AddAnchor(IDC_SAVE, BOTTOM_RIGHT);
@@ -192,8 +196,9 @@ BOOL CIPFilterDlg::OnInitDialog()
 	EnableSaveRestore(PREF_INI_SECTION);
 
 	ASSERT( m_ipfilter.GetStyle() & LVS_OWNERDATA );
+	// Win98: Explicitly set to Unicode to receive Unicode notifications.
 	m_ipfilter.SendMessage(CCM_SETUNICODEFORMAT, TRUE);
-	m_ipfilter.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+	m_ipfilter.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_INFOTIP);
 	m_ipfilter.EnableHdrCtrlSortBitmaps();
 	m_ipfilter.ReadColumnStats(ARRSIZE(_aColumns), _aColumns);
 	m_ipfilter.CreateColumns(ARRSIZE(_aColumns), _aColumns);
@@ -217,13 +222,11 @@ BOOL CIPFilterDlg::OnInitDialog()
 	m_ipfilter.m_pMenu = m_pMenuIPFilter;
 	m_ipfilter.m_pParent = this;
 
-	
 	// localize
 	SetWindowText(GetResString(IDS_IPFILTER));
 	SetDlgItemText(IDC_STATICIPLABEL,GetResString(IDS_IP_RULES));
 	SetDlgItemText(IDC_TOTAL_IPFILTER_LABEL,GetResString(IDS_TOTAL_IPFILTER_LABEL));
 	SetDlgItemText(IDC_TOTAL_IPS_LABEL,GetResString(IDS_TOTAL_IPS_LABEL));
-	SetDlgItemText(IDC_COPY,GetResString(IDS_COPY));
 	SetDlgItemText(IDC_REMOVE,GetResString(IDS_DELETESELECTED));
 	SetDlgItemText(IDC_APPEND,GetResString(IDS_APPEND));
 	SetDlgItemText(IDC_SAVE,GetResString(IDS_SAVE));
@@ -301,7 +304,7 @@ void CIPFilterDlg::OnLvnGetDispInfoIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-void CIPFilterDlg::OnBnClickedCopy()
+void CIPFilterDlg::OnCopyIPFilter()
 {
 	CWaitCursor curWait;
 	int iSelected = 0;
@@ -329,11 +332,6 @@ void CIPFilterDlg::OnBnClickedCopy()
 	}
 }
 
-void CIPFilterDlg::OnCopyIPFilter()
-{
-	OnBnClickedCopy();
-}
-
 void CIPFilterDlg::OnSelectAllIPFilter()
 {
 	m_ipfilter.SelectAllItems();
@@ -341,6 +339,12 @@ void CIPFilterDlg::OnSelectAllIPFilter()
 
 void CIPFilterDlg::OnBnClickedAppend()
 {
+	// Save/Restore the current directory
+	TCHAR szCurDir[MAX_PATH];
+	DWORD dwCurDirLen = GetCurrentDirectory(_countof(szCurDir), szCurDir);
+	if (dwCurDirLen == 0 || dwCurDirLen >= _countof(szCurDir))
+		szCurDir[0] = _T('\0');
+
 	CString strFilePath;			  // Do NOT localize that string
 	if (DialogBrowseFile(strFilePath, _T("All IP Filter Files (*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz;*.rar)|*ipfilter.dat;*ip.prefix;*.p2b;*.p2p;*.p2p.txt;*.zip;*.gz;*.rar|eMule IP Filter Files (*ipfilter.dat;*ip.prefix)|*ipfilter.dat;*ip.prefix|Peer Guardian Files (*.p2b;*.p2p;*.p2p.txt)|*.p2b;*.p2p;*.p2p.txt|Text Files (*.txt)|*.txt|ZIP Files (*.zip;*.gz)|*.zip;*.gz|RAR Files (*.rar)|*.rar|All Files (*.*)|*.*||")))
 	{
@@ -363,7 +367,7 @@ void CIPFilterDlg::OnBnClickedAppend()
 					zfile = zip.GetFile(_T("ipfilter.dat"));
 				if (zfile)
 				{
-					_tmakepath(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+					_tmakepathlimit(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
 					strTempUnzipFilePath.ReleaseBuffer();
 					if (zfile->Extract(strTempUnzipFilePath))
 					{
@@ -401,7 +405,7 @@ void CIPFilterDlg::OnBnClickedAppend()
 				if (rar.GetNextFile(strFile)
 					&& (strFile.CompareNoCase(_T("ipfilter.dat")) == 0 || strFile.CompareNoCase(_T("guarding.p2p")) == 0))
 				{
-					_tmakepath(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+					_tmakepathlimit(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
 					strTempUnzipFilePath.ReleaseBuffer();
 					if (rar.Extract(strTempUnzipFilePath))
 					{
@@ -435,7 +439,7 @@ void CIPFilterDlg::OnBnClickedAppend()
 			CGZIPFile gz;
 			if (gz.Open(strFilePath))
 			{
-				_tmakepath(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+				_tmakepathlimit(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
 				strTempUnzipFilePath.ReleaseBuffer();
 
 				// add filename and extension of uncompressed file to temporary file
@@ -472,6 +476,9 @@ void CIPFilterDlg::OnBnClickedAppend()
 		if (!strTempUnzipFilePath.IsEmpty())
 			VERIFY( _tremove(strTempUnzipFilePath) == 0);
 	}
+
+	if (szCurDir[0] != _T('\0'))
+		VERIFY( SetCurrentDirectory(szCurDir) );
 }
 
 void CIPFilterDlg::OnLvnDeleteItemIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
@@ -482,12 +489,14 @@ void CIPFilterDlg::OnLvnDeleteItemIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 	if (m_uIPFilterItems > 0)
 	{
 		ASSERT( (UINT)pNMLV->iItem < m_uIPFilterItems );
-		if ((UINT)pNMLV->iItem < m_uIPFilterItems-1)
-		{
+		if ((UINT)pNMLV->iItem < m_uIPFilterItems - 1)
 			memmove(m_ppIPFilterItems + pNMLV->iItem, m_ppIPFilterItems + pNMLV->iItem + 1, (m_uIPFilterItems - (pNMLV->iItem + 1)) * sizeof(*m_ppIPFilterItems));
-		}
 		m_uIPFilterItems--;
-		m_ppIPFilterItems = (const SIPFilter**)realloc(m_ppIPFilterItems, sizeof(*m_ppIPFilterItems) * m_uIPFilterItems);
+		const SIPFilter** ppNewIPFilterItems = (const SIPFilter**)realloc(m_ppIPFilterItems, sizeof(*m_ppIPFilterItems) * m_uIPFilterItems);
+		if (ppNewIPFilterItems != NULL)
+			m_ppIPFilterItems = ppNewIPFilterItems;
+		else
+			; // Keep the old list
 	}
 
 	*pResult = 0;

@@ -70,6 +70,8 @@ protected:
     bool m_bA4AFSaveCpu;
 	bool m_bAutoArchDisable;
 	int m_iExtractMetaData;
+	int m_iShareeMule;
+	bool bShowedWarning;
 	// MORPH START leuk_he Advanced official preferences.
 	bool bMiniMuleAutoClose;
 	int iMiniMuleTransparency;
@@ -209,6 +211,10 @@ protected:
 	HTREEITEM m_htiExtractMetaDataNever;
 	HTREEITEM m_htiExtractMetaDataID3Lib;
 	HTREEITEM m_htiAutoArch;
+	HTREEITEM m_htiShareeMule;
+	HTREEITEM m_htiShareeMuleMultiUser;
+	HTREEITEM m_htiShareeMulePublicUser;
+	HTREEITEM m_htiShareeMuleOldStyle;
 	//HTREEITEM m_htiExtractMetaDataMediaDet;
 
 	virtual void DoDataExchange(CDataExchange* pDX);

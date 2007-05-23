@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -82,7 +82,7 @@ public:
 	void	CancelKadSearch(UINT uSearchID);
 
 	bool	CanSearchRelatedFiles() const;
-	void	SearchRelatedFiles(const CAbstractFile* file);
+	void	SearchRelatedFiles(CPtrList& listFiles);
 
 	void	DownloadSelected();
 	void	DownloadSelected(bool bPaused);
@@ -105,6 +105,7 @@ protected:
 	UINT_PTR	global_search_timer;
 	UINT		m_uTimerLocalServer;
 	CProgressCtrl searchprogress;
+	CHeaderCtrl m_ctlSearchListHeader;
 	CEditDelayed m_ctlFilter;
 	CButton		m_ctlOpenParamsWnd;
 	bool		canceld;

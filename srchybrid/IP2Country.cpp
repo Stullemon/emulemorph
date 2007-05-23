@@ -167,20 +167,20 @@ bool CIP2Country::LoadFromFile(){
 				if (*szbuffer != _T('"'))
 					continue;
 				szIPStart=++szbuffer;
-				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
+				for (  ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
 				*szbuffer = '\0';
 				szIPEnd=szbuffer+=3;
-				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
+				for (  ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
 				*szbuffer = '\0';
 				sz2L = szbuffer+=3;
-				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
+				for (  ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
 				*szbuffer = '\0';
 				sz3L = szbuffer+=3;
-				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
+				for (  ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
 				*szbuffer = '\0';
 				szCountry = szbuffer+=3;
 				++szbuffer;
-				for ( szbuffer ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ )
+				for (  ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ )
 					if ( (*szbuffer >= (TCHAR)L'A') && (*szbuffer <= (TCHAR)L'Z') )
 						*szbuffer -= (TCHAR)(L'A' - L'a');
 					else if (*szbuffer == (TCHAR)L' ')
@@ -259,11 +259,11 @@ bool CIP2Country::LoadCountryFlagLib(){
 		//detect windows version
 		if(thePrefs.GetWindowsVersion() == _WINVER_XP_){
 			//it's XP, we can use beautiful 32bits flags with alpha channel :)
-			ip2countryCountryFlag = thePrefs.GetConfigDir()+_T("countryflag32.dll");
+			ip2countryCountryFlag = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)+_T("countryflag32.dll");
 		}
 		else{
 			//oh~ it's not XP, but we still can load the 24bits flags
-			ip2countryCountryFlag = thePrefs.GetConfigDir()+_T("countryflag.dll");
+			ip2countryCountryFlag = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)+_T("countryflag.dll");
 		}
 
 		_hCountryFlagDll = LoadLibrary(ip2countryCountryFlag); 
@@ -516,7 +516,7 @@ void CIP2Country::UpdateIP2CountryURL()
 	CString sbuffer;
 	CString strURL = thePrefs.GetUpdateURLIP2Country();
 	TCHAR szTempFilePath[_MAX_PATH];
-	_tmakepath(szTempFilePath, NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
+	_tmakepath(szTempFilePath, NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IP2COUNTRY_FILENAME, _T("tmp"));
 
 	CHttpDownloadDlg dlgDownload;
 	dlgDownload.m_strTitle = GetResString(IDS_IP2COUNTRY_DWNFILE);
@@ -548,7 +548,7 @@ void CIP2Country::UpdateIP2CountryURL()
 		if (zfile)
 		{
 			CString strTempUnzipFilePath;
-			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetConfigDir(), DFLT_IP2COUNTRY_FILENAME, _T(".unzip.tmp"));
+			_tmakepath(strTempUnzipFilePath.GetBuffer(_MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IP2COUNTRY_FILENAME, _T(".unzip.tmp"));
 			strTempUnzipFilePath.ReleaseBuffer();
 			if (zfile->Extract(strTempUnzipFilePath))
 			{
@@ -597,5 +597,5 @@ void CIP2Country::UpdateIP2CountryURL()
 
 CString CIP2Country::GetDefaultFilePath() const
 {
-	return thePrefs.GetConfigDir() + DFLT_IP2COUNTRY_FILENAME;
+	return thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + DFLT_IP2COUNTRY_FILENAME;
 }

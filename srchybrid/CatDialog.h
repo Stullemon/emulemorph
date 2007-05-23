@@ -28,8 +28,6 @@ public:
 	virtual ~CCatDialog();
 	virtual BOOL OnInitDialog();
 
-	bool WasCancelled()		{ return m_bCancelled; }
-
 // Dialog Data
 	enum { IDD = IDD_CAT };
 
@@ -44,7 +42,6 @@ private:
 	Category_Struct* m_myCat;
 	void Localize();
 	DWORD newcolor;
-	bool m_bCancelled;
 
 	// khaos::kmod+ Category Advanced A4AF Mode
 	CComboBox m_prio, m_comboA4AF;
@@ -53,5 +50,4 @@ private:
 public:
 	afx_msg void OnBnClickedBrowse();
 	afx_msg void OnBnClickedOk();
-	afx_msg void OnBnClickedCancel();
 };

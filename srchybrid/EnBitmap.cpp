@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -94,19 +94,8 @@ BOOL CEnBitmap::LoadImage(LPCTSTR szImagePath, COLORREF crBack)
 	// That DLL is installed with WinXP is available as redistributable from Microsoft for Win98+. As this DLL
 	// may not be available on some OS but we have to link statically to it, we have to take some special care.
 	//
-	// NOTE: Do *NOT* forget to specify /DELAYLOAD:gdiplus.dll as link parameter.
-	static int _bGdiPlusInstalled = -1;
-	if (_bGdiPlusInstalled == -1)
-	{
-		_bGdiPlusInstalled = 0;
-		HMODULE hLib = LoadLibrary(_T("gdiplus.dll"));
-		if (hLib != NULL)
-		{
-			_bGdiPlusInstalled = GetProcAddress(hLib, "GdiplusStartup") != NULL;
-			FreeLibrary(hLib);
-		}
-	}
-	if (_bGdiPlusInstalled > 0)
+	extern bool g_bGdiPlusInstalled;
+	if (g_bGdiPlusInstalled)
 	{
 		CImage img;
 		if (SUCCEEDED(img.Load(szImagePath)))

@@ -304,7 +304,7 @@ bool DetectWebCache(WCInfo_Struct* detectedWebcache, uint8 attempt)
 	switch (attempt)
 	{
 	case 1:	// first attempt, load data from a local file
-		if (pXMLDom->load(thePrefs.GetConfigDir() + "webcaches.xml") != VARIANT_TRUE)
+		if (pXMLDom->load(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + "webcaches.xml") != VARIANT_TRUE)
 		{
 			//don't try to connect to the website because it's down
 			//DetectWebCache(detectedWebcache, 2); // make a second attempt, load data from the website

@@ -1,6 +1,6 @@
 // parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -55,6 +55,7 @@
 #include <id3/tag.h>
 #include <id3/misc_support.h>
 #pragma warning(default:4100) // unreferenced formal parameter
+extern wchar_t *ID3_GetStringW(const ID3_Frame *frame, ID3_FieldID fldName);
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -528,7 +529,10 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 
 	// open file
 	CString strFilePath;
-	_tmakepath(strFilePath.GetBuffer(MAX_PATH), NULL, in_directory, in_filename, NULL);
+	if (!_tmakepathlimit(strFilePath.GetBuffer(MAX_PATH), NULL, in_directory, in_filename, NULL)){
+		LogError(GetResString(IDS_ERR_FILEOPEN), in_filename, _T(""));
+		return false;
+	}
 	strFilePath.ReleaseBuffer();
 	SetFilePath(strFilePath);
 	FILE* file = _tfsopen(strFilePath, _T("rbS"), _SH_DENYNO); // can not use _SH_DENYWR because we may access a completing part file
@@ -1409,7 +1413,7 @@ void CKnownFile::CreateHash(CFile* pFile, uint64 Length, uchar* pMd4HashOut, CAI
              len = sizeof(X)/(64 * sizeof(X[0])); 
 		else
 			len = (uint32)Required / 64;
-		pFile->Read(&X, len*64);
+		pFile->Read(X, len*64);
 
 		// SHA hash needs 180KB blocks
 		if (pShaHashOut != NULL){
@@ -1437,7 +1441,7 @@ void CKnownFile::CreateHash(CFile* pFile, uint64 Length, uchar* pMd4HashOut, CAI
 
 	Required = Length % 64;
 	if (Required != 0){
-		pFile->Read(&X, (uint32)Required);
+		pFile->Read(X, (uint32)Required);
 
 		if (pShaHashOut != NULL){
 			if (nIACHPos + Required >= EMBLOCKSIZE){
@@ -1513,7 +1517,7 @@ uchar* CKnownFile::GetPartHash(UINT part) const
 	return hashlist[part];
 }
 
-Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
+Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient, uint8 byRequestedVersion, uint16 nRequestedOptions) const
 {
 	if (m_ClientUploadList.IsEmpty())
 		return NULL;
@@ -1535,8 +1539,28 @@ Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 	}
 
 	CSafeMemFile data(1024);
-	uint16 nCount = 0;
+	
+	uint8 byUsedVersion;
+	bool bIsSX2Packet;
+	if (forClient->SupportsSourceExchange2() && byRequestedVersion > 0){
+		// the client uses SourceExchange2 and requested the highest version he knows
+		// and we send the highest version we know, but of course not higher than his request
+		byUsedVersion = min(byRequestedVersion, (uint8)SOURCEEXCHANGE2_VERSION);
+		bIsSX2Packet = true;
+		data.WriteUInt8(byUsedVersion);
 
+		// we don't support any special SX2 options yet, reserved for later use
+		if (nRequestedOptions != 0)
+			DebugLogWarning(_T("Client requested unknown options for SourceExchange2: %u (%s)"), nRequestedOptions, forClient->DbgGetClientInfo());
+	}
+	else{
+		byUsedVersion = forClient->GetSourceExchange1Version();
+		bIsSX2Packet = false;
+		if (forClient->SupportsSourceExchange2())
+			DebugLogWarning(_T("Client which announced to support SX2 sent SX1 packet instead (%s)"), forClient->DbgGetClientInfo());
+	}
+
+	uint16 nCount = 0;
 	data.WriteHash16(forClient->GetUploadFileID());
 	data.WriteUInt16(nCount);
 	uint32 cDbgNoSrc = 0;
@@ -1624,7 +1648,7 @@ Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 		{
 			nCount++;
 			uint32 dwID;
-			if (forClient->GetSourceExchangeVersion() >= 3)
+			if (byUsedVersion >= 3)
 				dwID = cur_src->GetUserIDHybrid();
 			else
 				dwID = cur_src->GetIP();
@@ -1632,9 +1656,9 @@ Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 		    data.WriteUInt16(cur_src->GetUserPort());
 		    data.WriteUInt32(cur_src->GetServerIP());
 		    data.WriteUInt16(cur_src->GetServerPort());
-			if (forClient->GetSourceExchangeVersion() >= 2)
+			if (byUsedVersion >= 2)
 			    data.WriteHash16(cur_src->GetUserHash());
-			if (forClient->GetSourceExchangeVersion() >= 4){
+			if (byUsedVersion >= 4){
 				// CryptSettings - SourceExchange V4
 				// 5 Reserved (!)
 				// 1 CryptLayer Required
@@ -1650,19 +1674,19 @@ Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient) const
 				break;
 		}
 	}
-	TRACE(_T("%hs: Out of %u clients, %u had no valid chunk status\n\r"), __FUNCTION__, m_ClientUploadList.GetCount(), cDbgNoSrc);
+	TRACE(_T("%hs: Out of %u clients, %u had no valid chunk status\n"), __FUNCTION__, m_ClientUploadList.GetCount(), cDbgNoSrc);
 	if (!nCount)
 		return 0;
-	data.Seek(16, SEEK_SET);
-	data.WriteUInt16(nCount);
+	data.Seek(bIsSX2Packet ? 17 : 16, SEEK_SET);
+	data.WriteUInt16((uint16)nCount);
 
 	Packet* result = new Packet(&data, OP_EMULEPROT);
-	result->opcode = OP_ANSWERSOURCES;
-	// 16+2+501*(4+2+4+2+16+1) = 14547 bytes max.
+	result->opcode = bIsSX2Packet ? OP_ANSWERSOURCES2 : OP_ANSWERSOURCES;
+	// (1+)16+2+501*(4+2+4+2+16+1) = 14547 (14548) bytes max.
 	if ( result->size > 354 )
 		result->PackPacket();
 	if (thePrefs.GetDebugSourceExchange())
-		AddDebugLogLine(false, _T("SXSend: Client source response; Count=%u, %s, File=\"%s\""), nCount, forClient->DbgGetClientInfo(), GetFileName());
+		AddDebugLogLine(false, _T("SXSend: Client source response SX2=%s, Version=%u; Count=%u, %s, File=\"%s\""), bIsSX2Packet ? _T("Yes") : _T("No"), byUsedVersion, nCount, forClient->DbgGetClientInfo(), GetFileName());
 	return result;
 }
 
@@ -1825,6 +1849,85 @@ void CKnownFile::RemoveMetaDataTags()
 	m_uMetaDataVer = 0;
 }
 
+CStringA GetED2KAudioCodec(WORD wFormatTag)
+{
+	if (wFormatTag == 0x0055)
+		return "mp3";
+	else if (wFormatTag == 0x0130)
+		return "sipr";
+	else if (wFormatTag == 0x2000)
+		return "ac3";
+	else if (wFormatTag == 0x2004)
+		return "cook";
+	return "";
+}
+
+CStringA GetED2KVideoCodec(DWORD biCompression)
+{
+	if (biCompression == BI_RGB)
+		return "rgb";
+	else if (biCompression == BI_RLE8)
+		return "rle8";
+	else if (biCompression == BI_RLE4)
+		return "rle4";
+	else if (biCompression == BI_BITFIELDS)
+		return "bitfields";
+
+	LPCSTR pszCompression = (LPCSTR)&biCompression;
+	for (int i = 0; i < 4; i++)
+	{
+		if (   !isalnum((unsigned char)pszCompression[i])
+			&& pszCompression[i] != '.' 
+			&& pszCompression[i] != '_' 
+			&& pszCompression[i] != ' ')
+			return "";
+	}
+
+	CStringA strCodec;
+	memcpy(strCodec.GetBuffer(4), &biCompression, 4);
+	strCodec.ReleaseBuffer(4);
+	strCodec.Trim();
+	if (strCodec.GetLength() < 2)
+		return "";
+	strCodec.MakeLower();
+	return strCodec;
+}
+
+SMediaInfo *GetRIFFMediaInfo(LPCTSTR pszFullPath)
+{
+	bool bIsAVI;
+	SMediaInfo *mi = new SMediaInfo;
+	if (!GetRIFFHeaders(pszFullPath, mi, bIsAVI)) {
+		delete mi;
+		return NULL;
+	}
+	return mi;
+}
+
+SMediaInfo *GetRMMediaInfo(LPCTSTR pszFullPath)
+{
+	bool bIsRM;
+	SMediaInfo *mi = new SMediaInfo;
+	if (!GetRMHeaders(pszFullPath, mi, bIsRM)) {
+		delete mi;
+		return NULL;
+	}
+	return mi;
+}
+
+// Max. string length which is used for string meta tags like TAG_MEDIA_TITLE, TAG_MEDIA_ARTIST, ...
+#define	MAX_METADATA_STR_LEN	80
+
+void TruncateED2KMetaData(CString& rstrData)
+{
+	rstrData.Trim();
+	if (rstrData.GetLength() > MAX_METADATA_STR_LEN)
+	{
+		rstrData.Truncate(MAX_METADATA_STR_LEN);
+		rstrData.Trim();
+	}
+}
+
 void CKnownFile::UpdateMetaDataTags()
 {
 	// 05-Jän-2004 [bc]: ed2k and Kad are already full of totally wrong and/or not properly attached meta data. Take
@@ -1840,130 +1943,125 @@ void CKnownFile::UpdateMetaDataTags()
 	if (_tcscmp(szExt, _T(".mp3"))==0 || _tcscmp(szExt, _T(".mp2"))==0 || _tcscmp(szExt, _T(".mp1"))==0 || _tcscmp(szExt, _T(".mpa"))==0)
 	{
 		TCHAR szFullPath[MAX_PATH];
-		_tmakepath(szFullPath, NULL, GetPath(), GetFileName(), NULL);
-
+		if (_tmakepathlimit(szFullPath, NULL, GetPath(), GetFileName(), NULL)){
 		try{
-			USES_CONVERSION;
-			ID3_Tag myTag;
-			myTag.Link(T2A(szFullPath));
-
-			const Mp3_Headerinfo* mp3info;
-			mp3info = myTag.GetMp3HeaderInfo();
-			if (mp3info)
-			{
-				// length
-				if (mp3info->time){
-					CTag* pTag = new CTag(FT_MEDIA_LENGTH, (uint32)mp3info->time);
-					AddTagUnique(pTag);
-					m_uMetaDataVer = META_DATA_VER;
+				// ID3LIB BUG: If there are ID3v2 _and_ ID3v1 tags available, id3lib
+				// destroys (actually corrupts) the Unicode strings from ID3v2 tags due to
+				// converting Unicode to ASCII and then convertion back from ASCII to Unicode.
+				// To prevent this, we force the reading of ID3v2 tags only, in case there are 
+				// also ID3v1 tags available.
+				ID3_Tag myTag;
+				CStringA strFilePathA(szFullPath);
+				size_t id3Size = myTag.Link(strFilePathA, ID3TT_ID3V2);
+				if (id3Size == 0) {
+					myTag.Clear();
+					myTag.Link(strFilePathA, ID3TT_ID3V1);
 				}
 
-				// here we could also create a "codec" ed2k meta tag.. though it would probable not be worth the
-				// extra bytes which would have to be sent to the servers..
-
-				// bitrate
-				UINT uBitrate = (mp3info->vbr_bitrate ? mp3info->vbr_bitrate : mp3info->bitrate) / 1000;
-				if (uBitrate){
-					CTag* pTag = new CTag(FT_MEDIA_BITRATE, (uint32)uBitrate);
-					AddTagUnique(pTag);
-					m_uMetaDataVer = META_DATA_VER;
-				}
-			}
-
-			ID3_Tag::Iterator* iter = myTag.CreateIterator();
-			const ID3_Frame* frame;
-			while ((frame = iter->GetNext()) != NULL)
-			{
-				ID3_FrameID eFrameID = frame->GetID();
-				switch (eFrameID)
+				const Mp3_Headerinfo* mp3info;
+				mp3info = myTag.GetMp3HeaderInfo();
+				if (mp3info)
 				{
-					case ID3FID_LEADARTIST:{
-						char* pszText = ID3_GetString(frame, ID3FN_TEXT);
-						CString strText(pszText);
-						strText.Trim();
-						if (!strText.IsEmpty()){
-							CTag* pTag = new CTag(FT_MEDIA_ARTIST, strText);
-							AddTagUnique(pTag);
-							m_uMetaDataVer = META_DATA_VER;
-						}
-						delete[] pszText;
-						break;
+					// length
+					if (mp3info->time){
+						CTag* pTag = new CTag(FT_MEDIA_LENGTH, (uint32)mp3info->time);
+						AddTagUnique(pTag);
+						m_uMetaDataVer = META_DATA_VER;
 					}
-					case ID3FID_ALBUM:{
-						char* pszText = ID3_GetString(frame, ID3FN_TEXT);
-						CString strText(pszText);
-						strText.Trim();
-						if (!strText.IsEmpty()){
-							CTag* pTag = new CTag(FT_MEDIA_ALBUM, strText);
-							AddTagUnique(pTag);
-							m_uMetaDataVer = META_DATA_VER;
-						}
-						delete[] pszText;
-						break;
-					}
-					case ID3FID_TITLE:{
-						char* pszText = ID3_GetString(frame, ID3FN_TEXT);
-						CString strText(pszText);
-						strText.Trim();
-						if (!strText.IsEmpty()){
-							CTag* pTag = new CTag(FT_MEDIA_TITLE, strText);
-							AddTagUnique(pTag);
-							m_uMetaDataVer = META_DATA_VER;
-						}
-						delete[] pszText;
-						break;
+
+					// here we could also create a "codec" ed2k meta tag.. though it would probable not be worth the
+					// extra bytes which would have to be sent to the servers..
+
+					// bitrate
+					UINT uBitrate = (mp3info->vbr_bitrate ? mp3info->vbr_bitrate : mp3info->bitrate) / 1000;
+					if (uBitrate){
+						CTag* pTag = new CTag(FT_MEDIA_BITRATE, (uint32)uBitrate);
+						AddTagUnique(pTag);
+						m_uMetaDataVer = META_DATA_VER;
 					}
 				}
+
+				ID3_Tag::Iterator* iter = myTag.CreateIterator();
+				const ID3_Frame* frame;
+				while ((frame = iter->GetNext()) != NULL)
+				{
+					ID3_FrameID eFrameID = frame->GetID();
+					switch (eFrameID)
+					{
+						case ID3FID_LEADARTIST:{
+							wchar_t* pszText = ID3_GetStringW(frame, ID3FN_TEXT);
+							CString strText(pszText);
+							TruncateED2KMetaData(strText);
+							if (!strText.IsEmpty()){
+								CTag* pTag = new CTag(FT_MEDIA_ARTIST, strText);
+								AddTagUnique(pTag);
+								m_uMetaDataVer = META_DATA_VER;
+							}
+							delete[] pszText;
+							break;
+						}
+						case ID3FID_ALBUM:{
+								wchar_t* pszText = ID3_GetStringW(frame, ID3FN_TEXT);
+							CString strText(pszText);
+							TruncateED2KMetaData(strText);
+							if (!strText.IsEmpty()){
+								CTag* pTag = new CTag(FT_MEDIA_ALBUM, strText);
+								AddTagUnique(pTag);
+								m_uMetaDataVer = META_DATA_VER;
+							}
+							delete[] pszText;
+							break;
+						}
+						case ID3FID_TITLE:{
+							wchar_t* pszText = ID3_GetStringW(frame, ID3FN_TEXT);
+							CString strText(pszText);
+							TruncateED2KMetaData(strText);
+							if (!strText.IsEmpty()){
+								CTag* pTag = new CTag(FT_MEDIA_TITLE, strText);
+								AddTagUnique(pTag);
+								m_uMetaDataVer = META_DATA_VER;
+							}
+							delete[] pszText;
+							break;
+						}
+					}
+				}
+				delete iter;
 			}
-			delete iter;
-		}
-		catch(...){
-			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("Unhandled exception while extracting file meta (MP3) data from \"%s\""), szFullPath);
-			ASSERT(0);
+			catch(...){
+				if (thePrefs.GetVerbose())
+					AddDebugLogLine(false, _T("Unhandled exception while extracting file meta (MP3) data from \"%s\""), szFullPath);
+				ASSERT(0);
+			}
 		}
 	}
 	else
 	{
 		TCHAR szFullPath[MAX_PATH];
-		_tmakepath(szFullPath, NULL, GetPath(), GetFileName(), NULL);
 
-		bool bIsAVI = false;
+		if (_tmakepathlimit(szFullPath, NULL, GetPath(), GetFileName(), NULL))
+		{
+
 		SMediaInfo* mi = NULL;
 		try
 		{
-			mi = new SMediaInfo;
-			if (GetRIFFHeaders(szFullPath, mi, bIsAVI))
+				mi = GetRIFFMediaInfo(szFullPath);
+				if (mi == NULL)
+					mi = GetRMMediaInfo(szFullPath);
+				if (mi)
 			{
-				UINT uLengthSec = 0;
+					mi->InitFileLength();
+					UINT uLengthSec = (UINT)mi->fFileLengthSec;
+
 				CStringA strCodec;
 				uint32 uBitrate = 0;
-				if (mi->iVideoStreams)
-				{
-					uLengthSec = (UINT)mi->fVideoLengthSec;
-					if (mi->video.bmiHeader.biCompression == BI_RGB)
-						strCodec = "rgb";
-					else if (mi->video.bmiHeader.biCompression == BI_RLE8)
-						strCodec = "rle8";
-					else if (mi->video.bmiHeader.biCompression == BI_RLE4)
-						strCodec = "rle4";
-					else if (mi->video.bmiHeader.biCompression == BI_BITFIELDS)
-						strCodec = "bitfields";
-					else{
-						memcpy(strCodec.GetBuffer(4), &mi->video.bmiHeader.biCompression, 4);
-						strCodec.ReleaseBuffer(4);
-						strCodec.MakeLower();
-					}
+					if (mi->iVideoStreams) {
+						strCodec = GetED2KVideoCodec(mi->video.bmiHeader.biCompression);
 					uBitrate = (mi->video.dwBitRate + 500) / 1000;
 				}
-				else if (mi->iAudioStreams)
-				{
-					uLengthSec = (UINT)mi->fAudioLengthSec;
+					else if (mi->iAudioStreams) {
+						strCodec = GetED2KAudioCodec(mi->audio.wFormatTag);
 					uBitrate = (DWORD)(((mi->audio.nAvgBytesPerSec * 8.0) + 500.0) / 1000.0);
-					if (mi->audio.wFormatTag == 0x0055)
-						strCodec = "mp3";
-					else if (mi->audio.wFormatTag == 0x2000)
-						strCodec = "ac3";
 				}
 
 				if (uLengthSec) {
@@ -1984,171 +2082,178 @@ void CKnownFile::UpdateMetaDataTags()
 					m_uMetaDataVer = META_DATA_VER;
 				}
 
-				delete mi;
-				return;
+					TruncateED2KMetaData(mi->strTitle);
+					if (!mi->strTitle.IsEmpty()){
+						CTag* pTag = new CTag(FT_MEDIA_TITLE, mi->strTitle);
+						AddTagUnique(pTag);
+						m_uMetaDataVer = META_DATA_VER;
+					}
+
+					TruncateED2KMetaData(mi->strAuthor);
+					if (!mi->strAuthor.IsEmpty()){
+						CTag* pTag = new CTag(FT_MEDIA_ARTIST, mi->strAuthor);
+						AddTagUnique(pTag);
+						m_uMetaDataVer = META_DATA_VER;
+					}
+
+					delete mi;
+					return;
+				}
 			}
-		}
-		catch(...){
-			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("Unhandled exception while extracting file meta (AVI) data from \"%s\""), szFullPath);
-			ASSERT(0);
-		}
+			catch(...){
+				if (thePrefs.GetVerbose())
+					AddDebugLogLine(false, _T("Unhandled exception while extracting file meta (AVI) data from \"%s\""), szFullPath);
+				ASSERT(0);
+			}
 		delete mi;
+		}
 
 #if _MSC_VER<1400
 		if (thePrefs.GetExtractMetaData() >= 2)
 		{
-		// starting the MediaDet object takes a noticeable amount of time.. avoid starting that object
-		// for files which are not expected to contain any Audio/Video data.
-		// note also: MediaDet does not work well for too short files (e.g. 16K)
-		EED2KFileType eFileType = GetED2KFileTypeID(GetFileName());
+			// starting the MediaDet object takes a noticeable amount of time.. avoid starting that object
+			// for files which are not expected to contain any Audio/Video data.
+			// note also: MediaDet does not work well for too short files (e.g. 16K)
+			EED2KFileType eFileType = GetED2KFileTypeID(GetFileName());
 			if ((eFileType == ED2KFT_AUDIO || eFileType == ED2KFT_VIDEO) && GetFileSize() >= (uint64)32768)
-		{
-			// Avoid processing of some file types which are known to crash due to bugged DirectShow filters.
-			TCHAR szExt[_MAX_EXT];
-			_tsplitpath(GetFileName(), NULL, NULL, NULL, szExt);
-			_tcslwr(szExt);
-			if (_tcscmp(szExt, _T(".ogm"))!=0 && _tcscmp(szExt, _T(".ogg"))!=0 && _tcscmp(szExt, _T(".mkv"))!=0)
 			{
-				TCHAR szFullPath[MAX_PATH];
-				_tmakepath(szFullPath, NULL, GetPath(), GetFileName(), NULL);
-				try{
-					CComPtr<IMediaDet> pMediaDet;
-					HRESULT hr = pMediaDet.CoCreateInstance(__uuidof(MediaDet));
-					if (SUCCEEDED(hr))
+				// Avoid processing of some file types which are known to crash due to bugged DirectShow filters.
+				TCHAR szExt[_MAX_EXT];
+				_tsplitpath(GetFileName(), NULL, NULL, NULL, szExt);
+				_tcslwr(szExt);
+				if (_tcscmp(szExt, _T(".ogm"))!=0 && _tcscmp(szExt, _T(".ogg"))!=0 && _tcscmp(szExt, _T(".mkv"))!=0)
+				{
+					TCHAR szFullPath[MAX_PATH];
+					if (_tmakepathlimit(szFullPath, NULL, GetPath(), GetFileName(), NULL))
 					{
-						USES_CONVERSION;
-						if (SUCCEEDED(hr = pMediaDet->put_Filename(CComBSTR(T2W(szFullPath)))))
-						{
-							// Get the first audio/video streams
-							long lAudioStream = -1;
-							long lVideoStream = -1;
-							double fVideoStreamLengthSec = 0.0;
-							DWORD dwVideoBitRate = 0;
-							DWORD dwVideoCodec = 0;
-							double fAudioStreamLengthSec = 0.0;
-							DWORD dwAudioBitRate = 0;
-							//DWORD dwAudioCodec = 0;
-							long lStreams;
-							if (SUCCEEDED(hr = pMediaDet->get_OutputStreams(&lStreams)))
+						try{
+							CComPtr<IMediaDet> pMediaDet;
+							HRESULT hr = pMediaDet.CoCreateInstance(__uuidof(MediaDet));
+							if (SUCCEEDED(hr))
 							{
-								for (long i = 0; i < lStreams; i++)
+								USES_CONVERSION;
+								if (SUCCEEDED(hr = pMediaDet->put_Filename(CComBSTR(T2W(szFullPath)))))
 								{
-									if (SUCCEEDED(hr = pMediaDet->put_CurrentStream(i)))
+									// Get the first audio/video streams
+									long lAudioStream = -1;
+									long lVideoStream = -1;
+									double fVideoStreamLengthSec = 0.0;
+									DWORD dwVideoBitRate = 0;
+									DWORD dwVideoCodec = 0;
+									double fAudioStreamLengthSec = 0.0;
+									DWORD dwAudioBitRate = 0;
+									WORD wAudioCodec = 0;
+									long lStreams;
+									if (SUCCEEDED(hr = pMediaDet->get_OutputStreams(&lStreams)))
 									{
-										GUID major_type;
-										if (SUCCEEDED(hr = pMediaDet->get_StreamType(&major_type)))
+										for (long i = 0; i < lStreams; i++)
 										{
-											if (major_type == MEDIATYPE_Video)
+											if (SUCCEEDED(hr = pMediaDet->put_CurrentStream(i)))
 											{
-												if (lVideoStream == -1){
-													lVideoStream = i;
-													pMediaDet->get_StreamLength(&fVideoStreamLengthSec);
+												GUID major_type;
+												if (SUCCEEDED(hr = pMediaDet->get_StreamType(&major_type)))
+												{
+													if (major_type == MEDIATYPE_Video)
+													{
+														if (lVideoStream == -1){
+															lVideoStream = i;
+															pMediaDet->get_StreamLength(&fVideoStreamLengthSec);
 
-													AM_MEDIA_TYPE mt = {0};
-													if (SUCCEEDED(hr = pMediaDet->get_StreamMediaType(&mt))){
-														if (mt.formattype == FORMAT_VideoInfo){
-															VIDEOINFOHEADER* pVIH = (VIDEOINFOHEADER*)mt.pbFormat;
-															// do not use that 'dwBitRate', whatever this number is, it's not
-															// the bitrate of the encoded video stream. seems to be the bitrate
-															// of the uncompressed stream divided by 2 !??
-															//dwVideoBitRate = pVIH->dwBitRate / 1000;
+															AM_MEDIA_TYPE mt = {0};
+															if (SUCCEEDED(hr = pMediaDet->get_StreamMediaType(&mt))){
+																if (mt.formattype == FORMAT_VideoInfo){
+																	VIDEOINFOHEADER* pVIH = (VIDEOINFOHEADER*)mt.pbFormat;
+																	// do not use that 'dwBitRate', whatever this number is, it's not
+																	// the bitrate of the encoded video stream. seems to be the bitrate
+																	// of the uncompressed stream divided by 2 !??
+																	//dwVideoBitRate = pVIH->dwBitRate / 1000;
 
-															// for AVI files this gives that used codec
-															// for MPEG(1) files this just gives "Y41P"
-															dwVideoCodec = pVIH->bmiHeader.biCompression;
+																	// for AVI files this gives that used codec
+																	// for MPEG(1) files this just gives "Y41P"
+																	dwVideoCodec = pVIH->bmiHeader.biCompression;
+																}
+															}
+
+															if (mt.pUnk != NULL)
+																mt.pUnk->Release();
+															if (mt.pbFormat != NULL)
+																CoTaskMemFree(mt.pbFormat);
 														}
 													}
+													else if (major_type == MEDIATYPE_Audio)
+													{
+														if (lAudioStream == -1){
+															lAudioStream = i;
+															pMediaDet->get_StreamLength(&fAudioStreamLengthSec);
+		
+															AM_MEDIA_TYPE mt = {0};
+															if (SUCCEEDED(hr = pMediaDet->get_StreamMediaType(&mt))){
+																if (mt.formattype == FORMAT_WaveFormatEx){
+																	WAVEFORMATEX* wfx = (WAVEFORMATEX*)mt.pbFormat;
+																	dwAudioBitRate = (DWORD)(((wfx->nAvgBytesPerSec * 8.0) + 500.0) / 1000.0);
+																	wAudioCodec = wfx->wFormatTag;
+																}
+															}
 
-													if (mt.pUnk != NULL)
-														mt.pUnk->Release();
-													if (mt.pbFormat != NULL)
-														CoTaskMemFree(mt.pbFormat);
-												}
-											}
-											else if (major_type == MEDIATYPE_Audio)
-											{
-												if (lAudioStream == -1){
-													lAudioStream = i;
-													pMediaDet->get_StreamLength(&fAudioStreamLengthSec);
-
-													AM_MEDIA_TYPE mt = {0};
-													if (SUCCEEDED(hr = pMediaDet->get_StreamMediaType(&mt))){
-														if (mt.formattype == FORMAT_WaveFormatEx){
-															WAVEFORMATEX* wfx = (WAVEFORMATEX*)mt.pbFormat;
-															dwAudioBitRate = (DWORD)(((wfx->nAvgBytesPerSec * 8.0) + 500.0) / 1000.0);
+															if (mt.pUnk != NULL)
+																mt.pUnk->Release();
+															if (mt.pbFormat != NULL)
+																CoTaskMemFree(mt.pbFormat);
 														}
 													}
+													else{
+														TRACE("%s - Unknown stream type\n", GetFileName());
+													}
 
-													if (mt.pUnk != NULL)
-														mt.pUnk->Release();
-													if (mt.pbFormat != NULL)
-														CoTaskMemFree(mt.pbFormat);
+													if (lVideoStream != -1 && lAudioStream != -1)
+														break;
 												}
 											}
-											else{
-												TRACE("%s - Unknown stream type\n", GetFileName());
-											}
-
-											if (lVideoStream != -1 && lAudioStream != -1)
-												break;
 										}
+									}
+
+									UINT uLengthSec = 0;
+									CStringA strCodec;
+									uint32 uBitrate = 0;
+									if (fVideoStreamLengthSec > 0.0){
+										uLengthSec = (UINT)fVideoStreamLengthSec;
+										strCodec = GetED2KVideoCodec(dwVideoCodec);
+										uBitrate = dwVideoBitRate;
+									}
+									else if (fAudioStreamLengthSec > 0.0){
+										uLengthSec = (UINT)fAudioStreamLengthSec;
+										strCodec = GetED2KAudioCodec(wAudioCodec);
+										uBitrate = dwAudioBitRate;
+									}
+
+									if (uLengthSec){
+										CTag* pTag = new CTag(FT_MEDIA_LENGTH, (uint32)uLengthSec);
+										AddTagUnique(pTag);
+										m_uMetaDataVer = META_DATA_VER;
+									}
+
+									if (!strCodec.IsEmpty()){
+										CTag* pTag = new CTag(FT_MEDIA_CODEC, CString(strCodec));
+										AddTagUnique(pTag);
+										m_uMetaDataVer = META_DATA_VER;
+									}
+
+									if (uBitrate){
+										CTag* pTag = new CTag(FT_MEDIA_BITRATE, (uint32)uBitrate);
+										AddTagUnique(pTag);
+										m_uMetaDataVer = META_DATA_VER;
 									}
 								}
 							}
-
-							UINT uLengthSec = 0;
-							CStringA strCodec;
-							uint32 uBitrate = 0;
-							if (fVideoStreamLengthSec > 0.0){
-								uLengthSec = (UINT)fVideoStreamLengthSec;
-								if (dwVideoCodec == BI_RGB)
-									strCodec = "rgb";
-								else if (dwVideoCodec == BI_RLE8)
-									strCodec = "rle8";
-								else if (dwVideoCodec == BI_RLE4)
-									strCodec = "rle4";
-								else if (dwVideoCodec == BI_BITFIELDS)
-									strCodec = "bitfields";
-								else{
-									memcpy(strCodec.GetBuffer(4), &dwVideoCodec, 4);
-									strCodec.ReleaseBuffer(4);
-									strCodec.MakeLower();
-								}
-								uBitrate = dwVideoBitRate;
-							}
-							else if (fAudioStreamLengthSec > 0.0){
-								uLengthSec = (UINT)fAudioStreamLengthSec;
-								uBitrate = dwAudioBitRate;
-							}
-
-							if (uLengthSec){
-								CTag* pTag = new CTag(FT_MEDIA_LENGTH, (uint32)uLengthSec);
-								AddTagUnique(pTag);
-								m_uMetaDataVer = META_DATA_VER;
-							}
-
-							if (!strCodec.IsEmpty()){
-								CTag* pTag = new CTag(FT_MEDIA_CODEC, CString(strCodec));
-								AddTagUnique(pTag);
-								m_uMetaDataVer = META_DATA_VER;
-							}
-
-							if (uBitrate){
-								CTag* pTag = new CTag(FT_MEDIA_BITRATE, (uint32)uBitrate);
-								AddTagUnique(pTag);
-								m_uMetaDataVer = META_DATA_VER;
-							}
+						}
+						catch(...){
+							if (thePrefs.GetVerbose())
+								AddDebugLogLine(false, _T("Unhandled exception while extracting meta data (MediaDet) from \"%s\""), szFullPath);
+							ASSERT(0);
 						}
 					}
 				}
-				catch(...){
-					if (thePrefs.GetVerbose())
-						AddDebugLogLine(false, _T("Unhandled exception while extracting meta data (MediaDet) from \"%s\""), szFullPath);
-					ASSERT(0);
-				}
 			}
-		}
 		}
 #endif
 	}
@@ -2254,6 +2359,69 @@ void CKnownFile::GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, vo
 		delete imgResults[i];
 	delete[] imgResults;
 }
+
+CString CKnownFile::GetInfoSummary() const
+{
+	CString strFolder = GetPath();
+	PathRemoveBackslash(strFolder.GetBuffer());
+	strFolder.ReleaseBuffer();
+
+	CString strAccepts, strRequests, strTransferred;
+    strRequests.Format(_T("%u (%u)"), statistic.GetRequests(), statistic.GetAllTimeRequests());
+	strAccepts.Format(_T("%u (%u)"), statistic.GetAccepts(), statistic.GetAllTimeAccepts());
+	strTransferred.Format(_T("%s (%s)"), CastItoXBytes(statistic.GetTransferred(), false, false), CastItoXBytes(statistic.GetAllTimeTransferred(), false, false));
+	CString strType = GetFileTypeDisplayStr();
+	if (strType.IsEmpty())
+		strType = _T("-");
+
+	CString info;
+	info.Format(_T("%s\n")
+		+ GetResString(IDS_FD_HASH) + _T(" %s\n")
+		+ GetResString(IDS_FD_SIZE) + _T(" %s\n<br_head>\n")
+		+ GetResString(IDS_TYPE) + _T(": %s\n")
+		+ GetResString(IDS_FOLDER) + _T(": %s\n\n")
+		+ GetResString(IDS_PRIORITY) + _T(": %s\n")
+		+ GetResString(IDS_SF_REQUESTS) + _T(": %s\n")
+		+ GetResString(IDS_SF_ACCEPTS) + _T(": %s\n")
+		+ GetResString(IDS_SF_TRANSFERRED) + _T(": %s"),
+		GetFileName(),
+		md4str(GetFileHash()),
+		CastItoXBytes(GetFileSize(), false, false),
+		strType,
+		strFolder,
+		GetUpPriorityDisplayString(),
+		strRequests,
+		strAccepts,
+		strTransferred);
+	return info;
+}
+
+CString CKnownFile::GetUpPriorityDisplayString() const {
+	switch (GetUpPriority()) {
+		case PR_VERYLOW :
+			return GetResString(IDS_PRIOVERYLOW);
+		case PR_LOW :
+			if (IsAutoUpPriority())
+				return GetResString(IDS_PRIOAUTOLOW);
+			else
+				return GetResString(IDS_PRIOLOW);
+		case PR_NORMAL :
+			if (IsAutoUpPriority())
+				return GetResString(IDS_PRIOAUTONORMAL);
+			else
+				return GetResString(IDS_PRIONORMAL);
+		case PR_HIGH :
+			if (IsAutoUpPriority())
+				return GetResString(IDS_PRIOAUTOHIGH);
+			else
+				return GetResString(IDS_PRIOHIGH);
+		case PR_VERYHIGH :
+			return GetResString(IDS_PRIORELEASE);
+		default:
+			return _T("");
+	}
+}
+
 //MORPH START - Added by SiRoB, Power Share
 void CKnownFile::SetPowerShared(int newValue) {
     int oldValue = m_powershared;

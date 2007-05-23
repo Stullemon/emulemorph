@@ -24,6 +24,7 @@ void MD5Final (unsigned char [16], MD5_CTX *);
 
 MD5Sum::MD5Sum()
 {
+	memset(m_rawHash, 0, sizeof(m_rawHash));
 }
 
 MD5Sum::MD5Sum(const CString& sSource)

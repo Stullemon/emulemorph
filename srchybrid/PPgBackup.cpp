@@ -169,8 +169,8 @@ void CPPgBackup::Backup(LPCTSTR extensionToBack, BOOL conFirm)
 	WIN32_FIND_DATA FileData; 
 	HANDLE hSearch; 
 	TCHAR buffer[200];
-	//CString szDirPath = CString(thePrefs.GetAppDir());
-	CString szDirPath = CString(thePrefs.GetConfigDir());
+	//CString szDirPath = CString(thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR));
+	CString szDirPath = CString(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 	TCHAR szNewPath[MAX_PATH]; 
 
 	SetCurrentDirectory(szDirPath);
@@ -260,8 +260,8 @@ void CPPgBackup::Backup2(LPCTSTR extensionToBack)
 	TCHAR buffer[200];  
 
 
-	//CString szDirPath = CString(thePrefs.GetAppDir());  
-	CString szDirPath = CString(thePrefs.GetConfigDir());
+	//CString szDirPath = CString(thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR));  
+	CString szDirPath = CString(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 	CString szTempPath = CString(thePrefs.GetTempDir());  
 	TCHAR szNewPath[MAX_PATH]; 
 
@@ -338,7 +338,7 @@ void CPPgBackup::Backup2(LPCTSTR extensionToBack)
 	{   
 		error = TRUE;  
 	}   
-	SetCurrentDirectory(CString(thePrefs.GetConfigDir()));  
+	SetCurrentDirectory(CString(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)));  
 
 	if (error)  
 		MessageBox(_T("Error encountered during backup"),_T("Error"),MB_OK);  
@@ -403,13 +403,13 @@ void CPPgBackup::Backup3()
 {
 	WIN32_FIND_DATA FileData; 
 	HANDLE hSearch; 
-	CString szDirPath = CString(thePrefs.GetConfigDir())+_T("Backup\\");
+	CString szDirPath = CString(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR))+_T("Backup\\");
 	if(!PathFileExists(szDirPath)) return;
 	TCHAR szNewPath[MAX_PATH]; 
 
 	SetCurrentDirectory(szDirPath);
 	BOOL error = FALSE;
-	szDirPath = CString(thePrefs.GetConfigDir())+_T("Backup2\\");
+	szDirPath = CString(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR))+_T("Backup2\\");
 
 	BOOL fFinished = FALSE; 
 

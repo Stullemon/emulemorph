@@ -32,7 +32,7 @@ public:
 	void CancelKadSearch(UINT uSearchID);
 
 	bool CanSearchRelatedFiles() const;
-	void SearchRelatedFiles(const CAbstractFile* file);
+	void SearchRelatedFiles(CPtrList& listFiles);
 
 	void DownloadSelected();
 	void DownloadSelected(bool paused);

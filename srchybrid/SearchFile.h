@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -30,11 +30,12 @@ public:
 	CSearchFile(CFileDataIO* in_data, bool bOptUTF8, uint32 nSearchID,
 				uint32 nServerIP=0, uint16 nServerPort=0,
 				LPCTSTR pszDirectory = NULL, 
-				bool nKademlia = false);
+				bool nKademlia = false, bool bServerUDPAnswer = false);
 	CSearchFile(const CSearchFile* copyfrom);
 	virtual ~CSearchFile();
 
 	bool	IsKademlia() const { return m_bKademlia; }
+	bool	IsServerUDPAnswer() const		{ return m_bServerUDPAnswer; }
 	uint32	AddSources(uint32 count);
 	uint32	GetSourceCount() const;
 	uint32	AddCompleteSources(uint32 count);
@@ -55,6 +56,13 @@ public:
 	uint16	GetClientServerPort() const		{ return m_nClientServerPort; }
 	void	SetClientServerPort(uint16 nPort) { m_nClientServerPort = nPort; }
 	int		GetClientsCount() const			{ return ((GetClientID() && GetClientPort()) ? 1 : 0) + m_aClients.GetSize(); }
+
+	// Spamfilter
+	void	SetNameWithoutKeyword(CString strName)	{ m_strNameWithoutKeywords = strName; }
+	CString	GetNameWithoutKeyword()	const			{ return m_strNameWithoutKeywords; }
+	void	SetSpamRating(uint32 nRating)			{ m_nSpamRating = nRating; }
+	uint32	GetSpamRating() const					{ return m_nSpamRating; }
+	bool	IsConsideredSpam() const;
 
 	virtual void	UpdateFileRatingCommentAvail(bool bForceUpdate = false);
 
@@ -93,15 +101,18 @@ public:
 			m_nIP = 0;
 			m_nPort = 0;
 			m_uAvail = 0;
+			m_bUDPAnswer = false;
 		}
-		SServer(uint32 nIP, uint16 nPort) {
+		SServer(uint32 nIP, uint16 nPort, bool bUDPAnswer) {
 			m_nIP = nIP;
 			m_nPort = nPort;
 			m_uAvail = 0;
+			m_bUDPAnswer = bUDPAnswer;
 		}
 		uint32 m_nIP;
 		uint16 m_nPort;
 		UINT   m_uAvail;
+		bool   m_bUDPAnswer;
 	};
 	void AddServer(const SServer& server) { m_aServers.Add(server); }
 	const CSimpleArray<SServer>& GetServers() const { return m_aServers; }
@@ -127,6 +138,7 @@ public:
 
 private:
 	bool	m_bKademlia;
+	bool	m_bServerUDPAnswer;
 	uint32	m_nClientID;
 	uint16	m_nClientPort;
 	uint32	m_nSearchID;
@@ -136,6 +148,9 @@ private:
 	CSimpleArray<SServer> m_aServers;
 	CSimpleArray<CxImage*> m_listImages;
 	LPTSTR m_pszDirectory;
+	// spamfilter
+	CString	m_strNameWithoutKeywords;
+	uint32	m_nSpamRating;
 	LPTSTR m_pszIsFake; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 
 	// GUI helpers

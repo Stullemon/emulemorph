@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -63,12 +63,14 @@ CFriendListCtrl::~CFriendListCtrl()
 
 void CFriendListCtrl::Init()
 {
-	SetExtendedStyle(LVS_EX_FULLROWSELECT);
 	SetName(_T("FriendListCtrl"));
+
+	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
 	RECT rcWindow;
 	GetWindowRect(&rcWindow);
 	InsertColumn(0, GetResString(IDS_QL_USERNAME), LVCFMT_LEFT, rcWindow.right - rcWindow.left - 4, 0);
+
 	SetAllIcons();
 	theApp.friendlist->SetWindow(this);
 	LoadSettings();
@@ -213,7 +215,7 @@ void CFriendListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	ClientMenu.AppendMenu(MF_STRING, MP_ADDFRIEND, GetResString(IDS_ADDAFRIEND), _T("ADDFRIEND"));
 	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND), _T("DELETEFRIEND"));
 	ClientMenu.AppendMenu(MF_STRING | (cur_friend ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
-	ClientMenu.AppendMenu(MF_STRING | ((cur_friend==NULL || (cur_friend && cur_friend->GetLinkedClient() && !cur_friend->GetLinkedClient()->GetViewSharedFilesSupport())) ? MF_GRAYED : MF_ENABLED), MP_SHOWLIST, GetResString(IDS_VIEWFILES) , _T("VIEWFILES"));
+	ClientMenu.AppendMenu(MF_STRING | ((cur_friend==NULL || (cur_friend && cur_friend->GetLinkedClient(true) && !cur_friend->GetLinkedClient(true)->GetViewSharedFilesSupport())) ? MF_GRAYED : MF_ENABLED), MP_SHOWLIST, GetResString(IDS_VIEWFILES) , _T("VIEWFILES"));
 	//MORPH START - Modified by SiRoB, Friend Slot
 	/*
 	ClientMenu.AppendMenu(MF_STRING, MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT), _T("FRIENDSLOT"));
@@ -253,12 +255,15 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 	if (iSel != -1) 
 		cur_friend = (CFriend*)GetItemData(iSel);
 	
-	switch (wParam){
-		case MP_MESSAGE:{
-			if (cur_friend){
-				if (cur_friend->GetLinkedClient())
+	switch (wParam)
+	{
+		case MP_MESSAGE:
+			if (cur_friend)
+			{
+				if (cur_friend->GetLinkedClient(true))
 					theApp.emuledlg->chatwnd->StartSession(cur_friend->GetLinkedClient());
-				else{
+				else
+				{
 					CUpDownClient* chatclient = new CUpDownClient(0,cur_friend->m_nLastUsedPort,cur_friend->m_dwLastUsedIP,0,0,true);
 					chatclient->SetUserName(cur_friend->m_strName);
 					chatclient->SetUserHash(cur_friend->m_abyUserhash);
@@ -267,9 +272,9 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				}
 			}
 			break;
-		}
-		case MP_REMOVEFRIEND:{
-			if (cur_friend){
+		case MP_REMOVEFRIEND:
+			if (cur_friend)
+			{
 				theApp.friendlist->RemoveFriend(cur_friend);
 				// auto select next item after deleted one.
 				if (iSel < GetItemCount()){
@@ -278,7 +283,6 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				}
 			}
 			break;
-		}
 		case MP_ADDFRIEND:{
 			CAddFriend dialog2; 
 			dialog2.DoModal();
@@ -291,11 +295,12 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				ShowFriendDetails(cur_friend);
 			break;
 		case MP_SHOWLIST:
-		{
-			if (cur_friend){
-				if (cur_friend->GetLinkedClient())
+			if (cur_friend)
+			{
+				if (cur_friend->GetLinkedClient(true))
 					cur_friend->GetLinkedClient()->RequestSharedFileList();
-				else{
+				else
+				{
 					CUpDownClient* newclient = new CUpDownClient(0,cur_friend->m_nLastUsedPort,cur_friend->m_dwLastUsedIP,0,0,true);
 					newclient->SetUserName(cur_friend->m_strName);
 					theApp.clientlist->AddClient(newclient);
@@ -303,7 +308,6 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				}
 			}
 			break;
-		}
 		//MORPH START - Added by SiRoB, Friend Addon
 		case MP_REMOVEALLFRIENDSLOT:
 			theApp.friendlist->RemoveAllFriendSlots();	
@@ -319,13 +323,15 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		//MORPH END - Added by IceCream, List Requested Files
 		case MP_FRIENDSLOT:
 		{
-			if (cur_friend){
-				bool IsAlready;
-                IsAlready = cur_friend->GetFriendSlot();
+			if (cur_friend)
+			{
+				bool bIsAlready = cur_friend->GetFriendSlot();
 				//MORPH START - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
-				//theApp.friendlist->RemoveAllFriendSlots();
-				if( !IsAlready )
-                    cur_friend->SetFriendSlot(true);
+				/*
+				theApp.friendlist->RemoveAllFriendSlots();
+				*/
+				if (!bIsAlready )
+                    			cur_friend->SetFriendSlot(true);
 				else
 					cur_friend->SetFriendSlot(false);
 				//MORPH END - Modified by SIRoB, Added by Yun.SF3, ZZ Upload System
@@ -371,15 +377,15 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
         case MP_GETFRIENDED2KLINK:
 		{
 			CString sCompleteLink;
-				if ( cur_friend && cur_friend->m_dwHasHash )
-				{
-					CString sLink;
-					CED2KFriendLink friendLink(cur_friend->m_strName, cur_friend->m_abyUserhash);
-					friendLink.GetLink(sLink);
-					if ( !sCompleteLink.IsEmpty() )
-						sCompleteLink.Append(_T("\r\n"));
-					sCompleteLink.Append(sLink);
-				}
+			if ( cur_friend && cur_friend->HasUserhash() )
+			{
+				CString sLink;
+				CED2KFriendLink friendLink(cur_friend->m_strName, cur_friend->m_abyUserhash);
+				friendLink.GetLink(sLink);
+				if ( !sCompleteLink.IsEmpty() )
+					sCompleteLink.Append(_T("\r\n"));
+				sCompleteLink.Append(sLink);
+			}
 			
 			if ( !sCompleteLink.IsEmpty() )
 				theApp.CopyTextToClipboard(sCompleteLink);
@@ -389,16 +395,16 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		{
 			CString sCompleteLink;
 			
-				if ( cur_friend && cur_friend->m_dwHasHash )
-				{
-					CString sLink;
-					CED2KFriendLink friendLink(cur_friend->m_strName, cur_friend->m_abyUserhash);
-					friendLink.GetLink(sLink);
-					sLink = _T("<a href=\"") + sLink + _T("\">") + StripInvalidFilenameChars(cur_friend->m_strName, true) + _T("</a>");
-					if ( !sCompleteLink.IsEmpty() )
-						sCompleteLink.Append(_T("\r\n"));
-					sCompleteLink.Append(sLink);
-				}
+			if ( cur_friend && cur_friend->HasUserhash() )
+			{
+				CString sLink;
+				CED2KFriendLink friendLink(cur_friend->m_strName, cur_friend->m_abyUserhash);
+				friendLink.GetLink(sLink);
+				sLink = _T("<a href=\"") + sLink + _T("\">") + StripInvalidFilenameChars(cur_friend->m_strName, true) + _T("</a>");
+				if ( !sCompleteLink.IsEmpty() )
+					sCompleteLink.Append(_T("\r\n"));
+				sCompleteLink.Append(sLink);
+			}
 			
 			if ( !sCompleteLink.IsEmpty() )
 				theApp.CopyTextToClipboard(sCompleteLink);
@@ -423,12 +429,15 @@ void CFriendListCtrl::OnNMDblclk(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 void CFriendListCtrl::ShowFriendDetails(const CFriend* pFriend)
 {
-	if (pFriend){
-		if (pFriend->GetLinkedClient()){
+	if (pFriend)
+	{
+		if (pFriend->GetLinkedClient(true))
+		{
 			CClientDetailDialog dialog(pFriend->GetLinkedClient());
 			dialog.DoModal();
 		}
-		else{
+		else
+		{
 			CAddFriend dlg;
 			dlg.m_pShowFriend = const_cast<CFriend*>(pFriend);
 			dlg.DoModal();
@@ -438,11 +447,7 @@ void CFriendListCtrl::ShowFriendDetails(const CFriend* pFriend)
 
 BOOL CFriendListCtrl::PreTranslateMessage(MSG* pMsg) 
 {
-   	if ( pMsg->message == 260 && pMsg->wParam == 13 && GetAsyncKeyState(VK_MENU)<0 ) {
-		PostMessage(WM_COMMAND, MPG_ALTENTER, 0);
-		return TRUE;
-	}
-	else if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_DELETE)
+	if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_DELETE)
 		PostMessage(WM_COMMAND, MP_REMOVEFRIEND, 0);
 	else if (pMsg->message == WM_KEYDOWN && pMsg->wParam == VK_INSERT)
 		PostMessage(WM_COMMAND, MP_ADDFRIEND, 0);

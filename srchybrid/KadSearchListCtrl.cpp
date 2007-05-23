@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -75,6 +75,7 @@ void CKadSearchListCtrl::Init()
 	InsertColumn(colLoad, GetResString(IDS_THELOAD) ,LVCFMT_LEFT,100);
 	InsertColumn(colPacketsSent, GetResString(IDS_PACKSENT) ,LVCFMT_LEFT,100);
 	InsertColumn(colResponses, GetResString(IDS_RESPONSES) ,LVCFMT_LEFT, 100);
+	
 	SetAllIcons();
 	Localize();
 

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -89,6 +89,22 @@ int CClosableTabCtrl::GetTabUnderContextMenu() const
 	if (m_ptCtxMenu.x == -1 || m_ptCtxMenu.y == -1)
 		return -1;
 	return GetTabUnderPoint(m_ptCtxMenu);
+}
+
+bool CClosableTabCtrl::SetDefaultContextMenuPos()
+{
+	int iTab = GetCurSel();
+	if (iTab != -1)
+	{
+		CRect rcItem;
+		if (GetItemRect(iTab, &rcItem))
+		{
+			m_ptCtxMenu.x = rcItem.left + rcItem.Width()/2;
+			m_ptCtxMenu.y = rcItem.top + rcItem.Height()/2;
+			return true;
+		}
+	}
+	return false;
 }
 
 void CClosableTabCtrl::OnMButtonUp(UINT nFlags, CPoint point)
@@ -247,12 +263,28 @@ void CClosableTabCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	if (m_bCloseable)
 	{
-		CMenu menu;
-		menu.CreatePopupMenu();
-		menu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE));
-		m_ptCtxMenu = point;
-		ScreenToClient(&m_ptCtxMenu);
-		menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+		if (point.x == -1 || point.y == -1) {
+			if (!SetDefaultContextMenuPos())
+				return;
+			point = m_ptCtxMenu;
+			ClientToScreen(&point);
+		}
+		else {
+			m_ptCtxMenu = point;
+			ScreenToClient(&m_ptCtxMenu);
+		}
+
+		int iTab = GetTabUnderPoint(m_ptCtxMenu);
+		if (iTab != -1)
+		{
+			if (GetParent()->SendMessage(UM_QUERYTAB, (WPARAM)iTab) == 0)
+			{
+				CMenu menu;
+				menu.CreatePopupMenu();
+				menu.AppendMenu(MF_STRING, MP_REMOVE, GetResString(IDS_FD_CLOSE));
+				menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+			}
+		}
 	}
 }
 

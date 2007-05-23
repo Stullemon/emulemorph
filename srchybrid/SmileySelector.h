@@ -1,5 +1,6 @@
+
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -16,20 +17,27 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 
-#include "UpDownClient.h"
 
-///////////////////////////////////////////////////////////////////////////////
-// CUrlClient
-
-class CUrlClient : public CUpDownClient
+class CSmileySelector : public CWnd
 {
-	DECLARE_DYNAMIC(CUrlClient)
+	DECLARE_DYNAMIC(CSmileySelector)
 
 public:
-	CUrlClient(LPCTSTR pszUrl, CPartFile* pPartFile, uint32 nIP = 0);
-	virtual ~CUrlClient();
+	CSmileySelector();
+	virtual ~CSmileySelector();
 
-	/*MORPH*/virtual bool TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket = NULL, bool* filtered = NULL);
-	virtual bool Disconnected(CString strReason, bool bFromSocket = false);
-	virtual bool SendHelloPacket();
+	BOOL Create(CWnd *pWndParent, const RECT *pRect, CEdit *pwndEdit);
+
+protected:
+	int m_iBitmaps;
+	CEdit *m_pwndEdit;
+	CToolBarCtrl m_tb;
+
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual BOOL PreTranslateMessage(MSG* pMsg);
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg void OnActivateApp(BOOL bActive, DWORD dwThreadID);
+	afx_msg void OnKillFocus(CWnd* pNewWnd);
+	afx_msg void OnTbnSmileyGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
 };

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -49,7 +49,6 @@ END_MESSAGE_MAP()
 CPPgDirectories::CPPgDirectories()
 	: CPropertyPage(CPPgDirectories::IDD)
 {
-	
 }
 
 CPPgDirectories::~CPPgDirectories()
@@ -73,7 +72,7 @@ BOOL CPPgDirectories::OnInitDialog()
 	((CEdit*)GetDlgItem(IDC_INCFILES))->SetLimitText(509);
 	((CEdit*)GetDlgItem(IDC_TEMPFILES))->SetLimitText(509);
 	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCFOLDERS), LVCFMT_LEFT, 280, -1); 
-	m_ctlUncPaths.SetExtendedStyle(LVS_EX_FULLROWSELECT);
+	m_ctlUncPaths.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
 	GetDlgItem(IDC_SELTEMPDIRADD)->ShowWindow(thePrefs.IsExtControlsEnabled()?SW_SHOW:SW_HIDE);
 
@@ -86,7 +85,7 @@ BOOL CPPgDirectories::OnInitDialog()
 
 void CPPgDirectories::LoadSettings(void)
 {
-	GetDlgItem(IDC_INCFILES)->SetWindowText(thePrefs.incomingdir);
+	GetDlgItem(IDC_INCFILES)->SetWindowText(thePrefs.m_strIncomingDir);
 
 	CString tempfolders;
 	for (int i=0;i<thePrefs.tempdir.GetCount();i++) {
@@ -104,7 +103,7 @@ void CPPgDirectories::LoadSettings(void)
 void CPPgDirectories::OnBnClickedSelincdir()
 {
 	TCHAR buffer[MAX_PATH] = {0};
-	GetDlgItemText(IDC_INCFILES, buffer, ARRSIZE(buffer));
+	GetDlgItemText(IDC_INCFILES, buffer, _countof(buffer));
 	if(SelectDir(GetSafeHwnd(),buffer,GetResString(IDS_SELECT_INCOMINGDIR)))
 		GetDlgItem(IDC_INCFILES)->SetWindowText(buffer);
 }
@@ -112,7 +111,7 @@ void CPPgDirectories::OnBnClickedSelincdir()
 void CPPgDirectories::OnBnClickedSeltempdir()
 {
 	TCHAR buffer[MAX_PATH] = {0};
-	GetDlgItemText(IDC_TEMPFILES, buffer, ARRSIZE(buffer));
+	GetDlgItemText(IDC_TEMPFILES, buffer, _countof(buffer));
 	if(SelectDir(GetSafeHwnd(),buffer,GetResString(IDS_SELECT_TEMPDIR)))
 		GetDlgItem(IDC_TEMPFILES)->SetWindowText(buffer);
 }
@@ -120,12 +119,12 @@ void CPPgDirectories::OnBnClickedSeltempdir()
 BOOL CPPgDirectories::OnApply()
 {
 	bool testtempdirchanged=false;
-	CString testincdirchanged=thePrefs.GetIncomingDir();
+	CString testincdirchanged = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 
 	CString strIncomingDir;
 	GetDlgItemText(IDC_INCFILES, strIncomingDir);
 	if (strIncomingDir.IsEmpty()){
-		strIncomingDir = thePrefs.GetAppDir() + _T("incoming");
+		strIncomingDir = thePrefs.GetDefaultDirectory(EMULE_INCOMINGDIR, true); // will create the directory here if it doesnt exists
 		SetDlgItemText(IDC_INCFILES, strIncomingDir);
 	}
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
@@ -139,7 +138,7 @@ BOOL CPPgDirectories::OnApply()
 	CString strTempDir;
 	GetDlgItemText(IDC_TEMPFILES, strTempDir);
 	if (strTempDir.IsEmpty()){
-		strTempDir = thePrefs.GetAppDir() + _T("temp");
+		strTempDir = thePrefs.GetDefaultDirectory(EMULE_TEMPDIR, true); // will create the directory here if it doesnt exists
 		SetDlgItemText(IDC_TEMPFILES, strTempDir);
 	}
 
@@ -180,7 +179,7 @@ BOOL CPPgDirectories::OnApply()
 	}
 
 	if (temptempfolders.IsEmpty())
-		temptempfolders.Add(strTempDir = thePrefs.GetAppDir() + _T("temp"));
+		temptempfolders.Add(strTempDir = thePrefs.GetDefaultDirectory(EMULE_TEMPDIR, true));
 
 	if (temptempfolders.GetCount()!=thePrefs.tempdir.GetCount())
 		testtempdirchanged=true;
@@ -190,8 +189,7 @@ BOOL CPPgDirectories::OnApply()
 		thePrefs.tempdir.RemoveAll();
 		for (int i=0;i<temptempfolders.GetCount();i++) {
 			CString toadd=temptempfolders.GetAt(i);
-			MakeFoldername( toadd.GetBuffer(MAX_PATH) );
-			toadd.ReleaseBuffer();
+			MakeFoldername(toadd);
 			if (!PathFileExists(toadd))
 				CreateDirectory(toadd,NULL);
 			if (PathFileExists(toadd))
@@ -199,21 +197,20 @@ BOOL CPPgDirectories::OnApply()
 		}
 	}
 	if (thePrefs.tempdir.IsEmpty())
-		thePrefs.tempdir.Add(thePrefs.GetAppDir() + _T("temp"));
+		thePrefs.tempdir.Add(thePrefs.GetDefaultDirectory(EMULE_TEMPDIR, true));
 
 	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
 	if(thePrefs.ShowFolderIcons()){
-	if(CString(thePrefs.GetIncomingDir()).Trim().MakeLower() != CString(strIncomingDir).Trim().MakeLower())
+	if(CString(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR)).Trim().MakeLower() != CString(strIncomingDir).Trim().MakeLower())
 		theApp.RemoveIncomingFolderIcon();
 	if(CString(thePrefs.GetTempDir()).Trim().MakeLower() != CString(strTempDir).Trim().MakeLower())
 		theApp.RemoveTempFolderIcon();
 	}
 	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
 	
-	// incomingdir
-	_sntprintf(thePrefs.incomingdir, ARRSIZE(thePrefs.incomingdir), _T("%s"), strIncomingDir);
-	MakeFoldername(thePrefs.incomingdir);
-	_stprintf(thePrefs.GetCategory(0)->incomingpath,_T("%s"),thePrefs.incomingdir);
+	thePrefs.m_strIncomingDir = strIncomingDir;
+	MakeFoldername(thePrefs.m_strIncomingDir);
+	thePrefs.GetCategory(0)->strIncomingPath = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 
 	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
 	if(thePrefs.ShowFolderIcons()){
@@ -243,7 +240,7 @@ BOOL CPPgDirectories::OnApply()
 		AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));
 	
 	// on changing incoming dir, update incoming dirs of category of the same path
-	if (testincdirchanged.CompareNoCase(thePrefs.GetIncomingDir())!=0) {
+	if (testincdirchanged.CompareNoCase(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR)) != 0) {
 		CString oldpath;
 		bool dontaskagain=false;
 		for (int cat=1; cat<=thePrefs.GetCatCount()-1;cat++){
@@ -255,7 +252,7 @@ BOOL CPPgDirectories::OnApply()
 					if (AfxMessageBox(GetResString(IDS_UPDATECATINCOMINGDIRS),MB_YESNO)==IDNO)
 						break;
 				}
-				_sntprintf(thePrefs.GetCategory(cat)->incomingpath, ARRSIZE(thePrefs.GetCategory(cat)->incomingpath), _T("%s%s"), thePrefs.GetIncomingDir(), oldpath.Mid(testincdirchanged.GetLength()));
+				thePrefs.GetCategory(cat)->strIncomingPath = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR) + oldpath.Mid(testincdirchanged.GetLength());
 			}
 		}
 	}
@@ -360,7 +357,7 @@ void CPPgDirectories::OnBnClickedSeltempdiradd()
 	GetDlgItemText(IDC_TEMPFILES, paths);
 
 	TCHAR buffer[MAX_PATH] = {0};
-	//GetDlgItemText(IDC_TEMPFILES, buffer, ARRSIZE(buffer));
+	//GetDlgItemText(IDC_TEMPFILES, buffer, _countof(buffer));
 
 	if(SelectDir(GetSafeHwnd(),buffer,GetResString(IDS_SELECT_TEMPDIR))) {
 		paths.Append(_T("|"));
