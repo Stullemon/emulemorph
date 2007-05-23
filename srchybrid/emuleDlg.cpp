@@ -1398,6 +1398,7 @@ void CemuleDlg::ShowTransferRate(bool bForceAll)
 		szBuff[_countof(szBuff) - 1] = _T('\0');
 		*/
 		_sntprintf(szBuff,_countof(szBuff),_T("(U:%.1f D:%.1f) eMule v%s [%s]"),(float)m_uUpDatarate/1024, (float)m_uDownDatarate/1024, theApp.m_strCurVersionLong,theApp.m_strModLongVersion);
+		szBuff[_countof(szBuff) - 1] = _T('\0');
 		 //MORPH END   - Changed by SiRoB, [itsonlyme: -modname-]
 		SetWindowText(szBuff);
 	}
