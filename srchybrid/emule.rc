@@ -1326,68 +1326,68 @@ CAPTION "Client Details"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     GROUPBOX        "General",IDC_STATIC30,7,1,308,82
-    LTEXT           "Name:",IDC_STATIC31,19,14,60,8,0,WS_EX_RIGHT
+    LTEXT           "Name:",IDC_STATIC31,19,14,60,8,0,WS_EX_LEFT
     CONTROL         "Static",IDC_DNAME,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,14,224,8
-    LTEXT           "Hash:",IDC_STATIC32,19,25,59,8,0,WS_EX_RIGHT
+    LTEXT           "Hash:",IDC_STATIC32,19,25,59,8,0,WS_EX_LEFT
     CONTROL         "Static",IDC_DHASH,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,25,145,8
     CONTROL         "Static",IDC_DID,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,231,25,79,8
-    LTEXT           "Software:",IDC_STATIC33,19,36,63,8,0,WS_EX_RIGHT
+    LTEXT           "Software:",IDC_STATIC33,19,36,63,8,0,WS_EX_LEFT
     CONTROL         "Static",IDC_DSOFT,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,36,215,8
-    LTEXT           "Server IP:",IDC_STATIC35,19,47,60,8,0,WS_EX_RIGHT
+    LTEXT           "Server IP:",IDC_STATIC35,19,47,60,8,0,WS_EX_LEFT
     LTEXT           "Static",IDC_DSIP,84,47,61,8,SS_NOPREFIX
     RTEXT           "Server Name:",IDC_STATIC38,147,47,68,8
     CONTROL         "Static",IDC_DSNAME,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,219,47,92,8
     LTEXT           "Identification:",IDC_STATIC133x,19,58,65,8,0,
-                    WS_EX_RIGHT
+                    WS_EX_LEFT
     CONTROL         "Static",IDC_CDIDENT,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,58,79,8
     GROUPBOX        "Transfer",IDC_STATIC40,7,88,308,69
     LTEXT           "Currently downloading:",IDC_STATIC41,19,98,86,8,0,
-                    WS_EX_RIGHT
+                    WS_EX_LEFT
     CONTROL         "Static",IDC_DDOWNLOADING,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,98,202,8
     LTEXT           "Downloaded (this session):",IDC_STATIC42,19,120,87,8,0,
-                    WS_EX_RIGHT
+                    WS_EX_LEFT
     CONTROL         "Static",IDC_DDOWN,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,120,53,8
     LTEXT           "Average Downloadrate:",IDC_STATIC43,19,131,86,8,0,
-                    WS_EX_RIGHT
+                    WS_EX_LEFT
     CONTROL         "Static",IDC_DAVDR,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,131,53,8
     LTEXT           "Downloaded total:",IDC_STATIC44,19,142,83,8,0,
-                    WS_EX_RIGHT
+                    WS_EX_LEFT
     CONTROL         "Static",IDC_DDOWNTOTAL,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,142,53,8
     LTEXT           "Uploaded (this session):",IDC_STATIC45,163,120,93,8,0,
-                    WS_EX_RIGHT
+                    WS_EX_LEFT
     CONTROL         "Static",IDC_DDUP,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,256,120,51,8
     LTEXT           "Average Uploadrate:",IDC_STATIC46,163,131,93,8,0,
-                    WS_EX_RIGHT
+                    WS_EX_LEFT
     CONTROL         "Static",IDC_DAVUR,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,256,131,50,8
     LTEXT           "Uploaded total:",IDC_STATIC47,163,142,93,8,0,
-                    WS_EX_RIGHT
+                    WS_EX_LEFT
     CONTROL         "Static",IDC_DUPTOTAL,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,256,142,50,8
     GROUPBOX        "Scores",IDC_STATIC50,7,161,308,49
-    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,174,87,8,0,WS_EX_RIGHT
+    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,174,87,8,0,WS_EX_LEFT
     CONTROL         "Static",IDC_DRATIO,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,174,53,8
-    LTEXT           "Rating (total):",IDC_STATIC52,19,185,84,8,0,WS_EX_RIGHT
+    LTEXT           "Rating (total):",IDC_STATIC52,19,185,84,8,0,WS_EX_LEFT
     CONTROL         "Static",IDC_DRATING,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,185,53,8
     LTEXT           "Uploadqueue Score:",IDC_STATIC53,19,196,91,8,0,
-                    WS_EX_RIGHT
+                    WS_EX_LEFT
     CONTROL         "Static",IDC_DSCORE,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,196,105,8
     LTEXT           "Currently downloading:",IDC_STATIC48,19,109,86,8,0,
-                    WS_EX_RIGHT
+                    WS_EX_LEFT
     CONTROL         "Static",IDC_UPLOADING,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,109,202,8
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,172,57,43,8
@@ -1395,17 +1395,17 @@ BEGIN
                     SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,219,57,92,8
     RTEXT           "Obfuscation:",IDC_STATIC_OBF_LABEL,163,69,52,8
     LTEXT           "Static",IDC_OBFUSCATION_STAT,219,69,94,8,SS_ENDELLIPSIS
-    LTEXT           "Country:",IDC_DLOC2,19,69,49,8,0,WS_EX_RIGHT
+    LTEXT           "Country:",IDC_DLOC2,19,69,49,8,0,WS_EX_LEFT
     CONTROL         "Static",IDC_DLOC,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,69,79,8
-    LTEXT           "WebCache:",IDC_STATIC56,19,226,64,10,0,WS_EX_RIGHT
+    LTEXT           "WebCache:",IDC_STATIC56,19,226,64,10,0,WS_EX_LEFT
     CONTROL         "Static",IDC_Webcache,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,226,197,10
     GROUPBOX        "WebCache",IDC_STATIC57,7,216,308,51
-    LTEXT           "Successful/Requested:",IDC_STATIC54,19,239,84,10,0,WS_EX_RIGHT
+    LTEXT           "Successful/Requested:",IDC_STATIC54,19,239,84,10,0,WS_EX_LEFT
     CONTROL         "Static",IDC_WCSTATISTICS,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,110,239,197,8
-    LTEXT           "Is trusted OHCB sender:",IDC_STATIC55,19,252,100,10,0,WS_EX_RIGHT
+    LTEXT           "Is trusted OHCB sender:",IDC_STATIC55,19,252,100,10,0,WS_EX_LEFT
     CONTROL         "Static",IDC_TRUSTEDOHCBSENDER,"Static",
                     SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,110,252,197,8
     ICON            "",IDC_COUNTRYFLAG,68,68,20,20,NOT WS_VISIBLE
@@ -1428,90 +1428,90 @@ CAPTION "File Details"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "Name:",IDC_FD_X1,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
-                    14,18,72,8,WS_EX_RIGHT
+                    14,18,72,8,WS_EX_LEFT
     EDITTEXT        IDC_FNAME,90,18,226,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP
     CONTROL         "part.met file:",IDC_FD_X2,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,30,72,8,WS_EX_RIGHT
+                    WS_GROUP,14,30,72,8,WS_EX_LEFT
     EDITTEXT        IDC_METFILE,90,30,226,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP
     CONTROL         "Hash:",IDC_FD_X3,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
-                    14,42,72,8,WS_EX_RIGHT
+                    14,42,72,8,WS_EX_LEFT
     EDITTEXT        IDC_FHASH,90,42,226,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP
     CONTROL         "AICH Hash:",IDC_FD_XAICH,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,54,72,8,WS_EX_RIGHT
+                    WS_GROUP,14,54,72,8,WS_EX_LEFT
     EDITTEXT        IDC_FD_AICHHASH,90,54,226,12,ES_AUTOHSCROLL | 
                     ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     CONTROL         "Size:",IDC_FD_X4,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
-                    14,66,72,8,WS_EX_RIGHT
+                    14,66,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_FSIZE,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,92,66,224,8
     CONTROL         "Parts:",IDC_FD_X9,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
-                    14,90,72,8,WS_EX_RIGHT
+                    14,90,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_PARTCOUNT,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,92,90,224,8
     CONTROL         "Status:",IDC_FD_X5,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,120,72,8,WS_EX_RIGHT
+                    WS_GROUP,14,120,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_PFSTATUS,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,92,120,102,8
     CONTROL         "Hashset available:",IDC_HSAV,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,201,120,72,8,WS_EX_RIGHT
+                    WS_GROUP,201,120,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_HASHSET,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,279,120,40,8
     CONTROL         "Sources:",IDC_FD_X7,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,129,72,8,WS_EX_RIGHT
+                    WS_GROUP,14,129,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_SOURCECOUNT,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,92,129,231,8
     CONTROL         "Datarate:",IDC_FD_X13,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,139,72,8,WS_EX_RIGHT
+                    WS_GROUP,14,139,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_DATARATE,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,92,139,231,8
     CONTROL         "Transferred:",IDC_FD_X14,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,149,72,8,WS_EX_RIGHT
+                    WS_GROUP,14,149,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_TRANSFERRED,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,92,149,70,8
     CONTROL         "Completed:",IDC_FD_X12,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,159,72,8,WS_EX_RIGHT
+                    WS_GROUP,14,159,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_COMPLSIZE,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,92,159,70,8
     CONTROL         "Remaining:",IDC_REMAINING_TEXT,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,169,72,8,WS_EX_RIGHT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,14,169,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_REMAINING,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,92,169,70,8
     CONTROL         "Compression:",IDC_FD_COMPR,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,172,149,72,8,WS_EX_RIGHT
+                    WS_GROUP,172,149,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_COMPRESSION,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,249,149,74,8
     CONTROL         "Corrupted:",IDC_FD_CORR,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,172,159,72,8,WS_EX_RIGHT
+                    WS_GROUP,172,159,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_CORRUPTED,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,249,159,74,8
     CONTROL         "Recovered:",IDC_FD_RECOV,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,172,169,72,8,WS_EX_RIGHT
+                    WS_GROUP,172,169,72,8,WS_EX_LEFT
     CONTROL         "Static",IDC_RECOVERED,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,249,169,74,8
     CONTROL         "Download started:",IDC_FD_X16,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,211,84,8,WS_EX_RIGHT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,14,211,84,8,WS_EX_LEFT
     CONTROL         "Static",IDC_FILECREATED,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,101,211,222,8
     CONTROL         "Download time:",IDC_DL_ACTIVE_TIME_LBL,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,221,84,8,WS_EX_RIGHT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,14,221,84,8,WS_EX_LEFT
     CONTROL         "Static",IDC_DL_ACTIVE_TIME,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,101,221,222,8
     CONTROL         "Seen complete:",IDC_FD_X15,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,231,81,8,WS_EX_RIGHT
+                    WS_GROUP,14,231,81,8,WS_EX_LEFT
     CONTROL         "Static",IDC_LASTSEENCOMPL,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,101,231,222,8
     CONTROL         "Last receive:",IDC_FD_LASTCHANGE,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,241,84,8,WS_EX_RIGHT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,14,241,84,8,WS_EX_LEFT
     CONTROL         "Static",IDC_LASTRECEIVED,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,101,241,222,8
     GROUPBOX        "General",IDC_FD_X0,7,7,320,98
     GROUPBOX        "Transfer",IDC_FD_X6,7,111,320,83
     GROUPBOX        "Dates",IDC_FD_X8,7,200,320,57
     CONTROL         "Filetype:",IDC_FD_X10,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,78,59,8,WS_EX_RIGHT
+                    WS_GROUP,14,78,59,8,WS_EX_LEFT
     CONTROL         "FileType-ID and warning",IDC_FD_X11,"Static",
                     SS_LEFTNOWORDWRAP | WS_GROUP,92,78,231,8
     CONTROL         "Static",IDC_WCReq,"Static",SS_LEFTNOWORDWRAP | 
@@ -1519,9 +1519,9 @@ BEGIN
     CONTROL         "Static",IDC_WCDOWNL,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,249,179,74,8
     CONTROL         "WC Succ/Req:",IDC_WC_REQ_SUCC,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,179,72,8,WS_EX_RIGHT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,14,179,72,8,WS_EX_LEFT
     CONTROL         "WC-Download:",IDC_WC_DOWNLOADED,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,172,179,72,8,WS_EX_RIGHT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,172,179,72,8,WS_EX_LEFT
 END
 
 IDD_PREVIEWDIALOG DIALOGEX 0, 0, 280, 233
