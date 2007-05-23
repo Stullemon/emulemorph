@@ -217,10 +217,6 @@ int CEncryptedStreamSocket::Receive(void* lpBuf, int nBufLen, int nFlags){
 				case OP_EDONKEYPROT:
 				case OP_PACKEDPROT:
 				case OP_EMULEPROT:
-			// MORPH START - WebCache
-		/*		case OP_WEBCACHEPACKEDPROT:
-				case OP_WEBCACHEPROT: */
-			// MORPH END   - WebCache
 					bNormalHeader = true;
 					break;
 			}
@@ -716,9 +712,6 @@ uint8 CEncryptedStreamSocket::GetSemiRandomNotProtocolMarker() const{
 				case OP_EDONKEYPROT:
 				case OP_PACKEDPROT:
 				case OP_EMULEPROT:
-				// MORPH START webcache
-				//case OP_THE_LETTER_G: //// yonatan http - first byte in an http GET header   change is 1/ (2^24) .... duh
-				// MORPH END webcache
 					break;
 				default:
 					bOk = true;

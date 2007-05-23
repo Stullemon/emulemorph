@@ -443,6 +443,7 @@ void CStatistics::ResetUpDatarateOverhead()
 	m_AvarageUDRO_list.RemoveAll();
 	m_nUpDatarateOverhead = 0;
 }
+
 #ifdef USE_MEM_STATS
 
 #ifdef _DEBUG

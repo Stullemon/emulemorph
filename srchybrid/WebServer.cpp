@@ -395,6 +395,8 @@ void CWebServer::ProcessURL(ThreadData Data)
 #ifndef _DEBUG
 	try{
 #endif	
+
+		
 		bool isUseGzip = thePrefs.GetWebUseGzip();
 		bool justAddLink,login=false;
 		bool banned =false; //MORPH badlogin fix by dreamwalker [leuk_he]
@@ -788,7 +790,6 @@ void CWebServer::ProcessURL(ThreadData Data)
 					bool bOk = false;
 					try
 					{
-
 						const CStringA* pstrOutA;
 						CStringA strA(wc2utf8(Out));
 						pstrOutA = &strA;
@@ -850,6 +851,8 @@ void CWebServer::ProcessURL(ThreadData Data)
 				else
 					Out += _GetLoginScreen(Data);
 			}
+
+
 
 			// send answer ...
 			USES_CONVERSION;

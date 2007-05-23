@@ -392,7 +392,6 @@ void CSharedFileList::FindSharedFiles()
 					&& _taccess(cur_file->GetFilePath(), 0) == 0)
 				continue;
 			m_UnsharedFiles_map.SetAt(CSKey(cur_file->GetFileHash()), true);
-
 			listlock.Lock();
 			m_Files_map.RemoveKey(key);
 
@@ -911,7 +910,7 @@ void CSharedFileList::SendListToServer(){
 		}
 	}
 	files.WriteUInt32(limit);
-	int count=0;
+	uint32 count=0;
 	for (pos = sortedList.GetHeadPosition();pos != 0 && count<limit; )
 	{
 		count++;

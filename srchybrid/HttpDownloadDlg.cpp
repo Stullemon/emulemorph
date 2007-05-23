@@ -211,7 +211,6 @@ CHttpDownloadDlg::CHttpDownloadDlg(CWnd* pParent /*=NULL*/)
 	m_bAbort = FALSE;
 	m_bSafeToClose = FALSE;
 	m_pThread = NULL;
-	m_pLastModifiedTime = NULL;
 }
 
 void CHttpDownloadDlg::DoDataExchange(CDataExchange* pDX)

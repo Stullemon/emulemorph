@@ -481,11 +481,15 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 								{
 									delete pAcceptThread;
 									pAcceptThread = NULL;
-									VERIFY( !closesocket(hSocket) );
+									VERIFY( !closesocket(hAccepted) );
+									hAccepted = NULL;
 								}
 							}
 							else
-								VERIFY( !closesocket(hSocket) );
+							{
+								VERIFY( !closesocket(hAccepted) );
+								hAccepted = NULL;
+							}
 						}
 					}
 

@@ -28,6 +28,7 @@
 
 class CDropDownButton;
 class CToolTipCtrlX;
+
 class CTransferWnd : public CResizableDialog
 {
 	DECLARE_DYNAMIC(CTransferWnd)

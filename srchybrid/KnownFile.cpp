@@ -48,7 +48,7 @@
 #include "emuledlg.h"
 #include "SharedFilesWnd.h"
 #include "MediaInfo.h"
-#include "UploadQueue.h"
+#include "UploadQueue.h" //Morph - AndCycle, depend by PowerShare
 
 // id3lib
 #pragma warning(disable:4100) // unreferenced formal parameter

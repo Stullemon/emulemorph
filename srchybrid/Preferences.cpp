@@ -667,6 +667,13 @@ bool	CPreferences::m_bCryptLayerRequired;
 uint32	CPreferences::m_dwKadUDPKey;
 uint8	CPreferences::m_byCryptTCPPaddingLength;
 
+#ifdef USE_OFFICIAL_UPNP
+bool	CPreferences::m_bSkipWANIPSetup;
+bool	CPreferences::m_bSkipWANPPPSetup;
+bool	CPreferences::m_bEnableUPnP;
+bool	CPreferences::m_bCloseUPnPOnExit;
+#endif
+
 bool	CPreferences::m_bEnableSearchResultFilter;
 
 bool	CPreferences::m_bIRCEnableSmileys;

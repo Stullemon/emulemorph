@@ -25,6 +25,10 @@
 #include "ListenSocket.h"
 #include "ClientUDPSocket.h"
 
+#ifdef USE_OFFICIAL_UPNP
+#include "UPnPFinder.h"
+#endif
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -261,10 +265,20 @@ public:
 	virtual ~CPPgWiz1Ports();
 	virtual BOOL OnInitDialog();
 	afx_msg void OnStartConTest();
+#ifdef USE_OFFICIAL_UPNP
+	afx_msg void OnStartUPnP();
+#endif
 	afx_msg void OnEnChangeUDPDisable();
 
 	afx_msg void OnEnChangeUDP();
 	afx_msg void OnEnChangeTCP();
+#ifdef USE_OFFICIAL_UPNP
+	afx_msg void OnTimer(UINT nIDEvent);
+	
+	BOOL	OnKillActive();
+	void	OnOK();
+	void	OnCancel();
+#endif
 	void OnPortChange();
 
 	CString m_sTestURL,m_sUDP,m_sTCP;
@@ -280,8 +294,15 @@ public:
 protected:
 	CString lastudp;
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+#ifdef USE_OFFICIAL_UPNP
+	void			ResetUPnPProgress();
+#endif
 
 	DECLARE_MESSAGE_MAP()
+	
+#ifdef USE_OFFICIAL_UPNP
+	int m_nUPnPTicks;
+#endif
 };
 
 IMPLEMENT_DYNAMIC(CPPgWiz1Ports, CDlgPageWizard)
@@ -289,8 +310,14 @@ IMPLEMENT_DYNAMIC(CPPgWiz1Ports, CDlgPageWizard)
 BEGIN_MESSAGE_MAP(CPPgWiz1Ports, CDlgPageWizard)
 	ON_BN_CLICKED(IDC_STARTTEST, OnStartConTest)
 	ON_BN_CLICKED(IDC_UDPDISABLE, OnEnChangeUDPDisable)
+#ifdef USE_OFFICIAL_UPNP
+	ON_BN_CLICKED(IDC_UPNPSTART, OnStartUPnP)
+#endif
 	ON_EN_CHANGE(IDC_TCP, OnEnChangeTCP)
 	ON_EN_CHANGE(IDC_UDP, OnEnChangeUDP)
+#ifdef USE_OFFICIAL_UPNP
+	ON_WM_TIMER()
+#endif
 END_MESSAGE_MAP()
 
 CPPgWiz1Ports::CPPgWiz1Ports()
@@ -347,6 +374,74 @@ void CPPgWiz1Ports::OnPortChange() {
 	
 	GetDlgItem(IDC_STARTTEST)->EnableWindow(flag);
 }
+
+#ifdef USE_OFFICIAL_UPNP
+BOOL CPPgWiz1Ports::OnKillActive(){
+	ResetUPnPProgress();
+	return CDlgPageWizard::OnKillActive();
+}
+
+void CPPgWiz1Ports::OnOK(){
+	ResetUPnPProgress();
+	CDlgPageWizard::OnOK();
+}
+
+void CPPgWiz1Ports::OnCancel(){
+	ResetUPnPProgress();
+	CDlgPageWizard::OnCancel();
+}
+
+// ** UPnP Button stuff
+void CPPgWiz1Ports::OnStartUPnP() {
+	CDlgPageWizard::OnApply();
+	try
+	{
+		if ( theApp.m_pUPnPFinder->AreServicesHealthy() )
+			theApp.m_pUPnPFinder->StartDiscovery(GetTCPPort(), GetUDPPort());
+	}
+	catch ( CUPnPFinder::UPnPError& ) {}
+	catch ( CException* e ) { e->Delete(); }
+
+	GetDlgItem(IDC_UPNPSTATUS)->SetWindowText(GetResString(IDS_UPNPSETUP));
+	GetDlgItem(IDC_UPNPSTART)->EnableWindow(FALSE);
+	m_nUPnPTicks = 0;
+	((CProgressCtrl*)GetDlgItem(IDC_UPNPPROGRESS))->SetPos(0);
+	VERIFY( SetTimer(1, 1000, NULL) );
+}
+
+void CPPgWiz1Ports::OnTimer(UINT /*nIDEvent*/){
+	m_nUPnPTicks++;
+	if (theApp.m_pUPnPFinder && theApp.m_pUPnPFinder->m_bUPnPPortsForwarded == TRIS_UNKNOWN)
+	{
+		if (m_nUPnPTicks < 40){
+			((CProgressCtrl*)GetDlgItem(IDC_UPNPPROGRESS))->SetPos(m_nUPnPTicks);
+			return;
+		}
+	}
+	if (theApp.m_pUPnPFinder && theApp.m_pUPnPFinder->m_bUPnPPortsForwarded == TRIS_TRUE){
+		((CProgressCtrl*)GetDlgItem(IDC_UPNPPROGRESS))->SetPos(40);
+		CString strMessage;
+		strMessage.Format(GetResString(IDS_UPNPSUCCESS), GetTCPPort(), GetUDPPort());
+		GetDlgItem(IDC_UPNPSTATUS)->SetWindowText(strMessage);
+		// enable UPnP in the preferences after the successful try
+		thePrefs.m_bEnableUPnP = true;
+	}
+	else{
+		((CProgressCtrl*)GetDlgItem(IDC_UPNPPROGRESS))->SetPos(0);
+		GetDlgItem(IDC_UPNPSTATUS)->SetWindowText(GetResString(IDS_UPNPFAILED));
+	}
+	GetDlgItem(IDC_UPNPSTART)->EnableWindow(TRUE);
+	VERIFY( KillTimer(1));
+}
+
+void CPPgWiz1Ports::ResetUPnPProgress(){
+	KillTimer(1);
+	((CProgressCtrl*)GetDlgItem(IDC_UPNPPROGRESS))->SetPos(0);
+	GetDlgItem(IDC_UPNPSTART)->EnableWindow(TRUE);
+}
+
+// **
+#endif
 
 void CPPgWiz1Ports::OnStartConTest() {
 

@@ -588,7 +588,8 @@ public:
 	static	bool	resumeSameCat;
 	static	bool	dontRecreateGraphs;
 	static	bool	autofilenamecleanup;
-	// khaos::kmod+ Obsolete static	int		allcatType;
+	//static	int		allcatType;
+	//static	bool	allcatTypeNeg;
 	static	bool	m_bUseAutocompl;
 	static	bool	m_bShowDwlPercentage;
 	static	bool	m_bShowClientPercentage; //Commander - Added: Client Percentage
@@ -896,6 +897,14 @@ public:
 	static bool		m_bCryptLayerRequired;
 	static uint8	m_byCryptTCPPaddingLength;
 	static uint32   m_dwKadUDPKey;
+
+#ifdef USE_OFFICIAL_UPNP
+	// UPnP
+	static bool		m_bSkipWANIPSetup;
+	static bool		m_bSkipWANPPPSetup;
+	static bool		m_bEnableUPnP;
+	static bool		m_bCloseUPnPOnExit;
+#endif
 
 	// Spam
 	static bool		m_bEnableSearchResultFilter;
@@ -1811,6 +1820,16 @@ public:
 	static bool		IsServerCryptLayerTCPRequested()	{return IsClientCryptLayerRequested();}
 	static uint32	GetKadUDPKey()						{return m_dwKadUDPKey;}
 	static uint8	GetCryptTCPPaddingLength()			{return m_byCryptTCPPaddingLength;}
+
+#ifdef USE_OFFICIAL_UPNP
+	// UPnP
+	static bool		GetSkipWANIPSetup()					{return m_bSkipWANIPSetup;}
+	static bool		GetSkipWANPPPSetup()				{return m_bSkipWANPPPSetup;}
+	static bool		IsUPnPEnabled()						{return m_bEnableUPnP;}
+	static void		SetSkipWANIPSetup(bool nv)			{m_bSkipWANIPSetup = nv;}
+	static void		SetSkipWANPPPSetup(bool nv)			{m_bSkipWANPPPSetup = nv;}
+	static bool		CloseUPnPOnExit()					{return m_bCloseUPnPOnExit;}
+#endif
 
 	// Spamfilter
 	static bool		IsSearchSpamFilterEnabled()			{return m_bEnableSearchResultFilter;}

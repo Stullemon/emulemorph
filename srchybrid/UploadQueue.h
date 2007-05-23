@@ -15,7 +15,7 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "UploadBandwidthThrottler.h"
+#include "UploadBandwidthThrottler.h" //Morph
 
 class CUpDownClient;
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
@@ -161,7 +161,6 @@ private:
 	uint32	successfullupcount;
 	uint32	failedupcount;
 	uint32	totaluploadtime;
-
 	uint32	m_nLastStartUpload;
 	uint32	m_dwRemovedClientByScore;
 

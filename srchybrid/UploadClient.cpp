@@ -19,6 +19,7 @@
 #include <zlib/zlib.h>
 #include "UpDownClient.h"
 #include "UrlClient.h"
+#include "Opcodes.h"
 #include "Packets.h"
 #include "UploadQueue.h"
 #include "Statistics.h"
@@ -142,7 +143,7 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			}
 		}
 		if (!m_DoneBlocks_list.IsEmpty()){
-			block = m_DoneBlocks_list.GetHead(); //MORPH - Changed by SiRoB, Display fix 
+		    block = m_DoneBlocks_list.GetHead();
 			if(block){
 			    uint32 start = (uint32)(block->StartOffset/PARTSIZE);
 			    s_UpStatusBar.FillRange((uint64)start*PARTSIZE, (uint64)(start+1)*PARTSIZE, crNextSending);

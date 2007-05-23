@@ -64,6 +64,7 @@ static UINT _uSaveStatistics = 0;
 static uint32 igraph, istats, iupdateconnstats;
 // <-----khaos-
 
+
 CUploadQueue::CUploadQueue()
 {
 	VERIFY( (h_timer = SetTimer(0,0,100,UploadTimer)) != NULL );
