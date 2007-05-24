@@ -2409,6 +2409,16 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"Enabled", m_bPeerCacheEnabled);
 	ini.WriteInt(L"PCPort", m_nPeerCachePort);
         
+#ifdef USE_OFFICIAL_UPNP
+	///////////////////////////////////////////////////////////////////////////
+	// Section: "UPnP"
+	//
+	ini.WriteBool(L"EnableUPnP", m_bEnableUPnP, L"UPnP");
+	ini.WriteBool(L"SkipWANIPSetup", m_bSkipWANIPSetup);
+	ini.WriteBool(L"SkipWANPPPSetup", m_bSkipWANPPPSetup);
+	ini.WriteBool(L"CloseUPnPOnExit", m_bCloseUPnPOnExit);
+#endif
+
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	ini.WriteBool(_T("UPnPNAT"), m_bUPnPNat, _T("eMule"));
 	ini.WriteBool(_T("UPnPNAT_Web"), m_bUPnPNatWeb, _T("eMule"));
@@ -3643,6 +3653,16 @@ void CPreferences::LoadPreferences()
 	m_bPeerCacheEnabled = ini.GetBool(L"Enabled", true);
 	m_nPeerCachePort = (uint16)ini.GetInt(L"PCPort", 0);
 	m_bPeerCacheShow = true; //ini.GetBool(L"Show", false); //allways see peercache
+
+#ifdef USE_OFFICIAL_UPNP
+	///////////////////////////////////////////////////////////////////////////
+	// Section: "UPnP"
+	//
+	m_bEnableUPnP = ini.GetBool(L"EnableUPnP", false, L"UPnP");
+	m_bSkipWANIPSetup = ini.GetBool(L"SkipWANIPSetup", false);
+	m_bSkipWANPPPSetup = ini.GetBool(L"SkipWANPPPSetup", false);
+	m_bCloseUPnPOnExit = ini.GetBool(L"CloseUPnPOnExit", true);
+#endif
 
     //MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	m_bUPnPNat = ini.GetBool(_T("UPnPNAT"), false, _T("eMule"));

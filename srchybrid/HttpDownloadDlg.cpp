@@ -211,6 +211,7 @@ CHttpDownloadDlg::CHttpDownloadDlg(CWnd* pParent /*=NULL*/)
 	m_bAbort = FALSE;
 	m_bSafeToClose = FALSE;
 	m_pThread = NULL;
+	m_pLastModifiedTime = NULL;//MORPH - Added by SiRoB,
 }
 
 void CHttpDownloadDlg::DoDataExchange(CDataExchange* pDX)

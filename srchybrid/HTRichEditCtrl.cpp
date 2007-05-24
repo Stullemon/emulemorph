@@ -1000,7 +1000,6 @@ BOOL CHTRichEditCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	return CRichEditCtrl::OnSetCursor(pWnd, nHitTest, message);
 }
 
-
 class CBitmapDataObject : public CCmdTarget
 {
 public:
