@@ -1174,12 +1174,13 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			{
 				EditCatTabLabel(rightclickindex, thePrefs.GetCategory(rightclickindex)->strTitle);
 				m_dlTab.SetTabTextColor(rightclickindex, thePrefs.GetCatColor(rightclickindex) );
-			theApp.emuledlg->searchwnd->UpdateCatTabs();
-			theApp.emuledlg->transferwnd->downloadlistctrl.UpdateCurrentCategoryView();
-			thePrefs.SaveCats();
-			if (CompareDirectories(oldincpath, thePrefs.GetCatPath(rightclickindex) ))
-				theApp.emuledlg->sharedfileswnd->Reload();
+				theApp.emuledlg->searchwnd->UpdateCatTabs();
+				theApp.emuledlg->transferwnd->downloadlistctrl.UpdateCurrentCategoryView();
+				thePrefs.SaveCats();
+				if (CompareDirectories(oldincpath, thePrefs.GetCatPath(rightclickindex) ))
+					theApp.emuledlg->sharedfileswnd->Reload();
 			}
+			break;
 		}
 		// khaos::categorymod+ Merge Category
 		case MP_CAT_MERGE: {
