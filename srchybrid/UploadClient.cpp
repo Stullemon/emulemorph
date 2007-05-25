@@ -39,7 +39,6 @@
 #include "TransferWnd.h"
 #include "Log.h"
 #include "Collection.h"
-#include "WebCache\WebCacheSocket.h" // yonatan http // MORPH - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -484,9 +483,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 	if (!m_pszUsername)
 		return 0;
 
-	if (IsProxy())  // JP Proxies don't have credits
-		return 0;	// JP Proxies don't have credits
-
 	if (credits == 0){
 		ASSERT ( IsKindOf(RUNTIME_CLASS(CUrlClient)) );
 		return 0;
@@ -539,32 +535,6 @@ uint32 CUpDownClient::GetScore(bool sysvalue, bool isdownloading, bool onlybasev
 		float modif = credits->GetScoreRatio(GetIP());
 		fBaseValue *= modif;
 	}
-        // MORPH START - Added by Commander, WebCache 1.2e
-        // Superlexx - TPS - reward clients using port 80
-	if(thePrefs.IsWebCacheDownloadEnabled() // only if we have webcache downloading on
-		&& SupportsWebCache()				// and if the remote client supports webcache
-		&& thePrefs.WebCacheIsTransparent()	// our proxy is transparent
-		&& GetUserPort() == 80				// remote client uses port 80
-		&& !HasLowID())						// remote client has HighID
-		fBaseValue *= (float)1.2;
-
-//	JP Webcache release START
-// boost clients if webcache upload will likely result in 3 or more proxy-downloads
-	if (SupportsWebCache() 
-		&& GetWebCacheName() != _T("") 
-		&& thePrefs.IsWebcacheReleaseAllowed()
-		&& currequpfile->ReleaseViaWebCache)
-	{
-		uint32 WebCacheClientCounter = currequpfile->GetNumberOfClientsRequestingThisFileUsingThisWebcache(GetWebCacheName(), 10);
-		if (WebCacheClientCounter >= 3)
-		{
-			fBaseValue *= WebCacheClientCounter;
-			fBaseValue += 5000;
-		}
-	}
-	//	JP Webcache release END
-    // MORPH END - Added by Commander, WebCache 1.2e
-
 	if (!onlybasevalue)
 		fBaseValue *= (float(filepriority)/10.0f);
 
@@ -773,15 +743,6 @@ void CUpDownClient::CreateNextBlockPackage(){
 				SetUploadFileID(srcFile);
 				*/
 
-				// MORPH START - Added by Commander, WebCache 1.2e
-				if (IsUploadingToWebCache()) // Superlexx - encryption: encrypt here
-				{
-					Crypt.RefreshLocalKey();
-					Crypt.encryptor.SetKey(Crypt.localKey, WC_KEYLENGTH);
-					Crypt.encryptor.DiscardBytes(16); // we must throw away 16 bytes of the key stream since they were already used once, 16 is the file hash length
-					Crypt.encryptor.ProcessString(filedata_ReadFromDisk, togo_ReadFromDisk);
-				}
-				// MORPH END - Added by Commander, WebCache 1.2e
 				// check extension to decide whether to compress or not
 				CString ext = srcfile_ReadFromDisk->GetFileName();
 				ext.MakeLower();
@@ -796,12 +757,7 @@ void CUpDownClient::CreateNextBlockPackage(){
 					compFlag=false;
 				//Xman end
 
-				// MORPH START - Modified by Commander, WebCache 1.2e
-				/*
 				if (!IsUploadingToPeerCache() && m_byDataCompVer == 1 && compFlag)
-				*/
-				if (!IsUploadingToPeerCache() && !IsUploadingToWebCache() && m_byDataCompVer == 1 && compFlag) // yonatan http
-				// MORPH END - Modified by Commander, WebCache 1.2e
 					CreatePackedPackets(filedata_ReadFromDisk,togo_ReadFromDisk,currentblock_ReadFromDisk,bFromPF);
 				else
 					CreateStandartPackets(filedata_ReadFromDisk,togo_ReadFromDisk,currentblock_ReadFromDisk,bFromPF);
@@ -916,7 +872,7 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 	
 #if !defined DONT_USE_SOCKET_BUFFERING
 	uint32 splittingsize = 10240;
-	if (!IsUploadingToWebCache() && !IsUploadingToPeerCache())
+	if (!IsUploadingToPeerCache())
 		splittingsize = max(m_nUpDatarateAVG,10240); //MORPH - Determine Remote Speed
 	if (togo > splittingsize)
 		nPacketSize = togo/(uint32)(togo/splittingsize);
@@ -998,67 +954,6 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 #endif
 			free(pRawPacketData);
 		}
-		// MORPH START - Added by Commander, WebCache 1.2e
-		else if (IsUploadingToWebCache())
-		{
-			if (m_pWCUpSocket == NULL){
-				ASSERT(0);
-				CString strError;
-				strError.Format(_T("Failed to upload to WebCache - missing socket; %s"), DbgGetClientInfo());
-				throw strError;
-			}
-			USES_CONVERSION;
-			CSafeMemFile dataHttp(10240);
-			if (m_iHttpSendState == 0) // yonatan - not sure it's wise to use this (also used by PC).
-			{
-				//MORPH - Changed by SiRoB, Optimization requpfile
-				/*
-				CKnownFile* srcfile = theApp.sharedfiles->GetFileByID(GetUploadFileID());
-				*/
-				//CKnownFile* srcfile = CheckAndGetReqUpFile();
-				CStringA str;
-//				str.AppendFormat("HTTP/1.1 200 OK\r\n"); // DFA
-				str.AppendFormat("HTTP/1.0 200 OK\r\n");
-				str.AppendFormat("Content-Length: %I64u\r\n", currentblock->EndOffset - currentblock->StartOffset);
-				str.AppendFormat("Expires: Mon, 03 Sep 2007 01:23:45 GMT\r\n" ); // rolled-back to 1.1b code (possible bug w/soothsayers' proxy)
-				str.AppendFormat("Cache-Control: public\r\n");
-				str.AppendFormat("Cache-Control: no-transform\r\n");
-				str.AppendFormat("Connection: keep-alive\r\nProxy-Connection: keep-alive\r\n");
-				//MORPH START - Changed by SiRoB, ModID
-				/*
-				str.AppendFormat("Server: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(MOD_VERSION));
-				*/
-				str.AppendFormat("Server: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(theApp.m_strModVersion));
-				//MORPH END   - Changed by SiRoB, ModID
-				str.AppendFormat("\r\n");
-				dataHttp.Write((LPCSTR)str, str.GetLength());
-				theStats.AddUpDataOverheadFileRequest((UINT)dataHttp.GetLength());
-
-				m_iHttpSendState = 1;
-				if (thePrefs.GetDebugClientTCPLevel() > 0){
-					DebugSend("WebCache-HTTP", this, GetUploadFileID());
-					Debug(_T("  %hs\n"), str);
-				}
-			}
-			dataHttp.Write(data, nPacketSize);
-			data += nPacketSize;
-
-			if (thePrefs.GetDebugClientTCPLevel() > 1){
-				DebugSend("WebCache-HTTP data", this, GetUploadFileID());
-				Debug(_T("  Start=%I64u  End=%I64u  Size=%u\n"), statpos, endpos, nPacketSize);
-			}
-
-			UINT uRawPacketSize = (UINT)dataHttp.GetLength();
-			LPBYTE pRawPacketData = dataHttp.Detach();
-			CRawPacket* packet = new CRawPacket((char*)pRawPacketData, uRawPacketSize, bFromPF);
-#if !defined DONT_USE_SEND_ARRAY_PACKET
-			apacket[npacket++] = packet;
-#else
-			m_pWCUpSocket->SendPacket(packet, true, false, nPacketSize);
-#endif
-			free(pRawPacketData);
-		}
-		// MORPH END - Added by Commander, WebCache 1.2e
 		else
 		{
 			Packet* packet;
@@ -1096,8 +991,6 @@ void CUpDownClient::CreateStandartPackets(byte* data,uint32 togo, Requested_Bloc
 	if (npacket) {
 		if (IsUploadingToPeerCache())
 			m_pPCUpSocket->SendPacket(apacket, npacket, true, false, Size);
-		else if (IsUploadingToWebCache())
-			m_pWCUpSocket->SendPacket(apacket, npacket, true, false, Size);
 		else
 			socket->SendPacket(apacket, npacket, true, false, Size);
 		delete[] apacket;
@@ -1317,23 +1210,6 @@ uint32 CUpDownClient::SendBlockData(){
         }
 		else
 			uUpStatsPort = GetUserPort();
-
-        // MORPH START - Added by Commander, WebCache 1.2e
-		// Superlexx - 0.44a port attempt
-		if(m_pWCUpSocket && IsUploadingToWebCache()) {
-			uUpStatsPort = (UINT)-3; //<<0.45a
-
-            // Check if filedata has been sent via the normal socket since last call.
-            uint64 sentBytesCompleteFileNormalSocket = socket->GetSentBytesCompleteFileSinceLastCallAndReset();
-            uint64 sentBytesPartFileNormalSocket = socket->GetSentBytesPartFileSinceLastCallAndReset();
-
-			if(thePrefs.GetVerbose() && (sentBytesCompleteFileNormalSocket + sentBytesPartFileNormalSocket > 0)) {
-                AddDebugLogLine(false, _T("Sent file data via normal socket when in WC mode. Bytes: %I64i."), sentBytesCompleteFileNormalSocket + sentBytesPartFileNormalSocket);
-			}
-        }
-		else
-			uUpStatsPort = GetUserPort(); //<<0.45a
-    	// MORPH END - Added by Commander, WebCache 1.2e
 
 	    // Extended statistics information based on which client software and which port we sent this data to...
 	    // This also updates the grand total for sent bytes, etc.  And where this data came from.
@@ -1709,11 +1585,7 @@ bool CUpDownClient::GetFriendSlot() const
 	return m_bFriendSlot;
 }
 
-//MORPH - Changed by SiRoB, WebCache Fix
-/*
-CEMSocket* CUpDownClient::GetFileUploadSocket(bool blog = false);
-*/
-CClientReqSocket* CUpDownClient::GetFileUploadSocket(bool bLog)
+CEMSocket* CUpDownClient::GetFileUploadSocket(bool bLog)
 {
     if (m_pPCUpSocket && (IsUploadingToPeerCache() || m_ePeerCacheUpState == PCUS_WAIT_CACHE_REPLY))
 	{
@@ -1721,14 +1593,6 @@ CClientReqSocket* CUpDownClient::GetFileUploadSocket(bool bLog)
             AddDebugLogLine(false, _T("%s got peercache socket."), DbgGetClientInfo());
         return m_pPCUpSocket;
     }
-// MORPH START - Modified by Commander, WebCache 1.2e
-    else if(m_pWCUpSocket && IsUploadingToWebCache())
-	{
-        if (bLog && thePrefs.GetVerbose())
-            AddDebugLogLine(false, _T("%s got webcache socket."), DbgGetClientInfo());
-        return m_pWCUpSocket;
-	}
-	// <-- WebCache
 	else
 	{
         if (bLog && thePrefs.GetVerbose())
@@ -1742,7 +1606,6 @@ void CUpDownClient::SetCollectionUploadSlot(bool bValue){
 	m_bCollectionUploadSlot = bValue;
 }
 
-// MORPH END - Modified by Commander, WebCache 1.2e
 /* Name:     IsCommunity
    Function: Test if client is community member
    Return:   true  - if one of the community tags occur in the name of the actual client

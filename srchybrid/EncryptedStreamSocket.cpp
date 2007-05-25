@@ -208,11 +208,7 @@ int CEncryptedStreamSocket::Receive(void* lpBuf, int nBufLen, int nFlags){
 			return m_nObfuscationBytesReceived;
 		case ECS_UNKNOWN:{
 			uint32 nRead = 1;
-			// MORPH START - WebCache
-			/*
 			bool bNormalHeader = false;
-			*/
-			bool bNormalHeader =  ((*(int*)lpBuf) == ' TEG' );
 			switch (((uchar*)lpBuf)[0]){
 				case OP_EDONKEYPROT:
 				case OP_PACKEDPROT:

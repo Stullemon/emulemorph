@@ -48,7 +48,6 @@ protected:
 	bool  m_bUseCompression; // Use compression. 
 	bool m_bFunnyNick; //MORPH - Added by SiRoB, Optionnal funnynick display
 	bool m_bClientQueueProgressBar; // MORPH - Added by Commander, ClientQueueProgressBar
-	bool m_bCountWCSessionStats; // MORPH - Added by Commander, Show WC stats
 
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	int m_iDownloadDataRateAverageTime;
@@ -128,7 +127,6 @@ protected:
 	HTREEITEM m_htiCompressLevel; //Morph - compresslevel
 	HTREEITEM m_htiUseCompression; //Morph - compresslevel
 	HTREEITEM m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
-	HTREEITEM m_htiCountWCSessionStats;//MORPH - Added by Commander, Show WC stats
 	HTREEITEM m_htiClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
 
 	//MORPH START - Added by SiRoB, Datarate Average Time Management

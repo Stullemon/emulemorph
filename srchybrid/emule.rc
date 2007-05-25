@@ -1319,96 +1319,86 @@ BEGIN
                     358,111,148,59
 END
 
-IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 274
+IDD_SOURCEDETAILWND DIALOGEX 0, 0, 322, 227
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Client Details"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    GROUPBOX        "General",IDC_STATIC30,7,1,308,82
-    LTEXT           "Name:",IDC_STATIC31,19,14,60,8,0,WS_EX_LEFT
+    GROUPBOX        "General",IDC_STATIC30,7,1,308,90
+    LTEXT           "Name:",IDC_STATIC31,19,14,62,8,0,WS_EX_RIGHT
     CONTROL         "Static",IDC_DNAME,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,14,224,8
-    LTEXT           "Hash:",IDC_STATIC32,19,25,59,8,0,WS_EX_LEFT
+    LTEXT           "Hash:",IDC_STATIC32,19,25,62,8,0,WS_EX_RIGHT
     CONTROL         "Static",IDC_DHASH,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,84,25,145,8
     CONTROL         "Static",IDC_DID,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,231,25,79,8
-    LTEXT           "Software:",IDC_STATIC33,19,36,63,8,0,WS_EX_LEFT
+    LTEXT           "Software:",IDC_STATIC33,19,36,304,8,0,WS_EX_RIGHT
     CONTROL         "Static",IDC_DSOFT,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,84,36,215,8
-    LTEXT           "Server IP:",IDC_STATIC35,19,47,60,8,0,WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,84,36,71,8
+    LTEXT           "Server IP:",IDC_STATIC35,19,47,62,8,0,WS_EX_RIGHT
     LTEXT           "Static",IDC_DSIP,84,47,61,8,SS_NOPREFIX
     RTEXT           "Server Name:",IDC_STATIC38,147,47,68,8
     CONTROL         "Static",IDC_DSNAME,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,219,47,92,8
-    LTEXT           "Identification:",IDC_STATIC133x,19,58,65,8,0,
-                    WS_EX_LEFT
+    LTEXT           "Identification:",IDC_STATIC133x,19,58,62,8,0,
+                    WS_EX_RIGHT
     CONTROL         "Static",IDC_CDIDENT,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,84,58,79,8
-    GROUPBOX        "Transfer",IDC_STATIC40,7,88,308,69
-    LTEXT           "Currently downloading:",IDC_STATIC41,19,98,86,8,0,
-                    WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,84,58,106,8
+    GROUPBOX        "Transfer",IDC_STATIC40,7,97,308,70
+    LTEXT           "Currently downloading:",IDC_STATIC41,19,107,87,8,0,
+                    WS_EX_RIGHT
     CONTROL         "Static",IDC_DDOWNLOADING,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,98,202,8
-    LTEXT           "Downloaded (this session):",IDC_STATIC42,19,120,87,8,0,
-                    WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,110,107,202,8
+    LTEXT           "Downloaded (this session):",IDC_STATIC42,19,129,87,8,0,
+                    WS_EX_RIGHT
     CONTROL         "Static",IDC_DDOWN,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,120,53,8
-    LTEXT           "Average Downloadrate:",IDC_STATIC43,19,131,86,8,0,
-                    WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,110,129,53,8
+    LTEXT           "Average Downloadrate:",IDC_STATIC43,19,140,87,8,0,
+                    WS_EX_RIGHT
     CONTROL         "Static",IDC_DAVDR,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,131,53,8
-    LTEXT           "Downloaded total:",IDC_STATIC44,19,142,83,8,0,
-                    WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,110,140,53,8
+    LTEXT           "Downloaded total:",IDC_STATIC44,19,151,87,8,0,
+                    WS_EX_RIGHT
     CONTROL         "Static",IDC_DDOWNTOTAL,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,142,53,8
-    LTEXT           "Uploaded (this session):",IDC_STATIC45,163,120,93,8,0,
-                    WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,110,151,53,8
+    LTEXT           "Uploaded (this session):",IDC_STATIC45,163,129,90,8,0,
+                    WS_EX_RIGHT
     CONTROL         "Static",IDC_DDUP,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,256,120,51,8
-    LTEXT           "Average Uploadrate:",IDC_STATIC46,163,131,93,8,0,
-                    WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,256,129,51,8
+    LTEXT           "Average Uploadrate:",IDC_STATIC46,163,140,90,8,0,
+                    WS_EX_RIGHT
     CONTROL         "Static",IDC_DAVUR,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,256,131,50,8
-    LTEXT           "Uploaded total:",IDC_STATIC47,163,142,93,8,0,
-                    WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,256,140,50,8
+    LTEXT           "Uploaded total:",IDC_STATIC47,163,151,90,8,0,
+                    WS_EX_RIGHT
     CONTROL         "Static",IDC_DUPTOTAL,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,256,142,50,8
-    GROUPBOX        "Scores",IDC_STATIC50,7,161,308,49
-    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,174,87,8,0,WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,256,151,50,8
+    GROUPBOX        "Scores",IDC_STATIC50,7,172,308,47
+    LTEXT           "DL/UP Modifier:",IDC_STATIC51,19,182,87,8,0,WS_EX_RIGHT
     CONTROL         "Static",IDC_DRATIO,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,174,53,8
-    LTEXT           "Rating (total):",IDC_STATIC52,19,185,84,8,0,WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,110,182,53,8
+    LTEXT           "Rating (total):",IDC_STATIC52,19,193,87,8,0,WS_EX_RIGHT
     CONTROL         "Static",IDC_DRATING,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,185,53,8
-    LTEXT           "Uploadqueue Score:",IDC_STATIC53,19,196,91,8,0,
-                    WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,110,193,53,8
+    LTEXT           "Uploadqueue Score:",IDC_STATIC53,19,204,87,8,0,
+                    WS_EX_RIGHT
     CONTROL         "Static",IDC_DSCORE,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,196,105,8
-    LTEXT           "Currently downloading:",IDC_STATIC48,19,109,86,8,0,
-                    WS_EX_LEFT
+                    SS_NOPREFIX | WS_GROUP,110,204,105,8
+    LTEXT           "Currently downloading:",IDC_STATIC48,19,118,87,8,0,
+                    WS_EX_RIGHT
     CONTROL         "Static",IDC_UPLOADING,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,109,202,8
-    RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,172,57,43,8
+                    SS_NOPREFIX | WS_GROUP,110,1118,202,8
+    RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     CONTROL         "Static",IDC_CLIENTDETAIL_KADCON,"Static",
                     SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,219,57,92,8
-    RTEXT           "Obfuscation:",IDC_STATIC_OBF_LABEL,163,69,52,8
-    LTEXT           "Static",IDC_OBFUSCATION_STAT,219,69,94,8,SS_ENDELLIPSIS
-    LTEXT           "Country:",IDC_DLOC2,19,69,49,8,0,WS_EX_LEFT
+    RTEXT           "Obfuscation:",IDC_STATIC_OBF_LABEL,163,71,52,8
+    LTEXT           "Static",IDC_OBFUSCATION_STAT,219,71,94,8,SS_ENDELLIPSIS
+    LTEXT           "Country:",IDC_DLOC2,19,69,62,8,0,WS_EX_RIGHT
     CONTROL         "Static",IDC_DLOC,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,84,69,79,8
-    LTEXT           "WebCache:",IDC_STATIC56,19,226,64,10,0,WS_EX_LEFT
-    CONTROL         "Static",IDC_Webcache,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,226,197,10
-    GROUPBOX        "WebCache",IDC_STATIC57,7,216,308,51
-    LTEXT           "Successful/Requested:",IDC_STATIC54,19,239,84,10,0,WS_EX_LEFT
-    CONTROL         "Static",IDC_WCSTATISTICS,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,239,197,8
-    LTEXT           "Is trusted OHCB sender:",IDC_STATIC55,19,252,100,10,0,WS_EX_LEFT
-    CONTROL         "Static",IDC_TRUSTEDOHCBSENDER,"Static",
-                    SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,110,252,197,8
-    ICON            "",IDC_COUNTRYFLAG,68,68,20,20,NOT WS_VISIBLE
+                    SS_NOPREFIX | WS_GROUP,84,69,106,8
+    ICON            "",IDC_COUNTRYFLAG,84,69,20,20,NOT WS_VISIBLE
 END
 
 IDD_META_DATA DIALOGEX 0, 0, 327, 130
@@ -1422,106 +1412,98 @@ BEGIN
                     SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,4,118,121,8
 END
 
-IDD_FILEDETAILS_INFO DIALOGEX 0, 0, 334, 260
+IDD_FILEDETAILS_INFO DIALOGEX 0, 0, 327, 235
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "File Details"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "Name:",IDC_FD_X1,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
-                    14,18,72,8,WS_EX_LEFT
-    EDITTEXT        IDC_FNAME,90,18,226,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    11,13,72,8,WS_EX_RIGHT
+    EDITTEXT        IDC_FNAME,87,13,226,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP
     CONTROL         "part.met file:",IDC_FD_X2,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,30,72,8,WS_EX_LEFT
-    EDITTEXT        IDC_METFILE,90,30,226,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    WS_GROUP,11,25,72,8,WS_EX_RIGHT
+    EDITTEXT        IDC_METFILE,87,25,226,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP
     CONTROL         "Hash:",IDC_FD_X3,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
-                    14,42,72,8,WS_EX_LEFT
-    EDITTEXT        IDC_FHASH,90,42,226,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    11,37,72,8,WS_EX_RIGHT
+    EDITTEXT        IDC_FHASH,87,37,226,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP
     CONTROL         "AICH Hash:",IDC_FD_XAICH,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,54,72,8,WS_EX_LEFT
-    EDITTEXT        IDC_FD_AICHHASH,90,54,226,12,ES_AUTOHSCROLL | 
+                    WS_GROUP,11,49,72,8,WS_EX_RIGHT
+    EDITTEXT        IDC_FD_AICHHASH,87,49,226,12,ES_AUTOHSCROLL | 
                     ES_READONLY | NOT WS_BORDER | NOT WS_TABSTOP
     CONTROL         "Size:",IDC_FD_X4,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
-                    14,66,72,8,WS_EX_LEFT
+                    11,61,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_FSIZE,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,66,224,8
+                    SS_NOPREFIX | WS_GROUP,89,61,224,8
     CONTROL         "Parts:",IDC_FD_X9,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,
-                    14,90,72,8,WS_EX_LEFT
+                    11,85,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_PARTCOUNT,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,90,224,8
+                    SS_NOPREFIX | WS_GROUP,89,85,224,8
     CONTROL         "Status:",IDC_FD_X5,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,120,72,8,WS_EX_LEFT
+                    WS_GROUP,11,97,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_PFSTATUS,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,120,102,8
+                    SS_NOPREFIX | WS_GROUP,89,97,102,8
     CONTROL         "Hashset available:",IDC_HSAV,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,201,120,72,8,WS_EX_LEFT
+                    WS_GROUP,198,97,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_HASHSET,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,279,120,40,8
+                    SS_NOPREFIX | WS_GROUP,276,97,40,8
     CONTROL         "Sources:",IDC_FD_X7,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,129,72,8,WS_EX_LEFT
+                    WS_GROUP,11,122,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_SOURCECOUNT,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,129,231,8
+                    SS_NOPREFIX | WS_GROUP,89,122,231,8
     CONTROL         "Datarate:",IDC_FD_X13,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,139,72,8,WS_EX_LEFT
+                    WS_GROUP,11,132,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_DATARATE,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,139,231,8
+                    SS_NOPREFIX | WS_GROUP,89,132,231,8
     CONTROL         "Transferred:",IDC_FD_X14,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,149,72,8,WS_EX_LEFT
+                    WS_GROUP,11,142,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_TRANSFERRED,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,149,70,8
+                    SS_NOPREFIX | WS_GROUP,89,142,70,8
     CONTROL         "Completed:",IDC_FD_X12,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,159,72,8,WS_EX_LEFT
+                    WS_GROUP,11,152,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_COMPLSIZE,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,159,70,8
+                    SS_NOPREFIX | WS_GROUP,89,152,70,8
     CONTROL         "Remaining:",IDC_REMAINING_TEXT,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,169,72,8,WS_EX_LEFT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,11,162,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_REMAINING,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,169,70,8
+                    SS_NOPREFIX | WS_GROUP,89,162,70,8
     CONTROL         "Compression:",IDC_FD_COMPR,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,172,149,72,8,WS_EX_LEFT
+                    WS_GROUP,169,142,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_COMPRESSION,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,249,149,74,8
+                    SS_NOPREFIX | WS_GROUP,246,142,74,8
     CONTROL         "Corrupted:",IDC_FD_CORR,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,172,159,72,8,WS_EX_LEFT
+                    WS_GROUP,169,152,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_CORRUPTED,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,249,159,74,8
+                    SS_NOPREFIX | WS_GROUP,246,152,74,8
     CONTROL         "Recovered:",IDC_FD_RECOV,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,172,169,72,8,WS_EX_LEFT
+                    WS_GROUP,169,162,72,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_RECOVERED,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,249,169,74,8
+                    SS_NOPREFIX | WS_GROUP,246,162,74,8
     CONTROL         "Download started:",IDC_FD_X16,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,211,84,8,WS_EX_LEFT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,11,188,82,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_FILECREATED,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,101,211,222,8
+                    SS_NOPREFIX | WS_GROUP,98,188,222,8
     CONTROL         "Download time:",IDC_DL_ACTIVE_TIME_LBL,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,221,84,8,WS_EX_LEFT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,11,198,82,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_DL_ACTIVE_TIME,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,101,221,222,8
+                    SS_NOPREFIX | WS_GROUP,98,198,222,8
     CONTROL         "Seen complete:",IDC_FD_X15,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,231,81,8,WS_EX_LEFT
+                    WS_GROUP,11,208,82,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_LASTSEENCOMPL,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,101,231,222,8
+                    SS_NOPREFIX | WS_GROUP,98,208,222,8
     CONTROL         "Last receive:",IDC_FD_LASTCHANGE,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,241,84,8,WS_EX_LEFT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,11,218,82,8,WS_EX_RIGHT
     CONTROL         "Static",IDC_LASTRECEIVED,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,101,241,222,8
-    GROUPBOX        "General",IDC_FD_X0,7,7,320,98
-    GROUPBOX        "Transfer",IDC_FD_X6,7,111,320,83
-    GROUPBOX        "Dates",IDC_FD_X8,7,200,320,57
+                    SS_NOPREFIX | WS_GROUP,98,218,222,8
+    GROUPBOX        "General",IDC_FD_X0,4,2,320,108
+    GROUPBOX        "Transfer",IDC_FD_X6,4,111,320,66
+    GROUPBOX        "Dates",IDC_FD_X8,4,177,320,55
     CONTROL         "Filetype:",IDC_FD_X10,"Static",SS_LEFTNOWORDWRAP | 
-                    WS_GROUP,14,78,59,8,WS_EX_LEFT
+                    WS_GROUP,11,73,72,8,WS_EX_RIGHT
     CONTROL         "FileType-ID and warning",IDC_FD_X11,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,92,78,231,8
-    CONTROL         "Static",IDC_WCReq,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,92,179,70,8
-    CONTROL         "Static",IDC_WCDOWNL,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,249,179,74,8
-    CONTROL         "WC Succ/Req:",IDC_WC_REQ_SUCC,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,14,179,72,8,WS_EX_LEFT
-    CONTROL         "WC-Download:",IDC_WC_DOWNLOADED,"Static",
-                    SS_LEFTNOWORDWRAP | WS_GROUP,172,179,72,8,WS_EX_LEFT
+                    SS_LEFTNOWORDWRAP | WS_GROUP,89,73,224,8
 END
 
 IDD_PREVIEWDIALOG DIALOGEX 0, 0, 280, 233
@@ -2141,48 +2123,6 @@ BEGIN
     LTEXT           "Static",IDC_WARNING,7,7,213,39
 END
 
-IDD_PPG_WEBCACHESETTINGS DIALOGEX 0, 0, 230, 244
-STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
-CAPTION "WEBCACHE"
-FONT 8, "MS Shell Dlg", 0, 0, 0x0
-BEGIN
-    GROUPBOX        "ISP Proxyserver Settings",IDC_Webcache,7,41,216,161
-    EDITTEXT        IDC_webcacheName,55,52,159,12,ES_AUTOHSCROLL
-    EDITTEXT        IDC_webcachePort,55,67,38,12,ES_AUTOHSCROLL | ES_NUMBER
-    LTEXT           "Port",IDC_STATIC_PORT,14,70,38,9
-    LTEXT           "Address",IDC_STATIC_ADDRESS,14,55,38,9
-    GROUPBOX        "Webcache Controls",IDC_STATIC_CONTROLS,7,7,216,30
-    CONTROL         "Enable Webcached Downloads",
-                    IDC_Activatewebcachedownloads,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,14,17,118,12
-    CTEXT           "You are using a TCP port that is usually not cached by ISP proxy-servers. Please change your TCP port to  21, 70, 80, 210, 443 563  or 1025-65535 to be able to activate the webcache download!",
-                    IDC_WrongPortWarning,21,203,194,34,NOT WS_VISIBLE
-    PUSHBUTTON      "Autodetect Webcache",IDC_DETECTWEBCACHE,14,175,201,12,
-                    BS_FLAT
-    LTEXT           "Number of blocks to download before reconnecting to the proxy (may help to solve disconnects in some cases)",
-                    IDC_STATIC_NRBLOCKS,14,97,124,28
-    RTEXT           "180k-Blocks",IDC_STATIC_BLOCKS,174,113,41,8
-    EDITTEXT        IDC_BLOCKS,141,108,30,13,ES_AUTOHSCROLL
-    CONTROL         "Extra long timeout for webcache connections",
-                    IDC_EXTRATIMEOUT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,124,168,13
-    CONTROL         "This webcache does NOT cache traffic within the same ISP",
-                    IDC_LOCALTRAFFIC,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    14,136,201,14
-    CONTROL         "",IDC_WEBCACHELINK2,"Static",SS_BLACKFRAME | NOT 
-                    WS_VISIBLE,14,190,201,10
-    CONTROL         "Persistent connections for proxy downloads",
-                    IDC_PERSISTENT_PROXY_CONNS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,14,149,201,14
-    PUSHBUTTON      "show advanced controls",IDC_ADVANCEDCONTROLS,133,16,82,
-                    17
-    PUSHBUTTON      "Test webcache configuration. Might take up to 30 Seconds",
-                    IDC_TestProxy,14,82,201,15
-    CONTROL         "Update webcachesettings automatically",
-                    IDC_UPDATE_WCSETTINGS,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,14,161,201,14
-END
-
 IDD_ASKEXIT DIALOGEX 0, 0, 232, 122
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
@@ -2469,7 +2409,6 @@ MORPH                   ICON                    "res\\MOD\\Morph.ico"
 EASTSHARE               ICON                    "res\\MOD\\EastShare.ico"
 EMULESPANA              ICON                    "res\\MOD\\emulespana.ico"
 UPNP                    ICON                    "res\\MOD\\UPnP.ico"
-WEBCACHE                ICON                    "res\\MOD\\Webcache.ico"
 FILEPERMISSION          ICON                    "res\\MOD\\filepermission.ico"
 FILEMASSRENAME          ICON                    "res\\MOD\\fileMassRename.ico"
 FILECRC32               ICON                    "res\\MOD\\fileCRC32.ico"
@@ -4607,17 +4546,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_WEBCACHE         "WebCache"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WrongPortforWebcache 
-                            "Webcache Download disabled: Only transfers on Port   21, 70,  80, 210, 443, 563 and in the range from 1025 to 65535 are cached. Please use one of these Ports if you want to enable the Webcache Feature"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_RESET               "Reset"
     IDS_SPREADBAR           "Spreadbar"
     IDS_SPREADBAR_DEFAULT_CHECKBOX "Enable SpreadBar by default"
@@ -5226,9 +5154,6 @@ BEGIN
     IDS_AUTOUPIP2COUNTRY    "Update Ip-to-country.csv on startup"
     IDS_UPDATEIPCURL        "Update"
     IDS_CLIENTQUEUEPROGRESSBAR "Show progress of client queue"
-    IDS_WEBCACHE_NOSUPPORT  "not supported"
-    IDS_STATS_SUCCESSFULLWC "Successful WC-DL/WC-Requests:"
-    IDS_STATS_FAILEDWC      "Failed WC-DL/WC-Requests:"
 END
 
 STRINGTABLE 
@@ -5272,35 +5197,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_WEBCACHE_ISP        "ISP Proxyserver Settings"
-    IDS_WC_PORT             "Port"
-    IDS_WC_ADDRESS          "Address"
-    IDS_WC_CONTROLS         "Webcache Controls"
-    IDS_WC_ENABLE           "Enable Webcached Downloads"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WC_WRONGPORT        "You are using a TCP port that is usually not cached by ISP proxy-servers. Please change your TCP port to  21, 70, 80, 210, 443 563  or 1025-65535 to be able to activate the webcache download!"
-    IDS_WC_AUTO             "Autodetect Webcache"
-    IDS_WC_NRBLOCKS         "Number of blocks to download before reconnecting to the proxy (may help to solve disconnects in some cases)"
-    IDS_WC_BLOCK            "180k-Blocks"
-    IDS_WC_TIMEOUT          "Extra long timeout for webcache connections"
-    IDS_WC_LOCAL            "This webcache does NOT cache traffic within the same ISP"
-    IDS_WC_SUBMIT_EMAIL     "Submit these settings via email"
-    IDS_WC_LINK             "Link: "
-    IDS_WC_PERSISTENT       "Persistent connections for proxy downloads"
-    IDS_WC_ADVANCED         "Show advanced controls"
-    IDS_WC_TEST             "Test webcache configuration. Might take up to 30 Seconds"
-    IDS_WC_HIDE_ADV         "Hide advanced controls"
-    IDS_WC_SUBMIT_WEB       "Submit webcache info via webform"
-    IDS_WC_SOURCES          "Webcache Capable"
-    IDS_WC_UPDATESETTING    "Update webcachesettings automatically"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_LOG_WCEVENTS        "Log WebCache Events"
     IDS_LOG_IACH            "Log IACH Events"
 END
 
@@ -5324,20 +5220,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRC_SUFFIX          "Suffix to add at the end of the filename after the CRC32:"
-    IDS_COUNTWCSESSIONSTATS "Count WC-Sessions to session stats"
-    IDS_WEBCACHE_NOPROXY    "no proxy set"
-    IDS_CD_WCSUCCFAIL       "Successful/Requested:"
-    IDS_CD_WCTRUSTSENDER    "Is trusted OHCB sender:"
-    IDS_WCDOWNL             "not working yet"
-    IDS_WC_REQ_SUCC         "WC Succ/Req:"
-    IDS_WC_DOWNLOADED       "WC-Download:"
     IDS_CRC32_TITLE         "CRC32 to filename"
     IDS_LOG_IPFILTER_LOADED "Loaded IP filters from ""%s"" in %ums"
     IDS_LOG_IPFILTER_INFO   "Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"
     IDS_IPFILTER_SAVERR     "Failed to save IP filter to file ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Not available"
-    IDS_WC_REACTIVATED      " Webcache has been reactivated."
-    IDS_WC_NEWPROXYIP       "A new proxy ip has been detected: %s."
     IDS_LOG_ERRDWN          "Error downloading %s"
 END
 
@@ -5562,7 +5449,6 @@ STRINGTABLE
 BEGIN
     IDS_DISPLAYFUNNYNICK_TIP 
                             "Create a artificial <i>[Funnynick]Madeup1 madeup2</i> for users that do not set their nick."
-    IDS_COUNTWCSESSIONSTATS_TIP "Keep apart statistics for webcache traffic"
     IDS_CLIENTQUEUEPROGRESSBAR_TIP 
                             "Show a bar in the bottom of the \ntransfer windows with the number of clients in the queue."
     IDS_DOWNLOADDATARATEAVERAGETIME_TIP 
@@ -5858,44 +5744,6 @@ STRINGTABLE
 BEGIN
     IDC_USERNAME_A_TIP      "Username at the proxy"
     IDC_PASSWORD_TIP        "Password at the proxy"
-    IDC_WEBCACHENAME_TIP    "hostname of the proxy of your isp. Use 'transperant@yourisp' for a transperant proxy"
-    IDC_WEBCACHEPORT_TIP    "port number (typically 80 or 8080)"
-    IDC_STATIC_ADDRESS_TIP  "IDC_STATIC_ADDRESS_TIP"
-    IDC_STATIC_CONTROLS_TIP "IDC_STATIC_CONTROLS_TIP"
-    IDC_ACTIVATEWEBCACHEDOWNLOADS_TIP 
-                            "Activate usage of your isp webcache proxy\nIf your isp support a webcache proxy this proxy will\nbe used to cache your downloads. If more people within\nyour isp request the same data from a webcache enabled\nmod the data will be transfered via the proxy. So this\nway the peer will only have to upload the data once.\nThis will only work if the uploader uses a webcache mod,\nand more people in your isp set the same proxy.\n Note: sending to webcache can not be disabled"
-    IDC_DETECTWEBCACHE_TIP  "Use the webcaches.xml in your config dir\nto lookup the proxy of your isp."
-    IDC_STATIC_BLOCKS_TIP   "Amount of data that determines if the connection should be reset."
-    IDC_EXTRATIMEOUT_TIP    "Wait 400 seconds instead of 130 seconds for a timeout of a 180 kb block"
-    IDC_LOCALTRAFFIC_TIP    "Data within the same isp is excluded by the proxy\nand webcache will be disabled for those. loopback\ntest might fail for the same reason."
-    IDC_PERSISTENT_PROXY_CONNS_TIP "Use persistant (http 1.1) flag for proxy"
-END
-
-STRINGTABLE 
-BEGIN
-    IDC_ADVANCEDCONTROLS_TIP "Show advanced options. "
-    IDC_TESTPROXY_TIP       "Test the proxy. This option tests if the proxy is reachable\nand the proxy can reach your emule port. It does NOT test\nif the proxy does actually caches(stores) data (required!)\nrequirements:\n1. connected to server\n2. You need to have a valid public IP\n3. You need to have a real high ID\n4. Test does not work if you have too\n   many open connections (too much downloads)"
-    IDC_UPDATE_WCSETTINGS_TIP 
-                            "Automatically reload webcache.xml on startup\n(<b>disabled</b> in source until someone picks up the project)"
-    IDC_MSG_WEBCACHEFAIL    "Your proxy-server does not seem to be caching data. There was no successful Webcache-Requests out of more than 100 that were sent. Please review your proxy-configuration. WebCache downloads have been disabled until a new proxy is tested!"
-    IDC_MSG_WEBCACHE_NOAUTODEC 
-                            "Sorry, your ISP is not in the database,\nyour ISP identifier is %s\nTo enable autodetection, please find out and submit your ISPs proxy."
-    IDC_MSG_WEBCACHE_NOIP   "No public IP, please connect to an ed2k-server or Kad.\nYour TCP port must be reachable (highID) if you are connected to a server,\nbut it's not necessary when connected to Kad"
-    IDC_MSG_WEBCACHE_CONFIGALT 
-                            "Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until a new proxy is tested.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."
-    IDC_MSG_WEBCACHE_NOACTIVE 
-                            "Webcache Autodetection has detected that your ISP-proxy does not cache data. Webcache disabled."
-    IDC_MSG_WEBCACHE_ERRRESOLVE 
-                            "WebCache Error - Failed to resolve HTTP proxy address:\n%s\nPlease review your webcache settings"
-    IDC_MSG_WEBCACHE_TRANSPAR 
-                            "Proxy Test can not test Transparent proxies. Test Canceled!"
-    IDC_MSG_WEBCACHE_TESTRUNNING 
-                            "Performing Proxy Test! Please check the log in the serverwindow for the results!"
-    IDC_MSG_WEBCACHE_TESTERR "Proxy Test Error!"
-    IDC_MSG_WEBCACHE_ALREADYRUNNING 
-                            "No New Test Started. There is already a Test in progress"
-    IDC_MSG_WEBCACHE_TESTREQ 
-                            "No Test Performed. Not all requirements met.\n Requirements:\n1. You have to be connected to a server\n2. You need to have a valid public IP\n3. You need to have a high ID\n4. Test does not work if you have too many open connections"
     IDC_UPDATEFAKELISTSTART_TIP 
                             "Try to update the list before connecting to the network"
 END

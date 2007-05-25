@@ -286,11 +286,6 @@ void CFileDetailDialogInfo::RefreshData()
 	UINT uValidSources = 0;
 	UINT uNNPSources = 0;
 	UINT uA4AFSources = 0;
-	//MORPH START - Changed by SiRoB, WebCache
-	uint32	uWebcacherequests = 0; //JP webcache
-	uint32	uSuccessfulWebcacherequests = 0;//jp webcache
-	uint64  uWebcachedownloaded = 0;//jp webcache
-	//MORPH END   - Changed by SiRoB, WebCache
 	for (int i = 0; i < m_paFiles->GetSize(); i++)
 	{
 		const CPartFile* file = STATIC_DOWNCAST(CPartFile, (*m_paFiles)[i]);
@@ -304,12 +299,6 @@ void CFileDetailDialogInfo::RefreshData()
 		uDataRate += file->GetDatarate();
 		uCompleted += (uint64)file->GetCompletedSize();
 		iHashsetAvailable += (file->GetHashCount() == file->GetED2KPartCount()) ? 1 : 0;	// SLUGFILLER: SafeHash - use GetED2KPartCount
-
-		//MORPH START - Changed by SiRoB, WebCache 1.2f
-		uWebcacherequests += file->Webcacherequests;//jp webcache
-		uSuccessfulWebcacherequests += file->SuccessfulWebcacherequests;//jp webcache
-		uWebcachedownloaded += file->WebCacheDownDataThisFile;//jp webcache
-		//MORPH END   - Changed by SiRoB, WebCache 1.2f
 
 		if (file->IsPartFile())
 		{
@@ -351,12 +340,6 @@ void CFileDetailDialogInfo::RefreshData()
 
 	str.Format(_T("%s (%.1f%%)"), CastItoXBytes(uCompression, false, false), uTransferred!=0 ? (uCompression * 100.0 / uTransferred) : 0.0);
 	SetDlgItemText(IDC_COMPRESSION, str);
-
-	//MORPH START - Changed by SiRoB, WebCache
-	str.Format(_T("%u/%u (%1.1f%%)"), uSuccessfulWebcacherequests, uWebcacherequests, uWebcacherequests != 0 ?(uSuccessfulWebcacherequests * 100.0) / uWebcacherequests:0.0);
-	SetDlgItemText(IDC_WCReq, str);
-	SetDlgItemText(IDC_WCDOWNL, CastItoXBytes(uWebcachedownloaded, false, false));
-	//MORPH END   - Changed by SiRoB, WebCache
 }
 
 void CFileDetailDialogInfo::OnDestroy()
@@ -393,8 +376,6 @@ void CFileDetailDialogInfo::Localize()
 	GetDlgItem(IDC_FD_XAICH)->SetWindowText(GetResString(IDS_IACHHASH)+_T(':'));
    	SetDlgItemText(IDC_REMAINING_TEXT, GetResString(IDS_DL_REMAINS)+_T(':'));
 	SetDlgItemText(IDC_FD_X10, GetResString(IDS_TYPE)+_T(':') );
-	GetDlgItem(IDC_WC_REQ_SUCC)->SetWindowText(GetResString(IDS_WC_REQ_SUCC));
-    GetDlgItem(IDC_WC_DOWNLOADED)->SetWindowText(GetResString(IDS_WC_DOWNLOADED));
 }
 
 HBRUSH CFileDetailDialogInfo::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)

@@ -78,12 +78,6 @@ BOOL CClientDetailPage::OnInitDialog()
 
 	AddAnchor(IDC_OBFUSCATION_STAT, TOP_LEFT, TOP_RIGHT);
 
-	//MORPH - Added by SiRoB, WebCache
-	AddAnchor(IDC_STATIC57, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_WCSTATISTICS, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_Webcache, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_TRUSTEDOHCBSENDER, TOP_LEFT, TOP_RIGHT);
-	//MORPH - Added by SiRoB, WebCache
 
 	Localize();
 	return TRUE;
@@ -113,6 +107,13 @@ BOOL CClientDetailPage::OnSetActive()
 			countryflag = theApp.ip2country->GetFlagImageList()->ExtractIcon(client->GetCountryFlagIndex());
 			((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->SetIcon(countryflag);
 			((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->ShowWindow(SW_SHOW);
+			RECT rect1;
+			RECT rect2;
+			((CStatic*)GetDlgItem(IDC_COUNTRYFLAG))->GetWindowRect(&rect1);
+			GetDlgItem(IDC_DLOC)->GetWindowRect(&rect2);
+			ScreenToClient(&rect1);
+			ScreenToClient(&rect2);
+			GetDlgItem(IDC_DLOC)->MoveWindow(CRect(rect1.right+2, rect2.top, rect2.right, rect2.bottom),TRUE);
 		}
 		//MORPH END - Added by Commander, CountryFlag
 		//EastShare End - added by AndCycle, IP to Country
@@ -275,28 +276,6 @@ BOOL CClientDetailPage::OnSetActive()
 		m_sAdditionalInfo.SetFont (&m_fStdFont);
 		#endif
 		// [MightyKnife] end: Private Modifications
-		//MORPH START - Added by SiRoB, Webcache 1.2f
-		//MORPH START - Modified by Commander, WebCacheName
-		if(client->SupportsWebCache() && client->GetWebCacheName() == "")
-			GetDlgItem(IDC_Webcache)->SetWindowText(GetResString(IDS_WEBCACHE_NOPROXY));
-		if(client->SupportsWebCache() && client->GetWebCacheName() != "")
-			GetDlgItem(IDC_Webcache)->SetWindowText(client->GetWebCacheName()); // Superlexx - webcache //JP changed to new GetWebcacheName-function
-    	if(!client->SupportsWebCache())
-			GetDlgItem(IDC_Webcache)->SetWindowText(GetResString(IDS_WEBCACHE_NOSUPPORT));
-    	//MORPH END - Modified by Commander, WebCacheName
-
-		double percentSessions = 0;
-		if (client->WebCachedBlockRequests != 0)
-			percentSessions = (double) 100 * client->SuccessfulWebCachedBlockDownloads / client->WebCachedBlockRequests;
-		buffer.Format( _T("%u/%u (%1.1f%%)"), client->SuccessfulWebCachedBlockDownloads, client->WebCachedBlockRequests, percentSessions );
-		GetDlgItem(IDC_WCSTATISTICS)->SetWindowText(buffer); //JP Client WC-Statistics
-		if (client->IsTrustedOHCBSender())
-			buffer.Format(GetResString(IDS_YES));
-		else
-			buffer.Format(GetResString(IDS_NO));
-		GetDlgItem(IDC_TRUSTEDOHCBSENDER)->SetWindowText(buffer); //JP Is trusted OHCB sender
-		//MORPH END   - Added by SiRoB, Webcache 1.2f
-
 		m_bDataChanged = false;
 	}
 	return TRUE;
@@ -332,10 +311,6 @@ void CClientDetailPage::Localize()
 	GetDlgItem(IDC_STATIC51)->SetWindowText(GetResString(IDS_CD_MOD));
 	GetDlgItem(IDC_STATIC52)->SetWindowText(GetResString(IDS_CD_RATING));
 	GetDlgItem(IDC_STATIC53)->SetWindowText(GetResString(IDS_CD_USCORE));
-	GetDlgItem(IDC_STATIC54)->SetWindowText(GetResString(IDS_CD_WCSUCCFAIL));
-	GetDlgItem(IDC_STATIC55)->SetWindowText(GetResString(IDS_CD_WCTRUSTSENDER));
-	GetDlgItem(IDC_STATIC56)->SetWindowText(GetResString(IDS_PW_WEBCACHE) + _T(":"));
-	GetDlgItem(IDC_STATIC57)->SetWindowText(GetResString(IDS_PW_WEBCACHE));
 	GetDlgItem(IDC_STATIC133x)->SetWindowText(GetResString(IDS_CD_IDENT));
 	GetDlgItem(IDC_DLOC2)->SetWindowText(GetResString(IDS_COUNTRY) + _T(":"));
 	GetDlgItem(IDC_CLIENTDETAIL_KAD)->SetWindowText(GetResString(IDS_KADEMLIA) + _T(":"));

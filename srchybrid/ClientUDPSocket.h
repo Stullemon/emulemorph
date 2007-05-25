@@ -49,9 +49,6 @@ public:
 
 protected:
 	bool	ProcessPacket(const BYTE* packet, UINT size, uint8 opcode, uint32 ip, uint16 port);
-	//MORPH START - Added by SiRoB, Webcache 1.2f
-	bool	ProcessWebCachePacket(const BYTE* packet, uint32 size, uint8 opcode, uint32 ip, uint16 port); //JP WEBCACHE
-	//MORPH START - Added by SiRoB, Webcache 1.2f
 
 	virtual void	OnSend(int nErrorCode);	
 	virtual void	OnReceive(int nErrorCode);

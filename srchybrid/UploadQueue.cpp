@@ -48,8 +48,6 @@
 #include "Kademlia/Kademlia/Prefs.h"
 #include "Log.h"
 #include "collection.h"
-// WebCache ///////////////////////////////////////////////////////////////////////////////////
-#include "PartFile.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -214,9 +212,6 @@ void CUploadQueue::MoveDownInUploadQueue(CUpDownClient* client) {
 		//MORPH START - Added by SiRoB, due to zz upload system PeerCache
 		theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket,true);
 		//MORPH END   - Added by SiRoB, due to zz upload system PeerCache
-    	//MORPH START - Added by SiRoB, due to zz upload system WebCache
-		theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket,true);
-		//MORPH END   - Added by SiRoB, due to zz upload system WebCache
     	   
 		// then add it last in it's class
         InsertInUploadingList(client);
@@ -1480,17 +1475,6 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 		*/
 		// [end] Mighty Knife
 
-		//MORPH START - Added by SiRoB, due to zz upload system WebCache
-		(void) theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pWCUpSocket);
-		//MORPH END   - Added by SiRoB, due to zz upload system WebCache
-
-		// Mighty Knife: more detailed logging
-		/*
-		if (thePrefs.GetLogUlDlEvents())
-			AddDebugLogLine(DLP_VERYLOW, true,_T("---- WebCache-socket %ssuccessully removed from upload list."),wcRemoved ? _T("") : _T("NOT "));
-		*/
-		// [end] Mighty Knife
-
 		/*if(thePrefs.GetLogUlDlEvents() && !(removed || pcRemoved || wcRemoved)) {
         	DebugLogError(false, _T("UploadQueue: Didn't find socket to delete. socket: 0x%x, PCUpSocket: 0x%x, WCUpSocket: 0x%x"), client->socket,client->m_pPCUpSocket,client->m_pWCUpSocket);
         }*/
@@ -2118,9 +2102,6 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 			// Remove the found Client from UploadBandwidthThrottler
    			theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket,true);
 			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket,true);
-			//MORPH START - Added by SiRoB, due to zz upload system WebCache
-			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pWCUpSocket,true);
-			//MORPH END   - Added by SiRoB, due to zz upload system WebCache
 			tempUploadinglist.AddTail(cur_client);
 		}
 
@@ -2159,18 +2140,6 @@ void CUploadQueue::CheckForHighPrioClient() {
         }
 	//}
 }
-// MORPH START - Added by Commander, WebCache 1.2e
-CUpDownClient*	CUploadQueue::FindClientByWebCacheUploadId(const uint32 id) // Superlexx - webcache - can be made more efficient
-{
-	for (POSITION pos = uploadinglist.GetHeadPosition(); pos != NULL;)
-	{
-		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
-		if ( cur_client->m_uWebCacheUploadId == id )
-			return cur_client;
-	}
-	return 0;
-}
-// MORPH END - Added by Commander, WebCache 1.2e
 
 //MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
 //MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]

@@ -77,10 +77,6 @@ public:
 	CUpDownClient*	GetNextClient(const CUpDownClient* update);
 
 
-	//MORPH START - Added by SiRoB, WebCache 1.2f
-	CUpDownClient*	FindClientByWebCacheUploadId(const uint32 id); // Superlexx - webcache
-	//MORPH END   - Added by SiRoB, WebCache 1.2f
-	
 	void	DeleteAll();
 	UINT	GetWaitingPosition(CUpDownClient* client);
 

@@ -267,12 +267,10 @@ public:
 	static	uint64	cumUpDataPort_4662;
 	static	uint64	cumUpDataPort_OTHER;
 	static	uint64	cumUpDataPort_PeerCache;
-	static	uint64	cumUpDataPort_WebCache; //MORPH - WebCache Statistic
 	// Session port breakdown stats for sent bytes...
 	static	uint64	sesUpDataPort_4662;
 	static	uint64	sesUpDataPort_OTHER;
 	static	uint64	sesUpDataPort_PeerCache;
-	static	uint64	sesUpDataPort_WebCache; //MORPH - WebCache Statistic
 
 	// Cumulative source breakdown stats for sent bytes...
 	static	uint64	cumUpData_File;
@@ -310,7 +308,6 @@ public:
 	static	uint64	cumDownData_EMULECOMPAT;
 	static	uint64	cumDownData_SHAREAZA;
 	static	uint64	cumDownData_URL;
-	static	uint64	cumDownData_WEBCACHE; //jp webcache statistics // MORPH - Added by Commander, WebCache 1.2e
 	// Session client breakdown stats for received bytes...
 	static	uint64	sesDownData_EDONKEY;
 	static	uint64	sesDownData_EDONKEYHYBRID;
@@ -320,24 +317,15 @@ public:
 	static	uint64	sesDownData_EMULECOMPAT;
 	static	uint64	sesDownData_SHAREAZA;
 	static	uint64	sesDownData_URL;
-	// MORPH START - Added by Commander, WebCache 1.2e
-	static	uint64	sesDownData_WEBCACHE; //jp webcache statistics
-	static  uint32	ses_WEBCACHEREQUESTS; //jp webcache statistics
-	static	uint32	ses_successfull_WCDOWNLOADS;  //jp webcache statistics
-	static  uint32	ses_PROXYREQUESTS; //jp webcache statistics
-    static  uint32	ses_successfullPROXYREQUESTS;//jp webcache statistics
-	// MORPH END - Added by Commander, WebCache 1.2e
 
 	// Cumulative port breakdown stats for received bytes...
 	static	uint64	cumDownDataPort_4662;
 	static	uint64	cumDownDataPort_OTHER;
 	static	uint64	cumDownDataPort_PeerCache;
-	static	uint64	cumDownDataPort_WebCache; //MORPH - WebCache Statistic
 	// Session port breakdown stats for received bytes...
 	static	uint64	sesDownDataPort_4662;
 	static	uint64	sesDownDataPort_OTHER;
 	static	uint64	sesDownDataPort_PeerCache;
-	static	uint64	sesDownDataPort_WebCache; //MORPH - WebCache Statistic
 
 	// Saved stats for cumulative connection data...
 	static	float	cumConnAvgDownRate;
@@ -476,7 +464,6 @@ public:
     static  bool    m_bLogA4AF; // ZZ:DownloadManager
 	static	bool	m_bLogUlDlEvents;
 	// MORPH START - Added by Commander, WebCache 1.2f
-	static	bool	m_bLogWebCacheEvents;//JP log webcache events
 	static	bool	m_bLogICHEvents;//JP log ICH events
 	// MORPH END   - Added by Commander, WebCache 1.2f
 	static	bool	m_bUseDebugDevice;
@@ -694,10 +681,6 @@ public:
     static bool m_bClientQueueProgressBar;
 	//MORPH END - Added by Commander, ClientQueueProgressBar
     
-	//MORPH START - Added by Commander, Show WC stats
-	static bool m_bCountWCSessionStats;
-	//MORPH END - Added by Commander, Show WC stats
-
 	//MORPH START - Added by Commander, FolderIcons
 	static bool m_bShowFolderIcons;
 	//MORPH END - Added by Commander, FolderIcons
@@ -913,46 +896,6 @@ public:
 
 
 	static bool		m_bCryptLayerRequiredStrictServer; // MORPH lh require obfuscated server connection 
-
-	// MORPH START - Added by Commander, WebCache 1.2f
-	static	bool	m_bHighIdPossible; // JP detect fake HighID (from netfinity)
-	static	bool	WebCacheDisabledThisSession; //JP temp disabler
-	static	uint32	WebCachePingSendTime;//jp check proxy config
-	static	bool	expectingWebCachePing;//jp check proxy config
-	static	bool	IsWebCacheTestPossible(); //jp check proxy config
-	static	CString	webcacheName;		//jp move these to private?? and make member functions to set and change them??
-	static	uint16	webcachePort;
-	static	bool	webcacheReleaseAllowed; //jp webcache release
-	static	bool	IsWebcacheReleaseAllowed() {return webcacheReleaseAllowed;}//jp webcache release
-	static	bool	UpdateWebcacheReleaseAllowed();//jp webcache release
-	static	bool	WebCacheIsTransparent() {return webcacheName.GetLength() > 15 && webcacheName.Left(12) == "transparent@";}
-	static	uint16	webcacheBlockLimit;
-	static	void	SetWebCacheBlockLimit(uint16 limit) {webcacheBlockLimit = limit;}
-	static	uint16	GetWebCacheBlockLimit() {return webcacheBlockLimit;}
-	static	bool	webcacheExtraTimeout;
-	static	bool	PersistentConnectionsForProxyDownloads;
-	static	bool	WCAutoupdate;
-	static	void	SetWebCacheExtraTimeout(bool value) {webcacheExtraTimeout = value;}
-	static	bool	GetWebCacheExtraTimeout() {return webcacheExtraTimeout;}
-	static	bool	webcacheCachesLocalTraffic;
-	static	void	SetWebCacheCachesLocalTraffic(bool value) {webcacheCachesLocalTraffic = value;}
-	static	bool	GetWebCacheCachesLocalTraffic() {return webcacheCachesLocalTraffic;}
-	static	bool	webcacheEnabled;
-	static	bool	IsWebCacheDownloadEnabled() {return webcacheEnabled && !WebCacheDisabledThisSession;} //jp
-	static	bool	UsesCachedTCPPort();	//jp
-	static	bool	detectWebcacheOnStart; // jp detect webcache on startup
-	static	uint32	webcacheLastSearch;
-	static	void	SetWebCacheLastSearch(uint32 time) {webcacheLastSearch = time;}
-	static	uint32	GetWebCacheLastSearch() {return webcacheLastSearch;}
-	static	uint32	webcacheLastGlobalIP;
-	static	void	SetWebCacheLastGlobalIP(uint32 IP) {webcacheLastGlobalIP = IP;}
-	static	uint32	GetWebCacheLastGlobalIP() {return webcacheLastGlobalIP;}
-	static	CString	webcacheLastResolvedName;
-	static	void	SetLastResolvedName(CString name) {webcacheLastResolvedName = name;}
-	static	CString	GetLastResolvedName()	{return webcacheLastResolvedName;}
-	// Superlexx end
-	static	uint8	webcacheTrustLevel;
-	// MORPH END - Added by Commander, WebCache 1.2f
 
 	//MORPH START - Added by Stulle, Global Source Limit
 	static  UINT	m_uGlobalHL;
@@ -1218,22 +1161,18 @@ public:
 	// Cumulative port breakdown stats for sent bytes...
 	static	uint64	GetUpTotalPortData()			{ return   GetCumUpDataPort_4662() 
 															 + GetCumUpDataPort_OTHER()
-															 + GetCumUpDataPort_PeerCache()
-															 + GetCumUpDataPort_WebCache(); } //MORPH - WecCache Statistic
+																+ GetCumUpDataPort_PeerCache();}
 	static	uint64	GetCumUpDataPort_4662()			{ return (cumUpDataPort_4662 +		sesUpDataPort_4662 );}
 	static	uint64	GetCumUpDataPort_OTHER()		{ return (cumUpDataPort_OTHER +		sesUpDataPort_OTHER );}
 	static	uint64	GetCumUpDataPort_PeerCache()	{ return (cumUpDataPort_PeerCache +	sesUpDataPort_PeerCache );}
-	static	uint64	GetCumUpDataPort_WebCache()		{ return (cumUpDataPort_WebCache +	sesUpDataPort_WebCache );} //MORPH - WecCache Statistic
 	
 	// Session port breakdown stats for sent bytes...
 	static	uint64	GetUpSessionPortData()			{ return   sesUpDataPort_4662 
 															 + sesUpDataPort_OTHER
-															 + sesUpDataPort_PeerCache
-															 + sesUpDataPort_WebCache; } //MORPH - WecCache Statistic
+																+ sesUpDataPort_PeerCache;}
 	static	uint64	GetUpDataPort_4662()			{ return sesUpDataPort_4662;}
 	static	uint64	GetUpDataPort_OTHER()			{ return sesUpDataPort_OTHER;}
 	static	uint64	GetUpDataPort_PeerCache()		{ return sesUpDataPort_PeerCache; }
-	static	uint64	GetUpDataPort_WebCache()		{ return sesUpDataPort_WebCache; } //MORPH - WecCache Statistic
 
 	// Cumulative DS breakdown stats for sent bytes...
 	static	uint64	GetUpTotalDataFile()			{ return (GetCumUpData_File() +				GetCumUpData_Partfile() );}
@@ -1252,9 +1191,7 @@ public:
 															 + GetCumDownData_AMULE()
 															 + GetCumDownData_EMULECOMPAT()
 															 + GetCumDownData_SHAREAZA()
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-															 + GetCumDownData_URL()
-															  + GetCumDownData_WEBCACHE(); } // jp webcache statistics
+																+ GetCumDownData_URL();}
 	static	uint64	GetCumDownData_EDONKEY()		{ return (cumDownData_EDONKEY +			sesDownData_EDONKEY);}
 	static	uint64	GetCumDownData_EDONKEYHYBRID()	{ return (cumDownData_EDONKEYHYBRID +	sesDownData_EDONKEYHYBRID);}
 	static	uint64	GetCumDownData_EMULE()			{ return (cumDownData_EMULE +			sesDownData_EMULE);}
@@ -1263,9 +1200,6 @@ public:
 	static	uint64	GetCumDownData_EMULECOMPAT()	{ return (cumDownData_EMULECOMPAT +		sesDownData_EMULECOMPAT);}
 	static	uint64	GetCumDownData_SHAREAZA()		{ return (cumDownData_SHAREAZA +			sesDownData_SHAREAZA );}
 	static	uint64	GetCumDownData_URL()			{ return (cumDownData_URL +				sesDownData_URL);}
-	// MORPH START - Added by Commander, WebCache 1.2e
-	static	uint64	GetCumDownData_WEBCACHE()		{ return (cumDownData_WEBCACHE +		sesDownData_WEBCACHE);} //jp webcache statistics
-	// MORPH END - Added by Commander, WebCache 1.2e
 	
 	// Session client breakdown stats for received bytes
 	static	uint64	GetDownSessionClientData()		{ return   sesDownData_EDONKEY 
@@ -1275,9 +1209,7 @@ public:
 															 + sesDownData_AMULE
 															 + sesDownData_EMULECOMPAT
 															 + sesDownData_SHAREAZA
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-															  + sesDownData_URL
-															  + sesDownData_WEBCACHE; } // jp webcache statistics
+																+ sesDownData_URL;}
 	static	uint64	GetDownData_EDONKEY()			{ return sesDownData_EDONKEY;}
 	static	uint64	GetDownData_EDONKEYHYBRID()		{ return sesDownData_EDONKEYHYBRID;}
 	static	uint64	GetDownData_EMULE()				{ return sesDownData_EMULE;}
@@ -1286,28 +1218,22 @@ public:
 	static	uint64	GetDownData_EMULECOMPAT()		{ return sesDownData_EMULECOMPAT;}
 	static	uint64	GetDownData_SHAREAZA()			{ return sesDownData_SHAREAZA;}
 	static	uint64	GetDownData_URL()				{ return sesDownData_URL;}
-	// MORPH START - Added by Commander, WebCache 1.2e
-	static	uint64	GetDownData_WEBCACHE()			{ return sesDownData_WEBCACHE;} //jp webcache statistics
-	// MORPH END - Added by Commander, WebCache 1.2e
 
 	// Cumulative port breakdown stats for received bytes...
 	static	uint64	GetDownTotalPortData()			{ return   GetCumDownDataPort_4662() 
 															 + GetCumDownDataPort_OTHER()
-															 + GetCumDownDataPort_PeerCache()
-															 + GetCumDownDataPort_WebCache(); } //MORPH - WecCache Statistic
-	static	uint64	GetCumDownDataPort_4662()		{ return cumDownDataPort_4662		+ sesDownDataPort_4662; }
+																+ GetCumDownDataPort_PeerCache();}
+	static	uint64	GetCumDownDataPort_4662()			{return cumDownDataPort_4662		+ sesDownDataPort_4662;}
 	static	uint64	GetCumDownDataPort_OTHER()		{ return cumDownDataPort_OTHER		+ sesDownDataPort_OTHER; }
 	static	uint64	GetCumDownDataPort_PeerCache()	{ return cumDownDataPort_PeerCache	+ sesDownDataPort_PeerCache; }
- 	static	uint64	GetCumDownDataPort_WebCache()	{ return cumDownDataPort_WebCache	+ sesDownDataPort_WebCache; } //MORPH - WecCache Statistic
+
 	// Session port breakdown stats for received bytes...
 	static	uint64	GetDownSessionDataPort()		{ return   sesDownDataPort_4662 
 															 + sesDownDataPort_OTHER
-															 + sesDownDataPort_PeerCache
-															 + sesDownDataPort_WebCache; } //MORPH - WecCache Statistic
+																+ sesDownDataPort_PeerCache;}
 	static	uint64	GetDownDataPort_4662()			{ return sesDownDataPort_4662;}
 	static	uint64	GetDownDataPort_OTHER()			{ return sesDownDataPort_OTHER;}
 	static	uint64	GetDownDataPort_PeerCache()		{ return sesDownDataPort_PeerCache; }
-	static	uint64	GetDownDataPort_WebCache()		{ return sesDownDataPort_WebCache; } //MORPH - WecCache Statistic
 
 	//		Saved stats for cumulative connection data
 	static	float	GetConnAvgDownRate()			{ return cumConnAvgDownRate;}
@@ -1699,10 +1625,6 @@ public:
 	static bool ShowClientQueueProgressBar()					{ return m_bClientQueueProgressBar;}
     //MORPH END - Added by Commander, ClientQueueProgressBar
 
-    //MORPH START - Added by Commander, Show WC stats
-	static bool CountWCSessionStats()							{ return m_bCountWCSessionStats;}
-    //MORPH END - Added by Commander, Show WC stats
-
 	//MORPH START - Added by Commander, FolderIcons
 	static bool ShowFolderIcons()								{ return m_bShowFolderIcons;}
 	//MORPH END - Added by Commander, FolderIcons
@@ -1773,7 +1695,6 @@ public:
     static	bool	GetLogA4AF()    					{return m_bVerbose && m_bLogA4AF;} // ZZ:DownloadManager
 	static	bool	GetLogUlDlEvents()					{return m_bVerbose && m_bLogUlDlEvents;}
 	static	bool	GetLogKadSecurityEvents()			{return m_bVerbose && true;}
-	static	bool	GetLogWebCacheEvents()				{return m_bVerbose && m_bLogWebCacheEvents;}//JP log webcache events
 	static	bool	GetLogICHEvents()					{return m_bVerbose && m_bLogICHEvents;}//JP log ICH events
 	static	bool	GetUseDebugDevice()					{return m_bUseDebugDevice;}
 	static	int		GetDebugServerTCPLevel()			{return m_iDebugServerTCPLevel;}

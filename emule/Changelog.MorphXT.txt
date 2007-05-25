@@ -7,6 +7,7 @@ ADD: FollowTheMajority, a new feature that will auto rename your file with major
 	can be changed from ModOptions->EastShare->FollowTheMajority, can be direct active from right click
 	or disable by any rename operation per file based. [AndCycle]
 ADD: FairPlay, at least upload one copy of downloaded file with priority [AndCycle]
+Removed: WebCache (http://forum.emule-project.net/index.php?showtopic=124737)
 
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.6 installer

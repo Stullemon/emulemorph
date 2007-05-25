@@ -114,7 +114,6 @@ CPPgMorph::CPPgMorph()
 	m_htiUseCompression=NULL ;// morph Use compress 
 
 	m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
-	m_htiCountWCSessionStats		= NULL; //MORPH - added by Commander, Show WC Session stats
 	m_htiClientQueueProgressBar = NULL; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	m_htiFriend = NULL;
@@ -355,7 +354,6 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiCompressLevel = m_ctrlTreeOptions.InsertItem(GetResString(IDS_COMPRESSLEVEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
 		m_ctrlTreeOptions.AddEditBox(m_htiCompressLevel, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiUseCompression= m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USECOMPRESS), m_htiUM, m_bUseCompression); //MORPH - added by Commander, Show WC Session stats
-		m_htiCountWCSessionStats = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_COUNTWCSESSIONSTATS), TVI_ROOT, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
 		//MORPH START - Added by IceCream, high process priority
 		m_htiHighProcess = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHPROCESS), TVI_ROOT, m_bHighProcess);
 		//MORPH END   - Added by IceCream, high process priority
@@ -411,7 +409,6 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseCompression, m_bUseCompression); //Morph - Compresslevel
 	DDV_MinMaxInt(pDX, m_iCompressLevel,1,9);//Morph - Compresslevel
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisplayFunnyNick, m_bFunnyNick);//MORPH - Added by SiRoB, Optionnal funnynick display
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiCountWCSessionStats, m_bCountWCSessionStats); //MORPH - added by Commander, Show WC Session stats
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiClientQueueProgressBar, m_bClientQueueProgressBar); //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiDownloadDataRateAverageTime, m_iDownloadDataRateAverageTime);//MORPH - Added by SiRoB, Upload Splitting Class
@@ -509,9 +506,7 @@ BOOL CPPgMorph::OnInitDialog()
     m_iCompressLevel = thePrefs.m_iCompressLevel; //Compresslevel
 	m_bUseCompression = thePrefs.m_bUseCompression; // use compression
 	m_bFunnyNick = thePrefs.m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
-	m_bCountWCSessionStats = thePrefs.m_bCountWCSessionStats; //MORPH - added by Commander, Show WC Session stats
 	m_bClientQueueProgressBar = thePrefs.m_bClientQueueProgressBar;//MORPH - Added by Commander, ClientQueueProgressBar
-	m_bCountWCSessionStats	= thePrefs.m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	m_iGlobalDataRateFriend = thePrefs.globaldataratefriend;
 	m_iMaxGlobalDataRateFriend = thePrefs.maxglobaldataratefriend;
@@ -633,7 +628,6 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_bUseCompression = m_bUseCompression; // use compression
 	thePrefs.m_bFunnyNick = m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 	thePrefs.m_bClientQueueProgressBar = m_bClientQueueProgressBar; //MORPH - Added by Commander, ClientQueueProgressBar
-	thePrefs.m_bCountWCSessionStats		   = m_bCountWCSessionStats; //MORPH - Added by Commander, Show WC stats
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	updateLegend |= thePrefs.globaldataratefriend != m_iGlobalDataRateFriend;
 	thePrefs.globaldataratefriend = m_iGlobalDataRateFriend;
@@ -816,9 +810,6 @@ void CPPgMorph::Localize(void)
 		if (m_htiDisplayFunnyNick) {m_ctrlTreeOptions.SetItemText(m_htiDisplayFunnyNick, GetResString(IDS_DISPLAYFUNNYNICK));//MORPH - Added by SiRoB, Optionnal funnynick display
 				                    SetTool(m_htiDisplayFunnyNick,IDS_DISPLAYFUNNYNICK_TIP);
 		}
-		if (m_htiCountWCSessionStats) {m_ctrlTreeOptions.SetItemText(m_htiCountWCSessionStats, GetResString(IDS_COUNTWCSESSIONSTATS)); //MORPH - added by Commander, Show WC Session stats 
-									   SetTool(m_htiCountWCSessionStats,IDS_COUNTWCSESSIONSTATS_TIP);
-		}
 		if (m_htiClientQueueProgressBar) {m_ctrlTreeOptions.SetItemText(m_htiClientQueueProgressBar, GetResString(IDS_CLIENTQUEUEPROGRESSBAR));//MORPH - Added by Commander, ClientQueueProgressBar
 									      SetTool(m_htiClientQueueProgressBar,IDS_CLIENTQUEUEPROGRESSBAR_TIP);
 		}
@@ -835,7 +826,6 @@ void CPPgMorph::Localize(void)
 		if (m_htiInfiniteQueue) m_ctrlTreeOptions.SetItemText(m_htiInfiniteQueue, GetResString(IDS_INFINITEQUEUE));	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 		if (m_htiDontRemoveSpareTrickleSlot) m_ctrlTreeOptions.SetItemText(m_htiDontRemoveSpareTrickleSlot, GetResString(IDS_DONTREMOVESPARETRICKLESLOT));//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 		if (m_htiDisplayFunnyNick) m_ctrlTreeOptions.SetItemText(m_htiDisplayFunnyNick, GetResString(IDS_DISPLAYFUNNYNICK));//MORPH - Added by SiRoB, Optionnal funnynick display
-		if (m_htiCountWCSessionStats) m_ctrlTreeOptions.SetItemText(m_htiCountWCSessionStats, GetResString(IDS_COUNTWCSESSIONSTATS)); //MORPH - added by Commander, Show WC Session stats 
 		if (m_htiClientQueueProgressBar) m_ctrlTreeOptions.SetItemText(m_htiClientQueueProgressBar, GetResString(IDS_CLIENTQUEUEPROGRESSBAR));//MORPH - Added by Commander, ClientQueueProgressBar
 		//MORPH START - Added by SiRoB, Datarate Average Time Management
 		if (m_htiDownloadDataRateAverageTime) {m_ctrlTreeOptions.SetEditLabel(m_htiDownloadDataRateAverageTime, GetResString(IDS_DATARATEAVERAGETIME));

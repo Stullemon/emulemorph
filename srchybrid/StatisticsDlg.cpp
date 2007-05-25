@@ -836,10 +836,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 			uint64	DownOHTotalPackets = 0;
 			CDownloadQueue::SDownloadStats myStats;
 			theApp.downloadqueue->GetDownloadSourcesStats(myStats);
-			//MORPH START - Added by Commander, Show failed WC sessions
-			uint32  failedWCSessions =				thePrefs.ses_WEBCACHEREQUESTS - thePrefs.ses_successfull_WCDOWNLOADS;
-			double  percentWCSessions =				0;
-			//MORPH END - Added by Commander, Show failed WC sessions
 			// TRANSFER -> DOWNLOADS -> SESSION SECTION
 			if (forceUpdate || stattree.IsExpanded(h_down_session)) 
 			{
@@ -923,17 +919,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("URL: %s (%1.1f%%)") , CastItoXBytes( DownDataClient, false, false ), percentClientTransferred );
 						stattree.SetItemText( down_scb[i] , cbuffer );
 						i++;
-						//MORPH START - Added by SiRoB, WebCache 1.2f
-						//jp webcache statistics START
-						DownDataClient = thePrefs.GetDownData_WEBCACHE();
-						if ( DownDataTotal!=0 && DownDataClient!=0 )
-							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
-						else
-							percentClientTransferred = 0;
-						cbuffer.Format( _T("WEBCACHE: %s (%1.1f%%)") , CastItoXBytes( DownDataClient ), percentClientTransferred );
-						stattree.SetItemText( down_scb[i] , cbuffer );
-						i++;
-						//MORPH END   - Added by SiRoB, WebCache 1.2f
 					}
 					// Downloaded Data By Port
 					if (forceUpdate || stattree.IsExpanded(hdown_spb)) 
@@ -942,7 +927,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						uint64	PortDataDefault =	thePrefs.GetDownDataPort_4662();
 						uint64	PortDataOther =		thePrefs.GetDownDataPort_OTHER();
 						uint64	PortDataPeerCache =	thePrefs.GetDownDataPort_PeerCache();
-						uint64	PortDataWebCache =	thePrefs.GetDownDataPort_WebCache(); //MORPH - WebCache Statistic
 						uint64	PortDataTotal =		thePrefs.GetDownSessionDataPort();
 						double	percentPortTransferred = 0;
 
@@ -967,15 +951,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER) , CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 						stattree.SetItemText( down_spb[i] , cbuffer );
 						i++;
-						//MORPH START - WebCache Statistic
-						if ( PortDataTotal!=0 && PortDataWebCache!=0 )
-							percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
-						else
-							percentPortTransferred = 0;
-						cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE) , CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
-						stattree.SetItemText( down_spb[i] , cbuffer );
-						i++;
-						//MORPH END   - WebCache Statistic
 					}
 				}
 				// Completed Downloads
@@ -1063,16 +1038,8 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					i++;
 				}
 				// Set Download Sessions
-			    // MORPH START - Added by Commander, Show WC session stats
-			    statGoodSessions =	thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]; // Add Active Downloads
+				statGoodSessions =	thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]; // Add Active Downloads
 				statBadSessions =	thePrefs.GetDownS_FailedSessions();
-				if(!thePrefs.CountWCSessionStats())
-				{
-					statGoodSessions =	(thePrefs.GetDownS_SuccessfulSessions() + myStats.a[1]) - thePrefs.ses_successfull_WCDOWNLOADS; // Add Active Downloads
-					if (statBadSessions > failedWCSessions)
-						statBadSessions -=	failedWCSessions;
-				}
-			    // MORPH END - Added by Commander, Show WC session stats
 				cbuffer.Format( _T("%s: %u") , GetResString(IDS_STATS_DLSES) , statGoodSessions + statBadSessions );
 				stattree.SetItemText( down_S[4] , cbuffer );
 				if (forceUpdate || stattree.IsExpanded(down_S[4])) 
@@ -1082,79 +1049,22 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					if (statGoodSessions > 0) 
 					{
 						percentSessions = (double) 100 * statGoodSessions / (statGoodSessions + statBadSessions);
-						// MORPH START - Added by Commander, Show WC session stats
-						if(thePrefs.CountWCSessionStats())
-						percentWCSessions = (double) 100 * thePrefs.ses_successfull_WCDOWNLOADS / statGoodSessions; //MORPH - Added by Commander, Show amount of successful WC sessions
-                        // MORPH END - Added by Commander, Show WC session stats
 						cbuffer.Format( _T("%s: %s") , GetResString(IDS_STATS_AVGDATADLSES) , CastItoXBytes( theStats.sessionReceivedBytes / statGoodSessions, false, false ) ); 
 					}
 					else 
 						cbuffer.Format( _T("%s: %s") , GetResString(IDS_STATS_AVGDATADLSES) , CastItoXBytes((uint32)0, false, false) );
 					stattree.SetItemText( down_ssessions[2] , cbuffer ); // Set Avg DL/Session
-                    
-					// MORPH START - Added by Commander, Show WC session stats
-					if(thePrefs.CountWCSessionStats())
-					{
-						cbuffer.Format( _T("%s: %u (%1.1f%%) (WC: %u (%1.1f%%))") , GetResString(IDS_STATS_SDLSES) , statGoodSessions , percentSessions, thePrefs.ses_successfull_WCDOWNLOADS, percentWCSessions ); //MORPH - Added by Commander, Show amount of successful WC sessions
-					}
-					else
-					{
 						cbuffer.Format( _T("%s: %u (%1.1f%%)"), GetResString(IDS_STATS_SDLSES) , statGoodSessions , percentSessions );
-					}
-				    // MORPH END - Added by Commander, Show WC session stats
-
 					stattree.SetItemText( down_ssessions[0] , cbuffer ); // Set Succ Sessions
 					// Set Failed Download Sessions (Avoid Division)
 					if (percentSessions != 0 && statBadSessions > 0) 
 						percentSessions = 100 - percentSessions; // There were some good sessions and bad ones...
 					else if (percentSessions == 0 && statBadSessions > 0) 
 						percentSessions = 100; // There were bad sessions and no good ones, must be 100%
-					else 
+					else
 						percentSessions = 0; // No sessions at all, or no bad ones.
-
-                    //MORPH START - Added by Commander, Show amount of failed WC sessions
-					if(thePrefs.CountWCSessionStats())
-						{
-						percentWCSessions = 0;
-						if(statBadSessions > 0)
-							percentWCSessions = (double) 100 * failedWCSessions / statBadSessions;
-						else
-							percentWCSessions = (double) 0;
-
-						cbuffer.Format( _T("%s: %u (%1.1f%%) (WC: %u (%1.1f%%))") , GetResString(IDS_STATS_FDLSES) , statBadSessions , percentSessions, failedWCSessions, percentWCSessions );
-						}
-					else
-						{
-						cbuffer.Format( _T("%s: %u (%1.1f%%)") , GetResString(IDS_STATS_FDLSES) , statBadSessions , percentSessions );
-						}
-					//MORPH END - Added by Commander, Show amount of failed WC sessions
-
+					cbuffer.Format( _T("%s: %u (%1.1f%%)") , GetResString(IDS_STATS_FDLSES) , statBadSessions , percentSessions );
 					stattree.SetItemText( down_ssessions[1] , cbuffer );
-					// Set Average Download Time
-					//MORPH START - Added by SiRoB, WebCache 1.2f
-					// jp webcache statistics START
-					// Set Successful webcacherequests
-					percentSessions = 0;
-					if (thePrefs.ses_WEBCACHEREQUESTS > 0)
-						percentSessions = (double) 100 * thePrefs.ses_successfull_WCDOWNLOADS / thePrefs.ses_WEBCACHEREQUESTS;
-					else 
-						percentSessions = (double) 0;
-
-					cbuffer.Format(GetResString(IDS_STATS_SUCCESSFULLWC) + _T(" %u/%u (%1.1f%%)"), thePrefs.ses_successfull_WCDOWNLOADS, thePrefs.ses_WEBCACHEREQUESTS, percentSessions );
-					stattree.SetItemText( down_ssessions[4] , cbuffer ); // Set Succ WC Sessions
-					//MORPH END   - Added by SiRoB, WebCache 1.2f
-		            
-                    //MORPH START - Added by Commander, Show failed WC sessions
-                    percentSessions = 0;
-					if (thePrefs.ses_WEBCACHEREQUESTS > 0)
-                        percentSessions = (double) 100 * failedWCSessions / thePrefs.ses_WEBCACHEREQUESTS;
-					else
-						percentSessions = (double) 0;
-
-					cbuffer.Format(GetResString(IDS_STATS_FAILEDWC) + _T(" %u/%u (%1.1f%%)"), failedWCSessions, thePrefs.ses_WEBCACHEREQUESTS, percentSessions);
-					stattree.SetItemText( down_ssessions[5] , cbuffer );
-					//MORPH END - Added by Commander, Show failed WC sessions
-                    
 					// Set Average Download Time
 					cbuffer.Format(_T("%s: %s"), GetResString(IDS_STATS_AVGDLTIME), CastSecondsToLngHM(thePrefs.GetDownS_AvgTime()));
 					stattree.SetItemText( down_ssessions[3] , cbuffer );
@@ -1294,18 +1204,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("URL: %s (%1.1f%%)") , CastItoXBytes( DownDataClient, false, false ), percentClientTransferred );
 						stattree.SetItemText( down_tcb[i] , cbuffer );
 						i++;
-						//MORPH START - Added by SiRoB, WebCache 1.2f
-						//jp webcache statistics START
-						DownDataClient = thePrefs.GetCumDownData_WEBCACHE();
-						if ( DownDataTotal!=0 && DownDataClient!=0 )
-							percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
-						else
-							percentClientTransferred = 0;
-						cbuffer.Format( _T("WEBCACHE: %s (%1.1f%%)") , CastItoXBytes( DownDataClient ), percentClientTransferred );
-						stattree.SetItemText( down_tcb[i] , cbuffer );
-						i++;
-						//jp webcache statistics END
-						//MORPH END   - Added by SiRoB, WebCache 1.2f
 					}
 					// Downloaded Data By Port
 					if (forceUpdate || stattree.IsExpanded(hdown_tpb)) 
@@ -1314,7 +1212,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						uint64	PortDataDefault =	thePrefs.GetCumDownDataPort_4662();
 						uint64	PortDataOther =		thePrefs.GetCumDownDataPort_OTHER();
 						uint64	PortDataPeerCache =	thePrefs.GetCumDownDataPort_PeerCache();
-						uint64	PortDataWebCache =	thePrefs.GetCumDownDataPort_WebCache(); //MORPH - WebCache Statistic
 						uint64	PortDataTotal =		thePrefs.GetDownTotalPortData();
 						double	percentPortTransferred = 0;
 
@@ -1339,16 +1236,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER) , CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 						stattree.SetItemText( down_tpb[i] , cbuffer );
 						i++;
-						
-						//MORPH START - WebCache Statistic
-						if ( PortDataTotal!=0 && PortDataWebCache!=0 )
-							percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
-						else
-							percentPortTransferred = 0;
-						cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE) , CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
-						stattree.SetItemText( down_tpb[i] , cbuffer );
-						i++;
-						//MORPH END   - WebCache Statistic
 					}
 				}
 				// Set Cum Completed Downloads
@@ -1538,7 +1425,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						uint64	PortDataDefault =	thePrefs.GetUpDataPort_4662();
 						uint64	PortDataOther =		thePrefs.GetUpDataPort_OTHER();
 						uint64	PortDataPeerCache =	thePrefs.GetUpDataPort_PeerCache();
-						uint64	PortDataWebCache =	thePrefs.GetUpDataPort_WebCache(); //MORPH - WebCache Statistic
 						uint64	PortDataTotal =		thePrefs.GetUpSessionPortData();
 						double	percentPortTransferred = 0;
 
@@ -1563,15 +1449,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER) , CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 						stattree.SetItemText( up_spb[i] , cbuffer );
 						i++;
-						//MORPH START - WebCache Statistic
-						if ( PortDataTotal!=0 && PortDataWebCache!=0 )
-							percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
-						else
-							percentPortTransferred = 0;
-						cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE) , CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
-						stattree.SetItemText( up_spb[i] , cbuffer );
-						i++;
-						//MORPH END   - WebCache Statistic
 					}
 					// Uploaded Data By Source
 					if (forceUpdate || stattree.IsExpanded(hup_ssb)) 
@@ -1775,7 +1652,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						uint64	PortDataDefault =	thePrefs.GetCumUpDataPort_4662();
 						uint64	PortDataOther =		thePrefs.GetCumUpDataPort_OTHER();
 						uint64	PortDataPeerCache =	thePrefs.GetCumUpDataPort_PeerCache();
-						uint64	PortDataWebCache =	thePrefs.GetCumUpDataPort_WebCache(); //MORPH - WebCache Statistic
 						uint64	PortDataTotal =		thePrefs.GetUpTotalPortData();
 						double	percentPortTransferred = 0;
 
@@ -1800,16 +1676,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 						cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER) , CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 						stattree.SetItemText( up_tpb[i] , cbuffer );
 						i++;
-						
-						//MORPH START - WebCache Statistic
-						if ( PortDataTotal!=0 && PortDataWebCache!=0 )
-							percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
-						else
-							percentPortTransferred = 0;
-						cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE) , CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
-						stattree.SetItemText( up_tpb[i] , cbuffer );
-						i++;
-						//MORPH END  - WebCache Statistic
 					}
 					// Uploaded Data By Source
 					if (forceUpdate || stattree.IsExpanded(hup_tsb)) 
@@ -2267,7 +2133,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								uint64	PortDataDefault =	(uint64)(thePrefs.GetCumUpDataPort_4662() * avgModifier[mx]);
 								uint64	PortDataOther =		(uint64)(thePrefs.GetCumUpDataPort_OTHER() * avgModifier[mx]);
 								uint64	PortDataPeerCache =	(uint64)(thePrefs.GetCumUpDataPort_PeerCache() * avgModifier[mx]);
-								uint64	PortDataWebCache =	(uint64)(thePrefs.GetCumUpDataPort_WebCache() * avgModifier[mx]); //MORPH - WebCache Statistic
 								uint64	PortDataTotal =		(uint64)( thePrefs.GetUpTotalPortData() * avgModifier[mx]);
 								double	percentPortTransferred = 0;
 
@@ -2292,16 +2157,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER) , CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 								stattree.SetItemText( time_aap_up_dp[mx][i] , cbuffer );
 								i++;
-								
-								//MORPH START - WebCache Statistic
-								if ( PortDataTotal!=0 && PortDataWebCache!=0 )
-									percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
-								else
-									percentPortTransferred = 0;
-								cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE) , CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
-								stattree.SetItemText( time_aap_up_dp[mx][i] , cbuffer );
-								i++;
-								//MORPH END  - WebCache Statistic
 							}
 							// Uploaded Data By Source
 							if (forceUpdate || stattree.IsExpanded(time_aap_up_hd[mx][2])) 
@@ -2488,18 +2343,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								cbuffer.Format( _T("URL: %s (%1.1f%%)") , CastItoXBytes( DownDataClient, false, false ), percentClientTransferred );
 								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer );
 								i++;
-								//MORPH START - Added by SiRoB, WebCache 1.2f
-								//jp webcache statistics START
-								DownDataClient = (uint64)(thePrefs.GetCumDownData_WEBCACHE() * avgModifier[mx]);
-								if ( DownDataTotal!=0 && DownDataClient!=0 )
-									percentClientTransferred = (double) 100 * DownDataClient / DownDataTotal;
-								else
-									percentClientTransferred = 0;
-								cbuffer.Format( _T("WEBCACHE: %s (%1.1f%%)") , CastItoXBytes( DownDataClient ), percentClientTransferred );
-								stattree.SetItemText( time_aap_down_dc[mx][i] , cbuffer );
-								i++;
-								//jp webcache statistics END
-								//MORPH END   - Added by SiRoB, WebCache 1.2f
 							}
 							// Downloaded Data By Port
 							if (forceUpdate || stattree.IsExpanded(time_aap_down_hd[mx][1])) 
@@ -2508,7 +2351,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								uint64	PortDataDefault =	(uint64)(thePrefs.GetCumDownDataPort_4662() * avgModifier[mx]);
 								uint64	PortDataOther =		(uint64)(thePrefs.GetCumDownDataPort_OTHER() * avgModifier[mx]);
 								uint64	PortDataPeerCache =	(uint64)(thePrefs.GetCumDownDataPort_PeerCache() * avgModifier[mx]);
-								uint64	PortDataWebCache =	(uint64)(thePrefs.GetCumDownDataPort_WebCache() * avgModifier[mx]); //MORPH - WebCache Statistic
 								uint64	PortDataTotal =		(uint64)(thePrefs.GetDownTotalPortData() * avgModifier[mx]);
 								double	percentPortTransferred = 0;
 
@@ -2533,16 +2375,6 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 								cbuffer.Format( _T("%s: %s (%1.1f%%)") , thePrefs.GetPeerCacheShow() ? _T("PeerCache") : GetResString(IDS_STATS_PRTOTHER), CastItoXBytes( PortDataPeerCache, false, false ) , percentPortTransferred);
 								stattree.SetItemText( time_aap_down_dp[mx][i] , cbuffer );
 								i++;
-
-								//MORPH START - WebCache Statistic
-								if ( PortDataTotal!=0 && PortDataWebCache!=0 )
-									percentPortTransferred = (double) 100 * PortDataWebCache / PortDataTotal;
-								else
-									percentPortTransferred = 0;
-								cbuffer.Format( _T("%s: %s (%1.1f%%)") , GetResString(IDS_PW_WEBCACHE), CastItoXBytes( PortDataWebCache, false, false ) , percentPortTransferred);
-								stattree.SetItemText( time_aap_down_dp[mx][i] , cbuffer );
-								i++;
-								//MORPH END   - WebCache Statistic
 							}
 						}
 						// Set Cum Completed Downloads
@@ -3488,8 +3320,7 @@ void CStatisticsDlg::CreateMyTree()
 		down_spb[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hdown_spb);
 	for(int i = 0; i<_countof(down_sources); i++) 
 		down_sources[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[3]);
-	//MORPH - Changed by SiRoB, WebCache 1.2f
-	for(int i = 0; i<6/* changed to 5 jp webcache statistics+1 */; i++) 
+	for(int i = 0; i<4; i++) 
 		down_ssessions[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), down_S[4]);
 	hdown_soh= stattree.InsertItem(GetResString(IDS_STATS_OVRHD),h_down_session);				// Downline Overhead (Session)
 	for(int i = 0; i<_countof(down_soh); i++) 
@@ -3568,8 +3399,7 @@ void CStatisticsDlg::CreateMyTree()
 		for(int i = 0; i<7; i++)
 			time_aap_down[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING),time_aap_hdown[x]);
 						time_aap_down_hd[x][0] = stattree.InsertItem(GetResString(IDS_CLIENTS),time_aap_down[x][0]);							// Clients Section
-		//MORPH - Changed by SiRoB, WebCache 1.2f
-		for(int i = 0; i<9/* changed to 9 jp webcache statistics */; i++)
+		for(int i = 0; i<8; i++)
 			time_aap_down_dc[x][i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), time_aap_down_hd[x][0]);
 						time_aap_down_hd[x][1] = stattree.InsertItem(GetResString(IDS_PORT),time_aap_down[x][0]);								// Ports Section
 		for(int i = 0; i<_countof(time_aap_down_dp[0]); i++)

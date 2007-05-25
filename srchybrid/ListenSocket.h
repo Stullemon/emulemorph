@@ -40,8 +40,7 @@ public:
 	void	SetClient(CUpDownClient* pClient);
 	void	Disconnect(LPCTSTR pszReason);
 	void	WaitForOnConnect();
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-	virtual void	ResetTimeOutTimer(); // yonatan http - made virtual, WC-TODO ?
+	void	ResetTimeOutTimer();
 	bool	CheckTimeOut();
 	virtual UINT GetTimeOut();
 	virtual void Safe_Delete();
@@ -55,6 +54,7 @@ public:
 	//MORPH END   - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
 	virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend);
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend);
+
 	void	DbgAppendClientInfo(CString& str);
 	CString DbgGetClientInfo();
 
@@ -77,9 +77,6 @@ protected:
 
 	bool	ProcessPacket(const BYTE* packet, uint32 size,UINT opcode);
 	bool	ProcessExtPacket(const BYTE* packet, uint32 size, UINT opcode, UINT uRawSize);
-	//MORPH START - Added by SiRoB, WebCache 1.2f
-	bool	ProcessWebCachePacket(const BYTE* packet, uint32 size, UINT opcode, UINT uRawSize); // yonatan - webcache protocol packets
-	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	void	PacketToDebugLogLine(LPCTSTR protocol, const uchar* packet, uint32 size, UINT opcode);
 	void	SetConState(SocketState val);
 

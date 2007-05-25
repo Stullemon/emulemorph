@@ -37,7 +37,6 @@ protected:
     bool m_bLogA4AF;
 	bool m_bLogUlDlEvents;
 	//MORPH START - Added by SiRoB, WebCache 1.2f
-	bool m_bLogWebCacheEvents;//JP log webcache events
 	bool m_bLogICHEvents;//JP log ICH events
 	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	bool m_bCreditSystem;
@@ -167,7 +166,6 @@ protected:
     HTREEITEM m_htiLogA4AF;
 	HTREEITEM m_htiLogUlDlEvents;
 	//MORPH START - Added by SiRoB, WebCache 1.2f
-	HTREEITEM m_htiLogWebCacheEvents; //jp log webcache events
 	HTREEITEM m_htiLogICHEvents; //JP log ICH events
 	//MORPH END   - Added by SiRoB, WebCache 1.2f
 

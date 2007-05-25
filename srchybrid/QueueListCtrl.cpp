@@ -103,10 +103,6 @@ void CQueueListCtrl::Init()
 	InsertColumn(13,GetResString(IDS_COUNTRY),LVCFMT_LEFT,100,13);
 	// Commander - Added: IP2Country column - End
 
-	//MORPH START - Added by SiRoB, WebCache 1.2f
-	InsertColumn(14, GetResString(IDS_WC_SOURCES) ,LVCFMT_LEFT, 100,14); //JP Webcache column
-	//MORPH END   - Added by SiRoB, WebCache 1.2f
-
 	SetAllIcons();
 	Localize();
 	LoadSettings();
@@ -263,12 +259,6 @@ void CQueueListCtrl::Localize()
 		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(13, &hdi);
 		// Commander - Added: IP2Country column - End
-
-		//MORPH START - Added by SiRoB, WebCache 1.2f
-		strRes = GetResString(IDS_WC_SOURCES);
-		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
-		pHeaderCtrl->SetItem(14, &hdi);
-		//MORPH END   - Added by SiRoB, WebCache 1.2f
 	}
 }
 
@@ -641,25 +631,6 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						}
 						break;
 					// Commander - Added: IP2Country column - End
-					//MORPH START - Added by SiRoB, WebCache 1.2f
-					case 14: {
-						if (client->SupportsWebCache())
-						{
-							Sbuffer = client->GetWebCacheName();
-							if (client->IsBehindOurWebCache())
-								dc->SetTextColor(RGB(0, 180, 0)); //if is behind our webcache display green
-							else if (Sbuffer != "")
-								dc->SetTextColor(RGB(255, 0, 0)); // if webcache info is there but not our own set red
-							else
-								Sbuffer = GetResString(IDS_WEBCACHE_NOPROXY);	// if no webcache info colour is black
-						   }
-						else
-							Sbuffer = "";
-						dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
- 						dc->SetTextColor(RGB(0, 0, 0));
-						break;
-					}
-					//MORPH END   - Added by SiRoB, WebCache 1.2f
 				}
 				if( iColumn != 9 && iColumn != 0 && iColumn != 13 && iColumn != 14) //JP Webcache added Column 14
 					dc.DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,DLC_DT_TEXT);
@@ -1072,22 +1043,6 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				iResult=-1;
                 // Commander - Added: IP2Country column - End
 			break;
-		//MORPH START - Add by SiRoB, WebCache 1.2f
-		//JP Webcache START 
-		case 14:
-			if (item1->SupportsWebCache() && item2->SupportsWebCache() )
-				iResult=CompareLocaleStringNoCase(item1->GetWebCacheName(),item2->GetWebCacheName());
-			else
-				iResult=item1->SupportsWebCache() - item2->SupportsWebCache();
-			break;
-		case 114:
-			if (item2->SupportsWebCache() && item1->SupportsWebCache() )
-				iResult=CompareLocaleStringNoCase(item2->GetWebCacheName(),item1->GetWebCacheName());
-			else
-				iResult=item2->SupportsWebCache() - item1->SupportsWebCache();
-		//JP Webcache END
-			break;
-		//MORPH END   - Add by SiRoB, WebCache 1.2f
 		default:
 			iResult=0;
 			break;

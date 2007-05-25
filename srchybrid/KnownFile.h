@@ -40,12 +40,6 @@ public:
 	CKnownFile();
 	virtual ~CKnownFile();
 
-	// MORPH START - Added by Commander, WebCache 1.2e
-	bool ReleaseViaWebCache; //JP webcache release
-	uint32 GetNumberOfClientsRequestingThisFileUsingThisWebcache(CString webcachename, uint32 maxCount); //JP webcache release
-	void SetReleaseViaWebCache(bool WCRelease) {ReleaseViaWebCache=WCRelease;} //JP webcache release
-	// MORPH END - Added by Commander, WebCache 1.2e
-
 	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
 
 	const CString& GetPath() const { return m_strDirectory; }

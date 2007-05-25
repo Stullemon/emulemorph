@@ -59,7 +59,6 @@
 #include "ClientUDPSocket.h"
 #include "shahashset.h"
 #include "Log.h"
-#include "WebCache/WebCacheSocket.h" // MORPH - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -308,37 +307,6 @@ void CUpDownClient::Init()
 
 	m_incompletepartVer = 0; //MORPH - Added By SiRoB, ICS merged into partstatus
 
-    // MORPH START - Added by Commander, WebCache 1.2e
-    m_bProxy = false;
-	m_bIsAcceptingOurOhcbs = true;
-	m_bIsTrustedOHCBSender = true;
-	m_bIsAllowedToSendOHCBs = true;
-	m_uWebCacheFlags = 0;
-	m_pWCDownSocket = NULL;
-	m_pWCUpSocket = NULL;
-	m_WA_webCacheIndex = -1;
-	m_bWebcacheFailedTry = false;
-	m_bWebCacheSupport = false;
-	m_uWebCacheDownloadId = 0;
-	m_uWebCacheUploadId = 0;
-	m_eWebCacheDownState = WCDS_NONE;
-	m_eWebCacheUpState = WCUS_NONE;
-	b_webcacheInfoNeeded = false;
-	//JP trusted OHCB-Senders Start
-	WebCachedBlockRequests = 0;
-	SuccessfulWebCachedBlockDownloads = 0;
-	//JP trusted OHCB-Senders END
-	// Superlexx - encryption
-	Crypt.useNewKey = true;
-	Crypt.isProxy = false;
-	GenerateKey(Crypt.remoteMasterKey);	// generate a key - will be done right before sending
-	memset(Crypt.localMasterKey, 0, WC_KEYLENGTH);
-	// TODO: WC: remove this
-	//for (int i=0; i<WC_KEYLENGTH; i++) Crypt.localMasterKey[i] = 0; // fill with zeroes so we can say if the key is valid
-    lastMultiOHCBPacketSent = 0; // Superlexx - Multi-OHCB
-	m_bWebCacheSupportsMultiOHCBs = false;
-	// yonatan http end ////////////////////////////////////////////////////////////////////////////
-	// MORPH END - Added by Commander, WebCache 1.2e
 	//MORPH START - ReadBlockFromFileThread
 	m_abyfiledata = NULL;
 	m_readblockthread =NULL;
@@ -381,16 +349,6 @@ CUpDownClient::~CUpDownClient(){
 		m_pPCUpSocket->client = NULL;
 		m_pPCUpSocket->Safe_Delete();
 	}
-	// MORPH START - Added by Commander, WebCache 1.2e
-	if (m_pWCDownSocket){
-		m_pWCDownSocket->client = NULL;
-		m_pWCDownSocket->Safe_Delete();
-	}
-	if (m_pWCUpSocket){
-		m_pWCUpSocket->client = NULL;
-		m_pWCUpSocket->Safe_Delete();
-	}
-	// MORPH END - Added by Commander, WebCache 1.2e
 
 	free(m_pszUsername);
 	//MORPH START - Added by SiRoB, Dynamic FunnyNick
@@ -753,30 +711,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				CheckForGPLEvilDoer();
 				break;
 
-			// MORPH START - Added by Commander, WebCache 1.2e
-			case WC_TAG_VOODOO:
-				if (temptag.IsInt()) {
-					m_strNotOfficial.AppendFormat(_T(",WCV=%s"),temptag.GetFullInfo());
-					m_bWebCacheSupport = temptag.IsInt() && temptag.GetInt() == 'ARC4';
-				}
-				//MOPRH START - Added by SiRoB,  Control Mod Tag
-				else {
-					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
-						strBanReason.Format(_T("Suspect Hello-Tag: %s"),apszSnafuTag[3]);
-				}
-				//MOPRH END - Added by SiRoB,  Control Mod Tag
-				break;
-			case WC_TAG_FLAGS:
-				m_strNotOfficial.AppendFormat(_T(",WCF=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
-				if (m_bWebCacheSupport && temptag.IsInt())
-				{
-					m_uWebCacheFlags = temptag.GetInt();
-					b_webcacheInfoNeeded = m_uWebCacheFlags & WC_FLAGS_INFO_NEEDED;
-					m_bWebCacheSupportsMultiOHCBs = (m_uWebCacheFlags & WC_FLAGS_MULTI_OHCBS)!=0;
-				}
-				break;
-			// Superlexx webcache - moved to the multipacket
-			// MORPH END - Added by Commander, WebCache 1.2e
 			case CT_EMULE_UDPPORTS:
 				// 16 KAD Port
 				// 16 UDP Port
@@ -1561,7 +1495,6 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
 	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	if (bSendModVersion || m_clientSoft == SO_LPHANT) tagcount+=(1/*WC_VOODOO*/+1/*WC_FLAGS*/); // MORPH - Modified by Commander, WebCache 1.2e
 
 	data->WriteUInt32(tagcount);
 
@@ -1678,21 +1611,6 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		// <--- enkeyDev: ICS
 		//Morph End - added by AndCycle, ICS
 	} //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	// MORPH START - Added by SiRoB, WebCache 1.2f
-	if (bSendModVersion || m_clientSoft == SO_LPHANT)
-	{
-		CTag tagWebCacheVoodoo( WC_TAG_VOODOO, (uint32)'ARC4' );
-		tagWebCacheVoodoo.WriteTagToFile(data);
-		uint32 flags = WC_FLAGS_UDP | WC_FLAGS_NO_OHCBS | WC_FLAGS_MULTI_OHCBS;
-		bool localMasterKeyNeeded = true;
-		for(int i=0; localMasterKeyNeeded && i < WC_KEYLENGTH; i++)
-		localMasterKeyNeeded = (Crypt.localMasterKey[i]==0);
-		if (b_webcacheInfoNeeded || m_WA_webCacheIndex == -1 || localMasterKeyNeeded)
-			flags |= WC_FLAGS_INFO_NEEDED;
-		CTag tagWebCacheFlags( WC_TAG_FLAGS, flags);
-		tagWebCacheFlags.WriteTagToFile(data);
-	}
-	// MORPH END   - Added by SiRoB, WebCache 1.2f
 	uint32 dwIP;
 	uint16 nPort;
 	if (theApp.serverconnect->IsConnected()){
@@ -1804,8 +1722,8 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		ClearDownloadBlockRequests();
 
 		if(GetDownloadState() == DS_CONNECTED){
-		    //MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
-			if(reqfile && m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo <= 1  || IsFriend() || IsProxy())
+		    //MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source or it's a friend
+			if(reqfile && m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo <= 1  || IsFriend())
 				SetDownloadState(DS_ONQUEUE);
 			else {
 			//MORPH END   - Added by SiRoB, Don't kill source if it's the only one complet source or it's a friend
@@ -1865,7 +1783,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			//MORPH START - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend.
 			if(reqfile && !reqfile->IsPartFile() && reqfile->m_nCompleteSourcesCountLo <= 1  || IsFriend())
 				bAddDeadSource = false;
-			//MORPH END   - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend or it's a proxy.
+			//MORPH END   - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend.
 		case US_ERROR:
 			if (bAddDeadSource)
 				theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
@@ -1878,10 +1796,10 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			if (socket && socket->GetProxyConnectFailed())
 				bAddDeadSource = false;
 		case DS_WAITCALLBACK:
-			//MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source, it's a friend or a proxy
-			if(m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1 || IsFriend() || IsProxy() || !IsEd2kClient())
+			//MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source or it's a friend
+			if(m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1 || IsFriend() || !IsEd2kClient())
 				bAddDeadSource = false;
-			//MORPH END   - Added by SiRoB, Don't kill source if it's a proxy
+			//MORPH END   - Added by SiRoB, Don't kill source if it's the only one complet source or it's a friend
 		case DS_ERROR:
 			if (bAddDeadSource)
 				theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
@@ -1938,18 +1856,6 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 			m_pPCUpSocket->client = NULL;
 			m_pPCUpSocket->Safe_Delete();
 		}
-		// MORPH START - Added by Commander, WebCache 1.2e
-		SetWebCacheDownState(WCDS_NONE);
-		SetWebCacheUpState(WCUS_NONE);
-		if (m_pWCDownSocket){
-			m_pWCDownSocket->client = NULL;
-			m_pWCDownSocket->Safe_Delete();
-		}
-		if (m_pWCUpSocket){
-			m_pWCUpSocket->client = NULL;
-			m_pWCUpSocket->Safe_Delete();
-		}
-		// MORPH END - Added by Commander, WebCache 1.2e
 		m_fSentOutOfPartReqs = 0;
 		return false;
 	}
@@ -3373,30 +3279,11 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 /*
 	}
 */
-	// MORPH START - Added by Commander, WebCache 1.2e
-	switch (m_eWebCacheDownState)
-	{
-	case WCDS_WAIT_CLIENT_REPLY:
-		strState += _T(" ProxyWait");
-		break;
-	case WCDS_WAIT_CACHE_REPLY:
-		strState += _T(" WC-Bug:CacheWait"); // not needed...
-		break;
-	case WCDS_DOWNLOADINGVIA:
-		strState += _T(" Via Proxy");
-		break;
-	case WCDS_DOWNLOADINGFROM:
-		strState += _T(" From Proxy");
-		break;
-	}
-	// MORPH END - Added by Commander, WebCache 1.2e
 #if !defined DONT_USE_SOCKET_BUFFERING
 	CEMSocket* s = socket;
 	if (s != NULL) {
 		if (m_pPCDownSocket)
 			s = m_pPCDownSocket;
-		else if (m_pWCDownSocket)
-			s = m_pWCDownSocket;
 #ifdef _DEBUG
 		strState.AppendFormat(_T(",BUF:%u"), socket->GetRecvBufferSize());
 #endif 
@@ -3461,18 +3348,11 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 /*
 	}
 */
-	// MORPH START - Added by Commander, WebCache 1.2e
-	if( m_eWebCacheUpState == WCUS_UPLOADING )
-		strState += _T(" Via Proxy");
-	// MORPH START - Added by Commander, WebCache 1.2e
-
 	if(GetUploadState() != US_NONE) {
 		CEMSocket* s = socket;
 		if (s != NULL) {
 			if (m_pPCUpSocket)
 				s = m_pPCUpSocket;
-			else if (m_pWCUpSocket)
-				s = m_pWCUpSocket;
 			DWORD busySince = s->GetBusyTimeSince();
 			if (s->GetBusyRatioTime() > 0)
 				strState.AppendFormat(_T(",BR: %0.2f"), s->GetBusyRatioTime());

@@ -71,7 +71,6 @@ CPreferencesDlg::CPreferencesDlg()
 	m_wndBackup.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, TBH-AutoBackup
 	m_wndEastShare.m_psp.dwFlags &= ~PSH_HASHELP; //EastShare - Added by Pretender, ES Prefs
 	m_wndEmulespana.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, emulEspaña preferency
-	m_wndWebcachesettings.m_psp.dwFlags &= ~PSH_HASHELP; //MORPH - Added by SiRoB, WebCache 1.2f
 //MORPH START - Preferences groups [ePlus/Sirob]
 /*
 	CTreePropSheet::SetPageIcon(&m_wndGeneral, _T("Preferences"));
@@ -134,7 +133,6 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndMorph2); //MORPH - Added by SiRoB, Morph Prefs
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	AddPage(&m_wndEmulespana); //MORPH - Added by SiRoB, emulEspaña preferency
-	AddPage(&m_wndWebcachesettings); //MORPH - Added by SiRoB, WebCache 1.2f
 	
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	AddPage(&m_wndDebug);
@@ -299,7 +297,6 @@ void CPreferencesDlg::Localize()
 	ImageList.Add(CTempIconLoader(_T("MORPH")));  //MORPH - Added by SiRoB, Morph Prefs
 	ImageList.Add(CTempIconLoader(_T("EASTSHARE")));  //MORPH - Added by IceCream, Morph Prefs  //EastShare - Modified by Pretender
 	ImageList.Add(CTempIconLoader(_T("EMULESPANA")));  //MORPH - Added by IceCream, eMulEspaña Preferency
-	ImageList.Add(CTempIconLoader(_T("WEBCACHE")));  //MORPH - Added by SiRoB, WebCache 1.2f
 	
 	m_slideBar.SetImageList(&ImageList);
 //MORPH END   - Preferences groups [ePlus/Sirob]
@@ -324,7 +321,6 @@ void CPreferencesDlg::Localize()
 	m_wndMorph2.Localize();//MORPH - Added by SiRoB, Morph Prefs
 	m_wndEastShare.Localize();
 	m_wndEmulespana.Localize(); //MORPH - Added by SiRoB, emulEspaña preferency
-	m_wndWebcachesettings.Localize(); //MORPH - Added by SiRoB, WebCache 1.2f
     m_wndIonixWebServer.Localize(); //MORPH ionix advanced webserver
 	m_wndNTService.Localize(); //MORPH leuk_he:run as ntservice v1..
 	m_slideBar.ResetContent(); //MORPH - Preferences groups [ePlus/Sirob]
@@ -390,7 +386,6 @@ void CPreferencesDlg::Localize()
 	m_slideBar.AddGroupItem(_T("Morph Update"), iGroup, c++);
 	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, c++);
 	m_slideBar.AddGroupItem(_T("emulEspaña"), iGroup, c++); //MORPH - Added by SiRoB, emulEspaña preferency
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_WEBCACHE), iGroup, c++); //MORPH - Added by SiRoB, WebCache 1.2f
 	//m_slideBar.AddGroupItem(_T(" "), iGroup, Multiwebserver=c++); // ionix advnaced webserver
 	Multiwebserver=c++;
 	NTService=c++;

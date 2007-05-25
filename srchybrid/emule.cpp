@@ -24,7 +24,6 @@
 #include <share.h>
 #include <Mmsystem.h>
 #include <atlimage.h>
-#include "secrunasuser.h" // yonatan - moved up... // MORPH - Modified by Commander, WebCache 1.2e
 #include "emule.h"
 #include "opcodes.h"
 #include "mdump.h"
@@ -60,11 +59,9 @@
 #include "UpDownClient.h"
 #include "ED2KLink.h"
 #include "Preferences.h"
-//#include "secrunasuser.h" // MORPH - Modified by Commander, WebCache 1.2e
+#include "secrunasuser.h"
 #include "SafeFile.h"
 #include "PeerCacheFinder.h"
-#include "WebCache/WebCache.h" // jp detect webcache on startup // MORPH - Added by Commander, WebCache 1.2e
-#include "WebCache/WebCacheMFRList.h"	// Superlexx - MFR
 #include "emuleDlg.h"
 #include "SearchDlg.h"
 #include "enbitmap.h"
@@ -1405,16 +1402,6 @@ void CemuleApp::SetPublicIP(const uint32 dwIP){
 	}
 	else
 		m_dwPublicIP = dwIP;
-
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-	// jp detect Webcache on Startup START
-	if (thePrefs.IsWebCacheDownloadEnabled() && false && thePrefs.WCAutoupdate //Webcache Fix
-		&& m_dwPublicIP != 0 )
-	{
-		thePrefs.detectWebcacheOnStart = false;
-		AutodetectWebcache();
-	}
-	// jp detect Webcache on Startup END
 }
 
 

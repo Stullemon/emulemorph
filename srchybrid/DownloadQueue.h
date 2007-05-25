@@ -179,10 +179,6 @@ public:
 	bool	IsZZRatioInWork() {return m_bIsZZRatioInWork;}
 	//MORPH END   - Added by SiRoB, ZZ Ratio in Work
         
-	// MORPH START - Added by Commander, WebCache 1.2f
-	bool	ContainsUnstoppedFiles(); //jp webcache release
-	// MORPH END   - Added by Commander, WebCache 1.2f
-
         
 protected:
 	bool	SendNextUDPPacket();

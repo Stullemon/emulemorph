@@ -157,11 +157,9 @@ uint64	CPreferences::sesUpData_SHAREAZA;
 uint64	CPreferences::cumUpDataPort_4662;
 uint64	CPreferences::cumUpDataPort_OTHER;
 uint64	CPreferences::cumUpDataPort_PeerCache;
-uint64	CPreferences::cumUpDataPort_WebCache; //MORPH - WebCache Statistic
 uint64	CPreferences::sesUpDataPort_4662;
 uint64	CPreferences::sesUpDataPort_OTHER;
 uint64	CPreferences::sesUpDataPort_PeerCache;
-uint64	CPreferences::sesUpDataPort_WebCache; //MORPH - WebCache Statistic
 uint64	CPreferences::cumUpData_File;
 uint64	CPreferences::cumUpData_Partfile;
 uint64	CPreferences::sesUpData_File;
@@ -188,7 +186,6 @@ uint64	CPreferences::cumDownData_AMULE;
 uint64	CPreferences::cumDownData_EMULECOMPAT;
 uint64	CPreferences::cumDownData_SHAREAZA;
 uint64	CPreferences::cumDownData_URL;
-uint64	CPreferences::cumDownData_WEBCACHE; //jp webcache statistics // MORPH - Added by Commander, WebCache 1.2e
 uint64	CPreferences::sesDownData_EDONKEY;
 uint64	CPreferences::sesDownData_EDONKEYHYBRID;
 uint64	CPreferences::sesDownData_EMULE;
@@ -197,21 +194,12 @@ uint64	CPreferences::sesDownData_AMULE;
 uint64	CPreferences::sesDownData_EMULECOMPAT;
 uint64	CPreferences::sesDownData_SHAREAZA;
 uint64	CPreferences::sesDownData_URL;
-// MORPH START - Added by Commander, WebCache 1.2e
-uint64	CPreferences::sesDownData_WEBCACHE; //jp webcache statistics
-uint32	CPreferences::ses_WEBCACHEREQUESTS; //jp webcache statistics needs to be uint32 or the statistics won't work
-uint32	CPreferences::ses_PROXYREQUESTS; //jp webcache statistics
-uint32	CPreferences::ses_successfullPROXYREQUESTS; //jp webcache statistics
-uint32	CPreferences::ses_successfull_WCDOWNLOADS; //jp webcache statistics needs to be uint32 or the statistics won't work
-// MORPH END - Added by Commander, WebCache 1.2e
 uint64	CPreferences::cumDownDataPort_4662;
 uint64	CPreferences::cumDownDataPort_OTHER;
 uint64	CPreferences::cumDownDataPort_PeerCache;
-uint64	CPreferences::cumDownDataPort_WebCache; //MORPH - WebCache Statistic
 uint64	CPreferences::sesDownDataPort_4662;
 uint64	CPreferences::sesDownDataPort_OTHER;
 uint64	CPreferences::sesDownDataPort_PeerCache;
-uint64	CPreferences::sesDownDataPort_WebCache; //MORPH - WebCache Statistic
 float	CPreferences::cumConnAvgDownRate;
 float	CPreferences::cumConnMaxAvgDownRate;
 float	CPreferences::cumConnMaxDownRate;
@@ -319,7 +307,6 @@ bool	CPreferences::m_bLogFileSaving;
 bool	CPreferences::m_bLogA4AF; // ZZ:DownloadManager
 bool	CPreferences::m_bLogUlDlEvents;
 // MORPH START - Added by Commander, WebCache 1.2e
-bool	CPreferences::m_bLogWebCacheEvents;//JP log webcache events
 bool	CPreferences::m_bLogICHEvents;//JP log ICH events
 // MORPH END - Added by Commander, WebCache 1.2e
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
@@ -456,10 +443,6 @@ bool	CPreferences::m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
 //MORPH START - Added by Commander, ClientQueueProgressBar
 bool CPreferences::m_bClientQueueProgressBar;
 //MORPH END - Added by Commander, ClientQueueProgressBar
-
-//MORPH START - Added by Commander, Show WC stats
-bool CPreferences::m_bCountWCSessionStats;
-//MORPH END - Added by Commander, Show WC stats
 
 //MORPH START - Added by Commander, FolderIcons
 bool CPreferences::m_bShowFolderIcons;
@@ -733,57 +716,6 @@ bool	CPreferences::enableNEWS;
 	bool	CPreferences::m_bWapLowEnabled;
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
-// MORPH START - Added by Commander, WebCache 1.2e
-CString	CPreferences::webcacheName;
-uint16	CPreferences::webcachePort;
-bool	CPreferences::webcacheReleaseAllowed; //jp webcache release
-uint16	CPreferences::webcacheBlockLimit;
-bool	CPreferences::PersistentConnectionsForProxyDownloads; //jp persistent proxy connections
-bool	CPreferences::WCAutoupdate; //jp WCAutoupdate
-bool	CPreferences::webcacheExtraTimeout;
-bool	CPreferences::webcacheCachesLocalTraffic;
-bool	CPreferences::webcacheEnabled;
-bool	CPreferences::detectWebcacheOnStart; //jp detect webcache on startup
-uint32	CPreferences::webcacheLastSearch;
-CString	CPreferences::webcacheLastResolvedName;
-uint32	CPreferences::webcacheLastGlobalIP;
-bool	CPreferences::UsesCachedTCPPort()  //jp
-{
-	//MORPH - Changed by SiRoB,
-	/*
-	if ((thePrefs.GetPort()==80) || (thePrefs.port==21) || (thePrefs.port==443) || (thePrefs.port==563) || (thePrefs.port==70) || (thePrefs.port==210) || ((thePrefs.port>=1025) && (thePrefs.port<=65535))) return true;
-	*/
-	if ((thePrefs.GetPort()==80) || (thePrefs.GetPort()==21) || (thePrefs.GetPort()==443) || (thePrefs.GetPort()==563) || (thePrefs.GetPort()==70) || (thePrefs.GetPort()==210) || ((thePrefs.GetPort()>=1025) && (thePrefs.GetPort()<=65535))) return true;
-	else return false;
-}
-//JP proxy configuration test start
-bool	CPreferences::m_bHighIdPossible;
-//JP proxy configuration test start
-bool	CPreferences::WebCacheDisabledThisSession;//jp temp disabled
-uint32	CPreferences::WebCachePingSendTime;//jp check proxy config
-bool	CPreferences::expectingWebCachePing;//jp check proxy config
-bool	CPreferences::IsWebCacheTestPossible()//jp check proxy config
-{
-	return (theApp.GetPublicIP() != 0 //we have a public IP
-		&& theApp.serverconnect->IsConnected() //connected to a server
-		&& !theApp.serverconnect->IsLowID()//don't have LowID
-		&& m_bHighIdPossible
-		&& !theApp.listensocket->TooManySockets());// no fake high ID
-}
-//JP proxy configuration test end
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-uint8	CPreferences::webcacheTrustLevel;
-//JP webcache release START
-bool	CPreferences::UpdateWebcacheReleaseAllowed()
-{
-	webcacheReleaseAllowed = true;
-	if (theApp.downloadqueue->ContainsUnstoppedFiles())
-		webcacheReleaseAllowed = false;
-	return webcacheReleaseAllowed;
-}
-//JP webcache release END
-// MORPH END - Added by Commander, WebCache 1.2e
-
 //MORPH START - Added by Stulle, Global Source Limit
 UINT	CPreferences::m_uGlobalHL; 
 bool	CPreferences::m_bGlobalHL;
@@ -816,15 +748,6 @@ CPreferences::CPreferences()
 #ifdef _DEBUG
 	m_iDbgHeap = 1;
 #endif
-// MORPH START - Added by Commander, WebCache 1.2e
-//JP set standard values for stuff that doesn't need to be saved. This should probably be somewhere else START
-expectingWebCachePing = false;
-WebCachePingSendTime = 0;
-WebCacheDisabledThisSession = false;
-webcacheReleaseAllowed = true; //jp webcache release
-m_bHighIdPossible = false; // JP detect fake HighID (from netfinity)
-//JP set standard values for stuff that doesn't need to be saved. This should probably be somewhere else END
-// MORPH END - Added by Commander, WebCache 1.2e
 }
 
 CPreferences::~CPreferences()
@@ -1237,10 +1160,6 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteUInt64(L"DownDataPort_4662", GetCumDownDataPort_4662());
 	ini.WriteUInt64(L"DownDataPort_OTHER", GetCumDownDataPort_OTHER());
 	ini.WriteUInt64(L"DownDataPort_PeerCache", GetCumDownDataPort_PeerCache());
-	ini.WriteUInt64(L"DownDataPort_WebCache", GetCumDownDataPort_WebCache()); //MORPH - WebCache Statistic
-	// MORPH START - Added by Commander, WebCache 1.2e
-	ini.WriteUInt64(L"DownData_WEBCACHE", GetCumDownData_WEBCACHE()); // Superlexx - webcache - statistics
-	// MORPH END - Added by Commander, WebCache 1.2e
 	
 	ini.WriteUInt64(L"DownOverheadTotal",theStats.GetDownDataOverheadFileRequest() +
 										theStats.GetDownDataOverheadSourceExchange() +
@@ -1279,7 +1198,6 @@ void CPreferences::SaveStats(int bBackUp){
 	ini.WriteUInt64(L"UpDataPort_4662", GetCumUpDataPort_4662());
 	ini.WriteUInt64(L"UpDataPort_OTHER", GetCumUpDataPort_OTHER());
 	ini.WriteUInt64(L"UpDataPort_PeerCache", GetCumUpDataPort_PeerCache());
-	ini.WriteUInt64(L"UpDataPort_WebCache", GetCumUpDataPort_WebCache()); //MORPH - WebCache Statistic
 	ini.WriteUInt64(L"UpData_File", GetCumUpData_File());
 	ini.WriteUInt64(L"UpData_Partfile", GetCumUpData_Partfile());
 
@@ -1488,7 +1406,6 @@ void CPreferences::Add2SessionTransferData(UINT uClientID, UINT uClientPort, BOO
 				case 4662:				sesUpDataPort_4662+=bytes;		break;
 				case (UINT)-1:			sesUpDataPort_PeerCache+=bytes;	break;
 				//case (UINT)-2:		sesUpDataPort_URL+=bytes;		break;
-				case (UINT)-3:			sesUpDataPort_WebCache+=bytes;	break; //MORPH - WebCache Statistic
 				default:				sesUpDataPort_OTHER+=bytes;		break;
 			}
 
@@ -1515,10 +1432,6 @@ void CPreferences::Add2SessionTransferData(UINT uClientID, UINT uClientPort, BOO
 				case SO_LPHANT:
 				case SO_XMULE:			sesDownData_EMULECOMPAT+=bytes;	break;
 				case SO_URL:			sesDownData_URL+=bytes;			break;
-
-				// MORPH START - Added by Commander, WebCache 1.2e
-				case SO_WEBCACHE:		sesDownData_WEBCACHE+=bytes;	break; // Superlexx - webcache - statistics
-				// MORPH END - Added by Commander, WebCache 1.2e
 			}
 
 			switch (uClientPort){
@@ -1529,7 +1442,6 @@ void CPreferences::Add2SessionTransferData(UINT uClientID, UINT uClientPort, BOO
 				case 4662:				sesDownDataPort_4662+=bytes;	break;
 				case (UINT)-1:			sesDownDataPort_PeerCache+=bytes;break;
 				//case (UINT)-2:		sesDownDataPort_URL+=bytes;		break;
-				case (UINT)-3:			sesDownDataPort_WebCache+=bytes;	break; //MORPH - WebCache Statistic
 				default:				sesDownDataPort_OTHER+=bytes;	break;
 			}
 
@@ -1582,7 +1494,6 @@ void CPreferences::ResetCumulativeStatistics(){
 	cumUpDataPort_4662=0;
 	cumUpDataPort_OTHER=0;
 	cumUpDataPort_PeerCache=0;
-	cumUpDataPort_WebCache=0; //MORPH - WebCache Statistic
 	cumDownCompletedFiles=0;
 	cumDownSuccessfulSessions=0;
 	cumDownFailedSessions=0;
@@ -1598,13 +1509,9 @@ void CPreferences::ResetCumulativeStatistics(){
 	cumDownData_EMULECOMPAT=0;
 	cumDownData_SHAREAZA=0;
 	cumDownData_URL=0;
-	// MORPH START - Added by Commander, WebCache 1.2e
-	cumDownData_WEBCACHE=0; // Superlexx - webcache - statistics
-	// MORPH END - Added by Commander, WebCache 1.2e
 	cumDownDataPort_4662=0;
 	cumDownDataPort_OTHER=0;
 	cumDownDataPort_PeerCache=0;
-	cumDownDataPort_WebCache=0;	//MORPH - WebCache Statistic
 	cumConnAvgDownRate=0;
 	cumConnMaxAvgDownRate=0;
 	cumConnMaxDownRate=0;
@@ -1716,7 +1623,6 @@ bool CPreferences::LoadStats(int loadBackUp)
 	cumUpDataPort_4662				= ini.GetUInt64(L"UpDataPort_4662");
 	cumUpDataPort_OTHER				= ini.GetUInt64(L"UpDataPort_OTHER");
 	cumUpDataPort_PeerCache			= ini.GetUInt64(L"UpDataPort_PeerCache");
-	cumUpDataPort_WebCache			= ini.GetUInt64(L"UpDataPort_WebCache"); //MORPH - WebCache Statistic
 
 	// Load cumulative source breakdown stats for sent bytes
 	cumUpData_File					= ini.GetUInt64(L"UpData_File");
@@ -1742,15 +1648,11 @@ bool CPreferences::LoadStats(int loadBackUp)
 	cumDownData_AMULE				= ini.GetUInt64(L"DownData_AMULE");
 	cumDownData_SHAREAZA			= ini.GetUInt64(L"DownData_SHAREAZA");
 	cumDownData_URL					= ini.GetUInt64(L"DownData_URL");
-	// MORPH START - Added by Commander, WebCache 1.2e
-	cumDownData_WEBCACHE			= ini.GetUInt64(_T("DownData_WEBCACHE")); // Superlexx - webcache - statistics
-	// MORPH END - Added by Commander, WebCache 1.2e
 
 	// Load cumulative port breakdown stats for received bytes
 	cumDownDataPort_4662			= ini.GetUInt64(L"DownDataPort_4662");
 	cumDownDataPort_OTHER			= ini.GetUInt64(L"DownDataPort_OTHER");
 	cumDownDataPort_PeerCache		= ini.GetUInt64(L"DownDataPort_PeerCache");
-	cumDownDataPort_WebCache		= ini.GetUInt64(L"DownDataPort_WebCache"); //MORPH - WebCache Statistic
 
 	// Load stats for cumulative connection data
 	cumConnAvgDownRate				= ini.GetFloat(L"ConnAvgDownRate");
@@ -1841,7 +1743,6 @@ bool CPreferences::LoadStats(int loadBackUp)
 		sesUpDataPort_4662			= 0;
 		sesUpDataPort_OTHER			= 0;
 		sesUpDataPort_PeerCache		= 0;
-		sesUpDataPort_WebCache		= 0; //MORPH - WebCache Statistic
 		
 		sesDownData_EDONKEY			= 0;
 		sesDownData_EDONKEYHYBRID	= 0;
@@ -1851,19 +1752,9 @@ bool CPreferences::LoadStats(int loadBackUp)
 		sesDownData_EMULECOMPAT		= 0;
 		sesDownData_SHAREAZA		= 0;
 		sesDownData_URL				= 0;
-
-		// MORPH START - Added by Commander, WebCache 1.2e
-		sesDownData_WEBCACHE		= 0; // Superlexx - webcache - statistics
-		ses_WEBCACHEREQUESTS		= 0; //jp webcache statistics (from proxy)
-		ses_successfull_WCDOWNLOADS	= 0; //jp webcache statistics (from proxy)
-		ses_PROXYREQUESTS           = 0; //jp webcache statistics (via proxy)
-		ses_successfullPROXYREQUESTS= 0; //jp webcache statistics (via proxy)
-		// MORPH END - Added by Commander, WebCache 1.2e
-
 		sesDownDataPort_4662		= 0;
 		sesDownDataPort_OTHER		= 0;
 		sesDownDataPort_PeerCache	= 0;
-		sesDownDataPort_WebCache	= 0; //MORPH - WebCache Statistic
 		
 		sesDownSuccessfulSessions	= 0;
 		sesDownFailedSessions		= 0;
@@ -2039,23 +1930,6 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(L"UDPPort",udpport);
 	ini.WriteInt(L"ServerUDPPort", nServerUDPPort);
     //ini.WriteBool(L"UseCompression",m_bUseCompression);	// xman use compression, not saved you must manualy edit to disable it to prevent misuse
-	 
-	// MORPH START - Added by Commander, WebCache 1.2e
-	ini.WriteString(L"webcacheName", webcacheName);
-	ini.WriteInt(L"webcachePort", webcachePort);
-	ini.WriteInt(L"WebCacheBlockLimit", webcacheBlockLimit);
-	ini.WriteBool(L"PersistentConnectionsForProxyDownloads", PersistentConnectionsForProxyDownloads); //JP persistent proxy connections
-	ini.WriteBool(L"WCAutoupdate", WCAutoupdate); //JP WCAutoupdate
-	ini.WriteBool(L"WebCacheExtraTimeout", webcacheExtraTimeout);
-	ini.WriteBool(L"WebCacheCachesLocalTraffic", webcacheCachesLocalTraffic);
-	ini.WriteBool(L"WebCacheEnabled", webcacheEnabled);
-	ini.WriteBool(L"detectWebcacheOnStart", detectWebcacheOnStart); // jp detect webcache on startup
-	ini.WriteUInt64(L"WebCacheLastSearch", (uint64)webcacheLastSearch);
-	ini.WriteUInt64(L"WebCacheLastGlobalIP", (uint64)webcacheLastGlobalIP);
-	ini.WriteString(L"WebCacheLastResolvedName", webcacheLastResolvedName);
-	ini.WriteUInt64(L"webcacheTrustLevel", (uint64)webcacheTrustLevel);
-// yonatan http end ////////////////////////////////////////////////////////////////////////////
-	// MORPH END - Added by Commander, WebCache 1.2e
 	ini.WriteInt(L"MaxSourcesPerFile",maxsourceperfile );
 	ini.WriteWORD(L"Language",m_wLanguageID);
 	ini.WriteInt(L"SeeShare",m_iSeeShares);
@@ -2189,7 +2063,6 @@ void CPreferences::SavePreferences()
     ini.WriteBool(L"LogA4AF", m_bLogA4AF);                           // do *not* use the according 'Get...' function here!
 	ini.WriteBool(L"LogUlDlEvents", m_bLogUlDlEvents);
 	// MORPH START - Added by Commander, WebCache 1.2f
-	ini.WriteBool(L"LogWebCacheEvents", m_bLogWebCacheEvents);//JP log webcache events
 	ini.WriteBool(L"LogICHEvents", m_bLogICHEvents);//JP log ICH events
 	// MORPH END - Added by Commander, WebCache 1.2f
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
@@ -2468,10 +2341,6 @@ void CPreferences::SavePreferences()
 	//MORPH START - Added by Commander, ClientQueueProgressBar  
 	ini.WriteBool(_T("ClientQueueProgressBar"),m_bClientQueueProgressBar, _T("eMule"));
 	//MORPH END - Added by Commander, ClientQueueProgressBar
-
-	//MORPH START - Added by Commander, Show WC stats
-	ini.WriteBool(_T("CountWCSessionStats"),m_bCountWCSessionStats, _T("eMule"));
-    //MORPH END - Added by Commander, Show WC stats
 
 	//MORPH START - Added by Commander, FolderIcons  
 	ini.WriteBool(_T("ShowFolderIcons"),m_bShowFolderIcons, _T("eMule"));
@@ -2947,26 +2816,6 @@ void CPreferences::LoadPreferences()
 		udpport = (uint16)iPort;
 
 	nServerUDPPort = (uint16)ini.GetInt(L"ServerUDPPort", -1); // 0 = Don't use UDP port for servers, -1 = use a random port (for backward compatibility)
-	// MORPH START - Added by Commander, WebCache 1.2e
-	// Superlexx - webcache
-	/*char tmpWebcacheName[100];
-	sprintf(tmpWebcacheName,"%s",ini.GetString(_T("webcacheName"),_T("")));
-	webcacheName = tmpWebcacheName; // TODO: something more elegant*/
-	webcacheName = ini.GetString(_T("webcacheName"), _T(""));
-	webcachePort=(uint16)ini.GetInt(_T("webcachePort"),0);
-	webcacheBlockLimit=(uint16)ini.GetInt(_T("webcacheBlockLimit"));
-	webcacheExtraTimeout=ini.GetBool(_T("webcacheExtraTimeout"));
-	PersistentConnectionsForProxyDownloads=ini.GetBool(_T("PersistentConnectionsForProxyDownloads"), false);
-	WCAutoupdate=ini.GetBool(_T("WCAutoupdate"), true);
-	webcacheCachesLocalTraffic=ini.GetBool(_T("webcacheCachesLocalTraffic"), true);
-	webcacheEnabled=ini.GetBool(_T("webcacheEnabled"),false); //webcache disabled on first start so webcache detection on start gets called.
-	detectWebcacheOnStart=ini.GetBool(_T("detectWebcacheOnStart"), true); // jp detect webcache on startup
-	webcacheLastSearch=(uint32)ini.GetUInt64(_T("webcacheLastSearch"));
-	webcacheLastGlobalIP=(uint32)ini.GetUInt64(_T("webcacheLastGlobalIP"));
-	webcacheLastResolvedName=ini.GetString(_T("webcacheLastResolvedName"),0);
-	webcacheTrustLevel=(uint8)ini.GetUInt64(_T("webcacheTrustLevel"),30);
-	// webcache end
-        // MORPH END - Added by Commander, WebCache 1.2e
 	maxsourceperfile=ini.GetInt(L"MaxSourcesPerFile",400 );
 	m_wLanguageID=ini.GetWORD(L"Language",0);
 	m_iSeeShares=(EViewSharedFilesAccess)ini.GetInt(L"SeeShare",vsfaNobody);
@@ -3127,7 +2976,6 @@ void CPreferences::LoadPreferences()
 		m_bLogUlDlEvents=ini.GetBool(L"LogUlDlEvents",true);
 
 		// MORPH START - Added by Commander, WebCache 1.2e
-		m_bLogWebCacheEvents=ini.GetBool(_T("LogWebCacheEvents"),true);//JP log webcache events
 		m_bLogICHEvents=ini.GetBool(_T("LogICHEvents"),true);//JP log ICH events
 		// MORPH END - Added by Commander, WebCache 1.2e
 	}
@@ -3288,10 +3136,6 @@ void CPreferences::LoadPreferences()
 	m_bClientQueueProgressBar=ini.GetBool(_T("ClientQueueProgressBar"),false);
     //MORPH END - Added by Commander, ClientQueueProgressBar
 	
-	//MORPH START - Added by Commander, Show WC stats
-	m_bCountWCSessionStats=ini.GetBool(_T("CountWCSessionStats"),false);
-    //MORPH END - Added by Commander, Show WC stats
-
 	//MORPH START - Added by Commander, FolderIcons
 	m_bShowFolderIcons=ini.GetBool(_T("ShowFolderIcons"),false);
 	//MORPH END - Added by Commander, FolderIcons

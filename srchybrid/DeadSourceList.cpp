@@ -134,7 +134,6 @@ void CDeadSourceList::AddDeadSource(const CUpDownClient* pToAdd){
 			bDbgCheck = true;
 			m_mapDeadSources.SetAt(CDeadSource(pToAdd->GetUserHash()), BLOCKTIMEFW);
 		}
-// WebCache - just a comment - if pToAdd points to a proxy-client bDbgCheck will be false
 		//ASSERT( bDbgCheck );
 	}
 	if (::GetTickCount() - m_dwLastCleanUp  > CLEANUPTIME)

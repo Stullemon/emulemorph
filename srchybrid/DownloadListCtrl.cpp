@@ -168,11 +168,8 @@ void CDownloadListCtrl::Init()
 	// khaos::accuratetimerem+
 	InsertColumn(14, GetResString(IDS_REMAININGSIZE), LVCFMT_LEFT, 80);
 	// khaos::accuratetimerem-
-	//MORPH START - Added by SiRoB, WebCache 1.2f
-	InsertColumn(15, GetResString(IDS_WC_SOURCES) ,LVCFMT_LEFT, 100); //JP Webcache column
-	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	//MORPH START - Added by SiRoB, IP2Country
-	InsertColumn(16, GetResString(IDS_COUNTRY) ,LVCFMT_LEFT, 100);
+	InsertColumn(15, GetResString(IDS_COUNTRY) ,LVCFMT_LEFT, 100);
 	//MORPH END   - Added by SiRoB, IP2Country
 	SetAllIcons();
 	Localize();
@@ -269,9 +266,6 @@ void CDownloadListCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("NEXTEMF"))); //33
 	m_ImageList.Add(CTempIconLoader(_T("NEO"))); //34
 	//MORPH END   - Added by SiRoB, More client
-	//MORPH START - Added by SiRoB, WebCache 1.2f
-	m_ImageList.Add(CTempIconLoader(_T("WEBCACHE"))); // 35// jp webcacheclient icon
-	//MORPH END   - Added by SiRoB, WebCache 1.2
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();
 	m_overlayimages.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
@@ -365,16 +359,10 @@ void CDownloadListCtrl::Localize()
 	pHeaderCtrl->SetItem(14, &hdi);
 	// khaos::accuratetimerem-
 		
-	//MORPH START - Added by SiRoB, WebCache 1.2f
-	strRes = GetResString(IDS_WC_SOURCES);
-	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
-	pHeaderCtrl->SetItem(15, &hdi);
-	//MORPH END   - Added by SiRoB, WebCache 1.2f
-
 	//MORPH START - Added by SiRoB, IP2Country
 	strRes = GetResString(IDS_COUNTRY);
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
-	pHeaderCtrl->SetItem(16, &hdi);
+	pHeaderCtrl->SetItem(15, &hdi);
 	//MORPH END   - Added by SiRoB, IP2Country
 
 	CreateMenues();
@@ -906,39 +894,6 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 			}
 			break;
 		// khaos::accuratetimerem-
-		//MORPH START - Added by SiRoB, WebCache 1.2f
-		//JP Webcache START
-		//JP added code from Gnaddelwarz
-		case 15: //WebCache
-			{
-				UINT wcsc = lpPartFile->GetWebcacheSourceCount();
-				UINT wcsc_our = 0;
-				UINT wcsc_not_our = 0;
-				if(thePrefs.IsExtControlsEnabled())
-				{
-				wcsc_our = lpPartFile->GetWebcacheSourceOurProxyCount();
-				wcsc_not_our = lpPartFile->GetWebcacheSourceNotOurProxyCount();
-				}
-
-				UINT sc = lpPartFile->GetSourceCount() + lpPartFile->GetSrcA4AFCount();
-				double PercentWCClients;
-				if (sc !=0)
-					PercentWCClients = (double) 100 * wcsc / sc;
-				else
-					PercentWCClients = 0;
-                if(wcsc > 0 && !(lpPartFile->GetStatus() == PS_PAUSED && wcsc == 0) && lpPartFile->GetStatus() != PS_COMPLETE) {
-					if(thePrefs.IsExtControlsEnabled())
-						buffer.Format(_T("%i/%i/%i (%1.1f%%)"), wcsc, wcsc_our, wcsc_not_our, PercentWCClients);
-					else
-                    buffer.Format(_T("%i (%1.1f%%)"), wcsc, PercentWCClients);
-                } else {
-                    buffer = _T("");
-				}
-				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
-			}
-			break;
-		//JP Webcache END
-		//MORPH END   - Added by SiRoB, WebCache 1.2f
 		}
 	}
 }
@@ -1021,12 +976,6 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					m_ImageList.Draw(dc, 12, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
 				else if (lpUpDownClient->GetClientSoft() == SO_LPHANT)
 					m_ImageList.Draw(dc, 13, point2, ILD_NORMAL | INDEXTOOVERLAYMASK(uOvlImg));
-				//MORPH START - Added by SiRoB, WebCache 1.2f
-				// jp webcacheclient icon START 
-				else if (lpUpDownClient->GetClientSoft() == SO_WEBCACHE)
-					m_ImageList.Draw(dc, 35, point2, ILD_NORMAL | uOvlImg);
-				// jp webcacheclient icon END
-				//MORPH END   - Added by SiRoB, WebCache 1.2f
 				else if (lpUpDownClient->ExtProtocolAvailable())
 				//MORPH START - Modified by SiRoB, More client icon & Credit overlay icon
 				{
@@ -1060,7 +1009,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 				//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
 
 				//Morph Start - added by AndCycle, IP to Country
-				if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(16)){
+				if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(15)){
 					POINT point3= {cur_rec.left,cur_rec.top+1};
 					theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, lpUpDownClient->GetCountryFlagIndex(), point3, CSize(18,16), CPoint(0,0), ILD_NORMAL);
 					cur_rec.left+=20;
@@ -1484,29 +1433,8 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 			dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT | DT_RIGHT);
 			break;
 			//MORPH END   - Remaining Client Available Data
-		//MORPH START - Added by SiRoB, WebCache 1.2f
-		//JP Webcache START
-		case 15: {
-			if (lpUpDownClient->SupportsWebCache())
-			{
-				buffer = lpUpDownClient->GetWebCacheName();
-				if (lpUpDownClient->IsBehindOurWebCache())
-					dc->SetTextColor(RGB(0, 180, 0)); //if is behind our webcache display green
-				else if (buffer != "")
-					dc->SetTextColor(RGB(255, 0, 0)); // if webcache info is there but not our own set red
-				else
-					buffer = GetResString(IDS_WEBCACHE_NOPROXY);	// if no webcache info colour is black
-			}
-			else
-				buffer = "";
-			dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
- 			dc->SetTextColor(RGB(0, 0, 0));
-			break;
-		}
-		//JP Webcache END
-		//MORPH END   - Added by SiRoB, WebCache 1.2f
 		//MORPH START - Added by SiRoB, IP2Country
-		case 16: {
+		case 15: {
 			RECT cur_rec = *lpRect;
 			if(theApp.ip2country->ShowCountryFlag()){
 				POINT point3= {cur_rec.left,cur_rec.top+1};
@@ -2023,7 +1951,17 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			m_FileMenu.EnableMenuItem(MP_FORCE,iFileNotSeenCompleteSource > 0 ? MF_GRAYED : MF_ENABLED);
 			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 
-			m_FileMenu.EnableMenuItem(MP_FOLLOW_THE_MAJORITY, iFileFollowTheMajority > 0 ? MF_GRAYED : MF_ENABLED); // EastShare       - FollowTheMajority by AndCycle
+			//EastShare Start - FollowTheMajority by AndCycle
+			m_FileMenu.EnableMenuItem(MP_FOLLOW_THE_MAJORITY,MF_ENABLED); // just in case
+			if(iSelectedItems == 1)
+			    m_FileMenu.CheckMenuItem(MP_FOLLOW_THE_MAJORITY, iFileFollowTheMajority == 1 ? MF_CHECKED : MF_UNCHECKED);
+			else if(iFileFollowTheMajority == 0)
+			    m_FileMenu.CheckMenuItem(MP_FOLLOW_THE_MAJORITY, MF_UNCHECKED);
+			else if(iFileFollowTheMajority == iSelectedItems)
+			    m_FileMenu.CheckMenuItem(MP_FOLLOW_THE_MAJORITY, MF_CHECKED);
+			else //if(iSelectedItems > 1 && iFileFollowTheMajority != iSelectedItems)
+			    m_FileMenu.ModifyMenu(MP_FOLLOW_THE_MAJORITY, MF_UNCHECKED | MF_STRING, MP_FOLLOW_THE_MAJORITY, GetResString(IDS_INVERT) + _T(" ") + GetResString(IDS_FOLLOW_THE_MAJORITY));
+			//EastShare End   - FollowTheMajority by AndCycle
 
 			bool bOpenEnabled = (iSelectedItems == 1 && iFilesToOpen == 1);
 			m_FileMenu.EnableMenuItem(MP_OPEN, bOpenEnabled ? MF_ENABLED : MF_GRAYED);
@@ -2234,6 +2172,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 		m_FileMenu.EnableMenuItem(MP_SR13_ImportParts,MF_GRAYED);
 		//m_FileMenu.EnableMenuItem(MP_SR13_InitiateRehash,MF_GRAYED);
 		//MORPH END   - Added by SiRoB, Import Parts [SR13]
+		m_FileMenu.EnableMenuItem(MP_FOLLOW_THE_MAJORITY,MF_GRAYED); //EastShare - FollowTheMajority by AndCycle
 		m_FileMenu.EnableMenuItem(MP_METINFO, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab,total) > 0 ? MF_ENABLED : MF_GRAYED);
@@ -2544,7 +2483,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					SetRedraw(false);
 					while(!selectedList.IsEmpty()) {
 						CPartFile* partfile = selectedList.GetHead();
-						partfile->SetFollowTheMajority(true);
+						partfile->InvertFollowTheMajority();
 						selectedList.RemoveHead();
 					}
 					SetRedraw(true);
@@ -3271,12 +3210,6 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 				comp=0;
 			break;
 		// khaos::categorymod-
-		//MORPH START - Added by SiRoB, WebCache 1.2f
-		//JP Webcache
-		case 15:
-			comp=file1->GetWebcacheSourceCount() - file2->GetWebcacheSourceCount();
-			break;
-		//MORPH END   - Added by SiRoB, WebCache 1.2f
 		// SLUGFILLER: DLsortFix
 		case 99:	// met file name asc, only available as last-resort sort to make sure no two files are equal
 			comp=CompareLocaleStringNoCase(file1->GetFullName(), file2->GetFullName());
@@ -3470,17 +3403,8 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 	case 14: //Remain Size
 		return CompareUnsigned64(client1->GetRemainingAvailableData(pfile), client2->GetRemainingAvailableData(pfile));
 	//MORPH END   - Remaining Available Data
-	//MORPH START - Added by SiRoB, WebCache 1.2f
-	//JP Webcache START 
-	case 15:
-		if (client1->SupportsWebCache() && client2->SupportsWebCache() )
-		return CompareLocaleStringNoCase(client1->GetWebCacheName(),client2->GetWebCacheName());
-		else
-			return client1->SupportsWebCache() - client2->SupportsWebCache();
-	//JP Webcache END
-	//MORPH END   - Added by SiRoB, WebCache 1.2f
 	// Commander - Added: IP2Country column - Start
-    case 16:
+    case 15:
 		if(client1->GetCountryName(true) && client2->GetCountryName(true))
 			return CompareLocaleStringNoCase(client1->GetCountryName(true), client2->GetCountryName(true));
 		else if(client1->GetCountryName(true))

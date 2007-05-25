@@ -194,8 +194,7 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 		if (cur_src->GetDownloadState() != DS_ONQUEUE &&
 			cur_src->GetDownloadState() != DS_DOWNLOADING &&
 			cur_src->GetDownloadState() != DS_NONEEDEDPARTS ||
-			cur_src->IsEd2kClient() == false ||
-			cur_src->IsProxy())
+			cur_src->IsEd2kClient() == false)
 			continue;
 		if (srcstosave.IsEmpty()) {
 			sourcedata = new CSourceData(cur_src, CalcExpiration(EXPIREIN));

@@ -27,13 +27,13 @@
 #include "Preferences.h"
 #include "emuleDlg.h"
 #include "Log.h"
-#include "WebCache/WebCacheSocket.h" // yonatan http // MORPH - Added by Commander, WebCache 1.2e
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
 
 namespace {
 	inline void EMTrace(char* fmt, ...) {
@@ -408,25 +408,6 @@ void CEMSocket::OnReceive(int nErrorCode){
 	char *rptr = GlobalReadBuffer; // floating index initialized with begin of buffer
 	const char *rend = GlobalReadBuffer + ret; // end of buffer
 
-	// MORPH START - Added by Commander, WebCache 1.2e
-	if( *(uint32*)GlobalReadBuffer == ' TEG' ) {
-		CWebCacheUpSocket* WCSocket;
-		if( !IsKindOf( RUNTIME_CLASS( CWebCacheUpSocket ) ) ) { // yonatan http - WC-TODO: make sure this is a new, incoming connection?
-			// Turn this into a CWebCacheUpSocket and attach to client.
-			SOCKET s = Detach(); // Detach socket from this (CClientReqSocket)
-			WCSocket = new CWebCacheUpSocket(); // Create a new WebCache socket
-			WCSocket->Attach( s, FD_WRITE|FD_READ|FD_CLOSE );
-			if( WCSocket->ProcessFirstHttpGet( GlobalReadBuffer, ret ) ) {
-				WCSocket->SetConnected(); //MORPH - WebCache Fix, set socket connected
-				delete this;
-				return;
-			}
-		} else {
-			static_cast<CWebCacheUpSocket*>(this)->ProcessHttpPacket( (BYTE*)GlobalReadBuffer, ret );
-		}
-	}
-	// MORPH END - Added by Commander, WebCache 1.2e
-
 	// Loop, processing packets until we run out of them
 	while ((rend - rptr >= PACKET_HEADER_SIZE) || ((pendingPacket != NULL) && (rend - rptr > 0)))
 	{
@@ -460,11 +441,6 @@ void CEMSocket::OnReceive(int nErrorCode){
 				case OP_EDONKEYPROT:
 				case OP_PACKEDPROT:
 				case OP_EMULEPROT:
-// MORPH START - Added by SiRoB, WebCache 1.2f
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-				case OP_WEBCACHEPACKEDPROT:
-				case OP_WEBCACHEPROT: // yonatan - webcache protocol packets
-// MORPH END   - Added by SiRoB, WebCache 1.2f
 					break;
 				default:
 					EMTrace("CEMSocket::OnReceive ERROR Wrong header");
@@ -527,19 +503,17 @@ void CEMSocket::OnReceive(int nErrorCode){
 }
 
 void CEMSocket::SetDownloadLimit(uint32 limit){	
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-	// JP added netfinity download throttler
 	// MOD BEGIN netfinity: Accumulate download limits
+/*(original code)
+	downloadLimit = limit;
+	downloadLimitEnable = true;	
+*/
 	downloadLimit += limit; 
 	downloadLimitEnable = true;	
 	if(downloadLimit > 20 * limit && downloadLimit > 4500) // Allow a maximum of 2.0 sec to accumulate or 3 * MTU
 		downloadLimit = max(20 * limit, 4500); 
 	// MOD END netfinity
 
-/*(original code)
-//	downloadLimit = limit;
-//	downloadLimitEnable = true;	
-*/
 	
 
 	// CPU load improvement

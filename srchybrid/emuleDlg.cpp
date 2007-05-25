@@ -664,11 +664,6 @@ BOOL CemuleDlg::OnInitDialog()
 	{
 		// temporary disable the 'startup minimized' option, otherwise no window will be shown at all
 		m_bStartMinimized = false;
-
-		//MORPH START - Added by SiRoB, WebCache 1.2f
-		thePrefs.detectWebcacheOnStart = true; //jp detect webcache on startup
-		//MORPH END   - Added by SiRoB, WebCache 1.2f
-
 		DestroySplash();
 
 		// SLUGFILLER: SafeHash remove - wait until emule is ready before opening the wizard
