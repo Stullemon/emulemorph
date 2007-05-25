@@ -730,6 +730,11 @@ BOOL CPPgWiz1Server::OnSetActive(){
 		if (*m_pbUDPDisabled){
 			CheckDlgButton(IDC_SHOWOVERHEAD, 0);
 			GetDlgItem(IDC_WIZARD_NETWORK_KADEMLIA)->EnableWindow(FALSE);
+			// MORPH START
+			m_iReqObfus = 0;
+			CheckDlgButton(IDC_WIZARDREQUIREOBFUSCATED,BST_UNCHECKED); // if udp is disabled obfuscated server is not a good default because crptping will fail.
+			// MORPH END
+		
 		}
 		else{
 			CheckDlgButton(IDC_SHOWOVERHEAD, m_iKademlia);
