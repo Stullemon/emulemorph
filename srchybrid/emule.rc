@@ -1334,9 +1334,9 @@ BEGIN
                     SS_NOPREFIX | WS_GROUP,84,25,145,8
     CONTROL         "Static",IDC_DID,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,231,25,79,8
-    LTEXT           "Software:",IDC_STATIC33,19,36,304,8,0,WS_EX_RIGHT
+    LTEXT           "Software:",IDC_STATIC33,19,36,62,8,0,WS_EX_RIGHT
     CONTROL         "Static",IDC_DSOFT,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,84,36,71,8
+                    SS_NOPREFIX | WS_GROUP,84,36,219,8
     LTEXT           "Server IP:",IDC_STATIC35,19,47,62,8,0,WS_EX_RIGHT
     LTEXT           "Static",IDC_DSIP,84,47,61,8,SS_NOPREFIX
     RTEXT           "Server Name:",IDC_STATIC38,147,47,68,8
@@ -1397,7 +1397,7 @@ BEGIN
     LTEXT           "Static",IDC_OBFUSCATION_STAT,219,71,94,8,SS_ENDELLIPSIS
     LTEXT           "Country:",IDC_DLOC2,19,69,62,8,0,WS_EX_RIGHT
     CONTROL         "Static",IDC_DLOC,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,84,69,106,8
+                    SS_NOPREFIX | WS_GROUP,84,69,74,8
     ICON            "",IDC_COUNTRYFLAG,84,69,20,20,NOT WS_VISIBLE
 END
 
