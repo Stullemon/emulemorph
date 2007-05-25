@@ -165,6 +165,7 @@ public:
 	static UINT  RemoveInstance(LPVOID /*pParam*/ );
 private:
 	bool UpnpAcceptsPorts; // Accepts ports, even when upnp is not enabled.  So not restart is required on enableing [leuk_he]
+	static CString StatusString; // string to show in display (for errors) 
 	typedef enum{
 		UPNPNAT_ACTION_ADD,
 		UPNPNAT_ACTION_DELETE

@@ -51,6 +51,7 @@ CCriticalSection						CUPnP_IGDControlPoint::m_ActionThreadCS;
 bool									CUPnP_IGDControlPoint::m_bStopAtFirstService;
 bool									CUPnP_IGDControlPoint::m_bClearOnClose;
 CEvent *								CUPnP_IGDControlPoint::InitializingEvent;
+CString                                 CUPnP_IGDControlPoint::StatusString;
 
 CUPnP_IGDControlPoint::CUPnP_IGDControlPoint(void)
 {
@@ -131,12 +132,15 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 	// Init UPnP
 	int rc;
 	//MORPH START leuk_he upnp bindaddr
+	StatusString=L"Starting";
     LPCSTR HostIp=NULL;
-	if (   (thePrefs.GetBindAddrA()!=NULL) 
+	if (   (thePrefs.GetBindAddrA()!=NULL)
 		&& IsLANIP((char *) thePrefs.GetBindAddrA()) )
 		HostIp=thePrefs.GetBindAddrA();
 	else if  ( thePrefs.GetUpnpBindAddr()!= 0 )
 		HostIp=strdup(ipstrA(htonl(thePrefs.GetUpnpBindAddr())));
+	 if ((HostIp!= NULL) && (inet_addr(HostIp)==INADDR_NONE))
+		 HostIp=NULL; // prevent failing if in prev version there was no valid interface. 
 	rc = UpnpInit( HostIp, thePrefs.GetUPnPPort() );
     /*
 	rc = UpnpInit( NULL, thePrefs.GetUPnPPort() );
@@ -144,6 +148,7 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 	// MORPH END leuk_he upnp bindaddr 
 	if (UPNP_E_SUCCESS != rc) {
 		AddLogLine(false, GetResString(IDS_UPNP_FAILEDINIT), thePrefs.GetUPnPPort(), GetErrDescription(rc) );
+		StatusString.Format(GetResString(IDS_UPNP_FAILEDINIT), thePrefs.GetUPnPPort(), GetErrDescription(rc) );
 		UpnpFinish();
 		thePrefs.SetUpnpDetect(UPNP_NOT_DETECTED);//leuk_he autodetect upnp in wizard
 		
@@ -153,6 +158,7 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 	// Check if you are in a LAN or directly connected to Internet
 	if(!IsLANIP(UpnpGetServerIpAddress())){
 		AddLogLine(false, GetResString(IDS_UPNP_PUBLICIP));
+		StatusString=GetResString(IDS_UPNP_PUBLICIP);
 		UpnpFinish();
 		thePrefs.SetUpnpDetect(UPNP_NOT_NEEDED)	;//leuk_he autodetect upnp in wizard
 		UpnpAcceptsPorts=false; 
@@ -163,6 +169,7 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 	rc = UpnpRegisterClient( (Upnp_FunPtr)IGD_Callback, &m_ctrlPoint, &m_ctrlPoint );
 	if (UPNP_E_SUCCESS != rc) {
 		AddLogLine(false, GetResString(IDS_UPNP_FAILEDREGISTER), GetErrDescription(rc) );
+		StatusString.Format(GetResString(IDS_UPNP_FAILEDREGISTER), GetErrDescription(rc));
 		UpnpFinish();
 		thePrefs.SetUpnpDetect(UPNP_NOT_DETECTED);//leuk_he autodetect upnp in wizard
 		return false;
@@ -215,7 +222,7 @@ if(thePrefs.GetUPnPVerboseLog())
 	AddDebugLogLine(false, _T("Waiting short for upnp to complete registration.") );
 
 if (InitializingEvent) 
-         return (bool)InitializingEvent->Lock((MINIMUM_DELAY*1000)+1) ; // 10 secs...  (should be UPNPTIMEOUT, btu 40 seconds is too long....)
+       return (InitializingEvent->Lock((MINIMUM_DELAY*1000)+1)==S_OK) ; // 10 secs...  (should be UPNPTIMEOUT, btu 40 seconds is too long....)
 
 return 0;
 }
@@ -273,6 +280,7 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 		}
 		case UPNP_DISCOVERY_SEARCH_TIMEOUT:
 			if (thePrefs.GetUpnpDetect() != UPNP_DETECTED) {	  	 //leuk_he autodetect upnp in wizard
+					StatusString=L"DeviceNotAutodetect";
 				 	thePrefs.SetUpnpDetect(UPNP_NOT_DETECTED);//leuk_he autodetect upnp in wizard
 			}
 			InitializingEvent->SetEvent();
@@ -1538,7 +1546,10 @@ void CUPnP_IGDControlPoint::DeleteAllPortMappingsOnClose(){
 int  CUPnP_IGDControlPoint::GetStatusString(CString & displaystring,bool verbose)
 {
 	if(!m_bInit){
-		displaystring=GetResString(IDS_UPNP_INFO_NONEED);
+		if	(StatusString.IsEmpty()	)
+    		displaystring=GetResString(IDS_UPNP_INFO_NONEED);
+		else 
+			displaystring=StatusString;
 		return (1);
 	}
 
