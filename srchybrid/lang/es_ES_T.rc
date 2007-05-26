@@ -165,7 +165,7 @@ BEGIN
     IDS_ERR_SAVESERVERMET   "¡Error al guardar server.met!"
     IDS_PASSIVE             "Pasivo"
     IDS_MAIN_BTN_CANCEL     "&Cancelar"
-    IDS_AVAIL               "Partes: %d , disponibles: %d (%.1f%%)\n\n"
+    IDS_AVAIL               "Partes: %u , disponibles: %u (%.1f%%)\n\n"
     IDS_TYPE                "Tipo"
     IDS_FILEID              "Identificador de archivo"
     IDS_FILE                "Archivo"
@@ -380,6 +380,18 @@ BEGIN
     IDS_ERR_FILECOMPLETIONTHREAD "Error al completar el archivo"
     IDS_FILEBUFFERSIZE      "Tamaño del buffer por archivo"
     IDS_QUEUESIZE           "Tamaño cola de espera"
+    IDS_ERR_OPEN            "Error al abrir el archivo pedido"
+    IDS_ERR_CLIENTERRORED   "El cliente '%s' caus un error al empaquetar (%s) - desconectando cliente"
+    IDS_ERR_REQ_FNF         "No se encontr el archivo pedido"
+    IDS_DESC                "Descripcin: %s"
+    IDS_PORT                "Puerto"
+    IDS_ERR_NOVALIDSERVERSFOUND 
+                            "No se encontraron servidores vlidos a los que conectarse en la lista de servidores"
+    IDS_CONNECTEDTOREQ      "Conectado a %s (%s:%u), enviando peticin de login"
+    IDS_ERR_FATAL           "Error fatal al intentar la conexin. La conexin a Internet podra estar desactivada"
+    IDS_ERR_LOSTC           "Conexin perdida con %s (%s:%i)"
+    IDS_ERR_DEAD            "%s (%s:%i) parece cado"
+    IDS_ERR_FULL            "%s (%s:%i) parece estar lleno"
 END
 
 STRINGTABLE 
@@ -420,22 +432,6 @@ BEGIN
     IDS_SECURITY            "Seguridad"
     IDS_IPFILTERLOADED      "%i direcciones IP filtradas"
     IDS_IPFILTER            "Filtrar IP"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_ERR_OPEN            "Error al abrir el archivo pedido"
-    IDS_ERR_CLIENTERRORED   "El cliente '%s' causó un error al empaquetar (%s) - desconectando cliente"
-    IDS_ERR_REQ_FNF         "No se encontró el archivo pedido"
-    IDS_DESC                "Descripción: %s"
-    IDS_PORT                "Puerto"
-    IDS_ERR_NOVALIDSERVERSFOUND 
-                            "No se encontraron servidores válidos a los que conectarse en la lista de servidores"
-    IDS_CONNECTEDTOREQ      "Conectado a %s (%s:%i), enviando petición de login"
-    IDS_ERR_FATAL           "Error fatal al intentar la conexión. La conexión a Internet podría estar desactivada"
-    IDS_ERR_LOSTC           "Conexión perdida con %s (%s:%i)"
-    IDS_ERR_DEAD            "%s (%s:%i) parece caído"
-    IDS_ERR_FULL            "%s (%s:%i) parece estar lleno"
     IDS_CONNECTEDTO         "Conexión establecida con: %s"
     IDS_DL_PREVIEW          "Pre&visualizar"
     IDS_VIEWQUEUE           "Mostrar cola"
@@ -964,28 +960,29 @@ BEGIN
     IDS_PW_UAP              "Añadir nuevos archivos compartidos con auto prioridad"
     IDS_MAXCLIENT           "Número máximo de usuarios"
     IDS_PW_TWEAK            "Opciones adicionales"
-    IDS_TWEAKS_WARNING      "Advertencia:  No cambies estos parámetros a menos que sepas lo que estás haciendo. No hagas el karmazen que puedes empeorar las cosas.\neMule funciona bien sin modificar estos parámetros."
+    IDS_TWEAKS_WARNING      "Advertencia:  No cambies estos parmetros a menos que sepas lo que ests haciendo. De lo contrario puedes empeorar las cosas.\neMule funciona bien sin modificar estos parmetros."
+    IDS_ADDAFRIEND          "Aadir Amigo"
+    IDS_PAF_REQINFO         "Informacin requerida"
+    IDS_PAF_MOREINFO        "Informacin adicional"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ADDAFRIEND          "Añadir Amigo"
-    IDS_PAF_REQINFO         "Información requerida"
-    IDS_PAF_MOREINFO        "Información adicional"
+    
     IDS_ERR_NOVALIDFRIENDINFO 
-                            "¡Tienes que introducir una IP y unos puertos válidos!"
-    IDS_ADD                 "Añadir"
+                            "Tienes que introducir una IP y unos puertos vlidos!"
+    IDS_ADD                 "Aadir"
     IDS_RECOVERED_PARTMET   "Recuperado archivo part.met de: %s"
-    IDS_CMT_QUEST           "Comentar este archivo (El texto se mostrará a todos los usuarios)"
-    IDS_CMT_AIDE            "Para las películas puedes poner su duración, su argumento, el idioma... y, si es una falsificación (fake), puedes informar a los demás usuarios de eMule... "
+    IDS_CMT_QUEST           "Comentar este archivo (El texto se mostrar a todos los usuarios)"
+    IDS_CMT_AIDE            "Para las pelculas puedes poner su duracin, su argumento, el idioma... y, si es una falsificacin (fake), puedes informar a los dems usuarios de eMule... "
     IDS_CMT_ADD             "Cambiar el com&entario de este archivo..."
     IDS_CMT_NONE            "Sin comentarios"
     IDS_CMT_READ            "Comentario de archivo:"
     IDS_CMT_SHOWALL         "Mostrar come&ntarios"
     IDS_CMT_READALL         "Todos los comentarios"
-    IDS_CMT_RATEQUEST       "Calificación de archivo"
-    IDS_CMT_RATEHELP        "Cambiar la calificación del archivo o advertir a otros usuarios de que no es válido"
-    IDS_CMT_FAKE            "No válido / Corrupto / Falsificación (fake)"
+    IDS_CMT_RATEQUEST       "Calificacin de archivo"
+    IDS_CMT_RATEHELP        "Cambiar la calificacin del archivo o advertir a otros usuarios de que no es vlido"
+    IDS_CMT_FAKE            "No vlido / Corrupto / Falsificacin (fake)"
 END
 
 STRINGTABLE 
@@ -1002,15 +999,11 @@ BEGIN
                             "Ignorar mensajes enviar enlace de eMule"
     IDS_CHECK4UPDATE        "Comprobar si hay una nueva versión"
     IDS_STARTUP             "Al iniciar"
-    IDS_NEWVERSIONAVL       "¡Existe una nueva versión de eMule. Comprueba la página web del proyecto para más información."
-    IDS_NEWVERSIONAVLPOPUP  "¡Existe una nueva versión de eMule. ¡Pincha aquí para ver las novedades de esta versión!"
-    IDS_NEWVERSIONFAILED    "No se puede comprobar si hay una nueva versión."
-    IDS_CB_TBN_ONNEWVERSION "Se ha detectado una nueva versión de eMule"
-    IDS_NONEWERVERSION      "No se ha detectado una nueva versión de eMule."
-END
-
-STRINGTABLE 
-BEGIN
+    IDS_NEWVERSIONAVL       "Existe una nueva versin de eMule. Comprueba la pgina web del proyecto para ms informacin."
+    IDS_NEWVERSIONAVLPOPUP  "Existe una nueva versin de eMule. Pincha aqu para ver las novedades de esta versin!"
+    IDS_NEWVERSIONFAILED    "No se puede comprobar si hay una nueva versin."
+    IDS_CB_TBN_ONNEWVERSION "Se ha detectado una nueva versin de eMule"
+    IDS_NONEWERVERSION      "No se ha detectado una nueva versin de eMule."
     IDS_EDIT                "Editar..."
     IDS_FILTERLEVEL         "Nivel de filtrado"
     IDS_FILTERSERVERBYIPFILTER 
@@ -1033,13 +1026,17 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DISABLEQUEUELIST    "Desactivar lista cola de espera"
-    IDS_USECREDITSYSTEM     "Usar Sistema de créditos (Se premia a los que más suben)"
-    IDS_FIRSTAUTODOWN       "Activa esta opción si quieres que eMule controle las prioridades de descarga.\n\nSi la activas, eMule se asegura que las descargas con muchas fuentes no interfieran con las que tienen pocas fuentes.\n\nEsta opción sólo afectará a futuras descargas. (Por defecto: Activado)"
-    IDS_FIRSTAUTOUP         "Activa esta opción si quieres que eMule controle las prioridades de subida.\n\nSi la activas, permites a eMule subir mejor los archivos con pocas fuentes respecto a los de muchas fuentes. Si lo desactivas eMule subirá mejor los archivos con muchas fuentes respecto a archivos que tienen pocas fuentes.\n\nEsta opción sólo afectará a futuros archivos compartidos. (Por defecto: Activado)"
-    IDS_FIRSTFULLCHUNK      "Activa esta opción si quieres subir trozos completos.\n\nEl uso de trozos completos proporciona a un cliente más posibilidades de completar el trozo. Si lo desactivas la cola de espera rotará más rápidamente. Si te dedicas a lanzar archivos nuevos, quizás quieras activarlo. (Por defecto: Activado)"
-    IDS_FIRSTSAFECON        "Activa esta opción si quieres que eMule se conecte de modo Seguro.\n\nSi lo desactivas, eMule se conectará a los Servidores un poco más rápido, pero tienes más posibilidades de obtener falsas ID-bajas. (Por defecto: Desactivado)"
-    IDS_FIRSTAUTOCON        "Activa esta opción si quieres que eMule se autoconecte al iniciarse. (Desactivado por defecto)"
-    IDS_FIRSTCOMPLETE       "Has completado por primera vez el asistente.\r\rTodas estas y otras configuraciones pueden ser cambiadas en el icono de Preferencias. ¡Para más información acude a la ayuda pulsando F1 dentro de eMule!"
+    IDS_USECREDITSYSTEM     "Usar Sistema de crditos (Se premia a los que ms suben)"
+    IDS_FIRSTAUTODOWN       "Activa esta opcin si quieres que eMule controle las prioridades de descarga.\n\nSi la activas, eMule se asegura que las descargas con muchas fuentes no interfieran con las que tienen pocas fuentes. Esta opcin slo afectar a futuras descargas. (Por defecto: Activado)"
+    IDS_FIRSTAUTOUP         "Activa esta opcin si quieres que eMule controle las prioridades de subida.\n\nSi la activas, permites a eMule subir mejor los archivos con pocas fuentes respecto a los de muchas fuentes. Si lo desactivas eMule subir mejor los archivos con muchas fuentes respecto a archivos que tienen pocas fuentes. Esta opcin slo afectar a futuros archivos compartidos. (Por defecto: Activado)"
+    IDS_FIRSTFULLCHUNK      "Activa esta opcin si quieres subir trozos completos.\n\nEl uso de trozos completos proporciona a un cliente ms posibilidades de completar el trozo. Si lo desactivas la cola de espera rotar ms rpidamente. Si te dedicas a lanzar archivos nuevos, quizs quieras activarlo. (Por defecto: Activado)"
+    IDS_FIRSTSAFECON        "Activa esta opcin si quieres que eMule se conecte de modo Seguro.\n\nSi lo desactivas, eMule se conectar a los Servidores un poco ms rpido, pero puedes obtener ms conexiones con una falsa ID baja. (Por defecto: Desactivado)"
+    IDS_FIRSTAUTOCON        "Activa esta opcin si quieres que eMule se conecte al inicio. (Desactivado por defecto)"
+    IDS_FIRSTCOMPLETE       "Has completado por primera vez el asistente.\r\rTodas estas y otras configuraciones pueden ser cambiadas en el icono de Preferencias. Para ms informacin acude a la ayuda pulsando F1 dentro de eMule!"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_ENTERUSERNAME       "Por favor introduce tu nombre de usuario:"
     IDS_STATIC_CPUMEM       "Conservar uso de CPU y Memoria"
     IDS_KAD_SEARCH_KEYWORD_TOO_SHORT 
@@ -1738,8 +1735,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_STATS_MINORCLIENTS  "Menor"
-    IDS_AICH_SYNCTOTAL      "Encontrados %i archivos sin un conjunto de hashes AICH válido, calculando un nuevo hash para ellos"
-    IDS_AICH_WARNUSER       "Desde la versión 0.44a eMule usa un hash de archivo adicional que permite reducir enormemente la pérdida de datos cuando se detecta una corrupción. Si se está actualizando desde una versión anterior, eMule necesita recalcular un nuevo hash de archivo para todos los archivos compartidos. Esto puede llevar un tiempo pero sólo se hace una vez."
+    IDS_AICH_SYNCTOTAL      "Encontrados %i archivos sin un conjunto de hashes AICH vlido, calculando un nuevo hash para ellos"
+    IDS_AICH_CALCFILE       "Calculando Hash AICH para el archivo %s"
+    IDS_AICH_WARNUSER       "Desde la versin 0.44a eMule usa un hash de archivo adicional que permite reducir enormemente la prdida de datos cuando se detecta una corrupcin. Si se est actualizando desde una versin anterior, eMule necesita recalcular un nuevo hash de archivo para todos los archivos compartidos. Esto puede llevar un tiempo pero slo se hace una vez."
     IDS_AICH_WORKED         "AICH ha recuperado %s de %s de la parte %u de %s"
     IDS_SOURCECLIENT        "Fuente Cliente"
     IDS_USERSIP             "IP Usuario"
@@ -1873,6 +1871,39 @@ BEGIN
     IDS_US_STALLEDW4BR      "¡Pausado! Esperando un bloque que se ha solicitado."
     IDS_US_STALLEDREADINGFDISK "¡Pausado! Leyendo disco."
     IDS_SERVERFEATURE_INTTYPETAGS "Etiquetas de tipo entero"
+    IDS_FILLGRAPHS          "Dibujar grficos con relleno"
+    IDS_PARAMETER           "Parmetro"
+    IDS_TEST                "Prueba"
+END
+
+
+STRINGTABLE 
+BEGIN
+    IDS_UPNPSTART           "Utilizar UPnP para redirigir los puertos"
+    IDS_UPNPSETUP           "Intentando redirigir los puertos mediante UPnP"
+    IDS_UPNPFAILED          "No se han podido redirigir los puertos mediante UPnP, por favor, abre estos puertos manualmente si es necesario!"
+    IDS_UPNPSUCCESS         "Se han redirigido correctamente los puertos %u (TCP) y %u (UDP) mediante UPnP"
+    IDS_FO_PREFBUTTON_NEW   "Abrir los puertos en el cortafuegos de WinXP SP1"
+    IDS_UPNP_NOSERVICE      "El servicio Host de Dispositivo Plug and Play universal no est ejecutndose, no se llevar a cabo la configuracin de UPnP"
+    IDS_DELAYEDBYUPNP       "La conexin a la red an no se ha realizado porque UPnP todava est redirigiendo los puertos"
+    IDS_DELAYEDBYUPNP2      "Por favor, espera unos segundos, eMule se conectar a la red cuando UPnP termine."
+    IDS_UPNP                "UPnP"
+    IDS_UPNPCLOSEONEXIT     "Eliminar las redirecciones de puertos de UPnP al salir"
+    IDS_UPNPSKIPWANIP       "No configurar la IP de la WAN"
+    IDS_UPNPSKIPWANPPP      "No configurar el PPP de la WAN"
+    IDS_SHAREEMULELABEL     "Compartiendo eMule con otros usuarios"
+    IDS_SHAREEMULEMULTI     "Cada usuario tiene su propia configuracin y descargas"
+    IDS_SHAREEMULEPUBLIC    "Todos tienen la misma configuracin y descargas"
+    IDS_SHAREEMULEOLD       "Guardar la configuracin y las descargas en el directorio del programa"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SHAREEMULEWARNING   "Cambiando esta opcin se permitir a eMule utilizar otra configuracin diferente a la actual, que ser ignorada y las descargas en curso dejarn de ser visibles. Podrs volver a tu configuracin actual cambiando nuevamente esta opcin.\n\nSer necesario reiniciar eMule para que los cambios sean efectivos."
+    IDS_SPAM                "Spam"
+    IDS_MARKSPAM            "Marcar como Spam"
+    IDS_MARKNOTSPAM         "Marcar como No Spam"
+    IDS_SEARCHSPAMFILTER    "Activar Filtro de Spam para los resultados de las bsquedas"
 END
 
 STRINGTABLE 
@@ -1905,17 +1936,6 @@ BEGIN
                             "El archivo es más pequeño que el mínimo de un bloque que el AICH pueda recuperar - no tiene sentido importarle esa información."
     IDS_SR13_IMPORTPARTS_IMPORTFINISH 
                             "Importación finalizada. %i partes fueron importadas a %s."
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_PW_WEBCACHE         "WebCaché"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WrongPortforWebcache 
-                            "Descarga del WebCaché desactivado: Estas usando un puerto TCP que no suele ser cacheado por los servidores-proxy de las ISP. ¡Por favor cambia tu puerto TCP a  21, 70, 80, 210, 443 563  o 1025-65535 para poder activar las descargas por WebCaché!"
 END
 
 STRINGTABLE 
@@ -2457,7 +2477,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP                "Universal Plug and Play (UPnP)"
     IDS_UPNP_INIT           "UPnP: Iniciado en %s:%d, buscando dispositivos..."
     IDS_UPNP_FAILEDINIT     "UPnP: No se consiguió iniciar UPnP en el puerto %d [%s]"
     IDS_UPNP_PUBLICIP       "UPnP: Tu IP es una IP pública, el UPnP será desactivado"
@@ -2545,9 +2564,6 @@ BEGIN
     IDS_UPDATEIPCURL        "Actualizar"
     IDS_CLIENTQUEUEPROGRESSBAR 
                             "Ver progreso de la lista de espera del usuario"
-    IDS_WEBCACHE_NOSUPPORT  "Sin soporte"
-    IDS_STATS_SUCCESSFULLWC "Descargas-WebCaché/Peticiones-WebCaché con éxito:"
-    IDS_STATS_FAILEDWC      "Descargas-WebCaché/Peticiones-WebCaché fallados:"
 END
 
 STRINGTABLE 
@@ -2593,40 +2609,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_WEBCACHE_ISP        "Configuración del Proxyserver del ISP"
-    IDS_WC_PORT             "Puerto"
-    IDS_WC_ADDRESS          "Dirección"
-    IDS_WC_CONTROLS         "Controles WebCaché"
-    IDS_WC_ENABLE           "Activar Descargas con WebCaché"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WC_WRONGPORT        "Estas usando un puerto TCP que no suele ser cacheado por los servidores-proxy de las ISP. ¡Por favor cambia tu puerto TCP a  21, 70, 80, 210, 443 563  o 1025-65535 para poder activar las descargas por WebCaché!"
-    IDS_WC_AUTO             "Autodetectar WebCaché"
-    IDS_WC_NRBLOCKS         "Bloques a descargar antes de reconectarse al proxy (podría solucionar desconexiones)"
-    IDS_WC_BLOCK            "BloqsDe180k"
-    IDS_WC_TIMEOUT          "Espera extralarga para conexiones por WebCaché"
-    IDS_WC_LOCAL            "Este WebCaché NO cachea tráfico dentro del mismo ISP"
-    IDS_WC_SUBMIT_EMAIL     "Enviar esta configuración vía email"
-    IDS_WC_LINK             "Link: "
-    IDS_WC_PERSISTENT       "Conexiones persistentes para descargas por proxy"
-    IDS_WC_ADVANCED         "Controles Avanzados"
-    IDS_WC_TEST             "Probar Configuración WebCaché. Podría tardar más de 30seg"
-    IDS_WC_HIDE_ADV         "Esconder Avanzados"
-    IDS_WC_SUBMIT_WEB       "Enviar información sobre el WebCaché vía formulario-web"
-    IDS_WC_SOURCES          "Fuentes WebCaché"
-    IDS_WC_UPDATESETTING    "Actualizar Configuración WebCaché Automáticamente"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_LOG_WCEVENTS        "Logear Eventos WebCaché"
-    IDS_LOG_IACH            "Logear Eventos IACH"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_IMPORTPARTS         "Importar trozos al arhivo..."
     IDS_IMPORTPARTS_STOP    "Parar importación de trozos al archivo"
 END
@@ -2645,20 +2627,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRC_SUFFIX          "Sufijo a añadir al final del nombre de archivo después del CRC32:"
-    IDS_COUNTWCSESSIONSTATS "Contar Sesiones-WebCaché en estadísticas de sesión"
-    IDS_WEBCACHE_NOPROXY    "Falta poner el proxy"
-    IDS_CD_WCSUCCFAIL       "Éxitos/Peticiones:"
-    IDS_CD_WCTRUSTSENDER    "Envía OHCB de confianza:"
-    IDS_WCDOWNL             "todavía no funciona"
-    IDS_WC_REQ_SUCC         "WC Éx/Pet:"
-    IDS_WC_DOWNLOADED       "WC-Descarga:"
     IDS_CRC32_TITLE         "CRC32 a nombrearchivo"
     IDS_LOG_IPFILTER_LOADED "Cargados filtros de IP de ""%s"" en %ums"
     IDS_LOG_IPFILTER_INFO   "Líneas analizadas:%u  Encontrados rangos de IP:%u  Duplicados:%u  Combinados:%u"
     IDS_IPFILTER_SAVERR     "No pudo guardar el filtro de IP al archivo ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "No disponible"
-    IDS_WC_REACTIVATED      "Se ha reactivado el WebCaché"
-    IDS_WC_NEWPROXYIP       "Se ha detectado una IP de proxy nueva: %s"
     IDS_LOG_ERRDWN          "Error en la descarga %s"
 END
 
@@ -2884,8 +2857,6 @@ STRINGTABLE
 BEGIN
     IDS_DISPLAYFUNNYNICK_TIP 
                             "Crear un nick artificial <i>[Funnynick]Madeup1 madeup2</i> para usuarios que no definieron su nick."
-    IDS_COUNTWCSESSIONSTATS_TIP 
-                            "Mantener separadas las estadísticas para el tráfico por Webcaché"
     IDS_CLIENTQUEUEPROGRESSBAR_TIP 
                             "Mostrar una barra en el fondo de la ventana de\ntransferencias con el número de los clientes en cola"
     IDS_DOWNLOADDATARATEAVERAGETIME_TIP 
@@ -3179,45 +3150,6 @@ STRINGTABLE
 BEGIN
     IDC_USERNAME_A_TIP      "Nombre de usuario para el acceso al proxy"
     IDC_PASSWORD_TIP        "Contraseña para el acceso al proxy"
-    IDC_WEBCACHENAME_TIP    "Nombre del Host del proxy de tu ISP. Usa 'transperant@tuisp' para usar un proxy transparente"
-    IDC_WEBCACHEPORT_TIP    "Número de puerto (normalmente 80 ó 8080)"
-    IDC_STATIC_ADDRESS_TIP  "IDC_STATIC_ADDRESS_TIP"
-    IDC_STATIC_CONTROLS_TIP "En este grupo puedes controlar el uso de una descarga a traves de Webcaché\nsi quieres saber mas pasate por www.webcache.com.es para obtener una informacion actualizada."
-    IDC_ACTIVATEWEBCACHEDOWNLOADS_TIP 
-                            "Activa el uso de tu ISP Proxy Webcaché\nSi tu ISP soporta el Proxy Webcaché, este proxy será\nutilizado para cachear tus descargas. Si más clientes\nsolicitan los mismos datos al mismo ISP con el Webcaché activado\nlos datos serán transferidos vía proxy. Entonces\nsolo será necesario subir los datos una vez.\nEsto sólo funciona si los clientes utilizan un MOD con Webcaché,\ny si más clientes de tu misma ISP tiene configurado el mismo proxy.\nNota: enviar datos al Proxy Webcaché no se puede desactivar"
-    IDC_DETECTWEBCACHE_TIP  "Usa el archivo webcaches.xml en el directorio config\npara mirar el proxy de tu ISP"
-    IDC_STATIC_BLOCKS_TIP   "Cantidad de datos que determinan si se reajusta la conexión"
-    IDC_EXTRATIMEOUT_TIP    "Esperar 400 segundos en vez de 130 segundos de intervalo de un bloque de 180 Kb"
-    IDC_LOCALTRAFFIC_TIP    "Datos de la misma ISP son excluídos por el proxy\ny el Webcaché es desabilitado para ellos. Loopback\ntest posiblemente falle por dicha razón"
-    IDC_PERSISTENT_PROXY_CONNS_TIP 
-                            "Usa persistentemente (http 1.1) flag para el proxy"
-END
-
-STRINGTABLE 
-BEGIN
-    IDC_ADVANCEDCONTROLS_TIP "Muestra las opciones avanzadas"
-    IDC_TESTPROXY_TIP       "Test del Proxy. Esta opción comprueba si el proxy es accesible\n y si el proxy puede acceder a tu puerto del eMule. NO TESTEAR\nsi el proxy está cacheando(stores) datos (¡Requerido!)\nRequisitos:\n1. Conectar a un servidor\n2. Necesita tener una IP pública válida\n3. Necesita tener una ID Alta real\n4. El Test no funcionará si tiene demasiadas\n   conexiones abiertas (demasiadas descargas)\nPara más información, acuda a http://www.webcache.com.es/"
-    IDC_UPDATE_WCSETTINGS_TIP 
-                            "Recargado automáticamente el archivo webcache.xml en el arranque\n(<b>Desactivado</b> en el código fuente hasta que alguien retome el proyecto)"
-    IDC_MSG_WEBCACHEFAIL    "Tu servidor-proxy no parece cachear datos. No se ha aceptado ningúna petición de Webcaché de las 100 que han sido enviadas. Por favor, revise su configuración del proxy. ¡Descargas desde WebCaché han sido desabilitadas hasta haber testeado un nuevo proxy!"
-    IDC_MSG_WEBCACHE_NOAUTODEC 
-                            "Lo siento, tu ISP no está en la base de datos,\nel identificados de tu ISP es %s\nPara activar lae autodetección, por favor, descubra y configure su proxy de su ISP"
-    IDC_MSG_WEBCACHE_NOIP   "IP no pública, por favor, conecte con un servidor de eD2K o con la red KAD.\nSu puerto TCP debe de ser accesible (ID Alta), si está conectado con un servidor,\npero no es necesario cuando esté conectado a la red KAD"
-    IDC_MSG_WEBCACHE_CONFIGALT 
-                            "La Autodetección del Webcaché ha detectado un cambio en su configuración de Webcaché, Webcaché se ha desactivado hasta que se testee su nuevo proxy.\n Puede desactivar la configuración automática del Webcaché en las opciones avanzadas."
-    IDC_MSG_WEBCACHE_NOACTIVE 
-                            "La Autodetección del Webcaché ha detectado que su ISP-proxy no cachea datos. Webcaché desactivado."
-    IDC_MSG_WEBCACHE_ERRRESOLVE 
-                            "Error de Webcaché - Fallo al resolver la dirección HTTP del Proxy:\n%s\nPor favor, revise su configuración"
-    IDC_MSG_WEBCACHE_TRANSPAR 
-                            "El Test de Proxy no puede probar Proxys transparentes. ¡Test cancelado!"
-    IDC_MSG_WEBCACHE_TESTRUNNING 
-                            "¡Testeando el Proxy! ¡Por favor, compruebe los resultados en el registro de la ventana de servidores!"
-    IDC_MSG_WEBCACHE_TESTERR "¡Error en el Test del Proxy!"
-    IDC_MSG_WEBCACHE_ALREADYRUNNING 
-                            "No comenzó ningún Test de Proxy nuevo. Hay ya un Test en curso."
-    IDC_MSG_WEBCACHE_TESTREQ 
-                            "Ningún Test realizado. No se cumplen todos los requisitos.\n Requisitos:\n1. Debe de estar conectado a un servidor\n2. Necesita tener una IP pública válida\n3. Necesita tener una ID Alta\n4. El Test no funcionará si tiene muchas conexiones abiertas"
     IDC_UPDATEFAKELISTSTART_TIP 
                             "Intentar actualizar la lista antes de conectar con la red"
 END
@@ -3518,25 +3450,25 @@ BEGIN
     IDS_RESTORELASTMAINWNDDLG_TIP 
                             "El eMule recuerda que ventana\n(KAD, Servidores, Tráfico, ha sido abierta, antes de que la aplicación sea cerrada\ny la restaura. Por defecto = deseleccionada"
   	IDS_STATIC_ICON         "Mostrar siempre el icono de la bandeja de sistema"
-	IDS_COMPRESSLEVEL       "Nivel de Compresión (1-9) "
-	IDS_COMPRESSLEVEL_TIP   "Reducir el nivel de Compresión de los datos comprimibles.\nSe salva un poco de CPU, pero es necesario enviar mayor cantidad de datos.\nEs muy útil para conexiones muy rápidas.\n1 = usa menos CPU, menor compresión\n9 = mejor compresión (por defecto)"
-	IDC_SVC_CURRENT_STATUS_LABEL "Estado actual"
+	  IDS_COMPRESSLEVEL       "Nivel de Compresión (1-9) "
+	  IDS_COMPRESSLEVEL_TIP   "Reducir el nivel de Compresión de los datos comprimibles.\nSe salva un poco de CPU, pero es necesario enviar mayor cantidad de datos.\nEs muy útil para conexiones muy rápidas.\n1 = usa menos CPU, menor compresión\n9 = mejor compresión (por defecto)"
+		IDC_SVC_CURRENT_STATUS_LABEL "Estado actual"
 END
 
 STRINGTABLE
 BEGIN
-	IDS_USECOMPRESS_TIP "Opción que desactiva la compresión de todos los datos del usuario.\nÚtil para servidores con velocidad muy alta (>~ 100mbit)\nEsta opción no se guarda, para hacer permanente esta opción\nes necesario añadir la línea UseCompression= en el archivo preferences.ini\nPOr defecto = activado (¡¡Recomendado!!)"
+		IDS_USECOMPRESS_TIP 		"Opción que desactiva la compresión de todos los datos del usuario.\nÚtil para servidores con velocidad muy alta (>~ 100mbit)\nEsta opción no se guarda, para hacer permanente esta opción\nes necesario añadir la línea UseCompression= en el archivo preferences.ini\nPOr defecto = activado (¡¡Recomendado!!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Estado actual"
-	IDS_USEUSERSORTEDSERVERLIST_TIP "Cuando se activa, se utiliza la misma clasificación de la lista de servidores\nque se muestra en el GUI cuando se intenta conectar a un servidor."
+		IDS_USEUSERSORTEDSERVERLIST_TIP "Cuando se activa, se utiliza la misma clasificación de la lista de servidores\nque se muestra en el GUI cuando se intenta conectar a un servidor."
     IDS_TEST_NOTIFICATION   "Test"
     IDS_SERVER_REQUIREOBFUSCATION "Requiere conexión ofuscada a los servidores"
-	IDS_SERVER_REQUIREOBFUSCATION_TIP "Requiere conexiones ofuscadas con los servidores.\nCualquier servidor que no soporta la ofuscación\nserá ignorado. Y sucede que el servidor falso\nno soporta la conexión ofuscada cuando se introduce\nesta opción. Compruebe que es imposible conectar\na un servidor hasta que no se consiga un encriptado válido."
-	IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Muestra un registro extra cuando se busca.\nTambién se incluye en el resultado de la búsqueda.\n(Por defecto = 0, no se guarda, edite el archivo preferences.ini para hacer del cambio permanente)"
+		IDS_SERVER_REQUIREOBFUSCATION_TIP "Requiere conexiones ofuscadas con los servidores.\nCualquier servidor que no soporta la ofuscación\nserá ignorado. Y sucede que el servidor falso\nno soporta la conexión ofuscada cuando se introduce\nesta opción. Compruebe que es imposible conectar\na un servidor hasta que no se consiga un encriptado válido."
+		IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Muestra un registro extra cuando se busca.\nTambién se incluye en el resultado de la búsqueda.\n(Por defecto = 0, no se guarda, edite el archivo preferences.ini para hacer del cambio permanente)"
 		IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
 END
   
 STRINGTABLE
- BEGIN
+BEGIN
       IDS_WIZ8_MORPH          "Configuraciones del MorphXT"
       IDS_MORPHWIZ_GUI        "Opciones del MorphXT"
       IDS_MORPHWIZ_SHOWMORE   "Mostrar más controles (Avanzado)"
@@ -3554,19 +3486,19 @@ END
 STRINGTABLE
 BEGIN
       IDS_PREF_GROUPGENERAL 	"Opciones Generales"
-      IDS_PREF_GROUPEXTENDED "Opciones Avanzadas"
+      IDS_PREF_GROUPEXTENDED 	"Opciones Avanzadas"
       IDS_PREF_GROUPMOD 			"Opciones del MorphXT"
       
       IDS_UPNP_NETSTATUS      "UPnP"
-	  IDS_UPNP_ENABLE_WEB     "Activar el UPnP en el puerto de la interfaz web"
-	  IDS_UPNP_INFOUNINIT     ",no iniciado\r\n"
-	  IDS_UPNP_INFOENABLED    ",activado\r\n"
-	  IDS_UPNP_INFODISABLED   ",desactivado\r\n"
-	  IDS_UPNP_INFOSTANDBY    "No se ha detectado ningún dispositivo\r\n"
-	  IDS_UPNP_INFO_NONEED    "Fallido o no necesario"
-	  IDS_ERR_NOVALIDSTATICSERVERSFOUND  "Servidores estáticos no válidos en la búsqueda de la lista de servidores"
-	  IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND  "Servidores ofuscados no válidos al intentar conectarse con la llave en la búsquedas (actualizar la lista de servidores o activa el UDP)"
-	  IDS_ZZRATIO_TIP         "ZZRatio está activado a partir de este momento. El ratio de esta sesión está visible por\nuna 'R' en la barra de estado. Tu descarga <b>media</b>no excederá\n3 veces tu subida cuando esté activado.\nSolución:<b>Sube más</b> o sube durantemás tiempo.\nLa razón por la cuál se activa el ratio, se puede ver pasando el ratón por encima de la R\nen la barra de estado."
+			IDS_UPNP_ENABLE_WEB     "Activar el UPnP en el puerto de la interfaz web"
+			IDS_UPNP_INFOUNINIT     ",no iniciado\r\n"
+			IDS_UPNP_INFOENABLED    ",activado\r\n"
+			IDS_UPNP_INFODISABLED   ",desactivado\r\n"
+			IDS_UPNP_INFOSTANDBY    "No se ha detectado ningún dispositivo\r\n"
+			IDS_UPNP_INFO_NONEED    "Fallido o no necesario"
+			IDS_ERR_NOVALIDSTATICSERVERSFOUND  "Servidores estáticos no válidos en la búsqueda de la lista de servidores"
+			IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND  "Servidores ofuscados no válidos al intentar conectarse con la llave en la búsquedas (actualizar la lista de servidores o activa el UDP)"
+			IDS_ZZRATIO_TIP         "ZZRatio está activado a partir de este momento. El ratio de esta sesión está visible por\nuna 'R' en la barra de estado. Tu descarga <b>media</b>no excederá\n3 veces tu subida cuando esté activado.\nSolución:<b>Sube más</b> o sube durantemás tiempo.\nLa razón por la cuál se activa el ratio, se puede ver pasando el ratón por encima de la R\nen la barra de estado."
 END
 
 #endif    // Spanish (Castilian) resources
