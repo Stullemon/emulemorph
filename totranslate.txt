@@ -1,5 +1,8 @@
-
 // Note: this are only the morph string, official strings will also be added to the file.  missing strings can be found in emule.rc when this file is not up to date. 
+// You can find the COMPLETE stringtable this is an extract of at the end of emule.rc
+// here: http://emulemorph.cvs.sourceforge.net/*checkout*/emulemorph/CVSROOT/MorphKad/srchybrid/emule.rc
+// Mail result to leuk_he at xs4all d0t nl 
+
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_DONE       "Crash report has been generated."
@@ -13,10 +16,7 @@ BEGIN
     IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
                             "Import aborted: hashset incomplete for %s (%i hashes for %i parts)."
     IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE "Import aborted: Couldn't open %s."
-    IDS_SR13_IMPORTPARTS_IMPORTSTART 
-                            "Importing %i parts (from 0 to %i) to %s."
-    IDS_SR13_IMPORTPARTS_PARTSKIPPEDALREADYCOMPLETE 
-                            "Part %i: skipped, already complete."
+    IDS_SR13_IMPORTPARTS_IMPORTSTART "Importing %i parts to %s."
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Part %i: imported."
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Part %i: imported for ICH handling."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
@@ -31,17 +31,6 @@ BEGIN
                             "File is smaller than minimal recovery block for AICH - there's no use in importing data to it."
     IDS_SR13_IMPORTPARTS_IMPORTFINISH 
                             "Import finished. %i parts were imported to %s."
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_PW_WEBCACHE         "WebCache"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WrongPortforWebcache 
-                            "Webcache Download disabled: Only transfers on Port   21, 70,  80, 210, 443, 563 and in the range from 1025 to 65535 are cached. Please use one of these Ports if you want to enable the Webcache Feature"
 END
 
 STRINGTABLE 
@@ -61,7 +50,9 @@ BEGIN
     IDS_ECFEF               "Equal Chance For Each File"
     IDS_ALL_TIME            "All Time"
     IDS_COPYFEEDBACK        "Copy feedback to clipboard"
+    IDS_FOLLOW_THE_MAJORITY "Follow the Majority"
     IDS_ANTILEECHERLOG      "[Anti-leechermods] Client %s has been temporary banned because of suspicious leech action"
+    IDS_FAIR_PLAY           "FairPlay"
 END
 
 STRINGTABLE 
@@ -374,7 +365,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SELECTIVESHARE      "Selective chunk sharing"
     IDS_BACKUP              "Backup"
     IDS_USS_MAXPING         "Max ping value (ms) (Default %i)"
     IDS_PAYBACKFIRST        "Pay Back First"
@@ -653,9 +643,6 @@ BEGIN
     IDS_AUTOUPIP2COUNTRY    "Update Ip-to-country.csv on startup"
     IDS_UPDATEIPCURL        "Update"
     IDS_CLIENTQUEUEPROGRESSBAR "Show progress of client queue"
-    IDS_WEBCACHE_NOSUPPORT  "not supported"
-    IDS_STATS_SUCCESSFULLWC "Successful WC-DL/WC-Requests:"
-    IDS_STATS_FAILEDWC      "Failed WC-DL/WC-Requests:"
 END
 
 STRINGTABLE 
@@ -699,35 +686,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_WEBCACHE_ISP        "ISP Proxyserver Settings"
-    IDS_WC_PORT             "Port"
-    IDS_WC_ADDRESS          "Address"
-    IDS_WC_CONTROLS         "Webcache Controls"
-    IDS_WC_ENABLE           "Enable Webcached Downloads"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WC_WRONGPORT        "You are using a TCP port that is usually not cached by ISP proxy-servers. Please change your TCP port to  21, 70, 80, 210, 443 563  or 1025-65535 to be able to activate the webcache download!"
-    IDS_WC_AUTO             "Autodetect Webcache"
-    IDS_WC_NRBLOCKS         "Number of blocks to download before reconnecting to the proxy (may help to solve disconnects in some cases)"
-    IDS_WC_BLOCK            "180k-Blocks"
-    IDS_WC_TIMEOUT          "Extra long timeout for webcache connections"
-    IDS_WC_LOCAL            "This webcache does NOT cache traffic within the same ISP"
-    IDS_WC_SUBMIT_EMAIL     "Submit these settings via email"
-    IDS_WC_LINK             "Link: "
-    IDS_WC_PERSISTENT       "Persistent connections for proxy downloads"
-    IDS_WC_ADVANCED         "Show advanced controls"
-    IDS_WC_TEST             "Test webcache configuration. Might take up to 30 Seconds"
-    IDS_WC_HIDE_ADV         "Hide advanced controls"
-    IDS_WC_SUBMIT_WEB       "Submit webcache info via webform"
-    IDS_WC_SOURCES          "Webcache Capable"
-    IDS_WC_UPDATESETTING    "Update webcachesettings automatically"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_LOG_WCEVENTS        "Log WebCache Events"
     IDS_LOG_IACH            "Log IACH Events"
 END
 
@@ -751,20 +709,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRC_SUFFIX          "Suffix to add at the end of the filename after the CRC32:"
-    IDS_COUNTWCSESSIONSTATS "Count WC-Sessions to session stats"
-    IDS_WEBCACHE_NOPROXY    "no proxy set"
-    IDS_CD_WCSUCCFAIL       "Successful/Requested:"
-    IDS_CD_WCTRUSTSENDER    "Is trusted OHCB sender:"
-    IDS_WCDOWNL             "not working yet"
-    IDS_WC_REQ_SUCC         "WC Succ/Req:"
-    IDS_WC_DOWNLOADED       "WC-Download:"
     IDS_CRC32_TITLE         "CRC32 to filename"
     IDS_LOG_IPFILTER_LOADED "Loaded IP filters from ""%s"" in %ums"
     IDS_LOG_IPFILTER_INFO   "Parsed lines:%u  Found IP ranges:%u  Duplicate:%u  Merged:%u"
     IDS_IPFILTER_SAVERR     "Failed to save IP filter to file ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Not available"
-    IDS_WC_REACTIVATED      " Webcache has been reactivated."
-    IDS_WC_NEWPROXYIP       "A new proxy ip has been detected: %s."
     IDS_LOG_ERRDWN          "Error downloading %s"
 END
 
@@ -854,6 +803,7 @@ BEGIN
     IDS_ZZRATIO_CHECK3      "Using friend slot and globaldatarate>3KB/s"
     IDS_ZZRATIO_CHECK4      "Upload limit under 10KB/s"
     IDS_ZZRATIO_CHECK5      "Average upload under 10KB/s"
+    IDS_ZZRATIO_TIP         "ZZRatio is active at this moment. This session ratio is visible by \na 'R' in the statusbar. Your <b>average</b> download will not exceed\n3 times your upload when this is active.\nSolution:<b>Upload more</b> or upload longer.\nThe reason for the active ratio can be seen by hovering the mouse over\nthe R in the status bar. "
 END
 
 STRINGTABLE 
@@ -897,7 +847,7 @@ BEGIN
     IDS_GLOBAL_HL           "Global HL"
     IDS_GLOBAL_HL_LIMIT     "Global Hardlimit"
 END
- 
+
 STRINGTABLE 
 BEGIN
     IDC_FILTE_TIP           "Messages containing these words are considered spam and\nare filtered and the client sending them are banned. Friend\nare not banned"
@@ -913,51 +863,18 @@ BEGIN
     IDC_PROXYNAME_TIP       "Hostname or ip address of proxy"
     IDC_PROXYPORT_TIP       "port number the proxy communicates on.\nTypical 1080 for socks and 80 or 8080 for http."
     IDC_ENABLEAUTH_TIP      "Enable this  if you need to login into the proxy\nNote that for http only basic authentication\n(not microsoft NTLM) is supported"
-END	
+END
 
-
-// leuk_he tooltipped
-// Format of string:
-//  <b> text </b> - The bold string
-//  <i> text </i> - The italic string 
-//  <u> text </u> - The underline string
-//  <s> text </s> - The strike out string
-//
-//  <cb=0x123456> text </cb> - The background color (RGB (12,34,56))
-//  <ct=0x123456> text </ct> - The text color (RGB (12,34,56))
-//
-//  <cbi=1> text </cbi> - The index background color(0 - F)
-//  <cti=1> text </cti> - The index text color(0 - F)
-//
-//	<al> or <al_l> - sets align to left edge
-//  <al_c> - sets align to the center 
-//  <al_r> - sets align to the right edge
-//
-//	<hr=100%> - the horizontal line with length 100%
-//  <hr=32> - the horizontal line with length 32 pixels.
-//
-//	<a="link"> text </a> - The hyperlink 
-//
-//  <h=1> text </h> - hot zone (number of zone)
-//
-//	<br[=1]> - new line (numbers of the lines)
-//  <t[=1]> - tabulation (number of tabulations)
-//
-//  <img[=0x0000] [cx=0] [cy=0]>				 - draws the image by his name
-//  <ilst[=0x0000]>								 - draws the image from image list
-//  <bmp[=0x0000] mask[=0xFF00FF] [cx=0] [cy=0]> - draws bitmap
-//  <icon[=0x0000] [cx=0] [cy=0]>				 - draws the icon
-//ppgserver:
 STRINGTABLE 
 BEGIN
     IDS_PW_RDEAD_TIP        "The number of retries before a server is considered\ndead and removed from the list."
     IDS_PW_RETRIES_TIP      "The number of retries before a server is considered\ndead and removed from the list. (default 3)"
-	IDS_PW_USC_TIP "Update the serverlist with the url that is in address.dat (edit) on startup of eMule. (default: unchecked)"
+    IDS_PW_USC_TIP          "Update the serverlist with the url that is in address.dat (edit) on startup of eMule. (default: unchecked)"
     IDS_PW_UCC_TIP          "When another client connects to you, \nadd to your server list the server that\nthe other client is currently using "
-	IDS_PW_USS_TIP "When connecting to a server request a list of servers from that server"
-	IDS_SMARTLOWIDCHECK_TIP "Will retry more times to connect if you previously had a high id"
-	IDS_PW_FASTSRVCON_TIP "disabling this setting will connect to servers slightly faster but might cause some false lowid's"
-	IDS_PW_SCORE_TIP "Use the server priority to connect to high priority servers first"
+    IDS_PW_USS_TIP          "When connecting to a server request a list of servers from that server"
+    IDS_SMARTLOWIDCHECK_TIP "Will retry more times to connect if you previously had a high id"
+    IDS_PW_FASTSRVCON_TIP   "disabling this setting will connect to servers slightly faster but might cause some false lowid's"
+    IDS_PW_SCORE_TIP        "Use the server priority to connect to high priority servers first"
     IDS_MANUALSERVERHIGHPRIO_TIP 
                             "Give servers that are manually\ntyped in a high priority"
     IDS_EDITLIST_TIP        "Edit the address.dat file to update the serverlist on startup with.\nYOu should put an entry in the address.dat file if you enable this checkbox"
@@ -1021,7 +938,6 @@ STRINGTABLE
 BEGIN
     IDS_DISPLAYFUNNYNICK_TIP 
                             "Create a artificial <i>[Funnynick]Madeup1 madeup2</i> for users that do not set their nick."
-    IDS_COUNTWCSESSIONSTATS_TIP "Keep apart statistics for webcache traffic"
     IDS_CLIENTQUEUEPROGRESSBAR_TIP 
                             "Show a bar in the bottom of the \ntransfer windows with the number of clients in the queue."
     IDS_DOWNLOADDATARATEAVERAGETIME_TIP 
@@ -1174,7 +1090,7 @@ BEGIN
     IDS_SELECTIVESHARE_TIP  "You can choose to make Hide Overshare stricter by only revealing\none chunk to each user, starting with the least uploaded chunks,\nand considering the chunks that were already offered when choosing\nthe next. Hide overshares must not be disabled for this to work\n(Off by default)."
     IDS_SHAREONLYTHENEED_TIP 
                             "Share Only the Need hides Chunks which were already\nasked by other clients on your queue. eMule analyzes\nyour upload queue if every user are asking for the\nsame chunks. if true, eMule hides the chunks which\nat least one user has already got and shows just\nthe chunks that no one has.\nTHey are purple in the spreadbar.\nThere is always one visible."
-	IDS_POWERSHARE_TIP2     "Settings for powershare, \ngive absolute priority to\na file without the need\nfor unsharing other files"
+    IDS_POWERSHARE_TIP2     "Settings for powershare, \ngive absolute priority to\na file without the need\nfor unsharing other files"
     IDS_POWERSHARE_DISABLED_TIP 
                             "No powersharing if not set on individual file."
     IDS_POWERSHARE_ACTIVATED_TIP 
@@ -1297,6 +1213,9 @@ BEGIN
     IDS_PAYBACKFIRSTLIMI_TIP 
                             "Amount the peer must have upload more to us\nthen we downloaded from him before PBF starts"
     IDS_EXPIRED_KNOWN_TIP   "Clean up .met files after file \nhas not been seen for xxx days\nSaves diskspace. Applies for\nknown*.met. Never set a very\nlow value (less than 30) here"
+    IDS_FOLLOW_THE_MAJORITY_TIP 
+                            "Auto rename your file with majority used, \ncan be direct active from right click or disable by any rename operation."
+    IDS_FAIR_PLAY_TIP       "at least upload one copy of downloaded file with priority."
 END
 
 STRINGTABLE 
@@ -1314,44 +1233,6 @@ STRINGTABLE
 BEGIN
     IDC_USERNAME_A_TIP      "Username at the proxy"
     IDC_PASSWORD_TIP        "Password at the proxy"
-    IDC_WEBCACHENAME_TIP    "hostname of the proxy of your isp. Use 'transperant@yourisp' for a transperant proxy"
-    IDC_WEBCACHEPORT_TIP    "port number (typically 80 or 8080)"
-    IDC_STATIC_ADDRESS_TIP  "IDC_STATIC_ADDRESS_TIP"
-    IDC_STATIC_CONTROLS_TIP "IDC_STATIC_CONTROLS_TIP"
-    IDC_ACTIVATEWEBCACHEDOWNLOADS_TIP 
-                            "Activate usage of your isp webcache proxy\nIf your isp support a webcache proxy this proxy will\nbe used to cache your downloads. If more people within\nyour isp request the same data from a webcache enabled\nmod the data will be transfered via the proxy. So this\nway the peer will only have to upload the data once.\nThis will only work if the uploader uses a webcache mod,\nand more people in your isp set the same proxy.\n Note: sending to webcache can not be disabled"
-    IDC_DETECTWEBCACHE_TIP  "Use the webcaches.xml in your config dir\nto lookup the proxy of your isp."
-    IDC_STATIC_BLOCKS_TIP   "Amount of data that determines if the connection should be reset."
-    IDC_EXTRATIMEOUT_TIP    "Wait 400 seconds instead of 130 seconds for a timeout of a 180 kb block"
-    IDC_LOCALTRAFFIC_TIP    "Data within the same isp is excluded by the proxy\nand webcache will be disabled for those. loopback\ntest might fail for the same reason."
-    IDC_PERSISTENT_PROXY_CONNS_TIP "Use persistant (http 1.1) flag for proxy"
-END
-
-STRINGTABLE 
-BEGIN
-    IDC_ADVANCEDCONTROLS_TIP "Show advanced options. "
-    IDC_TESTPROXY_TIP       "Test the proxy. This option tests if the proxy is reachable\nand the proxy can reach your emule port. It does NOT test\nif the proxy does actually caches(stores) data (required!)\nrequirements:\n1. connected to server\n2. You need to have a valid public IP\n3. You need to have a real high ID\n4. Test does not work if you have too\n   many open connections (too much downloads)"
-    IDC_UPDATE_WCSETTINGS_TIP 
-                            "Automatically reload webcache.xml on startup\n(<b>disabled</b> in source until someone picks up the project)"
-    IDC_MSG_WEBCACHEFAIL    "Your proxy-server does not seem to be caching data. There was no successful Webcache-Requests out of more than 100 that were sent. Please review your proxy-configuration. WebCache downloads have been disabled until a new proxy is tested!"
-    IDC_MSG_WEBCACHE_NOAUTODEC 
-                            "Sorry, your ISP is not in the database,\nyour ISP identifier is %s\nTo enable autodetection, please find out and submit your ISPs proxy."
-    IDC_MSG_WEBCACHE_NOIP   "No public IP, please connect to an ed2k-server or Kad.\nYour TCP port must be reachable (highID) if you are connected to a server,\nbut it's not necessary when connected to Kad"
-    IDC_MSG_WEBCACHE_CONFIGALT 
-                            "Webcache autodetection detected a change in the Webcache-configuration, webcache has been deactivated until a new proxy is tested.\n You can deactivate automatic webcache configuration in the Advanced Webcachesettings."
-    IDC_MSG_WEBCACHE_NOACTIVE 
-                            "Webcache Autodetection has detected that your ISP-proxy does not cache data. Webcache disabled."
-    IDC_MSG_WEBCACHE_ERRRESOLVE 
-                            "WebCache Error - Failed to resolve HTTP proxy address:\n%s\nPlease review your webcache settings"
-    IDC_MSG_WEBCACHE_TRANSPAR 
-                            "Proxy Test can not test Transparent proxies. Test Canceled!"
-    IDC_MSG_WEBCACHE_TESTRUNNING 
-                            "Performing Proxy Test! Please check the log in the serverwindow for the results!"
-    IDC_MSG_WEBCACHE_TESTERR "Proxy Test Error!"
-    IDC_MSG_WEBCACHE_ALREADYRUNNING 
-                            "No New Test Started. There is already a Test in progress"
-    IDC_MSG_WEBCACHE_TESTREQ 
-                            "No Test Performed. Not all requirements met.\n Requirements:\n1. You have to be connected to a server\n2. You need to have a valid public IP\n3. You need to have a high ID\n4. Test does not work if you have too many open connections"
     IDC_UPDATEFAKELISTSTART_TIP 
                             "Try to update the list before connecting to the network"
 END
@@ -1382,7 +1263,7 @@ BEGIN
     IDS_PW_SHOWTRANSTOOLBAR_TIP 
                             "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queue\nDisplays all known clients"
     IDC_SHOWDWLPERCENT_TIP  "A %-completed value will be added for each download in its progress bar."
-   IDC_EXITQUESTION_TIP     "You can stop eMule now ('Yes') and stop downloading and uploading now\nIf you keep eMule running you gather credits that make future\ndownloads faster. (choose No!) "
+    IDC_EXITQUESTION_TIP    "You can stop eMule now ('Yes') and stop downloading and uploading now\nIf you keep eMule running you gather credits that make future\ndownloads faster. (choose No!) "
     IDC_DONTASKMEAGAINCB_TIP 
                             "Check this option and eMule won't ask next time you do a shutdown of eMule\nYou can enable this option again in Options->general-> Prompt on exit"
     IDC_DONTASKMEAGAINCBSEL_TIP 
@@ -1398,22 +1279,22 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_TRAY_TIP "eMule will not minimize to task bar\nbut to the tray if this option is checked.\nAn extra option is displayed in the windows\nbar to minimize to the tray if unchecked"
-    IDS_PW_DBLCLICK_TIP "This option toggles,\nwhether a double or single click in the download screenlist is needed to expand and show the sources"
-    IDS_3DDEP_TIP "The slider affects the amount of 3D shading of the Progress Bars."
-	IDS_UPDATEQUEUE_TIP "The information displayed in the queue list will be updated not as often\nwhich will save some CPU time."
-	IDS_SHOWRATEONTITLE_TIP "Displays current Down- and Upload speed in eMule's window title."
-	IDS_INDICATERATINGS_TIP "Shows the -icon (comment, positive rating)\nthe !-icon (negative rating) for downloads in the Transfers list."
+    IDS_PW_TRAY_TIP         "eMule will not minimize to task bar\nbut to the tray if this option is checked.\nAn extra option is displayed in the windows\nbar to minimize to the tray if unchecked"
+    IDS_PW_DBLCLICK_TIP     "This option toggles,\nwhether a double or single click in the download screenlist is needed to expand and show the sources"
+    IDS_3DDEP_TIP           "The slider affects the amount of 3D shading of the Progress Bars."
+    IDS_UPDATEQUEUE_TIP     "The information displayed in the queue list will be updated not as often\nwhich will save some CPU time."
+    IDS_SHOWRATEONTITLE_TIP "Displays current Down- and Upload speed in eMule's window title."
+    IDS_INDICATERATINGS_TIP "Shows the -icon (comment, positive rating)\nthe !-icon (negative rating) for downloads in the Transfers list."
     IDS_DISABLEKNOWNLIST_TIP 
                             "eMule keeps track of all clients it connected to.\nTo save memory this list can be disabled with this option.\nTurn it off for low memory systems."
     IDS_DISABLEQUEUELIST_TIP 
                             "Similar to the Known Clients List the Queue List\nwill also consume system resources.\nDisable to save them."
     IDS_SHOWCATINFO_TIP     "Will display two values (x/y) right after a category name.\nThe first value (x) is the number of currently active (downloading)\nfiles and the second one (y) the total number of files for this category."
-	IDS_REPAINTGRAPHS_TIP "eMule may shortly freeze when the window is resized.\nThis is caused by redrawing the graphs with saved data.\nIf this option is checked, the graphs will not be\nrecreated and start new."
+    IDS_REPAINTGRAPHS_TIP   "eMule may shortly freeze when the window is resized.\nThis is caused by redrawing the graphs with saved data.\nIf this option is checked, the graphs will not be\nrecreated and start new."
     IDC_SELECT_HYPERTEXT_FONT_TIP 
-                            "This button opens a dialog to choose the font, style and color\nof the text displayed in the server info, messages lines  and IRC windows"
-	IDS_AUTOREMOVEFD_TIP "eMule shows finished downloads with a green progress bar.\nThis option will remove them automatically from the downloads list."
-END	
+                            "This button opens a dialog to choose the font, style and color\nof the text displayed in the server info, messages lines and IRC windows"
+    IDS_AUTOREMOVEFD_TIP    "eMule shows finished downloads with a green progress bar.\nThis option will remove them automatically from the downloads list."
+END
 
 STRINGTABLE 
 BEGIN
@@ -1571,7 +1452,7 @@ BEGIN
                             "Changes the look of the statistic graph window and some other minor \nstyles stuff. (might require restart)"
     IDS_LOGFILEFORMAT_TIP   "Changes the data format of the log files from unicode to UTF8 when set to 1."
     IDS_RTLWINDOWSLAYOUT_TIP 
-                            "Adds right-to-left reading support to eMule. \nUseful for languages  like Hebrew etc."
+                            "Adds right-to-left reading support to eMule. \nUseful for languages like Hebrew etc."
     IDS_PREVIEWONICONDBLCLK_TIP 
                             "If this setting is enabled a double click on a file's icon in the\ntransfer list will invoke the preview command. This will only work\nif 'Download list doubleclick to expand' is turned off in\n'Preferences -> Display'"
     IDS_INTERNETSECURITYZONE_TIP 
@@ -1653,18 +1534,17 @@ BEGIN
                             "This function should be only activated when using VLC -\nVideoLAN Client to preview files. It allows to preview multimedia\nfiles when at least 16 kB data for .mpeg files or 256 kB data for\nall other multimedia content (.avi, CD-Images with multimedia\ncontent) has been downloaded. Using this option the 'Create backup\nfor preview' setting has to be deactivated in the 'Video\nPlayer' dialog. Note that vlc version 8.5 and higher seem to\nhave some problems with broken indexes"
     IDS_RESTORELASTMAINWNDDLG_TIP 
                             "eMule remembers which of the main windows \n(Kademlia, Server, Transfer, was open, when before application exit \nand restores it. (default = unchecked)"
+END
 
-    IDS_STATIC_ICON         "Always display Tray Icon"
-	IDS_COMPRESSLEVEL       "CompressLevel (1-9) "
-	IDS_COMPRESSLEVEL_TIP   "Reduce the compresslevel of compressable data\nSome cpu is saved, but more data needs to be send\nUseful for very high speed lines. \n1=use less cpu,compress less\n9=best compression(default)"
+STRINGTABLE 
+BEGIN
     IDS_USECOMPRESS         "UseCompression (session)"
-	IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
+    IDS_USECOMPRESS_TIP     "Option to disable compression of all user data.\nUsefule for VERY high speed server (>~ 100mbit)\n This option is not saved, to make this permanent\nyou need to add UseCompression= into preferences.ini\nDefault = enabled (recommended!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Current Status"
     IDS_USEUSERSORTEDSERVERLIST_TIP 
                             "When enabled this will use the same server list sorting\nas shown in GUI when trying to connect to a server."
-	IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
-	IDS_TEST_NOTIFICATION   "Test"
-	IDS_SERVER_REQUIREOBFUSCATION      "Require obfuscated connection to servers"
+    IDS_TEST_NOTIFICATION   "Test"
+    IDS_SERVER_REQUIREOBFUSCATION "Require obfuscated connection to servers"
     IDS_SERVER_REQUIREOBFUSCATION_TIP 
                             "Requires obfuscated connections to servers\nany servers that do not support obfuscating \nwill be ignored. And it happens that fake server\ndo not support obfuscation when this option\nis introduced. Note that it is impossible to connect \nto server until you get a valid cryptping"
     IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP 
@@ -1676,23 +1556,38 @@ BEGIN
     IDS_MORPHWIZ_SHOWLESS   "Show less controls (simpler/beginner)"
     IDS_MORPHWIZ_NEXT       "On Finishing of wizard"
     IDS_MORPHWIZ_NET1       "Run network wizard to configure up/down internet speed."
+END
+
+STRINGTABLE 
+BEGIN
     IDS_WIZARDREQUIREOBFUSCATED 
                             "Required obfuscated connection to server.\nTurn on to prevent connecting to bad maintained/fake server"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_MORPHWIZ_IMPORT     "Run import tool to import pending downloads\nfrom eDonkey/shareaza/eMule"
-	IDS_PREF_GROUPGENERAL "General options"
-	IDS_PREF_GROUPEXTENDED "Advanced options"
-	IDS_PREF_GROUPMOD "Mod options"
+    IDS_PREF_GROUPGENERAL   "General options"
+    IDS_PREF_GROUPEXTENDED  "Advanced options"
+    IDS_PREF_GROUPMOD       "Mod options"
+    IDS_ERR_NOVALIDSTATICSERVERSFOUND 
+                            "No valid static servers to connect in serverlist found"
+    IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
+                            "No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_UPNP_NETSTATUS      "Upnp"
     IDS_UPNP_ENABLE_WEB     "Enable UPnP on web interface port"
     IDS_UPNP_INFOUNINIT     ",not initialized\r\n"
     IDS_UPNP_INFOENABLED    ",enabled\r\n"
     IDS_UPNP_INFODISABLED   ",disabled\r\n"
     IDS_UPNP_INFOSTANDBY    "No Device detected\r\n"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_UPNP_INFO_NONEED    "Failed or not needed"
-    IDS_ERR_NOVALIDSTATICSERVERSFOUND 
-                           "No valid static servers to connect in serverlist found"
-    IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
-	"No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
-	IDS_ZZRATIO_TIP         "ZZRatio is active at this moment. This session ratio is visible by \na 'R' in the statusbar. Your <b>average</b> download will not exceed\n3 times your upload when this is active.\nSolution:<b>Upload more</b> or upload longer.\nThe reason for the active ratio can be seen by hovering the mouse over\nthe R in the status bar. "
 END
 
