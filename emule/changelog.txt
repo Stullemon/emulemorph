@@ -2,6 +2,272 @@
 	http://emule-project.net
 	========================
 
+0.48a
+-----------------------
+- May, 13. 2007     -
+-----------------------
+.: Happy Birthday eMule :)
+
+-----------------------
+- May, 12. 2007     -
+-----------------------
+.: Fixed some bugs in UPnP and changed the behavior for ADSL devices a bit
+.: Fixed a bug concerning double adding friends
+.: If Vista is running with Aero, eMule will enable Minimize to Tray on Minimize by default (can be changed in the display options)
+
+0.48a BETA2
+-----------------------
+- May, 08. 2007     -
+-----------------------
+Ornis: Changed to wizzard to set file proper file permission on installed config files
+.: Fixed another Bug in the SourceExchange, which caused eMule to not response to requests in certain cases [Xman1]
+.: Sorting for cumulative stats in the sharedfiles list is now properly remembered when restarting eMule
+.: The "Disable UDP" and Enable "Kad" options now exclude eachother [leuk_he]
+.: Fixed a bug in UPnP when the UDP port has been disabled by the user [leuk_he]
+.: IRC optional serverports should work prorperly now
+.: Fixed a bug in IRC when receiving ed2k links from other users
+.: Added a excess flood protection for eMule IRC responses
+
+-----------------------
+- May, 05. 2007     -
+-----------------------
+.: The Spam indicator icon has been replaced [icon by Daan]
+.: The first time wizzard is now using the proper ports when testing UPnP in case a user has changed the ports in the wizzard
+.: Fixed eMule (error-)handling for files whose paths exceed the operation system pathlength limit
+.: If eMule started the Windows UPnP Service but failed to forward ports via UPnP it will shutdown the service afterwards
+.: Added an option to disable smileys
+.: Fixed a small memleak in the smileyselector window
+
+
+0.48a BETA1
+-----------------------
+- April, 29. 2007     -
+-----------------------
+.: The "official" development environment for eMule has switched to VS2003 SP1. VS2002 is no longer supported (but should still compile fine) 
+
+-----------------------
+- April, 28. 2007     -
+-----------------------
+.: Sorting in the ipfilter dialog has been fixed on Vista
+.: Tooltips now have the proper size on Vista
+.: All file related tooltips should look a bit nicer now (on all systems)
+.: Added tooltips to the shared files list
+
+-----------------------
+- April, 21. 2007     -
+-----------------------
+.: Sparse files have been disabled on Vista, due to a faulty / limited Vista implementation of them, which cannot be worked arround by eMule
+
+-----------------------
+- April, 15. 2007     -
+-----------------------
+.: Added a spamfilter for search results. It mainly works by remembering files a user has marked as spam and marking files
+   which seems to be very similar as spam too.
+.: Spam results are drawn gray and always put to the end of the list
+.: Spam results count max. 5 sources towards the 100 sources global search limit
+
+-----------------------
+- April, 9. 2007     -
+-----------------------
+.: The default paddingsize for obfuscated TCP connections has been increased to 128 bytes (from 16) in order to be harder detectable by size pattern matchings
+.: The paddinglength can be changed manually by adding "CryptTCPPaddingLength=[1-256]" into the eMule section in the preferences.ini
+
+-----------------------
+- March, 12. 2007     -
+-----------------------
+.: eMule now supports multi-user installations, which especially is supposed to fix the folder permission problems on Vista
+   In short: for Windows Versions before vista, nothing will change by default, on Vista eMule will use the current userspecific folders by default
+   Please consult the onlinehelp for a detailed explanation. The setting can be changed at the extended options.
+   
+-----------------------
+- March, 11. 2007     -
+-----------------------
+.: On Vista the half-open connection limit is now properly set to 9 by default (instead of 50)
+
+-----------------------
+- Feb, 20. 2007       -
+-----------------------
+.: When using autoconnect on startup or pressing the Connect button while UPnP is still busy, eMule will wait for it to finish
+   or timeout. You can enforce on isntant connect by clicking the button again
+
+-----------------------
+- Feb, 18. 2007       -
+-----------------------
+.: Added UPnP support [merged from Shareaza]
+.: Added UPnP test button into the first time wizzard
+
+-----------------------
+- Feb, 09. 2007       -
+-----------------------
+Ornis: added Farsi translation [translated by Mory Abdi & Ali Mojarad]
+.: The calculation of credits given for the first 9MB (less than one part) has been changed slightly to decrease the reward for clients who upload less than one part 
+
+-----------------------
+- Jan, 20. 2007       -
+-----------------------
+.: Fixed a obfuscation related bug in the sourceexchange
+.: Changed the sourceexchange protocol to avoid backwards compatibility problems and bugs in the future
+.: Added support for multi-related files searches [serverside implementation by lugdunum]
+
+-----------------------
+- Jan, 14. 2007       -
+-----------------------
+.: Fixed crash in Statistics window.
+Ornis: added Valencian translation [translated by "Valencian"]
+Ornis: major update of Slovenian translation [Gusar]
+Ornis: label of category tabs are now displayed in category color
+Ornis: return of the context menu on message tabs (Details, Add/Remove Friend, Close)
+
+-----------------------
+- Jan, 5. 2007       -
+-----------------------
+.: Prepared Kad for support of obfuscated packets. This is only passive in this version yet.
+
+-----------------------
+- Dec, 13. 2006       -
+-----------------------
+.: Fixed memory leak in list controls [eklmn]
+
+-----------------------
+- Dec, 12. 2006       -
+-----------------------
+.: Fixed performance problem with too large eD2K links and enabled 'Monitor Clipboard' option.
+
+-----------------------
+- Dec, 9. 2006        -
+-----------------------
+.: Several changes to make eMule work better under 640x480 resolutions.
+
+-----------------------
+- Dec, 6. 2006        -
+-----------------------
+.: Fixed saving/restoring of size/position in collections dialogs.
+.: Win98: Fixed missing volume labels and shell icons in directories property page's directory tree control.
+.: Win98: Fixed not supported multiline tooltip in tray bar.
+.: Win98/WinME: Fixed not supported toolbar customization.
+.: Win98/WinME/Win2000: Fixed toolbar chevron.
+.: Win98/WinME: Fixed vertical axis labels in statistics graphs.
+.: Win98/WinME: Fixed saving/restoring of expanded sub trees in statistics tree.
+.: Win98/WinME/Win2000: Fixed invisible buttons in transfers window.
+.: Win98: Fixed bug with "ShowActiveDownloadsBold=1" setting in Transfers window.
+
+-----------------------
+- Nov, 22. 2006       -
+-----------------------
+.: Reduced long time memory usage for GUI.
+.: eMule stores now hashs of filehashs in the cancelled.met for privacy reasons
+
+-----------------------
+- Nov, 21. 2006       -
+-----------------------
+.: Both windows in Transfere window are showing a toolbar to select the window contents.
+
+-----------------------
+- Nov, 18. 2006       -
+-----------------------
+.: Edit controls for Message and IRC window are using slightly larger fonts.
+
+-----------------------
+- Nov, 17. 2006       -
+-----------------------
+.: Fixed bug in IRC window with nick change messages which were not always shown.
+.: Fixed bug in IRC window with URL detection with special chars at end of URLs.
+
+-----------------------
+- Nov, 15. 2006       -
+-----------------------
+.: Minor visual improvements for IRC window and Message window text format buttons.
+.: Multiline messages in Message and IRC chat windows are intended for improved readability.
+.: Some visual improvements in Collection dialogs.
+
+-----------------------
+- Nov, 12. 2006       -
+-----------------------
+.: IRC channel filtering is performed on IRC server to reduce network load, the filter string now supports the wildcard character '*'. (e.g. "#emule-*" to match all channel names which start with "#emule-")
+.: IRC window: Activity is now also shown for the 'Channels' window to give some response when user explicitly invoked the "/LIST" command.
+.: IRC window: Nick list shows joined modes and names.
+
+-----------------------
+- Nov, 11. 2006       -
+-----------------------
+.: Fixed a bug with single clicking on emule tray bar icon.
+.: Fixed bug with requesting eMule friendship via IRC.
+.: Changed: By default the IRC channel list will contain only eMule-Help channels.
+.: Added: IRC server can optionally contain a port (seperated by ':' character)
+.: Fixed bug with background color not reset in IRC colored messages.
+.: Added title window for IRC channels.
+
+-----------------------
+- Nov, 9. 2006        -
+-----------------------
+.: Added smiley selector window to Message and IRC window.
+
+-----------------------
+- Nov, 7. 2006        -
+-----------------------
+.: Fixed bug with not outputed IRC notice messages.
+.: Fixed Message window splitter.
+
+-----------------------
+- Nov, 6. 2006        -
+-----------------------
+.: Fixed IRC window splitter.
+
+-----------------------
+- Nov, 5. 2006        -
+-----------------------
+.: Fixed bug with reversed sort orders for fresh emule installations.
+.: Fixed bug with already used IRC nick when connecting.
+.: Fixed bug with changing font size in IRC windows.
+
+-----------------------
+- Nov, 1. 2006        -
+-----------------------
+.: Added showing of smileys to Chat and IRC windows [Smileys by Daan]
+.: Reworked AutoScroll feature in all log and chat windows to automatically disable AutoScroll while viewing content not at the end of the window.
+.: Fixed right click problem in IRC and chat windows.
+.: Fixed some bugs in IRC color code handling.
+.: Fixed bugs with black background color in IRC windows.
+.: Skins: Fixed problems with foreground skin color in RichEdit controls.
+.: Skins: All icons can be read from all file formats which are supported by GDI+ (GIF, PNG, ...)
+
+-----------------------
+- Oct, 26. 2006       -
+-----------------------
+.: Fixed: "exit" command line option no longer starts eMule if it was not already running [DreamWalker]
+.: Fixed edk2-URL handling for better support of copying URLs from webpages.
+.: Fixed bug in file disk space statistics for pre-allocated files. [AnPapaSeiBua]
+.: Fixed bugs in Comment dialog with copy to clipboard functions.
+.: Fixed bug with "ed2k::<hash>" search expressions when combined with other search attributes. Note: "ed2k::<hash>" can still only be used in ED2K searches, not in Kad.
+.: Fixed bug in local search result filter with changing column.
+.: Fixed bug with Unicode strings in category properties.
+.: Added optional drawing of filled graphs in Statistics window.
+.: Several performance improvments and minor bug fixes in IRC module.
+
+-----------------------
+- Sep, 23. 2006       -
+-----------------------
+.: Fixed a potential crash when shutting down eMule [DavidXanatos]
+
+-----------------------
+- Sep, 21. 2006       -
+-----------------------
+.: Added support for RealMedia files to 'Content' dialog (any optional available MediaInfoLib will no longer be used for RealMedia files).
+.: Added support for publishing meta data for RealMedia files.
+.: Added several Kad optimizations to reduce overhead as well as memory usage:
+ - Redundant meta data will no longer get published.
+ - File format meta data is no longer published explicitly and handled special in search expressions.
+ - Removed (currently not used) data from Hello packet.
+
+-----------------------
+- Sep, 16. 2006       -
+-----------------------
+.: Fixed bug with invisible text in search filter control for high contrast color scheme.
+.: Taskbar Notifier: Added support for alpha channel background images.
+.: Taskbar Notifier: Changes made to "notifier.ini" file while eMule is running are read automatically without needing to do a restart.
+.: Added Unicode support for id3lib (Content dialog and metadata stored in Kad).
+
+
 v0.47c Hotfix
 -----------------------
 - Sep, 14. 2006       -

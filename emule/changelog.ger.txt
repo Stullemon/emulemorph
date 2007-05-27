@@ -2,6 +2,265 @@
         http://emule-project.net
         ========================
 
+0.48a
+-----------------------
+- May, 13. 2007     -
+-----------------------
+.: Happy Birthday eMule :)
+
+-----------------------
+- May, 12. 2007     -
+-----------------------
+.: Fehlerkorrektur einiger Bugs in UPnP und etwas verändertes Verhalten für ADSL-Geräte
+.: Fehlerkorrektur eines Bugs beim doppelten Hinzufügen eines Freundes
+.: Wenn eMule auf Vista mit Aero läuft wird die "Zum Systemicon minimieren" bei Minimieren-Option standardmäßig aktiviert. Dies kann unter Anzeigeoptionen geändert werden
+
+0.48a BETA2
+-----------------------
+- May, 08. 2007     -
+-----------------------
+Ornis: Der Installer setzt nun die richtigen Dateizugriffrechte für die Config-Dateien
+.: Fehlerkorrektur eines weiteren Bugs im Quellentausch [Xman1]
+.: Sortieren nach kumulativen Eigenschaften wird nun von eMule nach einem Neustart richtig wiederhergestellt
+.: Die "UDP deaktivieren" und das Aktivieren von Kad Optionen schließen sich nun gegenseitig aus
+.: IRC optionale Serverports sollten nur richtig funktionieren
+.: Fehlerkorrektur eines Bugs im IRC beim empfangen von ED2k Links
+.: Ein Excess-Flood Schutz für eMule Antworten im IRC wurde hinzugefügt
+
+-----------------------
+- May, 05. 2007     -
+-----------------------
+.: Das Spam-Indikator Icon wurde ausgetauscht [Icon von Daan]
+.: Der Erste-Start Wizzard nutzt nun die richtigen Ports für den UPnP test, falls diese vom Benutzer geändert wurden
+.: Fehlerkorrektur das (Fehler-)Behandlung von Dateien deren Pathlänge das Systemlimit überschreitet
+.: Wenn eMule den UPnP-Service startet, aber die Einrichtung der Port fehlschlägt, wird der Service von eMule danach wieder beendet
+.: Eine Option um Smileys zu dekativieren wurde hinzugefügt
+.: Ein kleines Speicherleck in den Simley-Auswahlfenstern wurde behoben
+
+0.48a BETA1
+-----------------------
+- April, 29. 2007     -
+-----------------------
+.: Die "offizielle" Entwicklungsumgebung für eMule ist nun VS2003 SP1. VS2002 wird nicht länger unterstützt (sollte aber trotzdem funktionieren)
+
+-----------------------
+- April, 28. 2007     -
+-----------------------
+.: Sorting in the ipfilter dialog has been fixed on Vista
+.: Tooltips now have the proper size on Vista
+.: All file related tooltips should look a bit nicer now (on all systems)
+.: Added tooltips to the shared files list
+
+-----------------------
+- April, 21. 2007     -
+-----------------------
+.: Sparse files have been disabled on Vista, due to a faulty / limited Vista implementation of them, which cannot be worked arround by eMule
+
+-----------------------
+- April, 15. 2007     -
+-----------------------
+.: Ein Spamfilter für suchergebnisse wurde hinzugefügt, der hauptsächlich durch das ausfiltern von ähnlichen Dateien, die vom Benutzer als Spam markiert wurden, funktioniert.
+.: Spam-Suchergebnisse werden in Grau dargestellt und befinden sich immer am Ende der Liste
+.: Spam-Suchergebnisse zählen als max. 5 Quellen für das 100 Quellen globale Suchlimit
+
+-----------------------
+- April, 9. 2007     -
+-----------------------
+.: The default paddingsize for obfuscated TCP connections has been increased to 128 bytes (from 16) in order to be harder detectable by size pattern matchings
+.: The paddinglength can be changed manually by adding "CryptTCPPaddingLength=[1-256]" into the eMule section in the preferences.ini
+
+-----------------------
+- March, 12. 2007     -
+-----------------------
+.: eMule Untersützt nun Mulit-Benutzer-Installationen, was insbesondere Rechteprobleme unter Vista löst. In Kürze: Auf XP, 2000, 98, etc bleibt standardmäßig alles beim alten, unter Vista werden Benutzereigene Verzeichnise genutzt.
+.: Die Einstellung für die Art der Installation kann unter "Erweiterte Einstellungen" geändert werden
+
+-----------------------
+- March, 11. 2007     -
+-----------------------
+.: In Vista wird das Limit für Halb-Offene von eMule nun korrekt auf 9 gestellt (statt 50)
+
+-----------------------
+- Feb, 20. 2007       -
+-----------------------
+.: Wenn "Automatischen Verbinden beim Start" aktiviert ist oder der Verbindenbutton gedrückt wurde und UPnP noch beschäftigt ist, wartet eMule mit dem Verbinden.
+
+-----------------------
+- Feb, 18. 2007       -
+-----------------------
+.: UPnP Untersützung hinzugefügt [shareaza]
+.: UPnP-Test button in den Erster Start-Wizzard eingefügt
+
+-----------------------
+- Feb, 09. 2007       -
+-----------------------
+Ornis: Farsi Übersetzung hinzugefügt [übersetzt von Mory Abdi & Ali Mojarad]
+.: Die Berechnung der credits für die ersten 9MB (weniger als ein teil) wurde etwas geändert um die Belohnung für Clienten die weniger als ein Teil hochladen zu verringern
+
+-----------------------
+- Jan, 20. 2007       -
+-----------------------
+.: Ein mit Obfuskation verbundener Bug im Quellentausch wurde behoben
+.: Das Quellentauschprotokoll wurde geändert um Rückwärtkomptiblitätsprobleme und andere Bugs in Zukunft zu vermeiden
+.: Untersützung für Multiple-"Zugehörige Dateien"-Suchen wurde hinzugefügt [Serverseitige Implementation von Lugdunum]
+
+-----------------------
+- Jan, 14. 2007       -
+-----------------------
+.: Ein Möglicher Crash im Statistikfenster wurde behoben 
+Ornis: Übersetzung für Valencian hinzugefügt [übersetz von "Valencian"]
+Ornis: Größere Überarbeitung der Slovenischen Übersetzung [Gusar]
+Ornis: Beschriftungen für Kategorierreiter werden nun in der Kategorierfrabe dargestellt
+Ornis: Rückkehr der Jedi.. contextmenüs für Nachrichtenreiter 
+
+-----------------------
+- Jan, 5. 2007       -
+-----------------------
+.: Kad wurde für Obfuskation-Unterstützung vorbereitet. Dies ist in dieser Version nur passiv.
+
+-----------------------
+- Dec, 13. 2006       -
+-----------------------
+.: Ein Speicherleck in den list controls wurde behoben [eklmn]
+
+-----------------------
+- Dec, 12. 2006       -
+-----------------------
+.: Fehlerkorrektur für Performanceproblem bei zu großen ED2k-Links mit "Beaobachte Zwischenablage"-Funktion
+
+-----------------------
+- Dec, 9. 2006        -
+-----------------------
+.: Verschiedene Änderungen um eMule besser unter 640x480 Auflösungen laufen zu lassen
+
+-----------------------
+- Dec, 6. 2006        -
+-----------------------
+.: Fehlerkorrektur der Speicherung und Wiederherstellung der Position/Größe des Kollektions-Dialogs
+.: Win98: Fehlerkorrektur von fehlenden Volume-Lables und shell icons in der Verzeichnis-Eigenschaftenseite
+.: Win98: Fehlerkorrektur von Mulitzeilen-Tooltip in der Traybar
+.: Win98/WinME: Fehlerkorrektur von nicht unterstützter Toolbar-Personalisierung
+.: Win98/WinME/Win2000: Fehlerkorrektur von toolbar chevron.
+.: Win98/WinME: Fehlerkorrektur von vertikelen Achsenbeschriftungen im Statisikengraph.
+.: Win98/WinME: Fehlerkorrektur für speicher/wiederherstellen im von Items im Statistikbaum.
+.: Win98/WinME/Win2000: Fehlerkorrektur für unsichtbare Knöpfe im Transferfewsnter
+.: Win98: Fehlerkorrektur für "ShowActiveDownloadsBold=1"-Option im Transferfenster
+
+-----------------------
+- Nov, 22. 2006       -
+-----------------------
+.: Langzeit-Speicherverbrauch für die GUI wurde reduziert
+.: eMule speichert nun Hash von Hash in der cancelled met für bessere Privatsphäre
+
+-----------------------
+- Nov, 21. 2006       -
+-----------------------
+.: Beide Fenster im Transerfenster zeigen nun toolsbars um den Inhalt auszuwählen
+
+-----------------------
+- Nov, 18. 2006       -
+-----------------------
+.: Edit controls im Nachrichten- und IRC-Fenster nutzen etwas größere Fonts
+
+-----------------------
+- Nov, 17. 2006       -
+-----------------------
+.: Fehlerkorrektur eines Bugs im IRC-Fenster bei dem Namensänderungsnachrichten nicht immer gezeigt wurden
+.: Fehlerkorrektur eines Bugs im IRC-Fenster bei URLs mit spezielle Zeichen am Ende
+
+-----------------------
+- Nov, 15. 2006       -
+-----------------------
+.: Kleinere visuelle Verbesserungen für IRC- und Nachrichtenfenster text format buttons
+.: Multizeilen-Nachrichten im IRC-Fenster hinzugefügt
+.: Kleinere visuelle im Kollektion-Dialog
+
+-----------------------
+- Nov, 12. 2006       -
+-----------------------
+.: IRC Channel Filterung um die Netzwerklast zu reduzieren hinzugefügt
+.: IRC-Fenster: Aktivität wird nun auch im "Channels"-Fenster angezeigt
+.: IRC-Fenster: Nicknamenliste zeigt die modes und namen 
+
+-----------------------
+- Nov, 11. 2006       -
+-----------------------
+.: Ein Bug beim Einzelklick auf das eMuleicon in der Traybar wurde behoben
+.: Ein Bug beim Hinzufügen von Freunden aus IRC wurde behoben
+.: Die eMule-Channelliste zeigt standardmäßig nun nur noch eMule-Hilfe channel
+.: IRC Serveradressen können nun optional einen Port enthalten (getrent durch ':')
+.: Fehlerkorrektur eines Bugs der Hintergrundfarbe bei farbigen Nachrichten im IRC
+.: Titelfenster für IRC Channel hinzugefügt
+
+-----------------------
+- Nov, 9. 2006        -
+-----------------------
+.: Ein Smileyauswahl-Fenster wurde zum Nachrichten und IRC-Fenster hinzugefügt
+
+-----------------------
+- Nov, 7. 2006        -
+-----------------------
+.: Fehlerkorrektur von nicht angezeigten IRC Notiz-Nachrichten
+.: Fehlerkorrektur beim Nachrichten Fensterteiler
+
+-----------------------
+- Nov, 6. 2006        -
+-----------------------
+.: Fehlerkorrektur beim IRC Fensterteiler
+
+-----------------------
+- Nov, 5. 2006        -
+-----------------------
+.: Fehlerkorrektur von falschen Sortiereinstellungen bei neuen eMuleinstallationen
+.: Fehlerkorrektur beim Verbinden zum IRC wenn der gewählte Name schon genutzt wird
+.: Fehlerkorrektur eines Bugs beim Wechseln von Fontsgrößen im IRC-Fenster
+
+-----------------------
+- Nov, 1. 2006        -
+-----------------------
+.: Im IRC- und Nachrichtenfenster werden nun Simleays graphisch dargestellt [Simeys von Daan]
+.: Die Autoscroll funktion in allen Logfenster wurde überarbeitet und deaktiviert sich während nicht das Ende des Fenster angezeigt wird
+.: Fehlerkorrektur einiger Bugs im IRC Farbhandling
+.: Fehlerkorrektur eines Bugs bei schwarzer Hintergrundfarbe im IRC Fenster
+.: Skins: Ein Problem mit der Vordergrundskinfarbe in Richedit controls wurde behoben
+.: Skins: Alle Icons können von allen Formaten gelesen werden die von GDI+ unterstützt werden (GIF, PNG, ...)
+
+-----------------------
+- Oct, 26. 2006       -
+-----------------------
+.: Korrigiert: "exit" Kommandozeilenbefehl started eMule nicht mehr wenn es nicht bereits lief
+.: Fehlerkorrektur beim behandeln von ED2k-Urls für bessere Untersützung beim Kopieren von URLs von Webseiten
+.: Fehlerkorrektur eines Bugs in der Laufwerkspeicherplatz-Statistik bei pre-allocated Dateien
+.: Fehlerkorrektur beim Nutzen des "ed2k::<hash>" Suchausdrucks zusammen mit anderen Attributen. Hinweis: "ed2k::<hash>" kann weiterhin nur für ED2k-Suchen genutzt werden.
+.: Fehlerkorrektur eines Bugs im lokalem Suchfilter beim Wechseln der Spalte
+.: Fehlerkorrektur von Unicodestrings in Kategorieeigenschaften
+.: Optionalen zeichnen von soliden Graphen im Statistikfenster hinzugefügt
+.: Verschiedene Performanceverbesserungen und kleinere Fehlerkorrekturen im IRC-Modul
+
+-----------------------
+- Sep, 23. 2006       -
+-----------------------
+.: Ein potentieller Crash beim Schließen von eMule wurde behoben [DavidXanatos]
+
+-----------------------
+- Sep, 21. 2006       -
+-----------------------
+.: Unterstützung für RealMedia-Dateien zum "Content"-Dialog hinzugefügt (optional vorhandende MediaInfoLib wird nicht mehr für RealMedia-Dateien genutzt)
+.: Unterstützung für Veröffentlichung von Metadaten für Realmedia-Dateien hinzugeügt
+.: Verschiedene Optimierungen für Kad vorgenommen um Overhead und Speicher zu sparen
+ - Redunante Metadaten werden nicht mehr veröffentlicht
+ - Dateiformat Metadaten werden nicht mehr explizit veröffentlich und in speziellen Suchausdrücken behandelt
+ - Ungenutzte Daten vom Hello-Paket entfernt
+
+-----------------------
+- Sep, 16. 2006       -
+-----------------------
+.: Fehlerkorrektur von unsichtbarem text im Suchfilter bei Hoch-KOntrast Farbschemen
+.: Taskbar Benachrichtigung: Unterstützung für Aplha-Channel Hintergrundbilder
+.: Taskbar Benachrichtigung: Änderungen in notitfier.ini während eMule läuft werden automatisch ohne Neustart eingelesen
+.: Unicode-Untersützung für id3lib hinzugefügt
+
+
 v0.47c Hotfix
 -----------------------
 - Sep, 14. 2006       -
