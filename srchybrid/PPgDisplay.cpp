@@ -172,15 +172,38 @@ BOOL CPPgDisplay::OnApply()
 	bool bResetToolbar = false;
 	if (thePrefs.m_bDisableKnownClientList != (IsDlgButtonChecked(IDC_DISABLEKNOWNLIST) != 0)) {
 		thePrefs.m_bDisableKnownClientList = (IsDlgButtonChecked(IDC_DISABLEKNOWNLIST) != 0);
+		/* MORPH START xman list fix  http://forum.emule-project.net/index.php?showtopic=124852
 		if (thePrefs.m_bDisableKnownClientList)
 			bListDisabled = true;
+		*/
+		  //Xman Code Fix
+        if (thePrefs.m_bDisableKnownClientList)
+        {
+            bListDisabled = true;
+            theApp.emuledlg->transferwnd->clientlistctrl.DeleteAllItems();
+        }
+        else
+            theApp.emuledlg->transferwnd->clientlistctrl.ShowKnownClients();
+        //Xman end
 		bResetToolbar = true;
 	}
 
 	if (thePrefs.m_bDisableQueueList != (IsDlgButtonChecked(IDC_DISABLEQUEUELIST) != 0)) {
 		thePrefs.m_bDisableQueueList = (IsDlgButtonChecked(IDC_DISABLEQUEUELIST) != 0);
+		/*
 		if (thePrefs.m_bDisableQueueList)
 			bListDisabled = true;
+		*/
+		//Xman Code Fix
+        if (thePrefs.m_bDisableQueueList)
+        {
+            bListDisabled = true;
+            theApp.emuledlg->transferwnd->queuelistctrl.DeleteAllItems();
+        }
+        else
+            theApp.emuledlg->transferwnd->queuelistctrl.ShowQueueClients();
+        //Xman end
+		// MORPH END xman list fix   
 		bResetToolbar = true;
 	}
 

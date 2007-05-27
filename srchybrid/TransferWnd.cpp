@@ -2041,12 +2041,12 @@ void CTransferWnd::OnDisableList()
 	bool bSwitchList = false;
 	if (thePrefs.m_bDisableKnownClientList && m_uWnd2 == wnd2Clients)
 	{
-		clientlistctrl.DeleteAllItems();
+		// clientlistctrl.DeleteAllItems(); xman disbale queue list fix
 		bSwitchList = true;
 	}
 	if (thePrefs.m_bDisableQueueList && m_uWnd2 == wnd2OnQueue)
 	{
-		queuelistctrl.DeleteAllItems();
+		//queuelistctrl.DeleteAllItems(); xman disbale queue list fix
 		bSwitchList = true;
 	}
 	if (bSwitchList)
