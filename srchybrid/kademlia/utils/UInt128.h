@@ -35,13 +35,16 @@ namespace Kademlia
 	class CUInt128
 	{
 		public:
-			CUInt128();
+			// netfinity: Inlined default constructor
+			CUInt128() : m_uData0(0), m_uData1(0), m_uData2(0), m_uData3(0) {}
 			CUInt128(bool bFill);
 			CUInt128(ULONG uValue);
 			CUInt128(const byte *pbyValueBE);
 			//Generates a new number, copying the most significant 'numBits' bits from 'value'.
 			//The remaining bits are randomly generated.
-			CUInt128(const CUInt128 &uValue, UINT uNumBits = 128);
+			CUInt128(const CUInt128 &uValue, UINT uNumBits/* = 128*/);
+			// netfinity: Copy constructor - This one is extra fast as it is completly inline!!!
+			CUInt128(const CUInt128 &uValue) : m_uData0(uValue.m_uData0), m_uData1(uValue.m_uData1), m_uData2(uValue.m_uData2), m_uData3(uValue.m_uData3) {}
 
 			const byte* GetData() const;
 			byte* GetDataPtr() const;
@@ -53,6 +56,8 @@ namespace Kademlia
 			void ToBinaryString(CString *pstr, bool bTrim = false) const;
 			void ToByteArray(byte *pby) const;
 			ULONG Get32BitChunk(int iVal) const;
+			// netfinity: Safe KAD - Check if a number appears to be constructed rather than randomly generated
+			bool IsGoodRandom() const;
 			CUInt128& SetValue(const CUInt128 &uValue);
 			CUInt128& SetValue(ULONG uValue);
 			CUInt128& SetValueBE(const byte *pbyValueBE);
@@ -85,6 +90,128 @@ namespace Kademlia
 			bool operator== (ULONG uValue) const;
 			bool operator!= (ULONG uValue) const;
 		private:
+			// netfinity: Constructors can't initialize arrays inline
+			union
+			{
 			ULONG		m_uData[4];
+				struct
+				{
+					ULONG	m_uData0;
+					ULONG	m_uData1;
+					ULONG	m_uData2;
+					ULONG	m_uData3;
+				};
+			};
 	};
+
+	// netfinity: This code is better used inline, for speed
+
+	inline
+	CUInt128& CUInt128::SetValue(const CUInt128 &uValue)
+	{
+		m_uData[0] = uValue.m_uData[0];
+		m_uData[1] = uValue.m_uData[1];
+		m_uData[2] = uValue.m_uData[2];
+		m_uData[3] = uValue.m_uData[3];
+		return *this;
+	}
+
+	inline
+	CUInt128& CUInt128::SetValue(ULONG uValue)
+	{
+		m_uData[0] = 0;
+		m_uData[1] = 0;
+		m_uData[2] = 0;
+		m_uData[3] = uValue;
+		return *this;
+	}
+
+	inline
+	CUInt128& CUInt128::Xor(const CUInt128 &uValue)
+	{
+		m_uData[0] ^= uValue.m_uData[0];
+		m_uData[1] ^= uValue.m_uData[1];
+		m_uData[2] ^= uValue.m_uData[2];
+		m_uData[3] ^= uValue.m_uData[3];
+		return *this;
+	}
+
+	inline
+	void CUInt128::operator=  (const CUInt128 &uValue)
+	{
+		SetValue(uValue);
+	}
+
+	inline
+	bool CUInt128::operator<  (const CUInt128 &uValue) const
+	{
+		if (m_uData[0] == uValue.m_uData[0])
+			if (m_uData[1] == uValue.m_uData[1])
+				if (m_uData[2] == uValue.m_uData[2])
+					return (m_uData[3] < uValue.m_uData[3]);
+				else
+					return (m_uData[2] < uValue.m_uData[2]);
+			else
+				return (m_uData[1] < uValue.m_uData[1]);
+		else
+			return (m_uData[0] < uValue.m_uData[0]);
+	}
+
+	inline
+	bool CUInt128::operator>  (const CUInt128 &uValue) const
+	{
+		if (m_uData[0] == uValue.m_uData[0])
+			if (m_uData[1] == uValue.m_uData[1])
+				if (m_uData[2] == uValue.m_uData[2])
+					return (m_uData[3] > uValue.m_uData[3]);
+				else
+					return (m_uData[2] > uValue.m_uData[2]);
+			else
+				return (m_uData[1] > uValue.m_uData[1]);
+		else
+			return (m_uData[0] > uValue.m_uData[0]);
+	}
+
+	inline
+	bool CUInt128::operator<= (const CUInt128 &uValue) const
+	{
+		if (m_uData[0] == uValue.m_uData[0])
+			if (m_uData[1] == uValue.m_uData[1])
+				if (m_uData[2] == uValue.m_uData[2])
+					return (m_uData[3] <= uValue.m_uData[3]);
+				else
+					return (m_uData[2] < uValue.m_uData[2]);
+			else
+				return (m_uData[1] < uValue.m_uData[1]);
+		else
+			return (m_uData[0] < uValue.m_uData[0]);
+	}
+
+	inline
+	bool CUInt128::operator>= (const CUInt128 &uValue) const
+	{
+		if (m_uData[0] == uValue.m_uData[0])
+			if (m_uData[1] == uValue.m_uData[1])
+				if (m_uData[2] == uValue.m_uData[2])
+					return (m_uData[3] >= uValue.m_uData[3]);
+				else
+					return (m_uData[2] > uValue.m_uData[2]);
+			else
+				return (m_uData[1] > uValue.m_uData[1]);
+		else
+			return (m_uData[0] > uValue.m_uData[0]);
 }
+
+	inline
+	bool CUInt128::operator== (const CUInt128 &uValue) const
+	{
+		return (m_uData[0] == uValue.m_uData[0] && m_uData[1] == uValue.m_uData[1] && m_uData[2] == uValue.m_uData[2] && m_uData[3] == uValue.m_uData[3]);
+	}
+
+	inline
+	bool CUInt128::operator!= (const CUInt128 &uValue) const
+	{
+		return (m_uData[0] != uValue.m_uData[0] || m_uData[1] != uValue.m_uData[1] || m_uData[2] != uValue.m_uData[2] || m_uData[3] != uValue.m_uData[3]);
+	}
+}
+

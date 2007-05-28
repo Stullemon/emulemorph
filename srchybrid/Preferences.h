@@ -1737,8 +1737,10 @@ public:
 	static bool		IsClientCryptLayerRequested()		{return IsClientCryptLayerSupported() && m_bCryptLayerRequested;}
 	static bool		IsClientCryptLayerRequired()		{return IsClientCryptLayerRequested() && m_bCryptLayerRequired;}
 	static bool		IsClientCryptLayerRequiredStrict()	{return false;} // not even incoming test connections will be answered
-	static bool		IsServerCryptLayerUDPEnabled()		{return IsClientCryptLayerSupported();}
-	static bool		IsServerCryptLayerTCPRequested()	{return IsClientCryptLayerRequested();}
+	// MORPH START :require obfuscated server connection 
+	static bool		IsServerCryptLayerUDPEnabled()		{return IsClientCryptLayerSupported()||IsServerCryptLayerRequiredStrict(); }
+	static bool		IsServerCryptLayerTCPRequested()	{return IsClientCryptLayerRequested()||IsServerCryptLayerRequiredStrict(); }
+	// MORPH END  :require obfuscated server connection 
 	static uint32	GetKadUDPKey()						{return m_dwKadUDPKey;}
 	static uint8	GetCryptTCPPaddingLength()			{return m_byCryptTCPPaddingLength;}
 
@@ -1754,8 +1756,8 @@ public:
 
 	// Spamfilter
 	static bool		IsSearchSpamFilterEnabled()			{return m_bEnableSearchResultFilter;}
-
-	static bool     IsServerCryptLayerRequiredStrict()  {return IsClientCryptLayerSupported() && m_bCryptLayerRequiredStrictServer;} // MORPH lh require obfuscated server connection 
+	// MORPH  require obfuscated server connection 
+	static bool     IsServerCryptLayerRequiredStrict()  {return IsClientCryptLayerSupported() && m_bCryptLayerRequiredStrictServer && udpport > 0;} // MORPH lh require obfuscated server connection 
 	
 
 	static uint16	GetRandomTCPPort();

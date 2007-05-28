@@ -293,7 +293,14 @@ void CServerList::ServerStats()
 	// Update the server list even if we are connected to Kademlia only. The idea is for both networks to keep 
 	// each other up to date.. Kad network can get you back into the ED2K network.. And the ED2K network can get 
 	// you back into the Kad network..
+	
+    // MORPH START obfuscated server require: Also send cryptpings when we are trying to connect. 
+	/*
 	if (theApp.IsConnected() && theApp.serverconnect->IsUDPSocketAvailable() && list.GetCount() > 0)
+	*/
+	if ((theApp.IsConnected()||theApp.IsWaitingForCryptPingConnect()) && 
+		theApp.serverconnect->IsUDPSocketAvailable() && list.GetCount() > 0)	
+    // MORPH END obfuscated server require
 	{
 		CServer* ping_server = GetNextStatServer();
 		if( !ping_server )
@@ -320,7 +327,9 @@ void CServerList::ServerStats()
 		}
 		srand(tNow);
 		ping_server->SetRealLastPingedTime(tNow); // this is not used to calcualte the next ping, but only to ensure a minimum delay for premature pings
-		if (!ping_server->GetCryptPingReplyPending() && (tNow - ping_server->GetLastPingedTime()) >= UDPSERVSTATREASKTIME && theApp.GetPublicIP() != 0 && thePrefs.IsServerCryptLayerUDPEnabled()){
+		// MORPH START lh require obfuscated server connection  , added )||(theApp.IsWaitingForCryptPingConnect()
+		if (!ping_server->GetCryptPingReplyPending() && (tNow - ping_server->GetLastPingedTime()) >= UDPSERVSTATREASKTIME && ((theApp.GetPublicIP() != 0)||(theApp.IsWaitingForCryptPingConnect())) && thePrefs.IsServerCryptLayerUDPEnabled()){
+			// MORPH END lh require obfuscated server connection 
 			// we try a obfsucation ping first and wait 20 seconds for an answer
 			// if it doesn'T get responsed, we don't count it as error but continue with a normal ping
 			ping_server->SetCryptPingReplyPending(true);

@@ -184,8 +184,8 @@ public:
 	void	PartFileHashFinished(CKnownFile* result);
 	bool	HashSinglePart(UINT partnumber); // true = ok , false = corrupted //MORPH - Flush Thread
 	// SLUGFILLER: SafeHash - replaced old handlers, full hash checker remains for file completion
-	void	PartHashFinished(uint16 partnumber, bool corrupt);
-	void	PartHashFinishedAICHRecover(uint16 partnumber, bool corrupt);
+	void	PartHashFinished(UINT partnumber, bool corrupt);
+	void	PartHashFinishedAICHRecover(UINT partnumber, bool corrupt);
 	bool	IsPartShareable(UINT partnumber) const;
 	bool	IsRangeShareable(uint64 start, uint64 end) const;
 	//MORPH END   - Added by SiRoB, SLUGFILLER: SafeHash
@@ -463,7 +463,7 @@ private:  //morph
 	CList<uint16,uint16>	m_ICHPartsComplete;
 	// SLUGFILLER: SafeHash
 	float	percentcompleted;
-	CList<uint16,uint16>	corrupted_list;
+	CList<UINT,UINT>	corrupted_list;
 	uint32	m_ClientSrcAnswered;
 	UINT	availablePartsCount;
 	CWinThread* m_AllocateThread;
@@ -566,7 +566,7 @@ public:
 	virtual	BOOL	InitInstance() {return true;}
 	virtual int		Run();
 	int	SetFirstHash(CPartFile* pOwner);
-	void	SetSinglePartHash(CPartFile* pOwner, uint16 part, bool ICHused = false, bool AICHRecover = false);
+	void	SetSinglePartHash(CPartFile* pOwner, UINT part, bool ICHused = false, bool AICHRecover = false);
 private:
 	CPartFile*				m_pOwner;
 	bool					m_ICHused;

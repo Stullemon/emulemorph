@@ -2214,12 +2214,14 @@ void CPreferences::SavePreferences()
     ini.WriteInt(L"MaxMessageSessions",maxmsgsessions);
     ini.WriteBool(L"PreferRestrictedOverUser",m_bPreferRestrictedOverUser);
 	ini.WriteBool(L"UserSortedServerList",m_bUseUserSortedServerList);
+	ini.WriteInt(L"CryptTCPPaddingLength",m_byCryptTCPPaddingLength);
 	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
 	CString WriteAllowedIPs ;
 	if (GetAllowedRemoteAccessIPs().GetCount() > 0)
 		for (int i = 0; i <  GetAllowedRemoteAccessIPs().GetCount(); i++)
            WriteAllowedIPs = WriteAllowedIPs  + _T(";") + ipstr(GetAllowedRemoteAccessIPs()[i]);
     ini.WriteString(L"AllowedIPs",WriteAllowedIPs);  // End Seciotn Webserver
+
 	// MORPH END  leuk_he Advanced official preferences. 
 
 

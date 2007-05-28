@@ -60,9 +60,9 @@ namespace Kademlia
 			uint32 Consolidate();
 			bool OnBigTimer();
 			void OnSmallTimer();
-			bool Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate);
-			bool AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate);
-			bool Add(CContact* pContact, bool bUpdate);
+			bool Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate, bool bAdd = true); // netfinity: Safe KAD
+			bool AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate, bool bAdd = true); // netfinity: Safe KAD
+			bool Add(CContact* pContact, bool bUpdate, bool bAdd = true); // netfinity: Safe KAD
 			CContact *GetContact(const CUInt128 &uID) const;
 			UINT GetNumContacts() const;
 			// Returns a list of all contacts in all leafs of this zone.

@@ -49,10 +49,11 @@ static char THIS_FILE[] = __FILE__;
 using namespace Kademlia;
 using namespace CryptoPP;
 
-CUInt128::CUInt128()
+// netfinity: Moved this inline for speed!
+/*CUInt128::CUInt128()
 {
 	SetValue((ULONG)0);
-}
+}*/
 
 CUInt128::CUInt128(bool bFill)
 {
@@ -93,7 +94,8 @@ CUInt128::CUInt128(const CUInt128 &uValue, UINT uNumBits)
 		SetBitNumber(iIndex, (rand()%2));
 }
 
-CUInt128& CUInt128::SetValue(const CUInt128 &uValue)
+// netfinity: Moved this inline for speed!
+/*CUInt128& CUInt128::SetValue(const CUInt128 &uValue)
 {
 	m_uData[0] = uValue.m_uData[0];
 	m_uData[1] = uValue.m_uData[1];
@@ -109,7 +111,7 @@ CUInt128& CUInt128::SetValue(ULONG uValue)
 	m_uData[2] = 0;
 	m_uData[3] = uValue;
 	return *this;
-}
+}*/
 
 CUInt128& CUInt128::SetValueBE(const byte *pbyValueBE)
 {
@@ -160,12 +162,13 @@ CUInt128& CUInt128::SetBitNumber(UINT uBit, UINT uValue)
 	return *this;
 }
 
-CUInt128& CUInt128::Xor(const CUInt128 &uValue)
+// netfinity: Moved this inline for speed!
+/*CUInt128& CUInt128::Xor(const CUInt128 &uValue)
 {
 	for (int iIndex=0; iIndex<4; iIndex++)
 		m_uData[iIndex] ^= uValue.m_uData[iIndex];
 	return *this;
-}
+}*/
 
 CUInt128& CUInt128::XorBE(const byte *pbyValueBE)
 {
@@ -175,11 +178,23 @@ CUInt128& CUInt128::XorBE(const byte *pbyValueBE)
 void CUInt128::ToHexString(CString *pstr) const
 {
 	pstr->SetString(_T(""));
-	CString sElement;
-	for (int iIndex=0; iIndex<4; iIndex++)
+	// netfinity: Reduced CPU usage
+	//CString element;
+	wchar_t element[10];
+	for (int i=0; i<4; ++i)
 	{
-		sElement.Format(_T("%08X"), m_uData[iIndex]);
-		pstr->Append(sElement);
+		// netfinity: Reduced CPU usage
+		//element.Format(_T("%08X"), m_data[i]);
+		for (int j=0; j<8; ++j)
+	{
+			ULONG	digit = (m_uData[i] >> (j*4)) & 0xF;
+			if (digit < 10)
+				element[7-j] = _T('0') + digit;
+			else
+				element[7-j] = _T('A') + (digit - 10);
+		}
+		element[8] = _T('\0');
+		pstr->Append(element);
 	}
 }
 
@@ -193,8 +208,12 @@ void CUInt128::ToBinaryString(CString *pstr, bool bTrim) const
 		iBit = GetBitNumber(iIndex);
 		if ((!bTrim) || (iBit != 0))
 		{
-			sElement.Format(_T("%d"), iBit);
-			pstr->Append(sElement);
+			// netfinity: Reduced CPU usage
+			//element.Format(_T("%d"), b);
+			if (iBit == 1)
+				pstr->Append(_T("1") /*element*/);
+			else
+				pstr->Append(_T("0"));
 			bTrim = false;
 		}
 	}
@@ -333,7 +352,8 @@ void CUInt128::operator-  (const CUInt128 &uValue)
 {
 	Subtract(uValue);
 }
-void CUInt128::operator=  (const CUInt128 &uValue)
+// netfinity: Moved this inline for speed!
+/*void CUInt128::operator=  (const CUInt128 &uValue)
 {
 	SetValue(uValue);
 }
@@ -360,7 +380,7 @@ bool CUInt128::operator== (const CUInt128 &uValue) const
 bool CUInt128::operator!= (const CUInt128 &uValue) const
 {
 	return (CompareTo(uValue) != 0);
-}
+}*/
 
 void CUInt128::operator+  (ULONG uValue)
 {
@@ -397,4 +417,22 @@ bool CUInt128::operator== (ULONG uValue) const
 bool CUInt128::operator!= (ULONG uValue) const
 {
 	return (CompareTo(uValue) != 0);
+}
+
+// netfinity: Safe KAD - Check if a number appears to be constructed rather than randomly generated
+bool CUInt128::IsGoodRandom() const
+{
+	int	iByteCnt[256];
+	for (int i=0; i<256; ++i)
+		iByteCnt[i]=0;
+	for (int i=0; i<4; ++i)
+	{
+		++iByteCnt[(m_uData[i]>>24)&0xFF];
+		++iByteCnt[(m_uData[i]>>16)&0xFF];
+		++iByteCnt[(m_uData[i]>>8)&0xFF];
+		++iByteCnt[(m_uData[i])&0xFF];
+	}
+	for (int i=0; i<256; ++i)
+		if (iByteCnt[i]>6) return false; // It is highly unlikely that more than 6 out of 16 bytes would roll the same number on a 256 sided dice
+	return true;
 }

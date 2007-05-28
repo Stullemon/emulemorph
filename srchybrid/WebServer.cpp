@@ -468,7 +468,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 
 			BadLogin * ipWatched;
 
-			if(ipWatched = FindBadLoginByIp(Data,ip)){
+			if((ipWatched = FindBadLoginByIp(Data,ip))!= NULL){
 				if(ipWatched->tries > LOGIN_TRIES_LIMIT){
 					banned = true;
 				}

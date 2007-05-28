@@ -76,7 +76,7 @@ public:
 
 	bool	AwaitingTestFromIP(uint32 dwIP) const;
 	bool	IsConnectedObfuscated() const;
-
+	bool    IsWaitingForConnect() { return m_idRetryTimer>0;}; // MORPH lh require obfuscated server connection 
 private:
 	bool	connecting;
 	bool	singleconnecting;

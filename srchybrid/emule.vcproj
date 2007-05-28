@@ -2918,10 +2918,10 @@
 				RelativePath="res\Transfer.ico">
 			</File>
 			<File
-				RelativePath="res\transfers.ico">
+				RelativePath=".\res\Mod\transfers.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\transfers.ico">
+				RelativePath="res\transfers.ico">
 			</File>
 			<File
 				RelativePath="res\TransferUpDown.ico">
@@ -3068,7 +3068,7 @@
 				RelativePath="..\emule\Changelog.MorphXT.txt">
 			</File>
 			<File
-				RelativePath="..\docs\kademlia\changelog.txt">
+				RelativePath="..\emule\changelog.txt">
 			</File>
 			<File
 				RelativePath="..\docs\readme.txt">

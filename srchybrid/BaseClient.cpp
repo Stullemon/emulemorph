@@ -458,6 +458,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("ACAT")) && m_strModVersion[4] != 0x00 ||
 			StrStrI(m_strModVersion,_T("sivka v12e8")) && m_nClientVersion != MAKE_CLIENT_VERSION(0, 42, 4) || // added - Stulle
 			StrStrI(m_strModVersion,_T("!FREEANGEL!")) ||
+			StrStrI(m_strModVersion,_T("Applejuice")) || // community & gpl violator
 			StrStrI(m_strModVersion,_T("          ")) ||
 			m_strModVersion.IsEmpty() == false && StrStrI(m_strClientSoftware,_T("edonkey"))||
 			((GetVersion()>589) && (GetSourceExchange1Version()>0) && (GetClientSoft()==51)) //LSD, edonkey user with eMule property
@@ -3214,7 +3215,9 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 				strState = GetResString(IDS_QUEUEFULL);
 			else
 			// EastShare START - Modified by TAHO, moved and moddified from Priority column
-			//strState = GetResString(IDS_ONQUEUE);
+            /*
+			strState = GetResString(IDS_ONQUEUE);
+            */
 			{
 				if (GetRemoteQueueRank()){
 					//MORPH - RemoteQueueRank Estimated Time
@@ -3259,10 +3262,11 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 			strState = GetResString(IDS_KAD_TOOMANDYKADLKPS);
 			break;
 	}
-/*
+/* MORPH
 	if (thePrefs.GetPeerCacheShow())
 	{
-*/		switch (m_ePeerCacheDownState)
+  END MORPH*/
+  		switch (m_ePeerCacheDownState)
 		{
 		case PCDS_WAIT_CLIENT_REPLY:
 			strState += _T(" Peer")+GetResString(IDS_PCDS_CLIENTWAIT);

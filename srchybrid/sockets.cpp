@@ -309,7 +309,7 @@ bool CServerConnect::SendPacket(Packet* packet,bool delpacket, CServerSocket* to
 }
 
 bool CServerConnect::SendUDPPacket(Packet* packet, CServer* host, bool delpacket, uint16 nSpecialPort, BYTE* pRawPacket, uint32 nLen){
-	if (theApp.IsConnected()){
+	if (theApp.IsConnected()||(theApp.IsWaitingForCryptPingConnect())){ // MORPH lh require obfuscated server connection  
 		if (udpsocket != NULL)
 			udpsocket->SendPacket(packet, host, nSpecialPort, pRawPacket, nLen);
 	}

@@ -328,7 +328,12 @@ uint32 CServer::GetServerKeyUDP(bool bForce) const{
 }
 
 void CServer::SetServerKeyUDP(uint32 dwServerKeyUDP){
-	ASSERT( theApp.GetPublicIP() != 0 || dwServerKeyUDP == 0 );
+	/* old code:
+   ASSERT( (theApp.GetPublicIP() != 0) || dwServerKeyUDP == 0 );	 // MORPH lh require obfuscated server connection  modified
+   */
+   // we need a server key for the first connect BEFORE we gat a valid ip
+   // optimization: determine ip in a different way (upnp or adapter)
+	ASSERT( ((theApp.GetPublicIP() != 0) &&(!theApp.IsWaitingForCryptPingConnect())) || dwServerKeyUDP == 0 );	 // MORPH lh require obfuscated server connection  modified
 	m_dwServerKeyUDP = dwServerKeyUDP;
 	m_dwIPServerKeyUDP = theApp.GetPublicIP();
 }

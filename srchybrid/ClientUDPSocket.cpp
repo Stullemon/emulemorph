@@ -1,4 +1,4 @@
-//this file is part of eMule
+ï»¿//this file is part of eMule
 //Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
@@ -38,7 +38,7 @@
 #include "EncryptedDatagramSocket.h"
 #include "./kademlia/kademlia/prefs.h"
 
-#include "FirewallOpener.h" // emulEspaña: Added by MoNKi [MoNKi: -Random Ports-]
+#include "FirewallOpener.h" // emulEspaa: Added by MoNKi [MoNKi: -Random Ports-]
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -324,8 +324,13 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 					if(sender->GetUDPVersion() > 3)
 					{
 						if (reqfile->IsPartFile())
+						/* MORPH START
+							((CPartFile*)reqfile)->WritePartStatus(&data_out);
+						else
+						*/
 							((CPartFile*)reqfile)->WritePartStatus(&data_out, sender);	// SLUGFILLER: hideOS
 						else if (!reqfile->HideOvershares(&data_out, sender))	//Slugfiller: HideOS
+						// MORPH END
 							data_out.WriteUInt16(0);
 					}
 					data_out.WriteUInt16((uint16)(theApp.uploadqueue->GetWaitingPosition(sender)));
@@ -463,7 +468,7 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 }
 
 
-SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize){ // ZZ:UploadBandWithThrottler (UDP)
+SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 /*minFragSize */){ // ZZ:UploadBandWithThrottler (UDP)
 // ZZ:UploadBandWithThrottler (UDP) -->
 	// NOTE: *** This function is invoked from a *different* thread!
     sendLocker.Lock();
@@ -558,8 +563,8 @@ bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort, boo
 
 bool CClientUDPSocket::Create()
 {
-	// emulEspaña: Modified by MoNKi [MoNKi: -UPnPNAT Support-]
-	// emulEspaña: Modified by MoNKi [MoNKi: -Random Ports-]
+	// emulEspaa: Modified by MoNKi [MoNKi: -UPnPNAT Support-]
+	// emulEspaa: Modified by MoNKi [MoNKi: -Random Ports-]
 	/*
 	bool ret=true;
 
@@ -620,12 +625,12 @@ bool CClientUDPSocket::Create()
 		m_port=thePrefs.GetUDPPort();
 
 	return ret;
-	// End emulEspaña	
+	// End emulEspaa	
 }
 
 bool CClientUDPSocket::Rebind(){
 	
-	// emulEspaña: Modified by MoNKi [MoNKi: -Random Ports-]
+	// emulEspaa: Modified by MoNKi [MoNKi: -Random Ports-]
 	/*
 	if (thePrefs.GetUDPPort()==m_port)
 		return false;
@@ -633,12 +638,12 @@ bool CClientUDPSocket::Rebind(){
 	if (!thePrefs.GetUseRandomPorts() && thePrefs.GetUDPPort(false, true)==m_port)
 		return false;
 
-	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
+	// emulEspaa: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	if(theApp.m_UPnP_IGDControlPoint->IsUpnpAcceptsPorts()){
 		theApp.m_UPnP_IGDControlPoint->DeletePortMapping(m_port, CUPnP_IGDControlPoint::UNAT_UDP, _T("UDP Port"));
 	}
 	// End -UPnPNAT Support-
-	// End emulEspaña
+	// End emulEspaa
 
 	Close();
 

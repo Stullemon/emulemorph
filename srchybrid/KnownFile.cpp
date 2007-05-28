@@ -1,4 +1,4 @@
-// parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
+ï»¿// parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
 //this file is part of eMule
 //Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
@@ -183,6 +183,9 @@ void CKnownFile::Dump(CDumpContext& dc) const
 
 CBarShader CKnownFile::s_ShareStatusBar(16);
 //MORPH START - Modified by SiRoB, Reduce ShareStatusBar CPU consumption
+/*
+void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat) const
+*/
 void CKnownFile::DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat) /*const*/
 { 
 	int iWidth=rect->right - rect->left;
@@ -1131,14 +1134,17 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 	}
 	//MORPH END   - Added by SiRoB, SLUGFILLER: Spreadbars
 
-	// 05-Jän-2004 [bc]: ed2k and Kad are already full of totally wrong and/or not properly attached meta data. Take
+	// 05-Jn-2004 [bc]: ed2k and Kad are already full of totally wrong and/or not properly attached meta data. Take
 	// the chance to clean any available meta data tags and provide only tags which were determined by us.
 	// It's a brute force method, but that wrong meta data is driving me crazy because wrong meta data is even worse than
 	// missing meta data.
 	if (m_uMetaDataVer == 0)
 		RemoveMetaDataTags();
-
+/* MORPH START
+	return true;
+*/
 	return m_nFileSize!=(uint64)0;		// SLUGFILLER: SafeHash - Must have a filesize tag
+ // MORPH  END
 }
 
 bool CKnownFile::LoadDateFromFile(CFileDataIO* file){
@@ -1825,7 +1831,7 @@ void CKnownFile::RemoveMetaDataTags()
 		{ FT_MEDIA_CODEC,   2 }
 	};
 
-	// 05-Jän-2004 [bc]: ed2k and Kad are already full of totally wrong and/or not properly attached meta data. Take
+	// 05-Jn-2004 [bc]: ed2k and Kad are already full of totally wrong and/or not properly attached meta data. Take
 	// the chance to clean any available meta data tags and provide only tags which were determined by us.
 	// Remove all meta tags. Never ever trust the meta tags received from other clients or servers.
 	for (int j = 0; j < ARRSIZE(_aEmuleMetaTags); j++)
@@ -1928,7 +1934,7 @@ void TruncateED2KMetaData(CString& rstrData)
 
 void CKnownFile::UpdateMetaDataTags()
 {
-	// 05-Jän-2004 [bc]: ed2k and Kad are already full of totally wrong and/or not properly attached meta data. Take
+	// 05-Jn-2004 [bc]: ed2k and Kad are already full of totally wrong and/or not properly attached meta data. Take
 	// the chance to clean any available meta data tags and provide only tags which were determined by us.
 	RemoveMetaDataTags();
 

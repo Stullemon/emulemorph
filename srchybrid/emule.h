@@ -271,6 +271,11 @@ public:
 public:
 	CWapServer*		wapserver;
 //MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
+// Morph start lh: lh require obfuscated server connection 
+   // When you want to connect to a server obfuscated you need
+   // to be able to cryptping, else no server will have a valid Key
+	bool IsWaitingForCryptPingConnect();  
+// Morph end lh: lh require obfuscated server connection 
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 	public:
 		bool	IsEd2kFriendLinkInClipboard();

@@ -80,6 +80,19 @@ bool CRoutingBin::AddContact(CContact *pContact)
 	CContact *pContactTest = GetContact(pContact->GetClientID());
 	if (pContactTest == NULL)
 	{
+		// BEGIN netfinity: Safe KAD - Only two nodes per IP range and bucket, unless closer
+		int	nSimilarIPs = 0;
+		for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
+		{
+			if ((((*itContactList)->GetIPAddress() & 0xFFFFF000) == (pContact->GetIPAddress() & 0xFFFFF000)) && ((*itContactList)->GetDistance() < pContact->GetDistance()))
+				++nSimilarIPs;
+		}
+		if (nSimilarIPs >= 2)
+		{
+			AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - Already 2 contacts in bucket with similar IP's that are closer") , ipstr(ntohl(pContact->GetIPAddress())));
+			return false;
+		}
+		// END netfinity: Safe KAD - Only two nodes per IP range and bucket, unless closer
 		// If not full, add to end of list
 		if ( m_listEntries.size() < K)
 		{

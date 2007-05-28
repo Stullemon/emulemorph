@@ -7665,7 +7665,7 @@ bool CPartFile::IsRangeShareable(uint64 start, uint64 end) const
 			return false;
 	return true;
 }
-void CPartFile::PartHashFinished(uint16 partnumber, bool corrupt)
+void CPartFile::PartHashFinished(UINT  partnumber, bool corrupt)
 {
 	if (partnumber >= GetPartCount())
 		return;
@@ -7750,7 +7750,7 @@ void CPartFile::PartHashFinished(uint16 partnumber, bool corrupt)
 	}
 }
 
-void CPartFile::PartHashFinishedAICHRecover(uint16 partnumber, bool corrupt)
+void CPartFile::PartHashFinishedAICHRecover(UINT partnumber, bool corrupt)
 {
 	if (partnumber >= GetPartCount())
 		return;
@@ -7904,7 +7904,7 @@ int CPartHashThread::SetFirstHash(CPartFile* pOwner)
 	return m_PartsToHash.GetSize();
 }
 
-void CPartHashThread::SetSinglePartHash(CPartFile* pOwner, uint16 part, bool ICHused, bool AICHRecover)
+void CPartHashThread::SetSinglePartHash(CPartFile* pOwner, UINT part, bool ICHused, bool AICHRecover)
 {
 	m_pOwner = pOwner;
 	m_ICHused = ICHused;

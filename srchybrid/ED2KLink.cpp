@@ -1,4 +1,4 @@
-//this file is part of eMule
+ï»¿//this file is part of eMule
 //Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
@@ -519,7 +519,7 @@ CED2KLink* CED2KLink::CreateLinkFromUrl(const TCHAR* uri)
 					return new CED2KServerLink(strServer, strPort);
 			}
 		}
-		// MORPH START - Added by Commander, Friendlinks [emulEspaña]
+		// MORPH START - Added by Commander, Friendlinks [emulEspaa]
 		else if ( strTok == _T("friend") )
 		{
 			CString sNick = GetNextString(strURI, _T("|"), iPos);
@@ -536,13 +536,13 @@ CED2KLink* CED2KLink::CreateLinkFromUrl(const TCHAR* uri)
 			if ( !sURL.IsEmpty() && GetNextString(strURI, _T("|"), iPos) == _T("/") )
 				return new CED2KFriendListLink(sURL);
 		}
-		// MORPH END - Added by Commander, Friendlinks [emulEspaña]
+		// MORPH END - Added by Commander, Friendlinks [emulEspaa]
 	}
 
 	throw GetResString(IDS_ERR_NOSLLINK);
 }
 
-// MORPH START - Added by Commander, Friendlinks [emulEspaña]
+// MORPH START - Added by Commander, Friendlinks [emulEspaa]
 CED2KFriendLink::CED2KFriendLink(LPCTSTR userName, LPCTSTR userHash)
 {
 	if ( _tcslen(userHash) != 32 )
@@ -552,8 +552,8 @@ CED2KFriendLink::CED2KFriendLink(LPCTSTR userName, LPCTSTR userHash)
 
 	for (int idx = 0; idx < 16; ++idx)
 	{
-		m_hash[idx] = FromHexDigit(*userHash++) * 16;
-		m_hash[idx] += FromHexDigit(*userHash++);
+		m_hash[idx] = (uchar)FromHexDigit(*userHash++) * 16;
+		m_hash[idx] += (uchar)FromHexDigit(*userHash++);
 	}
 }
 
@@ -626,4 +626,4 @@ CED2KLink::LinkType CED2KFriendListLink::GetKind() const
 {
 	return kFriendList;
 }
-// MORPH END - Added by Commander, Friendlinks [emulEspaña]
+// MORPH END - Added by Commander, Friendlinks [emulEspaa]

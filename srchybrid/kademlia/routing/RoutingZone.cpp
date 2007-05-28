@@ -289,13 +289,13 @@ bool CRoutingZone::CanSplit() const
 	return false;
 }
 
-bool CRoutingZone::Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate)
+bool CRoutingZone::Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate, bool bAdd) // netfinity: Safe KAD
 {
 	uint32 uhostIP = ntohl(uIP);
 	if (::IsGoodIPPort(uhostIP, uUDPPort))
 	{
 		if (!::theApp.ipfilter->IsFiltered(uhostIP)) {
-			return AddUnfiltered(uID, uIP, uUDPPort, uTCPPort, uVersion, bUpdate);
+			return AddUnfiltered(uID, uIP, uUDPPort, uTCPPort, uVersion, bUpdate, bAdd); // netfinity: Safe KAD
 		}
 		else if (::thePrefs.GetLogFilteredIPs())
 			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s) - IP filter (%s)"), ipstr(uhostIP), ::theApp.ipfilter->GetLastHit());
@@ -305,20 +305,20 @@ bool CRoutingZone::Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 
 	return false;
 }
 
-bool CRoutingZone::AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate)
+bool CRoutingZone::AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate, bool bAdd) // netfinity: Safe KAD
 {
 	if (uID != uMe)
 	{
 		// JOHNTODO -- How do these end up leaking at times?
 		CContact* pContact = new CContact(uID, uIP, uUDPPort, uTCPPort, uVersion);
-		if (Add(pContact, bUpdate))
+		if (Add(pContact, bUpdate, bAdd)) // netfinity: Safe KAD
 			return true;
 		delete pContact;
 	}
 	return false;
 }
 
-bool CRoutingZone::Add(CContact* pContact, bool bUpdate)
+bool CRoutingZone::Add(CContact* pContact, bool bUpdate, bool bAdd) // netfinity: Safe KAD
 {
 	// If we are not a leaf, call add on the correct branch.
 	if (!IsLeaf())
@@ -340,7 +340,7 @@ bool CRoutingZone::Add(CContact* pContact, bool bUpdate)
 			}
 			return false;
 		}
-		else if (m_pBin->GetRemaining())
+		else if (m_pBin->GetRemaining() && bAdd) // netfinity: Safe KAD - Don't add if it was an update only call
 		{
 			// This bin is not full, so add the new contact.
 			if(m_pBin->AddContact(pContact))
@@ -353,11 +353,11 @@ bool CRoutingZone::Add(CContact* pContact, bool bUpdate)
 			}
 			return false;
 		}
-		else if (CanSplit())
+		else if (CanSplit() && bAdd) // netfinity: Safe KAD - Don't add if it was an update only call
 		{
 			// This bin was full and split, call add on the correct branch.
 			Split();
-			return m_pSubZones[pContact->GetDistance().GetBitNumber(m_uLevel)]->Add(pContact, bUpdate);
+			return m_pSubZones[pContact->GetDistance().GetBitNumber(m_uLevel)]->Add(pContact, bUpdate, bAdd); // netfinity: Safe KAD - Just to be consequent
 		}
 		else
 			return false;

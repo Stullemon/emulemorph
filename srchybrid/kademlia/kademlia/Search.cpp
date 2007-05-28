@@ -405,7 +405,7 @@ void CSearch::StorePacket()
 						m_pfileSearchTerms.WriteUInt64(pFile->GetFileSize());
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA2_SEARCH_SOURCE_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_SOURCE_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_SOURCE_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 					}
 					else
 					{
@@ -418,7 +418,7 @@ void CSearch::StorePacket()
 					m_pfileSearchTerms.WriteUInt8(1);
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_REQ(File)", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort()); // netf
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -468,13 +468,13 @@ void CSearch::StorePacket()
 				{
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA2_SEARCH_KEY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_KEY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_KEY_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 				}
 				else
 				{
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_REQ(KEYWORD)", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -499,7 +499,7 @@ void CSearch::StorePacket()
 						m_pfileSearchTerms.WriteUInt64(pFile->GetFileSize());
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA2_SEARCH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_NOTES_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 					}
 					else
 					{
@@ -512,7 +512,7 @@ void CSearch::StorePacket()
 					m_pfileSearchTerms.WriteUInt128(&CKademlia::GetPrefs()->GetKadID());
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_NOTES_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -675,13 +675,13 @@ void CSearch::StorePacket()
 					{
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA2_PUBLISH_KEY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_KEY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_KEY_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 					}
 					else
 					{
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA_PUBLISH_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 					}
 				}
 				// Inc total request answers
@@ -723,13 +723,13 @@ void CSearch::StorePacket()
 					{
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA2_PUBLISH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_NOTES_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 					}
 					else
 					{
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA_PUBLISH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_NOTES_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 					}
 					// Inc total request answers
 					m_uTotalRequestAnswers++;
@@ -765,7 +765,7 @@ void CSearch::StorePacket()
 				// Send packet
 				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 					DebugSend("KADEMLIA_FINDBUDDY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-				CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_FINDBUDDY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+				CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_FINDBUDDY_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 				// Inc total request answers
 				m_uAnswers++;
 				// Update search in the GUI
@@ -794,7 +794,7 @@ void CSearch::StorePacket()
 				// Send packet
 				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 					DebugSend("KADEMLIA_CALLBACK_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-				CKademlia::GetUDPListener()->SendPacket( &fileIO, KADEMLIA_CALLBACK_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+				CKademlia::GetUDPListener()->SendPacket( &fileIO, KADEMLIA_CALLBACK_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 				// Inc total request answers
 				m_uAnswers++;
 				// Update search in the GUI
@@ -1144,7 +1144,7 @@ void CSearch::SendFindValue(CContact* pContact)
 
 		if (pContact->GetVersion() >= 2/*47a*/)
 		{
-			CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA2_REQ, pContact->GetIPAddress(), pContact->GetUDPPort());
+			CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA2_REQ, *pContact); //->GetIPAddress(), pContact->GetUDPPort());
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 			{
 				switch(m_uType)
@@ -1180,7 +1180,7 @@ void CSearch::SendFindValue(CContact* pContact)
 		}
 		else
 		{
-			CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA_REQ, pContact->GetIPAddress(), pContact->GetUDPPort());
+			CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA_REQ, *pContact); //->GetIPAddress(), pContact->GetUDPPort());
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 			{
 				switch(m_uType)
@@ -1407,7 +1407,8 @@ uint32 CSearch::GetNodeLoad() const
 	return m_uTotalLoad/m_uTotalLoadResponses;
 }
 
-uint32 CSearch::GetSearchID() const
+// netfinity: Moved inline for performance reasons
+/*uint32 CSearch::GetSearchID() const
 {
 	return m_uSearchID;
 }
@@ -1422,7 +1423,7 @@ void CSearch::SetSearchTypes( uint32 uVal )
 void CSearch::SetTargetID( CUInt128 uVal )
 {
 	m_uTarget = uVal;
-}
+}*/
 uint32 CSearch::GetAnswers() const
 {
 	if(m_listFileIDs.size() == 0)
@@ -1430,7 +1431,7 @@ uint32 CSearch::GetAnswers() const
 	// If we sent more then one packet per node, we have to average the answers for the real count.
 	return m_uAnswers/((m_listFileIDs.size()+49)/50);
 }
-uint32 CSearch::GetKadPacketSent() const
+/*uint32 CSearch::GetKadPacketSent() const
 {
 	return m_uKadPacketSent;
 }
@@ -1462,7 +1463,7 @@ uint32 CSearch::GetNodeLoadResonse() const
 uint32 CSearch::GetNodeLoadTotal() const
 {
 	return m_uTotalLoad;
-}
+}*/
 void CSearch::UpdateNodeLoad( uint8 uLoad )
 {
 	// Since all nodes do not return a load value, keep track of total responses and total load.

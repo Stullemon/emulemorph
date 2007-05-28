@@ -106,7 +106,7 @@ protected:
     int m_iWebFileUploadSizeLimitMB;
     CString m_sAllowedIPs;
 	int m_iDebugSearchResultDetailLevel;
-
+	int m_iCryptTCPPaddingLength ;
     // continue extra official preferences....
 	HTREEITEM m_hti_advanced;
     HTREEITEM m_hti_bMiniMuleAutoClose;
@@ -143,6 +143,7 @@ protected:
 	HTREEITEM m_hti_AllowedIPs;
 	HTREEITEM m_hti_UseUserSortedServerList;
 	HTREEITEM m_hti_DebugSearchResultDetailLevel;
+	HTREEITEM m_htiCryptTCPPaddingLength;
 	// MORPH END  leuk_he Advanced official preferences. 
 	
 

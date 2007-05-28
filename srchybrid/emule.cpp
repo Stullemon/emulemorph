@@ -252,7 +252,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-	m_strCurVersionLong += _T(" alpha2");
+	m_strCurVersionLong += _T(" alpha3");
 #endif
 
 	// create the protocol version number
@@ -2345,3 +2345,12 @@ bool CemuleApp::IsRunningAsService(int OptimizeLevel ){
 	   return false;  // disable optimizations
 }
 // MORPH END leuk_he:run as ntservice v1..
+// MORPH START lh require obfuscated server connection 
+bool CemuleApp::IsWaitingForCryptPingConnect()
+{
+	return theApp.serverconnect->IsWaitingForConnect()&&
+		   thePrefs.IsServerCryptLayerRequiredStrict();
+}
+// MORPH END lh require obfuscated server connection 
+
+

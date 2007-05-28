@@ -36,11 +36,15 @@ struct SSearchTerm;
 
 namespace Kademlia
 {
+// BEGIN netfinity: Safe KAD - Track on port number too and keep ID for future reference
 	struct TrackPackets_Struct{
 		uint32 dwIP;
+		uint16 uPort;
 		uint32 dwInserted;
 		uint8  byOpcode;
+		CUInt128 uID;
 	};
+// END netfinity: Safe KAD - Track on port number too and keep ID for future reference
 
 	class CKademliaUDPListener
 	{
@@ -56,15 +60,20 @@ namespace Kademlia
 			void SendPacket(const byte* pbyData, uint32 uLenData, uint32 uDestinationHost, uint16 uDestinationPort);
 			void SendPacket(const byte *pbyData, uint32 uLenData, byte byOpcode, uint32 uDestinationHost, uint16 uDestinationPort);
 			void SendPacket(CSafeMemFile* pfileData, byte byOpcode, uint32 uDestinationHost, uint16 uDestinationPort);
+// BEGIN netfinity: Safe KAD - Track on port number too and keep ID for future reference
+			void SendPacket(const byte* pbyData, uint32 uLenData, CContact& destinationContact);
+			void SendPacket(const byte *pbyData, uint32 uLenData, byte byOpcode, CContact& destinationContact);
+			void SendPacket(CSafeMemFile* pfileData, byte byOpcode, CContact& destinationContact);
+// END netfinity: Safe KAD - Track on port number too and keep ID for future reference
 		private:
-			void AddContact (const byte* pbyData, uint32 uLenData, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, bool bUpdate);
-			void AddContact_KADEMLIA2 (const byte* pbyData, uint32 uLenData, uint32 uIP, uint16 uUDPPort, bool bUpdate);
-			void AddContacts(const byte* pbyData, uint32 uLenData, uint16 uNumContacts, bool bUpdate);
+			void AddContact (const byte* pbyData, uint32 uLenData, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, bool bUpdate, bool bAdd = true, CUInt128 uExpectedID = CUInt128()); // netfinity: Safe KAD
+			void AddContact_KADEMLIA2 (const byte* pbyData, uint32 uLenData, uint32 uIP, uint16 uUDPPort, bool bUpdate, bool bAdd = true, CUInt128 uExpectedID = CUInt128()); // netfinity: Safe KAD
+			void AddContacts(const byte* pbyData, uint32 uLenData, uint16 uNumContacts, bool bUpdate, bool bAdd = true); // netfinity: Safe KAD
 			static SSearchTerm* CreateSearchExpressionTree(CSafeMemFile& fileIO, int iLevel);
 			static void Free(SSearchTerm* pSearchTerms);
 			void Process_KADEMLIA_BOOTSTRAP_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA2_BOOTSTRAP_REQ (uint32 uIP, uint16 uUDPPort);
-			void Process_KADEMLIA_BOOTSTRAP_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP);
+			void Process_KADEMLIA_BOOTSTRAP_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA2_BOOTSTRAP_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_HELLO_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA2_HELLO_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
@@ -82,25 +91,27 @@ namespace Kademlia
 			void Process_KADEMLIA_PUBLISH_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA2_PUBLISH_KEY_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA2_PUBLISH_SOURCE_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
-			void Process_KADEMLIA_PUBLISH_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP);
-			void Process_KADEMLIA2_PUBLISH_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP);
+			void Process_KADEMLIA_PUBLISH_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
+			void Process_KADEMLIA2_PUBLISH_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_SEARCH_NOTES_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA2_SEARCH_NOTES_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
-			void Process_KADEMLIA_SEARCH_NOTES_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP);
+			void Process_KADEMLIA_SEARCH_NOTES_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_PUBLISH_NOTES_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA2_PUBLISH_NOTES_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
-			void Process_KADEMLIA_PUBLISH_NOTES_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP);
+			void Process_KADEMLIA_PUBLISH_NOTES_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_FIREWALLED_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
-			void Process_KADEMLIA_FIREWALLED_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP);
+			void Process_KADEMLIA_FIREWALLED_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_FIREWALLED_ACK_RES (uint32 uLenPacket);
 			void Process_KADEMLIA_FINDBUDDY_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_FINDBUDDY_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
-			void Process_KADEMLIA_CALLBACK_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP);
+			void Process_KADEMLIA_CALLBACK_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA2_PING (uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA2_PONG (uint32 uIP, uint16 uUDPPort);
 
-			void AddTrackedPacket(uint32 dwIP, uint8 byOpcode);
-			bool IsOnTrackList(uint32 dwIP, uint8 byOpcode, bool bDontRemove = false);
+// BEGIN netfinity: Safe KAD - Track on port number too and keep ID for future reference
+			void AddTrackedPacket(uint32 dwIP, uint16 uPort, uint8 byOpcode, CUInt128 uID = CUInt128());
+			bool IsOnTrackList(uint32 dwIP, uint16 uPort, uint8 byOpcode, CUInt128* uID = NULL, bool bDontRemove = false);
+// END netfinity: Safe KAD - Track on port number too and keep ID for future reference
 			CList<TrackPackets_Struct> listTrackedRequests;
 	};
 }

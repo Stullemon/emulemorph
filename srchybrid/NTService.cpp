@@ -706,9 +706,9 @@ BOOL Is_Terminal_Services ()
   BOOL    bResult = FALSE;
   DWORD   dwVersion;
 //  OSVERSIONINFOEXA osVersion;
-  DWORDLONG dwlCondition = 0;
+/*  DWORDLONG dwlCondition = 0;
   HMODULE hmodK32 = NULL;
-  HMODULE hmodNtDll = NULL;
+  HMODULE hmodNtDll = NULL; */
   typedef ULONGLONG (WINAPI *PFnVerSetCondition) (ULONGLONG, ULONG, UCHAR);
   typedef BOOL (WINAPI *PFnVerifyVersionA) (POSVERSIONINFOEXA, DWORD, DWORDLONG);
 //  PFnVerSetCondition pfnVerSetCondition;

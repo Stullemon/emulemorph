@@ -420,7 +420,7 @@ void CClientCreditsList::LoadList()
 		}
 	}
 	uint8 tmpprioOrderfile;
-	uint8 maxavailablefile = index;
+	uint8 maxavailablefile =(uint8) index;
 	for (;index>0;index--){
 		for (uint8 i=1; i<index;i++)
 		{
@@ -671,7 +671,7 @@ void CClientCreditsList::SaveList()
 	BYTE* pBuffer = NULL;
 	pBuffer = new BYTE[count*sizeof(CreditStruct_30c)]; //Morph - modified by AndCycle, original 30c file format
 	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	BYTE* pBufferSUQWT;
+	BYTE* pBufferSUQWT=NULL;
 	if (m_bSaveUploadQueueWaitTime)
 		pBufferSUQWT = new BYTE[count*sizeof(CreditStruct)];
 	const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day

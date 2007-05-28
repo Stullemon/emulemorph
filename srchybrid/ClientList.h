@@ -146,4 +146,6 @@ private:
 public:
 	void ResetIP2Country();
 //EastShare End - added by AndCycle, IP to Country
+	CList<IPANDTICS> listBootstrapRequests; // netfinity: Safe KAD - Node spam prevention
+	CList<IPANDTICS> listHelloRequests; // netfinity: Safe KAD - Node spam prevention
 };

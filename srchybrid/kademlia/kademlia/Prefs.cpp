@@ -86,6 +86,9 @@ void CPrefs::Init(LPCTSTR szFilename)
 	m_sFilename = szFilename;
 	m_bLastFirewallState = true;
 	ReadFile();
+	// netfinity: Safe KAD - Check against broken Kad ID's
+	if (!m_uClientID.IsGoodRandom())
+		m_uClientID.SetValueRandom();
 }
 
 void CPrefs::ReadFile()
@@ -96,14 +99,19 @@ void CPrefs::ReadFile()
 		CFileException fexp;
 		if (file.Open(m_sFilename, CFile::modeRead | CFile::osSequentialScan | CFile::typeBinary | CFile::shareDenyWrite, &fexp))
 		{
+			uint32				uIP;
+			Kademlia::CUInt128	uClientID;
+
 			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
-			m_uIP = file.ReadUInt32();
+			uIP = file.ReadUInt32();
 			file.ReadUInt16();
-			file.ReadUInt128(&m_uClientID);
-			// get rid of invalid kad IDs which may have been stored by older versions
-			if (m_uClientID == 0)
-				m_uClientID.SetValueRandom();
+			file.ReadUInt128(&uClientID);
+			file.ReadUInt8();
 			file.Close();
+
+			// netfinity: Only set if no exceptions occured
+			m_uIP = m_uIPLast = uIP;
+			m_uClientID = uClientID;
 		}
 	}
 	catch (CException *ex)
@@ -123,7 +131,7 @@ void CPrefs::WriteFile()
 	{
 		CSafeBufferedFile file;
 		CFileException fexp;
-		if (file.Open(m_sFilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite, &fexp))
+		if (file.Open(m_sFilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareExclusive, &fexp))
 		{
 			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 			file.WriteUInt32(m_uIP);
@@ -144,28 +152,22 @@ void CPrefs::WriteFile()
 	}
 }
 
-void CPrefs::SetIPAddress(uint32 uVal,uint32 uipreceivefrom)
+void CPrefs::SetIPAddress(uint32 uVal)
 {
 	//This is our first check on connect, init our IP..
 	if( !uVal || !m_uIPLast )
-	{	// morph: added some extra logging, nothing else. 
+	{
 		m_uIP = uVal;
 		m_uIPLast = uVal;
 	}
 	//If the last check matches this one, reset our current IP.
 	//If the last check does not match, wait for our next incoming IP.
 	//This happens for two reasons.. We just changed our IP, or a client responsed with a bad IP.
-	if( uVal == m_uIPLast ){
-    	AddDebugLogLine(false, _T("Received my adress:%s from %s via KAD"),ipstr(ntohl(uVal)),ipstr(ntohl(  uipreceivefrom)));
+	if( uVal == m_uIPLast )
     	m_uIP = uVal;
-	}
 	else 
-	{
-		// MORPH extra log line... where do those bad ip adresses com from? 
-		AddDebugLogLine(false, _T("Received suspicious my adress:%s from %s via KAD"),ipstr(ntohl(uVal)),ipstr(ntohl(  uipreceivefrom)));
 		m_uIPLast = uVal;
 	}
-}
 
 
 bool CPrefs::HasLostConnection() const

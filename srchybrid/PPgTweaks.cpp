@@ -238,10 +238,9 @@ CPPgTweaks::CPPgTweaks()
 	m_hti_UseUserSortedServerList=NULL;
 	m_hti_WebFileUploadSizeLimitMB =NULL;
 	m_hti_AllowedIPs=NULL;
-	m_hti_DebugSearchResultDetailLevel;
+	m_hti_DebugSearchResultDetailLevel=NULL;
+	m_htiCryptTCPPaddingLength=NULL;
 	//MORPH END  leuk_he Advanced official preferences.
-
-
 }
 
 CPPgTweaks::~CPPgTweaks()
@@ -450,8 +449,13 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_hti_AllowedIPs=m_ctrlTreeOptions.InsertItem(GetResString(IDS_ALLOWEDIPS),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_hti_AllowedIPs, RUNTIME_CLASS(CTreeOptionsEditEx));
 
-		m_hti_DebugSearchResultDetailLevel=m_ctrlTreeOptions.InsertItem(L"DebugSearchResultDetailLevel",TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
+		m_hti_DebugSearchResultDetailLevel=m_ctrlTreeOptions.InsertItem(GetResString(IDS_DEBUGSEARCHDETAILLEVEL),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_hti_DebugSearchResultDetailLevel, RUNTIME_CLASS(CTreeOptionsEditEx));
+
+		m_htiCryptTCPPaddingLength=m_ctrlTreeOptions.InsertItem(GetResString(IDS_CRYPTTCPPADDINGLENGTH),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_htiCryptTCPPaddingLength, RUNTIME_CLASS(CNumTreeOptionsEdit));													   
+
+
 
 		if (m_bExtControls) // show more controls --> still possible to manully expand. 
 			m_ctrlTreeOptions.Expand(m_hti_advanced, TVE_EXPAND);
@@ -615,6 +619,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 										DDV_MinMaxInt(pDX, m_iWebFileUploadSizeLimitMB, 0, INT_MAX);}
     if(m_hti_AllowedIPs) DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_AllowedIPs,m_sAllowedIPs); //TODO: check string for ip
 	if(m_hti_DebugSearchResultDetailLevel) DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_DebugSearchResultDetailLevel,m_iDebugSearchResultDetailLevel); //TODO: check string for ip
+	if (m_htiCryptTCPPaddingLength) { DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_htiCryptTCPPaddingLength,m_iCryptTCPPaddingLength );
+									  DDV_MinMaxInt(pDX, m_iCryptTCPPaddingLength , 1,256);}
     // MORPH END  leuk_he Advanced official preferences.
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -732,6 +738,7 @@ BOOL CPPgTweaks::OnInitDialog()
 		for (int i = 0; i <  thePrefs.GetAllowedRemoteAccessIPs().GetCount(); i++)
            m_sAllowedIPs= m_sAllowedIPs+ _T(";") + ipstr(thePrefs.GetAllowedRemoteAccessIPs()[i]);
 	m_iDebugSearchResultDetailLevel=thePrefs.GetDebugSearchResultDetailLevel();
+	m_iCryptTCPPaddingLength  = thePrefs.GetCryptTCPPaddingLength();
 	// MORPH END  leuk_he Advanced official preferences.
 
 	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
@@ -939,6 +946,7 @@ BOOL CPPgTweaks::OnApply()
 		strIP = m_sAllowedIPs.Tokenize(L";", iPos);
 	}
 	thePrefs.m_iDebugSearchResultDetailLevel=m_iDebugSearchResultDetailLevel;
+	thePrefs.m_byCryptTCPPaddingLength=m_iCryptTCPPaddingLength ;
 	//MORPH END  leuk_he Advanced official preferences.
 
 
@@ -1115,7 +1123,8 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_hti_PreferRestrictedOverUser,IDS_PREFERRESTRICTEDOVERUSER_TIP);
 		SetTool(m_hti_WebFileUploadSizeLimitMB ,IDS_WEBFILEUPLOADSIZELIMITMB_TIP);
 		SetTool(m_hti_AllowedIPs,IDS_ALLOWEDIPS);
-		SetTool(m_hti_DebugSearchResultDetailLevel,IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP); // TODO tooltip
+		SetTool(m_hti_DebugSearchResultDetailLevel,IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP); 
+		SetTool(m_htiCryptTCPPaddingLength,IDS_CRYPTTCPPADDINGLENGTH_TIP);
 		//MORPH END leuk_he tooltipped
 
 	}

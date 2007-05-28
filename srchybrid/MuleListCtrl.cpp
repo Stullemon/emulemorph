@@ -552,6 +552,10 @@ int CMuleListCtrl::MoveItem(int iOldIndex, int iNewIndex)
 	if(iNewIndex > iOldIndex)
 		iNewIndex--;
 
+	// netfinity start: Don't move item if new index is the same as the old one
+	if(iNewIndex == iOldIndex)
+		return iNewIndex;
+  // netf end
 	// copy item
 	LVITEM lvi;
 	TCHAR szText[256];
