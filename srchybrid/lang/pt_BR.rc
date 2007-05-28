@@ -84,15 +84,22 @@ BEGIN
                             "Atualizando lista de servidores: %s%% de %s concluído"
     IDS_HTTPDOWNLOAD_RETREIVEING_FILE "Baixando arquivo"
     IDS_HTTPDOWNLOAD_OF     "%s de %s"
-
+    IDS_FILELINK            "Link do Arquivo"
+    IDS_LD_BASICOPT         "Opções Básicas"
+    IDS_LD_ADDSOURCE        "Adicionar você mesmo como fonte"
+    IDS_LD_EMULEHASH        "Adicionar o AICH Hash do eMule para manipulação avançada de corrupção"
+    IDS_LD_ADVANCEDOPT      "Opções Avançadas"
     IDS_CANCEL              "Cancelar"
+    IDS_LD_ADDHTML          "Adicionar tags em HTML"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_HTTP_CAPTION        "Atualizando lista de servidores"
     IDS_HTTPDOWNLOAD_TIMELEFT "%s (%s copiados)"
+    IDS_LD_ADDHASHSET       "Adicionar o hashset completo"
     IDS_HSAV                "Hashset Disponível"
+    IDS_DL_SHOWED2KLINK     "Exibir Link ED2K..."
     IDS_FD_CORR             "Corrompido"
     IDS_HTTPDOWNLOAD_OK_TO_OVERWRITE 
                             "O arquivo '%s' já existe.\nVocê deseja substituí-lo?"
@@ -123,10 +130,27 @@ BEGIN
                             "Cliente desconhecido mandou um pacote de protocolo extendido"
     IDS_ERR_OPENMET         "Erro: Falha ao abrir o arquivo part.met! (%s => %s)"
     IDS_ERR_BADMETVERSION   "Erro: Versão inválida de arquivo part.met! (%s => %s)"
+    IDS_ERR_METCORRUPT      "Erro: %s (%s) está corrompido, impossível carregar o arquivo"
+    IDS_ERR_FILEERROR       "Erro inesperado de arquivo ao carregar %s (%s): %s"
+    IDS_ERR_FILEOPEN        "Falha ao abrir %s (%s)"
+    IDS_SEL_SKINDIR         "Selecionar pasta de Skins"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_ERR_HASHERRORWARNING 
+                            "Atenção: Impossível calcular hash do arquivo .part baixado - hashset incompleto (%s)"
+    IDS_ERR_INCOMPLETEHASH  "Erro: Impossível calcular hash do arquivo .part baixado - hashset incompleto (%s). Isto não pode acontecer"
+    IDS_DOWNLOADING         "Transferindo"
+    IDS_WAITING             "Aguardando"
+    IDS_HASHING             "Calculando Hash"
+    IDS_COMPLETING          "Completando"
+    IDS_COMPLETE            "Completo"
+    IDS_PAUSED              "Pausado"
+    IDS_ERRORLIKE           "Erro"
+    IDS_ASSIGNED2K          "eMule não está associado para link ED2K. Você quer associar o link ED2K para o eMule agora? (recomendado)"
+    IDS_ERR_EMPTYADRESSESDAT 
+                            "Não há uma lista de endereços de servidores no arquivo 'adresses.dat'. Por favor coloque uma lista de servidores válidos neste arquivo como forma de auto-atualizar sua lista de servidores"
     IDS_ERR_BADSERVERMETVERSION 
                             "Versão de identificação inválida no server.met (0x%X)!"
     IDS_SERVERSFOUND        "%i servidores encontrados no server.met "
@@ -161,53 +185,40 @@ BEGIN
     IDS_USERS               "Usuários: %i"
     IDS_UPDOWN              "Up: %.1f(%.1f) | Down: %.1f(%.1f)"
     IDS_CONNECTED           "Conectado"
+    IDS_LINKNOTADDED        "Não pode adicionar link"
+    IDS_MAIN_EXIT           "Você deseja realmente sair do eMule?"
+    IDS_MAIN_POPUP_RESTORE  "Restaurar"
+    IDS_CONNECTTOANYSERVER  "Conectar a qualquer servidor"
+    IDS_EXIT                "Sair"
+    IDS_CONNECTING          "Conectando"
+    IDS_FAILED              "Falhou"
+    IDS_ERR_BADSERVERREPLY  "Resposta de login corrompida ou inválida recebida do servidor"
+    IDS_NEWCLIENTID         "Sua nova ID é %u"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_WRITEERROR      "Erro de arquivo inesperado ao tentar escrever %s : %s"
+    IDS_ERR_REHASH          "Cuidado: %s pode estar corrompido, calculando novo hash das partes completas"
+    IDS_SKIN_PROF           "Perfis de Skins"
+    IDS_ERR_PART_FNF        "Arquivo .part não foi encontrado"
+    IDS_KADOPEN             "Aberto"
+    IDS_ERR_SAVEMET         "ERRO ao salvar o arquivo .part: %s (%s)"
+    IDS_ERR_FOUNDCORRUPTION "Encontrada parte corrompida :( (%u) em %s"
+    IDS_HASHINGDONE         "Novo cálculo de hash concluído %s, arquivo parece estar ok"
+    IDS_ERR_PARTCORRUPT     "O arquivo .part baixado %u está corrompido :(  (%s)"
+    IDS_ICHWORKED           "ICH: Parte corrompida recuperada %u  (%s), Salvos: %s"
+    IDS_ERR_OUTOFSPACE      "Você não tem espaço em disco suficiente para fazer download %s!"
+    IDS_SE                  "Troca de Fonte"
+    IDS_ERR_WRITEERROR      "Erro inesperado de arquivo ao tentar escrever %s : %s"
     IDS_ERR_COMPLETIONFAILED 
                             "Erro inesperado ao completar %s. Arq.......... pausado, reinicie o eMule para iniciar nova tentativa de completá-lo"
     IDS_ERR_DELETEFAILED    "Falha ao deletar %s, você terá que fazer isso manualmente"
     IDS_DOWNLOADDONE        "Download concluído %s"
     IDS_ERR_DELETE          "Falha ao deletar %s"
-    IDS_ERR_HASHERRORWARNING 
-                            "Atenção: Impossível fazer hash do arquivo part baixado - hashset incompleto (%s)"
-    IDS_ERR_INCOMPLETEHASH  "Erro: Impossível fazer hash do arquivo part baixado - hashset incompleto (%s). Isso não pode acontecer"
-    IDS_DOWNLOADING         "Transferindo"
-    IDS_WAITING             "Aguardando"
-    IDS_HASHING             "Hashing"
-    IDS_COMPLETING          "Completando"
-    IDS_COMPLETE            "Completo"
-    IDS_PAUSED              "Pausado"
-    IDS_ERRORLIKE           "Erro"
-    IDS_ASSIGNED2K          "O eMule não está associado com links eD2k. Você quer associar os links eD2k com o eMule agora? (recomendado)"
-    IDS_ERR_EMPTYADRESSESDAT 
-                            "Não há uma lista de endereços de servidores no arquivo 'adresses.dat'. Por favor coloque uma lista de servidorest válida nesse arquivo para auto-atualizar sua lista de servidores"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_LINKNOTADDED        "Não pode adicionar link"
-    IDS_MAIN_EXIT           "Fechar o eMule?"
-    IDS_MAIN_POPUP_RESTORE  "Restaurar"
-    IDS_CONNECTTOANYSERVER  "Conectar a qualquer servidor"
-    IDS_EXIT                "&Sair"
-    IDS_CONNECTING          "Conectando...."
-    IDS_FAILED              "Falhou!"
-    IDS_ERR_BADSERVERREPLY  "Resposta de login corrompida ou inválida recebida do servidor"
-    IDS_NEWCLIENTID         "Sua nova ID é %u"
-    IDS_SHAREDFOLDERS       "Pastas compartilhadas"
-    IDS_VIEW1               "Visualizar"
-    IDS_VIEW2               " (não compartilhado)"
-    IDS_PRIOLOW             "Baixa"
-    IDS_PRIONORMAL          "Normal"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_PRIOHIGH            "Alta"
-    IDS_DOWNLOADMENUTITLE   "Downloads"
     IDS_PRIORITY            "Prioridade"
     IDS_NEWSERVERS          "Recebido %d novos servidores"
     IDS_DL_STOP             "&Parar"
@@ -226,7 +237,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ONQUEUE             "Na Fila"
+    IDS_ONQUEUE             "Fila"
     IDS_TRANSFERRING        "Transferindo"
     IDS_RECHASHSET          "Recebendo hashset"
     IDS_NONEEDEDPARTS       "Nenhuma parte necessária"
@@ -284,6 +295,7 @@ BEGIN
     IDS_SHAREDFILES         "Arquivos"
     IDS_PRIOVERYLOW         "Muito Baixa"
     IDS_PRIORELEASE         "Lançamento"
+    IDS_TRAYDLG_SPEED       "eMule Speed"
     IDS_FSTATUS_FRIENDSONLY "Somente Amigos"
     IDS_ERR_RENAMESF        "Falha ao renomear\r\n    ""%s""\r\npara\r\n    ""%s""\r\n\r\n%hs"
     IDS_AVAILABLE           "disponível"
@@ -309,19 +321,19 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_STATS_UNKNOWNCLIENT "Desconhecido: %i"
-    IDS_STATS_TOTAL         "Total: %i"
+    IDS_STATS_UNKNOWNCLIENT "Desconhecido: %u"
+    IDS_STATS_TOTAL         "Total: %u"
     IDS_DISABLED            "Desabilitado"
     IDS_STOPPED             "Parado"
-    IDS_STATS_UPDATELABEL   "Atualizar a cada: %i seg"
+    IDS_STATS_UPDATELABEL   "Atualizar em: %u s"
     IDS_ASKEDFAF            "\nPediu por outro arquivo"
     IDS_WAITED              "Aguardou"
     IDS_ERR_LOADCREDITFILE  "Falha ao carregar o arquivo de crédito, um novo arquivo será criado"
+    IDS_ERR_CREDITFILEOLD   "Arquivo de crédito está desatualizado e será substituído"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_CREDITFILEOLD   "Arquivo de crédito esta desatualizado e será substituído"
     IDS_CREDITFILELOADED    "Arquivo de crédito carregado, %u usuários são conhecidos"
     IDS_CREDITFILECORRUPT   "Erro: O arquivo de crédito esta corrompido e será substituido!"
     IDS_ERR_CREDITFILEREAD  "Erro de arquivo inesperado ao ler o arquivo de crédito: %s"
@@ -396,24 +408,6 @@ BEGIN
     IDS_ERR_FULL            "%s (%s:%i) parece estar cheio"
 END
 
-STRINGTABLE 
-BEGIN
-    IDS_ERR_METCORRUPT      "Erro: %s (%s) está corrompido, impossível carregar o arquivo"
-    IDS_ERR_FILEERROR       "Erro de arquivo inesperado ao carregar %s (%s): %s"
-    IDS_ERR_FILEOPEN        "Falha ao abrir %s (%s)"
-    IDS_SEL_SKINDIR         "Selecionar Diretório de Skin..."
-    IDS_ERR_REHASH          "Cuidado: %s Pode estar corrompido, fazendo novo hash das partes completas"
-    IDS_SKIN_PROF           "Perfis de Pele"
-    IDS_ERR_PART_FNF        "Arquivo .part não foi encontrado"
-    IDS_KADOPEN             "Aberto"
-    IDS_ERR_SAVEMET         "ERRO ao salvar o arquivo part: %s (%s)"
-    IDS_ERR_FOUNDCORRUPTION "Encontrada part corrompida (%i) em %s"
-    IDS_HASHINGDONE         "Novo hashing concluido %s, arq. parece estar ok"
-    IDS_ERR_PARTCORRUPT     "O Arquivo .part baixado %i está corrompido :(  (%s)"
-    IDS_ICHWORKED           "ICH: Parte corrompida recuperada %i  (%s)"
-    IDS_ERR_OUTOFSPACE      "Você não tem espaço em disco suficiente para fazer download %s!"
-    IDS_SE                  "Troca de Fonte"
-END
 
 STRINGTABLE 
 BEGIN
@@ -442,6 +436,10 @@ BEGIN
     IDS_SV_LOG              "Registro"
     IDS_SV_NEWSERVER        "Novo Servidor"
     IDS_SV_ADDRESS          "IP ou Endereço"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_SV_PORT             "Porta"
     IDS_SV_ADD              "Adicionar à Lista"
     IDS_SV_MET              "Atualizar server.met pela URL"
@@ -450,10 +448,23 @@ BEGIN
     IDS_SF_STATISTICS       "Estatísticas"
     IDS_SF_RELOAD           "Recarregar"
     IDS_SF_CURRENT          "Sessão Atual"
+    IDS_SF_TOTAL            "Total"
+    IDS_SF_TRANS            "Transferidos:"
+    IDS_SF_ACCEPTED         "Uploads aceitos:"
+    IDS_SF_REQUESTED        "Solicitado:"
+    IDS_ST_DOWNLOAD         "Velocidade de download"
+    IDS_ST_UPLOAD           "Velocidade de upload"
+    IDS_ST_CURRENT          "Atual"
+    IDS_ST_SESSION          "Média da sessão"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_WS_PASS             "Senha"
+    IDS_WS_ERR_LOADTEMPLATE "Não é possível carregar modelos: substitua o arquivo %s para uma versão mais recente!"
+    IDS_WEB_CONLIMITS       "Limites de Conexões"
+    IDS_INFLST_USER_TOTALDOWNLOAD "Total Recebido"
+    IDS_INFLST_USER_TOTALUPLOAD "Total Enviado"
     IDS_SPEED_LIMITS        "Limites de Velocidade"
     IDS_CAPACITY_LIMITS     "Limites de banda"
     IDS_ADMIN               "Administrador"
@@ -488,14 +499,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SF_TOTAL            "Total"
-    IDS_SF_TRANS            "Transferidos:"
-    IDS_SF_ACCEPTED         "Uploads aceitos:"
-    IDS_SF_REQUESTED        "Solicitado:"
-    IDS_ST_DOWNLOAD         "Velocidade de Download"
-    IDS_ST_UPLOAD           "Velocidade de Upload"
-    IDS_ST_CURRENT          "Atual"
-    IDS_ST_SESSION          "Média da sessão"
     IDS_ST_ACTIVED          "Downloads ativos"
     IDS_ST_ACTIVEU          "Uploads ativos"
     IDS_CW_MESSAGES         "Mensagens"
@@ -729,6 +732,14 @@ BEGIN
     IDS_IRC_IGNOREQUITMESSAGE "Ignorar mensagens de Saída"
     IDS_STATSSETUPINFO      "Estatísticas"
     IDS_IRC_SOUNDEVENTS     "Ativar eventos sonoros"
+    IDS_HARDLIMIT           "Limite Rígido"
+    IDS_COL_MORECOLORS      "mais..."
+    IDS_TOOMANYCONNS        "Muitas conexões"
+    IDS_DOWNLOADRENAMED     "Já existe um arquivo com este nome, o arquivo foi salvo como %s"
+    IDS_TBN_DOWNLOADDONE    "Transferido:"
+    IDS_PW_TBN_USESOUND     "Usar o som:"
+    IDS_PW_TBN_ONLOG        "Houver novas informações no registro"
+    IDS_PW_TBN_ONCHAT       "Iniciar uma nova sessão de bate-papo"
 END
 
 STRINGTABLE 
@@ -749,11 +760,26 @@ BEGIN
     IDS_DYNUP_RADIO_PINGTOLERANCE_HEADER "Método para tolerância"
     IDS_DYNUP_RADIO_PINGTOLERANCE_MS "Milisegundos (ms)"
     IDS_DYNUP_RADIO_PINGTOLERANCE_PERCENT "Porcentagem (%)"
+    IDS_CMT_POOR            "Ruim"
+    IDS_CMT_GOOD            "Bom"
+    IDS_CMT_FAIR            "Regular"
+    IDS_CMT_EXCELLENT       "Excelente"
+    IDS_CMT_NOTRATED        "Não avaliado"
+    IDS_KILO                "K"
+    IDS_MEGA                "M"
+    IDS_GIGA                "G"
+    IDS_TERRA               "T"
+    IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE "Ignorar mensagens de protocolo eMule"
+    IDS_SMARTLOWIDCHECK     "Usar verificação inteligente de ID Baixa ao conectar"
+    IDS_SF_SRVOCC           "Ocupação do servidor: %.2f%%"
+    IDS_3DDEP               "Estilo da Barra"
+    IDS_AUTOTAKEED2KLINKS   "Abrir Links ED2K somente durante funcionamento"
+    IDS_ADDNEWFILESPAUSED   "Adicionar arquivos para download em modo pausado"
+    IDS_DOWNLOADMOVIECHUNKS "Tentar baixar as primeiras/últimas partes"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_DOWNLOADMOVIECHUNKS "Baixar logo as primeiras/últimas partes do arquivo"
     IDS_UPDATEQUEUE         "Não atualizar fila de espera em tempo real"
     IDS_RECOVER_SINGLE      "Recuperação de arquivo: 1 arquivo recuperado."
     IDS_RECOVER_MULTIPLE    "Recuperação de arquivo: %ld arquivos recuperados."
@@ -774,14 +800,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_HARDLIMIT           "Limite Rígido"
-    IDS_COL_MORECOLORS      "mais..."
-    IDS_TOOMANYCONNS        "Muitas conexões"
-    IDS_DOWNLOADRENAMED     "Já existe um arquivo com este nome, o arquivo foi salvo como %s"
-    IDS_TBN_DOWNLOADDONE    "Baixado:"
-    IDS_PW_TBN_USESOUND     "Usar o som:"
-    IDS_PW_TBN_ONLOG        "Ocorrer novas informações no Log"
-    IDS_PW_TBN_ONCHAT       "Iniciar uma nova sessão de Bate-papo"
     IDS_PW_TBN_POP_ALWAYS   "Uma nova mensagem for recebida"
     IDS_PW_TBN_ONDOWNLOAD   "Houver Download Concluído"
     IDS_PW_EKDEV_OPTIONS    "Notificações"
@@ -911,7 +929,7 @@ BEGIN
     IDS_WIDTH               "Largura"
     IDS_FPS                 "Fps"
     IDS_CHANNELS            "Canais"
-    IDS_SAMPLERATE          "Taxa de Hz"
+    IDS_SAMPLERATE          "Freqüência"
 END
 
 STRINGTABLE 
@@ -988,21 +1006,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CMT_FAKE            "Inválido / Corrompido / Falso"
-    IDS_CMT_POOR            "Ruim"
-    IDS_CMT_GOOD            "Bom"
-    IDS_CMT_FAIR            "Regular"
-    IDS_CMT_EXCELLENT       "Excelente"
-    IDS_CMT_NOTRATED        "Não avaliado"
-    IDS_KILO                "k"
-    IDS_MEGA                "M"
-    IDS_GIGA                "G"
-    IDS_TERRA               "T"
-    IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE "Ignorar mensagens de Proto eMule"
-    IDS_SMARTLOWIDCHECK     "Usar verificação inteligente de ID Baixa ao conectar"
-    IDS_SF_SRVOCC           "Ocupação do Servidor: %.2f%%"
-    IDS_3DDEP               "Barra de Progresso"
-    IDS_AUTOTAKEED2KLINKS   "Adicionar Links eD2k só quando aberto"
-    IDS_ADDNEWFILESPAUSED   "Adicionar arquivos para download em modo Pausado"
 END
 
 STRINGTABLE 
@@ -1116,11 +1119,6 @@ BEGIN
     IDS_SV_URL              "URL"
     IDS_WS_RELOAD_TMPL      "Recarregar Modelo"
     IDS_SV_DEBUGLOG         "Registro de Depuração"
-    IDS_WS_PASS             "Senha"
-    IDS_WS_ERR_LOADTEMPLATE "Não é possivel carregar modelos: substitua o arquivo %s para uma versão mais recente!"
-    IDS_WEB_CONLIMITS       "Limites de Conexões"
-    IDS_INFLST_USER_TOTALDOWNLOAD "Total Recebido"
-    IDS_INFLST_USER_TOTALUPLOAD "Total Enviado"
 END
 
 STRINGTABLE 
@@ -1807,15 +1805,15 @@ BEGIN
     IDS_DOWNLOADING_SERVERMET "Baixando server.met..."
     IDS_FULLALLOC           "Alocar tamanho total do arquivo para parts não 'sparse'"
     IDS_X_SHAREAZA_IMPORT_NO_HASH "Hash não encontrado."
-    IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT "Lista Gap list corrupta."
-    IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST "Lista Gap não encontrada."
-    IDS_X_SHAREAZA_IMPORT_HASH_SET_CORRUPT "Hash corrupta."
-    IDS_X_SHAREAZA_IMPORT_NO_HASH_SET "Hash não encontrado."
+    IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT "Lista de intervalos corrompida."
+    IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST "Lista de intervalos não encontrada."
+    IDS_X_SHAREAZA_IMPORT_HASH_SET_CORRUPT "Hash corrompido"
+    IDS_X_SHAREAZA_IMPORT_NO_HASH_SET "Hashset não encontrado."
     IDS_CONVERTINGKNOWN2MET "Convertendo %s para %s para suportar arquivos grandes..."
     IDS_CONVERTINGKNOWN2FAILED 
-                            "...falha convertendo known2.met, ignorando registros antigos"
-    IDS_CONVERTINGKNOWN2DONE "... pronto, conversão terminada"
-    IDS_ERR_MET_BAD         "Erro: o arquivo %s contém erros, impossível carregar lista de arquivos conhecidos"
+                            "...falhou ao converter known2.met, ignorando registros antigos"
+    IDS_CONVERTINGKNOWN2DONE "...completo, conversão finalizada"
+    IDS_ERR_MET_BAD         "Erro: o arquivo %s está corrompido, não é possível carregar arquivos conhecidos"
     IDS_SRV_LARGEFILES      "Suporte para arquivos grandes"
 END
 
@@ -1844,6 +1842,22 @@ BEGIN
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD "Parte %i: importada para manejar ICH."
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
                             "Parte %i: pulada, não é compatível com bloco parcialmente completo."
+    IDS_RESTORESEARCHPARAMS "Restaurar Parâmetros da Pesquisa"
+    IDS_COMMAND             "Comando"
+    IDS_ARGUMENTS           "Argumentos"
+    IDS_ARCPREV_PLEASEWAIT  "Escaneando arquivo..."
+    IDS_AP_CREATEPREVCOPY   "Pré-visualizar arquivo "
+    IDS_ARCHIVEDETAILS      "Detalhes do Arquivo"
+    IDS_ARCHTYPE            "Tipo do Arquivo"
+    IDS_ATTRIBUTES          "Atributos"
+    IDS_LASTMODIFIED        "Última modificação"
+    IDS_RARFULLENCR         "Cabeçalho criptografado - não pode ler arquivo"
+    IDS_ARCPARSED           "Arquivo escaneado"
+    IDS_ARCPREV_LISTMAYBEINCOMPL "Arquivo pode estar incompleto"
+    IDS_ARCPREV_DIRNOTFOUND "Conteúdo não encontrado"
+    IDS_ARCPREV_INSUFFDATA  "Dados disponíveis insuficientes"
+    IDS_PASSWPROT           "Protegido por senha"
+    IDS_ARCPREV_DIRSUCCREAD "Conteúdo lido com sucesso"
 END
 
 STRINGTABLE 
@@ -1854,18 +1868,26 @@ BEGIN
                             "Arquivo é menor que o bloco mínimo para recuperação AICH - não tem motivo para importar dados pra ele."
     IDS_SR13_IMPORTPARTS_IMPORTFINISH 
                             "Importação terminada. %i partes foram importadas para %s."
+    IDS_ENABLEOBFUSCATION   "Habilitar protocolo de ofuscamento"
+    IDS_CONNECTINGTOOBFUSCATED 
+                            "Conectando em %s (%s:%u - usando Protocolo de Ofuscamento) ..."
+    IDS_CONNECTEDTOOBFUSCATED "Conexão ofuscada estabelecida em: %s"
+    IDS_VERIFIED            "verificado"
+    IDS_OBFUSCATED          "Ofuscado"
+    IDS_UNVERIFIED          "não-verificado"
+    IDS_INVALIDFILEEXT      "Extensão de arquivo inválida"
+    IDS_UNKNOWNFILEEXT      "Extensão de arquivo desconhecida"
+    IDS_ENABLEMINIMULE      "Habilitar MiniMule"
+    IDS_DISABLE_AUTOARCHPREV 
+                            "Desabilitar pré-visualização automática de arquivo em detalhes do arquivo"
+    IDS_US_STALLEDW4BR      "Atrasado! Esperando pedido de bloco"
+    IDS_US_STALLEDREADINGFDISK "Atrasado! Lendo do disco"
+    IDS_SERVERFEATURE_INTTYPETAGS "Tags de tipo Inteiro"
+    IDS_FILLGRAPHS          "Preencher gráficos"
+    IDS_PARAMETER           "Parâmetro"
+    IDS_TEST                "Teste"
 END
 
-STRINGTABLE 
-BEGIN
-    IDS_PW_WEBCACHE         "WebCache"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WrongPortforWebcache 
-                            "Download Webcache desligado: Apenas transferências na porta 21, 70,  80, 210, 443, 563 e na variação de 1025 a 65535 são cacheadas. Por favor use uma dessas portas se você quiser ativar o Webcache"
-END
 
 STRINGTABLE 
 BEGIN
@@ -1885,6 +1907,22 @@ BEGIN
     IDS_ALL_TIME            "Todo Tempo"
     IDS_COPYFEEDBACK        "Copiar Informações do Arquivo"
     IDS_ANTILEECHERLOG      "[Anti-leechermods] Cliente %s foi banido temporariamente por suspeita de atividade leecher"
+    IDS_UPNPSTART           "Configurar Portas usando UPnP"
+    IDS_UPNPSETUP           "Tentando configurar o redirecionamento de portas por UPnP..."
+    IDS_UPNPFAILED          "UPnP falhou, por favor redirecione estas portas manualmente se necessário!"
+    IDS_UPNPSUCCESS         "UPnP configurou com sucesso o redirecionamento para as portas %u (TCP) e %u (UDP)"
+    IDS_FO_PREFBUTTON_NEW   "Abrir portas no firewall do WinXP SP1"
+    IDS_UPNP_NOSERVICE      "Dispositivo UPnP não está funcionando, pulando configuração UPnP"
+    IDS_DELAYEDBYUPNP       "A conexão com a rede está atrasada, porque o UPnP está ocupado configurando o redirecionamento de portas."
+    IDS_DELAYEDBYUPNP2      "Por favor aguarde alguns segundos, o eMule irá conectar quando finalizar UPnP."
+    IDS_UPNP                "UPnP"
+    IDS_UPNPCLOSEONEXIT     "Remover o redirecionamento de portas por UPnP ao sair"
+    IDS_UPNPSKIPWANIP       "Pular configuração de WAN IP"
+    IDS_UPNPSKIPWANPPP      "Pular configuração de WAN PPP"
+    IDS_SHAREEMULELABEL     "Compartilhar o eMule com outros usuários deste computador"
+    IDS_SHAREEMULEMULTI     "Cada usuário tem suas próprias configurações e downloads"
+    IDS_SHAREEMULEPUBLIC    "Todo mundo compartilha as mesmas configurações e downloads"
+    IDS_SHAREEMULEOLD       "Armazenar configurações e downloads na pasta do eMule"
 END
 
 STRINGTABLE 
@@ -2402,7 +2440,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP                "Universal Plug and Play (UPnP)"
     IDS_UPNP_INIT           "UPnP: Iniciado em %s:%d, procurando dispositivos.."
     IDS_UPNP_FAILEDINIT     "UPnP: Falha iniciando UPnP na porta %d [%s]"
     IDS_UPNP_PUBLICIP       "UPnP: Seu endereço IP é público, UPnP será desligado"
@@ -2488,9 +2525,6 @@ BEGIN
     IDS_AUTOUPIP2COUNTRY    "Atualizar Ip-to-country.csv ao Iniciar"
     IDS_UPDATEIPCURL        "Atualizar"
     IDS_CLIENTQUEUEPROGRESSBAR "Mostrar progresso da fila de espera"
-    IDS_WEBCACHE_NOSUPPORT  "não suportado"
-    IDS_STATS_SUCCESSFULLWC "WC-DL/WC-Requests bem sucedidos:"
-    IDS_STATS_FAILEDWC      "WC-DL/WC-Requests falhados:"
 END
 
 STRINGTABLE 
@@ -2529,35 +2563,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_WEBCACHE_ISP        "Configurações do PROXY"
-    IDS_WC_PORT             "Porta"
-    IDS_WC_ADDRESS          "Endereço"
-    IDS_WC_CONTROLS         "Controles do WebCache"
-    IDS_WC_ENABLE           "Ligar downloads via WebCache"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WC_WRONGPORT        "Você está usando uma porta TCP que não é normalmente cacheada pelos servidores Proxy. Mude sua porta para 21, 70, 80, 210, 443, 563 ou 1025-65535 para poder ativar downloads via WebCache!"
-    IDS_WC_AUTO             "Detecção Automática de Webcache"
-    IDS_WC_NRBLOCKS         "Números de blocos para baixar antes de reconectar ao proxy (pode ajudar a resolver desconexões)"
-    IDS_WC_BLOCK            "Blocos de 180k"
-    IDS_WC_TIMEOUT          "Duração extra longa para conexões WebCache"
-    IDS_WC_LOCAL            "WebCache não faz cache de dados do mesmo ISP"
-    IDS_WC_SUBMIT_EMAIL     "Enviar essas configurações via email"
-    IDS_WC_LINK             "Link: "
-    IDS_WC_PERSISTENT       "Conexões persistentes para downloads via proxy"
-    IDS_WC_ADVANCED         "Controles avançados"
-    IDS_WC_TEST             "Testar configurações. Pode levar até 30 Segundos"
-    IDS_WC_HIDE_ADV         "Esconder controles avançados"
-    IDS_WC_SUBMIT_WEB       "Enviar informações de WebCache via formulário web"
-    IDS_WC_SOURCES          "Apto a Webcache"
-    IDS_WC_UPDATESETTING    "Atualizar configurações WebCache automaticamente"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_LOG_WCEVENTS        "Registrar eventos WebCache"
     IDS_LOG_IACH            "Registrar eventos IACH"
 END
 
@@ -2581,20 +2586,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRC_SUFFIX          "Sufixo para adicionar ao final do nome do arquivo depois do CRC32:"
-    IDS_COUNTWCSESSIONSTATS "Contar Sessões WC às estatísticas de sessão"
-    IDS_WEBCACHE_NOPROXY    "sem proxy configurado"
-    IDS_CD_WCSUCCFAIL       "Bem sucedido/Requerido:"
-    IDS_CD_WCTRUSTSENDER    "Informante OHCB confiável:"
-    IDS_WCDOWNL             "não funcionando ainda"
-    IDS_WC_REQ_SUCC         "WC Succ/Req:"
-    IDS_WC_DOWNLOADED       "WC-Download:"
     IDS_CRC32_TITLE         "CRC32 ao nome do arquivo"
     IDS_LOG_IPFILTER_LOADED "Carregado filtros de IP de ""%s"" em %ums"
     IDS_LOG_IPFILTER_INFO   "Linhas analisadas: %u Faixas de IP encontradas: %u Duplicados: %u Unidos: %u"
     IDS_IPFILTER_SAVERR     "Falha ao salvar filtro de IP ao arquivo ""%s"" - %hs"
     IDS_IPFILTER_NOTAVAIL   "Não disponível"
-    IDS_WC_REACTIVATED      " Webcache foi reativado."
-    IDS_WC_NEWPROXYIP       "Um novo IP de proxy foi detectado: %s."
     IDS_LOG_ERRDWN          "Erro baixando %s"
 END
 
@@ -2817,7 +2813,6 @@ STRINGTABLE
 BEGIN
     IDS_DISPLAYFUNNYNICK_TIP 
                             "Cria um apelido artificial no formato <i>[Funnynick]Inventado1 Inventado2</i>\npara usuários que não escolherem um apelido."
-    IDS_COUNTWCSESSIONSTATS_TIP "Cria estatísticas a parte para o tráfego do WebCache"
     IDS_CLIENTQUEUEPROGRESSBAR_TIP 
                             "Mostra uma barra na parte inferior da janela de transferências\nmostrando o número de clientes na fila."
     IDS_DOWNLOADDATARATEAVERAGETIME_TIP 
@@ -3109,44 +3104,10 @@ STRINGTABLE
 BEGIN
     IDC_USERNAME_A_TIP      "Nome do usuário no proxy"
     IDC_PASSWORD_TIP        "A senha do proxy"
-    IDC_WEBCACHENAME_TIP    "Nome do host do proxy no seu provedor. Use 'transparent@seuprovedor' para um proxy transparente"
-    IDC_WEBCACHEPORT_TIP    "Número da porta (tipicamente 80 ou 8080)"
-    IDC_STATIC_ADDRESS_TIP  "IDC_STATIC_ADDRESS_TIP"
-    IDC_STATIC_CONTROLS_TIP "IDC_STATIC_CONTROLS_TIP"
-    IDC_ACTIVATEWEBCACHEDOWNLOADS_TIP 
-                            "Ativa o uso do proxy Webcache do seu provedor.\nSe o seu provedor suporta um proxy Webcache, esse proxy será\nusado para fazer cache dos seus Downloads. Se mais pessoas\ndo seu provedor pedirem os mesmos dados de um MOD com Webcache ativo,\nos dados serão transferidos através do proxy. Dessa forma\no usuário só precisará enviar os dados uma vez.\nIsso só funcionará se o enviate usar um mod com Webcache,\ne mais pessoas no seu provedor usarem o mesmo proxy.\nNota: enviar dados para o Webcache não pode ser desligado."
-    IDC_DETECTWEBCACHE_TIP  "Usa o webcaches.xml na sua pasta 'config'\npara procurar por proxy no seu provedor."
-    IDC_STATIC_BLOCKS_TIP   "Quantidade de dados que determina se a conexão deve ser resetada."
-    IDC_EXTRATIMEOUT_TIP    "Espera 400 segundos invés de 130 para esgotar\no tempo de envio de um bloco de 180kb"
-    IDC_LOCALTRAFFIC_TIP    "Alguns provedores possuem proxies que não fazem cache de dados\ninternos (dados trafegando de um usuário do provedor para outro\ndo mesmo provedor). Com essa opção ligada, o eMule desligará o\ndownload via Webcache para esses casos."
-    IDC_PERSISTENT_PROXY_CONNS_TIP "Usa flag de download persistente (http 1.1) no proxy"
 END
 
 STRINGTABLE 
 BEGIN
-    IDC_ADVANCEDCONTROLS_TIP "Mostra opções avançadas. "
-    IDC_TESTPROXY_TIP       "Testa o proxy. Essa opção testa se o proxy é alcançável\ne se o proxy pode alcançar sua porta do eMule. Isso NÃO testa\nse o proxy atualmente faz cache(guarda) os dados (requerido!)\nRequerimentos:\n1. Conectado a um servidor\n2. Você precisa ter um IP válido e público\n3. Você precisa ter ID Alta\n4. O teste não funciona se você tiver muitas\nconexões abertas. (muitos downloads)"
-    IDC_UPDATE_WCSETTINGS_TIP 
-                            "Recarregar o webcache.xml automaticamente ao iniciar\n(<b>desligado</b> no código fonte até alguém pegar o projeto)"
-    IDC_MSG_WEBCACHEFAIL    "Seu servidor proxy não parece estar fazendo cache. Não houve nenhum requerimento Webcache bem sucedido dos mais de 100 que foram enviados. Por favor reveja sua configuração de proxy. Downloads de WebCache foram desativados até um novo proxy ser testado!"
-    IDC_MSG_WEBCACHE_NOAUTODEC 
-                            "Desculpe, seu provedor não está no banco de dados,\no identificador do seu provedor é %s\nPara ativar auto-detecção, por favor descubra e submeta o proxy do seu provedor."
-    IDC_MSG_WEBCACHE_NOIP   "Sem IP público, por favor conecte a um servidor eD2k ou Kad.\nSua porta TCP tem de ser alcançável (ID Alta) se você estiver conectado a um servidor,\nmas não é necessário quando conectado a rede Kad"
-    IDC_MSG_WEBCACHE_CONFIGALT 
-                            "Auto-detecção de Webcache detectou uma mudança nas configurações de Webcache\n,Webcache foi desativado até um novo proxy ser testado.\nVocê pode desativar a detecção automática em 'Webcache Avançado'"
-    IDC_MSG_WEBCACHE_NOACTIVE 
-                            "Auto-detecção de Webcache detectou que seu proxy do provedor não faz cache de dados. Webcache desligado."
-    IDC_MSG_WEBCACHE_ERRRESOLVE 
-                            "Erro WebCache - Falha ao ailed to determinar endereço do proxy HTTP:\n%s\nPor favor reveja suas configurações de Webcache"
-    IDC_MSG_WEBCACHE_TRANSPAR 
-                            "Teste de proxy não pode testar proxys transparentes. Teste cancelado!"
-    IDC_MSG_WEBCACHE_TESTRUNNING 
-                            "Efetuando teste de Proxy! Por favor verifique os Registros na tela de servidores para os resultados!"
-    IDC_MSG_WEBCACHE_TESTERR "Erro no Teste de Proxy"
-    IDC_MSG_WEBCACHE_ALREADYRUNNING 
-                            "Nenhum teste novo iniciado. Já existe um teste em andamento."
-    IDC_MSG_WEBCACHE_TESTREQ 
-                            "Nenhum teste efetuado. Requerimentos não cumpridos.\n Requerimentos:\n1. Você tem de estar conectado a um servidor\n2. Você tem de ter um IP válido e público\n3. Você precisa ter ID Alta\n4. O teste não funciona se você tiver muitas conexões abertas"
     IDC_UPDATEFAKELISTSTART_TIP 
                             "Tenta atualizar a lista antes de conectar-se à rede"
 END
@@ -3466,17 +3427,18 @@ BEGIN
                             "Requerer conexão ofuscada com o servidor.\nLigue para prevenir conectar em servidores falsos e antigos."
     IDS_WIZ8_MORPH          "Opções do MorphXT"
     IDS_MORPHWIZ_GUI        "Opções do Mod"
-    IDS_MORPHWIZ_SHOWMORE   "Mostrar mais controles (avançados!)"
-    IDS_MORPHWIZ_SHOWLESS   "Mostrar menos controles"
+    IDS_MORPHWIZ_SHOWMORE   "Mostrar mais controles (avançados)"
+    IDS_MORPHWIZ_SHOWLESS   "Mostrar menos controles (pra iniciantes)"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_MORPHWIZ_NEXT       "Ao finalizar o Assistente"
     IDS_MORPHWIZ_NET1       "Executar o Assistente de Rede para configurar a velocidade da Internet."
     IDS_MORPHWIZ_IMPORT     "Executar a Ferramenta de Importação para importar Downloads\ndo eDonkey/shareaza/eMule"
 END
-STRINGTABLE 
+
+STRINGTABLE
 BEGIN
 	IDS_PREF_GROUPGENERAL "Opções Gerais"
 	IDS_PREF_GROUPEXTENDED "Opções Avançadas"
