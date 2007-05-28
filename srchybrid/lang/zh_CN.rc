@@ -507,14 +507,14 @@ BEGIN
     IDS_FR                  "星期五"
     IDS_SA                  "星期六"
     IDS_SO                  "星期日"
-    IDS_WEB_ADMINLOGIN      "Web服务器-管理员-登陆"
-    IDS_WEB_GUESTLOGIN      "Web服务器-客人-登陆"
-    IDS_WEB_SESSIONEND      "Web服务器:注销"
+    IDS_WEB_ADMINLOGIN      "远程网络界面-管理员-登陆"
+    IDS_WEB_GUESTLOGIN      "远程网络界面-客人-登陆"
+    IDS_WEB_SESSIONEND      "远程网络界面:注销"
     IDS_DETAILS             "详细资料"
     IDS_ACTION              "动作"
     IDS_REMOVE              "删除"
     IDS_NEW                 "新建"
-    IDS_WEB_BADLOGINATTEMPT "Web服务器:登陆尝试失败"
+    IDS_WEB_BADLOGINATTEMPT "远程网络界面:登陆尝试失败"
 END
 
 STRINGTABLE 
@@ -590,7 +590,7 @@ BEGIN
     IDS_FD_TRANSFER         "传输"
     IDS_FD_PARTS            "文件段"
     IDS_FD_TRANS            "已传输:"
-    IDS_FD_DATARATE         "数据传输率:"
+    IDS_FD_DATARATE         "数据传输速率:"
     IDS_FD_COMPSIZE         "已完成大小:"
     IDS_FD_CLOSE            "关闭"
     IDS_FD_TITLE            "文件详情"
@@ -1122,7 +1122,7 @@ BEGIN
     IDS_KAD_SEARCH_KEYWORD_INVALID 
                             "无效的Kad关键字.\r\n\r\nKad搜索表达式必须符合以下格式:\r\n\r\n\t<Kad关键字> [ <ed2k搜索表达式> ]\r\n\r\n<Kad关键字>不能包含以下任何字符:\r\n\r\n\t%s"
     IDS_EDITCAT             "编辑分类属性"
-    IDS_PW_WS               "Web服务器"
+    IDS_PW_WS               "远程网络界面"
 END
 
 STRINGTABLE 
@@ -1133,7 +1133,7 @@ BEGIN
     IDS_WEB_LOGIN_NOW       "现在登陆"
     IDS_WEB_CONFIRM_REMOVE_SERVER 
                             "确定要把这个服务器从列表中删除吗?"
-    IDS_WEB_CONTROL         "Web控制面板"
+    IDS_WEB_CONTROL         "远程网络控制"
     IDS_WEB_LOGOUT          "注销"
     IDS_WEB_ACTIONS         "动作"
     IDS_WEB_SHOW_UPLOAD_QUEUE "显示队列"
@@ -1159,7 +1159,7 @@ BEGIN
     IDS_S_DAYS              "天"
     IDS_STARTTIME           "开始时间"
     IDS_VALUE               "值"
-    IDS_SCHED_ENTERDATARATELIMIT "输入数据传输率限制:"
+    IDS_SCHED_ENTERDATARATELIMIT "输入数据传输速率限制:"
     IDS_SCHED_ENTERVAL      "请输入新的值:"
     IDS_SCHED_ACTCONFIG     "设置动作"
     IDS_SELECTCAT           "选择分类"
@@ -1169,7 +1169,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ACTSESSIONS         "活动会话数"
-    IDS_WEBSRV              "Web服务器:"
+    IDS_WEBSRV              "远程网络界面:"
     IDS_SW_REFETCHRES       "重新得到结果"
     IDS_FILEHASH            "文件Hash"
     IDS_PW_PROXY            "代理服务器"
@@ -1869,6 +1869,16 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_SHAREEMULEWARNING   "改变这个选项将让eMule使用不同的设置. 当前的设置将被忽略, 已经开始的下载可能不再出现. 不过可以随时通过再次改变这个选项回到目前的设置.\n\n此处的更改在重启eMule后才生效."
+    IDS_SPAM                "垃圾信息"
+    IDS_MARKSPAM            "标记为垃圾信息"
+    IDS_MARKNOTSPAM         "标记为非垃圾信息"
+    IDS_SEARCHSPAMFILTER    "对搜索结果进行垃圾信息过滤"
+    IDS_SHOWSMILEYS         "显示表情图标"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_CRASHRPT_DONE       "程序崩溃报告已经生成."
     IDS_CRASHRPT_AV         "程序崩溃报告器可用且正在运行."
 END
@@ -1915,7 +1925,9 @@ BEGIN
     IDS_ECFEF               "每个文件机会均等"
     IDS_ALL_TIME            "始终"
     IDS_COPYFEEDBACK        "复制信息到剪贴板"
+    IDS_FOLLOW_THE_MAJORITY "命名遵循分类"
     IDS_ANTILEECHERLOG      "[反吸血骡] 客户 %s 因可疑的吸血行为被暂时阻止"
+    IDS_FAIR_PLAY           "公平游戏"
 END
 
 STRINGTABLE 
@@ -2477,7 +2489,7 @@ BEGIN
     IDS_UPNP_PORTDELETED    "UPnP: 端口映射已删除 ""%s"". [%s]"
     IDS_UPNP_LOGEVENTS      "记录 UPnP 事件"
     IDS_UPNP_ENABLE         "启用UPnP"
-    IDS_UPNP_ENABLEWEB      "在网络服务器界面启用UPnP端口"
+    IDS_UPNP_ENABLEWEB      "为远程网络界面端口启用UPnP"
     IDS_RANDOMPORTS         "随机端口"
     IDS_MINPORT             "最小端口"
 END
@@ -3070,7 +3082,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPNP_ENABLE_TIP     "设置你的电脑所面临的路由器端口.\n可能必须先启用路由器的uPnP功能\n如果你已经手动设定好了端口则无需此项设置\n如果你没有使用路由器也不需设置\n如果使用了'随机端口'则推荐使用此项设置\n(默认设置: 自动检测)"
-    IDS_UPNP_ENABLEWEB_TIP  "设置web服务器界面所使用的端口, \n这样才能通过internet执行web服务器管理"
+    IDS_UPNP_ENABLEWEB_TIP  "设置远程网络界面所使用的端口, \n这样才能通过internet执行远程网络服务管理"
     WAP_TIP                 "无线通讯协议(WAP)是一个开放的国际标准\n适用于通过无线连接(如手机上网)使用的程序"
     ENABLEWAP_TIP           "启用wap界面"
     TEMPLATE_TIP            "选择Morph将使用的wap模板,\n默认位于emule的wapserver目录下(未设定!)"
@@ -3087,17 +3099,17 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDC_WSPASS_TIP          "设置可以访问web服务器界面的密码. \n设置恰当的密码非常重要,\n否则任何人都可能通过web服务器界面控制你的eMule.\n输入的密码将显示为 ***. 无预设密码."
+    IDC_WSPASS_TIP          "设置用于访问远程网络服务界面的密码. \n设置恰当的密码非常重要,\n否则任何人都可能通过web服务界面控制你的eMule.\n输入的密码将显示为 ***. 无预设密码."
     IDC_WSPASSLOW_TIP       "启用游客帐号\n游客只能浏览, 不能更改任何设置"
     IDC_MMPASSWORDFIELD_TIP "允许java客户访问的密码"
-    IDC_WSPORT_TIP          "web服务器界面的端口. 默认为4711. \n改变此端口会导致web服务器界面更加难以访问.\n但如果改成80端口, 有时会更容易访问.\n如果使用了路由器, 需要打开这个端口或者启用uPnp"
+    IDC_WSPORT_TIP          "web服务界面的端口. 默认为4711. \n改变此端口会导致web服务界面更加难以访问.\n但如果改成80端口, 有时会更容易访问.\n如果使用了路由器, 需要打开这个端口或者启用uPnp"
     IDC_MMPORT_FIELD_TIP    "Emule的手机用户界面的监听端口.\n大多数java手机适用80端口 (默认设置)"
-    IDC_TMPLPATH_TIP        "web服务器界面所采用的模板.\n这个模板也包含html代码."
+    IDC_TMPLPATH_TIP        "web服务界面所采用的模板.\n这个模板也包含html代码."
     IDC_WSTIMEOUT_TIP       "在自动注销前所等待的时间.\n设为0则将禁用自动注销."
-    IDC_WSENABLED_TIP       "启用eMule的web服务器界面.\n你将能够通过浏览器远程控制eMule"
+    IDC_WSENABLED_TIP       "启用eMule的web服务界面.\n你将能够通过浏览器远程控制eMule"
     IDC_WSENABLEDLOW_TIP    "启用只读游客帐号.\n默认设置: 禁用."
     IDC_MMENABLED_TIP       "启用emule手机界面.\n可以通过支持java的手机远程控制eMule.\n大多数jave手机有40 KB的可用固定内存,\n大约150-200KB的可用流量."
-    IDC_WS_GZIP_TIP         "压缩传送到web服务器界面的数据.\n所有主流浏览器都支持这项功能,\n但如果你希望通过脚本控制eMule,\n可能需要禁用此项功能"
+    IDC_WS_GZIP_TIP         "压缩传送到web服务界面的数据.\n所有主流浏览器都支持这项功能,\n但如果你希望通过脚本控制eMule,\n可能需要禁用此项功能"
     IDC_WS_ALLOWHILEVFUNC_TIP 
                             "允许管理员帐号控制关闭eMule\n以及关闭或重启计算机. \n需要 选项->常规中设为在Windows启动运行eMule"
 END
@@ -3105,7 +3117,7 @@ END
 STRINGTABLE 
 BEGIN
     IDC_WSRELOADTMPL_TIP    "重新加载模板."
-    IDC_TMPLBROWSE_TIP      "浏览文件系统,\n选择包含有web服务器界面所需html代码的模板文件"
+    IDC_TMPLBROWSE_TIP      "浏览文件系统,\n选择包含有web服务界面所需html代码的模板文件"
     IDC_GUIDELINK_TIP       "通过浏览器访问http://mobil.emule-project.net/\n启动手机eMule向导"
     IDS_PREFER_SHARE_ALL_TIP 
                             "优先连接到那些有能力处理你的全部共享文件\n(即软性限制符合要求)的服务器."
@@ -3133,6 +3145,9 @@ BEGIN
     IDS_PAYBACKFIRSTLIMI_TIP 
                             "设定在某用户传递给你多少数据后才启动优先回报模式"
     IDS_EXPIRED_KNOWN_TIP   "在某个文件消失超过一定天数后, 清除.met文件以节约硬盘空间.\n针对know*.met进行操作, 切勿设定小于30的数值!"
+    IDS_FOLLOW_THE_MAJORITY_TIP 
+                            "根据设定的类别自动重命名下载中的文件, \n可通过右键点击选择激活, 并可通过任何重命名操作取消."
+    IDS_FAIR_PLAY_TIP       "以高优先级上传已下载的文件, 直到传出完整的一份."
 END
 
 STRINGTABLE 
@@ -3473,7 +3488,7 @@ BEGIN
     IDS_WIZARDREQUIREOBFUSCATED "仅连接到支持加密连接的服务器.\n启用此选项将不会连接到恶意的/虚假的服务器"
     IDS_MORPHWIZ_IMPORT     "运行导入工具来导入\neDonkey/shareaza/eMule中的未完成下载"
     IDS_UPNP_NETSTATUS      "Upnp"
-    IDS_UPNP_ENABLE_WEB     "在网络界面启用UPnP"
+    IDS_UPNP_ENABLE_WEB     "为远程网络界面端口启用UPnP"
     IDS_UPNP_INFOUNINIT     ",尚未初始化\r\n"
     IDS_UPNP_INFOENABLED    ",已启用\r\n"
     IDS_UPNP_INFODISABLED   ",已禁用\r\n"
