@@ -1389,7 +1389,7 @@ BEGIN
     LTEXT           "Currently downloading:",IDC_STATIC48,19,118,87,8,0,
                     WS_EX_RIGHT
     CONTROL         "Static",IDC_UPLOADING,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,110,1118,202,8
+                    SS_NOPREFIX | WS_GROUP,110,118,202,8
     RTEXT           "Kad:",IDC_CLIENTDETAIL_KAD,195,57,20,8
     CONTROL         "Static",IDC_CLIENTDETAIL_KADCON,"Static",
                     SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,219,57,92,8
@@ -6076,7 +6076,7 @@ BEGIN
 END
 
 STRINGTABLE 
-BEGIN
+BEGIN								    
     IDS_MORPHWIZ_IMPORT     "Run import tool to import pending downloads\nfrom eDonkey/shareaza/eMule"
     IDS_PREF_GROUPGENERAL   "General options"
     IDS_PREF_GROUPEXTENDED  "Advanced options"
@@ -6100,7 +6100,13 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPNP_INFO_NONEED    "Failed or not needed"
+	IDS_DEBUGSEARCHDETAILLEVEL    "DebugSearchDetailLevel"
+    IDS_CRYPTTCPPADDINGLENGTH	  "CryptTCPPaddingLength=[1-256]"
+	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "The amount of random bytes that is added to obfuccated traffic. (default 128). \nlow values means less overhead (try 16), highvalues means better obfuscation "
 END
+
+
+
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////

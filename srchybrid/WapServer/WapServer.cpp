@@ -3274,7 +3274,7 @@ bool CWapServer::IsSessionAdmin(WapThreadData Data,CString SsessionID){
 		for(int i = 0; i < pThis->m_Params.Sessions.GetSize(); i++)
 		{
 			if(pThis->m_Params.Sessions[i].lSession == sessionID && sessionID != 0)
-				return pThis->m_Params.Sessions[i].admin;
+				return pThis->m_Params.Sessions[i].admin>1;	// MORPH: ionix multiuser 
 		}
 	}
 	return false;
@@ -4224,7 +4224,7 @@ void CWapServer::SendProgressBar(WapThreadData Data, CString filehash)
 	}
 	else
 	{
-		s_ChunkBar=cur_file->GetProgressString(thePrefs.GetWapGraphWidth()-1);
+		s_ChunkBar=cur_file->GetProgressString((uint16)thePrefs.GetWapGraphWidth()-1);
 	}
 
 	if((png || gif) && !thePrefs.GetWapAllwaysSendBWImages()){
