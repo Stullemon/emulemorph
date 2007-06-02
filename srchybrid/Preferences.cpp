@@ -940,7 +940,7 @@ void CPreferences::Init()
 	}
 
 
-	if (((int*)userhash[0]) == 0 && ((int*)userhash[1]) == 0 && ((int*)userhash[2]) == 0 && ((int*)userhash[3]) == 0)
+	if (((int*)userhash)[0] == 0 && ((int*)userhash)[1] == 0 && ((int*)userhash)[2] == 0 && ((int*)userhash)[3] == 0) //Xman Bugfix by ilmira
 		CreateUserHash();
 }
 

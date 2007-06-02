@@ -1,7 +1,5 @@
 eMule Copyright (C)2002-2005 Merkur (merkur-@users.sourceforge.net)
-eMule morph Copyright (C)2002-2006 morph team
-
-
+eMule morph Copyright (C)2002-2007 morph team
 Note: --- Additions made for emule morph
 
 
@@ -276,7 +274,7 @@ COMPILING THE SOURCECODE:
 
 The sourcecode of eMule is availible as seperate download at:
  http://sourceforge.net/projects/emulemorph
-You need Microsoft(C) Visual Studio .NET 2003 to compile eMule morph
+You need Microsoft(C) Visual Studio .NET 2003 + sp1 of this compiler to compile eMule morph
 vs2002 might work, vc2005 will surely not work without modifications to the source
 You need to have MFC/ATL installed!
 
@@ -284,7 +282,8 @@ You need to have MFC/ATL installed!
 
 Since eMule v0.29b the separate download and compilation of additional 
 libraries is required. These libs are 3rd party and therefore - as usual - not 
-within our distribution. You need the following libs:
+within the official distribution. Morph provides them as a special download (scr and libs) 
+You need the following libs:
 
 
 ----- Libs (active):
@@ -308,7 +307,7 @@ within our distribution. You need the following libs:
 Micorsoft speech api (5.1?)(or just remove "HAVE_SAPI_H" from the preprocessor definitions)
 
 
-Or download all libs and run emule_all.vcpproj using your favrout p2p application:
+Or download all libs and run emule,vcpproj using your favrout p2p application:
 ed2k://|file|eMule047aMorphXT85_complete_compilable_Package.rar|18128572|4BD14E6F69E3B1046423932F638BEAA8|h=5NX573HANXXHWOGAD2JWUXC57GD55B6X|/
 
 read 
@@ -335,9 +334,7 @@ required foldernames, or adapt them to your needs!).
  If you make modifications to eMule and you distribute the compiled version of 
  your build, be sure to obey the GPL license. You have to include the 
  sourcecode, or make it availible for download together with the binary 
- version.
-
-
+ version. READ THE GPL!
 
 MISC. STUFF:
 ------------
@@ -375,6 +372,7 @@ program?
 --- MORPHxt team:
 stulle 
 leuk_he 
+andcycle 
 sirob (Retired because of french davsi law)
 Morpheus (founder, retired)
 And all the other team members listed at:
@@ -383,7 +381,7 @@ http://sourceforge.net/project/memberlist.php?group_id=72158
 
 LEGAL:
 ------
-eMulemorph  Copyright (C)2002-2006 Morph team 
+eMulemorph  Copyright (C)2002-2007 Morph team 
 
 eMule Copyright (C)2002-2005 Merkur (merkur-@users.sourceforge.net)
 

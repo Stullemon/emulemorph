@@ -1329,6 +1329,58 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::GetSpecificPortMapp
 	return status;
 }
 
+
+
+/* Experimental
+CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::GetExternalIPAddress(CUPnP_IGDControlPoint::UPNP_SERVICE *srv, bool bLog){
+	if(!m_bInit)
+		return UNAT_ERROR;
+
+	UPNPNAT_RETURN status = UNAT_ERROR;
+
+	USES_CONVERSION;
+
+	IXML_Document *actionNode = NULL;
+	char actionName[] = "GetExternalIPAddress";
+	UpnpAddToAction( &actionNode, actionName , CT2CA(srv->ServiceType),		"", "");
+
+	IXML_Document* RespNode = NULL;
+	int rc = UpnpSendAction( m_ctrlPoint,CT2CA(srv->ControlURL),
+		CT2CA(srv->ServiceType), NULL, actionNode, &RespNode);
+	if( rc != UPNP_E_SUCCESS)
+	{
+		if(rc == 714){
+			//NoSuchEntryInArray
+			status = UNAT_NOT_FOUND;
+		}
+		else{
+			//Other error
+			status = UNAT_ERROR;
+		}
+
+		if(bLog && thePrefs.GetUPnPVerboseLog())
+			theApp.QueueDebugLogLine(false, _T("UPnP: Failed to get external ip\"%s\". [%s]"), desc, GetErrDescription(RespNode, rc));
+	}
+	else{
+		Cstring ExternalIp=  GetFirstDocumentItem(RespNode, _T("ExternalIp")));
+		status = UNAT_OK;
+	}
+
+    if( RespNode )
+        ixmlDocument_free( RespNode );
+    if( actionNode )
+        ixmlDocument_free( actionNode );
+
+	return status;
+}
+ Experimental */ 
+
+
+
+
+
+
+
 /////////////////////////////////////////////////////////////////////////////////
 // Returns a CString with the local IP in format xxx.xxx.xxx.xxx
 /////////////////////////////////////////////////////////////////////////////////

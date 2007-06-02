@@ -301,7 +301,7 @@ public:
 	void			SetUserHash(const uchar* pUserHash);
 	bool			HasValidHash() const
 					{
-						return ((const int*)m_achUserHash[0]) != 0 || ((const int*)m_achUserHash[1]) != 0 || ((const int*)m_achUserHash[2]) != 0 || ((const int*)m_achUserHash[3]) != 0; 
+							return ((const int*)m_achUserHash)[0] != 0 || ((const int*)m_achUserHash)[1] != 0 || ((const int*)m_achUserHash)[2] != 0 || ((const int*)m_achUserHash)[3] != 0; //Xman Bugfix by ilmira
 					}
 	int				GetHashType() const;
 	const uchar*	GetBuddyID() const								{ return (uchar*)m_achBuddyID; }
