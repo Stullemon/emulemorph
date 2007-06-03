@@ -10,36 +10,36 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "emule", "emule.vcproj", "{5
 		{3E1649FA-0B0F-460D-9AE4-7B702737B13D} = {3E1649FA-0B0F-460D-9AE4-7B702737B13D}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlibstat", "..\..\StulleMule\zlib\contrib\vstudio\vc7\zlibstat.vcproj", "{76047B4C-9603-4706-8342-80B1365ED9D5}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlibstat", "..\zlib\contrib\vstudio\vc7\zlibstat.vcproj", "{76047B4C-9603-4706-8342-80B1365ED9D5}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cryptlib", "..\..\StulleMule\crypto51\cryptlib.vcproj", "{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cryptlib", "..\crypto51\cryptlib.vcproj", "{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResizableLib", "..\..\StulleMule\ResizableLib\ResizableLib.vcproj", "{A5743026-DE7A-4C3D-86EA-46D6B6847F14}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResizableLib", "..\ResizableLib\ResizableLib.vcproj", "{A5743026-DE7A-4C3D-86EA-46D6B6847F14}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng", "..\..\StulleMule\png\projects\visualc71\libpng.vcproj", "{3E1649FA-0B0F-460D-9AE4-7B702737B13D}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libpng", "..\png\projects\visualc71\libpng.vcproj", "{3E1649FA-0B0F-460D-9AE4-7B702737B13D}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "id3lib", "..\..\StulleMule\id3lib\libprj\id3lib.vcproj", "{4AACBF8D-B90F-41AD-A5BE-D5E557C668E3}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "id3lib", "..\id3lib\libprj\id3lib.vcproj", "{4AACBF8D-B90F-41AD-A5BE-D5E557C668E3}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CxImage", "..\..\StulleMule\srchybrid\CxImage\cximage.vcproj", "{8FEC2660-7F95-4C2E-8747-36176E1FCF82}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CxImage", "..\srchybrid\CxImage\cximage.vcproj", "{8FEC2660-7F95-4C2E-8747-36176E1FCF82}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "upnpLib", "..\..\StulleMule\srchybrid\upnplib\win32project\upnpLib.vcproj", "{313EDA74-70F6-481B-8F05-C49A16481905}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "upnpLib", "..\srchybrid\upnplib\win32project\upnpLib.vcproj", "{313EDA74-70F6-481B-8F05-C49A16481905}"
 	ProjectSection(ProjectDependencies) = postProject
 		{98A1AD27-110A-4C3E-AF0C-4F967E536517} = {98A1AD27-110A-4C3E-AF0C-4F967E536517}
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pthread", "..\..\StulleMule\srchybrid\pthreads\pthreads\pthread.vcproj", "{98A1AD27-110A-4C3E-AF0C-4F967E536517}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pthread", "..\srchybrid\pthreads\pthreads\pthread.vcproj", "{98A1AD27-110A-4C3E-AF0C-4F967E536517}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
