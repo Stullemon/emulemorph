@@ -1513,21 +1513,19 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
 	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	// MORPH START - prevent being banned by MorphXT < 10.0
+	//MORPH START - prevent being banned by MorphXT
 	bool bSendWCOpcodes = false;
-	if (m_nClientVersion < MAKE_CLIENT_VERSION(0, 48, 0) &&
-			(
-				IsMorph() || // pre 10.0
-				GetModClient() == MOD_STULLE || // MorphXT based
-				GetModClient() == MOD_EASTSHARE || // MorphXT based
-				StrStrI(m_strModVersion,_T("Most Wanted")) // MorphXT based
-			)
+	if	(
+			IsMorph() || // pre 10.0
+			GetModClient() == MOD_STULLE || // MorphXT based
+			GetModClient() == MOD_EASTSHARE || // MorphXT based
+			StrStrI(m_strModVersion,_T("Most Wanted")) // MorphXT based
 		)
 	{
 		bSendWCOpcodes = true;
 		tagcount+=(1/*WC_VOODOO*/+1/*WC_FLAGS*/);
 	}
-	// MORPH END   - prevent being banned by MorphXT < 10.0
+	//MORPH END   - prevent being banned by MorphXT
 
 	data->WriteUInt32(tagcount);
 
@@ -1644,7 +1642,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		// <--- enkeyDev: ICS
 		//Morph End - added by AndCycle, ICS
 	} //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	//MORPH START - prevent being banned by MorphXT < 10.0
+	//MORPH START - prevent being banned by MorphXT
 	if(bSendWCOpcodes)
 	{
 		CTag tagWebCacheVoodoo( WC_TAG_VOODOO, (uint32)'ARC5' ); // fooled, bloody fooled!
@@ -1652,7 +1650,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		CTag tagWebCacheFlags( WC_TAG_FLAGS, (uint32)'0'); // m_bWebCacheSupport is false and this data will not be processed
 		tagWebCacheFlags.WriteTagToFile(data);
 	}
-	//MORPH END  - prevent being banned by MorphXT < 10.0
+	//MORPH END   - prevent being banned by MorphXT
 	uint32 dwIP;
 	uint16 nPort;
 	if (theApp.serverconnect->IsConnected()){
