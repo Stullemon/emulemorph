@@ -712,6 +712,23 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				CheckForGPLEvilDoer();
 				break;
 
+			// MORPH START - Append WC info to m_strNotOfficial
+			case WC_TAG_VOODOO:
+				if (temptag.IsInt()) {
+					m_strNotOfficial.AppendFormat(_T(",WCV=%s"),temptag.GetFullInfo());
+				}
+				//MOPRH START - Added by SiRoB,  Control Mod Tag
+				else {
+					if (strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
+						strBanReason.Format(_T("Suspect Hello-Tag: %s"),apszSnafuTag[3]);
+				}
+				//MOPRH END - Added by SiRoB,  Control Mod Tag
+				break;
+			case WC_TAG_FLAGS:
+				m_strNotOfficial.AppendFormat(_T(",WCF=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
+				break;
+			// MORPH END - Append WC info to m_strNotOfficial
+
 			case CT_EMULE_UDPPORTS:
 				// 16 KAD Port
 				// 16 UDP Port
@@ -1496,6 +1513,21 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
 	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
+	// MORPH START - prevent being banned by MorphXT < 10.0
+	bool bSendWCOpcodes = false;
+	if (m_nClientVersion < MAKE_CLIENT_VERSION(0, 48, 0) &&
+			(
+				IsMorph() || // pre 10.0
+				GetModClient() == MOD_STULLE || // MorphXT based
+				GetModClient() == MOD_EASTSHARE || // MorphXT based
+				StrStrI(m_strModVersion,_T("Most Wanted")) // MorphXT based
+			)
+		)
+	{
+		bSendWCOpcodes = true;
+		tagcount+=(1/*WC_VOODOO*/+1/*WC_FLAGS*/);
+	}
+	// MORPH END   - prevent being banned by MorphXT < 10.0
 
 	data->WriteUInt32(tagcount);
 
@@ -1612,6 +1644,15 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		// <--- enkeyDev: ICS
 		//Morph End - added by AndCycle, ICS
 	} //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
+	//MORPH START - prevent being banned by MorphXT < 10.0
+	if(bSendWCOpcodes)
+	{
+		CTag tagWebCacheVoodoo( WC_TAG_VOODOO, (uint32)'ARC5' ); // fooled, bloody fooled!
+		tagWebCacheVoodoo.WriteTagToFile(data);
+		CTag tagWebCacheFlags( WC_TAG_FLAGS, (uint32)'0'); // m_bWebCacheSupport is false and this data will not be processed
+		tagWebCacheFlags.WriteTagToFile(data);
+	}
+	//MORPH END  - prevent being banned by MorphXT < 10.0
 	uint32 dwIP;
 	uint16 nPort;
 	if (theApp.serverconnect->IsConnected()){
