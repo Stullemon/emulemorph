@@ -6,13 +6,22 @@ Merged to 0.48a [Stulle]
 ADD: FollowTheMajority, a new feature that will auto rename your file with majority used, default action
 	can be changed from ModOptions->EastShare->FollowTheMajority, can be direct active from right click
 	or disable by any rename operation per file based. [AndCycle]
-ADD: FairPlay, at least upload one copy of downloaded file with priority [AndCycle]
+ADD:     FairPlay, at least upload one copy of downloaded file with priority [AndCycle]
 Removed: WebCache (http://forum.emule-project.net/index.php?showtopic=124737)
 Fixed: Obfucated server only connect on first startup, Always send cryptping. 
 ADD:   Safe KAD :slows down the spreading of bad KAD nodes & kad cpu optimizations. (netfinity)
 ADD    CryptTCPPaddingLength added to advanced preferences.
+CHANGE: never ask confirmation when emule stopped with  "eMule.exe exit"
+CHANGE: send  non existing 9.7 to old mods to work arround bug in morph anti leecher. 
 
-emulel_all.sln & emule_71.vcproj removed. Replaced by emule.vcproj with depenancies
+UPDATED:French (nicolas_FR)
+        italian(idro), 
+        Simplified chinese(pennyliu123), 
+        Portugese_braziallian(heiler bemerguy), 
+        Spanish(guijarrelson))
+        
+Source: 
+emule_all.sln & emule_71.vcproj removed. Replaced by emule.vcproj with depenancies.
 
 --------------------------------------
 Changelog for eMule 0.47c MorphXT v9.6 installer
