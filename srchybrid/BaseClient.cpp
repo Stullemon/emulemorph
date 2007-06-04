@@ -412,10 +412,6 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		return _T("Fake emuleVersion");
 	}else if(m_clientSoft == SO_EMULE && !m_pszUsername){
 		return _T("Empty Nick");
-	//MORPH START - Added by Stulle, Morph Leecher Detection
-	}else if(IsMorphLeecher()){
-		return _T("MORPH Leecher");
-	//MORPH END - Added by Stulle, Morph Leecher Detection
 	}else if (old_m_strClientSoftware != m_strClientSoftware)
 	{
 		if (StrStrI(m_strModVersion,_T("Freeza"))||

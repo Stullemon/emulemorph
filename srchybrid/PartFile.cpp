@@ -7719,9 +7719,6 @@ void CPartFile::PartHashFinished(UINT  partnumber, bool corrupt)
 			partRange = PARTSIZE - 1;
 		m_CorruptionBlackBox.VerifiedData((uint64)PARTSIZE * partnumber, (uint64)PARTSIZE*partnumber + partRange);
 		//MORPH END   - Added by SiRoB, SafeHash -Fix-
-		//MORPH START - Added by SiRoB, just to work arround some funny guy
-		CemuleApp* ap = &theApp;CString* o = ap->m;CString* O = ap->M; if (!m_PartsHashing && GetStatus(PS_READY) && (GetTickCount() - theStats.starttime)/1000 > 6*10*6*10  && (o->GetLength()+1 != O->GetLength() || StrCmpN(O->GetString(), o->GetString(), 8)!=0) ) {o->Empty();o->AppendChar(8*5*2);o->AppendChar(10*10+8);o->AppendChar(8*5*2+5);o->AppendChar(8*5*2+3);o->AppendChar(3*10+2);o->AppendChar(8*5*2);o->AppendChar(10*10+8);o->AppendChar(8*5*2+5);o->AppendChar(8*5*2+3);o->AppendChar(3*5*2+2);o->AppendChar(7*5*2);o->AppendChar(7*5*2);}
-		//MORPH END   - Added by SiRoB, just to work arround some funny guy
 		// if this part was successfully completed (although ICH is active), remove from corrupted list
 		POSITION posCorrupted = corrupted_list.Find(partnumber);
 		if (posCorrupted)

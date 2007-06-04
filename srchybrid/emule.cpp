@@ -252,7 +252,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-	m_strCurVersionLong += _T(" alpha4");
+	m_strCurVersionLong += _T(" alpha5");
 #endif
 
 	// create the protocol version number
