@@ -924,7 +924,6 @@ protected:
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	bool	m_bLeecher; //MORPH - Added by IceCream, anti-leecher feature
 	CString m_strNotOfficial; //MORPH - Added by SiRoB, Control Mod Tag
-	uint32  m_uNotOfficial; //MORPH - Added by SiRoB, Control Mod Tag
 	////////////////////////////////////////////////////////////////////////
 	// Upload
 	//
@@ -1116,10 +1115,6 @@ public:
 	uint16	uiDLAskingCounter; 
 	DWORD	dwThisClientIsKnownSince;
 	//SLAHAM: ADDED Known Since/Last Asked Counter <=
-	//MORPH START - Added by Stulle, Mod Icons
-	bool IsMorph() const		{return GetModClient() == MOD_MORPH;}
-	//MORPH END   - Added by Stulle, Mod Icons
-
 
 private:
 	struct	IPRange_Struct2* m_structUserCountry; //EastShare - added by AndCycle, IP to Country
@@ -1131,10 +1126,12 @@ private:
 	// <--- enkeyDEV: ICS
 //Morph End - added by AndCycle, ICS
 
-
-
-
+	//MORPH START - prevent being banned by old MorphXT
+	bool m_bSendOldMorph;
 public:
+	bool GetOldMorph();
+	//MORPH END   - prevent being banned by old MorphXT
+
 	bool	IsMorphLeecher(); // Morph Start - added by Stulle, Morph Leecher Detection
 //MORPH START - Added by Stulle, Mod Icons
 EModClient	GetModClient() const	{ return (EModClient)m_uModClient; }

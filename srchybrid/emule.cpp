@@ -274,6 +274,8 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	//MORPH START - Added by SiRoB, [-modname-]
 	m_strModVersion = CemuleApp::m_szMVersion;
 	m_strModVersion.AppendFormat(_T(" %u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
+	m_strModVersionOld = CemuleApp::m_szMVersion;
+	m_strModVersionOld.AppendFormat(_T(" 9.7"));
 	if (CemuleApp::m_szMMVersion[0]!=0)
 		m_strModVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
 	m_strModLongVersion = CemuleApp::m_szMVersionLong;

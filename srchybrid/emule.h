@@ -137,6 +137,7 @@ public:
 	static const TCHAR	m_szMVersion[];
 	static const TCHAR	m_szMMVersion[];
 	CString		m_strModVersion;
+	CString		m_strModVersionOld;
 	CString		m_strModLongVersion;
 	CString*	m;
 	CString*	M;

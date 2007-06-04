@@ -301,11 +301,12 @@ void CUpDownClient::Init()
 	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 	m_strModVersion.Empty();
 	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
-	m_uNotOfficial = 0;  //MOPRH - Added by SiRoB,  Control Mod Tag
 	m_nDownTotalTime = 0;//wistily Total download time for this client for this emule session
 	m_nUpTotalTime = 0;//wistily Total upload time for this client for this emule session
 
 	m_incompletepartVer = 0; //MORPH - Added By SiRoB, ICS merged into partstatus
+
+	m_bSendOldMorph = false; //MORPH - prevent being banned by old MorphXT
 
 	//MORPH START - ReadBlockFromFileThread
 	m_abyfiledata = NULL;
@@ -401,10 +402,12 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		return _T("Allready Known");
 	}else if (!m_strNotOfficial.IsEmpty() && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd))){
 		return _T("Ghost MOD");
+	// temporary removed
+	/*
 	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion != MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd) && theApp.m_strModVersion.GetLength() == m_strModVersion.GetLength()) || StrStrI(m_strModVersion,_T("MorphXT")) && !IsMorph()){
 		return _T("Fake MODSTRING");
-	}else if (!StrStrI(m_strModVersion,_T("Morph")) && IsMorph()) {
-		return _T("Hidden MODSTRING");
+	*/
+	// temporary removed
 	}else if (m_nClientVersion > MAKE_CLIENT_VERSION(0, 30, 0) && m_byEmuleVersion > 0 && m_byEmuleVersion != 0x99 && m_clientSoft == SO_EMULE){
 		return _T("Fake emuleVersion");
 	}else if(m_clientSoft == SO_EMULE && !m_pszUsername){
@@ -446,14 +449,6 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("EastShare")) && StrStrI(m_strClientSoftware,_T("0.29"))||
 			// EastShare END - Added by TAHO, Pretender
 			StrStrI(m_strModVersion,_T("LSD.7c")) && !StrStrI(m_strClientSoftware,_T("27"))||
-			/*
-			StrStrI(m_strModVersion,_T("MorphXT+")) ||
-			StrStrI(m_strModVersion,_T("MorphXT\xD7")) ||
-			StrStrI(m_strModVersion,_T("M\xF8rphXT")) ||
-			StrStrI(m_strModVersion,_T("MorphXT 7.60")) ||
-			StrStrI(m_strModVersion,_T("MorphXT 7.30")) ||
-			StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("\xD7")) || IsMorph() == false) ||
-			*/
 			StrStrI(m_strModVersion,_T("eChanblard v7.0")) ||
 			StrStrI(m_strModVersion,_T("ACAT")) && m_strModVersion[4] != 0x00 ||
 			StrStrI(m_strModVersion,_T("sivka v12e8")) && m_nClientVersion != MAKE_CLIENT_VERSION(0, 42, 4) || // added - Stulle
@@ -572,7 +567,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	m_fNoViewSharedFiles = 0;
 	m_bUnicodeSupport = false;
 	m_incompletepartVer = 0; // enkeyDev: ICS //Morph - added by AndCycle, ICS
-	m_uNotOfficial = 0; //MOPRH - Added by SiRoB, Control Mod Tag
 	//MORPH START - Added by SiRoB, ET_MOD_VERSION 0x55
 	m_strModVersion.Empty();
 	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
@@ -600,8 +594,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	for (uint32 i = 0; i < tagcount; i++)
 	{
 		CTag temptag(data, true);
-		m_uNotOfficial <<= 1; //MOPRH - Added by SiRoB, Control Mod Tag
-		m_uNotOfficial ^= temptag.GetNameID(); //MOPRH - Added by SiRoB,  Control Mod Tag
 		switch (temptag.GetNameID())
 		{
 			case CT_NAME:
@@ -670,17 +662,12 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				if (temptag.IsStr())
 				{
 					m_strModVersion = temptag.GetStr();
+					m_bSendOldMorph = GetOldMorph();//MORPH - prevent being banned by old MorphXT
 					//MOPRH START - Added by Stulle, Mod Icons
-					if (m_strModVersion[0]==0x4D && m_strModVersion[1]==0x6F && m_strModVersion[2]==0x72 && m_strModVersion[3]==0x70 && m_strModVersion[4]==0x68 &&
-						( ((m_nClientVersion >> 17) & 0x7f) == 0 && ((m_nClientVersion >> 10) & 0x7f) < 45 ||
-						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39 && m_strModVersion[9] >= 0x2E && m_strModVersion[10] >= 0x30 && m_strModVersion[10] <= 0x39 &&
-						 ( m_strModVersion[11] == 0x00 || m_strModVersion[11] == 0x20 &&  m_strModVersion[12] != 0x00 || m_strModVersion[11] >= 0x30 && m_strModVersion[11] <= 0x39  && 
-						  ( m_strModVersion[12] == 0x00 || m_strModVersion[12] == 0x20 &&  m_strModVersion[13] != 0x00)
-						 )
-						)
-					   ){
+					if(StrStrI(m_strModVersion,_T("MorphXT"))!=0 &&
+					   (m_strModVersion[11] == 0x00 || // for pre 10.0
+					   (m_strModVersion[11] == 0x20 && m_strModVersion[12] == 0x00))) // from 10.0 to 99.x
 						m_uModClient = MOD_MORPH;
-					}
 					else if(StrStrI(m_strModVersion,_T("ScarAngel"))!=0)
 						m_uModClient = MOD_SCAR;
 					else if(StrStrI(m_strModVersion,_T("StulleMule"))!=0)
@@ -1144,8 +1131,18 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	CTag tag7(ET_FEATURES, dwTagValue);
 	tag7.WriteTagToFile(&data);
 	if (bSendModVersion){ //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-		CTag tag8(ET_MOD_VERSION, theApp.m_strModVersion);
-		tag8.WriteTagToFile(&data);
+		//MORPH START - prevent being banned by old MorphXT
+		if(m_bSendOldMorph)
+		{
+			CTag tag8(ET_MOD_VERSION, theApp.m_strModVersion);
+			tag8.WriteTagToFile(&data);
+		}
+		else
+		{
+			CTag tag8(ET_MOD_VERSION, theApp.m_strModVersion);
+			tag8.WriteTagToFile(&data);
+		}
+		//MORPH END   - prevent being banned by old MorphXT
 		//Morph Start - added by AndCycle, ICS
 		// enkeyDev: ICS
 		CTag tag9(ET_INCOMPLETEPARTS,1);
@@ -1210,8 +1207,6 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 	for (uint32 i = 0;i < tagcount; i++)
 	{
 		CTag temptag(&data, false);
-		m_uNotOfficial <<= 1; //MOPRH - Added by SiRoB, Control Mod Tag
-		m_uNotOfficial ^= temptag.GetNameID(); //MOPRH - Added by SiRoB,  Control Mod Tag
 		switch (temptag.GetNameID())
 		{
 			case ET_COMPRESSION:
@@ -1373,17 +1368,12 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 				if (temptag.IsStr())
 				{
 					m_strModVersion = temptag.GetStr();
+					m_bSendOldMorph = GetOldMorph();//MORPH - prevent being banned by old MorphXT
 					//MOPRH START - Added by Stulle, Mod Icons
-					if (m_strModVersion[0]==0x4D && m_strModVersion[1]==0x6F && m_strModVersion[2]==0x72 && m_strModVersion[3]==0x70 && m_strModVersion[4]==0x68 &&
-						( ((m_nClientVersion >> 17) & 0x7f) == 0 && ((m_nClientVersion >> 10) & 0x7f) < 45 ||
-						 m_strModVersion[5]==0x58 && m_strModVersion[6]==0x54 && m_strModVersion[7]==0x20 && m_strModVersion[8] >= 0x30 && m_strModVersion[8] <= 0x39 && m_strModVersion[9] >= 0x2E && m_strModVersion[10] >= 0x30 && m_strModVersion[10] <= 0x39 &&
-						 ( m_strModVersion[11] == 0x00 || m_strModVersion[11] == 0x20 &&  m_strModVersion[12] != 0x00 || m_strModVersion[11] >= 0x30 && m_strModVersion[11] <= 0x39  && 
-						  ( m_strModVersion[12] == 0x00 || m_strModVersion[12] == 0x20 &&  m_strModVersion[13] != 0x00)
-						 )
-						)
-					   ){
+					if(StrStrI(m_strModVersion,_T("MorphXT"))!=0 &&
+					   (m_strModVersion[11] == 0x00 || // for pre 10.0
+					   (m_strModVersion[11] == 0x20 && m_strModVersion[12] == 0x00))) // from 10.0 to 99.x
 						m_uModClient = MOD_MORPH;
-					}
 					else if(StrStrI(m_strModVersion,_T("ScarAngel"))!=0)
 						m_uModClient = MOD_SCAR;
 					else if(StrStrI(m_strModVersion,_T("StulleMule"))!=0)
@@ -1513,19 +1503,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
 	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	//MORPH START - prevent being banned by MorphXT
-	bool bSendWCOpcodes = false;
-	if	(
-			IsMorph() || // pre 10.0
-			GetModClient() == MOD_STULLE || // MorphXT based
-			GetModClient() == MOD_EASTSHARE || // MorphXT based
-			StrStrI(m_strModVersion,_T("Most Wanted")) // MorphXT based
-		)
-	{
-		bSendWCOpcodes = true;
-		tagcount+=(1/*WC_VOODOO*/+1/*WC_FLAGS*/);
-	}
-	//MORPH END   - prevent being banned by MorphXT
+	m_bSendOldMorph = GetOldMorph();//MORPH - prevent being banned by old MorphXT
 
 	data->WriteUInt32(tagcount);
 
@@ -1631,8 +1609,18 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 
 	if (bSendModVersion) { //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
-		CTag tagMODVersion(ET_MOD_VERSION, theApp.m_strModVersion);
-		tagMODVersion.WriteTagToFile(data);
+		//MORPH START - prevent being banned by old MorphXT
+		if(m_bSendOldMorph)
+		{
+			CTag tagMODVersion(ET_MOD_VERSION, theApp.m_strModVersionOld);
+			tagMODVersion.WriteTagToFile(data);
+		}
+		else
+		{
+			CTag tagMODVersion(ET_MOD_VERSION, theApp.m_strModVersion);
+			tagMODVersion.WriteTagToFile(data);
+		}
+		//MORPH END   - prevent being banned by old MorphXT
 		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
 
 		//Morph Start - added by AndCycle, ICS
@@ -1642,15 +1630,6 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 		// <--- enkeyDev: ICS
 		//Morph End - added by AndCycle, ICS
 	} //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	//MORPH START - prevent being banned by MorphXT
-	if(bSendWCOpcodes)
-	{
-		CTag tagWebCacheVoodoo( WC_TAG_VOODOO, (uint32)'ARC5' ); // fooled, bloody fooled!
-		tagWebCacheVoodoo.WriteTagToFile(data);
-		CTag tagWebCacheFlags( WC_TAG_FLAGS, (uint32)'0'); // m_bWebCacheSupport is false and this data will not be processed
-		tagWebCacheFlags.WriteTagToFile(data);
-	}
-	//MORPH END   - prevent being banned by MorphXT
 	uint32 dwIP;
 	uint16 nPort;
 	if (theApp.serverconnect->IsConnected()){
@@ -3843,8 +3822,7 @@ bool CUpDownClient::IsMorphLeecher()
 			StrStrI(m_strModVersion,_T("M\xF8rphXT")) ||
 			StrStrI(m_strModVersion,_T("MorphXT 7.60")) ||
 			StrStrI(m_strModVersion,_T("MorphXT 7.30")) ||
-			(StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("FF")) || StrStrI(m_strModVersion,_T("\xD7")) || IsMorph() == false)) ||
-			(StrStrI(m_strModVersion,_T("phXT")) && (m_strModVersion[0]==0x4D || m_strModVersion[0]==0x6D) && !IsMorph())
+			(StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("FF")) || StrStrI(m_strModVersion,_T("\xD7"))))
 			)
 		{
 			old_m_strClientSoftware = m_strClientSoftware;
@@ -3854,3 +3832,24 @@ bool CUpDownClient::IsMorphLeecher()
 	return false;
 }
 //MORPH END - Added by Stulle, Morph Leecher Detection
+
+//MORPH START - prevent being banned by old MorphXT
+bool CUpDownClient::GetOldMorph()
+{
+	if(m_pszUsername == NULL)
+		return true; // unknown, always true!
+
+	if(m_nClientVersion >= MAKE_CLIENT_VERSION(0, 48, 0))
+		return false; // bug fixed from this point on
+
+	if	(// pre 10.0
+			GetModClient() == MOD_MORPH || // MorphXT
+			GetModClient() == MOD_STULLE || // MorphXT based
+			GetModClient() == MOD_EASTSHARE || // MorphXT based
+			StrStrI(m_strModVersion,_T("Most Wanted")) // MorphXT based
+		)
+		return true; // it's an old morph
+
+	return false; // it's not an old morph
+}
+//MORPH END   - prevent being banned by old MorphXT

@@ -659,7 +659,7 @@
 #define SP_UDPSERVERSPAMRATIO			0x08
 
 #define MAX_GSL                         8000 //MORPH - Added by Stulle, Global Source Limit
-//MORPH START - prevent being banned by MorphXT < 10.0
+//MORPH START - Append WC info to m_strNotOfficial
 #define WC_TAG_VOODOO		0x69		// hello packet tag: magic number == 'WebC' for pre-1.1 (unsupported), 'ARC4' for 1.1
 #define WC_TAG_FLAGS		0x6A		// webcache flags tag
-//MORPH END   - prevent being banned by MorphXT < 10.0
+//MORPH END   - Append WC info to m_strNotOfficial
