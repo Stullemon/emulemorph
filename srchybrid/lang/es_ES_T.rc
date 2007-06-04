@@ -3453,15 +3453,15 @@ BEGIN
 	  IDS_COMPRESSLEVEL       "Nivel de Compresión (1-9) "
 	  IDS_COMPRESSLEVEL_TIP   "Reducir el nivel de Compresión de los datos comprimibles.\nSe salva un poco de CPU, pero es necesario enviar mayor cantidad de datos.\nEs muy útil para conexiones muy rápidas.\n1 = usa menos CPU, menor compresión\n9 = mejor compresión (por defecto)"
 		IDC_SVC_CURRENT_STATUS_LABEL "Estado actual"
+		IDS_USEUSERSORTEDSERVERLIST_TIP "Cuando se activa, usa el mismo criterio que clasifica a los servidores\nen la pestaña de Servidores en el GUI cuando se intenta conectar a un servidor."
 END
 
 STRINGTABLE
 BEGIN
 		IDS_USECOMPRESS_TIP 		"Opción que desactiva la compresión de todos los datos del usuario.\nÚtil para servidores con velocidad muy alta (>~ 100mbit)\nEsta opción no se guarda, para hacer permanente esta opción\nes necesario añadir la línea UseCompression= en el archivo preferences.ini\nPOr defecto = activado (¡¡Recomendado!!)"
-    IDS_SVC_CURRENT_STATUS_LABEL "Estado actual"
-		IDS_USEUSERSORTEDSERVERLIST_TIP "Cuando se activa, se utiliza la misma clasificación de la lista de servidores\nque se muestra en el GUI cuando se intenta conectar a un servidor."
-    IDS_TEST_NOTIFICATION   "Test"
-    IDS_SERVER_REQUIREOBFUSCATION "Requiere conexión ofuscada a los servidores"
+		IDS_SVC_CURRENT_STATUS_LABEL "Estado actual"
+		IDS_TEST_NOTIFICATION   "Test"
+		IDS_SERVER_REQUIREOBFUSCATION "Requiere conexión ofuscada a los servidores"
 		IDS_SERVER_REQUIREOBFUSCATION_TIP "Requiere conexiones ofuscadas con los servidores.\nCualquier servidor que no soporta la ofuscación\nserá ignorado. Y sucede que el servidor falso\nno soporta la conexión ofuscada cuando se introduce\nesta opción. Compruebe que es imposible conectar\na un servidor hasta que no se consiga un encriptado válido."
 		IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Muestra un registro extra cuando se busca.\nTambién se incluye en el resultado de la búsqueda.\n(Por defecto = 0, no se guarda, edite el archivo preferences.ini para hacer del cambio permanente)"
 		IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
@@ -3499,6 +3499,18 @@ BEGIN
 			IDS_ERR_NOVALIDSTATICSERVERSFOUND  "Servidores estáticos no válidos en la búsqueda de la lista de servidores"
 			IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND  "Servidores ofuscados no válidos al intentar conectarse con la llave en la búsquedas (actualizar la lista de servidores o activa el UDP)"
 			IDS_ZZRATIO_TIP         "ZZRatio está activado a partir de este momento. El ratio de esta sesión está visible por\nuna 'R' en la barra de estado. Tu descarga <b>media</b>no excederá\n3 veces tu subida cuando esté activado.\nSolución:<b>Sube más</b> o sube durantemás tiempo.\nLa razón por la cuál se activa el ratio, se puede ver pasando el ratón por encima de la R\nen la barra de estado."
+END
+
+STRINGTABLE
+BEGIN
+	IDS_DEBUGSEARCHDETAILLEVEL    "DebugSearchDetailLevel"
+    IDS_CRYPTTCPPADDINGLENGTH	  "CryptTCPPaddingLength=[1-256]"
+	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "La cantidad de octetos al azar a la cual se agrega tráfico ofuscado. (Por defecto = 128). \nValores bajos suponen menos sobrecarga (prueba con 16), valores altos mejoran el sistema de ofuscación."
+	IDS_FOLLOW_THE_MAJORITY_TIP 
+                            "Renombra Automáticamente tu archivo con el nombre usado por la mayoría de clientes,\npuede ser activado directamente con el botón derecho o desactivado en cualquier operación de renombrado."
+    IDS_FOLLOW_THE_MAJORITY "Seguir a la Mayoría"
+	IDS_FAIR_PLAY           "Juego justo"
+	IDS_FAIR_PLAY_TIP       "Al menos se sube una copia del fichero descargado con mayor prioridad."
 END
 
 #endif    // Spanish (Castilian) resources
