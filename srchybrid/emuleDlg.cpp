@@ -1679,8 +1679,15 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 		if (clcommand==_T("connect")) {StartConnection(); return true;}
 		if (clcommand==_T("disconnect")) {theApp.serverconnect->Disconnect(); return true;}
 		if (clcommand==_T("resume")) {theApp.downloadqueue->StartNextFile(); return true;}
+		/* MORPH START  do not ask exit from command prompt.
 		if (clcommand==_T("exit")) {OnClose(); return true;}
-		if (clcommand==_T("uninstall")) {OnClose(); return true;} // // MORPH run as service v1, quit on uninstaller
+		*/
+		if (clcommand==_T("exit")  ||
+			clcommand==_T("uninstall")) { // MORPH uninstall run as a service from installer. 
+		     theApp.m_app_state = APP_STATE_SHUTTINGDOWN; // do no ask to close
+			 OnClose(); 
+			 return true;}
+		// MORPH END	  do not ask exit from command prompt.
 		if (clcommand==_T("restore")) {RestoreWindow();return true;}
 		if (clcommand==_T("reloadipf")) {theApp.ipfilter->LoadFromDefaultFile(); return true;}
 		if (clcommand.Left(7).MakeLower()==_T("limits=") && clcommand.GetLength()>8) {
@@ -2169,6 +2176,9 @@ void CemuleDlg::OnClose()
 	//EastShare END - Pretender, TBH-AutoBackup
 
 	if(thePrefs.GetInvisibleMode()) UnRegisterInvisibleHotKey(); //Commander - Added: Invisible Mode [TPT]
+
+	sLock1.Unlock(); // MORPH now we need to unlock to prevent a deadlock.  there should be a better way to let the writethread end. 
+
 
 	// explicitly delete all listview items which may hold ptrs to objects which will get deleted
 	// by the dtors (some lines below) to avoid potential problems during application shutdown.
