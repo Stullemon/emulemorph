@@ -37,6 +37,10 @@
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #include "emuledlg.h"
 #include "Log.h"
+//MORPH START - new includes
+#include "ClientList.h"
+#include "UpDownClient.h"
+//MORPH END   - new includes
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -322,7 +326,16 @@ float CClientCredits::GetMyScoreRatio(uint32 dwForIP) const
 		return 1.0F;
 	}
 
-	if (GetUploadedTotal() < 1000000)
+	CUpDownClient* client = theApp.clientlist->FindClientByIP(dwForIP);
+	uint64 uUploadedTotalMin = 1000000;
+	bool bNewCredits = false;
+	if(client->GetClientSoft() == SO_EMULE && client->GetVersion() >= MAKE_CLIENT_VERSION(0, 48, 0))
+	{
+		uUploadedTotalMin = 1048576;
+		bNewCredits = true;
+	}
+
+	if (GetUploadedTotal() < uUploadedTotalMin)
 		return 1.0F;
 	float result = 0.0F;
 	if (!GetDownloadedTotal())
@@ -334,8 +347,22 @@ float CClientCredits::GetMyScoreRatio(uint32 dwForIP) const
 	result2 += 2.0F;
 	result2 = (float)sqrt(result2);
 
-	if (result > result2)
-		result = result2;
+	if(!bNewCredits)
+	{
+		if (result > result2)
+			result = result2;
+	}
+	else
+	{
+		// linear calcualtion of the max multiplicator based on uploaded data for the first chunk (1MB = 1.01, 9.2MB = 3.34)
+		float result3 = 10.0F;
+		if (GetUploadedTotal() < 9646899){
+			result3 = (((float)(GetUploadedTotal() - 1048576) / 8598323.0F) * 2.34F) + 1.0F;
+		}
+
+		// take the smallest result
+		result = min(result, min(result2, result3));
+	}
 
 	if (result < 1.0F)
 		return 1.0F;

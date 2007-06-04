@@ -138,9 +138,9 @@ public:
 	static const TCHAR	m_szMMVersion[];
 	CString		m_strModVersion;
 	CString		m_strModVersionOld;
+	CString		m_strModVersionPure;
 	CString		m_strModLongVersion;
-	CString*	m;
-	CString*	M;
+	uint8		m_uModLength;
 	//MORPH END   - Added by SiRoB, [-modname-]
 	
 // Implementierung

@@ -402,16 +402,16 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		return _T("Allready Known");
 	}else if (!m_strNotOfficial.IsEmpty() && m_strModVersion.IsEmpty() && (m_clientSoft == SO_EMULE) && (m_nClientVersion <= MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd))){
 		return _T("Ghost MOD");
-	// temporary removed
-	/*
-	}else if (StrStrI(m_strModVersion,theApp.m_strModVersion) && (m_uNotOfficial != 0x4394 &&  m_uNotOfficial != 0x11094 || m_nClientVersion != MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd) && theApp.m_strModVersion.GetLength() == m_strModVersion.GetLength()) || StrStrI(m_strModVersion,_T("MorphXT")) && !IsMorph()){
+	}else if (IsModFaker()){
 		return _T("Fake MODSTRING");
-	*/
-	// temporary removed
 	}else if (m_nClientVersion > MAKE_CLIENT_VERSION(0, 30, 0) && m_byEmuleVersion > 0 && m_byEmuleVersion != 0x99 && m_clientSoft == SO_EMULE){
 		return _T("Fake emuleVersion");
 	}else if(m_clientSoft == SO_EMULE && !m_pszUsername){
 		return _T("Empty Nick");
+	//MORPH START - Added by Stulle, Morph Leecher Detection
+	}else if(IsMorphLeecher()){
+		return _T("MORPH Leecher");
+	//MORPH END - Added by Stulle, Morph Leecher Detection
 	}else if (old_m_strClientSoftware != m_strClientSoftware)
 	{
 		if (StrStrI(m_strModVersion,_T("Freeza"))||
@@ -1130,7 +1130,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 		//MORPH START - prevent being banned by old MorphXT
 		if(m_bSendOldMorph)
 		{
-			CTag tag8(ET_MOD_VERSION, theApp.m_strModVersion);
+			CTag tag8(ET_MOD_VERSION, theApp.m_strModVersionOld);
 			tag8.WriteTagToFile(&data);
 		}
 		else
@@ -1506,7 +1506,14 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	// eD2K Name
 
 	// TODO implement multi language website which informs users of the effects of bad mods
+	//MOPRH START - Anti ModID Faker [Xman]
+	/*
 	CTag tagName(CT_NAME, (!m_bGPLEvildoer) ? thePrefs.GetUserNick() : _T("Please use a GPL-conform version of eMule") );
+	*/
+	CString m_strTemp = thePrefs.GetUserNick();
+	m_strTemp.AppendFormat(_T(" «%s»"), theApp.m_strModVersion);
+	CTag tagName(CT_NAME, (!m_bGPLEvildoer) ? m_strTemp : _T("Please use a GPL-conform version of eMule") );
+	//MOPRH END   - Anti ModID Faker [Xman]
 	tagName.WriteTagToFile(data, utf8strRaw);
 
 	// eD2K Version
@@ -3835,6 +3842,9 @@ bool CUpDownClient::GetOldMorph()
 	if(m_pszUsername == NULL)
 		return true; // unknown, always true!
 
+	if(m_clientSoft != SO_EMULE)
+		return false; // no mule, anyways
+
 	if(m_nClientVersion >= MAKE_CLIENT_VERSION(0, 48, 0))
 		return false; // bug fixed from this point on
 
@@ -3849,3 +3859,33 @@ bool CUpDownClient::GetOldMorph()
 	return false; // it's not an old morph
 }
 //MORPH END   - prevent being banned by old MorphXT
+
+//MOPRH START - Anti ModID Faker [Xman]
+bool CUpDownClient::IsModFaker()
+{
+	static 	const float MOD_FLOAT_VERSION= (float)_tstof(theApp.m_strModVersion.Mid(theApp.m_uModLength)) ;
+	const float fModVersion=GetModVersion(m_strModVersion);
+
+	if(fModVersion == MOD_FLOAT_VERSION && m_nClientVersion != MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd))
+		return true;
+	// first MorphXT using this is 10.0
+	if(fModVersion >= 10.0f && CString(m_pszUsername).Right(m_strModVersion.GetLength()+1)!=m_strModVersion + _T("»"))
+		return true;
+	return false;
+}
+
+//gives back the Mod Version as float
+//0 if it isn't this mod
+float CUpDownClient::GetModVersion(CString modversion) const
+{
+	uint8 temp = (uint8)(theApp.m_strModVersion.GetLength());
+	if(modversion.GetLength()<temp)
+		return 0.0f;
+
+	// remark: when the first letters do not equal the modstring it's allright!
+	if(modversion.Left(theApp.m_uModLength).CompareNoCase(theApp.m_strModVersionPure)!=0)
+		return 0.0f;
+
+	return (float)_tstof(modversion.Mid(theApp.m_uModLength));
+}
+//MORPH END   - Anti ModID Faker [Xman]

@@ -300,10 +300,6 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 	m_bConnectRequestDelayedForUPnP = false;
 #endif
 	b_HideApp = false; //MORPH - Added by SiRoB, Toggle Show Hide window
-	//MORPH START - Added by SiRoB, [itsonlyme: -modname-]
-	theApp.m = &theApp.m_strModVersion;
-	theApp.M = &theApp.m_strModLongVersion;
-	//MORPH END  - Added by SiRoB, [itsonlyme: -modname-]
 }
 
 CemuleDlg::~CemuleDlg()

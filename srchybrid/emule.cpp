@@ -252,7 +252,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-	m_strCurVersionLong += _T(" alpha5");
+	m_strCurVersionLong += _T(" alpha6");
 #endif
 
 	// create the protocol version number
@@ -282,6 +282,9 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strModLongVersion.AppendFormat(_T("%u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
    if (CemuleApp::m_szMMVersion[0]!=0)
 		m_strModLongVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
+	m_strModVersionPure = CemuleApp::m_szMVersion;
+	m_strModVersionPure.AppendFormat(_T(" "));
+	m_uModLength = (uint8)(m_strModVersionPure.GetLength()); // one space included!
 	//MORPH END   - Added by SiRoB, [-modname-]
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	m_UPnP_IGDControlPoint = CUPnP_IGDControlPoint::GetInstance();

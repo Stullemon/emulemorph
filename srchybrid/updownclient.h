@@ -1137,6 +1137,10 @@ public:
 EModClient	GetModClient() const	{ return (EModClient)m_uModClient; }
 //MORPH END   - Added by Stulle, Mod Icons
 
+//MOPRH START - Anti ModID Faker [Xman]
+	bool IsModFaker();
+	float GetModVersion(CString modversion) const;
+//MORPH END   - Anti ModID Faker [Xman]
 };
 //#pragma pack()
 //>>> eWombat [SNAFU_V3]

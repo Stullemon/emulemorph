@@ -10,9 +10,12 @@ ADD:     FairPlay, at least upload one copy of downloaded file with priority [An
 Removed: WebCache (http://forum.emule-project.net/index.php?showtopic=124737)
 Fixed: Obfucated server only connect on first startup, Always send cryptping. 
 ADD:   Safe KAD :slows down the spreading of bad KAD nodes & kad cpu optimizations. (netfinity)
-ADD    CryptTCPPaddingLength added to advanced preferences.
+ADD:   CryptTCPPaddingLength added to advanced preferences.
+Add:   Anti Mod Faker [Xman]
 CHANGE: never ask confirmation when emule stopped with  "eMule.exe exit"
 CHANGE: send  non existing 9.7 to old mods to work arround bug in morph anti leecher. 
+Change: Do not save obfuscated sources [Xman]
+Change: Calculate own score the new way for >= 0.48a clients
 
 UPDATED:French (nicolas_FR)
         italian(idro), 
