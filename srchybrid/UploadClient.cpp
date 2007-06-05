@@ -599,7 +599,7 @@ bool CUpDownClient::IsPBForPS() const
 	if (
 		currentReqFile->GetPowerShared() || 
 		!currentReqFile->IsPartFile() && credits->GetPayBackFirstStatus() && thePrefs.IsPayBackFirst() && IsSecure() ||
-		currentReqFile->statistic.GetFairPlay() // EastShare - FairPlay by AndCycle
+		(!currentReqFile->IsPartFile() && currentReqFile->statistic.GetFairPlay()) // EastShare - FairPlay by AndCycle
 		)
 		return true;
 	return false;
