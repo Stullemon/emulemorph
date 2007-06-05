@@ -58,6 +58,7 @@ CIndexed::CIndexed()
 	m_mapNotes.InitHashTable(1031);
 	m_mapLoad.InitHashTable(1031);
 	m_mapSources.InitHashTable(1031);
+	/* MORPH START dir vista officla fix (godlaugh2007)
 	m_sSourceFileName = CMiscUtils::GetAppDir();
 	m_sSourceFileName.Append(CONFIGFOLDER);
 	m_sSourceFileName.Append(_T("src_index.dat"));
@@ -67,7 +68,12 @@ CIndexed::CIndexed()
 	m_sLoadFileName = CMiscUtils::GetAppDir();
 	m_sLoadFileName.Append(CONFIGFOLDER);
 	m_sLoadFileName.Append(_T("load_index.dat"));
-	m_tLastClean = time(NULL) + (60*30);
+	*/
+	m_sSourceFileName =thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)  + _T("src_index.dat");
+	m_sKeyFileName =thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)  + _T("key_index.dat");
+    m_sLoadFileName =thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)  + _T("load_index.dat");
+    // MORPH END dir vista officla fix (godlaugh2007)
+    m_tLastClean = time(NULL) + (60*30);
 	m_uTotalIndexSource = 0;
 	m_uTotalIndexKeyword = 0;
 	m_uTotalIndexNotes = 0;

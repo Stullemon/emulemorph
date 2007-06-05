@@ -82,9 +82,13 @@ CRoutingZone::CRoutingZone()
 	// Set our KadID for creating the contact tree
 	CKademlia::GetPrefs()->GetKadID(&uMe);
 	// Set the preference file name.
+	/* MORPH START dir vista officla fix (godlaugh2007)
 	m_sFilename = CMiscUtils::GetAppDir();
 	m_sFilename.Append(CONFIGFOLDER);
 	m_sFilename.Append(_T("nodes.dat"));
+	*/ 
+	m_sFilename =thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("nodes.dat")
+    // MORPH END dir vista officla fix (godlaugh2007)
 	// Init our root node.
 	Init(NULL, 0, CUInt128((ULONG)0));
 }

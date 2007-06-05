@@ -51,10 +51,15 @@ static char THIS_FILE[] = __FILE__;
 using namespace Kademlia;
 
 CPrefs::CPrefs()
-{
+{	
+	/* MORPH START dir vista officla fix (godlaugh2007)
 	CString sFilename = CMiscUtils::GetAppDir();
 	sFilename.Append(CONFIGFOLDER);
 	sFilename.Append(_T("preferencesKad.dat"));
+    */
+	CString sFilename =thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("preferencesKad.dat");
+    // MORPH END dir vista officla fix (godlaugh2007)
+	
 	Init(sFilename);
 }
 

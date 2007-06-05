@@ -51,6 +51,7 @@ void CMiscUtils::IPAddressToString(uint32 uIP, CString *pString)
 	                ((uIP      ) & 0xFF) );
 }
 
+/* MORPH REPLACED by the prefs.getconfig dir
 LPCTSTR CMiscUtils::GetAppDir()
 {
 	if (m_sAppDirectory.GetLength() == 0)
@@ -64,6 +65,7 @@ LPCTSTR CMiscUtils::GetAppDir()
 	}
 	return m_sAppDirectory;
 }
+MORPH END REPLACED*/
 
 void CMiscUtils::DebugHexDump(const byte *pbyData, uint32 uLenData)
 {
