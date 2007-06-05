@@ -4219,6 +4219,9 @@ void CemuleDlg::SaveSettings (bool _shutdown) {
 	if (_shutdown) {
 		theApp.scheduler->RestoreOriginals();
 	}
+	if (_shutdown) {
+		theApp.searchlist->SaveSpamFilter();
+	}
 	thePrefs.Save();
 	if (_shutdown) {
 		thePerfLog.Shutdown();

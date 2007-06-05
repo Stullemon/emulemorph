@@ -3825,6 +3825,7 @@ bool CUpDownClient::IsMorphLeecher()
 			StrStrI(m_strModVersion,_T("M\xF8rphXT")) ||
 			StrStrI(m_strModVersion,_T("MorphXT 7.60")) ||
 			StrStrI(m_strModVersion,_T("MorphXT 7.30")) ||
+			(StrStrI(m_strModVersion,_T("MorphXT 9.7")) && m_nClientVersion < MAKE_CLIENT_VERSION(0, 48, 0)) ||
 			(StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("FF")) || StrStrI(m_strModVersion,_T("\xD7"))))
 			)
 		{

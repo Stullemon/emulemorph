@@ -226,7 +226,7 @@ void CHistoryListCtrl::Init(void)
 	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
 	ilDummyImageList.Detach();
 
-	SetExtendedStyle(LVS_EX_FULLROWSELECT);
+	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 	ModifyStyle(LVS_SINGLESEL,0);
 	
 	InsertColumn(0,GetResString(IDS_DL_FILENAME),LVCFMT_LEFT, 260);
