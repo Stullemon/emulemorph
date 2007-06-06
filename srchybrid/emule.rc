@@ -1945,7 +1945,7 @@ BEGIN
     PUSHBUTTON      "Update",IDC_UPDATEIPFURL,173,125,48,14,BS_FLAT
     CONTROL         "Update IPfilter.dat on startup",IDC_AUTOUPIPFILTER,
                     "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,90,
-                    115,10
+                    110,10
     EDITTEXT        IDC_UPDATE_URL_IPFILTER,14,110,207,12,ES_AUTOHSCROLL
     LTEXT           "URL for updating",IDC_URL_FOR_UPDATING2,14,99,207,8,0,
                     WS_EX_TRANSPARENT
@@ -6102,7 +6102,7 @@ BEGIN
     IDS_UPNP_INFO_NONEED    "Failed or not needed"
 	IDS_DEBUGSEARCHDETAILLEVEL    "DebugSearchDetailLevel"
     IDS_CRYPTTCPPADDINGLENGTH	  "CryptTCPPaddingLength=[1-256]"
-	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "The amount of random bytes that is added to obfuccated traffic. (default 128). \nlow values means less overhead (try 16), highvalues means better obfuscation "
+	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "The amount of random bytes that is added to obfucsated traffic. (default 128). \nLow values means less overhead (try 16), higher values means better obfuscation."
 END
 
 

@@ -367,7 +367,7 @@ void CCorruptionBlackBox::CorruptedData(uint64 nStartPos, uint64 nEndPos){
 			if ((aDataVerified[k] + aDataCorrupt[k]) > 0)
 				nCorruptPercentage = (int)(((uint64)aDataCorrupt[k]*100)/(aDataVerified[k] + aDataCorrupt[k]));
 			else {
-				AddDebugLogLine(DLP_HIGH, false, _T("CorruptionBlackBox: Programm Error: No records for guilty client found!"));
+				AddDebugLogLine(DLP_HIGH, false, _T("CorruptionBlackBox: Program Error: No records for guilty client found!"));
 				ASSERT( false );
 				nCorruptPercentage = 0;
 			}
