@@ -3864,6 +3864,9 @@ bool CUpDownClient::GetOldMorph()
 //MOPRH START - Anti ModID Faker [Xman]
 bool CUpDownClient::IsModFaker()
 {
+	
+	if(CemuleApp::m_szMMVersion[0]!=0) 
+		return false;
 	static 	const float MOD_FLOAT_VERSION= (float)_tstof(theApp.m_strModVersion.Mid(theApp.m_uModLength)) ;
 	const float fModVersion=GetModVersion(m_strModVersion);
 
