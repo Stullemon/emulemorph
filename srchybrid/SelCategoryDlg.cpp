@@ -91,22 +91,34 @@ void CSelCategoryDlg::OnOK()
 	m_cancel = false; //MORPH - Added by SiRoB
 	int	comboIndex = ((CComboBox*)GetDlgItem(IDC_CATCOMBO))->GetCurSel();
 
-	CString* catTitle = new CString(thePrefs.GetCategory(comboIndex)->strTitle);
-	catTitle->Trim();
+	if(comboIndex >= 0)
+	{
+		CString* catTitle = new CString(thePrefs.GetCategory(comboIndex)->strTitle);
+		catTitle->Trim();
 
-	CString	comboText;
-	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->GetWindowText(comboText);
-	comboText.Trim();
+		CString	comboText;
+		((CComboBox*)GetDlgItem(IDC_CATCOMBO))->GetWindowText(comboText);
+		comboText.Trim();
 
-	if (catTitle->CompareNoCase(comboText) == 0 || (comboIndex == 0 && comboText.Compare(GetResString(IDS_ALL) + _T("/") + GetResString(IDS_CAT_UNASSIGN)) == 0))
-		m_Return = comboIndex;
-	else {
+		if (catTitle->CompareNoCase(comboText) == 0 || (comboIndex == 0 && comboText.Compare(GetResString(IDS_ALL) + _T("/") + GetResString(IDS_CAT_UNASSIGN)) == 0))
+			m_Return = comboIndex;
+		else {
+			m_bCreatedNew = true;
+			m_Return = theApp.emuledlg->transferwnd->AddCategory(comboText, thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR), _T(""),_T(""));
+		}
+
+		delete catTitle;
+		catTitle = NULL;
+	}
+	else
+	{
+		CString	comboText;
+		((CComboBox*)GetDlgItem(IDC_CATCOMBO))->GetWindowText(comboText);
+		comboText.Trim();
+
 		m_bCreatedNew = true;
 		m_Return = theApp.emuledlg->transferwnd->AddCategory(comboText, thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR), _T(""),_T(""));
 	}
-
-	delete catTitle;
-	catTitle = NULL;
 
 	CDialog::OnOK();
 }
