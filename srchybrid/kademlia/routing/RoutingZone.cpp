@@ -87,7 +87,7 @@ CRoutingZone::CRoutingZone()
 	m_sFilename.Append(CONFIGFOLDER);
 	m_sFilename.Append(_T("nodes.dat"));
 	*/ 
-	m_sFilename =thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("nodes.dat")
+	m_sFilename =thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("nodes.dat");
     // MORPH END dir vista officla fix (godlaugh2007)
 	// Init our root node.
 	Init(NULL, 0, CUInt128((ULONG)0));
