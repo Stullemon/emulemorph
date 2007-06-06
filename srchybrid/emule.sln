@@ -47,26 +47,7 @@ Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Beta = Beta
 		Debug = Debug
-		Debug Static = Debug Static
-		DLL ASM Debug = DLL ASM Debug
-		DLL ASM Release = DLL ASM Release
-		DLL Debug = DLL Debug
-		DLL Release = DLL Release
-		DLL VB = DLL VB
-		Instru = Instru
-		INstrumented = INstrumented
-		LIB ASM Debug = LIB ASM Debug
-		LIB ASM Release = LIB ASM Release
-		LIB Debug = LIB Debug
-		LIB Release = LIB Release
 		Release = Release
-		Release P4-AthlonXP = Release P4-AthlonXP
-		Release Static = Release Static
-		ReleaseAxp = ReleaseAxp
-		releasewin98 = releasewin98
-		ReleaseWithoutAsm = ReleaseWithoutAsm
-		Unicode Debug = Unicode Debug
-		Unicode Release = Unicode Release
 	EndGlobalSection
 	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
