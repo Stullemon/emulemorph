@@ -660,9 +660,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_strModVersion = temptag.GetStr();
 					m_bSendOldMorph = GetOldMorph();//MORPH - prevent being banned by old MorphXT
 					//MOPRH START - Added by Stulle, Mod Icons
-					if(StrStrI(m_strModVersion,_T("MorphXT"))!=0 &&
-					   (m_strModVersion[11] == 0x00 || // for pre 10.0
-					   (m_strModVersion[11] == 0x20 && m_strModVersion[12] == 0x00))) // from 10.0 to 99.x
+					if(StrStrI(m_strModVersion,_T("MorphXT"))!=0)
 						m_uModClient = MOD_MORPH;
 					else if(StrStrI(m_strModVersion,_T("ScarAngel"))!=0)
 						m_uModClient = MOD_SCAR;
@@ -1366,9 +1364,7 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 					m_strModVersion = temptag.GetStr();
 					m_bSendOldMorph = GetOldMorph();//MORPH - prevent being banned by old MorphXT
 					//MOPRH START - Added by Stulle, Mod Icons
-					if(StrStrI(m_strModVersion,_T("MorphXT"))!=0 &&
-					   (m_strModVersion[11] == 0x00 || // for pre 10.0
-					   (m_strModVersion[11] == 0x20 && m_strModVersion[12] == 0x00))) // from 10.0 to 99.x
+					if(StrStrI(m_strModVersion,_T("MorphXT"))!=0)
 						m_uModClient = MOD_MORPH;
 					else if(StrStrI(m_strModVersion,_T("ScarAngel"))!=0)
 						m_uModClient = MOD_SCAR;
@@ -3865,7 +3861,7 @@ bool CUpDownClient::GetOldMorph()
 bool CUpDownClient::IsModFaker()
 {
 	
-	if(CemuleApp::m_szMMVersion[0]!=0) 
+	if(CemuleApp::m_szMMVersion[0]!=0)
 		return false;
 	static 	const float MOD_FLOAT_VERSION= (float)_tstof(theApp.m_strModVersion.Mid(theApp.m_uModLength)) ;
 	const float fModVersion=GetModVersion(m_strModVersion);
