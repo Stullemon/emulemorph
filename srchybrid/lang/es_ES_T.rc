@@ -388,8 +388,8 @@ BEGIN
     IDS_ERR_NOVALIDSERVERSFOUND 
                             "No se encontraron servidores vlidos a los que conectarse en la lista de servidores"
     IDS_CONNECTEDTOREQ      "Conectado a %s (%s:%u), enviando peticin de login"
-    IDS_ERR_FATAL           "Error fatal al intentar la conexin. La conexin a Internet podra estar desactivada"
-    IDS_ERR_LOSTC           "Conexin perdida con %s (%s:%i)"
+    IDS_ERR_FATAL           "Error fatal al intentar la conexión. La conexión a Internet podrá estar desactivada"
+    IDS_ERR_LOSTC           "Conexión perdida con %s (%s:%i)"
     IDS_ERR_DEAD            "%s (%s:%i) parece cado"
     IDS_ERR_FULL            "%s (%s:%i) parece estar lleno"
 END
@@ -1737,7 +1737,7 @@ BEGIN
     IDS_STATS_MINORCLIENTS  "Menor"
     IDS_AICH_SYNCTOTAL      "Encontrados %i archivos sin un conjunto de hashes AICH vlido, calculando un nuevo hash para ellos"
     IDS_AICH_CALCFILE       "Calculando Hash AICH para el archivo %s"
-    IDS_AICH_WARNUSER       "Desde la versin 0.44a eMule usa un hash de archivo adicional que permite reducir enormemente la prdida de datos cuando se detecta una corrupcin. Si se est actualizando desde una versin anterior, eMule necesita recalcular un nuevo hash de archivo para todos los archivos compartidos. Esto puede llevar un tiempo pero slo se hace una vez."
+    IDS_AICH_WARNUSER       "Desde la versin 0.44a eMule usa un hash de archivo adicional que permite reducir enormemente la prdida de datos cuando se detecta una corrupcin. Si se está actualizando desde una versin anterior, eMule necesita recalcular un nuevo hash de archivo para todos los archivos compartidos. Esto puede llevar un tiempo pero slo se hace una vez."
     IDS_AICH_WORKED         "AICH ha recuperado %s de %s de la parte %u de %s"
     IDS_SOURCECLIENT        "Fuente Cliente"
     IDS_USERSIP             "IP Usuario"
@@ -1871,7 +1871,7 @@ BEGIN
     IDS_US_STALLEDW4BR      "¡Pausado! Esperando un bloque que se ha solicitado."
     IDS_US_STALLEDREADINGFDISK "¡Pausado! Leyendo disco."
     IDS_SERVERFEATURE_INTTYPETAGS "Etiquetas de tipo entero"
-    IDS_FILLGRAPHS          "Dibujar grficos con relleno"
+    IDS_FILLGRAPHS          "Dibujar gráficos con relleno"
     IDS_PARAMETER           "Parmetro"
     IDS_TEST                "Prueba"
 END
@@ -1884,8 +1884,8 @@ BEGIN
     IDS_UPNPFAILED          "No se han podido redirigir los puertos mediante UPnP, por favor, abre estos puertos manualmente si es necesario!"
     IDS_UPNPSUCCESS         "Se han redirigido correctamente los puertos %u (TCP) y %u (UDP) mediante UPnP"
     IDS_FO_PREFBUTTON_NEW   "Abrir los puertos en el cortafuegos de WinXP SP1"
-    IDS_UPNP_NOSERVICE      "El servicio Host de Dispositivo Plug and Play universal no est ejecutndose, no se llevar a cabo la configuracin de UPnP"
-    IDS_DELAYEDBYUPNP       "La conexin a la red an no se ha realizado porque UPnP todava est redirigiendo los puertos"
+    IDS_UPNP_NOSERVICE      "El servicio Host de Dispositivo Plug and Play universal no está ejecutándose, no se llevar a cabo la configuración de UPnP"
+    IDS_DELAYEDBYUPNP       "La conexión a la red aún no se ha realizado porque UPnP todavía está redirigiendo los puertos"
     IDS_DELAYEDBYUPNP2      "Por favor, espera unos segundos, eMule se conectar a la red cuando UPnP termine."
     IDS_UPNP                "UPnP"
     IDS_UPNPCLOSEONEXIT     "Eliminar las redirecciones de puertos de UPnP al salir"
@@ -1903,7 +1903,8 @@ BEGIN
     IDS_SPAM                "Spam"
     IDS_MARKSPAM            "Marcar como Spam"
     IDS_MARKNOTSPAM         "Marcar como No Spam"
-    IDS_SEARCHSPAMFILTER    "Activar Filtro de Spam para los resultados de las bsquedas"
+    IDS_SEARCHSPAMFILTER    "Activar Filtro de Spam para los resultados de las búsquedas"
+	IDS_SHOWSMILEYS         "Mostrar emoticonos"
 END
 
 STRINGTABLE 
@@ -2398,7 +2399,7 @@ BEGIN
     IDS_FEEDEDIT            "Editar..."
     IDS_FEEDDELETE          "Eliminar"
     IDS_FEEDDELETEALL       "Eliminar Todo"
-    IDS_FEEDBUTTON          "Nuevas Entradas >"
+    IDS_FEEDBUTTON          "Añadir RSS"
     IDS_ADDNEWSFEED         "Añadir nuevas Entradas de Noticias"
     IDS_EDITNEWSFEED        "Editar entradas de Noticias"
     IDS_FEEDURL             "Por favor introduzca la URL de la Fuente de Entradas:"
@@ -3509,10 +3510,18 @@ BEGIN
 	IDS_FOLLOW_THE_MAJORITY_TIP 
                             "Renombra Automáticamente tu archivo con el nombre usado por la mayoría de clientes,\npuede ser activado directamente con el botón derecho o desactivado en cualquier operación de renombrado."
     IDS_FOLLOW_THE_MAJORITY "Seguir a la Mayoría"
-	IDS_FAIR_PLAY           "Juego justo"
+	IDS_FAIR_PLAY           "Juego Justo"
 	IDS_FAIR_PLAY_TIP       "Al menos se sube una copia del fichero descargado con mayor prioridad."
 END
 
+STRINGTABLE
+BEGIN
+	IDS_PW_EMAILNOTIFICATIONS "Notificaciones via Email"
+	IDS_PW_SENDERADDRESS    "Dirección remitente:"
+	IDS_PW_SMTPSERVER       "Servidor SMTP:"
+
+
+END
 #endif    // Spanish (Castilian) resources
 /////////////////////////////////////////////////////////////////////////////
 

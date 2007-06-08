@@ -1,59 +1,30 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
-	Name="es_ES_T"
+	Version="7.10"
+	Name="languages - Spanish (Castilian)"
 	ProjectGUID="{B0DAEE35-FD0F-4FAF-A7C1-3D52103B3E81}"
-	Keyword="Win32Proj"
-	>
+	Keyword="Win32Proj">
 	<Platforms>
 		<Platform
-			Name="Win32"
-		/>
+			Name="Win32"/>
 	</Platforms>
-	<ToolFiles>
-	</ToolFiles>
 	<Configurations>
 		<Configuration
 			Name="Dynamic|Win32"
 			OutputDirectory="dynamic"
 			IntermediateDirectory="obj"
 			ConfigurationType="2"
-			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC70.vsprops"
-			CharacterSet="2"
-			>
-			<Tool
-				Name="VCPreBuildEventTool"
-			/>
-			<Tool
-				Name="VCCustomBuildTool"
-			/>
-			<Tool
-				Name="VCXMLDataGeneratorTool"
-			/>
-			<Tool
-				Name="VCWebServiceProxyGeneratorTool"
-			/>
-			<Tool
-				Name="VCMIDLTool"
-			/>
+			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
-			/>
+				Detect64BitPortabilityProblems="TRUE"/>
 			<Tool
-				Name="VCManagedResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCResourceCompilerTool"
-			/>
-			<Tool
-				Name="VCPreLinkEventTool"
-			/>
+				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				OutputFile="$(OutDir)/es_ES_T.dll"
@@ -61,47 +32,42 @@
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
-				ResourceOnlyDLL="true"
-				TargetMachine="1"
-			/>
+				ResourceOnlyDLL="TRUE"
+				TargetMachine="1"/>
 			<Tool
-				Name="VCALinkTool"
-			/>
-			<Tool
-				Name="VCManifestTool"
-			/>
-			<Tool
-				Name="VCXDCMakeTool"
-			/>
-			<Tool
-				Name="VCBscMakeTool"
-			/>
-			<Tool
-				Name="VCFxCopTool"
-			/>
-			<Tool
-				Name="VCAppVerifierTool"
-			/>
-			<Tool
-				Name="VCWebDeploymentTool"
-			/>
+				Name="VCMIDLTool"/>
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Copying language DLL into debug directory"
-				CommandLine="if not exist ..\debug\lang md ..\debug\lang&#x0D;&#x0A;copy &quot;$(TargetPath)&quot; ..\debug\lang\$(TargetFileName)&#x0D;&#x0A;"
-			/>
+				CommandLine="if not exist ..\debug\lang md ..\debug\lang
+copy &quot;$(TargetPath)&quot; ..\debug\lang\$(TargetFileName)
+"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCWebDeploymentTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
 	</Configurations>
 	<References>
 	</References>
 	<Files>
 		<File
-			RelativePath="es_ES_T.h"
-			>
+			RelativePath="es_ES_T.h">
 		</File>
 		<File
-			RelativePath="es_ES_T.rc"
-			>
+			RelativePath="es_ES_T.rc">
 		</File>
 	</Files>
 	<Globals>
