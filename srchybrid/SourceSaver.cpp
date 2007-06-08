@@ -200,10 +200,10 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 			sourcedata = new CSourceData(cur_src, CalcExpiration(EXPIREIN));
 			srcstosave.AddHead(sourcedata);
 			continue;
+		}
 		// Skip also Required Obfuscation, because we don't save the userhash (and we don't know if all settings are still valid on next restart)
 		if (cur_src->RequiresCryptLayer() ||thePrefs.IsClientCryptLayerRequired())
 			continue;
-		}
 		if ((UINT)srcstosave.GetCount() < maxSourcesToSave || (cur_src->GetAvailablePartCount() > srcstosave.GetTail()->partsavailable) || (cur_src->GetSourceExchange1Version() > srcstosave.GetTail()->nSrcExchangeVer)) {
 			if ((UINT)srcstosave.GetCount() == maxSourcesToSave)
 				delete srcstosave.RemoveTail();
