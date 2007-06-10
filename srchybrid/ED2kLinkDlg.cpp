@@ -232,9 +232,8 @@ void CED2kLinkDlg::UpdateLink()
 			CString tempED2kLink = CreateED2kLink(file, false);
 
 			//for compatible with phpBB, phpBB using "[" "]" to identify tag
-			tempED2kLink.Replace(_T("["), _T("("));
-			tempED2kLink.Replace(_T("]"), _T(")"));
-
+			tempED2kLink.Replace(_T("["), _T("%5B"));
+            tempED2kLink.Replace(_T("]"), _T("%5D")); //Quezl
 			strLinks += tempED2kLink;
 		}
 		else //  *!!! beware of this ELSE !!!*
@@ -295,8 +294,8 @@ void CED2kLinkDlg::UpdateLink()
 			CString tempFileName = StripInvalidFilenameChars(file->GetFileName(), true);
 
 			//like before, just show up #for compatible with phpBB, phpBB using "[" "]" to identify tag#
-			tempFileName.Replace(_T("["), _T("("));
-			tempFileName.Replace(_T("]"), _T(")"));
+			//tempFileName.Replace(_T("["), _T("("));
+			//tempFileName.Replace(_T("]"), _T(")")); not needed see http://forum.emule-project.net/index.php?s=&showtopic=22612&view=findpost&p=862768
 
 			strLinks += _T("]") + tempFileName + _T("[/url]");
 		}
