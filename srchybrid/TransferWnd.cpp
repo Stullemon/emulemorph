@@ -179,8 +179,8 @@ switch (thePrefs.GetTransferWnd1()) {
 
 // khaos::categorymod+
 	// show & cat-tabs
-	/*
 	m_dlTab.ModifyStyle(0,TCS_OWNERDRAWFIXED);
+	/*
 	thePrefs.GetCategory(0)->strTitle = GetCatTitle(thePrefs.GetCategory(0)->filter);
 	thePrefs.GetCategory(0)->strIncomingPath = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 	thePrefs.GetCategory(0)->care4all=true;
@@ -1398,7 +1398,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		//MORPH END   - Added by SiRoB, Seen Complet filter
 	    //MORPH START - Added by Commander, Open Incoming Folder Fix
 		case MP_HM_OPENINC:
-			ShellExecute(NULL, _T("open"), thePrefs.GetCategory(m_isetcatmenu)->strIncomingPath,NULL, NULL, SW_SHOW);
+			ShellExecute(NULL, _T("open"), thePrefs.GetCategory(rightclickindex)->strIncomingPath,NULL, NULL, SW_SHOW);
 			break;
 		//MORPH END - Added by Commander, Open Incoming Folder Fix
 	}
