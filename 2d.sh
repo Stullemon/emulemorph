@@ -15,7 +15,7 @@ mkdir $DESTDIR/$i
 done
 for i in `cat srclist.txt`
 do
-cp -p $i $DESTDIR/$i
+cp -p $i $DESTDIR/$i 
 done
 cp srchybrid/ptreads/pthreads/*.* $DESTDIR/srchybrid/pthreads/pthreads/
 cp emule/Changelog.MorphXT.txt emule/license.txt readme.txt Packag_Licences_Readme.html $DESTDIR
