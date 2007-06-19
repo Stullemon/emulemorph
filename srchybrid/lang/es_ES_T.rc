@@ -57,7 +57,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SOCKETS_INIT_FAILED "Error iniciando los sockets de Windows."
+    IDS_SOCKETS_INIT_FAILED "Error iniciando los sockets de Windows"
     IDS_ABOUTBOX            "&Acerca de eMule..."
     IDS_HTTPDOWNLOAD_FILESTATUS "%s de %s"
     IDS_HTTPDOWNLOAD_CONNECTED "Conectado a %s"
@@ -109,7 +109,7 @@ BEGIN
                             "Ha ocurrido un error al abrir el archivo, error:%s"
     IDS_HTTPDOWNLOAD_ABORTING_TRANSFER "Cancelando transferencia"
     IDS_FD_COMPR            "Compresión"
-    IDS_WIZARD_NETWORK      "Elige la(s) red(es) que quieres utilizar."
+    IDS_WIZARD_NETWORK      "Elige la(s) red(es) que quieres utilizar"
     IDS_MAIN_READY          "Versión %s de eMule lista"
     IDS_WIZARD_ED2K         "Configuración eD2K"
     IDS_SEL_SKIN            "Seleccionar Tema visual..."
@@ -134,7 +134,7 @@ BEGIN
     IDS_ERR_METCORRUPT      "Error: %s (%s) corrupto, imposible cargar el archivo"
     IDS_ERR_FILEERROR       "Error de archivo al leer %s (%s): %s"
     IDS_ERR_FILEOPEN        "Error al abrir %s (%s)"
-    IDS_SEL_SKINDIR         "Seleccionar Carpeta de Temas visuales.."
+    IDS_SEL_SKINDIR         "Seleccionar Carpeta de Temas visuales."
 END
 
 STRINGTABLE 
@@ -175,7 +175,7 @@ BEGIN
     IDS_PING                "Ping"
     IDS_FILES               "Archivos"
     IDS_PREFERENCE          "Preferencia"
-    IDS_PRIONOPREF          "Sin Pref."
+    IDS_PRIONOPREF          "Sin Pref"
     IDS_CONNECTTHIS         "Conectar al servidor seleccionado"
 END
 
@@ -335,7 +335,7 @@ BEGIN
     IDS_STATS_TOTAL         "Total: %i"
     IDS_DISABLED            "Desactivado"
     IDS_STOPPED             "Detenido"
-    IDS_STATS_UPDATELABEL   "Intervalo de actualización: %i seg."
+    IDS_STATS_UPDATELABEL   "Intervalo de actualización: %i seg"
     IDS_WAITED              "En espera"
     IDS_ERR_LOADCREDITFILE  "Error al cargar el archivo de créditos, se creará un nuevo archivo"
     IDS_ERR_CREDITFILEOLD   "El archivo de créditos está obsoleto y será reemplazado"
@@ -404,7 +404,7 @@ BEGIN
     IDS_DL_ACTIVE_TIME      "Tiempo de descarga"
     IDS_STATS_FILTEREDCLIENTS "Filtrados: %i"
     IDS_FILTERLABEL         "Filtrar mensajes que contengan: (Separador | )"
-    IDS_ERR_LARGEREQBLOCK   "Un cliente ha solicitado un bloque demasiado grande."
+    IDS_ERR_LARGEREQBLOCK   "Un cliente ha solicitado un bloque demasiado grande"
     IDS_SHOWRATEONTITLE     "Mostrar índices de transferencia en el título"
     IDS_TBN_NOMESSAGEHISTORY "¡Ningún mensaje en el historial!"
     IDS_PW_DAP              "Añadir nuevas descargas con auto prioridad"
@@ -583,7 +583,7 @@ BEGIN
     IDS_EM_MESSAGES         "&Mensajes"
     IDS_EM_STATISTIC        "Est&adísticas"
     IDS_EM_PREFS            "&Preferencias"
-    IDS_MB_LANGUAGEINFO     "Se ha elegido un idioma por defecto. Puedes cambiar el idioma en cualquier momento en la pestaña de preferencias."
+    IDS_MB_LANGUAGEINFO     "Se ha elegido un idioma por defecto. Puedes cambiar el idioma en cualquier momento en la pestaña de preferencias"
     IDS_FD_MET              "Archivo part.met:"
     IDS_FD_HASH             "Hash:"
     IDS_FD_SIZE             "Tamaño:"
@@ -645,7 +645,7 @@ BEGIN
     IDS_SCORE               "Puntuación"
     IDS_ASKED               "Pedido"
     IDS_LASTSEEN            "Última comprobación"
-    IDS_BANNED              "bloqueado(s)"
+    IDS_BANNED              "Bloqueado(s)"
     IDS_UUSERS              "Usuarios"
     IDS_UFAILED             "Error"
     IDS_OPENFILE            "Abrir archivo"
@@ -710,8 +710,8 @@ BEGIN
     IDS_MBYTES              "MB"
     IDS_GBYTES              "GB"
     IDS_TBYTES              "TB"
-    IDS_SECS                "seg."
-    IDS_MINS                "min."
+    IDS_SECS                "seg"
+    IDS_MINS                "min"
     IDS_HOURS               "h"
     IDS_DAYS                "D"
     IDS_ED2KLINKFIX         "Enlaces eD2K"
@@ -726,8 +726,8 @@ BEGIN
     IDS_IRC_IGNOREPARTMESSAGE "Ignorar mensajes de información de Partes"
     IDS_STATS_FAILUPCOUNT   "Total de subidas erróneas: %i (%.2f%%)"
     IDS_STATS_AVEUPTIME     "Tiempo medio de subida: %s"
-    IDS_SEARCHMINSIZE       "Tamaño mín."
-    IDS_SEARCHMAXSIZE       "Tamaño máx."
+    IDS_SEARCHMINSIZE       "Tamaño mín"
+    IDS_SEARCHMAXSIZE       "Tamaño máx"
     IDS_PREF_ONLINESIG      "Activar firma en línea (Online-Signature)"
     IDS_ERROR_SAVEFILE      "Error al guardar"
     IDS_REQ_SHAREDFILES     "El usuario %s (%u) ha solicitado tu lista de archivos compartidos -> %s"
@@ -769,7 +769,7 @@ BEGIN
     IDS_GIGA                "G"
     IDS_TERRA               "T"
     IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE "Ignorar mensajes de eMule"
-    IDS_SMARTLOWIDCHECK     "Control inteligente de LowID al conectar."
+    IDS_SMARTLOWIDCHECK     "Control inteligente de LowID al conectar"
     IDS_SF_SRVOCC           "Ocupación de Servidores: %.2f%%"
     IDS_3DDEP               "Estilo Barra de progreso"
     IDS_AUTOTAKEED2KLINKS   "Capturar enlaces eD2K sólo durante el funcionamiento de eMule"
@@ -780,11 +780,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPDATEQUEUE         "No actualizar lista cola de espera en tiempo real"
-    IDS_RECOVER_SINGLE      "1 archivo recuperado."
-    IDS_RECOVER_MULTIPLE    "%ld archivos recuperados."
+    IDS_RECOVER_SINGLE      "1 archivo recuperado"
+    IDS_RECOVER_MULTIPLE    "%ld archivos recuperados"
     IDS_ATTEMPTING_RECOVERY "Intentando recuperar archivo"
-    IDS_RECOVERY_SUCCESSFUL "Archivo recuperado correctamente."
-    IDS_RECOVERY_FAILED     "Error al recuperar el archivo."
+    IDS_RECOVERY_SUCCESSFUL "Archivo recuperado correctamente"
+    IDS_RECOVERY_FAILED     "Error al recuperar el archivo"
     IDS_STARTNEXTFILE       "Descargar siguiente archivo pausado cuando otro se complete"
     IDS_FULLCHUNKTRANS      "Intentar transferir partes completas en todas las subidas"
     IDS_MANUALSERVERHIGHPRIO 
@@ -812,7 +812,7 @@ BEGIN
     IDS_IRC_PRIVMESSAGE     "Mensaje privado"
     IDS_WEB_REMOTE_LINK_ADDED "Enlace añadido: "
     IDS_WEB_REMOTE_LINK_NOT_ADDED 
-                            "Enlace no añadido. La contraseña es incorrecta."
+                            "Enlace no añadido. La contraseña es incorrecta"
     IDS_DL_TRY_TO_GET_PREVIEW_PARTS 
                             "Descargar primero las partes necesarias para previsualizar"
     IDS_IRC_KICK            "Patear"
@@ -842,20 +842,20 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_IRC_ADDTIMESTAMP    "Añadir fecha/hora en los mensajes."
+    IDS_IRC_ADDTIMESTAMP    "Añadir fecha/hora en los mensajes"
     IDS_IRC_USEFILTER       "Usar Filtro Lista de Canales"
     IDS_IRC_PERFORM         "Al conectar"
     IDS_IRC_USEPERFORM      "Usar cadena personalizada al conectar"
     IDS_IRC_ADDTOFRIENDLIST "Añadir a lista de amigos"
-    IDS_IRC_LOADCHANNELLISTONCON "Cargar lista de canales al conectar."
+    IDS_IRC_LOADCHANNELLISTONCON "Cargar lista de canales al conectar"
     IDS_IRC_ADDASFRIEND     "¡Te han añadido como amigo!"
     IDS_PW_WARNING          "El número seleccionado para ""%s"" es mayor que el que soporta el SO:  %d\nEsto puede causar inestabilidad en el sistema.\n\n¿Estás seguro de que quieres hacer eso?"
     IDS_TAKEOVER            "Tomar"
     IDS_CLEANUP             "Limpiar"
     IDS_RENAME              "Renombrar"
-    IDS_IRC_ADDLINKTOIRC    "Añadir esto al portapapeles del IRC para enviar a amigos."
+    IDS_IRC_ADDLINKTOIRC    "Añadir esto al portapapeles del IRC para enviar a amigos"
     IDS_IRC_SENDLINK        "Enviar a amigo: "
-    IDS_IRC_RECIEVEDLINK    "%s enviado (%s) para que comience automáticamente."
+    IDS_IRC_RECIEVEDLINK    "%s enviado (%s) para que comience automáticamente"
     IDS_IRC_ACCEPTLINKS     "Aceptar enlaces eD2K en IRC (¡Usar con precaución!)"
     IDS_SHARED              "Compartido"
 END
@@ -886,7 +886,7 @@ BEGIN
     IDS_PW_MINREC           "Mínimo recomendado\t%i "
     IDS_PW_UA               "Velocidad máx. de subida/descarga"
     IDS_PW_PA               "Velocidad mín. subida/descarga"
-    IDS_IRC_IGNOREINFOMESSAGE "Ignorar mensajes de información."
+    IDS_IRC_IGNOREINFOMESSAGE "Ignorar mensajes de información"
     IDS_CONNECTIONLOST      "Conexión perdida"
     IDS_WIZ_OS_FRAME        "Sistema Operativo"
     IDS_HASHINGFILE         "Codificando hash de archivo:"
@@ -954,13 +954,13 @@ BEGIN
     IDS_PRIOAUTORELEASE     "Auto [Lanz.]"
     IDS_PRIOAUTOLOW         "Auto [Baja]"
     IDS_ERR_CONTIMEOUT      "Intento de conexión a ""%s"" (%s:%i ) fuera del tiempo límite"
-    IDS_OUTOFSERVERS        "Error al conectar a todos los servidores de la lista. Realizando otra pasada."
+    IDS_OUTOFSERVERS        "Error al conectar a todos los servidores de la lista. Realizando otra pasada"
     IDS_PW_CONLIMITS        "Límites de conexión"
-    IDS_MAXCON5SECLABEL     "Nuevas conexiones máx. / 5seg."
+    IDS_MAXCON5SECLABEL     "Nuevas conexiones máx. / 5seg"
     IDS_PW_UAP              "Añadir nuevos archivos compartidos con auto prioridad"
     IDS_MAXCLIENT           "Número máximo de usuarios"
     IDS_PW_TWEAK            "Opciones adicionales"
-    IDS_TWEAKS_WARNING      "Advertencia:  No cambies estos parmetros a menos que sepas lo que ests haciendo. De lo contrario puedes empeorar las cosas.\neMule funciona bien sin modificar estos parmetros."
+    IDS_TWEAKS_WARNING      "Advertencia:  No cambies estos parmetros a menos que sepas lo que ests haciendo. De lo contrario puedes empeorar las cosas.\neMule funciona bien sin modificar estos parmetros"
     IDS_ADDAFRIEND          "Aadir Amigo"
     IDS_PAF_REQINFO         "Informacin requerida"
     IDS_PAF_MOREINFO        "Informacin adicional"
@@ -999,15 +999,15 @@ BEGIN
                             "Ignorar mensajes enviar enlace de eMule"
     IDS_CHECK4UPDATE        "Comprobar si hay una nueva versión"
     IDS_STARTUP             "Al iniciar"
-    IDS_NEWVERSIONAVL       "Existe una nueva versin de eMule. Comprueba la pgina web del proyecto para ms informacin."
-    IDS_NEWVERSIONAVLPOPUP  "Existe una nueva versin de eMule. Pincha aqu para ver las novedades de esta versin!"
-    IDS_NEWVERSIONFAILED    "No se puede comprobar si hay una nueva versin."
-    IDS_CB_TBN_ONNEWVERSION "Se ha detectado una nueva versin de eMule"
-    IDS_NONEWERVERSION      "No se ha detectado una nueva versin de eMule."
+    IDS_NEWVERSIONAVL       "Existe una nueva versión de eMule. Comprueba la página web del proyecto para más información"
+    IDS_NEWVERSIONAVLPOPUP  "Existe una nueva versión de eMule. Pincha aquí para ver las novedades de esta versión!"
+    IDS_NEWVERSIONFAILED    "No se puede comprobar si hay una nueva versión"
+    IDS_CB_TBN_ONNEWVERSION "Se ha detectado una nueva versión de eMule"
+    IDS_NONEWERVERSION      "No se ha detectado una nueva versión de eMule"
     IDS_EDIT                "Editar..."
     IDS_FILTERLEVEL         "Nivel de filtrado"
     IDS_FILTERSERVERBYIPFILTER 
-                            "Filtrar servidores (rechazar servidores dynIP)"
+                            "Filtrar servidores (rechazar servidores DynIP)"
     IDS_FILTERCOMMENTSLABEL "Ignorar comentarios que contengan: (Separador | )"
     IDS_CLIENTLIST          "Clientes conocidos"
     IDS_FOLDER              "Carpeta"
@@ -1026,13 +1026,13 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DISABLEQUEUELIST    "Desactivar lista cola de espera"
-    IDS_USECREDITSYSTEM     "Usar Sistema de crditos (Se premia a los que ms suben)"
-    IDS_FIRSTAUTODOWN       "Activa esta opcin si quieres que eMule controle las prioridades de descarga.\n\nSi la activas, eMule se asegura que las descargas con muchas fuentes no interfieran con las que tienen pocas fuentes. Esta opcin slo afectar a futuras descargas. (Por defecto: Activado)"
-    IDS_FIRSTAUTOUP         "Activa esta opcin si quieres que eMule controle las prioridades de subida.\n\nSi la activas, permites a eMule subir mejor los archivos con pocas fuentes respecto a los de muchas fuentes. Si lo desactivas eMule subir mejor los archivos con muchas fuentes respecto a archivos que tienen pocas fuentes. Esta opcin slo afectar a futuros archivos compartidos. (Por defecto: Activado)"
-    IDS_FIRSTFULLCHUNK      "Activa esta opcin si quieres subir trozos completos.\n\nEl uso de trozos completos proporciona a un cliente ms posibilidades de completar el trozo. Si lo desactivas la cola de espera rotar ms rpidamente. Si te dedicas a lanzar archivos nuevos, quizs quieras activarlo. (Por defecto: Activado)"
-    IDS_FIRSTSAFECON        "Activa esta opcin si quieres que eMule se conecte de modo Seguro.\n\nSi lo desactivas, eMule se conectar a los Servidores un poco ms rpido, pero puedes obtener ms conexiones con una falsa ID baja. (Por defecto: Desactivado)"
-    IDS_FIRSTAUTOCON        "Activa esta opcin si quieres que eMule se conecte al inicio. (Desactivado por defecto)"
-    IDS_FIRSTCOMPLETE       "Has completado por primera vez el asistente.\r\rTodas estas y otras configuraciones pueden ser cambiadas en el icono de Preferencias. Para ms informacin acude a la ayuda pulsando F1 dentro de eMule!"
+    IDS_USECREDITSYSTEM     "Usar Sistema de créditos (Se premia a los que más suben)"
+    IDS_FIRSTAUTODOWN       "Activa esta opción si quieres que eMule controle las prioridades de descarga.\n\nSi la activas, eMule se asegura que las descargas con muchas fuentes\nno interfieran con las que tienen pocas fuentes. Esta opción sólo afectará a futuras descargas.\n(Por defecto: Activado)"
+    IDS_FIRSTAUTOUP         "Activa esta opción si quieres que eMule controle las prioridades de subida.\n\nSi la activas, permites a eMule subir mejor los archivos con pocas fuentes\n respecto a los de muchas fuentes. Si lo desactivas eMule subirá mejor los archivos con muchas fuentes\nrespecto a archivos que tienen pocas fuentes. Esta opción sólo afectará a futuros archivos compartidos. (Por defecto: Activado)"
+    IDS_FIRSTFULLCHUNK      "Activa esta opción si quieres subir trozos completos.\n\nEl uso de trozos completos proporciona a un cliente más posibilidades de completar el trozo.\nSi lo desactivas la cola de espera rotar más rápidamente. Si te dedicas a lanzar archivos nuevos,\nquizás quieras activarlo. (Por defecto: Activado)"
+    IDS_FIRSTSAFECON        "Activa esta opción si quieres que eMule se conecte de modo Seguro.\n\nSi lo desactivas, eMule se conectará a los Servidores un poco más rápido,\npero puedes obtener más conexiones con una falsa ID baja. (Por defecto: Desactivado)"
+    IDS_FIRSTAUTOCON        "Activa esta opción si quieres que eMule se conecte al inicio. (Desactivado por defecto)"
+    IDS_FIRSTCOMPLETE       "Has completado por primera vez el asistente.\r\rTodas estas y otras configuraciones pueden ser cambiadas en el icono de Preferencias.\nPara más información acude a la ayuda pulsando F1 dentro de eMule!"
 END
 
 STRINGTABLE 
@@ -1040,10 +1040,10 @@ BEGIN
     IDS_ENTERUSERNAME       "Por favor introduce tu nombre de usuario:"
     IDS_STATIC_CPUMEM       "Conservar uso de CPU y Memoria"
     IDS_KAD_SEARCH_KEYWORD_TOO_SHORT 
-                            "La palabra clave es demasiado corta.\r\n\r\nLa(s) palabra(s) clave usada(s) en la búsqueda en KAD debe(n) tener un mínimo de 3 caracteres."
+                            "La palabra clave es demasiado corta.\r\n\r\nLa(s) palabra(s) clave usada(s) en la búsqueda en KAD debe(n) tener un mínimo de 3 caracteres"
     IDS_LOG2DISK            "Guardar el registro en el disco"
     IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING 
-                            "Ya existe una búsqueda en curso para la palabra clave ""%s"".\r\n\r\nPara buscar otra vez esa palabra clave, espere hasta que la búsqueda de la palabra clave finalice o se cierre el panel de resultados de búsqueda."
+                            "Ya existe una búsqueda en curso para la palabra clave ""%s"".\r\n\r\nPara buscar otra vez esa palabra clave, espere hasta que la búsqueda de la palabra clave finalice\no se cierre el panel de resultados de búsqueda"
     IDS_KAD_SEARCH_KEYWORD_INVALID 
                             "La palabra clave en KAD no es válida.\r\n\r\nUna búsqueda en KAD tiene el siguiente formato:\r\n\r\n\t<Palabra clave en KAD> [ <búsqueda-eD2k> ]\r\n\r\nLa <palabra clave en KAD> no debe contener ninguno de los siguientes caracteres:\r\n\r\n\t%s"
     IDS_EDITCAT             "Editar Categoría-Propiedades"
@@ -1115,11 +1115,11 @@ STRINGTABLE
 BEGIN
     IDS_AUTOSCROLL          "AutoDesplazamiento"
     IDS_WIZ1_WELCOME_TITLE  "Bienvenido a eMule"
-    IDS_WIZ1_WELCOME_ACTIONS "Este asistente te guiará para configurar eMule."
-    IDS_WIZ1_WELCOME_BTN_HINT "Para continuar, pulsar Siguiente."
+    IDS_WIZ1_WELCOME_ACTIONS "Este asistente te guiará para configurar eMule"
+    IDS_WIZ1_WELCOME_BTN_HINT "Para continuar, pulsar Siguiente"
     IDS_WIZ1_END_TITLE      "Completando el asistente"
     IDS_WIZ1                "Iniciando el asistente de eMule por primera vez"
-    IDS_WIZ1_END_BTN_HINT   "Para cerrar este asistente, pulsa Finalizar."
+    IDS_WIZ1_END_BTN_HINT   "Para cerrar este asistente, pulsa Finalizar"
     IDS_WIZ1_UPLOAD_SUBTITLE "Transferencia Partes Completas"
     IDS_DL_RESUMENEXT       "Reanudar siguiente archivo pausado"
     IDS_STARTPRIO           "Prioridad para esta categoría"
@@ -1177,7 +1177,7 @@ BEGIN
     IDS_STATS_SESSION       "Sesión"
     IDS_STATS_SRATIO        "Índice SU:DE Sesión:"
     IDS_STATS_CRATIO        "Índice SU:DE Acumulado:"
-    IDS_SEARCH_NORESULT     "No se encuentra entrada coincidente."
+    IDS_SEARCH_NORESULT     "No se encuentra entrada coincidente"
     IDS_STATS_CURRSRVDUR    "Duración Servidor actual"
     IDS_LONGSECS            "Segundos"
     IDS_STATS_DLSES         "Sesiones de descarga"
@@ -1194,8 +1194,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_STATS_MBRESET_TXT   "¿Estás seguro de querer poner a cero tus estadísticas acumuladas?\n\nSi cambias de opinión, puedes recuperarlas pulsando el botón 'Recuperar Estadísticas'."
-    IDS_STATS_MBRESTORE_TXT "¿Estás seguro de recuperar tus estadísticas acumuladas desde la copia de seguridad?\n\nPulsando otra vez 'Recuperar Estadísticas' se volverán a cargar tus estadísticas actuales."
+    IDS_STATS_MBRESET_TXT   "¿Estás seguro de querer poner a cero tus estadísticas acumuladas?\n\nSi cambias de opinión, puedes recuperarlas pulsando el botón 'Recuperar Estadísticas'"
+    IDS_STATS_MBRESTORE_TXT "¿Estás seguro de recuperar tus estadísticas acumuladas desde la copia de seguridad?\n\nPulsando otra vez 'Recuperar Estadísticas' se volverán a cargar tus estadísticas actuales"
     IDS_ERR_NOSTATBKUP      "ERROR: No se encuentra el archivo de copia de seguridad de estadísticas..."
     IDS_STATS_NFOLOADEDBKUP "Datos cargados de copia de seguridad de estadísticas..."
     IDS_STATS_NFORESET      "¡Estadísticas puestas a cero!"
@@ -1283,7 +1283,7 @@ BEGIN
     IDS_SEARCHAUTHORCOLLECTION "Buscar el Autor de la Colección"
     IDS_ERR_DUPL_FILES      "Archivos compartidos duplicados: ""%s"" y ""%s"""
     IDS_USS_TRACEROUTEOFTENFAILED 
-                            "Sensor de Velodidad de Subida: Tracerouting fallido varias veces. Desactivando el Sensor de Velocidad de Subida."
+                            "Sensor de Velodidad de Subida: Tracerouting fallido varias veces. Desactivando el Sensor de Velocidad de Subida"
     IDS_USS_STARTING        "Sensor de Velodidad de Subida: Hecho con las preparaciones. Comenzando el control de la Velocidad de Subida. (Los primeros 60 segundos estarán en modo rápido de reacción)"
     IDS_A4AF                "Fuentes"
     IDS_MOBILEMULE          "eMuleMóvil"
@@ -1304,10 +1304,10 @@ BEGIN
     IDS_KBYTESSEC           "KBytes/seg (KB/s)"
     IDS_ERR_CREATE_DIR      "Error al crear %s directorio ""%s"" - %s"
     IDS_WRN_INCFILE_RESERVED 
-                            "El directorio entrante no debe colocarse en un directorio de instalación de eMule."
+                            "El directorio entrante no debe colocarse en un directorio de instalación de eMule"
     IDS_WRN_TEMPFILES_RESERVED 
-                            "El directorio temporal no debe colocarse en un directorio de instalación de eMule."
-    IDS_WRN_INCTEMP_SAME    "El directorio entrante y el directorio temporal no deben ser el mismo."
+                            "El directorio temporal no debe colocarse en un directorio de instalación de eMule"
+    IDS_WRN_INCTEMP_SAME    "El directorio entrante y el directorio temporal no deben ser el mismo"
     IDS_MMFAILED            "¡Error al crear socket para eMuleMóvil!"
     IDS_MMSTARTED           "Servidor eMuleMóvil activado en Puerto %i. Versión Protocolo: %s"
     IDS_SHOWDWLPERCENTAGE   "Mostrar porcentaje de descarga en barra de progreso"
@@ -1329,9 +1329,9 @@ BEGIN
     IDS_FD_TIMEDATE         "Fechas"
     IDS_FILEINFORMATION     "Información de archivo"
     IDS_STATS_FREESPACE     "Espacio libre"
-    IDS_IRC_HELPCHANNEL     "Conectar a canales de ayuda."
+    IDS_IRC_HELPCHANNEL     "Conectar a canales de ayuda"
     IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-spanish"
-    IDS_IRC_ACCEPTLINKSFRIENDS "Sólo de amigos."
+    IDS_IRC_ACCEPTLINKSFRIENDS "Sólo de amigos"
     IDS_COMPLSOURCES        "Fuentes completas"
     IDS_CHECKNOENDTIME      "Sin caducidad"
 END
@@ -1411,7 +1411,7 @@ BEGIN
     IDS_DELETESELECTED      "Eliminar"
     IDS_ERR_FAILEDDOWNLOADLANG 
                             "¡Error al descargar e instalar el idioma seleccionado (archivo dll) desde %s!"
-    IDS_ERR_BADFOLDER       "Carpeta no válida.\nNo puede crearse la carpeta. Comprobar Nombre y Localización."
+    IDS_ERR_BADFOLDER       "Carpeta no válida.\nNo puede crearse la carpeta. Comprobar Nombre y Localización"
     IDS_AUTOREMOVEFD        "Limpiar automáticamente descargas completas"
     IDS_MM_BLOCK            "3 intentos erróneos de conexión a MobileMule - ¡cualquier intento posterior será bloqueado durante 10 min.!"
     IDS_MM_NEWUSER          "Nuevo usuario conectado con éxito al Servidor-MobileMule"
@@ -1420,7 +1420,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_RADCLIENTS          "De clientes conocidos"
-    IDS_KADUDPPORTERR       "El puerto UDP de Kademlia entra en conflicto con otro puerto UDP externo o el puerto ServerUDP de eMule. El puerto se ha cambiado a %u."
+    IDS_KADUDPPORTERR       "El puerto UDP de Kademlia entra en conflicto con otro puerto UDP externo o el puerto ServerUDP de eMule. El puerto se ha cambiado a %u"
     IDS_CONFIRM_FILEDELETE  "¿Estás seguro de querer eliminar todos los archivos seleccionados del disco?"
     IDS_OPENFOLDER          "Abrir carpeta"
     IDS_RUNASUSER           "Iniciar eMule como Usuario limitado"
@@ -1468,7 +1468,7 @@ BEGIN
     IDS_MINLENGTH           "Duración mín. [hh:mm:ss]"
     IDS_EM_HELP             "A&yuda"
     IDS_WRN_FRIENDDUPLIPPORT 
-                            "Amigo no añadido.\r\n\r\nYa existe un amigo con la misma dirección IP y puerto disponible."
+                            "Amigo no añadido.\r\n\r\nYa existe un amigo con la misma dirección IP y puerto disponible"
     IDS_DYNUP               "Sensor de Velocidad de Subida (USS)"
     IDS_KADOVERHEAD         "Tráfico excedente KAD (Paquetes): %s (%s)"
     IDS_FIND                "Encontrar..."
@@ -1484,7 +1484,7 @@ BEGIN
     IDS_DELETEIPFILTERS     "¿Realmente quieres eliminar los filtros IP seleccionados?"
     IDS_TOTAL_IPFILTER_LABEL "Total de IPs filtradas:"
     IDS_TOTAL_IPS_LABEL     "Total IPs:"
-    IDS_RAU_WARNING         "Esta configuración proporciona seguridad extra al eMule contra ataques y ""exploits"", por lo que recomendamos el uso de esta opción.\nSin embargo, insistimos en que se lea el manual antes de activarla.\n\nLos cambios tendrán efecto después de reiniciar eMule."
+    IDS_RAU_WARNING         "Esta configuración proporciona seguridad extra al eMule contra ataques y ""exploits"", por lo que recomendamos el uso de esta opción.\nSin embargo, insistimos en que se lea el manual antes de activarla.\n\nLos cambios tendrán efecto después de reiniciar eMule"
     IDS_APPEND              "Añadir..."
     IDS_SAVE                "Guardar"
     IDS_IP_START            "Inicio"
@@ -1509,14 +1509,14 @@ BEGIN
     IDS_ARCHTYPE            "Tipo del Archivo:"
     IDS_ATTRIBUTES          "Atributos"
     IDS_LASTMODIFIED        "Última modificación"
-    IDS_RARFULLENCR         "Cabeceras cifradas - no se puede leer el archivo."
-    IDS_ARCPARSED           "Archivo escaneado."
+    IDS_RARFULLENCR         "Cabeceras cifradas - no se puede leer el archivo"
+    IDS_ARCPARSED           "Archivo escaneado"
     IDS_ARCPREV_LISTMAYBEINCOMPL 
-                            "La lista de archivos podría estar incompleta."
-    IDS_ARCPREV_DIRNOTFOUND "No se ha encontrado la Tabla de Contenidos."
-    IDS_ARCPREV_INSUFFDATA  "Faltan datos."
+                            "La lista de archivos podría estar incompleta"
+    IDS_ARCPREV_DIRNOTFOUND "No se ha encontrado la Tabla de Contenidos"
+    IDS_ARCPREV_INSUFFDATA  "Faltan datos"
     IDS_PASSWPROT           "Protección con contraseña"
-    IDS_ARCPREV_DIRSUCCREAD "Se ha leído correctamente la Tabla de Contenidos."
+    IDS_ARCPREV_DIRSUCCREAD "Se ha leído correctamente la Tabla de Contenidos"
 END
 
 STRINGTABLE 
@@ -1571,7 +1571,7 @@ BEGIN
     IDS_COLL_TEXTFORMAT     "Guardar colección en un formato de texto simple"
     IDS_RUNNINGRESTRICTED   "eMule está funcionando con privilegios limitados"
     IDS_USS_MANUALUPLOADLIMITDETECTED 
-                            "Sensor de Velocidad de Subida (USS): Detectado un aumento del límite de subida en Preferencias. Se usará modo de reacción rápida durante 60 seg."
+                            "Sensor de Velocidad de Subida (USS): Detectado un aumento del límite de subida en Preferencias. Se usará modo de reacción rápida durante 60 seg"
     IDS_USS_STATE_PREPARING "Preparando..."
     IDS_USS_STATE_WAITING   "Esperando..."
     IDS_USS_STATE_ERROR     "¡Error!"
@@ -1592,15 +1592,15 @@ BEGIN
     IDS_IRC_IGNOREMISCMESSAGE "Ignorar otros mensajes de información"
     IDS_KNOWN               "Conocido"
     IDS_RAU_RUNNING         "eMule está funcionando como usuario limitado ""%s"""
-    IDS_RAU_FAILED          "Error al iniciar eMule como usuario limitado ""eMule_Secure"". Guardando los privilegios del usuario actual (""%S"")."
-    IDS_KADCONTACTSREAD     "Leídos %ld contactos de archivo."
-    IDS_ERR_KADCONTACTS     "No se han encontrado contactos, autoarranca o descarga un archivo nodes.dat."
+    IDS_RAU_FAILED          "Error al iniciar eMule como usuario limitado ""eMule_Secure"". Guardando los privilegios del usuario actual (""%S"")"
+    IDS_KADCONTACTSREAD     "Leídos %ld contactos de archivo"
+    IDS_ERR_KADCONTACTS     "No se han encontrado contactos, autoarranca o descarga un archivo nodes.dat"
     IDS_METATAGS            "Número de Meta Tag:"
     IDS_FILEFORMAT          "Formato de archivo"
     IDS_UDPREASKS           "Peticiones reiteradas de archivo vía UDP"
-    IDS_DYNUP_PINGTOLERANCE_MS 			"Tolerancia de Ping (ms)"
+    IDS_DYNUP_PINGTOLERANCE_MS 			"Tolerancia de Ping (más)"
     IDS_DYNUP_RADIO_PINGTOLERANCE_HEADER 	"Método de tolerancia de ping"
-    IDS_DYNUP_RADIO_PINGTOLERANCE_MS 		"Milisegundos (ms)"
+    IDS_DYNUP_RADIO_PINGTOLERANCE_MS 		"Milisegundos (más)"
     IDS_DYNUP_RADIO_PINGTOLERANCE_PERCENT 	"Porcentaje (%)"
     IDS_LOG_A4AF            "Registrar acciones A4AF"
     IDS_A4AF_SAVE_CPU       "Desactivar comprobación A4AF para conservar CPU"
@@ -1616,7 +1616,7 @@ BEGIN
     IDS_INSTALL_SKIN_FILE_ERROR 
                             "Error al extraer el archivo de Temas visuales de eMule ""%s"" al archivo local ""%s"" - %s"
     IDS_INSTALL_SKIN_PKG_ERROR 
-                            "Éste no es un paquete de archivos válido de Temas visuales para eMule."
+                            "Éste no es un paquete de archivos válido de Temas visuales para eMule"
     IDS_NEXT_REASK          "Siguiente petición para este cliente"
     IDS_A4AF_FILES          "Archivos A4AF"
     IDS_FO_TEMPTCP_S        "Puerto %u (TCP) abierto en el cortafuegos interno de WinXP para esta sesión de eMule"
@@ -1639,15 +1639,15 @@ BEGIN
     IDS_LOG_ULDL_EVENTS     "Registrar eventos de subida/descarga"
     IDS_PEERCACHE_ENABLED   "Tu proveedor de acceso a Internet (ISP) es compatible con PeerCache. ¡Activando descargas con Cache!"
     IDS_IRC_EMULEPROTO_ALLOWADDFRIEND 
-                            "Permitir a un usuario añadirte como amigo."
+                            "Permitir a un usuario añadirte como amigo"
     IDS_SOURCESWAPBLOCKED   "Intercambio bloqueado"
     IDS_A4AF_CHECK_THIS_NOW "Comprobar esta fuente ahora (debug)"
     IDS_STATS_FRATIO        "Sesión Índice SU:DE (Excluidas Subidas a amigos):"
     IDS_STATS_UDATA_FRIENDS "Datos subidos a puestos reservados de amigos (Sesión): %s"
-    IDS_IMP_ERR_BADFORMAT   "Archivo temp con formato erróneo o desconocido."
-    IDS_SEARCH_INVALIDCHAR  "Expresión de búsqueda contiene caracteres no válidos. Has introducido un carácter '?' o caracteres que no pueden usarse en esta red."
+    IDS_IMP_ERR_BADFORMAT   "Archivo temp con formato erróneo o desconocido"
+    IDS_SEARCH_INVALIDCHAR  "Expresión de búsqueda contiene caracteres no válidos. Has introducido un carácter '?' o caracteres que no pueden usarse en esta red"
     IDS_PORTSCON            "Puertos y Conexión"
-    IDS_PORTINFO            "eMule utiliza dos puertos de comunicación con servidores y clientes. Estos puertos deben estar libres y disponibles para clientes remotos. El puerto TCP debe estar disponible para asegurar el funcionamiento básico de eMule. El puerto UDP es utilizado por KAD (red sin servidores) y reduce el uso de la red (Sobrecarga).\n\nPuedes cambiar los puertos mientras no haya empezado la actividad en la red."
+    IDS_PORTINFO            "eMule utiliza dos puertos de comunicación con servidores y clientes. Estos puertos deben estar libres y disponibles para clientes remotos. El puerto TCP debe estar disponible para asegurar el funcionamiento básico de eMule. El puerto UDP es utilizado por KAD (red sin servidores) y reduce el uso de la red (Sobrecarga).\n\nPuedes cambiar los puertos mientras no haya empezado la actividad en la red"
 END
 
 STRINGTABLE 
@@ -1656,7 +1656,7 @@ BEGIN
     IDS_TESTINFO            "Aquí puedes hacer pruebas para comprobar si tus puertos TCP y UDP son accesibles desde el exterior. El éxito de esta prueba es fundamental para que se conecten contigo servidores y clientes. ¡El puerto TCP tiene que funcionar!"
     IDS_CONNECTIONTEST      "Prueba de Conexión"
     IDS_NOPORTCHANGEPOSSIBLE 
-                            "¡El cambio de puertos no es posible después de conectarse a clientes o mientras se sigue conectado a un servidor/KAD!\n\nPor favor reinicia eMule con la nueva configuración de puertos."
+                            "¡El cambio de puertos no es posible después de conectarse a clientes o mientras se sigue conectado a un servidor/KAD!\n\nPor favor reinicia eMule con la nueva configuración de puertos"
     IDS_NETWORK_INFO        "Información de Red"
     IDS_SP_TOTALUL          "Subidas totales"
     IDS_SP_ULFRIENDS        "Puestos reservados de subida a amigos"
@@ -1737,13 +1737,13 @@ BEGIN
     IDS_STATS_MINORCLIENTS  "Menor"
     IDS_AICH_SYNCTOTAL      "Encontrados %i archivos sin un conjunto de hashes AICH vlido, calculando un nuevo hash para ellos"
     IDS_AICH_CALCFILE       "Calculando Hash AICH para el archivo %s"
-    IDS_AICH_WARNUSER       "Desde la versin 0.44a eMule usa un hash de archivo adicional que permite reducir enormemente la prdida de datos cuando se detecta una corrupcin. Si se está actualizando desde una versin anterior, eMule necesita recalcular un nuevo hash de archivo para todos los archivos compartidos. Esto puede llevar un tiempo pero slo se hace una vez."
+    IDS_AICH_WARNUSER       "Desde la versin 0.44a eMule usa un hash de archivo adicional que permite reducir enormemente la prdida de datos cuando se detecta una corrupcin. Si se está actualizando desde una versin anterior, eMule necesita recalcular un nuevo hash de archivo para todos los archivos compartidos. Esto puede llevar un tiempo pero slo se hace una vez"
     IDS_AICH_WORKED         "AICH ha recuperado %s de %s de la parte %u de %s"
     IDS_SOURCECLIENT        "Fuente Cliente"
     IDS_USERSIP             "IP Usuario"
     IDS_FEATURES            "Características"
-    IDS_IRC_NEWNICK         "Seleccionar un alias IRC."
-    IDS_IRC_NEWNICKDESC     "Debería ser una palabra que contuviera menos de 20 caracteres (A-Z, 0-9). Esto puede cambiarse otra vez en Preferencias->IRC."
+    IDS_IRC_NEWNICK         "Seleccionar un alias IRC"
+    IDS_IRC_NEWNICKDESC     "Debería ser una palabra que contuviera menos de 20 caracteres (A-Z, 0-9). Esto puede cambiarse otra vez en Preferencias->IRC"
     IDS_SPARSEPARTFILES     "Crear nuevos archivos part como 'dispersos' (sólo NTFS)"
     IDS_ASPECTRATIO         "Formato"
     IDS_NEGATEFILTER        "Anular filtro"
@@ -1778,9 +1778,9 @@ BEGIN
     IDS_DWL_IPFILTERFILE    "Descargando archivo de filtros IP"
     IDS_DWLIPFILTERFAILED   "Error al descargar filtros IP"
     IDS_FINDBUDDY           "Encontrar Mediador"
-    IDS_ERR_IPFILTERZIPEXTR "Error al extraer el archivo de filtros IP del archivo ZIP descargado ""%s""."
+    IDS_ERR_IPFILTERZIPEXTR "Error al extraer el archivo de filtros IP del archivo ZIP descargado ""%s"""
     IDS_ERR_IPFILTERCONTENTERR 
-                            "El archivo de filtros IP descargado ""%s"" es un archivo ZIP con contenido desconocido."
+                            "El archivo de filtros IP descargado ""%s"" es un archivo ZIP con contenido desconocido"
     IDS_STORENOTES          "Guardar Notas"
     IDS_NOTES               "Notas"
     IDS_KADSEARCHALREADY    "Ya está en curso otra búsqueda. ¡Por favor, inténtalo otra vez más tarde!"
@@ -1833,12 +1833,12 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_X_SHAREAZA_IMPORT_NO_HASH "No se ha encontrado el hash."
-    IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT "La lista de huecos está corrupta."
-    IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST "Lista de huecos no encontrada."
+    IDS_X_SHAREAZA_IMPORT_NO_HASH "No se ha encontrado el hash"
+    IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT "La lista de huecos está corrupta"
+    IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST "Lista de huecos no encontrada"
     IDS_X_SHAREAZA_IMPORT_HASH_SET_CORRUPT 
-                            "El conjunto de hashes está corrupto."
-    IDS_X_SHAREAZA_IMPORT_NO_HASH_SET "No se encuentra el conjunto de hashes."
+                            "El conjunto de hashes está corrupto"
+    IDS_X_SHAREAZA_IMPORT_NO_HASH_SET "No se encuentra el conjunto de hashes"
     IDS_CONVERTINGKNOWN2MET "Convirtiendo %s a %s para soportar archivos grandes..."
     IDS_CONVERTINGKNOWN2FAILED 
                             "...error al convertir known2.met, se han eliminado datos antiguos"
@@ -1850,8 +1850,8 @@ BEGIN
     IDS_NEWVERSIONAVLBETA   "Esta versión Beta está anticuada. ¡Las versiones Beta suelen tener fallos, por lo que es muy importante que actualices a una versión estable lo antes posible!"
     IDS_BOLD                "Cambia a Texto en Negrita"
     IDS_UNDERLINE           "Cambia a Texto Subrayado"
-    IDS_COLOUR              "Selecciona Color para el Texto en Primer Plano,(Opcionalmente Color para el Fondo)."
-    IDS_RESETFORMAT         "Deshace todos los Formatos modificados previamente,(Envía una Etiqueta de Restauración)."
+    IDS_COLOUR              "Selecciona Color para el Texto en Primer Plano,(Opcionalmente Color para el Fondo)"
+    IDS_RESETFORMAT         "Deshace todos los Formatos modificados previamente,(Envía una Etiqueta de Restauración)"
 END
 
 STRINGTABLE 
@@ -1868,8 +1868,8 @@ BEGIN
     IDS_ENABLEMINIMULE      "Activar MiniMule"
     IDS_DISABLE_AUTOARCHPREV 
                             "Desact. inicio autom. de previsualiz. de archivos en detalles del archivo"
-    IDS_US_STALLEDW4BR      "¡Pausado! Esperando un bloque que se ha solicitado."
-    IDS_US_STALLEDREADINGFDISK "¡Pausado! Leyendo disco."
+    IDS_US_STALLEDW4BR      "¡Pausado! Esperando un bloque que se ha solicitado"
+    IDS_US_STALLEDREADINGFDISK "¡Pausado! Leyendo disco"
     IDS_SERVERFEATURE_INTTYPETAGS "Etiquetas de tipo entero"
     IDS_FILLGRAPHS          "Dibujar gráficos con relleno"
     IDS_PARAMETER           "Parmetro"
@@ -1886,20 +1886,20 @@ BEGIN
     IDS_FO_PREFBUTTON_NEW   "Abrir los puertos en el cortafuegos de WinXP SP1"
     IDS_UPNP_NOSERVICE      "El servicio Host de Dispositivo Plug and Play universal no está ejecutándose, no se llevar a cabo la configuración de UPnP"
     IDS_DELAYEDBYUPNP       "La conexión a la red aún no se ha realizado porque UPnP todavía está redirigiendo los puertos"
-    IDS_DELAYEDBYUPNP2      "Por favor, espera unos segundos, eMule se conectar a la red cuando UPnP termine."
+    IDS_DELAYEDBYUPNP2      "Por favor, espera unos segundos, eMule se conectar a la red cuando UPnP termine"
     IDS_UPNP                "UPnP"
     IDS_UPNPCLOSEONEXIT     "Eliminar las redirecciones de puertos de UPnP al salir"
     IDS_UPNPSKIPWANIP       "No configurar la IP de la WAN"
     IDS_UPNPSKIPWANPPP      "No configurar el PPP de la WAN"
     IDS_SHAREEMULELABEL     "Compartiendo eMule con otros usuarios"
-    IDS_SHAREEMULEMULTI     "Cada usuario tiene su propia configuracin y descargas"
-    IDS_SHAREEMULEPUBLIC    "Todos tienen la misma configuracin y descargas"
-    IDS_SHAREEMULEOLD       "Guardar la configuracin y las descargas en el directorio del programa"
+    IDS_SHAREEMULEMULTI     "Cada usuario tiene su propia configuración y descargas"
+    IDS_SHAREEMULEPUBLIC    "Todos tienen la misma configuración y descargas"
+    IDS_SHAREEMULEOLD       "Guardar la configuración y las descargas en el directorio del programa"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SHAREEMULEWARNING   "Cambiando esta opcin se permitir a eMule utilizar otra configuracin diferente a la actual, que ser ignorada y las descargas en curso dejarn de ser visibles. Podrs volver a tu configuracin actual cambiando nuevamente esta opcin.\n\nSer necesario reiniciar eMule para que los cambios sean efectivos."
+    IDS_SHAREEMULEWARNING   "Cambiando esta opción se permitirá a eMule utilizar otra configuración diferente a la actual, que ser ignorada y las descargas en curso dejarán de ser visibles. Podrás volver a tu configuración actual cambiando nuevamente esta opción.\n\nEs necesario reiniciar eMule para que los cambios sean efectivos"
     IDS_SPAM                "Spam"
     IDS_MARKSPAM            "Marcar como Spam"
     IDS_MARKNOTSPAM         "Marcar como No Spam"
@@ -1909,34 +1909,34 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CRASHRPT_DONE       "El informe de errores ha sido generado."
-    IDS_CRASHRPT_AV         "El RecopiladorDeErrores está disponible y activo."
+    IDS_CRASHRPT_DONE       "El informe de errores ha sido generado"
+    IDS_CRASHRPT_AV         "El RecopiladorDeErrores está disponible y activo"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
-                            "Importación cancelada: No se puede importar a un archivo completado."
+                            "Importación cancelada: No se puede importar a un archivo completado"
     IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
-                            "Importación cancelada: hashset no completado para %s (%i hashes para %i partes)."
+                            "Importación cancelada: hashset no completado para %s (%i hashes para %i partes)"
     IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE 
-                            "Importación cancelada: No se pudo abrir %s."
-    IDS_SR13_IMPORTPARTS_IMPORTSTART "Importando %i partes a %s."
-    IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Parte %i: importada."
+                            "Importación cancelada: No se pudo abrir %s"
+    IDS_SR13_IMPORTPARTS_IMPORTSTART "Importando %i partes a %s"
+    IDS_SR13_IMPORTPARTS_PARTIMPORTEDGOOD "Parte %i: importada"
     IDS_SR13_IMPORTPARTS_PARTIMPORTEDBAD 
-                            "Parte %i: importada para manejo de ICH."
+                            "Parte %i: importada para manejo de AICH"
     IDS_SR13_IMPORTPARTS_PARTSKIPPEDDONTMATCH 
-                            "Parte %i: ignorada, no cuadra con el bloque parcialmente completo."
+                            "Parte %i: ignorada, no cuadra con el bloque parcialmente completo"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
-                            "%i partes corruptas fueron importadas para A/ICH. Iniciando nuevo hash."
+                            "%i partes corruptas fueron importadas para AICH. Iniciando nuevo hash"
     IDS_SR13_IMPORTPARTS_ERR_FILETOOSMALL 
-                            "El archivo es más pequeño que el mínimo de un bloque que el AICH pueda recuperar - no tiene sentido importarle esa información."
+                            "El archivo es más pequeño que el mínimo de un bloque que el AICH pueda recuperar - no tiene sentido importarle esa información"
     IDS_SR13_IMPORTPARTS_IMPORTFINISH 
-                            "Importación finalizada. %i partes fueron importadas a %s."
+                            "Importación finalizada. %i partes fueron importadas a %s"
 END
 
 STRINGTABLE 
@@ -1964,7 +1964,7 @@ BEGIN
     IDS_DOWNLOAD_IN_RED     "Mostrar en Rojo archivos descargandose"
     IDS_UPSLOTNUMBER        "Slot #"
     IDS_STATS_LEECHERCLIENTS "Leechers: %u"
-    IDS_WARNINGMORPH        "Advertencia:  No cambies estos parámetros a menos que sepas lo que estás haciendo. No hagas el karmazen que puedes empeorar las cosas.\neMule funciona bien sin modificar estos parámetros."
+    IDS_WARNINGMORPH        "Advertencia:  No cambies estos parámetros a menos que sepas lo que estás haciendo. No hagas el karmazen que puedes empeorar las cosas.\neMule funciona bien sin modificar estos parámetros"
     IDS_DM                  "Administración de Descargas"
     IDS_SCC                 "Control de Categorías Inteligente (SCC)"
     IDS_SAC                 "Control de A4AF Inteligente (SAC)"
@@ -2033,7 +2033,7 @@ STRINGTABLE
 BEGIN
     IDS_CAT_MINIMUM         "Mínimo"
     IDS_CAT_MAXIMUM         "Máximo"
-    IDS_CAT_DLGHELP         "Las casillas indican si el criterio debería ser usado a la hora de seleccionar categorías para archivos nuevos."
+    IDS_CAT_DLGHELP         "Las casillas indican si el criterio debería ser usado a la hora de seleccionar categorías para archivos nuevos"
     IDS_CAT_FILTERS         "Filtros de Categorías"
     IDS_CAT_RS              "\tTamaño restante (MB)"
     IDS_CAT_FS              "Tamaño del archivo (MB)"
@@ -2059,7 +2059,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CAT_SETORDER        "Poner prioridad lineal"
-    IDS_CAT_ORDER           "Introduzca un entero mayor o igual a cero.  Valores negativos reanudan al primero."
+    IDS_CAT_ORDER           "Introduzca un entero mayor o igual a cero.  Valores negativos reanudan al primero"
     IDS_CAT_PAUSEDSHOWN     " | Pausados visibles"
     IDS_CAT_PAUSEDHIDDEN    " | Pausados invisibles"
     IDS_CAT_COLCATEGORY     "Categoría"
@@ -2153,10 +2153,10 @@ STRINGTABLE
 BEGIN
     IDS_LISTREQNODL         "¡Este usuario no está en la lista de espera de descarga!"
     IDS_LISTREQNOUL         "¡Este usuario no está en una lista de espera!"
-    IDS_LEECHERDETREM       "Leecher detectado y eliminado de la lista de espera de subida."
-    IDS_LEECHERPUTBACK      "Leecher reestablecido a la lista de espera."
+    IDS_LEECHERDETREM       "Leecher detectado y eliminado de la lista de espera de subida"
+    IDS_LEECHERPUTBACK      "Leecher reestablecido a la lista de espera"
     IDS_TRIEDDLOTHERFILE    "%s: La sesión de subida no ha sido permitida porque el usuario intentaba bajarse un archivo diferente al que tenía asignado en la lista de espera. ID del archivo: (esperado=%s, pedido=%s)"
-    IDS_CLIENTPUTBACK       "Usuario puesto otra vez en la lista de espera, con tiempo de espera intacto."
+    IDS_CLIENTPUTBACK       "Usuario puesto otra vez en la lista de espera, con tiempo de espera intacto"
 END
 
 STRINGTABLE 
@@ -2199,34 +2199,34 @@ BEGIN
     IDS_USS_ENABLED         "Activar"
     IDS_USS_LOG             "Mostrar actividad en el log del debug"
     IDS_USS_PINGTOLERANCE   "Tolerancia del Ping (en %%) (Por defecto %i)"
-    IDS_USS_GOINGUPDIVIDER  "Lentitud de asceno (Por defecto %i)"
+    IDS_USS_GOINGUPDIVIDER  "Lentitud de ascenso (Por defecto %i)"
     IDS_USS_GOINGDOWNDIVIDER "Lentitud de descenso (Por defecto %i)"
     IDS_USS_NUMBEROFPINGS   "Número maximo de pings de media (Por defecto %i)"
-    IDS_USSFINDLASTCOMMON   "Sensor de Velocidad de Subida (USS): Iniciando traceroutes para encontrar último host en común."
+    IDS_USSFINDLASTCOMMON   "Sensor de Velocidad de Subida (USS): Iniciando traceroutes para encontrar último host en común"
     IDS_USSFOUNDLASTCOMMON  "Sensor de Velocidad de Subida (USS): Último host en común encontrado. ÚltimoHostEnComún: %s @ TTL: %i HostToPing: %s"
     IDS_USSSTARTLOWPING     "Sensor de Velocidad de Subida (USS): Buscando un valor inicial para pings más bajos..."
     IDS_USSCOLLECTINGHOSTS  "Sensor de Velocidad de Subida (USS): Intento #%i. Coleccionando hosts..."
     IDS_USSENOUGHHOSTS      "Sensor de Velocidad de Subida (USS): Tengo suficientes hosts. Listando los hosts a los que se les hará traceroutes:"
     IDS_USSHOSTLISTING      "Sensor de Velocidad de Subida (USS): Host #%i: %s"
-    IDS_USSLOWESTPING       "Sensor de Velocidad de Subida (USS): Ping más bajo: %i ms"
-    IDS_USSREADY            "Sensor de Velocidad de Subida (USS): Hecho con preparaciones. Iniciando control de velocidad de subida."
-    IDS_USSCANTPING         "Sensor de Velocidad de Subida (USS): ¡Fallado ping #%i al host! (TTL: %i IP: %s Error: %i). Durmiendo 1 segundo antes de volver a intentar. Información de error a continuación."
+    IDS_USSLOWESTPING       "Sensor de Velocidad de Subida (USS): Ping más bajo: %i más"
+    IDS_USSREADY            "Sensor de Velocidad de Subida (USS): Hecho con preparaciones. Iniciando control de velocidad de subida"
+    IDS_USSCANTPING         "Sensor de Velocidad de Subida (USS): ¡Fallado ping #%i al host! (TTL: %i IP: %s Error: %i). Durmiendo 1 segundo antes de volver a intentar. Información de error a continuación"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_USSCANTPINGREMOVE   "Sensor de Velocidad de Subida (USS): ¡Error al hacer ping a un host! (TTL: %i IP: %s Error: %i). Eliminando este host y reiniciando la colección de hosts. Información de error a continuación."
-    IDS_USSHOSTTOOCLOSE     "Sensor de Velocidad de Subida (USS): ¡El host estaba demasiado cerca! (TTL: %i IP: %s status: %i). Eliminando este host y reiniciando la colección de hosts."
+    IDS_USSCANTPINGREMOVE   "Sensor de Velocidad de Subida (USS): ¡Error al hacer ping a un host! (TTL: %i IP: %s Error: %i). Eliminando este host y reiniciando la colección de hosts. Información de error a continuación"
+    IDS_USSHOSTTOOCLOSE     "Sensor de Velocidad de Subida (USS): ¡El host estaba demasiado cerca! (TTL: %i IP: %s status: %i). Eliminando este host y reiniciando la colección de hosts"
     IDS_USSHOSTTTL          "Sensor de Velocidad de Subida (USS): Host en TTL %i: %s"
-    IDS_USSPINGFAILED       "Sensor de Velocidad de Subida (USS): Ping #%i fallido. Razón para ello a continuación."
-    IDS_USSNEWTRACEROUTE    "Sensor de Velocidad de Subida (USS): La Topologia de la red ha cambiado. TTL: %i IP esperada: %s Recibio IP: %s Se hara un nuevo traceroute."
-    IDS_USSPINGNUMCONTINUE  "Sensor de Velocidad de Subida (USS): Ping #%i correcto. Continuando."
-    IDS_USSNEWLOWEST        "Sensor de Velocidad de Subida (USS): Nuevo ping más bajo: %i ms. Anterior: %i ms"
-    IDS_USSPINGFAILDIS      "Sensor de Velocidad de Subida (USS): Pinging falló demasiadas veces. Desactivando el Sensor de Velocidad de Upload (USS)."
+    IDS_USSPINGFAILED       "Sensor de Velocidad de Subida (USS): Ping #%i fallido. Razón para ello a continuación"
+    IDS_USSNEWTRACEROUTE    "Sensor de Velocidad de Subida (USS): La Topologia de la red ha cambiado. TTL: %i IP esperada: %s Recibio IP: %s Se hara un nuevo traceroute"
+    IDS_USSPINGNUMCONTINUE  "Sensor de Velocidad de Subida (USS): Ping #%i correcto. Continuando"
+    IDS_USSNEWLOWEST        "Sensor de Velocidad de Subida (USS): Nuevo ping más bajo: %i más. Anterior: %i más"
+    IDS_USSPINGFAILDIS      "Sensor de Velocidad de Subida (USS): Pinging falló demasiadas veces. Desactivando el Sensor de Velocidad de Upload (USS)"
     IDS_USSPINGERPINGREPLY  "Sensor de Velocidad de Subida (USS): Respuesta de %s: bytes=%d tiempo=%ldms TTL=%i"
     IDS_USSPINGERWSASFAI    "Pinger: WSAStartup() fallido, err: %d\n"
     IDS_USSPINGERLOADLIB    "Pinger: LoadLibrary() fallido: No pudo localizar ICMP.DLL!"
-    IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() fallido para al menos una función."
+    IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() fallido para al menos una función"
     IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() fallido, err: "
     IDS_USSPINGERICMPENDERR "Error cerrando el manejo de ICMP, err: "
 END
@@ -2234,11 +2234,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_USS_UDP             "Forzar ping UDP"
-    IDS_UPSTOPPEDLEECHER    "Sesión de subida no ha podido iniciarse. El usuario tiene pinta de ser un leecher."
-    IDS_IPSTOPPEDOTHFILE    "Sesión de subida no ha podido iniciarse. El usuario intentó bajarse un archivo que no era el que se había previsto en la lista de espera."
+    IDS_UPSTOPPEDLEECHER    "Sesión de subida no ha podido iniciarse. El usuario tiene pinta de ser un leecher"
+    IDS_IPSTOPPEDOTHFILE    "Sesión de subida no ha podido iniciarse. El usuario intentó bajarse un archivo que no era el que se había previsto en la lista de espera"
     IDS_NEWMSGFROM          "Nuevo mensaje de '%s' (IP:%s)"
     IDS_FILTEREDFROM        "Mensaje filtrado de '%s' (IP:%s)"
-    IDS_ERRORPROCESSING     "Error mientras se procesaba el paquete."
+    IDS_ERRORPROCESSING     "Error mientras se procesaba el paquete"
     IDS_RECEIVEDSRCEXREQ    "RCV:Usuario que Solicita Fuentes '%s' Archivo '%s'"
 END
 
@@ -2269,7 +2269,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_BACKUP              "Backup"
-    IDS_USS_MAXPING         "Valor de ping máximo (ms) (Por Defecto %i)"
+    IDS_USS_MAXPING         "Valor de ping máximo (más) (Por Defecto %i)"
     IDS_PAYBACKFIRST        "Dar Primero"
     IDS_USS_USEMAXPING      "Usar máximo valor de ping"
     IDS_CREDIT_SYSTEM       "Sistema de Créditos"
@@ -2369,8 +2369,8 @@ BEGIN
     IDS_VISITMVERSIONCHECK  "\n\n¿Quiéres visitar la página web de Morph?"
     IDS_MVERSIONCHECK       "&Versioncheck (Morph)"
     IDS_NONEWMVERVERSION    "No se ha detectado ninguna versión nueva de Morph"
-    IDS_NEWMVERSIONAVL      "Una nueva versión de eMule Morph esta disponible! Visita la página para más información."
-    IDS_NEWMVERSIONAVLPOPUP "Una nueva versión de eMule Morph esta disponible! Haga click aquí para conocer los detalles de la nueva versión."
+    IDS_NEWMVERSIONAVL      "Una nueva versión de eMule Morph esta disponible! Visita la página para más información"
+    IDS_NEWMVERSIONAVLPOPUP "Una nueva versión de eMule Morph esta disponible! Haga click aquí para conocer los detalles de la nueva versión"
     IDS_CTRLKEY             "CTRL"
     IDS_ALTKEY              "ALT"
     IDS_SHIFTKEY            "SHIFT"
@@ -2417,14 +2417,14 @@ BEGIN
     IDS_INSERTTEXTCOLUMN    "&Copia la columna del portapapeles"
     IDS_MASSRENAME2         "Nombre de Archivo Originales:"
     IDS_MASSRENAME3         "Nuevos Nombres de Archivo:"
-    IDS_NOTENOUGHFILENAMES  "No hay suficientes Nombres de Archivos en la lista de nuevos nombres de archivos. No se pudo renombrar."
-    IDS_IDENTICALFILENAMES  "No está permitido que haya dos o más nombres de archivos iguales en un mismo directorio (Línea %d). No se pudo renombrar."
+    IDS_NOTENOUGHFILENAMES  "No hay suficientes Nombres de Archivos en la lista de nuevos nombres de archivos. No se pudo renombrar"
+    IDS_IDENTICALFILENAMES  "No está permitido que haya dos o más nombres de archivos iguales en un mismo directorio (Línea %d). No se pudo renombrar"
     IDS_MR                  "Renombrado Masivo..."
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHECKDOTTOSPACE     "Convertir ""."" en "" """
+    IDS_CHECKDOTTOSPACE     "Convertir """" en "" """
     IDS_CHECKUNDERLINETOSPACE "Convertir ""_"" en "" """
     IDS_CHECKCONVERTAPOSTROPHES 
                             "Convertir apostrofes incorrectos ""´"", ""`"" a los estadar "" ' """
@@ -2620,8 +2620,8 @@ BEGIN
     IDS_CRC_CALCULATED      "CRC32 calculado"
     IDS_CRC_CHECKOK         "Checkeo del CRC32 = Ok"
     IDS_CRC_FORCEADDING     "Añadir Etiqueta/CRC32 a archivo incluso si el nombre de archivo ya contiene un CRC32 válido"
-    IDS_CRC_FORCEUPPERCASE  "Si el nombre de archivo ya contiene un CRC32 válido, convertir a mayúsculas."
-    IDS_CRC_DONTADDCRC      "No añadir Sufijo/CRC32 al nombre de archivo, sólo añadir prefijo como texto estático."
+    IDS_CRC_FORCEUPPERCASE  "Si el nombre de archivo ya contiene un CRC32 válido, convertir a mayúsculas"
+    IDS_CRC_DONTADDCRC      "No añadir Sufijo/CRC32 al nombre de archivo, sólo añadir prefijo como texto estático"
     IDS_CRC_PREFIX          "Prefijo a añadir al final del nombre de archivo antes del CRC32:"
 END
 
@@ -2642,23 +2642,23 @@ BEGIN
     IDS_FC_LOADED           "El comprobador de Fakes %i ha sido cargado correctamente"
     IDS_LOG_FC_LOADED       "Cargado comprobador de Fakes de ""%s"" en %ums"
     IDS_LOG_FC_INFO         "Encontrada Referencia de Fake:%u  Duplicado:%u  Combinado:%u"
-    IDS_LOG_FC_ERR1         "No se pudo extraer el archivo de comprobador de Fakes del ZIP descargado (""%s"")."
-    IDS_LOG_FC_ERR2         "El archivo de comprobado de Fakes ""%s"" descargado es un ZIP que tiene un contenido distinto al esperado."
+    IDS_LOG_FC_ERR1         "No se pudo extraer el archivo de comprobador de Fakes del ZIP descargado (""%s"")"
+    IDS_LOG_FC_ERR2         "El archivo de comprobado de Fakes ""%s"" descargado es un ZIP que tiene un contenido distinto al esperado"
     IDS_MASSRENAME_TITLE    "Renombrar-Masivo"
-    IDS_LOG_CRC32_WRN1      "Alerta: Un archivo con el que el CRC32 debería ser calculado ya no está siendo compartido. Por ello el cálculo no se ha realizado."
-    IDS_LOG_CRC32_WRN2      "Alerta: El archivo '%s' ya no está siendo compartido. Por ello el cálculo del CRC32 no ha podido realizarse."
-    IDS_LOG_CRC32_WRN3      "Alerta: No se pudo abrir el archivo '%s' para poder calcular el CRC32. Archivo no analizado."
-    IDS_LOG_CRC32_SKIP1     "El cálculo del CRC32 del archivo '%s' no ha sido realizado - ya se había hecho con anterioridad."
+    IDS_LOG_CRC32_WRN1      "Alerta: Un archivo con el que el CRC32 debería ser calculado ya no está siendo compartido. Por ello el cálculo no se ha realizado"
+    IDS_LOG_CRC32_WRN2      "Alerta: El archivo '%s' ya no está siendo compartido. Por ello el cálculo del CRC32 no ha podido realizarse"
+    IDS_LOG_CRC32_WRN3      "Alerta: No se pudo abrir el archivo '%s' para poder calcular el CRC32. Archivo no analizado"
+    IDS_LOG_CRC32_SKIP1     "El cálculo del CRC32 del archivo '%s' no ha sido realizado - ya se había hecho con anterioridad"
     IDS_LOG_CRC32_SKIP2     "No se pudo calcular el CRC32 del archivo '%s'; el archivo es sólo parte de un archivo, no uno completo!"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_LOG_CRC32_CALC      "Calculando el CRC32 del archivo '%s'..."
-    IDS_LOG_CRC32_ADORT     "Se canceló el cálculo del CRC32."
+    IDS_LOG_CRC32_ADORT     "Se canceló el cálculo del CRC32"
     IDS_LOG_CRC32_COMPLETED "El cálculo del CRC32 del archivo '%s' ha sido completado. CRC del Archivo: %s"
-    IDS_IP2COUNTRY_MSG1     "IP2Country utiliza la base de datos IP-to-Country proporcionado por WebHosting."
-    IDS_IP2COUNTRY_MSG2     "Info (http://www.webhosting.info), disponible en http://ip-to-country.webhosting.info."
+    IDS_IP2COUNTRY_MSG1     "IP2Country utiliza la base de datos IP-to-Country proporcionado por WebHosting"
+    IDS_IP2COUNTRY_MSG2     "Info (http://www.webhosting.info), disponible en http://ip-to-country.webhosting.info"
     IDS_IP2COUNTRY_LOADED   "IP2Country cargado"
     IDS_IP2COUNTRY_UNLOADED "IP2Country descargado"
     IDS_IP2COUNTRY_ERROR1   "línea de error número : %i"
@@ -2666,8 +2666,8 @@ BEGIN
     IDS_IP2COUNTRY_ERROR4   "Bandera Desactivada, no se pudo cargar"
     IDS_IP2COUNTRY_ERROR5   "resID no válido, puede que necesites actualizar la bandera del icono del Dll,"
     IDS_IP2COUNTRY_ERROR6   "Falló la descarga del archivo de IP to Country"
-    IDS_IP2COUNTRY_ERROR7   "No se pudo extraer el archivo IP to Country del ZIP descargado (""%s"")."
-    IDS_IP2COUNTRY_ERROR8   "El archivo IP to Country ""%s"" descargado es un ZIP que tiene un contenido distinto al esperado."
+    IDS_IP2COUNTRY_ERROR7   "No se pudo extraer el archivo IP to Country del ZIP descargado (""%s"")"
+    IDS_IP2COUNTRY_ERROR8   "El archivo IP to Country ""%s"" descargado es un ZIP que tiene un contenido distinto al esperado"
     IDS_IP2COUNTRY_LOADED2  "Cargado el IP2Country de ""%s"" en %ums"
 END
 
@@ -2694,8 +2694,8 @@ BEGIN
     IDS_IP2COUNTRY_DWNFILE  "Descargando archivo IP2Country"
     IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv descargado debido a actualización en proceso"
     IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv cargado después de haberse actualizado con éxito"
-    IDS_HASHING_COMPLETED   "Completado el hashing del archivo '%s'."
-    IDS_HASHING_COMPLETED2  "Hashing de nuevos archivos completado."
+    IDS_HASHING_COMPLETED   "Completado el hashing del archivo '%s'"
+    IDS_HASHING_COMPLETED2  "Hashing de nuevos archivos completado"
     IDS_HASHING_NEWFILE     "Archivo nuevo: '%s'"
     IDS_SUQWT_LOAD          "Cargar %s"
     IDS_VERBOSE_TITLE       "Información Extra"
@@ -2705,13 +2705,13 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SCHED_BACKUP_LOG    "Iniciado backup programado."
+    IDS_SCHED_BACKUP_LOG    "Iniciado backup programado"
     IDS_SCHED_UPDATE_IPCONFIG_LOG 
-                            "Actualización del IPFILTER.DAT programada iniciada."
+                            "Actualización del IPFILTER.DAT programada iniciada"
     IDS_SCHED_UPDATE_FAKES_LOG 
-                            "Actualización del FAKES.DAT programada iniciada."
+                            "Actualización del FAKES.DAT programada iniciada"
     IDS_SCHED_UPDATE_WARNING 
-                            "¡No programes los eventos de auto-actualización a lo bruto!\r\nUna vez a la semana es más que suficiente."
+                            "¡No programes los eventos de auto-actualización a lo bruto!\r\nUna vez a la semana es más que suficiente"
 END
 
 STRINGTABLE 
@@ -2771,60 +2771,60 @@ END
 STRINGTABLE 
 BEGIN
     IDC_FILTE_TIP           "Mensajes que contengan estas palabras se considerarán spam y\nserán flitrados y los clientes que los estén enviando serán baneados.\nLos que envíen mensajes con palabras filtradas que estén en la lista de amigos no serán baneados"
-    IDC_MSGONLYFRIEND_TIP   "Mensajes provinientes de clientes que no estén en tu lista de amigos no se mostrarán"
+    IDC_MSGONLYFRIEND_TIP   "Mensajes provenientes de clientes que no estén en tu lista de amigos no se mostrarán"
     IDC_COMMENTFILTE_TIP    "Comentarios de archivos que contengan estas\npalabras serán considerados spam y no serán mostradas\nen los detalles del archivo"
     IDC_SEC_MIS_TIP         "La identificación segura siempre está activada en MorphXT.\nFuncionar como usuario seguro sólo está disponible en sistema basados en Windows NT (NT/2000/XP)"
-    IDC_RUNASUSER_TIP       "Ejecutar el eMule como usuario restringido. eMule creará un usuario\n'eMule_secure' que sólo tiene permitido escribir en las carpetas temp,\n incoming y la de instalación. Nota:\nEjecutar previsualizar desde el eMule puede que no funcione,\nla asociación del eMule con los links eD2K está restringida.\nTu sistema está más seguro contra hackeos.\nMira a ver en el administrador de tareas si el eMule está siendo\nejecutado con el nombre de 'eMule_secure'."
-    IDC_MSGONLYSEC_SEC      "Sólo serán aceptados los mensajes de clientes con una identificación segura."
-    IDC_ADVSPAMFILTER_TIP   "Mensajes duplicados o mensajes a los que no contestas tras unos pocos mensajes serán considerados como spam y se baneará al cliente."
+    IDC_RUNASUSER_TIP       "Ejecutar el eMule como usuario restringido. eMule creará un usuario\n'eMule_secure' que sólo tiene permitido escribir en las carpetas temp,\nincoming y la de instalación. Nota:\nEjecutar previsualizar desde el eMule puede que no funcione,\nla asociación del eMule con los links eD2K está restringida.\nTu sistema está más seguro contra hackeos.\nMira a ver en el administrador de tareas si el eMule está siendo\nejecutado con el nombre de 'eMule_secure'"
+    IDC_MSGONLYSEC_SEC      "Sólo serán aceptados los mensajes de clientes con una identificación segura"
+    IDC_ADVSPAMFILTER_TIP   "Mensajes duplicados o mensajes a los que no contestas tras unos pocos mensajes serán considerados como spam y se baneará al cliente"
     IDS_LOG_SERVER_FILTERED "Servidor eliminado en %s de la lista '%s': en ipfilter '%s'"
-    IDC_ENABLEPROXY_TIP     "Utiliza esta opción si la única manera que tienes de conectarte a internet es mediante un proxy. Esto siempre causará lowID (no óptimo).\n<b>ADVERTENCIA</b>\nSólo introduzca un proxy si está completamente seguro de tener uno\ny de que puede proveer la información correcta.\nLos proxies apenas se usan en PCs para el hogar\ny no ofrecen ninguna ventaja fuera de la LAN.\nRouters y modems no son proxies. No confundir ésta opción con la del WebCaché que se encuentra en otro apartado posterior."
+    IDC_ENABLEPROXY_TIP     "Utiliza esta opción si la única manera que tienes de conectarte a internet es mediante un proxy. Esto siempre causará lowID (no óptimo).\n<b>ADVERTENCIA</b>\nSólo introduzca un proxy si está completamente seguro de tener uno\ny de que puede proveer la información correcta.\nLos proxies apenas se usan en PCs para el hogar\ny no ofrecen ninguna ventaja fuera de la LAN.\nRouters y modems no son proxies. No confundir ésta opción con la del WebCaché que se encuentra en otro apartado posterior"
     IDC_PROXYTYPE_TIP       "Ponga el protocolo del proxy.\nLa precedencia de la velocidad del protocolo proxy es como sigue:\n1. SOCKS 4a (mayor velocidad por menor encabezado)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (peor velocidad por gran encabezado)"
     IDC_PROXYNAME_TIP       "Nombre del host o dirección IP del proxy"
-    IDC_PROXYPORT_TIP       "Puerto por el que se comunica el proxy.\nSuele ser el 1080 para socks y 80 o 8080 para http."
+    IDC_PROXYPORT_TIP       "Puerto por el que se comunica el proxy.\nSuele ser el 1080 para socks y 80 o 8080 para http"
     IDC_ENABLEAUTH_TIP      "Habilita esto si necesitas loguearte al proxy\nNótese que para http sólo está\nsoportada la autentificación básica (Microsoft NTLM no)"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_RDEAD_TIP        "El número de intentos antes de considerar al servidor\nmuerto y eliminado de la lista."
+    IDS_PW_RDEAD_TIP        "El número de intentos antes de considerar al servidor\nmuerto y eliminado de la lista"
     IDS_PW_RETRIES_TIP      "El número de intentos antes de considerar al servidor\nmuerto y eliminado de la lista. (Por defecto: 3)"
-    IDS_PW_USC_TIP          "Actualizar la lista de servidores con la URL que está en address.dat (editar) al iniciar el eMule. (Por defecto: sin marcar)"
+    IDS_PW_USC_TIP          "Actualizar la lista de servidores con la URL que está en addresses.dat (editar) al iniciar el eMule. (Por defecto: sin marcar)"
     IDS_PW_UCC_TIP          "Cuando otro cliente se conecta a tí, \nañadir a la lista de servidores el servidor que\nel otro cliente esté usando"
     IDS_PW_USS_TIP          "Cuando se esté conectando a un servidor, pedir una lista de servidores de ese servidor"
     IDS_SMARTLOWIDCHECK_TIP "Intentará conectarse más veces si se ha tenido ID-alta anteriormente"
-    IDS_PW_FASTSRVCON_TIP   "Activa esta opción si quieres que eMule se conecte de modo Seguro.\n\nSi lo desactivas, eMule se conectará a los Servidores un poco más rápido, pero tienes más posibilidades de obtener falsas ID-bajas. (Por defecto: Desactivado)"
+    IDS_PW_FASTSRVCON_TIP   "Activa esta opción si quieres que eMule se conecte de modo Seguro.\nSi lo desactivas, eMule se conectará a los Servidores un poco más rápido,\npero tienes más posibilidades de obtener falsas ID-bajas. (Por defecto: Desactivado)"
     IDS_PW_SCORE_TIP        "A la hora de conectarse a servidores lo hará en el orden en que indique la prioridad que tengan dichos servidores"
     IDS_MANUALSERVERHIGHPRIO_TIP 
                             "Al añadir un servidor manualmente se le asignará prioridad alta automáticamente"
-    IDS_EDITLIST_TIP        "Edita address.dat para que se autoactualice la lista de servidores al iniciarse.\nDeberías meter al menos una dirección en address.dat si habilitas esta opción"
+    IDS_EDITLIST_TIP        "Edita addresses.dat para que se autoactualice la lista de servidores al iniciarse.\nDeberías meter al menos una dirección en addresses.dat si habilitas esta opción"
     IDS_PW_AUTOCONNECTSTATICONLY_TIP 
-                            "Sólo se conecta a servidores que están marcados como estáticos. Si no hay servidores estáticos en la lista la conexión automática dará error."
+                            "Sólo se conecta a servidores que están marcados como estáticos.\nSi no hay servidores estáticos en la lista la conexión automática dará error."
     IDS_MAXCONNECTIONSSWITCHBORDER_TIP 
-                            "Límite máximo para pasar de USS a SUC y viceversa\nUSS es mejor con cuando hay pocos slots abiertos,\nSUC necesita abrir muchos slots para determinar una buena media."
-    IDS_SUC_TIP             "Usar el Control de Subida Inteligente (SUC)\nPros: Sin tráfico extra (no hace pings)\nContras: necesita clientes activos para poder encontrar la velocidad óptima."
-    IDC_USS_TIP             "Hace pings al último\nrouter límite común de tu ISP (para tres clientes aleatorios)\npara determinar el tiempo de reacción de tu conexión."
+                            "Límite máximo para pasar de USS a SUC y viceversa\nUSS es mejor con cuando hay pocos slots abiertos,\nSUC necesita abrir muchos slots para determinar una buena media"
+    IDS_SUC_TIP             "Usar el Control de Subida Inteligente (SUC)\nPros: Sin tráfico extra (no hace pings)\nContras: necesita clientes activos para poder encontrar la velocidad óptima"
+    IDC_USS_TIP             "Hace pings al último\nrouter límite común de tu ISP (para tres clientes aleatorios)\npara determinar el tiempo de reacción de tu conexión"
     IDC_SUC_LOG_TIP         "Loguear en el log del verbose (información extra avanzada)"
-    IDS_SUC_HIGH_TIP        "Si la respuesta media del cliente supera este valor la velocidad de subida comenzará a descender."
+    IDS_SUC_HIGH_TIP        "Si la respuesta media del cliente supera este valor la velocidad de subida comenzará a descender"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_DM_TIP              "Configuraciones extras relacionadas con la Descarga:\nCategorías, ventana de descarga, SelecciónInteligenteDeTrozos (ICS)"
     IDS_SCC_TIP             "Cómo manejar las categorías en la ventana de transferencias"
-    IDS_SAC_TIP             "Dirección de las fuentes que tienen archivos múltiples (<b>A</b>sked <b>4</b> for <b>A</b>nother <b>F</b>ile)\n&Pequeño control af4f.\nLa traducción literal es preguntar por otro archivo."
+    IDS_SAC_TIP             "Dirección de las fuentes que tienen archivos múltiples (<b>A</b>sked <b>4</b> for <b>A</b>nother <b>F</b>ile)\n&Pequeño control af4f.\nLa traducción literal es preguntar por otro archivo"
     IDS_DEFAULT_TIP         "IDS_DEFAULT_TIP"
     IDS_UM_TIP              "Direccion de la subida:\ncontrol de slot, deteccion de la\nanchura de banda de subida"
-    IDS_DYNUPLOAD_TIP       "Variar la velocidad de subida de forma automatica\ndetectando la anchura de banda disponible."
-    IDS_SECURITY_TIP        "Opciones de seguridad: Anti leecher & anti hackeo de creditos."
-    IDS_PW_DISPLAY_TIP      "Como mostrar algunos articulos\nen la ventana de descarga."
-    IDS_PW_FRIENDS_TIP      "Ajustes de la velocidad de los slots para los amigos.\nPuedes hacer amigo a un usuario y despues establecer un slot de amigos\npara empezar una descarga directa."
-    IDS_POWERSHARE_TIP      "Powershare es un slot de alta prioridad de subida, para lanzar archivos con pocas fuentes completas.\nAjustes de la velocidad."
+    IDS_DYNUPLOAD_TIP       "Variar la velocidad de subida de forma automatica\ndetectando la anchura de banda disponible"
+    IDS_SECURITY_TIP        "Opciones de seguridad: Anti leecher & anti hackeo de créditos"
+    IDS_PW_DISPLAY_TIP      "Como mostrar algunos articulos\nen la ventana de descarga"
+    IDS_PW_FRIENDS_TIP      "Ajustes de la velocidad de los slots para los amigos.\nPuedes hacer amigo a un usuario y despues establecer un slot de amigos\npara empezar una descarga directa"
+    IDS_POWERSHARE_TIP      "Powershare es un slot de alta prioridad de subida, para lanzar archivos con pocas fuentes completas.\nAjustes de la velocidad"
     IDS_AUTODYNUPSWITCHING_TIP "Cambiar entre SUC y USS"
-    IDS_SLOT_LIMIT_NONE_TIP "No limitar el número de slots abiertas.\nEste es el ajuste recomendado, pero la subida debe ser correcta o demasiados\nslots lentos se abren cuando la velocidad de subida del sistema no\npuede ser alcanzada."
+    IDS_SLOT_LIMIT_NONE_TIP "No limitar el número de slots abiertas.\nEste es el ajuste recomendado, pero la subida debe ser correcta o demasiados\nslots lentos se abren cuando la velocidad de subida del sistema no\npuede ser alcanzada"
     IDS_SLOT_LIMIT_THREE_TIP 
-                            "Limitar el numero de slots a la velocidad de subidad dividida entre 3kb\ncomo en el eMule oficial. No se aplica hasta que 4 slots\nde subida esten activos (Por defecto)."
-    IDS_DYNDISABLED_TIP     "Usar los valores de la velocidad de subida en la pestaña de las conexiones de subida."
+                            "Limitar el número de slots a la velocidad de subidad dividida entre 3kb\ncomo en el eMule oficial. No se aplica hasta que 4 slots\nde subida esten activos (Por defecto)"
+    IDS_DYNDISABLED_TIP     "Usar los valores de la velocidad de subida en la pestaña de las conexiones de subida"
 END
 
 STRINGTABLE 
@@ -2836,9 +2836,9 @@ BEGIN
     IDS_USS_PINGTOLERANCE_TIP 
                             "Valores grandes da al ping mayor tolerancia antes que el upload cambie"
     IDS_USS_GOINGUPDIVIDER_TIP 
-                            "Velocidad en ms segundos para reaccionar con una velocidad mayor que el upload"
+                            "Velocidad en más segundos para reaccionar con una velocidad mayor que el upload"
     IDS_USS_GOINGDOWNDIVIDER_TIP 
-                            "Velocidad en ms segundos para reaccionar con una velocidad menor que el upload"
+                            "Velocidad en más segundos para reaccionar con una velocidad menor que el upload"
     IDS_USS_NUMBEROFPINGS_TIP 
                             "Valor del ping para usar como promedio\nUn valor bajo(1) hace responder muy rápidamente pero no podrá avanzar.\nUn valor alto hace que el USS reaccione demasiado lento"
     IDS_MINUPLOAD_TIP       "Velocidad mínima de subida que mantendrá el USS/SUC en caso de estar saturado el ancho de banda"
@@ -2857,7 +2857,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DISPLAYFUNNYNICK_TIP 
-                            "Crear un nick artificial <i>[Funnynick]Madeup1 madeup2</i> para usuarios que no definieron su nick."
+                            "Crear un nick artificial <i>[Funnynick]Madeup1 madeup2</i> para usuarios que no definieron su nick"
     IDS_CLIENTQUEUEPROGRESSBAR_TIP 
                             "Mostrar una barra en el fondo de la ventana de\ntransferencias con el número de los clientes en cola"
     IDS_DOWNLOADDATARATEAVERAGETIME_TIP 
@@ -2865,22 +2865,22 @@ BEGIN
     IDS_UPLOADDATARATEAVERAGETIME_TIP 
                             "Tiempo (en segundos) que se muestra el promedio de la velocidad de subida en la ventana de Gráfico"
     IDS_MINDATARATEFRIEND_TIP 
-                            "Cantidad total de velocidad de subida que es usado para slots de amigos.\nObserve si esta velocidad excede de 3kb/s, el zzRatio 1:3 de la sesión\n se activará. Puede observar una r(Ratio no alcanzado) o R(Ratio alcanzado)\ncerca de los valores de Subida/Descarga en la parte inferior de la barra de estado."
+                            "Cantidad total de velocidad de subida que es usado para slots de amigos.\nObserve si esta velocidad excede de 3kb/s, el zzRatio 1:3 de la sesión\nse activará. Puede observar una r(Ratio no alcanzado) o R(Ratio alcanzado)\ncerca de los valores de Subida/Descarga en la parte inferior de la barra de estado"
     IDS_MAXCLIENTDATARATEFRIEND_TIP 
                             "Máxima velocidad que es permitida a un amigo por cada slot"
     IDS_MINDATARATEPOWERSHARE_TIP 
                             "Velocidad total que es gastada en todos los PowerShare slots. (Por defecto:todo)"
     IDS_MAXCLIENTDATARATEPOWERSHARE_TIP 
-                            "Máxima velocidad de subida permitida para 1 slot en estado de PowerShare.\nPor defecto = 0, enfocando toda la velocidad del PowerShared para el número mas bajo de ranuras.\nConfigurando un valor aquí hace que el interruptor del Morph distribuya el ancho de banda."
+                            "Máxima velocidad de subida permitida para 1 slot en estado de PowerShare.\nPor defecto = 0, enfocando toda la velocidad del PowerShared para el número mas bajo de ranuras.\nConfigurando un valor aquí hace que el interruptor del Morph distribuya el ancho de banda"
     IDS_MAXCLIENTDATARATE_TIP 
-                            "Velocidad Máxima de subida que 1 slot de un cliente normal puede recibir.\nPor defecto = 0, Velocidad para acabar de completar el slot lo mas rapidamente posible,\nEl valor que se pone aqui, sirve para limitar las subidas y distribuir la anchura de banda entre un\nmáximo de slot posibles. Puede ser que durante breves periodos de tiempo, esta velocidad\nse puede superar para completar tu ancho de banda."
+                            "Velocidad Máxima de subida que 1 slot de un cliente normal puede recibir.\nPor defecto = 0, Velocidad para acabar de completar el slot lo mas rapidamente posible,\nEl valor que se pone aqui, sirve para limitar las subidas y distribuir la anchura de banda entre un\nmáximo de slot posibles. Puede ser que durante breves periodos de tiempo, esta velocidad\nse puede superar para completar tu ancho de banda"
     IDS_SLOT_LIMIT_GROUP_TIP 
-                            "Opción que se debe tomar como último recurso para limitar el número de slots.\nPrimero se aplican los diferentes metodos de subida y esta opcion tan solo sirve\npara limitar el numero de slot, si los limites de velocidad no se pueden\najustar correctamente."
-    IDS_SLOT_LIMIT_NUM_TIP  "El límite superior de los slots abiertos es un número configurable.\nEsto es únicamente útil en clientes con una velocidad de subida alta."
-    IDS_CAT_SHOWCATNAME_TIP "Muestra el nombre completo de la categoría o el número de la categoría\nen la columna de Categoría en la ventana de transferencias."
+                            "Opción que se debe tomar como último recurso para limitar el número de slots.\nPrimero se aplican los diferentes metodos de subida y esta opción tan solo sirve\npara limitar el número de slot, si los limites de velocidad no se pueden\najustar correctamente"
+    IDS_SLOT_LIMIT_NUM_TIP  "El límite superior de los slots abiertos es un número configurable.\nEsto es únicamente útil en clientes con una velocidad de subida alta"
+    IDS_CAT_SHOWCATNAME_TIP "Muestra el nombre completo de la categoría o el número de la categoría\nen la columna de Categoría en la ventana de transferencias"
     IDS_CAT_SHOWSELCATDLG_TIP 
                             "Muestra el diálogo de la selección/adición de categorías\ncada vez que un fichero es añadido a eMule"
-    IDS_CAT_USEAUTOCAT_TIP  "Utiliazr los criterios de seleccion de la categoria\n(tamaño/fuentes/avanzados), para buscar un elemento\napropiado para la categoria"
+    IDS_CAT_USEAUTOCAT_TIP  "Utilizar los criterios de seleccion de la categoria\n(tamaño/fuentes/avanzados), para buscar un elemento\napropiado para la categoria"
     IDS_CAT_USEACTIVE_TIP   "Usar la categoría activa para empezar nuevas descargas en ella"
 END
 
@@ -2893,112 +2893,112 @@ BEGIN
     IDS_CAT_STARTFILESONADD_TIP 
                             "Si creas una nueva categoría en el diálogo de\nSeleccionar Categoría, cuando agregue múltiples archivos en el estado pausado\nlos archivos añadidos serán comenzados (Por defecto=0, desactivado)"
     IDS_A4AF_SMARTSWAP_TIP  "Si esta Activado, Preguntará la dirección para Otro Archivo"
-    IDS_A4AF_SHOWDEBUG_TIP  "Mostrar mensajes sobre A4AF en el registro de Información Extra\n si el registro de la respuesta el programa (Información Extra) está activado"
-    IDS_A4AF_ADVMODE_TIP    "Opciones de cómo manipular si una fuente tiene múltiples fuentes."
+    IDS_A4AF_SHOWDEBUG_TIP  "Mostrar mensajes sobre A4AF en el registro de Información Extra\nsi el registro de la respuesta el programa (Información Extra) está activado"
+    IDS_A4AF_ADVMODE_TIP    "Opciones de cómo manipular si una fuente tiene múltiples fuentes"
     IDS_A4AF_DISABLED_TIP   "Desactivar manejo adicional del A4AF"
-    IDS_A4AF_BALANCE_TIP    "Divide la fuente del A4AF igualmente sobre los archivos."
+    IDS_A4AF_BALANCE_TIP    "Divide la fuente del A4AF igualmente sobre los archivos"
     IDS_A4AF_STACK_TIP      "Mover todas las fuentes de A4AF a un mismo archivo"
-    IDS_SLS_USESLS_TIP      "Salva las fuentes existentes, cuando cierras tu eMule, para volverlas a cargar\npara un arranque mas rapido, pero esto funciona si inicias el eMule\nen menos de 30 minutos desde que cerraste."
-    IDS_REMTIMEAVRREAL_TIP  "Que mostrar en la columna de tiempo restante\nen la ventana de trafico."
-    IDS_BOTH_TIP            "Mostar el tiempo real y a la izquierda el tiempo de transferencia."
-    IDS_REALTIME_TIP_TIP    "Mostrar solo el tiempo total."
-    IDS_AVG_TIP             "Mostrar el tiempo tomando la velocidad media."
-    IDS_ICS_USEICS_TIP      "Utilizar la spreadbar para informar de la seleccion integente de trozos."
-    IDS_HIGHPROCESS_TIP     "Darle al eMule una prioridad alta, a la hora de adquirir recursos\npara un mejor funcionamiento, en detrimento de otras aplicaciones."
+    IDS_SLS_USESLS_TIP      "Salva las fuentes existentes, cuando cierras tu eMule, para volverlas a cargar\npara un arranque mas rapido, pero esto funciona si inicias el eMule\nen menos de 30 minutos desde que cerraste"
+    IDS_REMTIMEAVRREAL_TIP  "Que mostrar en la columna de tiempo restante\nen la ventana de trafico"
+    IDS_BOTH_TIP            "Mostar el tiempo real y a la izquierda el tiempo de transferencia"
+    IDS_REALTIME_TIP_TIP    "Mostrar solo el tiempo total"
+    IDS_AVG_TIP             "Mostrar el tiempo tomando la velocidad media"
+    IDS_ICS_USEICS_TIP      "Utilizar la SpreadBar para informar de la seleccion integente de trozos"
+    IDS_HIGHPROCESS_TIP     "Darle al eMule una prioridad alta, a la hora de adquirir recursos\npara un mejor funcionamiento, en detrimento de otras aplicaciones"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_COMMUNITYTAG_TIP    "Las etiquetas de la comunidad son reconocidas en otras etiqueta,\n por ejemplo: un usuario <i>Andu[<b>NWO</b>]</i>\nserá aqui reconocido como una\ncomunidad de etiqueta 'NWO'. La comunidad solamente se usa para mostrar al resto de la\ncomunidad los ficheros compartidos (¡Ningun estimulo para la comunidad!). Para mostrar los archivos\ncompartidos lo tienes que establecer en las preferencias de los archivos, el Morph permite mostrar los archivos de forma\nindividual. Tu no tienes lo tienes que fijar la [etiqueta] en tu nombre, la etiqueta tambien será agregado por\neste ajuste."
-    IDS_MORPH_RFHA_TIP      "Informar de las actividades que realiza el hashing."
-    IDS_MORPH_RAIF_TIP      "Añadir y quitar las actividades de los amigos en el registro."
-    IDS_MORPH_KSSERV_SIP    "Si un servidor estatico de la lista de servidores, ha pasado\nel numero maximo de intentos de conexion, se deshabilita\nen vez de eliminarlo de la lista, hasta reiniciar el eMule."
-    IDS_GLOBAL_HL_TIP       "El limite global es un limite para el numero total de fuentes, en vez\nde aplicar un limite de fuentes por archivo, lo que normalmente\nhace el eMule."
-    IDS_SUC_ENABLED_TIP     "Permitir el hardlimit global en vez de las fuentes por archivo."
-    IDS_GLOBAL_HL_LIMIT_TIP "Valor para el limite global, depende de la disponibilidad\nde la velocidad de subida/bajada y de la latencia.\nUn valor normal seria, entre 3000 y 6000."
+    IDS_COMMUNITYTAG_TIP    "Las etiquetas de la comunidad son reconocidas en otras etiqueta,\npor ejemplo: un usuario <i>Andu[<b>NWO</b>]</i>\nserá aqui reconocido como una\ncomunidad de etiqueta 'NWO'. La comunidad solamente se usa para mostrar al resto de la\ncomunidad los ficheros compartidos (¡Ningun estimulo para la comunidad!). Para mostrar los archivos\ncompartidos lo tienes que establecer en las preferencias de los archivos, el Morph permite mostrar los archivos de forma\nindividual. Tu no tienes lo tienes que fijar la [etiqueta] en tu nombre, la etiqueta también será agregado por\neste ajuste"
+    IDS_MORPH_RFHA_TIP      "Informar de las actividades que realiza el hashing"
+    IDS_MORPH_RAIF_TIP      "Añadir y quitar las actividades de los amigos en el registro"
+    IDS_MORPH_KSSERV_SIP    "Si un servidor estatico de la lista de servidores, ha pasado\nel número maximo de intentos de conexión, se deshabilita\nen vez de eliminarlo de la lista, hasta reiniciar el eMule"
+    IDS_GLOBAL_HL_TIP       "El limite global es un limite para el número total de fuentes, en vez\nde aplicar un limite de fuentes por archivo, lo que normalmente\nhace el eMule"
+    IDS_SUC_ENABLED_TIP     "Permitir el hardlimit global en vez de las fuentes por archivo"
+    IDS_GLOBAL_HL_LIMIT_TIP "Valor para el limite global, depende de la disponibilidad\nde la velocidad de subida/bajada y de la latencia.\nUn valor normal seria, entre 3000 y 6000"
     IDS_MAXDATARATEFRIEND_TIP 
-                            "Flujo maximo de datos para los amigos (% de la subida)\ncuando usemos USS/SUC. Si la subida a los amigos sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro."
+                            "Flujo maximo de datos para los amigos (% de la subida)\ncuando usemos USS/SUC. Si la subida a los amigos sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro"
     IDS_MAXDATARATEPOWERSHARE_TIP 
-                            "Flujo maximo de datos para el PowerShare (% de la subida),\nsi la subida con PowerShare sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro."
+                            "Flujo maximo de datos para el PowerShare (% de la subida),\nsi la subida con PowerShare sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_EXTRACT_META_DATA_TIP "Extrae el id3 y el bitrate de los archivos"
-    IDS_NEVER_TIP1          "Comportamiento normal. Opción buena cuando no se cuelga."
+    IDS_NEVER_TIP1          "Comportamiento normal. Opción buena cuando no se cuelga"
     IDS_META_DATA_ID3LIB_TIP "Usa la librería id3"
     IDS_LOG2DISK_TIP        "Guardar el registro normal en el directorio 'logs' de eMule.\nCon esto podemos ver lo que sucede con el eMule cuando el ordenador\nes apagado inesperadamente. "
     IDS_DATEFILENAMELOG_TIP "Guarda el archivo de registro en el directorio de logs en el formato:\neMule - YYYY.MM.DD.log"
-    IDS_VERBOSE_TIP         "debug log settings. Meant for some debugging of the program"
+    IDS_VERBOSE_TIP         "Opciones del registro de depuración. Mensajes de depuración para eliminar ciertos errores del programa"
     IDS_ENABLED_TIP         "Muestra mensajes de registro en la pestaña de Información Extra"
     IDS_LOG_LEVEL_TIP       "1 = muestra sólo los mensajes importantes... 5 = muestra más mensajes"
     IDS_DATARATEPOWERSHARE_TIP 
-                            "Cantidad de velocidad de subida (kb/s) que es permitida para PowerShare slots."
+                            "Cantidad de velocidad de subida (kb/s) que es permitida para PowerShare slots"
     LOWIDRETRIES            "Número de veces que se intenta reconectar al servidor\ncuando se consigue una ID Baja"
     RANDOMPORTTIME_TIP      "Tiempo en segundos que eMule no cambiará los puertos\nsi está activada los puertos aleatorios (en conexiones). Esto\nprevendrá que eMule cambie de puertos demasiado rápido al reiniciar"
     ICPCONN_TIP             "Crea un agujero en el Firewall"
-    ENABLE_TIP              "Abre automáticamente los puertos en tu Firewall\n<b>ATENCIÓN</b>: Consume mucha CPU en algunas configuraciones\nNo es necesario si no usas Firewall o usa\nuna tercera parte de Firewall, o abra los puertos manualmente en su Firewall personal"
+    ENABLE_TIP              "Abre automáticamente los puertos en tu Firewall\n<b>ATENCIÓN</b>: Consume mucha CPU en algunas configuraciones\nNo es necesario si no usas Firewall o usas\nuna tercera parte de Firewall, o si abre los puertos manualmente en su Firewall personal"
     CLEARMAPTIP             "Abre los puertos en el Firewall de Windows XP cuando se ejecuta\neMule, y los cierra cuando se finaliza el eMule"
     ADDMPATIP               "eMule monitoriza un puerto (aleatorio) UDP de un servidor para saber el estado del servidor. Abre este puerto también en el Firewall"
-    UPNP_GROUP_TIP          "Detecta la capacidad de uPnP de los routers."
+    UPNP_GROUP_TIP          "Detecta la capacidad de uPnP de los routers"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_CON_CAPFRM_TIP   "En este grupo puedes completar la capacidad de tu conexion de red a Internet.\nEstos datos no se utilizan para enviar informacion al servidor, si no que se utilizan para\ndibujar la grafica de forma correcta en la ventana de estadisticas."
+    IDS_PW_CON_CAPFRM_TIP   "En este grupo puedes completar la capacidad de tu conexión de red a Internet.\nEstos datos no se utilizan para enviar informacion al servidor, si no que se utilizan para\ndibujar la grafica de forma correcta en la ventana de estadisticas"
     IDS_PW_CON_LIMITFRM_TIP "Si creas una nueva categoría en el diálogo de\nSeleccionar Categoría, cuando agregue múltiples archivos en el estado pausado\nlos archivos añadidos serán comenzados (Por defecto=0, desactivado)"
-    IDS_PW_DOWNL_TIP        "Habilitar un limite superior para la descarga, eMule no descargará a mas velocidad que este limite.\nObservar que si la subida es demasiado lenta (menos de 10KB/s), el limite de la velocidad de descarga\nse ve disminuido por un coeficiente de tu subida."
-    IDS_PW_UPL_TIP          "Habilitar un limite de subida (cuando esta deshabilitado, el eMule\nintentará determinar la velocidad de subida optima por medio del sensor de subida).\nFijar el limite al 80% teorico de tu velocidad de subida.\nSi fijas este limite al maximo de tu conexion puede llegar a ser inestable,\nsi lo limitas a un valor demasiado bajo, no conseguiras creditos para ganar puestos en la cola\nde descarga. Un valor por debajo de 10KB/s limita tu descarga con un coeficiente."
-    IDS_NETWORK_TIP         "Habilita como minimo una red que permita al eMule encontrar fuentes y\npublicar tus archivos en Internet, se recomienda habilitar las dos."
-    IDS_SHOWOVERHEAD_TIP    "Mostrar el ancho de banda actual, (ancho de banda excedente) en la barra de estado.\nLos gastos de banda indirectos de eD2K realmente no se utilizan para transferir archivos, pero\nse envian datos como: la parte a transferir, la cola, ect."
+    IDS_PW_DOWNL_TIP        "Habilitar un limite superior para la descarga, eMule no descargará a mas velocidad que este limite.\nObservar que si la subida es demasiado lenta (menos de 10KB/s), el limite de la velocidad de descarga\nse ve disminuido por un coeficiente de tu subida"
+    IDS_PW_UPL_TIP          "Habilitar un limite de subida (cuando esta deshabilitado, el eMule\nintentará determinar la velocidad de subida optima por medio del sensor de subida).\nFijar el limite al 80% teorico de tu velocidad de subida.\nSi fijas este limite al maximo de tu conexión puede llegar a ser inestable,\nsi lo limitas a un valor demasiado bajo, no conseguiras créditos para ganar puestos en la cola\nde descarga. Un valor por debajo de 10KB/s limita tu descarga con un coeficiente"
+    IDS_NETWORK_TIP         "Habilita como minimo una red que permita al eMule encontrar fuentes y\npublicar tus archivos en Internet, se recomienda habilitar las dos"
+    IDS_SHOWOVERHEAD_TIP    "Mostrar el ancho de banda actual, (ancho de banda excedente) en la barra de estado.\nLos gastos de banda indirectos de eD2K realmente no se utilizan para transferir archivos, pero\nse envian datos como: la parte a transferir, la cola, etc"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_CLIENTPORT_TIP   "Elige los puertos para que el eMule escuche Internet."
-    IDS_PW_AUTOCON_TIP      "Conectar automaticamente con la red eD2K y/o KAD."
-    IDS_PW_RECON_TIP        "Intentar conectar automaticamente a la red eD2K\ncuando se pierde la conexion con el servidor."
-    IDS_WIZARD_TIP          "Mostrar el asistente para configurar tu conexion a Internet.\nEl asistente pondrá los valores de tu conexion en esta pantalla.\nTambien puedes lanzar el asistente desde el menu de herramientas."
-    IDS_UDPDISABLED_TIP     "Deshabilitar el trafico UDP. Si tu conexion de Internet\nobtiene un trafico inestable del UDP, esta opcion deshabilita el UDP.\nEsto conlleva mas gastos indirectos por parte del eMule, pero todavia funcionará."
-    IDS_STARTTEST_TIP       "Realizara una prueba con el servidor de emule-project.net para comprobar\nsi los puertos son accesibles para el eMule. eMule puede ralentizarse\nsi los puertos no se pueden abrir o son puertos mas lentos. Si el test falla comprueba\nsi algo esta bloqueando el trafico de entrada de Internet."
-    IDS_RANDOMPORTS_TIP     "En vez de elegir dos puertos fijos, se utilizan dos al azar comprendidos\nentre el puerto mínimo y máximo. Asegurate de que estos puertos esten accesibles desde\nInternet teniendo una conexion directa o usando uPnP (vease los ajustes de eMuleespaña)\npara remitirse a los puertos del router."
-    IDS_MINPORT_TIP         "Numero de puerto mínimo para seleccionar un puerto al azar.\nAlgunos bloques de puertos están por debajo del 1024."
-    IDS_MAXPORT_TIP         "Numero de puerto máximo para seleccionar un puerto al azar."
-    IDC_DOWNLOAD_CAP_TIP    "La velocidad máxima teorica de descarga de tu conexion a Internet.\nEste valor será utilizado para calcular la escala en la ventana de estadisticas."
-    IDC_UPLOAD_CAP_TIP      "La velocidad máxima de subida de tu conexion a Internet en Kilobytes por segundo.\nEste valor será utilizado para calcular la escala en la ventana de estadisticas y no se\nenviará a otros clientes.."
+    IDS_PW_CLIENTPORT_TIP   "Elige los puertos para que el eMule escuche Internet"
+    IDS_PW_AUTOCON_TIP      "Conectar automaticamente con la red eD2K y/o KAD"
+    IDS_PW_RECON_TIP        "Intentar conectar automaticamente a la red eD2K\ncuando se pierde la conexión con el servidor"
+    IDS_WIZARD_TIP          "Mostrar el asistente para configurar tu conexión a Internet.\nEl asistente pondrá los valores de tu conexión en esta pantalla.\nTambien puedes lanzar el asistente desde el menu de herramientas"
+    IDS_UDPDISABLED_TIP     "Deshabilitar el trafico UDP. Si tu conexión de Internet\nobtiene un trafico inestable del UDP, esta opción deshabilita el UDP.\nEsto conlleva mas gastos indirectos por parte del eMule, pero todavia funcionará"
+    IDS_STARTTEST_TIP       "Realizara una prueba con el servidor de emule-project.net para comprobar\nsi los puertos son accesibles para el eMule. eMule puede ralentizarse\nsi los puertos no se pueden abrir o son puertos mas lentos. Si el test falla comprueba\nsi algo esta bloqueando el trafico de entrada de Internet"
+    IDS_RANDOMPORTS_TIP     "En vez de elegir dos puertos fijos, se utilizan dos al azar comprendidos\nentre el puerto mínimo y máximo. Asegurate de que estos puertos esten accesibles desde\nInternet teniendo una conexión directa o usando uPnP (vease los ajustes de eMulEspaña)\npara remitirse a los puertos del router"
+    IDS_MINPORT_TIP         "Numero de puerto mínimo para seleccionar un puerto al azar.\nAlgunos bloques de puertos están por debajo del 1024"
+    IDS_MAXPORT_TIP         "Numero de puerto máximo para seleccionar un puerto al azar"
+    IDC_DOWNLOAD_CAP_TIP    "La velocidad máxima teorica de descarga de tu conexión a Internet.\nEste valor será utilizado para calcular la escala en la ventana de estadisticas"
+    IDC_UPLOAD_CAP_TIP      "La velocidad máxima de subida de tu conexión a Internet en Kilobytes por segundo.\nEste valor será utilizado para calcular la escala en la ventana de estadisticas y no se\nenviará a otros clientes"
 END
 
 STRINGTABLE 
 BEGIN
-    IDC_PORT_TIP            "Numero de puerto para el acceso del TCP que utiliza el eMule.\nEste puede ser cualquier numero comprendido entre 1 y 65535 por lo que otra\naplicacion no puede usar este puerto. Puedes conectar con mas clientes si el puerto\nes accesible desde Internet, indicado por una flecha de hacia arriba verde\nen la barra de estado (si esta redireccionado correctamente en el router y abierto en\ntu firewall). Con el puerto 80 o 8080 (HTTP) puedes conseguir una ayuda\ndel Webcaché (Para mas información entra www.webcache.com.es), el puerto 1755\nes un puerto recomendado para la gente que sufre priorizacion de paquetes,\npero cualquier numero te servirá."
-    IDC_UDPPORT_TIP         "Numero de puerto para el acceso del UDP que utiliza el eMule.\nEste puede ser cualquier numero comprendido entre 1 y 65535 por lo que otra\naplicacion no puede usar este puerto. Puede ser incluso el mismo que el TCP, ya que\neste utiliza diferente protocolo. Redireccionar el puerto del router y firewall\npara un funcionamiento óptimo."
+    IDC_PORT_TIP            "Numero de puerto para el acceso del TCP que utiliza el eMule.\nEste puede ser cualquier número comprendido entre 1 y 65535 por lo que otra\naplicacion no puede usar este puerto. Puedes conectar con mas clientes si el puerto\nes accesible desde Internet, indicado por una flecha de hacia arriba verde\nen la barra de estado (si esta redireccionado correctamente en el router y abierto en\ntu firewall). Con el puerto 80 o 8080 (HTTP) puedes conseguir una ayuda\ndel Webcaché (Para mas información entra www.webcache.com.es), el puerto 1755\nes un puerto recomendado para la gente que sufre priorizacion de paquetes,\npero cualquier número te servirá"
+    IDC_UDPPORT_TIP         "Numero de puerto para el acceso del UDP que utiliza el eMule.\nEste puede ser cualquier número comprendido entre 1 y 65535 por lo que otra\naplicacion no puede usar este puerto. Puede ser incluso el mismo que el TCP, ya que\neste utiliza diferente protocolo. Redireccionar el puerto del router y firewall\npara un funcionamiento óptimo"
     IDC_MAXSOURCEPERFILE_TIP 
-                            "El máximo numero de fuentes que el eMule cogerá para un archivo.\nObservar que el Morph tambien tiene la opcion en los ajustes del Morph, de activar\nun limite global que defina un limite máximo para todas las fuentes de los archivos\nen lugar de ajustar el máximo por archivo."
-    IDC_MAXCON_TIP          "Numero máximo de conexiones simultaneas TCP/IP que el eMule puede hacer.\nReduce este numero si tienes problemas en la red, aumenta este numero para\nencontrar fuentes mas rapidamente, (Mirar tambien la opcion conexiones/5 segundos\npara las fuentes en estado 'demasiadas conexiones'."
+                            "El máximo número de fuentes que el eMule cogerá para un archivo.\nObservar que el Morph también tiene la opción en los ajustes del Morph, de activar\nun limite global que defina un limite máximo para todas las fuentes de los archivos\nen lugar de ajustar el máximo por archivo"
+    IDC_MAXCON_TIP          "Numero máximo de conexiones simultaneas TCP/IP que el eMule puede hacer.\nReduce este número si tienes problemas en la red, aumenta este número para\nencontrar fuentes mas rapidamente, (Mirar también la opción conexiones/5 segundos\npara las fuentes en estado 'demasiadas conexiones'"
     IDC_NETWORK_KADEMLIA_TIP 
-                            "Permitir la red KAD. Esta red encuentra mejor las fuentes para archivos pequeños\ny no es dependiente del servidor, puesto que cada uno de los clientes eMule, será\nun pequeño servidor. Esta red usa el protocolo UDP."
-    IDC_NETWORK_ED2K_TIP    "Permitir la red eD2K. Muchos de los servidores centralizados mantienen los datos\nde los archivos donde pueden ser localizados en la red. Asegurate de conectarte\na un buen servidor (Este te devolverá los resultados apropiados de la busqueda).\nEste protocolo es compatible con los clientes que la red KAD, pero depende de la\ncalidad de los servidores."
-    IDS_QL_USERNAME_TIP     "El nombre de usuario que se exhibe a otros usuarios.\nPon tu publicidad o [el nombre de tu comunidad]."
-    IDS_PW_LANG_TIP         "Lenguaje del interface. El eMule descargara una libreria (dll) y lo pondrá en el directorio 'lang' si\nhas selecionado un idioma que no este instalado todavia. Las librerias para las extensiones\ndel Morph no se descargan y se deben poner manualmente en el directorio 'lang' o\ninstalar alli por el instalador del Morph."
-    IDS_PW_BEEP_TIP         "Señal sonora al producirse un error."
-    IDS_PW_PROMPT_TIP       "Preguntar ¿Quieres realmente cerrar el eMule? cuando intentes cerrar el eMule."
-    IDS_PW_SPLASH_TIP       "Mostrar la ventana de inicio al comenzar el eMule."
+                            "Permitir la red KAD. Esta red encuentra mejor las fuentes para archivos pequeños\ny no es dependiente del servidor, puesto que cada uno de los clientes eMule, será\nun pequeño servidor. Esta red usa el protocolo UDP"
+    IDC_NETWORK_ED2K_TIP    "Permitir la red eD2K. Muchos de los servidores centralizados mantienen los datos\nde los archivos donde pueden ser localizados en la red. Asegurate de conectarte\na un buen servidor (Este te devolverá los resultados apropiados de la busqueda).\nEste protocolo es compatible con los clientes que la red KAD, pero depende de la\ncalidad de los servidores"
+    IDS_QL_USERNAME_TIP     "El nombre de usuario que se exhibe a otros usuarios.\nPon tu publicidad o [el nombre de tu comunidad]"
+    IDS_PW_LANG_TIP         "Lenguaje del interface. El eMule descargara una libreria (dll) y lo pondrá en el directorio 'lang' si\nhas selecionado un idioma que no este instalado todavia. Las librerias para las extensiones\ndel Morph no se descargan y se deben poner manualmente en el directorio 'lang' o\ninstalar alli por el instalador del Morph"
+    IDS_PW_BEEP_TIP         "Señal sonora al producirse un error"
+    IDS_PW_PROMPT_TIP       "Preguntar ¿Quieres realmente cerrar el eMule? cuando intentes cerrar el eMule"
+    IDS_PW_SPLASH_TIP       "Mostrar la ventana de inicio al comenzar el eMule"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_FRONT_TIP        "Poner el eMule en segundo o en primer plano\nsi añades un link desde tu explorador."
+    IDS_PW_FRONT_TIP        "Poner el eMule en segundo o en primer plano\nsi añades un link desde tu explorador"
     IDS_PREF_ONLINESIG_TIP  "Escribir onlinesig.dat en el directorio del eMule donde\notras aplicaciones lo pueden leer y traducir en una bandera\no una firma para un foro. (Solamente visible en opciones\nadicionales-> mostrar mas controles)"
-    IDS_PREF_STARTMIN_TIP   "Cuando el eMule se inicia, empezar con la ventana minimizada.\nSi el modo invisible esta activado en el arranque estaran ocultas y tendras\npinchar en la llave invisible para mostrar tu eMule."
-    IDS_WEBSVEDIT_TIP       "Editar el archivo webservices.dat para asociar un articulo de menu\nen el archivo con un Servicio Web en linea."
-    IDS_ED2KLINKFIX_TIP     "Reasociar los link eD2K de todas las ventanas para abrirse con esta aplicacion\n.Si esto falla una primera vez 'linkkiller.exe' presionar este boton otra vez.\nEsto puede fallar si el eMule funciona en modo seguro."
-    IDS_CHECK4UPDATE_TIP    "Dejar que el eMule compruebe cada x dias para saber si hay nuevas\nversiones de eMule y Morph."
+    IDS_PREF_STARTMIN_TIP   "Cuando el eMule se inicia, empezar con la ventana minimizada.\nSi el modo invisible esta activado en el arranque estaran ocultas y tendras\npinchar en la llave invisible para mostrar tu eMule"
+    IDS_WEBSVEDIT_TIP       "Editar el archivo webservices.dat para asociar un articulo de menu\nen el archivo con un Servicio Web en linea"
+    IDS_ED2KLINKFIX_TIP     "Reasociar los link eD2K de todas las ventanas para abrirse con esta aplicacion\n.Si esto falla una primera vez 'linkkiller.exe' presionar este boton otra vez.\nEsto puede fallar si el eMule funciona en modo seguro"
+    IDS_CHECK4UPDATE_TIP    "Dejar que el eMule comprueba cada x dias para saber si hay nuevas\nversiones de eMule y Morph"
     IDS_STARTWITHWINDOWS_TIP 
-                            "Iniciar eMule cuando se inicie windows. eMule se agrega al registro de windows en\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
-    IDS_PW_STARTUPSOUND_TIP "Tocar <i>startup.wav</i> del directorio config\nen el inicio del eMule."
+                            "Iniciar eMule cuando se inicie Windows. eMule se agrega al registro de Windows en\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
+    IDS_PW_STARTUPSOUND_TIP "Tocar <i>startup.wav</i> del directorio config\nen el inicio del eMule"
     IDC_INVISIBLE_MODE_KEY_COMBO_TIP 
-                            "Teclas que hay que pulsar para activar el modo invisible."
-    IDS_INVMODE_TIP         "Activar el modo invisible en el eMule. Observar que el eMule permanece visible\nen la lista de procesos del administrador de tareas y un buen administrador de redes\npuede encontrar el tu eMule funcionando en el ordenador."
+                            "Teclas que hay que pulsar para activar el modo invisible"
+    IDS_INVMODE_TIP         "Activar el modo invisible en el eMule. Observar que el eMule permanece visible\nen la lista de procesos del administrador de tareas y un buen administrador de redes\npuede encontrar tu eMule funcionando en tu ordenador"
 END
 
 STRINGTABLE 
@@ -3007,143 +3007,143 @@ BEGIN
     IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP 
                             "Permitir los datos de la coleccion en la SpreadBar.\nEsto es óptimo para mejorar los lanzamientos\npero puede incrementar el uso de memoria RAM"
     IDS_HIDEOVERSHARES_TIP  "Cambiar la subida de partes dentro de un mismo archivo. \nSe ocultan las partes que mas se han subido, respecto a las\nque mas se han bajado. Esto causa\nque se soliciten las partes menos descargadas.\nAlgunas partes estan siempre visibles. "
-    IDS_SELECTIVESHARE_TIP  "Puedes cambiarlo para que a usuario solo vea una parte\nempezando con los menos subidos, y viendo que partes se han ofrecido\nelegir el siguiente. No se debe deshabilitar la ocultacion de las partes\nmás compartidas para que esto funcione (Por defecto)."
+    IDS_SELECTIVESHARE_TIP  "Puedes cambiarlo para que a usuario solo vea una parte\nempezando con los menos subidos, y viendo que partes se han ofrecido\nelegir el siguiente. No se debe deshabilitar la ocultacion de las partes\nmás compartidas para que esto funcione (Por defecto)"
     IDS_SHAREONLYTHENEED_TIP 
-                            "Solamente se ocultan las partes que ya fueron\npedidas por otros clientes de tu cola. eMule analiza\n tu cola de subida si cada usuario esta pidiendo las mismas\npartes. Si esta activado, eMule oculta las partes que ya has subido por lo menos\na un cliente, y muestra los que nadie tiene. Estan de color morado en la\nSpreadBar.Siempre hay uno visible."
-    IDS_POWERSHARE_TIP2     "Ajustes para el PowerShare, \ndan prioridad absoluta a un archivo\n sin la necesidad de compartir\notros archivos"
+                            "Solamente se ocultan las partes que ya fueron\npedidas por otros clientes de tu cola. eMule analiza\ntu cola de subida si cada usuario esta pidiendo las mismas\npartes. Si esta activado, eMule oculta las partes que ya has subido por lo menos\na un cliente, y muestra los que nadie tiene. Estan de color morado en la\nSpreadBar.Siempre hay uno visible"
+    IDS_POWERSHARE_TIP2     "Ajustes para el PowerShare,\ndan prioridad absoluta a un archivo\nsin la necesidad de compartir\notros archivos"
     IDS_POWERSHARE_DISABLED_TIP 
-                            "No esta activado el PowerShare\na no ser que lo hagas de forma\nindividual."
+                            "No esta activado el PowerShare\na no ser que lo hagas de forma\nindividual"
     IDS_POWERSHARE_ACTIVATED_TIP 
-                            "El Powershare esta activado\nexcepto si el archivo lo tienes\nen otro modo."
+                            "El Powershare esta activado\nexcepto si el archivo lo tienes\nen otro modo"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_POWERSHARE_AUTO_TIP "Decidir si el PowerShare es útil, dependiendo de las peticiones y si tiene pocas fuentes el archivo."
+    IDS_POWERSHARE_AUTO_TIP "Decidir si el PowerShare es útil, dependiendo de las peticiones y si tiene pocas fuentes el archivo"
     IDS_POWERSHARE_LIMITED_TIP 
                             "Limite de PowerShare hasta las xx fuentes completas"
     IDS_POWERSHARE_LIMIT_TIP 
                             "Cantidad de fuentes (fuentes virtuales) para activar el limite"
     IDS_POWERSHARE_INTERPRIO_TIP 
-                            "Utilizar otras prioridades en el PowerShare, como las prioridades individuales.\nPor ejemplo: Prioridad alta simpre va antes que prioridad normal en vez de un factor (por defecto deshabilitado)."
-    IDS_PERMISSION_TIP      "Permisos para que la gente vea la lista de todos tus archivos."
+                            "Utilizar otras prioridades en el PowerShare, como las prioridades individuales.\nPor ejemplo: Prioridad alta siempre va antes que prioridad normal en vez de un factor (por defecto deshabilitado)"
+    IDS_PERMISSION_TIP      "Permisos para que la gente vea la lista de todos tus archivos"
     IDS_FSTATUS_EVER_TIP    "Todos los archivos son publicos, si el permiso\nindividual de cada archivo esta permitido"
     IDS_FSTATUS_FRIENDSONLY_TIP 
-                            "Solamente tus amigos pueden ver tu lista de archivos."
-    IDS_HIDDEN_TIP          "Todos los archivos compartidos estan ocultos."
-    IDS_COMMUNITY_TIP       "Solo la gente de tu comunidad (cadena definida en Morph -> community) \ntienen permiso para ver tu lista archivos."
-    IDS_PW_DISPLAY_TIP2     "Ajustes visuales."
-    IDS_FOLDERICON_TIP      "Cambiar el icono de carpeta en el explorador por un icono del\neMule, en las carpetas de entrada (incoming) y temporal."
+                            "Solamente tus amigos pueden ver tu lista de archivos"
+    IDS_HIDDEN_TIP          "Todos los archivos compartidos estan ocultos"
+    IDS_COMMUNITY_TIP       "Solo la gente de tu comunidad (cadena definida en Morph -> community) \ntienen permiso para ver tu lista archivos"
+    IDS_PW_DISPLAY_TIP2     "Ajustes visuales"
+    IDS_FOLDERICON_TIP      "Cambiar el icono de carpeta en el explorador por un icono del\neMule, en las carpetas de entrada (incoming) y temporal"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_TCPIP_CONNS_TIP     "Ajustes del protocolo TCP/IP."
-    IDS_MAXCON5SECLABEL_TIP "Numero de nuevas conexiones que el eMule puede abrir durante\n5 segundos, (Por defecto es 20). Si aumentas este valor, tambien tienes que\naumentar el valor de conexiones a medio abrir"
-    IDS_MAXHALFOPENCONS_TIP "Si aumentas el numero de nuevas conexiones a abrir durante 5 segundos\ntambien tienes que aumentar el maximo numero de conexiones a medio abrir,\npero para un valor muy alto de estos, tienes que reconfigurar el parche\ntcp/ip.sys(XPSP2), para que no se sobrecarge el router. El aumento de este valor\nhace que el eMule se conecte mas rapidamente con las fuentes 'demasiadas conexiones abiertas'."
-    IDS_CONDTCPACCEPT_TIP   "Rechazar conexiones rapidamente utiliza un método más eficiente para rechazar\nintentos de conexion entrantes de clientes prohibidos y/o clientes cuya IP se encuentra\nen la lista del filto de IPs. Esta utiliza una caracteristica especial del winsock llamada 'SO_CONDITIONAL_ACCEPT'\nque conlleva menos gastos indirectos del TCP, en el caso de que se rechace la conexion,\npero causa un aumento de uso de CPU la busqueda del IP, si el cliente es rechazado."
+    IDS_TCPIP_CONNS_TIP     "Ajustes del protocolo TCP/IP"
+    IDS_MAXCON5SECLABEL_TIP "Numero de nuevas conexiones que el eMule puede abrir durante\n5 segundos, (Por defecto es 20). Si aumentas este valor, también tienes que\naumentar el valor de conexiones a medio abrir"
+    IDS_MAXHALFOPENCONS_TIP "Si aumentas el número de nuevas conexiones a abrir durante 5 segundos\ntambien tienes que aumentar el maximo número de conexiones a medio abrir,\npero para un valor muy alto de estos, tienes que reconfigurar el parche\ntcp/ip.sys(XPSP2), para que no se sobrecarge el router. El aumento de este valor\nhace que el eMule se conecte mas rapidamente con las fuentes 'demasiadas conexiones abiertas'"
+    IDS_CONDTCPACCEPT_TIP   "Rechazar conexiones rapidamente utiliza un método más eficiente para rechazar\nintentos de conexión entrantes de clientes prohibidos y/o clientes cuya IP se encuentra\nen la lista del filto de IPs. Esta utiliza una caracteristica especial del winsock llamada 'SO_CONDITIONAL_ACCEPT'\nque conlleva menos gastos indirectos del TCP, en el caso de que se rechace la conexión,\npero causa un aumento de uso de CPU la busqueda del IP, si el cliente es rechazado"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_SERVERKEEPALIVETIMEOUT_TIP 
-                            "Fijar este valor a un valor mas bajo si experimentas que el router se desconecta del servidor\n. Fijar un valor demasiado bajo te prohibirá la conexion con los servidores."
+                            "Fijar este valor a un valor mas bajo si experimentas que el router se desconecta del servidor.\nFijar un valor demasiado bajo te prohibirá la conexión con los servidores"
     IDS_AUTOTAKEED2KLINKS_TIP 
                             "Enviar solamente los enlaces eD2K al eMule cuando este este en funcionamiento.\nForzado a no trabajar en modo seguro. "
-    IDS_USECREDITSYSTEM_TIP "Debes usar este sistema de creditos en Morph."
-    IDS_PW_FILTER_TIP       "Filtrar la salida de las direcciones del RFC 1918."
-    IDS_SHOWEXTSETTINGS_TIP "Mostrar mas opciones y ajuestes en el menu. (avanzado)"
-    IDS_A4AF_SAVE_CPU_TIP   "Deshabilitar la comprobacion de fuentes\n para otros archivos segun las prioridades."
+    IDS_USECREDITSYSTEM_TIP "Debes usar este sistema de créditos en Morph"
+    IDS_PW_FILTER_TIP       "Filtrar la salida de las direcciones del RFC 1918"
+    IDS_SHOWEXTSETTINGS_TIP "Mostrar mas opciones y ajustes en el menu. (avanzado)"
+    IDS_A4AF_SAVE_CPU_TIP   "Deshabilitar la comprobacion de fuentes\npara otros archivos segun las prioridades"
     IDS_YOURHOSTNAME_TIP    "El hostname que se agrega en vez de tu IP cuando creas un enlace eD2K y usa 'Añadirte a ti mismo como fuente'"
-    IDS_DISABLEPEERACHE_TIP "Deshabilitar la descarga desde la tecnologia http peercache."
-    IDS_SPARSEPARTFILES_TIP "No asignar el total del espacio en el disco para la descarga\ncuando se crea un nuevo archivo temporal, a no ser que sea\nnecesario. Requiere que el sistema de ficheros sea NTFS.\nAhorra espacio de disco durante la transferencia pero puede\naumentar la fragmentacion de los archivos."
-    IDS_FULLALLOC_TIP       "Asigna el tamaño del archivo completo, cuando se reciben los primeros bytes.\nUna transferencia directa no se parará debido a la falta de espacio\nen el disco y la fragmentacion sera mínima. Requiere mas espacio\nen el disco durante la descarga."
-    IDS_CHECKDISKSPACE_TIP  "Comprobar el espacio en el disco al asignar el espacio.\nEvita que tu disco quede completamente lleno."
+    IDS_DISABLEPEERACHE_TIP "Deshabilitar la descarga desde la tecnologia http peercache"
+    IDS_SPARSEPARTFILES_TIP "No asignar el total del espacio en el disco para la descarga\ncuando se crea un nuevo archivo temporal, a no ser que sea\nnecesario. Requiere que el sistema de ficheros sea NTFS.\nAhorra espacio de disco durante la transferencia pero puede\naumentar la fragmentacion de los archivos"
+    IDS_FULLALLOC_TIP       "Asigna el tamaño del archivo completo, cuando se reciben los primeros bytes.\nUna transferencia directa no se parará debido a la falta de espacio\nen el disco y la fragmentacion sera mínima. Requiere mas espacio\nen el disco durante la descarga"
+    IDS_CHECKDISKSPACE_TIP  "Comprobar el espacio en el disco al asignar el espacio.\nEvita que tu disco quede completamente lleno"
     IDS_MINFREEDISKSPACE_TIP 
-                            "Cantidad de espacio en el disco que el eMule dejará libremente por disco."
-    IDS_COMMITFILES_TIP     "Prevenir la corrupcion de datos en los archivos .met y .dat."
-    IDS_NEVER_TIP2          "Nunca, puedo prevenir desplomes en los archivos extraños mp3."
-    IDS_ONSHUTDOWN_TIP      "Salvar los archivos .met y .dat a la salida del eMule\npuede alargar la finalizacion del eMule."
-    IDS_ALWAYS_TIP          "Limpiar siempre los archivos .met y .dat, disminuye el funcionamiento del\neMule, pero los datos son mas fiables."
+                            "Cantidad de espacio en el disco que el eMule dejará libre por disco"
+    IDS_COMMITFILES_TIP     "Prevenir la corrupcion de datos en los archivos .met y .dat"
+    IDS_NEVER_TIP2          "Nunca, puedo prevenir desplomes en los archivos extraños mp3"
+    IDS_ONSHUTDOWN_TIP      "Salvar los archivos .met y .dat a la salida del eMule\npuede alargar la finalizacion del eMule"
+    IDS_ALWAYS_TIP          "Limpiar siempre los archivos .met y .dat, disminuye el funcionamiento del\neMule, pero los datos son mas fiables"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP_ENABLE_TIP     "Redirecciona los puertos del router a tu cliente.\nAsegurate que está habilitado el UPnP en el router.\nSi redirecciona manualmente los puertos desde su router\no no tiene router, no debe activar esta opción.\nRecomendado si se usan 'puertos aleatorios'\n(Por defecto : autodetectar)"
+    IDS_UPNP_ENABLE_TIP     "Redirecciona los puertos del router a tu cliente.\nAsegurate que está habilitado el UPnP en el router.\nSi redirecciona manualmente los puertos desde tu router\no no tienes router, no debes activar esta opción.\nRecomendado si se usan 'puertos aleatorios'\n(Por defecto: autodetectar)"
     IDS_UPNP_ENABLEWEB_TIP  "Se debe acceder libremente desde Internet al Servidor Web, por lo que el puerto del Servidor Web debe de estar abierto"
     WAP_TIP                 "Wireless Application Protocol (WAP) es un estándar internacional abierto\npara aplicaciones que usan una comunicación inalámbrica (por ejemplo, acceso\na Internet desde un teléfono móvil)"
     ENABLEWAP_TIP           "Habilitar la interfaz Wap"
     TEMPLATE_TIP            "Seleccionar la plantilla Wap que Morph usará.\nLa localización por defecto es en el directorio eMule\\wapserver (¡no configurado!)"
     WPAPORT_TIP             "Puerto por el que se accederá al servidor Wap"
-    WAPPASS_TIP             "Contraseña para tener acceso complero"
+    WAPPASS_TIP             "Contraseña para tener acceso completo"
     GUESTWAP_TIP            "GUESTWAP_TIP"
-    WAPLOW1_TIP             "Habilita el acceso de invitado con permisos limitados."
-    WAPLOWPASS_TIP          "Contraseña para la cuenta de invitado."
+    WAPLOW1_TIP             "Habilita el acceso de invitado con permisos limitados"
+    WAPLOWPASS_TIP          "Contraseña para la cuenta de invitado"
     IDS_BINDADDR            "Dirección de enlace desde eMule a la interfaz"
-    IDS_BINDADDR_TIP        "Si tiene conexiones múltiples, debe forzar a eMule\nusar esta interfaz particular en el pc. Puede\nusar con eMule solamente una conexión de Internet. Configure este\nvalor a 0.0.0.0 para enlazar todas las interfaces (por defecto)\nNecesita reiniciar eMule para que los cambios sean efectivos."
+    IDS_BINDADDR_TIP        "Si tiene conexiones múltiples, debe forzar a eMule\nusar esta interfaz particular en el pc. Puede\nusar con eMule solamente una conexión de Internet. Configure este\nvalor a 0.0.0.0 para enlazar todas las interfaces (por defecto)\nNecesita reiniciar eMule para que los cambios sean efectivos"
     IDS_UPNPBINDADDR        "Dirección del Host UPnP a enlazar"
     IDS_UPNPBINDADDR_TIP    "Si el pc tiene múltiples interfaces, esta\nes la dirección de la que los puertos son redireccionados\ndesde la interfaz UPnPp del router. Si se\nva a configurar una dirección binaria, no es necesario configurar este parámetro"
 END
 
 STRINGTABLE 
 BEGIN
-    IDC_WSPASS_TIP          "Pon una contraseña para tener acceso al Servidor web.\nEs importante poner una contraseña apropiada o cualquier persona puede acceder\na tu eMule a traves del servidor web. Cuando introduces tu contraseña, esta no es\nvisible, ya que se camufla con '*', por defecto no hay contraseña."
-    IDC_WSPASSLOW_TIP       "Permitir una cuenta de invitado en la que este no puede\ncambiar ningun ajuste, tan solo puede mirar."
-    IDC_MMPASSWORDFIELD_TIP "Contraseña para el acceso de clientes java."
-    IDC_WSPORT_TIP          "Puerto para el servidor web, por defecto esta el 4711.\nCambia el puerto si quieres que sea mas dificil encontrar tu acceso, o cambialo\npor el puerto 80. Es el mejor metodo para acceder desde algunas localizaciones si\npermites el acceso en tu route o permites el uPnp."
+    IDC_WSPASS_TIP          "Pon una contraseña para tener acceso al Servidor web.\nEs importante poner una contraseña apropiada o cualquier persona puede acceder\na tu eMule a traves del servidor web. Cuando introduces tu contraseña, esta no es\nvisible, ya que se camufla con '*', por defecto no hay contraseña"
+    IDC_WSPASSLOW_TIP       "Permitir una cuenta de invitado en la que este no puede\ncambiar ningun ajuste, tan solo puede mirar"
+    IDC_MMPASSWORDFIELD_TIP "Contraseña para el acceso de clientes java"
+    IDC_WSPORT_TIP          "Puerto para el servidor web, por defecto esta el 4711.\nCambia el puerto si quieres que sea mas dificil encontrar tu acceso, o cambialo\npor el puerto 80. Es el mejor metodo para acceder desde algunas localizaciones si\npermites el acceso en tu route o permites el uPnp"
     IDC_MMPORT_FIELD_TIP    "Puerto por el que el eMule escuchara el eMulemovil.\nLa mayoria de los telefonos java prefieren el puerto 80 (por defecto)"
-    IDC_TMPLPATH_TIP        "Plantilla para la interfaz web.\nEsta plantilla tambien contiene los codigos html."
-    IDC_WSTIMEOUT_TIP       "Minutos antes de salit automaticamente.\nSi pones un cero desactivas esta opcion."
-    IDC_WSENABLED_TIP       "Habilitar el Servidor Web. Puedes controlar tu eMule desde\nun navegador en una posición remota."
-    IDC_WSENABLEDLOW_TIP    "Permitir una cuenta de invitado que solo permita leer.\nPor defecto deshabilitado."
-    IDC_MMENABLED_TIP       "Permitir una comunicacion de eMule con tu movil.\nControla tu eMule con cualquier movil que permita java. La mayoria de los moviles que permiten\njava tienen la memoria libre entre 40KB y sobre 150-200KB, que puedes utilizar."
-    IDC_WS_GZIP_TIP         "Comprimir los datos que se envian al Servidor Web.\nTodos los nuevos browser soportan esto, pero si tu control sobre el eMule\nse basa en escribir ordenes, si quieres lo puedes deshabilitar."
+    IDC_TMPLPATH_TIP        "Plantilla para la interfaz web.\nEsta plantilla también contiene los codigos html"
+    IDC_WSTIMEOUT_TIP       "Minutos antes de salit automaticamente.\nSi pones un cero desactivas esta opción"
+    IDC_WSENABLED_TIP       "Habilitar el Servidor Web. Puedes controlar tu eMule desde\nun navegador en una posición remota"
+    IDC_WSENABLEDLOW_TIP    "Permitir una cuenta de invitado que solo permita leer.\nPor defecto deshabilitado"
+    IDC_MMENABLED_TIP       "Permitir una comunicacion de eMule con tu movil.\nControla tu eMule con cualquier movil que permita java. La mayoria de los moviles que permiten\njava tienen la memoria libre entre 40KB y sobre 150-200KB, que puedes utilizar"
+    IDC_WS_GZIP_TIP         "Comprimir los datos que se envian al Servidor Web.\nTodos los nuevos browser soportan esto, pero si tu control sobre el eMule\nse basa en escribir ordenes, si quieres lo puedes deshabilitar"
     IDC_WS_ALLOWHILEVFUNC_TIP 
-                            "El administrador puede cerrar el eMule, apagar y reiniciar el ordenador.\nPuede llegar a ser util si lo activas que el eMule se inicie cuando se\ninicia windows, preferencias->general."
+                            "El administrador puede cerrar el eMule, apagar y reiniciar el ordenador.\nPuede llegar a ser util si lo activas que el eMule se inicie cuando se\ninicia Windows, preferencias->general"
 END
 
 STRINGTABLE 
 BEGIN
-    IDC_WSRELOADTMPL_TIP    "Recarga la plantilla."
-    IDC_TMPLBROWSE_TIP      "Busca en el sistema de archivos la plantilla que contiene\nel codigo html para el Servidor Web."
+    IDC_WSRELOADTMPL_TIP    "Recarga la plantilla"
+    IDC_TMPLBROWSE_TIP      "Busca en el sistema de archivos la plantilla que contiene\nel codigo html para el Servidor Web"
     IDC_GUIDELINK_TIP       "Abre la guia del movileMule en una ventana del navegador\nhttp://mobil.emule-project.net/"
     IDS_PREFER_SHARE_ALL_TIP 
-                            "Conectar primero con los servidores que pueden manejar el numero de archivos\nque tu puedes compartir, para que todos tengan las mismas posibilidades."
+                            "Conectar primero con los servidores que pueden manejar el número de archivos\nque tu puedes compartir, para que todos tengan las mismas posibilidades"
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES_TIP 
-                            "Comenzar a descargar un archivo tan solo si este se ha visto completo por lo menos\nuna vez, pero por fuerza la descarga se retrasa si se piden muchas solicitudes\nde tan solo una fuente completa."
+                            "Comenzar a descargar un archivo tan solo si este se ha visto completo por lo menos\nuna vez, pero por fuerza la descarga se retrasa si se piden muchas solicitudes\nde tan solo una fuente completa"
     IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP 
-                            "Guarda el tiempo de espera en tu cola. Basicamente te permite que el tiempo muerto\nque tarda en formase la cola de subia, se vea reducido al ser guardado, y aunque tu\ndesaparezcas tu puesto en la cola este reservado, por defecto esta activado."
+                            "Guarda el tiempo de espera en tu cola. Basicamente te permite que el tiempo muerto\nque tarda en formarse la cola de subia, se vea reducido al ser guardado, y aunque tu\ndesaparezcas tu puesto en la cola este reservado, por defecto esta activado"
     IDS_ENABLE_CHUNKDOTS_TIP 
-                            "Mostrar puntos en la barra de progreso para cada paquete, 9,28Mb."
-    IDS_ECFEF_TIP           "Una cola para todos los archivos con las mismas posibilidades.\nCambia la prioridad de cada archivo basado en los datos y peticiones\nde subida en esta sesion."
-    IDS_IP2COUNTRY_TIP      "Nombres y banderas de cada pais, en los detalles del cliente en la ventana\nde transferencias. Necesitas un archivo actualizado de country.csv que lo puedes\ndescargar o actualizar en Morph Update para mostrar correctamente los datos basados\nen la localizacion estimada del numero IP de la persona."
+                            "Mostrar puntos en la barra de progreso para cada paquete, 9,28Mb"
+    IDS_ECFEF_TIP           "Una cola para todos los archivos con las mismas posibilidades.\nCambia la prioridad de cada archivo basado en los datos y peticiones\nde subida en esta sesion"
+    IDS_IP2COUNTRY_TIP      "Nombres y banderas de cada pais, en los detalles del cliente en la ventana\nde transferencias. Necesitas un archivo actualizado de country.csv que lo puedes\ndescargar o actualizar en Morph Update para mostrar correctamente los datos basados\nen la localizacion estimada del número IP de la persona"
     IDS_DISABLED_TIP        "Sin letras de paises. (deshabilitar la columna del pais en el siguiente inicio)"
     IDS_COUNTRYNAME_SHOWFLAG_TIP 
-                            "Mostar la bandera del pais en la columna de pais o al principio de la linea."
-    IDS_CREDIT_SYSTEM_TIP   "Que sistema de creditos usas. Para el funcionamiento del Morph se requiere un sistema.\nLa prioridad de avance en tu cola de subida depende del sistema de credito que eligas."
+                            "Mostar la bandera del pais en la columna de pais o al principio de la linea"
+    IDS_CREDIT_SYSTEM_TIP   "Que sistema de créditos usas. Para el funcionamiento del Morph se requiere un sistema.\nLa prioridad de avance en tu cola de subida depende del sistema de credito que elijas"
     IDS_OFFICIAL_CREDIT_TIP "Inicio:1 Min: 1 max: 10\nRatio1 = Total subido x 2 / Total descargado\nRatio2 = SQRT(Total subido + 2 )\nSe comparan los dos coeficientes y el valor mas bajo se utiliza como coeficiente\nmodificador. Tambien existen algunas condiciones limite:\n      Subida total menor que 1MB => Modificador = 1\n      Descarga total = 0 => Modificador = 10"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOVELACE_CREDIT_TIP "Inicio:1 Max:100 Min:0.1 Ratio:1:1.5\n1-modificador=100*((1-1/(1+exp((3*{MB Subido}^2-{MB descargado}^2)/1000)))^6.6667)\nTan solo los clientes que usan el 'SecureHash' pueden conseguir un multiplicador de 100, todos los\ndemas se quedaran en 10. La gran diferencia con el sistema de creditos oficial, es que\nlos creditos se evaluan en diferencias y no en coeficientes. Usando el sistema oficial\nobtienes los mejores creditos despues de generar un nuevo hash de usuario (cuando\nhaces una instalacion limpia). Con este sistema de creditos consigues mejores\ncreditos cuantos mas MB subas."
+    IDS_LOVELACE_CREDIT_TIP "Inicio:1 Max:100 Min:0.1 Ratio:1:1.5\n1-modificador=100*((1-1/(1+exp((3*{MB Subido}^2-{MB descargado}^2)/1000)))^6.6667)\nTan solo los clientes que usan el 'SecureHash' pueden conseguir un multiplicador de 100, todos los\ndemas se quedaran en 10. La gran diferencia con el sistema de créditos oficial, es que\nlos créditos se evaluan en diferencias y no en coeficientes. Usando el sistema oficial\nobtienes los mejores créditos despues de generar un nuevo hash de usuario (cuando\nhaces una instalacion limpia). Con este sistema de créditos consigues mejores\ncréditos cuantos mas MB subas"
     IDS_PAWCIO_CREDIT_TIP   "Inicio:3 Min:1 Max:100.\nRatio = 3 * Descargado / Subido - Para nuevos clientes (Datos descargados y subidos menor que 1MB)\nratio = 3.0 (en vez de 1.0) - Si has recibido mas de 1MB de alguien pero no han dado cualquier cosa al usuario, este\nconsigue un ratio = 100.0 - Pequeña prima para aquellos clientes que te han dado muchos MB:\n- Si tu recibes 100MB entonces el usuario recibe un ratio = 50.0"
     IDS_EASTSHARE_CREDIT_TIP 
                             "Inicio:100 min: 10 max: 5000\nRatio = +6 por MB subido y -2 por descargado\nbonus  +100 si subes 1MB+\nvalor bajo si subes por debajo de tus posibilidades 1MB+, ratio = 50"
-    IDS_PAYBACKFIRST_TIP    "Abrir un slot con PowerShare para subir datos inmediatamente a un cliente.\nTrabaja solo sobre archivos descargados completamente y no sobre los que estan parcialmente descargados."
+    IDS_PAYBACKFIRST_TIP    "Abrir un slot con PowerShare para subir datos inmediatamente a un cliente.\nTrabaja solo sobre archivos descargados completamente y no sobre los que estan parcialmente descargados"
     IDS_PAYBACKFIRSTLIMI_TIP 
-                            "Sube el nivel de MB que tenemos que dar al cliente antes de que nosotros\nempecemos a descargar de el."
-    IDS_EXPIRED_KNOWN_TIP   "Limpiar los archivos .met despues de que el archivo no se haya modificado por x dias\npara ahorra espacio en el disco duro. Solicitar known*.met. No poner un valor muy pequeño,\npor debajo de 30."
+                            "Sube el nivel de MB que tenemos que dar al cliente antes de que nosotros\nempecemos a descargar de el"
+    IDS_EXPIRED_KNOWN_TIP   "Limpiar los archivos .met despues de que el archivo no se haya modificado por x dias\npara ahorrar espacio en el disco duro. Solicitar known*.met. No poner un valor muy pequeño,\npor debajo de 30"
 END
 
 STRINGTABLE 
 BEGIN
     IDC_FILTERSERVERBYIPFILTE_TIP 
-                            "También aplicar el siguiente filtro para los servidores (recomendado).\nSi selecciona este filtro para los servidores, eliminará y desconectará si son contenidos en el filtro.\nInabilite este ajuste para conectarse a ellos (falsamente...) pudiéndose conectarse con ID Baja."
+                            "También aplicar el siguiente filtro para los servidores (recomendado).\nSi selecciona este filtro para los servidores, eliminará y desconectará si son contenidos en el filtro.\nInhabilite este ajuste para conectarse a ellos (falsamente...) pudiéndose conectarse con ID Baja"
     IDC_STATIC_FILTERLEVE_TIP 
                             "Nivel de las entradas del filtro son aplicadas.\nCada entrada del ipfilter.dat tiene un (posible) valor,\nintroduciendo el valor 0, desactiva temporalmente el filtro de IPs.\n0 Se recomienda para testear puertos abiertos, o elimina\nipfilter.dat para preservar memoria. (El valor por defecto es 127)\nLa lista usada para el filtro en Morph es de meuh4567\nlos siguientes niveles permiten\nel máximo número de fuentes para el valor 0, 254 para algo de paranoia"
-    IDC_RELOADFILTE_TIP     "Carga el archivo otra vez en memoria."
-    IDC_EDITFILTE_TIP       "Edita ipfilter.dat con el block de notas."
+    IDC_RELOADFILTE_TIP     "Carga el archivo otra vez en memoria"
+    IDC_EDITFILTE_TIP       "Edita ipfilter.dat con el block de notas"
     IDC_LOADUR_TIP          "Carga un flitro de IPs desde la dirección http mostrada aquí.\nPuesdes encontrar una lista de bloqueados en<a=""http://www.bluetack.co.uk""> http://bluetack.co.uk</a>\nMorph Update ofrece una lista completa de bloqueados también.\nzip & rar (necesario el archivo unrar.dll) es también soportado\n(Utilizar solamente uno de éstos)"
 END
 
@@ -3157,61 +3157,61 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDC_UPDATEFAKES_TIP     "Descargar y actualizar el archivo de fakes ahora.\nSi el archivo es mas nuevo que el existente se descarga."
+    IDC_UPDATEFAKES_TIP     "Descargar y actualizar el archivo de fakes ahora.\nSi el archivo es mas nuevo que el existente se descarga"
     IDC_RESETFAKESURL_TIP   "Resetear el campo de URL y ponerlo por defecto:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
     IDC_UPDATE_URL_FAKELIST_TIP 
-                            "De donde actualizar, deberia tener forma de un archivo zip.\nMorph comprueba si la fecha en el archivo es mas reciente que la descarga anterior y lo actualiza\ntan solo si es mas reciente."
+                            "De donde actualizar, deberia tener forma de un archivo zip.\nMorph comprueba si la fecha en el archivo es mas reciente que la descarga anterior y lo actualiza\ntan solo si es mas reciente"
     IDC_AUTOUPIPFILTER_TIP  "Intentar actualizar la lista antes de conectar con la red"
-    IDC_UPDATEIPFURL_TIP    "Descargar y actualizar el archivo ipfilter.zip ahora.\nSi el archivo es mas nuevo que el existente se descarga."
-    IDS_PW_TOOL_TIP         "Si posicionas el raton encima de una descarga o una opcion en las preferencias,\naparece una pequeña nota con la informacion. Especifica el tiempo que quieres\nde retraso desde que posicionas el raton hasta que salte la nota."
+    IDC_UPDATEIPFURL_TIP    "Descargar y actualizar el archivo ipfilter.zip ahora.\nSi el archivo es mas nuevo que el existente se descarga"
+    IDS_PW_TOOL_TIP         "Si posicionas el raton encima de una descarga o una opción en las preferencias,\naparece una pequeña nota con la informacion. Especifica el tiempo que quieres\nde retraso desde que posicionas el raton hasta que salte la nota"
     IDC_RESETIPFURL_TIP     "Resetear el campo de URL y ponerlo por defecto\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
     IDC_UPDATE_URL_IPFILTER_TIP 
                             "URL donde descargar el arhivo ipfilter.dat (formato zip)"
-    IDC_MORPH2_COUNTRY_TIP  "Descargar la lista de banderas de paises en el inicio."
-    IDC_UPDATEIPCURL_TIP    "Descargar los rangos de IP por paises que se exiben en la columna de pais."
+    IDC_MORPH2_COUNTRY_TIP  "Descargar la lista de banderas de paises en el inicio"
+    IDC_UPDATEIPCURL_TIP    "Descargar los rangos de IP por paises que se exiben en la columna de pais"
     IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP 
-                            "De donde descargar la lista, la lista solo se descargara si la version existente es mas\nactual que la descargada previamente."
+                            "De donde descargar la lista, la lista solo se descargara si la version existente es mas\nactual que la descargada previamente"
     IDC_RESETIPCURL_TIP     "Resetear el campo URL a:\nhttp://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_RESET_TIP        "El historial guarda todas las búsquedas del usuario, IP del KAD\nlos updates de url y los filtros de IP y permite completar \nentradas si encuentra algo conveniente entre lo salvado.\nEl botón reset borrará todas las entradas."
-    IDS_DISABLEHIST_TIP     "El historial guarda todas las búsquedas del usuario, IP del KAD\nlos updates de url y los filtros de IP y permite completar \nentradas si encuentra algo conveniente entre lo salvado.\nSi está marcado permites quitar esta opción."
+    IDS_PW_RESET_TIP        "El historial guarda todas las búsquedas del usuario, IP del KAD\nlos updates de url y los filtros de IP y permite completar \nentradas si encuentra algo conveniente entre lo salvado.\nEl botón reset borrará todas las entradas"
+    IDS_DISABLEHIST_TIP     "El historial guarda todas las búsquedas del usuario, IP del KAD\nlos updates de url y los filtros de IP y permite completar \nentradas si encuentra algo conveniente entre lo salvado.\nSi está marcado permites quitar esta opción"
     IDS_PW_SHOWTRANSTOOLBAR_TIP 
-                            "Aparecerán nuevos iconos en la ventana de transferencia.\nPermite cambiar entre los distintos modos:\n\nVista dividida. Mostrando todos los archivos en la lista de subidas y descargas\nMostrar solo las descarags en progreso\nMostrar solo las subidas en progreso\nMostrar los ficheros en descarga\nMostrar la cola de subidaMostrar todos los clientes conocidos"
-    IDC_SHOWDWLPERCENT_TIP  "Una variable en tanto por ciento será añadida a cada descarga en su barra de progreso."
+                            "Aparecerán nuevos iconos en la ventana de transferencia.\nPermite cambiar entre los distintos modos:\n\nVista dividida. Mostrando todos los archivos en la lista de subidas y descargas\nMostrar solo las descargas en progreso\nMostrar solo las subidas en progreso\nMostrar los ficheros en descarga\nMostrar la cola de subida\nMostrar todos los clientes conocidos"
+    IDC_SHOWDWLPERCENT_TIP  "Una variable en tanto por ciento será añadida a cada descarga en su barra de progreso"
     IDC_EXITQUESTION_TIP    "Puedes parar eMule ahora ('Yes') y parar las subidas y bajadas\nSi dejas el eMule encendido conseguirás créditos que en un fututo harán que\ndescargues más rápido. (elige no!) "
     IDC_DONTASKMEAGAINCB_TIP 
                             "Selecciona esta opción y eMule no te preguntará la próxima vez que apagues el eMule\nPuedes volver a activarla en  Opciones->General-> Prompt on exit"
     IDC_DONTASKMEAGAINCBSEL_TIP 
                             "Activa ésto para que no vuelva  salir la pantalla. Puedes activarlo en \nOpciones -> Morph -> Admisnistrador de descargas -> SCC -> Mostrar el diálogo de 'Select catagory' dialog"
-    IDS_CAT_SELDLGTXT_TIP   "Puedes organizar las descargas por categorías.\nSon las etiquetas que aparecen en la pantalla de descargas.\nPuedes añadir categorías poniendo\nel nombre de la categoría o seleccionando una de las \nexistentes."
-    IDS_OKCANCELSEL_TIP     "Selecciona la categoría y pulsa ok para \ndescargar en esa categoría o\npulsa cancelar para no\ndescargarla(s)."
+    IDS_CAT_SELDLGTXT_TIP   "Puedes organizar las descargas por categorías.\nSon las etiquetas que aparecen en la pantalla de descargas.\nPuedes añadir categorías poniendo\nel nombre de la categoría o seleccionando una de las \nexistentes"
+    IDS_OKCANCELSEL_TIP     "Selecciona la categoría y pulsa ok para \ndescargar en esa categoría o\npulsa cancelar para no\ndescargarla(s)"
     IDC_DISABLEOBFUSCATION_TIP 
                             "Si por alguna razón quieres desactivar la ofuscación\ncompletamente selecciónalo. En general no tienes por\nqué activarlo. (Por defecto: Desactivado)"
-    IDC_ONLYOBFUSCATED_TIP  "Si activas esta opcion, eMule solo aceptará y establecerá conexiones ofuscadas. Los clientes que no tengan\nsoporte para las conexiones ofuscadas serán rechazados y en la conexion a un servidor automaticamente\nsolo se conectará a los que tengan soporte para la ofuscacion. Tan solo debes elegir esta opcion si\nsufres algun tipo de capado completo del protocolo eD2K en tu red, ya que sino rechazas fuentes\ninnecesariamente y tu eMule sufre un rendimiento menor. Sin embargo si tu estas seguro de que sufres\nun bloqueo, entonces activa esta opcion, porque ahorra los intentos en las conexiones que fallan y\npor lo tanto pierdes tiempo, recursos y gastos innecesarios.\n\n¡Tan solo activa esta opcion si no puedes recibir datos de ninguna manera! Por defecto desactivado."
+    IDC_ONLYOBFUSCATED_TIP  "Si activas esta opción, eMule sólo aceptará y establecerá conexiones ofuscadas. Los clientes que no tengan\nsoporte para las conexiones ofuscadas serán rechazados y en la conexión a un servidor automáticamente\nsólo se conectará a los que tengan soporte para la ofuscación. Tan sólo debes elegir esta opción si\nsufre algún tipo de priorización completa del protocolo eD2K en tu red, ya que si no rechazas fuentes\ninnecesariamente y tu eMule sufre un rendimiento menor. Sin embargo, si estás seguro de que sufres\nun bloqueo, entonces activa esta opción, porque ahorra los intentos en las conexiones que fallan y\npor lo tanto no pierdes tiempo, recursos y gastos innecesarios.\n\n¡Tan sólo activa esta opción si no puedes recibir datos de ninguna manera! Por defecto: desactivado"
     IDC_ENABLEOBFUSCATION_TIP 
-                            "Si piensas que el eMule está sufriendo una priorización de paquetes por tu ISP, activa esta opción. Siempre\nque el eMule tenga la capacidad de una conexión ofuscada y el otro cliente tambien lo permita, este se\nconectará de forma ofucada. Al conectar con un servidor, primero lo intentará de forma ofuscada y tan\nsólo si no es posible se conectará de forma norma. En general no existen deventajas activando esta\nopción, tan sólo un insignificante aumento de CPU y unos pocos bytes de más de gastos indirectos\nasí que realmente no haces nada malo activando esta opción, con lo que se recomienda activarlo.\n(Por defecto: Desactivado)"
+                            "Si piensas que el eMule está sufriendo una priorización de paquetes por tu ISP, activa esta opción. Siempre\nque el eMule tenga la capacidad de una conexión ofuscada y el otro cliente también lo permita, este se\nconectará de forma ofuscada. Al conectar con un servidor, primero lo intentará de forma ofuscada y tan\nsólo si no es posible se conectará de forma normal. En general no existen desventajas activando esta\nopción, tan sólo un insignificante aumento de CPU y unos pocos bytes de más de gastos indirectos\nasí que realmente no haces nada malo activando esta opción, con lo que se recomienda activarlo.\n(Por defecto: Desactivado)"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_TRAY_TIP         "eMule no se minimiza a la barra de tareas, si no que se va a la barra de sistema.\nAdemas se muestra un nuevo icono en la barra de ventana para minimizar."
-    IDS_PW_DBLCLICK_TIP     "Con esta opcion puedes elegir la forma de desplegar las tranferencias, con uno o dos click."
-    IDS_3DDEP_TIP           "El desplazador afecta a la cantidad de sombra en las barras de progreso."
-    IDS_UPDATEQUEUE_TIP     "La información exhibida en la lista de cola no será actualizada\npara ahorrar CPU."
-    IDS_SHOWRATEONTITLE_TIP "Mostrar los indices de transferencia, descarga y subida,\nen el titulo de la ventana del eMule."
-    IDS_INDICATERATINGS_TIP "Mostrar un icono con los comentarios, en los archivos que los tengan\nen la ventana de trafico."
+    IDS_PW_TRAY_TIP         "eMule no se minimiza a la barra de tareas, sino que se va a la barra de sistema.\nAdemas se muestra un nuevo icono en la barra de ventana para minimizar"
+    IDS_PW_DBLCLICK_TIP     "Con esta opción puedes elegir la forma de desplegar las tranferencias, con uno o dos click"
+    IDS_3DDEP_TIP           "El desplazador afecta a la cantidad de sombra en las barras de progreso"
+    IDS_UPDATEQUEUE_TIP     "La información exhibida en la lista de cola no será actualizada\npara ahorrar CPU"
+    IDS_SHOWRATEONTITLE_TIP "Mostrar los indices de transferencia, descarga y subida,\nen el titulo de la ventana del eMule"
+    IDS_INDICATERATINGS_TIP "Mostrar un icono con los comentarios, en los archivos que los tengan\nen la ventana de trafico"
     IDS_DISABLEKNOWNLIST_TIP 
-                            "eMule no pierde a todos los clientes que estan conectados.\nPara ahorra memoria, puedes deshabilitar esta opcion, si tu ordenador tiene\npoca memoria se recomienda que desactives esta opcion."
+                            "eMule no pierde a todos los clientes que estan conectados.\nPara ahorrar memoria, puedes deshabilitar esta opción, si tu ordenador tiene\npoca memoria se recomienda que desactives esta opción"
     IDS_DISABLEQUEUELIST_TIP 
-                            "Similar a la lista de clientes conocidos, es tambien la lista de cola,\nque tambien consume recursos del sistema. Desactivala para ahorralos."
-    IDS_SHOWCATINFO_TIP     "Se muestran dos valores (x/y) a la derecha del nombre de la categoria.\nEl primer valor (x) es el numero de descargas activas y el segundo (y) el\nnumero total de archivos en la categoria."
-    IDS_REPAINTGRAPHS_TIP   "El eMule se puede congelar cuando tiene que redibujar un grafico al cambiar el tamaño\nde la ventana. Esto pasa porque tiene que redibujar la grafica con los datos guardados.\nSi esta activada esta opcion, los graficos son borrados y empiezan de cero cuando\nse cambia el tamaño de la ventana."
+                            "Similar a la lista de clientes conocidos, es también la lista de cola,\nque también consume recursos del sistema. Desactívala para ahorrarlos"
+    IDS_SHOWCATINFO_TIP     "Se muestran dos valores (x/y) a la derecha del nombre de la categoria.\nEl primer valor (x) es el número de descargas activas y el segundo (y) el\nnumero total de archivos en la categoria"
+    IDS_REPAINTGRAPHS_TIP   "El eMule se puede congelar cuando tiene que redibujar un grafico al cambiar el tamaño\nde la ventana. Esto pasa porque tiene que redibujar la grafica con los datos guardados.\nSi esta activada esta opción, los graficos son borrados y empiezan de cero cuando\nse cambia el tamaño de la ventana"
     IDC_SELECT_HYPERTEXT_FONT_TIP 
-                            "Este boton abre un dialogo para elegir la fuente, el estilo\n y el color del texto en la ventana de servidores, las lineas de mensajes y la\nventana del IRC."
-    IDS_AUTOREMOVEFD_TIP    "Cuando el eMule termina de descargar un archivo, la barra de progreso se pone\nde color verde. Esta opcion limpia automaticamente todas los archivos que ya\nestan completamente descargados de la lista de descargas de la ventana de trafico."
+                            "Este botón abre un dialogo para elegir la fuente, el estilo\ny el color del texto en la ventana de servidores, las lineas de mensajes y la\nventana del IRC"
+    IDS_AUTOREMOVEFD_TIP    "Cuando el eMule termina de descargar un archivo, la barra de progreso se pone\nde color verde. Esta opción limpia automaticamente todas los archivos que ya\nestan completamente descargados de la lista de descargas de la ventana de trafico"
 END
 
 STRINGTABLE 
@@ -3235,7 +3235,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ADVADMIN_NOTE       "Nota: debe usar la plantilla de interfaz Web de\nMultiUsuario, sino no podrá activarlo."
+    IDS_ADVADMIN_NOTE       "Nota: debe usar la plantilla de interfaz Web de\nMultiUsuario, sino no podrá activarlo"
     IDS_ADVADMIN_USERLEVEL  "Nivel de usuario:"
     IDS_ADVADMIN_OPERATOR   "Operador"
     IDS_ADVADMIN_ADMIN      "Administrador"
@@ -3297,16 +3297,16 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SVC_RUNNINGASSERVICE "Ejecutándose actualmente como servicio del sistema."
-    IDS_SVC_ACCESSDENIED    "Acceso a los servicios del sistema denegado."
-    IDS_SVC_NOTINSTALLED    "Servicio no instalado."
-    IDS_SVC_INSTALLED       "Servicio instalado."
+    IDS_SVC_RUNNINGASSERVICE "Ejecutándose actualmente como servicio del sistema"
+    IDS_SVC_ACCESSDENIED    "Acceso a los servicios del sistema denegado"
+    IDS_SVC_NOTINSTALLED    "Servicio no instalado"
+    IDS_SVC_INSTALLED       "Servicio instalado"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SVC_INSTALLFAILED   "Instalación fallida, comprueba el registro."
-    IDS_SVC_UNINSTALLFAILED "Desinstalación fallida, comprueba el registro."
+    IDS_SVC_INSTALLFAILED   "Instalación fallida, comprueba el registro"
+    IDS_SVC_UNINSTALLFAILED "Desinstalación fallida, comprueba el registro"
     IDS_SVC_INSTALLED_DISABLED "Servicio desactivado. (¿Seleccionar para eliminar?)"
     IDS_SVC_OSTOOOLD        "No soportado en Windows 95"
     IDS_SVC_INSTALLSERVICE  "Instalar"
@@ -3318,18 +3318,18 @@ BEGIN
     IDS_SVC_INSTALLSERVICE_TIP 
                             "Instalar un servicio de eMule en el Servicio NT.\nEste servicio usará la configuración exacta \nde este eMule, pero no interactuará en el escritorio.\nPuedes comenzar el servicio desde 'services.msc'. Compruebe\nque el Servicio Web está activado"
     IDS_SVC_SERVERUNINSTALL_TIP 
-                            "Parar/Desinstalar el servicio instalado anteriormente."
+                            "Parar/Desinstalar el servicio instalado anteriormente"
     IDS_SVC_STARTWITHSYSTEM_TIP 
-                            "El servicio de eMule comenzará cuando Windows arranque. No es necesario logearte en Windows."
-    IDS_SVC_MANUALSTART_TIP "El servicio de eMule comenzará manualmente."
+                            "El servicio de eMule comenzará cuando Windows arranque. No es necesario logearte en Windows"
+    IDS_SVC_MANUALSTART_TIP "El servicio de eMule comenzará manualmente"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SVC_SETTINGS_TIP    "Aplicar una gama de ajustes puede ser útil cuando el servicio se está ejecutando:\nConectar al iniciar, sin sonidos, habilitar el Servicio Web, sin notificaciones,\nno iniciar con Windows (¡Iniciar automáticamente puede crear conflictos con Windows!)\nComprueba que necesita recargar las preferencias, y desactivar\nesta opción, no restaura los ajustes anteriores fijados anteriormente."
-    IDS_SVC_RUNBROWSER_TIP  "Al comenzar eMule.exe desde el escritorio en una ventana\ndel navegador se comienza el Servicio Web en vez del modo GUI\ndel eMule, si el servicio está ejecutándose."
+    IDS_SVC_SETTINGS_TIP    "Aplicar una gama de ajustes puede ser útil cuando el servicio se está ejecutando:\nConectar al iniciar, sin sonidos, habilitar el Servicio Web, sin notificaciones,\nno iniciar con Windows (¡Iniciar automáticamente puede crear conflictos con Windows!)\nComprueba que necesita recargar las preferencias, y desactivar\nesta opción, no restaura los ajustes anteriores fijados anteriormente"
+    IDS_SVC_RUNBROWSER_TIP  "Al comenzar eMule.exe desde el escritorio en una ventana\ndel navegador se comienza el Servicio Web en vez del modo GUI\ndel eMule, si el servicio está ejecutándose"
     IDS_SVC_REPLACESERVICE_TIP 
-                            "Si el servicio se está ejecutando, será detenido y \n la versión normal del GUI será arrancada"
+                            "Si el servicio se está ejecutando, será detenido y \nla versión normal del GUI será arrancada"
     IDS_SVC_CURRENT_STATUS_TIP 
                             "Mostrará el estado actual de eMule como servicio NT"
     IDS_SVC_ONSTARTBOX      "En el comienzo de eMule"
@@ -3366,21 +3366,21 @@ BEGIN
     IDS_RESTORELASTLOGPANE_TIP 
                             "Recordar qué pestaña de registro\nha sido usada en la última sesión"
     IDS_PREVIEWCOPIEDARCHIVES_TIP 
-                            "Cuando esta opción esté desactivada (=0), eMule usará un nuevo método\nde vista preliminar que sea más rápido y use menos espacio en el disco en la carpeta temporal.\nLas regeneraciones de esta versión son bienvenidas."
+                            "Cuando esta opción esté desactivada (=0), eMule usará un nuevo método\nde vista preliminar que sea más rápido y use menos espacio en el disco en la carpeta temporal.\nLas regeneraciones de esta versión son bienvenidas"
     IDS_STRAIGHTWINDOWSTYLES_TIP 
                             "Cambia el aspecto de la ventana gráfica de estadísticas y alguna otra cosa de estilo\nde menor importancia. (Puede requerir reiniciar el eMule)"
     IDS_LOGFILEFORMAT_TIP   "Cambia el formato de datos de los archivos de registro de UniCode a UTF8 cuando se configura a 1"
     IDS_RTLWINDOWSLAYOUT_TIP 
-                            "Agrega la lectura de la ayuda en eMule right-to-left. \nÚtil para idiomas como el Hebreo, etc."
+                            "Agrega la lectura de la ayuda en eMule right-to-left. \nÚtil para idiomas como el Hebreo, etc"
     IDS_PREVIEWONICONDBLCLK_TIP 
-                            "Si se activa esta opción, haciendo doble click en el icono de lso archivos en\nla lista de transfecencia, abrirá una vista preliminar. Sólo funcionará si\nla opción 'Doble click para expandir la lista  de descargas' está desactivada en\n'Preferencias -> Mostrar"
+                            "Si se activa esta opción, haciendo doble click en el icono de los archivos en\nla lista de transferencia, abrirá una vista preliminar. Sólo funcionará si\nla opción 'Doble click para expandir la lista de descargas' está desactivada en\n'Preferencias -> Mostrar"
     IDS_INTERNETSECURITYZONE_TIP 
                             "Zonas de Seguridad configuradas del mismo modo que los ajustes de Internet Explorer. Define\nqué características son permitidas en el código HTML. Relevante para la ventana de MiniMule.\nPermitido = <b>Sitios Restringidos</b>|Internet|Intranet|Sitios de Confianza|Ordenador del usuario"
-    IDS_TXTEDITOR_TIP       "El programa por defecto para editar los Servicios Web y el IPFilter.dat\npuede añadirse aquí. Proveer la ruta completa del nuevo editor ejecutable\nsi no se usa el establecido por defecto, Notepad.exe."
-    IDS_DATETIMEFORMAT_TIP  "DateTimeFormat=%A, %x, %X\n Esta secuencia define cómo se mostrará la fecha y la hora en el eMule.\n%a,%A  Abreviado, nombre de la semana COMPLETO\n%b,%B  Abreviado, nombre del mes COMPLETO\n%c  Representación de la fecha y la hora apropiada de modo local\n%d  Día del mes (01 – 31)\n%H      Hora en el formato de 24 horas (00 – 23)\n%I  Hora en el formato de 12 horas (01 – 12)\n%j  Año en decimal (001 – 366)\n%m  Mes en decimal (01 – 12)\n%M  Minutos en decimal (00 – 59)\n%p  A.M./P.M.\n%S  Segundos\n%U  Número de la semana del año, \n%w  Número del día de la semana (0 – 6; Domingo es el 0)\n%x Fecha representada en modo local\n%X  Hora representada en modo local\n%y  Año sin siglo\n%Y  Año con siglo\n%z, %Z  Nombre de la zona horaria, o la abreviatura"
-    IDS_SERVERUDPPORT_TIP   "Normalmente, el puerto local usado para preguntar a los servidores por fuentes o\n para buscar archivos en ellos, es elegido al azar. Si eMule es abierto en una máquina con una red más\ncompleja, especialmente cuando se usan routers, puede ser necesario\nfijar este puerto a un valor fijo, o desactivarlo completamente.\nDeshabilitando este puerto, significa que eMule no será capaz\nde actualizar el estado de los servidores en la lista de servidores y\nno podrá recibir fuentes de ellos, tampoco podrá\nhacer una búsqueda global. Eximir de esto es lo que mantiene al eMule conectado al servidor actualmente.\nGeneralmente el valor por defecto no se debe cambiar.\nPossibles valores para ServerUDPPort son:\n0                   Desactivado\n1 - 65534 UDP fijado como puerto local\n<b>65535</b> puerto al azar (por defecto)"
+    IDS_TXTEDITOR_TIP       "El programa por defecto para editar los Servicios Web y el IPFilter.dat\npuede añadirse aquí. Proveer la ruta completa del nuevo editor ejecutable\nsi no se usa el establecido por defecto, Notepad.exe"
+    IDS_DATETIMEFORMAT_TIP  "DateTimeFormat=%A, %x, %X\nEsta secuencia define cómo se mostrará la fecha y la hora en el eMule.\n%a,%A  Abreviado, nombre de la semana COMPLETO\n%b,%B  Abreviado, nombre del mes COMPLETO\n%c  Representación de la fecha y la hora apropiada de modo local\n%d  Día del mes (01 – 31)\n%H  Hora en el formato de 24 horas (00 – 23)\n%I  Hora en el formato de 12 horas (01 – 12)\n%j  Año en decimal (001 – 366)\n%m  Mes en decimal (01 – 12)\n%M  Minutos en decimal (00 – 59)\n%p  A.M./P.M.\n%S  Segundos\n%U  Número de la semana del año, \n%w  Número del día de la semana (0 – 6; Domingo es el 0)\n%x  Fecha representada en modo local\n%X  Hora representada en modo local\n%y  Año sin siglo\n%Y  Año con siglo\n%z, %Z  Nombre de la zona horaria, o la abreviatura"
+    IDS_SERVERUDPPORT_TIP   "Normalmente, el puerto local usado para preguntar a los servidores por fuentes o\npara buscar archivos en ellos, es elegido al azar. Si eMule es abierto en una máquina con una red más\ncompleja, especialmente cuando se usan routers, puede ser necesario\nfijar este puerto a un valor fijo, o desactivarlo completamente.\nDeshabilitando este puerto, significa que eMule no será capaz\nde actualizar el estado de los servidores en la lista de servidores y\nno podrá recibir fuentes de ellos, tampoco podrá\nhacer una búsqueda global. Eximir de esto es lo que mantiene al eMule conectado al servidor actualmente.\nGeneralmente el valor por defecto no se debe cambiar.\nPosibles valores para ServerUDPPort son:\n0 - Desactivado\n1 - 65534 UDP fijado como puerto local\n<b>65535</b> - Puerto al azar (Por defecto)"
     IDS_REMOVEFILESTOBIN_TIP 
-                            "Esta opción afecta a la función Borrar del disco del menu del botón derecho\nde la ventana de Compartidos. Si está desactivada, los archivos son eliminados permanentemente\ndel disco sin moverlos a la Papelera de Reciclaje."
+                            "Esta opción afecta a la función Borrar del disco del menu del botón derecho\nde la ventana de Compartidos. Si está desactivada, los archivos son eliminados permanentemente\ndel disco sin moverlos a la Papelera de Reciclaje"
     IDS_ADVANCEDPREFS       "Preferencias Avanzadas"
     IDS_ADVANCEDPREFS_TIP   "Preferencias de menor importancia para la optimización avanzada.\nTambién soportado en el eMule Oficial editando el archivo\npreferences.ini"
     IDS_TRUSTEVERYHASH      "AICHTrustEveryHash(sesión actual)"
@@ -3414,9 +3414,9 @@ BEGIN
     IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB(por defecto 5,0 = todos)"
     IDS_HIGHRESTIMER        "HighresTimer"
     IDS_HIGHRESTIMER_TIP    "?"
-    IDS_TRUSTEVERYHASH_TIP  "(Sesión únicamente no salvada). ELIMINAR ERRORES ÚNICAMENTE. Desactivar la votación "
+    IDS_TRUSTEVERYHASH_TIP  "(Sesión actual no salvada) ÚNICAMENTE ELIMINA ERRORES. Desactivar la votación del archivo"
     IDS_INSPECTALLFILETYPES_TIP 
-                            "Para determinar el formato del archivo a descargar/compartir\nevaluando las cabeceras\n(muy útil cuando está instalada la Librería MediaInfo Lib)"
+                            "Para determinar el formato del archivo a descargar/compartir\nevaluando las cabeceras\n(muy útil cuando está instalada la librería MediaInfo.Lib)"
     IDS_MAXMSGSESSIONS_TIP  "Máximo de sesiones abiertas de Chat"
     IDS_PREFERRESTRICTEDOVERUSER_TIP 
                             "No crea una cuenta eMule_secure nueva pero\nrestringe los permisos de la cuenta actual.\nPuede ser una alternativa al Modo Seguro si está\nejecutándose en una cuenta limitada"
@@ -3432,39 +3432,39 @@ BEGIN
     IDS_MINIMULEAUTOCLOSE_TIP 
                             "La ventana de MiniMule seguirá siendo visible hasta que se cierre.\nConfigurar este valor a 0 para que se cierre automáticamente la ventana cuando\nel cursor es movido fuera de la ventana. Parecido a un tooltip.\n(Por defecto = 1)"
     IDS_MINIMULETRANSPARENCY_TIP 
-                            "Controla la transparencia de la ventana de MiniMule. 0 significa opacidad\ny 100 es translúcida.\n(Por defecto = 0), posiblemente requiera reiniciar."
-    IDS_CREATECRASHDUMP_TIP "Cuando esta llave es activada, eMule automáticamente guarda un registro de\ndesplome si eMule sufre una caída inexplicable. Esto puede ayudar a los desarrolladores\npara solucionar el problema. El registro del desplome es guardado en la carpeta de instalación\nde eMule, llamada 'eMule-version-number-Modversion.dmp'\nSi sufre problemas de desplome de eMule, configura a 1 esta llame y reporta al foro del\nMorph (o envíalo a leukhe\\@gmail.com) con los detalles\nPor defecto = deseleccionado"
+                            "Controla la transparencia de la ventana de MiniMule. 0 significa opacidad\ny 100 es translúcida.\n(Por defecto = 0), posiblemente requiera reiniciar"
+    IDS_CREATECRASHDUMP_TIP "Cuando esta llave es activada, eMule automáticamente guarda un registro de\ndesplome si eMule sufre una caída inexplicable. Esto puede ayudar a los desarrolladores\npara solucionar el problema. El registro del desplome es guardado en la carpeta de instalación\nde eMule, llamada 'eMule-version-number-Modversion.dmp'\nSi sufre problemas de desplome de eMule, configura a 1 esta llave y reporta al foro del\nMorph (o envíalo a leukhe\\@gmail.com) con los detalles\nPor defecto: desactivado (Se recomienda activar esta opción)"
     IDS_CHECKCOMCTL32_TIP   "Suprime la advertencia sobre una versión antigua del dll.\nEsto puede suceder cuando se está usando una versión de Windows que no ha sido actualizada.\neMule puede trabajar sin la actualización, pero no es lo correcto. Puedes descargar la\nactualización del dll en Microsoft.\nPor defecto = 1"
-    IDS_CHECKSHELL32_TIP    "Suprime la advertencia sobre una versión antigua del Windows Shell (pre Internet Explorer 4)\nAlgunas funciones integradas del Windows Shell pueden no funcionar. La mejor solución, es actualizar el\nthe shell.dll que viene como parte del Internet Explorer.\nPor defecto = 1"
+    IDS_CHECKSHELL32_TIP    "Suprime la advertencia sobre una versión antigua del Windows Shell (pre Internet Explorer 4)\nAlgunas funciones integradas del Windows Shell pueden no funcionar. La mejor solución, es actualizar el\nshell.dll que viene como parte del Internet Explorer.\nPor defecto = 1"
     IDS_IGNOREINSTANCES_TIP "Permite la ejecución de varios eMule a la vez.\nNota:\nPara ejecutar 2 eMules en la misma máquina, deben estar\ninstaladas en diferentes carpetas, deben tener carpetas\ntemporales diferentes y también los puertos usados por cada eMule deben\nser diferentes y únicos. No es recomendable ejecutar 2 eMules\na no ser que sea con propósitos de pruebas.\nPor defecto = 0"
     IDS_NOTIFIERMAILENCRYPTCERTNAME_TIP 
                             "Nombre del certificado para la encriptación de las notificaciones por email con S/MIME. Los certificados serán bloqueados en las ventanas de direcciones locales"
     IDS_MEDIAINFO_MEDIAINFODLLPATH_TIP 
-                            "Este ajuste indicará a eMule dónde encontrar el mediainfo dll. Por defecto está en el\ndirectorio de eMule. Necesitarás ajustar estar preferencias si quieres salvar el DLL\nen un directorio diferente.\nPor defecto = MEDIAINFO.DLL"
+                            "Este ajuste indicará a eMule dónde encontrar el mediainfo.dll. Por defecto está en el\ndirectorio de eMule. Necesitarás ajustar estar preferencias si quieres salvar el DLL\nen un directorio diferente.\nPor defecto = MEDIAINFO.DLL"
     IDS_MEDIAINFO_RIFF_TIP  "Usa el mediainfo dll para encontrar si el archivo es un archivo 'avi'.\nPor defecto = 1"
     IDS_MEDIAINFO_ID3LIB_TIP 
-                            "Manda al eMule comprobar los archivos mpeg (mp1,mp2,mp3,mpa) por la cabecera mpeg.\nMeta data es mostrado en los detalles del archivo de\nla ventana de diálogo. ID3Lib o Media Info Dll es usado para esto.\nPor defecto = 1"
-    IDS_MAXLOGBUFF_TIP      "Define la cantidad de memoria del sistema que eMule usa para mostrar los registros.\nPara Windows 98 | ME un valor por defecto de 64 kB es reservado, para Win 2k|XP\nes de 128 kB. En Win98|ME el buffer no ha de ser mayor de 64 kB.\nLos registros son rotatorios, es decir, si el buffer está casi completo\nun mensaje antiguo es eliminado cuando llega uno nuevo (FIFO)."
+                            "Manda al eMule comprobar los archivos mpeg (mp1, mp2, mp3, mpa) por la cabecera mpeg.\nMeta data es mostrado en los detalles del archivo de\nla ventana de diálogo. ID3Lib o mediainfo.dll es usado para esto.\nPor defecto = 1"
+    IDS_MAXLOGBUFF_TIP      "Define la cantidad de memoria del sistema que eMule usa para mostrar los registros.\nPara Windows 98 | ME un valor por defecto de 64 kB es reservado, para Win 2k|XP\nes de 128 kB. En Win98|ME el buffer no ha de ser mayor de 64 kB.\nLos registros son rotatorios, es decir, si el buffer está casi completo\nun mensaje antiguo es eliminado cuando llega uno nuevo (FIFO)"
     IDS_MAXCHATHISTORY_TIP  "Define el número máximo de líneas salvadas en el historial de mensajes del IRC.\nDespués de este valor, es eliminado el mensaje más antiguo\ncuando llega uno nuevo (FIFO - First In First Out).\nPor defecto = 100"
     IDS_PREVIEWSMALLBLOCKS_TIP 
-                            "Esta función sólo debe activarse (=1) si se usa VLC -\nVideoLAN Client para la vista previa de archivos. Permite una vista previa multimedia\nen archivos de por lo menos 16 kB de .mpeg o 256 kB\npara los demás formatos multimedia (.avi, CD-Images con contenido\nmultimedia) que ha sido descargada. Usando esta opción, la opción de 'Crear una copia de seguridad\npara previsualizar' ha de ser descativada en el diálogo 'Reproductor de Video'.\nCompruebe que la versión de VLC sea 8.5 o mayor parece que\ntiene algunos problemas con los índices rotos."
+                            "Esta función sólo debe activarse (=1) si se usa VLC -\nVideoLAN Client para la vista previa de archivos. Permite una vista previa multimedia\nen archivos de por lo menos 16 kB de .mpeg o 256 kB\npara los demás formatos multimedia (.avi, CD-Images con contenido\nmultimedia) que ha sido descargada. Usando esta opción, la opción de 'Crear una copia de seguridad\npara previsualizar' ha de ser desactivada en el diálogo 'Reproductor de Video'.\nCompruebe que la versión de VLC sea 8.5 o mayor parece que\ntiene algunos problemas con los índices rotos"
     IDS_RESTORELASTMAINWNDDLG_TIP 
                             "El eMule recuerda que ventana\n(KAD, Servidores, Tráfico, ha sido abierta, antes de que la aplicación sea cerrada\ny la restaura. Por defecto = deseleccionada"
   	IDS_STATIC_ICON         "Mostrar siempre el icono de la bandeja de sistema"
 	  IDS_COMPRESSLEVEL       "Nivel de Compresión (1-9) "
 	  IDS_COMPRESSLEVEL_TIP   "Reducir el nivel de Compresión de los datos comprimibles.\nSe salva un poco de CPU, pero es necesario enviar mayor cantidad de datos.\nEs muy útil para conexiones muy rápidas.\n1 = usa menos CPU, menor compresión\n9 = mejor compresión (por defecto)"
 		IDC_SVC_CURRENT_STATUS_LABEL "Estado actual"
-		IDS_USEUSERSORTEDSERVERLIST_TIP "Cuando se activa, usa el mismo criterio que clasifica a los servidores\nen la pestaña de Servidores en el GUI cuando se intenta conectar a un servidor."
+		IDS_USEUSERSORTEDSERVERLIST_TIP "Cuando se activa, usa el mismo criterio que clasifica a los servidores\nen la pestaña de Servidores en el GUI cuando se intenta conectar a un servidor"
 END
 
 STRINGTABLE
 BEGIN
-		IDS_USECOMPRESS_TIP 		"Opción que desactiva la compresión de todos los datos del usuario.\nÚtil para servidores con velocidad muy alta (>~ 100mbit)\nEsta opción no se guarda, para hacer permanente esta opción\nes necesario añadir la línea UseCompression= en el archivo preferences.ini\nPOr defecto = activado (¡¡Recomendado!!)"
+		IDS_USECOMPRESS_TIP 		"Opción que desactiva la compresión de todos los datos del usuario.\nÚtil para servidores con velocidad muy alta (>~ 100mbit)\nEsta opción no se guarda, para hacer permanente esta opción\nes necesario añadir la línea UseCompression= en el archivo preferences.ini\nPor defecto = activado (¡¡Recomendado!!)"
 		IDS_SVC_CURRENT_STATUS_LABEL "Estado actual"
 		IDS_TEST_NOTIFICATION   "Test"
 		IDS_SERVER_REQUIREOBFUSCATION "Requiere conexión ofuscada a los servidores"
-		IDS_SERVER_REQUIREOBFUSCATION_TIP "Requiere conexiones ofuscadas con los servidores.\nCualquier servidor que no soporta la ofuscación\nserá ignorado. Y sucede que el servidor falso\nno soporta la conexión ofuscada cuando se introduce\nesta opción. Compruebe que es imposible conectar\na un servidor hasta que no se consiga un encriptado válido."
-		IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Muestra un registro extra cuando se busca.\nTambién se incluye en el resultado de la búsqueda.\n(Por defecto = 0, no se guarda, edite el archivo preferences.ini para hacer del cambio permanente)"
+		IDS_SERVER_REQUIREOBFUSCATION_TIP "Requiere conexiones ofuscadas con los servidores.\nCualquier servidor que no soporta la ofuscación\nserá ignorado. Y sucede que el servidor falso\nno soporta la conexión ofuscada cuando se introduce\nesta opción. Compruebe que es imposible conectar\na un servidor hasta que no se consiga un encriptado válido"
+		IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Muestra un registro extra cuando se busca.\nTambién se incluye en el resultado de la búsqueda.\n(Por defecto = 0, no se guarda, edita el archivo preferences.ini para hacer del cambio permanente)"
 		IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
 END
   
@@ -3479,8 +3479,8 @@ END
 STRINGTABLE
 BEGIN
       IDS_MORPHWIZ_NEXT       "En la finalización del Asistente"
-      IDS_MORPHWIZ_NET1       "Ejecutar el Asistente de conexión para configurar\nla velocidad de descarga."
-      IDS_WIZARDREQUIREOBFUSCATED  "Requerida conexión ofuscada al servidor.\nHabilitar para prevenir la conexión a servidores mal mantenidos/falsos."
+      IDS_MORPHWIZ_NET1       "Ejecutar el Asistente de conexión para configurar\nla velocidad de descarga"
+      IDS_WIZARDREQUIREOBFUSCATED  "Requerida conexión ofuscada al servidor.\nHabilitar para prevenir la conexión a servidores mal mantenidos/falsos"
       IDS_MORPHWIZ_IMPORT     "Ejecutar la herramienta de importación, para importar descargas pendientes\ndesde eDonkey/Shareaza/eMule"
 END
 
@@ -3499,19 +3499,19 @@ BEGIN
 			IDS_UPNP_INFO_NONEED    "Fallido o no necesario"
 			IDS_ERR_NOVALIDSTATICSERVERSFOUND  "Servidores estáticos no válidos en la búsqueda de la lista de servidores"
 			IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND  "Servidores ofuscados no válidos al intentar conectarse con la llave en la búsquedas (actualizar la lista de servidores o activa el UDP)"
-			IDS_ZZRATIO_TIP         "ZZRatio está activado a partir de este momento. El ratio de esta sesión está visible por\nuna 'R' en la barra de estado. Tu descarga <b>media</b>no excederá\n3 veces tu subida cuando esté activado.\nSolución:<b>Sube más</b> o sube durantemás tiempo.\nLa razón por la cuál se activa el ratio, se puede ver pasando el ratón por encima de la R\nen la barra de estado."
+			IDS_ZZRATIO_TIP         "ZZRatio está activado a partir de este momento. El ratio de esta sesión está visible por\nuna 'R' en la barra de estado. Tu descarga <b>media</b>no excederá\n3 veces tu subida cuando esté activado.\nSolución:<b>Sube más</b> o sube durantemás tiempo.\nLa razón por la cuál se activa el ratio, se puede ver pasando el ratón por encima de la R\nen la barra de estado"
 END
 
 STRINGTABLE
 BEGIN
 	IDS_DEBUGSEARCHDETAILLEVEL    "DebugSearchDetailLevel"
-    IDS_CRYPTTCPPADDINGLENGTH	  "CryptTCPPaddingLength=[1-256]"
-	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "La cantidad de octetos al azar a la cual se agrega tráfico ofuscado. (Por defecto = 128). \nValores bajos suponen menos sobrecarga (prueba con 16), valores altos mejoran el sistema de ofuscación."
+    IDS_CRYPTTCPPADDINGLENGTH	  "CryptTCPPaddingLength=[1-254]"
+	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "La cantidad de octetos al azar a la cual se agrega tráfico ofuscado. (Por defecto = 128). \nValores bajos suponen menos sobrecarga (prueba con 16), valores altos mejoran el sistema de ofuscación"
 	IDS_FOLLOW_THE_MAJORITY_TIP 
-                            "Renombra Automáticamente tu archivo con el nombre usado por la mayoría de clientes,\npuede ser activado directamente con el botón derecho o desactivado en cualquier operación de renombrado."
+                            "Renombra Automáticamente tu archivo con el nombre usado por la mayoría de clientes,\npuede ser activado directamente con el botón derecho o desactivado en cualquier operación de renombrado"
     IDS_FOLLOW_THE_MAJORITY "Seguir a la Mayoría"
 	IDS_FAIR_PLAY           "Juego Justo"
-	IDS_FAIR_PLAY_TIP       "Al menos se sube una copia del fichero descargado con mayor prioridad."
+	IDS_FAIR_PLAY_TIP       "Al menos se sube una copia del fichero descargado con mayor prioridad"
 END
 
 STRINGTABLE

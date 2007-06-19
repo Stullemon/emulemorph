@@ -318,7 +318,22 @@ BEGIN
     IDS_STATS_DDATA         "Heruntergeladen: %s"
     IDS_STATS_UDATA         "Hochgeladen: %s"
 END
-
+// >
+STRINGTABLE 
+BEGIN
+    IDS_CRC32_ABORT         "Berechnung abbrechen"
+    IDS_DONTREMOVESPARETRICKLESLOT "Reserveslots nicht entfernen"
+    IDS_MINDATARATEFRIEND   "Global datarate (0kB/s = unlimited, 1...3kB/s = no zzRatio)"
+    IDS_MINDATARATEPOWERSHARE "Global datarate (0kB/s = unlimited)"
+    IDS_MAXCLIENTDATARATEFRIEND "Max client datarate (0kB/s = unlimited)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE "Max client datarate (0kB/s = unlimited)"
+    IDS_MAXCLIENTDATARATE   "Max client datarate (0kB/s = unlimited)"
+    IDS_DISPLAYFUNNYNICK    "Enable FunnyNick display"
+    IDS_MAXDATARATEFRIEND   "Max Global datarate limit (% of upload speed)"
+    IDS_MAXDATARATEPOWERSHARE "Max Global datarate limit (% of upload speed)"
+    IDS_HIDDEN              "Hidden"
+END
+// <
 STRINGTABLE 
 BEGIN
     IDS_STATS_AVGDL         "Durchschnittliche Downloadrate: %s"
@@ -1880,7 +1895,42 @@ BEGIN
     IDS_US_STALLEDW4BR      "Wartet auf Blockanfrage."
     IDS_US_STALLEDREADINGFDISK "Wartet. Lese von Disk."
     IDS_SERVERFEATURE_INTTYPETAGS "Integer type Tags"
+    IDS_FILLGRAPHS          "Graphen ausgefüllt zeichnen"
+    IDS_PARAMETER           "Parameter"
+    IDS_TEST                "Test"
 END
+
+STRINGTABLE 
+BEGIN
+//    IDS_UPNPSTART           "Benutze UPnP zur Porteinstellung"
+//    IDS_UPNPSETUP           "Versuche Port-Weiterleitungen via UPnP einzustellen..."
+//    IDS_UPNPFAILED          "UPnP konnte die Portweiterleitung nicht konfigurieren. Bitte führe die Portweiterleitung manuell durch!"
+//    IDS_UPNPSUCCESS         "UPnP hat erfolgreich Portweiterleitungen für die Ports %u (TCP) und %u (UDP) durchgeführt."
+    IDS_FO_PREFBUTTON_NEW   "Öffne Ports in der WinXP SP1 Firewall"
+//    IDS_UPNP_NOSERVICE      "UPnP Device Host Dienst läuft nicht - überspringe UPnP Setup"
+//    IDS_DELAYEDBYUPNP       "Verbinden mit dem Netzwerk wird verzögert, da UPnP noch die Portweiterleitungen konfiguriert."
+//    IDS_DELAYEDBYUPNP2      "Bitte warte einige Sekunden, eMule wird sich verbinden sobald UPnP fertig ist."
+//    IDS_UPNP                "UPnP"
+//    IDS_UPNPCLOSEONEXIT     "Lösche UPnP Portweiterleitungen beim Programmende"
+//    IDS_UPNPSKIPWANIP       "Überspringe WAN IP Setup"
+//    IDS_UPNPSKIPWANPPP      "Überspringe WAN PPP Setup"
+    IDS_SHAREEMULELABEL     "eMule mit anderen Benutztern teilen"
+    IDS_SHAREEMULEMULTI     "Jeder Nutzer hat seine eigene Konfiguration und Downloads"
+    IDS_SHAREEMULEPUBLIC    "Jeder hat dieselbe Konfiguration und Downloads"
+    IDS_SHAREEMULEOLD       "Speicher die Konfiguration und Downloads im eMule Programmverzeichnis"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SHAREEMULEWARNING   "Durch das Ändern dieser Option wird eMule eine andere Konfiguration benutzen. Deine aktuellen Einstellungen werden ignoriert werden und bereits gestartete Downloads werden nicht fortgesetzt. Du kannst später wieder zur aktuellen Version durch das Ändern dieser Option wechseln.\n\nUm diese Änderung zu übernehmen muss eMule neu gestartet werden."
+    IDS_SPAM                "Spam"
+    IDS_MARKSPAM            "Als Spam markieren"
+    IDS_MARKNOTSPAM         "Als Nicht-Spam markieren"
+    IDS_SEARCHSPAMFILTER    "Aktiviere Spam-Filter für Suchergebnisse"
+END
+
+//Pascal
+
 
 #endif    // German (Germany) resources
 /////////////////////////////////////////////////////////////////////////////
