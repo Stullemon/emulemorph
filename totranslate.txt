@@ -557,7 +557,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP                "Universal Plug and Play (UPnP)"
     IDS_UPNP_INIT           "UPnP: Initiated on %s:%d, searching devices..."
     IDS_UPNP_FAILEDINIT     "UPnP: Failed initiating UPnP on port %d [%s]"
     IDS_UPNP_PUBLICIP       "UPnP: Your IP is a public internet IP, UPnP will be disabled"
@@ -1233,6 +1232,10 @@ STRINGTABLE
 BEGIN
     IDC_USERNAME_A_TIP      "Username at the proxy"
     IDC_PASSWORD_TIP        "Password at the proxy"
+END
+
+STRINGTABLE 
+BEGIN
     IDC_UPDATEFAKELISTSTART_TIP 
                             "Try to update the list before connecting to the network"
 END
@@ -1574,6 +1577,10 @@ BEGIN
                             "No valid static servers to connect in serverlist found"
     IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
                             "No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
+    IDS_DEBUGSEARCHDETAILLEVEL "DebugSearchDetailLevel"
+    IDS_CRYPTTCPPADDINGLENGTH "CryptTCPPaddingLength=[1-256]"
+    IDS_CRYPTTCPPADDINGLENGTH_TIP 
+                            "The amount of random bytes that is added to obfucsated traffic. (default 128). \nLow values means less overhead (try 16), higher values means better obfuscation."
 END
 
 STRINGTABLE 
@@ -1590,4 +1597,36 @@ STRINGTABLE
 BEGIN
     IDS_UPNP_INFO_NONEED    "Failed or not needed"
 END
+
+STRINGTABLE 
+BEGIN
+    IDS_DISABLECATCOLORS       "Disable category colors"
+    IDS_DISABLECATCOLOR_TIP    "Disable category colors in text tab of the transfer window"
+    IDS_CHANGEUSERASSERVICE    "You will have to change the user login of the service manually, or save config files in a program directory"
+    IDS_MORPHWIZ_GUI            "Mod options"
+    IDS_MORPHWIZ_NEXT	        "On Finishing of wizard" 
+END
+
+/// For the installer the following strings need to be translated (assuming ther eis a inno setup translation available
+tasks_firewall=Add an exception to the Windows Firewall
+dialog_firewall=Setup failed to add eMule to the Windows Firewall.%nPlease add eMule to the exception list manually.
+shellextention=Install shell extention for .met and .part files.
+tasks_assocurl=Registers eMule to take ed2k-Links and .emulecollection.
+languagesupport=Language dll other than english
+configfiles=extra configuration files, ipfilter and iptocountry files
+tparty=Tools from other projects
+mediainfo=Mediainfo.dll to extract extra information from media files
+unrar=Unrar.dll for certain downloads.
+corefiles=Required files.
+helpfile=Helpfiles.
+locofdata=Location of datafiles
+progdir=install configuration and data files into subdir of program (default)
+appdir=install data files into common applications directory
+userdocdir=install data files into local homedirecotry of user
+
+
+
+
+
+
 
