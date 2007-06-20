@@ -6100,9 +6100,11 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_DISABLECATCOLORS	  "Disable category colors"
+    IDS_DISABLECATCOLORS	   "Disable category colors"
     IDS_DISABLECATCOLOR_TIP    "Disable category colors in text tab of the transfer window"
 	IDS_CHANGEUSERASSERVICE    "You will have to change the user login of the service manually, or save config files in a program directory"
+    IDS_MORPHWIZ_GUI            "Mod options"
+    IDS_MORPHWIZ_NEXT		    "On Finishing of wizard" 
 END
 
 
