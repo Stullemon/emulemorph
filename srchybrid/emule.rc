@@ -17,7 +17,7 @@
 #if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_NEU)
 #ifdef _WIN32
 LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
-#pragma code_page(950)
+#pragma code_page(1252)
 #endif //_WIN32
 
 /////////////////////////////////////////////////////////////////////////////
@@ -195,11 +195,11 @@ STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD |
     WS_SYSMENU
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    CONTROL         "",IDC_CHATSEL,"SysTabControl32",0x0,140,16,367,270
+    CONTROL         "",IDC_CHATSEL,"SysTabControl32",0x0,140,16,367,254
     EDITTEXT        IDC_CMESSAGE,158,273,245,12,ES_AUTOHSCROLL
     DEFPUSHBUTTON   "Send",IDC_CSEND,405,272,50,14
     PUSHBUTTON      "Close",IDC_CCLOSE,456,272,50,14
-    CONTROL         "",IDC_FRIENDS_LIST,"SysListView32",LVS_REPORT |
+    CONTROL         "",IDC_FRIENDS_LIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
                     WS_BORDER | WS_TABSTOP,4,17,132,127
     CONTROL         "Messages",IDC_MESSAGES_LBL,"Static",SS_LEFTNOWORDWRAP | 
@@ -373,13 +373,12 @@ BEGIN
     CONTROL         "Beep on errors",IDC_BEEPER,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,14,54,202,10
     CONTROL         "Bring to front on link click",IDC_BRINGTOFOREGROUND,
-                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,66,
-                    202,10
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,14,66,202,10
     CONTROL         "Prompt on exit",IDC_EXIT,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,14,91,202,10
     CONTROL         "Onlinesig",IDC_ONLINESIG,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,14,78,202,10
-    GROUPBOX        "Startup",IDC_STARTUP,14,103,202,84,
+    GROUPBOX        "Startup",IDC_STARTUP,14,103,202,84
     CONTROL         "Check for new version on startup",IDC_CHECK4UPDATE,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,19,117,135,10
     CONTROL         "",IDC_CHECKDAYS,"msctls_trackbar32",TBS_AUTOTICKS | 
@@ -543,8 +542,8 @@ BEGIN
     LTEXT           "Static",IDC_MAXCONLABEL,120,176,86,8
     LTEXT           "TCP",IDC_STATIC,14,103,24,8
     GROUPBOX        "Network",IDC_CONNECTION_NETWORK,149,209,74,56,BS_FLAT
-    PUSHBUTTON      "Open these ports on WinXP SP1 firewall",
-                    IDC_OPENPORTS,14,149,202,12,WS_DISABLED
+    PUSHBUTTON      "Open these ports on WinXP SP1 firewall",IDC_OPENPORTS,
+                    14,149,202,12,WS_DISABLED
     CONTROL         "IDS_RANDOMPORTS",IDC_RANDOMPORTS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,120,102,96,10
     EDITTEXT        IDC_MINPORT,176,117,38,12,ES_RIGHT | ES_AUTOHSCROLL | 
@@ -2088,7 +2087,7 @@ BEGIN
     CONTROL         "Convert hexadecimal numbers ""%xx"" back to characters",
                     IDC_CHECKCONVERTHEX,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
                     WS_TABSTOP,7,37,197,10
-    CONTROL         "Convert wrong apostrophes ""¡¦"", ""`"" to standard apostrophes "" ' """,
+    CONTROL         "Convert wrong apostrophes ""’"", ""`"" to standard apostrophes "" ' """,
                     IDC_CHECKCONVERTAPOSTROPHES,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,7,27,232,10
     CONTROL         "Search and Replace:",IDC_CHECKSEARCHANDREPLACE,"Button",
@@ -2608,7 +2607,7 @@ BEGIN
     BEGIN
         BOTTOMMARGIN, 150
     END
-    END
+END
 #endif    // APSTUDIO_INVOKED
 
 #endif    // Neutral resources
@@ -2933,16 +2932,16 @@ STRINGTABLE
 BEGIN
     IDS_STATS_AVGDL         "Average Downloadrate: %s"
     IDS_STATS_AVGUL         "Average Uploadrate: %s"
-    IDS_STATS_FOUNDSRC      "Found Sources: %i"
-    IDS_STATS_ACTDL         "Active Downloads (chunks): %i"
-    IDS_STATS_ACTUL         "Active Uploads: %i"
-    IDS_STATS_WAITINGUSERS  "Waiting Uploads: %i"
-    IDS_STATS_RECONNECTS    "Reconnects: %i"
-    IDS_STATS_UNKNOWNCLIENT "Unknown: %i"
-    IDS_STATS_TOTAL         "Total: %i"
+    IDS_STATS_FOUNDSRC      "Found Sources: %u"
+    IDS_STATS_ACTDL         "Active Downloads (chunks): %u"
+    IDS_STATS_ACTUL         "Active Uploads: %u"
+    IDS_STATS_WAITINGUSERS  "Waiting Uploads: %u"
+    IDS_STATS_RECONNECTS    "Reconnects: %u"
+    IDS_STATS_UNKNOWNCLIENT "Unknown: %u"
+    IDS_STATS_TOTAL         "Total: %u"
     IDS_DISABLED            "Disabled"
     IDS_STOPPED             "Stopped"
-    IDS_STATS_UPDATELABEL   "Update delay: %i sec"
+    IDS_STATS_UPDATELABEL   "Update delay: %u sec"
     IDS_ASKEDFAF            "\nAsked for another file"
     IDS_WAITED              "Waited"
     IDS_ERR_LOADCREDITFILE  "Failed to load creditfile, a new file will be created"
@@ -4486,22 +4485,12 @@ END
 
 STRINGTABLE 
 BEGIN
-//    IDS_UPNPSTART           "Use UPnP to setup ports"
-//    IDS_UPNPSETUP           "Trying to setup port forwardings with UPnP..."
-//    IDS_UPNPFAILED          "UPnP failed to setup port forwardings, please foward those ports manually if necessary!"
-//    IDS_UPNPSUCCESS         "UPnP successfully set up forwardings for ports %u (TCP) and %u (UDP)"
     IDS_FO_PREFBUTTON_NEW   "Open ports on WinXP SP1 firewall"
-//    IDS_UPNP_NOSERVICE      "UPnP Device Host service is not running, skipping UPnP setup"
-//    IDS_DELAYEDBYUPNP       "Connecting to the network is delayed, because UPnP is still busy configuring the port forwardings."
-//    IDS_DELAYEDBYUPNP2      "Please wait some seconds, eMule will connect as soon as UPnP finished."
-//    IDS_UPNP                "UPnP"
-//    IDS_UPNPCLOSEONEXIT     "Remove UPnP port forwardings on exit"
-//    IDS_UPNPSKIPWANIP       "Skip WAN IP setup"
-//    IDS_UPNPSKIPWANPPP      "Skip WAN PPP setup"
+    IDS_UPNP                "Universal Plug and Play (UPnP)"
     IDS_SHAREEMULELABEL     "Sharing eMule with other computer users"
     IDS_SHAREEMULEMULTI     "Each user has its own configuration and downloads"
     IDS_SHAREEMULEPUBLIC    "Everyone has the same configuration and downloads"
-    IDS_SHAREEMULEOLD       "Store config and downloads in the programm directory"
+    IDS_SHAREEMULEOLD       "Store config and downloads in the program directory"
 END
 
 STRINGTABLE 
@@ -5068,7 +5057,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP                "Universal Plug and Play (UPnP)"
     IDS_UPNP_INIT           "UPnP: Initiated on %s:%d, searching devices..."
     IDS_UPNP_FAILEDINIT     "UPnP: Failed initiating UPnP on port %d [%s]"
     IDS_UPNP_PUBLICIP       "UPnP: Your IP is a public internet IP, UPnP will be disabled"
@@ -5744,6 +5732,10 @@ STRINGTABLE
 BEGIN
     IDC_USERNAME_A_TIP      "Username at the proxy"
     IDC_PASSWORD_TIP        "Password at the proxy"
+END
+
+STRINGTABLE 
+BEGIN
     IDC_UPDATEFAKELISTSTART_TIP 
                             "Try to update the list before connecting to the network"
 END
@@ -6076,7 +6068,7 @@ BEGIN
 END
 
 STRINGTABLE 
-BEGIN								    
+BEGIN
     IDS_MORPHWIZ_IMPORT     "Run import tool to import pending downloads\nfrom eDonkey/shareaza/eMule"
     IDS_PREF_GROUPGENERAL   "General options"
     IDS_PREF_GROUPEXTENDED  "Advanced options"
@@ -6085,6 +6077,10 @@ BEGIN
                             "No valid static servers to connect in serverlist found"
     IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
                             "No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
+    IDS_DEBUGSEARCHDETAILLEVEL "DebugSearchDetailLevel"
+    IDS_CRYPTTCPPADDINGLENGTH "CryptTCPPaddingLength=[1-256]"
+    IDS_CRYPTTCPPADDINGLENGTH_TIP 
+                            "The amount of random bytes that is added to obfucsated traffic. (default 128). \nLow values means less overhead (try 16), higher values means better obfuscation."
 END
 
 STRINGTABLE 
@@ -6100,11 +6096,14 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPNP_INFO_NONEED    "Failed or not needed"
-	IDS_DEBUGSEARCHDETAILLEVEL    "DebugSearchDetailLevel"
-    IDS_CRYPTTCPPADDINGLENGTH	  "CryptTCPPaddingLength=[1-256]"
-	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "The amount of random bytes that is added to obfucsated traffic. (default 128). \nLow values means less overhead (try 16), higher values means better obfuscation."
 END
 
+STRINGTABLE 
+BEGIN
+    IDS_DISABLECATCOLORS	  "Disable category colors"
+    IDS_DISABLECATCOLOR_TIP    "Disable category colors in text tab of the transfer window"
+	IDS_CHANGEUSERASSERVICE    "You will have to change the user login of the service manually, or save config files in a program directory"
+END
 
 
 
