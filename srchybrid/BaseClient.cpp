@@ -1507,7 +1507,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	CTag tagName(CT_NAME, (!m_bGPLEvildoer) ? thePrefs.GetUserNick() : _T("Please use a GPL-conform version of eMule") );
 	*/
 	CString m_strTemp = thePrefs.GetUserNick();
-	m_strTemp.AppendFormat(_T(" «%s»"), theApp.m_strModVersion);
+	m_strTemp.AppendFormat(_T("\x20\xABs\xBB"), theApp.m_strModVersion);
 	CTag tagName(CT_NAME, (!m_bGPLEvildoer) ? m_strTemp : _T("Please use a GPL-conform version of eMule") );
 	//MOPRH END   - Anti ModID Faker [Xman]
 	tagName.WriteTagToFile(data, utf8strRaw);
@@ -3869,7 +3869,7 @@ bool CUpDownClient::IsModFaker()
 	if(fModVersion == MOD_FLOAT_VERSION && m_nClientVersion != MAKE_CLIENT_VERSION(CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, CemuleApp::m_nVersionUpd))
 		return true;
 	// first MorphXT using this is 10.0
-	if(fModVersion >= 10.0f && CString(m_pszUsername).Right(m_strModVersion.GetLength()+1)!=m_strModVersion + _T("»"))
+	if(fModVersion >= 10.0f && CString(m_pszUsername).Right(m_strModVersion.GetLength()+1)!=m_strModVersion + _T("\xBB"))
 		return true;
 	return false;
 }
