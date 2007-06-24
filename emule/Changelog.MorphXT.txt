@@ -1,4 +1,15 @@
 --------------------------------------
+Changelog for eMule 0.48a MorphXT v10.1
+--------------------------------------
+xx-06-2007
+FIX: Do not save obfuscated sources.
+FIX: layout of messages tab. 
+FIX: chrash on "open incoming directory" on category.
+ADD: some donwnload optimiztions (when downloading at really high speeds) 
+ADD: preference for disable color on categories tab.
+CHANGE: add a warning when using config in my_documents combined with NTservice.
+
+--------------------------------------
 Changelog for eMule 0.48a MorphXT v10.0
 --------------------------------------
 06-06-2007
