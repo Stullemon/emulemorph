@@ -98,8 +98,8 @@ STRINGTABLE
 BEGIN
     IDS_HTTP_CAPTION        "Actualizando lista de servidores"
     IDS_HTTPDOWNLOAD_TIMELEFT "%s (%s copiado)"
-    IDS_LD_ADDHASHSET       "Añadir conjunto de hashes completo"
-    IDS_HSAV                "Conjunto de hashes disponible"
+    IDS_LD_ADDHASHSET       "Añadir conjunto de Hashes completo"
+    IDS_HSAV                "Conjunto de Hashes disponible"
     IDS_DL_SHOWED2KLINK     "Mostrar enlace eD2K..."
     IDS_FD_CORR             "Corrupto"
     IDS_HTTPDOWNLOAD_OK_TO_OVERWRITE 
@@ -119,8 +119,8 @@ END
 STRINGTABLE 
 BEGIN
     IDS_MAIN_BTN_DISCONNECT "Des&conectar"
-    IDS_ERR_WRONGFILEID     "Enviada Identificación de archivo errónea"
-    IDS_ERR_BADHASHSET      "Recibido un conjunto de hashes corrupto o no válido"
+    IDS_ERR_WRONGFILEID     "Enviada Identificación (Hash) de archivo errónea"
+    IDS_ERR_BADHASHSET      "Recibido un conjunto de Hashes corrupto o no válido"
     IDS_ERR_BADDATABLOCK    "Recibido un bloque de datos corrupto o no válido"
     IDS_ERR_ILLFORMEDHASH   "Hash no válido"
     IDS_ERR_BADED2KLINK     "Enlace eD2K no válido"
@@ -140,11 +140,11 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ERR_HASHERRORWARNING 
-                            "Atención: Imposible codificar el hash de la parte descargada - conjunto de hashes incompleto (%s)"
-    IDS_ERR_INCOMPLETEHASH  "Error: Imposible codificar el hash de la parte descargada - conjunto de hashes incompleto (%s). Esto no debería suceder nunca"
+                            "Atención: Imposible codificar el Hash de la parte descargada - conjunto de Hashes incompleto (%s)"
+    IDS_ERR_INCOMPLETEHASH  "Error: Imposible codificar el Hash de la parte descargada - conjunto de Hashes incompleto (%s). Esto no debería suceder nunca"
     IDS_DOWNLOADING         "Descargando"
     IDS_WAITING             "Esperando"
-    IDS_HASHING             "Codificando hash"
+    IDS_HASHING             "Codificando Hash"
     IDS_COMPLETING          "Completando"
     IDS_COMPLETE            "Completo"
     IDS_PAUSED              "Pausado"
@@ -167,7 +167,7 @@ BEGIN
     IDS_MAIN_BTN_CANCEL     "&Cancelar"
     IDS_AVAIL               "Partes: %u , disponibles: %u (%.1f%%)\n\n"
     IDS_TYPE                "Tipo"
-    IDS_FILEID              "Identificador de archivo"
+    IDS_FILEID              "Identificador (Hash) de archivo"
     IDS_FILE                "Archivo"
     IDS_DOWNLOAD            "Descarga"
     IDS_SL_SERVERNAME       "Nombre del servidor"
@@ -201,14 +201,14 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ERR_REHASH          "Atención: %s podría estar corrupto, recodificando el hash de las partes completadas"
+    IDS_ERR_REHASH          "Atención: %s podría estar corrupto, recodificando el Hash de las partes completadas"
     IDS_SKIN_PROF           "Perfiles de Temas visuales"
     IDS_ERR_PART_FNF        "No se encontró el archivo .part"
     IDS_KADOPEN             "Abierto"
     IDS_ERR_SAVEMET         "Error al guardar el archivo .part: %s (%s)"
     IDS_ERR_FOUNDCORRUPTION "Parte corrupta (%i) en %s"
-    IDS_HASHINGDONE         "Finalizado recodificación del hash en %s, el archivo parece estar bien"
-    IDS_ERR_PARTCORRUPT     "Parte descargada %i corrupta :(  (%s)"
+    IDS_HASHINGDONE         "Finalizado recodificación del Hash en %s, el archivo parece estar bien"
+    IDS_ERR_PARTCORRUPT     "Parte descargada %i corrupta :  (%s)"
     IDS_ICHWORKED           "ICH: Recuperada parte corrupta %i (%s), Salvados: %s"
     IDS_ERR_OUTOFSPACE      "¡Insuficiente espacio en disco para descargar %s!"
     IDS_SE                  "Intercambio de fuentes"
@@ -249,9 +249,9 @@ BEGIN
     IDS_CONNVIASERVER       "Conectando a través de un servidor"
     IDS_ONQUEUE             "En la cola"
     IDS_TRANSFERRING        "Transfiriendo"
-    IDS_RECHASHSET          "Recibiendo conjunto de hashes"
+    IDS_RECHASHSET          "Recibiendo conjunto de Hashes"
     IDS_NONEEDEDPARTS       "No se necesitan partes"
-    IDS_NOCONNECTLOW2LOW    "Imposible conectar LowID con LowID"
+    IDS_NOCONNECTLOW2LOW    "Imposible conectar ID Baja con ID Baja"
     IDS_UNKNOWN             "Desconocido"
     IDS_ASKED4ANOTHERFILE   "(A4AF) Se le ha pedido otro archivo"
     IDS_Q_CANCELDL          "¿Estás seguro de cancelar y borrar estos archivos?\n"
@@ -358,7 +358,7 @@ BEGIN
     IDS_ERR_CONNECTIONERROR "Error al conectar a %s (%s:%i): %s"
     IDS_ERR_SOCKET          "Error en el socket del servidor: %s (%s:%i): %s"
     IDS_SHAREDFOUND         "Encontrados %i archivos compartidos"
-    IDS_SHAREDFOUNDHASHING  "Encontrados %i archivos compartidos, codificando hash de %i nuevos archivos"
+    IDS_SHAREDFOUNDHASHING  "Encontrados %i archivos compartidos, codificando Hash de %i nuevos archivos"
     IDS_ERR_INCOMPLETEBLOCK "Pedido bloque incompleto"
 END
 
@@ -386,11 +386,11 @@ BEGIN
     IDS_DESC                "Descripcin: %s"
     IDS_PORT                "Puerto"
     IDS_ERR_NOVALIDSERVERSFOUND 
-                            "No se encontraron servidores vlidos a los que conectarse en la lista de servidores"
-    IDS_CONNECTEDTOREQ      "Conectado a %s (%s:%u), enviando peticin de login"
+                            "No se encontraron servidores válidos a los que conectarse en la lista de servidores"
+    IDS_CONNECTEDTOREQ      "Conectado a %s (%s:%u), enviando petición de login"
     IDS_ERR_FATAL           "Error fatal al intentar la conexión. La conexión a Internet podrá estar desactivada"
     IDS_ERR_LOSTC           "Conexión perdida con %s (%s:%i)"
-    IDS_ERR_DEAD            "%s (%s:%i) parece cado"
+    IDS_ERR_DEAD            "%s (%s:%i) parece caído"
     IDS_ERR_FULL            "%s (%s:%i) parece estar lleno"
 END
 
@@ -626,7 +626,7 @@ BEGIN
     IDS_EMULEW              "Pulsa "
     IDS_EMULEW2             "para comprobar si hay una nueva versión"
     IDS_EMULEW3             "aquí"
-    IDS_PW_MAXSOURCES       "Máx. fuentes/archivo"
+    IDS_PW_MAXSOURCES       "Max fuentes/archivo"
     IDS_SHAREDFILESCOUNT    "Nº de archivos compartidos: %i"
     IDS_SF_SIZE             "Total de archivos compartidos: %s"
     IDS_ERR_BADPORT         "Nº de puerto erróneo"
@@ -769,7 +769,7 @@ BEGIN
     IDS_GIGA                "G"
     IDS_TERRA               "T"
     IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE "Ignorar mensajes de eMule"
-    IDS_SMARTLOWIDCHECK     "Control inteligente de LowID al conectar"
+    IDS_SMARTLOWIDCHECK     "Control inteligente de ID Baja al conectar"
     IDS_SF_SRVOCC           "Ocupación de Servidores: %.2f%%"
     IDS_3DDEP               "Estilo Barra de progreso"
     IDS_AUTOTAKEED2KLINKS   "Capturar enlaces eD2K sólo durante el funcionamiento de eMule"
@@ -789,10 +789,10 @@ BEGIN
     IDS_FULLCHUNKTRANS      "Intentar transferir partes completas en todas las subidas"
     IDS_MANUALSERVERHIGHPRIO 
                             "Config. alta prioridad los servidores añadidos manualmente"
-    IDS_VERBOSE             "Información extra (respuesta del programa)"
+    IDS_VERBOSE             "Información extra (Respuesta del programa)"
     IDS_FLAT                "Plano"
     IDS_ROUND               "3D"
-    IDS_SAMEUSERHASH        "Los clientes '%s' y '%s' tienen el mismo hash de usuario o IP - eliminado '%s'"
+    IDS_SAMEUSERHASH        "Los clientes '%s' y '%s' tienen el mismo Hash de usuario o IP - eliminado '%s'"
     IDS_SEARCHEXTENTION     "Extensión"
     IDS_SEARCHAVAIL         "Disponibilidad"
     IDS_ERR_NOHELP          "¡Por favor, visita la sección de descarga de nuestra página web para descargar una copia del archivo de ayuda más reciente!\n\n¿Quieres ver la ayuda vía web ahora?"
@@ -837,7 +837,7 @@ BEGIN
     IDS_IRC_NICK            "Usuario"
     IDS_IRC_SEND            "Enviar"
     IDS_IRC_NAME            "Nombre"
-    IDS_IRC_SLAPMSGSEND     "PRIVMSG %s :\001ACTION da una bofetada a %s around with a large Babelfish!\001"
+    IDS_IRC_SLAPMSGSEND     "PRIVMSG %s :\001ACTION da una bofetada a %s con un Pescado babeante!\001"
 END
 
 STRINGTABLE 
@@ -884,12 +884,12 @@ STRINGTABLE
 BEGIN
     IDS_PW_UNLIMITED        "Ilimitado"
     IDS_PW_MINREC           "Mínimo recomendado\t%i "
-    IDS_PW_UA               "Velocidad máx. de subida/descarga"
+    IDS_PW_UA               "Velocidad max de subida/descarga"
     IDS_PW_PA               "Velocidad mín. subida/descarga"
     IDS_IRC_IGNOREINFOMESSAGE "Ignorar mensajes de información"
     IDS_CONNECTIONLOST      "Conexión perdida"
     IDS_WIZ_OS_FRAME        "Sistema Operativo"
-    IDS_HASHINGFILE         "Codificando hash de archivo:"
+    IDS_HASHINGFILE         "Codificando Hash de archivo:"
     IDS_WIZ_TRUEUPLOAD_TEXT "Capacidad de Subida"
     IDS_WIZ_TRUEDOWNLOAD_TEXT "Capacidad de Descarga"
     IDS_FRIENDLIST          "Amigos"
@@ -956,33 +956,33 @@ BEGIN
     IDS_ERR_CONTIMEOUT      "Intento de conexión a ""%s"" (%s:%i ) fuera del tiempo límite"
     IDS_OUTOFSERVERS        "Error al conectar a todos los servidores de la lista. Realizando otra pasada"
     IDS_PW_CONLIMITS        "Límites de conexión"
-    IDS_MAXCON5SECLABEL     "Nuevas conexiones máx. / 5seg"
+    IDS_MAXCON5SECLABEL     "Nuevas conexiones máx / 5seg"
     IDS_PW_UAP              "Añadir nuevos archivos compartidos con auto prioridad"
     IDS_MAXCLIENT           "Número máximo de usuarios"
     IDS_PW_TWEAK            "Opciones adicionales"
     IDS_TWEAKS_WARNING      "Advertencia:  No cambies estos parmetros a menos que sepas lo que ests haciendo. De lo contrario puedes empeorar las cosas.\neMule funciona bien sin modificar estos parmetros"
-    IDS_ADDAFRIEND          "Aadir Amigo"
-    IDS_PAF_REQINFO         "Informacin requerida"
-    IDS_PAF_MOREINFO        "Informacin adicional"
+    IDS_ADDAFRIEND          "Añadir Amigo"
+    IDS_PAF_REQINFO         "Información requerida"
+    IDS_PAF_MOREINFO        "Información adicional"
 END
 
 STRINGTABLE 
 BEGIN
     
     IDS_ERR_NOVALIDFRIENDINFO 
-                            "Tienes que introducir una IP y unos puertos vlidos!"
-    IDS_ADD                 "Aadir"
+                            "Tienes que introducir una IP y unos puertos válidos!"
+    IDS_ADD                 "Añadir"
     IDS_RECOVERED_PARTMET   "Recuperado archivo part.met de: %s"
     IDS_CMT_QUEST           "Comentar este archivo (El texto se mostrar a todos los usuarios)"
-    IDS_CMT_AIDE            "Para las pelculas puedes poner su duracin, su argumento, el idioma... y, si es una falsificacin (fake), puedes informar a los dems usuarios de eMule... "
+    IDS_CMT_AIDE            "Para las pelculas puedes poner su duración, su argumento, el idioma... y, si es una falsificación (fake), puedes informar a los demás usuarios de eMule..."
     IDS_CMT_ADD             "Cambiar el com&entario de este archivo..."
     IDS_CMT_NONE            "Sin comentarios"
     IDS_CMT_READ            "Comentario de archivo:"
     IDS_CMT_SHOWALL         "Mostrar come&ntarios"
     IDS_CMT_READALL         "Todos los comentarios"
-    IDS_CMT_RATEQUEST       "Calificacin de archivo"
-    IDS_CMT_RATEHELP        "Cambiar la calificacin del archivo o advertir a otros usuarios de que no es vlido"
-    IDS_CMT_FAKE            "No vlido / Corrupto / Falsificacin (fake)"
+    IDS_CMT_RATEQUEST       "Calificación de archivo"
+    IDS_CMT_RATEHELP        "Cambiar la calificacin del archivo o advertir a otros usuarios de que no es válido"
+    IDS_CMT_FAKE            "No válido / Corrupto / Falsificación (fake)"
 END
 
 STRINGTABLE 
@@ -1016,7 +1016,7 @@ BEGIN
     IDS_CL_DOWNLSTATUS      "Estado de Descarga"
     IDS_CL_TRANSFDOWN       "Descargado"
     IDS_CL_PENDING          "Pendiente"
-    IDS_CL_LOW2LOW          "IP baja a IP baja"
+    IDS_CL_LOW2LOW          "IP Baja a IP Baja"
     IDS_ERROR               "Error"
     IDS_OPENINC             "Abrir carpeta de entrada"
     IDS_HOTMENU             "Menú rápido"
@@ -1065,7 +1065,7 @@ BEGIN
     IDS_WEB_GZIP_COMPRESSION "Compresión Gzip"
     IDS_WEB_GZIP_COMMENT    "Ahorra tráfico, especialmente en gráficos"
     IDS_WEB_REFRESH_TIME    "Tiempo de refresco de las páginas"
-    IDS_WEB_REFRESH_COMMENT "Tiempo en segundos (cero=desactivado):"
+    IDS_WEB_REFRESH_COMMENT "Tiempo en segundos (cero=Desactivado):"
     IDS_SV_URL              "URL"
     IDS_WS_RELOAD_TMPL      "Plantilla"
     IDS_SV_DEBUGLOG         "Registro de depuración"
@@ -1162,11 +1162,11 @@ BEGIN
     IDS_STATS_OVRHD         "Excedente"
     IDS_STATS_RECORDS       "Records"
     IDS_STATS_COMPDL        "Descargas completas"
-    IDS_STATS_SVRECWORKING  "Máx. Servidores activos"
-    IDS_STATS_SVRECUSERS    "Máx. Usuarios conectados"
+    IDS_STATS_SVRECWORKING  "Max Servidores activos"
+    IDS_STATS_SVRECUSERS    "Max Usuarios conectados"
     IDS_SEARCH_TEXT         "Buscar"
-    IDS_STATS_SVRECFILES    "Máx. Archivos disponibles"
-    IDS_STATS_SHRECNUM      "Máx. Archivos compartidos"
+    IDS_STATS_SVRECFILES    "Max Archivos disponibles"
+    IDS_STATS_SHRECNUM      "Max Archivos compartidos"
     IDS_SEARCH_COLUMN       "Buscar en columna"
     IDS_STATS_SHRECSIZE     "Mayor cantidad compartida"
     IDS_STATS_SHRECASIZE    "Promedio de archivo mayor"
@@ -1219,8 +1219,8 @@ BEGIN
     IDS_STATS_DOWNTIME      "Tiempo de Descarga"
     IDS_STATS_UPTIME        "Tiempo de Subida"
     IDS_STATS_TOTALSRVDUR   "Duración total del Servidor"
-    IDS_STATS_MAXAVGUL      "Máx. Promedio de Subida"
-    IDS_STATS_MAXUL         "Máx. Índice de Subida"
+    IDS_STATS_MAXAVGUL      "Max Promedio de Subida"
+    IDS_STATS_MAXUL         "Max Índice de Subida"
     IDS_STATS_AVGDLTIME     "Promedio de descarga"
     IDS_STATS_PRTDEF        "Por defecto"
     IDS_STATS_PRTOTHER      "Otro"
@@ -1400,7 +1400,7 @@ STRINGTABLE
 BEGIN
     IDS_DYNUP_GOINGUPDIVIDER "Aumentar velocidad"
     IDS_DYNUP_GOINGDOWNDIVIDER "Disminuir velocidad"
-    IDS_DYNUP_NUMBEROFPINGS "Número máx. de pings de promedio"
+    IDS_DYNUP_NUMBEROFPINGS "Número max de pings de promedio"
     IDS_DYNUP_MINUPLOAD     "Velocidad de subida permitida más baja"
     IDS_ESTTIMELEFT         "Tiempo restante estimado:"
     IDS_TRANSFER_RATE_LABEL "Índice de transferencia:"
@@ -1674,7 +1674,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CHAT_IDENT          "Identificación:"
-    IDS_MAXHALFOPENCONS     "Máx. conexiones a medio abrir"
+    IDS_MAXHALFOPENCONS     "Max conexiones a medio abrir"
     IDS_WIZ_STARTWITHWINDOWS 
                             "Activa esta opción si quieres que eMule se inicie con Windows. (Desactivado por defecto)"
     IDS_KAD_WAITCBK         "Esperando respuesta KAD"
@@ -1723,7 +1723,7 @@ BEGIN
     IDS_LD_ED2KLINK         "Enlace eD2K"
     IDS_LD_COPYCLIPBOARD    "Copiar al Portapapeles"
     IDS_LD_HOSTNAME         "Usar hostname (dirección de Red), desde Preferencias, en vez de la IP cuando se crea un enlace de fuente"
-    IDS_SAVEACFAILED        "¡Error al guardar conjunto de hashes AICH!"
+    IDS_SAVEACFAILED        "¡Error al guardar conjunto de Hashes AICH!"
     IDS_IACHHASH            "Hash AICH"
     IDS_BYTESPERSEC         "B/s"
     IDS_KBYTESPERSEC        "kB/s"
@@ -1735,9 +1735,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_STATS_MINORCLIENTS  "Menor"
-    IDS_AICH_SYNCTOTAL      "Encontrados %i archivos sin un conjunto de hashes AICH vlido, calculando un nuevo hash para ellos"
+    IDS_AICH_SYNCTOTAL      "Encontrados %i archivos sin un conjunto de Hashes AICH válido, calculando un nuevo Hash para ellos"
     IDS_AICH_CALCFILE       "Calculando Hash AICH para el archivo %s"
-    IDS_AICH_WARNUSER       "Desde la versin 0.44a eMule usa un hash de archivo adicional que permite reducir enormemente la prdida de datos cuando se detecta una corrupcin. Si se está actualizando desde una versin anterior, eMule necesita recalcular un nuevo hash de archivo para todos los archivos compartidos. Esto puede llevar un tiempo pero slo se hace una vez"
+    IDS_AICH_WARNUSER       "Desde la versión 0.44a eMule usa un Hash de archivo adicional que permite reducir enormemente la pérdida de datos cuando se detecta una corrupción. Si se está actualizando desde una versión anterior, eMule necesita recalcular un nuevo Hash de archivo para todos los archivos compartidos. Esto puede llevar un tiempo pero sólo se hace una vez"
     IDS_AICH_WORKED         "AICH ha recuperado %s de %s de la parte %u de %s"
     IDS_SOURCECLIENT        "Fuente Cliente"
     IDS_USERSIP             "IP Usuario"
@@ -1833,12 +1833,12 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_X_SHAREAZA_IMPORT_NO_HASH "No se ha encontrado el hash"
+    IDS_X_SHAREAZA_IMPORT_NO_HASH "No se ha encontrado el Hash"
     IDS_X_SHAREAZA_IMPORT_GAP_LIST_CORRUPT "La lista de huecos está corrupta"
     IDS_X_SHAREAZA_IMPORT_NO_GAP_LIST "Lista de huecos no encontrada"
     IDS_X_SHAREAZA_IMPORT_HASH_SET_CORRUPT 
-                            "El conjunto de hashes está corrupto"
-    IDS_X_SHAREAZA_IMPORT_NO_HASH_SET "No se encuentra el conjunto de hashes"
+                            "El conjunto de Hashes está corrupto"
+    IDS_X_SHAREAZA_IMPORT_NO_HASH_SET "No se encuentra el conjunto de Hashes"
     IDS_CONVERTINGKNOWN2MET "Convirtiendo %s a %s para soportar archivos grandes..."
     IDS_CONVERTINGKNOWN2FAILED 
                             "...error al convertir known2.met, se han eliminado datos antiguos"
@@ -1918,7 +1918,7 @@ BEGIN
     IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 
                             "Importación cancelada: No se puede importar a un archivo completado"
     IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 
-                            "Importación cancelada: hashset no completado para %s (%i hashes para %i partes)"
+                            "Importación cancelada: Hashset no completado para %s (%i Hashes para %i partes)"
     IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE 
                             "Importación cancelada: No se pudo abrir %s"
     IDS_SR13_IMPORTPARTS_IMPORTSTART "Importando %i partes a %s"
@@ -1932,7 +1932,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SR13_IMPORTPARTS_BADPARTSREHASH 
-                            "%i partes corruptas fueron importadas para AICH. Iniciando nuevo hash"
+                            "%i partes corruptas fueron importadas para AICH. Iniciando nuevo Hash"
     IDS_SR13_IMPORTPARTS_ERR_FILETOOSMALL 
                             "El archivo es más pequeño que el mínimo de un bloque que el AICH pueda recuperar - no tiene sentido importarle esa información"
     IDS_SR13_IMPORTPARTS_IMPORTFINISH 
@@ -1987,7 +1987,7 @@ STRINGTABLE
 BEGIN
     IDS_CRASHRPT_NOTAV      "El RecopiladorDeErrores no ha sido encontrado en el directorio del eMule. Si quiere ayudarnos a depurar nuestro mod, por favor descárguese el archivo CrashRpt.dll"
     IDS_UPLOAD_COMPLETED    "Completando"
-    IDS_UPLOAD_PREEMPTED    "Movimiento paquí movimiento pallá..."
+    IDS_UPLOAD_PREEMPTED    "Cerrando slot, abriendo slot de mayor prioridad"
     IDS_UPLOAD_TOO_MANY_SLOTS "Demasiados slots"
 END
 
@@ -1997,7 +1997,7 @@ BEGIN
     IDS_SF_TURN_SIMPLE      "Subida de Archivo (simple)"
     IDS_SF_FULLUPLOAD       "Subida de Archivo (entero)"
     IDS_UM                  "Administración de la Subida"
-    IDS_ANTI_LEECHER        "Activar control anti-leecher"
+    IDS_ANTI_LEECHER        "Activar control Anti-leecher"
     IDS_PROGRESS_PERCENT    "Mostrar Porcentage en la barra de progreso"
     IDS_DOWNLOAD_IN_BOLD    "Mostrar en Negrita archivos descargandose"
     IDS_CAT_RESUMENEXT      "Reanudar Siguiente"
@@ -2053,7 +2053,7 @@ STRINGTABLE
 BEGIN
     IDS_BOTH                "Ambos"
     IDS_REALTIME            "En Tiempo Real"
-    IDS_ANTI_CREDITHACK     "Activar control del hackeo anticréditos"
+    IDS_ANTI_CREDITHACK     "Activar control del Anti-hackeo de créditos"
 END
 
 STRINGTABLE 
@@ -2146,7 +2146,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_RECONNECTONLOWID    "Reconectar cuando haya LowID"
+    IDS_RECONNECTONLOWID    "Reconectar cuando haya ID Baja"
 END
 
 STRINGTABLE 
@@ -2304,7 +2304,7 @@ BEGIN
     IDS_COUNTRYNAME_MID     "Mostrar 3 letras"
     IDS_COUNTRYNAME_LONG    "Mostrar nombre entero"
     IDS_COUNTRYNAME_SHOWFLAG "Mostrar Bandera"
-    IDS_REMOVEALLFRIENDSLOT "Eliminar todos los Slots para Amigos"
+    IDS_REMOVEALLFRIENDSLOT "Eliminar todos los slots para Amigos"
     IDS_INFINITEQUEUE       "Lista de Espera Infinita"
     IDS_PAYBACKFIRSTLIMIT   "Cantidad antes de accionar (Por Defecto 10MB)"
     IDS_ENABLE_CHUNKDOTS    "Activar PuntosDeTrozos en la barra de progreso"
@@ -2507,7 +2507,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_MAXPORT             "Puerto Máx"
+    IDS_MAXPORT             "Puerto Max"
     IDS_RANDOMPORTSRESETTIME 
                             "Tiempo (en segundos) de reinicio seguro de puertos aleatorios"
     IDS_ICFSUPPORT          "Activar soporte para el CortaFuegos de Windows (ICF)"
@@ -2673,15 +2673,15 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UP_LOWID2           "%i LowID"
+    IDS_UP_LOWID2           "%i ID Baja"
     IDS_UP_LOWID_AWAITED    "%i **** Esperó Reconexión %s"
     IDS_IP2COUNTRY_NALONG   "No Aplicable"
     IDS_IP2COUNTRY_NASHORT  "N/A"
     IDS_SOURCE_LOADER_SAVER "SLS"
     IDS_NEWFRIEND           "Nuevo amigo:"
     IDS_REMOVEDFRIEND       "Amigo Eliminado:"
-    IDS_FRIENDNAME_CHANGED1 "Amigo cambió su nombre: '%s'->'%s', ip %i.%i.%i.%i:%i, hash %s"
-    IDS_FRIENDNAME_CHANGED2 "Amigo cambió su nombre: '%s'->'%s', hash %s"
+    IDS_FRIENDNAME_CHANGED1 "Amigo cambió su nombre: '%s'->'%s', ip %i.%i.%i.%i:%i, Hash %s"
+    IDS_FRIENDNAME_CHANGED2 "Amigo cambió su nombre: '%s'->'%s', Hash %s"
     IDS_FAILEDTOLOAD        "No se pudo cargar"
 END
 
@@ -2694,13 +2694,13 @@ BEGIN
     IDS_IP2COUNTRY_DWNFILE  "Descargando archivo IP2Country"
     IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv descargado debido a actualización en proceso"
     IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv cargado después de haberse actualizado con éxito"
-    IDS_HASHING_COMPLETED   "Completado el hashing del archivo '%s'"
+    IDS_HASHING_COMPLETED   "Completado el Hashing del archivo '%s'"
     IDS_HASHING_COMPLETED2  "Hashing de nuevos archivos completado"
     IDS_HASHING_NEWFILE     "Archivo nuevo: '%s'"
     IDS_SUQWT_LOAD          "Cargar %s"
     IDS_VERBOSE_TITLE       "Información Extra"
-    IDS_UP_LOWID            "%s LowID"
-    IDS_UP_LOWID_DELAYED    "%s LowID retrasado %s"
+    IDS_UP_LOWID            "%s ID Baja"
+    IDS_UP_LOWID_DELAYED    "%s ID Baja retrasado %s"
 END
 
 STRINGTABLE 
@@ -2759,7 +2759,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SLOT_LIMIT_NUM      "Máx nº de slots (60-255)"
+    IDS_SLOT_LIMIT_NUM      "Max nº de slots (60-255)"
 END
 
 STRINGTABLE 
@@ -2778,7 +2778,7 @@ BEGIN
     IDC_MSGONLYSEC_SEC      "Sólo serán aceptados los mensajes de clientes con una identificación segura"
     IDC_ADVSPAMFILTER_TIP   "Mensajes duplicados o mensajes a los que no contestas tras unos pocos mensajes serán considerados como spam y se baneará al cliente"
     IDS_LOG_SERVER_FILTERED "Servidor eliminado en %s de la lista '%s': en ipfilter '%s'"
-    IDC_ENABLEPROXY_TIP     "Utiliza esta opción si la única manera que tienes de conectarte a internet es mediante un proxy. Esto siempre causará lowID (no óptimo).\n<b>ADVERTENCIA</b>\nSólo introduzca un proxy si está completamente seguro de tener uno\ny de que puede proveer la información correcta.\nLos proxies apenas se usan en PCs para el hogar\ny no ofrecen ninguna ventaja fuera de la LAN.\nRouters y modems no son proxies. No confundir ésta opción con la del WebCaché que se encuentra en otro apartado posterior"
+    IDC_ENABLEPROXY_TIP     "Utiliza esta opción si la única manera que tienes de conectarte a internet es mediante un proxy. Esto siempre causará ID Baja (no óptimo).\n<b>ADVERTENCIA</b>\nSólo introduzca un proxy si está completamente seguro de tener uno\ny de que puede proveer la información correcta.\nLos proxies apenas se usan en PCs para el hogar\ny no ofrecen ninguna ventaja fuera de la LAN.\nRouters y modems no son proxies. No confundir ésta opción con la del WebCaché que se encuentra en otro apartado posterior"
     IDC_PROXYTYPE_TIP       "Ponga el protocolo del proxy.\nLa precedencia de la velocidad del protocolo proxy es como sigue:\n1. SOCKS 4a (mayor velocidad por menor encabezado)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (peor velocidad por gran encabezado)"
     IDC_PROXYNAME_TIP       "Nombre del host o dirección IP del proxy"
     IDC_PROXYPORT_TIP       "Puerto por el que se comunica el proxy.\nSuele ser el 1080 para socks y 80 o 8080 para http"
@@ -2792,7 +2792,7 @@ BEGIN
     IDS_PW_USC_TIP          "Actualizar la lista de servidores con la URL que está en addresses.dat (editar) al iniciar el eMule. (Por defecto: sin marcar)"
     IDS_PW_UCC_TIP          "Cuando otro cliente se conecta a tí, \nañadir a la lista de servidores el servidor que\nel otro cliente esté usando"
     IDS_PW_USS_TIP          "Cuando se esté conectando a un servidor, pedir una lista de servidores de ese servidor"
-    IDS_SMARTLOWIDCHECK_TIP "Intentará conectarse más veces si se ha tenido ID-alta anteriormente"
+    IDS_SMARTLOWIDCHECK_TIP "Intentará conectarse más veces si se ha tenido ID Alta anteriormente"
     IDS_PW_FASTSRVCON_TIP   "Activa esta opción si quieres que eMule se conecte de modo Seguro.\nSi lo desactivas, eMule se conectará a los Servidores un poco más rápido,\npero tienes más posibilidades de obtener falsas ID-bajas. (Por defecto: Desactivado)"
     IDS_PW_SCORE_TIP        "A la hora de conectarse a servidores lo hará en el orden en que indique la prioridad que tengan dichos servidores"
     IDS_MANUALSERVERHIGHPRIO_TIP 
@@ -2804,7 +2804,7 @@ BEGIN
                             "Límite máximo para pasar de USS a SUC y viceversa\nUSS es mejor con cuando hay pocos slots abiertos,\nSUC necesita abrir muchos slots para determinar una buena media"
     IDS_SUC_TIP             "Usar el Control de Subida Inteligente (SUC)\nPros: Sin tráfico extra (no hace pings)\nContras: necesita clientes activos para poder encontrar la velocidad óptima"
     IDC_USS_TIP             "Hace pings al último\nrouter límite común de tu ISP (para tres clientes aleatorios)\npara determinar el tiempo de reacción de tu conexión"
-    IDC_SUC_LOG_TIP         "Loguear en el log del verbose (información extra avanzada)"
+    IDC_SUC_LOG_TIP         "Registrar en el Log del MorphXT (Información Extra Avanzada)"
     IDS_SUC_HIGH_TIP        "Si la respuesta media del cliente supera este valor la velocidad de subida comenzará a descender"
 END
 
@@ -2816,7 +2816,7 @@ BEGIN
     IDS_DEFAULT_TIP         "IDS_DEFAULT_TIP"
     IDS_UM_TIP              "Direccion de la subida:\ncontrol de slot, deteccion de la\nanchura de banda de subida"
     IDS_DYNUPLOAD_TIP       "Variar la velocidad de subida de forma automatica\ndetectando la anchura de banda disponible"
-    IDS_SECURITY_TIP        "Opciones de seguridad: Anti leecher & anti hackeo de créditos"
+    IDS_SECURITY_TIP        "Opciones de seguridad: Anti-leecher & Anti-hackeo de créditos"
     IDS_PW_DISPLAY_TIP      "Como mostrar algunos articulos\nen la ventana de descarga"
     IDS_PW_FRIENDS_TIP      "Ajustes de la velocidad de los slots para los amigos.\nPuedes hacer amigo a un usuario y despues establecer un slot de amigos\npara empezar una descarga directa"
     IDS_POWERSHARE_TIP      "Powershare es un slot de alta prioridad de subida, para lanzar archivos con pocas fuentes completas.\nAjustes de la velocidad"
@@ -2848,7 +2848,7 @@ BEGIN
     IDS_CLIENTPERCENTAGE_TIP 
                             "Muestra el porcentage que  el cliente tiene en el SpreadBar"
     IDS_ANTI_LEECHER_TIP    "Banea y rechaza clientes que pueden ser leechers o no envían\ninformación de indentificación apropiada(fantasmas). (Por defecto: Activada)"
-    IDS_ANTI_CREDITHACK_TIP "Previene nuestros créditos/userhash de ser robados (Por defecto: Activado)"
+    IDS_ANTI_CREDITHACK_TIP "Previene nuestros créditos/userHash de ser robados (Por defecto: Activado)"
     IDS_INFINITEQUEUE_TIP   "Quita el límite de tu cola"
     IDS_DONTREMOVESPARETRICKLESLOT_TIP 
                             "Si Morph abre un hilo extra (subida lenta) de slots,\ndesactivando esta opción, se cerrarán esos hilos cuando\nno vayan a ser necesarios y pone los usuarios de vuelta\nen la cola sin abandonar su posición"
@@ -2871,9 +2871,9 @@ BEGIN
     IDS_MINDATARATEPOWERSHARE_TIP 
                             "Velocidad total que es gastada en todos los PowerShare slots. (Por defecto:todo)"
     IDS_MAXCLIENTDATARATEPOWERSHARE_TIP 
-                            "Máxima velocidad de subida permitida para 1 slot en estado de PowerShare.\nPor defecto = 0, enfocando toda la velocidad del PowerShared para el número mas bajo de ranuras.\nConfigurando un valor aquí hace que el interruptor del Morph distribuya el ancho de banda"
+                            "Máxima velocidad de subida permitida para 1 slot en estado de PowerShare.\nPor defecto: 0, enfocando toda la velocidad del PowerShared para el número mas bajo de ranuras.\nConfigurando un valor aquí hace que el interruptor del Morph distribuya el ancho de banda"
     IDS_MAXCLIENTDATARATE_TIP 
-                            "Velocidad Máxima de subida que 1 slot de un cliente normal puede recibir.\nPor defecto = 0, Velocidad para acabar de completar el slot lo mas rapidamente posible,\nEl valor que se pone aqui, sirve para limitar las subidas y distribuir la anchura de banda entre un\nmáximo de slot posibles. Puede ser que durante breves periodos de tiempo, esta velocidad\nse puede superar para completar tu ancho de banda"
+                            "Velocidad Máxima de subida que 1 slot de un cliente normal puede recibir.\nPor defecto: 0, Velocidad para acabar de completar el slot lo mas rapidamente posible,\nEl valor que se pone aqui, sirve para limitar las subidas y distribuir la anchura de banda entre un\nmáximo de slot posibles. Puede ser que durante breves periodos de tiempo, esta velocidad\nse puede superar para completar tu ancho de banda"
     IDS_SLOT_LIMIT_GROUP_TIP 
                             "Opción que se debe tomar como último recurso para limitar el número de slots.\nPrimero se aplican los diferentes metodos de subida y esta opción tan solo sirve\npara limitar el número de slot, si los limites de velocidad no se pueden\najustar correctamente"
     IDS_SLOT_LIMIT_NUM_TIP  "El límite superior de los slots abiertos es un número configurable.\nEsto es únicamente útil en clientes con una velocidad de subida alta"
@@ -2891,7 +2891,7 @@ BEGIN
     IDS_CAT_SMALLFILEDLPUSH_TIP 
                             "Asigna una Prioridad Lineal 0 a archivos menores a 154624 bytes"
     IDS_CAT_STARTFILESONADD_TIP 
-                            "Si creas una nueva categoría en el diálogo de\nSeleccionar Categoría, cuando agregue múltiples archivos en el estado pausado\nlos archivos añadidos serán comenzados (Por defecto=0, desactivado)"
+                            "Si creas una nueva categoría en el diálogo de\nSeleccionar Categoría, cuando agregue múltiples archivos en el estado pausado\nlos archivos añadidos serán comenzados (Por defecto:0, desactivado)"
     IDS_A4AF_SMARTSWAP_TIP  "Si esta Activado, Preguntará la dirección para Otro Archivo"
     IDS_A4AF_SHOWDEBUG_TIP  "Mostrar mensajes sobre A4AF en el registro de Información Extra\nsi el registro de la respuesta el programa (Información Extra) está activado"
     IDS_A4AF_ADVMODE_TIP    "Opciones de cómo manipular si una fuente tiene múltiples fuentes"
@@ -2910,7 +2910,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_COMMUNITYTAG_TIP    "Las etiquetas de la comunidad son reconocidas en otras etiqueta,\npor ejemplo: un usuario <i>Andu[<b>NWO</b>]</i>\nserá aqui reconocido como una\ncomunidad de etiqueta 'NWO'. La comunidad solamente se usa para mostrar al resto de la\ncomunidad los ficheros compartidos (¡Ningun estimulo para la comunidad!). Para mostrar los archivos\ncompartidos lo tienes que establecer en las preferencias de los archivos, el Morph permite mostrar los archivos de forma\nindividual. Tu no tienes lo tienes que fijar la [etiqueta] en tu nombre, la etiqueta también será agregado por\neste ajuste"
-    IDS_MORPH_RFHA_TIP      "Informar de las actividades que realiza el hashing"
+    IDS_MORPH_RFHA_TIP      "Informar de las actividades que realiza el Hashing"
     IDS_MORPH_RAIF_TIP      "Añadir y quitar las actividades de los amigos en el registro"
     IDS_MORPH_KSSERV_SIP    "Si un servidor estatico de la lista de servidores, ha pasado\nel número maximo de intentos de conexión, se deshabilita\nen vez de eliminarlo de la lista, hasta reiniciar el eMule"
     IDS_GLOBAL_HL_TIP       "El limite global es un limite para el número total de fuentes, en vez\nde aplicar un limite de fuentes por archivo, lo que normalmente\nhace el eMule"
@@ -2927,7 +2927,7 @@ BEGIN
     IDS_EXTRACT_META_DATA_TIP "Extrae el id3 y el bitrate de los archivos"
     IDS_NEVER_TIP1          "Comportamiento normal. Opción buena cuando no se cuelga"
     IDS_META_DATA_ID3LIB_TIP "Usa la librería id3"
-    IDS_LOG2DISK_TIP        "Guardar el registro normal en el directorio 'logs' de eMule.\nCon esto podemos ver lo que sucede con el eMule cuando el ordenador\nes apagado inesperadamente. "
+    IDS_LOG2DISK_TIP        "Guardar el registro normal en el directorio 'logs' de eMule.\nCon esto podemos ver lo que sucede con el eMule cuando el ordenador\nes apagado inesperadamente."
     IDS_DATEFILENAMELOG_TIP "Guarda el archivo de registro en el directorio de logs en el formato:\neMule - YYYY.MM.DD.log"
     IDS_VERBOSE_TIP         "Opciones del registro de depuración. Mensajes de depuración para eliminar ciertos errores del programa"
     IDS_ENABLED_TIP         "Muestra mensajes de registro en la pestaña de Información Extra"
@@ -2946,7 +2946,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_PW_CON_CAPFRM_TIP   "En este grupo puedes completar la capacidad de tu conexión de red a Internet.\nEstos datos no se utilizan para enviar informacion al servidor, si no que se utilizan para\ndibujar la grafica de forma correcta en la ventana de estadisticas"
-    IDS_PW_CON_LIMITFRM_TIP "Si creas una nueva categoría en el diálogo de\nSeleccionar Categoría, cuando agregue múltiples archivos en el estado pausado\nlos archivos añadidos serán comenzados (Por defecto=0, desactivado)"
+    IDS_PW_CON_LIMITFRM_TIP "Si creas una nueva categoría en el diálogo de\nSeleccionar Categoría, cuando agregue múltiples archivos en el estado pausado\nlos archivos añadidos serán comenzados (Por defecto:0, desactivado)"
     IDS_PW_DOWNL_TIP        "Habilitar un limite superior para la descarga, eMule no descargará a mas velocidad que este limite.\nObservar que si la subida es demasiado lenta (menos de 10KB/s), el limite de la velocidad de descarga\nse ve disminuido por un coeficiente de tu subida"
     IDS_PW_UPL_TIP          "Habilitar un limite de subida (cuando esta deshabilitado, el eMule\nintentará determinar la velocidad de subida optima por medio del sensor de subida).\nFijar el limite al 80% teorico de tu velocidad de subida.\nSi fijas este limite al maximo de tu conexión puede llegar a ser inestable,\nsi lo limitas a un valor demasiado bajo, no conseguiras créditos para ganar puestos en la cola\nde descarga. Un valor por debajo de 10KB/s limita tu descarga con un coeficiente"
     IDS_NETWORK_TIP         "Habilita como minimo una red que permita al eMule encontrar fuentes y\npublicar tus archivos en Internet, se recomienda habilitar las dos"
@@ -3003,10 +3003,10 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SFM_TIP             "Opciones sobre los archivos que compartes. "
+    IDS_SFM_TIP             "Opciones sobre los archivos que compartes."
     IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP 
                             "Permitir los datos de la coleccion en la SpreadBar.\nEsto es óptimo para mejorar los lanzamientos\npero puede incrementar el uso de memoria RAM"
-    IDS_HIDEOVERSHARES_TIP  "Cambiar la subida de partes dentro de un mismo archivo. \nSe ocultan las partes que mas se han subido, respecto a las\nque mas se han bajado. Esto causa\nque se soliciten las partes menos descargadas.\nAlgunas partes estan siempre visibles. "
+    IDS_HIDEOVERSHARES_TIP  "Cambiar la subida de partes dentro de un mismo archivo. \nSe ocultan las partes que mas se han subido, respecto a las\nque mas se han bajado. Esto causa\nque se soliciten las partes menos descargadas.\nAlgunas partes estan siempre visibles."
     IDS_SELECTIVESHARE_TIP  "Puedes cambiarlo para que a usuario solo vea una parte\nempezando con los menos subidos, y viendo que partes se han ofrecido\nelegir el siguiente. No se debe deshabilitar la ocultacion de las partes\nmás compartidas para que esto funcione (Por defecto)"
     IDS_SHAREONLYTHENEED_TIP 
                             "Solamente se ocultan las partes que ya fueron\npedidas por otros clientes de tu cola. eMule analiza\ntu cola de subida si cada usuario esta pidiendo las mismas\npartes. Si esta activado, eMule oculta las partes que ya has subido por lo menos\na un cliente, y muestra los que nadie tiene. Estan de color morado en la\nSpreadBar.Siempre hay uno visible"
@@ -3049,7 +3049,7 @@ BEGIN
     IDS_SERVERKEEPALIVETIMEOUT_TIP 
                             "Fijar este valor a un valor mas bajo si experimentas que el router se desconecta del servidor.\nFijar un valor demasiado bajo te prohibirá la conexión con los servidores"
     IDS_AUTOTAKEED2KLINKS_TIP 
-                            "Enviar solamente los enlaces eD2K al eMule cuando este este en funcionamiento.\nForzado a no trabajar en modo seguro. "
+                            "Enviar solamente los enlaces eD2K al eMule cuando este este en funcionamiento.\nForzado a no trabajar en modo seguro."
     IDS_USECREDITSYSTEM_TIP "Debes usar este sistema de créditos en Morph"
     IDS_PW_FILTER_TIP       "Filtrar la salida de las direcciones del RFC 1918"
     IDS_SHOWEXTSETTINGS_TIP "Mostrar mas opciones y ajustes en el menu. (avanzado)"
@@ -3126,7 +3126,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOVELACE_CREDIT_TIP "Inicio:1 Max:100 Min:0.1 Ratio:1:1.5\n1-modificador=100*((1-1/(1+exp((3*{MB Subido}^2-{MB descargado}^2)/1000)))^6.6667)\nTan solo los clientes que usan el 'SecureHash' pueden conseguir un multiplicador de 100, todos los\ndemas se quedaran en 10. La gran diferencia con el sistema de créditos oficial, es que\nlos créditos se evaluan en diferencias y no en coeficientes. Usando el sistema oficial\nobtienes los mejores créditos despues de generar un nuevo hash de usuario (cuando\nhaces una instalacion limpia). Con este sistema de créditos consigues mejores\ncréditos cuantos mas MB subas"
+    IDS_LOVELACE_CREDIT_TIP "Inicio:1 Max:100 Min:0.1 Ratio:1:1.5\n1-modificador=100*((1-1/(1+exp((3*{MB Subido}^2-{MB descargado}^2)/1000)))^6.6667)\nTan solo los clientes que usan el 'SecureHash' pueden conseguir un multiplicador de 100, todos los\ndemas se quedaran en 10. La gran diferencia con el sistema de créditos oficial, es que\nlos créditos se evaluan en diferencias y no en coeficientes. Usando el sistema oficial\nobtienes los mejores créditos despues de generar un nuevo Hash de usuario (cuando\nhaces una instalacion limpia). Con este sistema de créditos consigues mejores\ncréditos cuantos mas MB subas"
     IDS_PAWCIO_CREDIT_TIP   "Inicio:3 Min:1 Max:100.\nRatio = 3 * Descargado / Subido - Para nuevos clientes (Datos descargados y subidos menor que 1MB)\nratio = 3.0 (en vez de 1.0) - Si has recibido mas de 1MB de alguien pero no han dado cualquier cosa al usuario, este\nconsigue un ratio = 100.0 - Pequeña prima para aquellos clientes que te han dado muchos MB:\n- Si tu recibes 100MB entonces el usuario recibe un ratio = 50.0"
     IDS_EASTSHARE_CREDIT_TIP 
                             "Inicio:100 min: 10 max: 5000\nRatio = +6 por MB subido y -2 por descargado\nbonus  +100 si subes 1MB+\nvalor bajo si subes por debajo de tus posibilidades 1MB+, ratio = 50"
@@ -3190,7 +3190,7 @@ BEGIN
     IDS_OKCANCELSEL_TIP     "Selecciona la categoría y pulsa ok para \ndescargar en esa categoría o\npulsa cancelar para no\ndescargarla(s)"
     IDC_DISABLEOBFUSCATION_TIP 
                             "Si por alguna razón quieres desactivar la ofuscación\ncompletamente selecciónalo. En general no tienes por\nqué activarlo. (Por defecto: Desactivado)"
-    IDC_ONLYOBFUSCATED_TIP  "Si activas esta opción, eMule sólo aceptará y establecerá conexiones ofuscadas. Los clientes que no tengan\nsoporte para las conexiones ofuscadas serán rechazados y en la conexión a un servidor automáticamente\nsólo se conectará a los que tengan soporte para la ofuscación. Tan sólo debes elegir esta opción si\nsufre algún tipo de priorización completa del protocolo eD2K en tu red, ya que si no rechazas fuentes\ninnecesariamente y tu eMule sufre un rendimiento menor. Sin embargo, si estás seguro de que sufres\nun bloqueo, entonces activa esta opción, porque ahorra los intentos en las conexiones que fallan y\npor lo tanto no pierdes tiempo, recursos y gastos innecesarios.\n\n¡Tan sólo activa esta opción si no puedes recibir datos de ninguna manera! Por defecto: desactivado"
+    IDC_ONLYOBFUSCATED_TIP  "Si activas esta opción, eMule sólo aceptará y establecerá conexiones ofuscadas. Los clientes que no tengan\nsoporte para las conexiones ofuscadas serán rechazados y en la conexión a un servidor automáticamente\nsólo se conectará a los que tengan soporte para la ofuscación. Tan sólo debes elegir esta opción si\nsufre algún tipo de priorización completa del protocolo eD2K en tu red, ya que si no rechazas fuentes\ninnecesariamente y tu eMule sufre un rendimiento menor. Sin embargo, si estás seguro de que sufres\nun bloqueo, entonces activa esta opción, porque ahorra los intentos en las conexiones que fallan y\npor lo tanto no pierdes tiempo, recursos y gastos innecesarios.\n\n¡Tan sólo activa esta opción si no puedes recibir datos de ninguna manera! Por defecto: Desactivado"
     IDC_ENABLEOBFUSCATION_TIP 
                             "Si piensas que el eMule está sufriendo una priorización de paquetes por tu ISP, activa esta opción. Siempre\nque el eMule tenga la capacidad de una conexión ofuscada y el otro cliente también lo permita, este se\nconectará de forma ofuscada. Al conectar con un servidor, primero lo intentará de forma ofuscada y tan\nsólo si no es posible se conectará de forma normal. En general no existen desventajas activando esta\nopción, tan sólo un insignificante aumento de CPU y unos pocos bytes de más de gastos indirectos\nasí que realmente no haces nada malo activando esta opción, con lo que se recomienda activarlo.\n(Por defecto: Desactivado)"
 END
@@ -3421,7 +3421,7 @@ BEGIN
     IDS_PREFERRESTRICTEDOVERUSER_TIP 
                             "No crea una cuenta eMule_secure nueva pero\nrestringe los permisos de la cuenta actual.\nPuede ser una alternativa al Modo Seguro si está\nejecutándose en una cuenta limitada"
     IDS_WEBFILEUPLOADSIZELIMITMB_TIP 
-                            "Cantidad de MB que se permiten descargar por HTTP desde el servidor Web (por defecto = 5)"
+                            "Cantidad de MB que se permiten descargar por HTTP desde el servidor Web (por defecto: 5)"
     IDS_ALLOWEDIPS          "IP's de servidores Web permitidas (separado por ;)"
     IDS_ALLOWEDIPS_TIP      "IP's que son permitidas para conectarse con el servidor Web, separadas por ';'"
 END
@@ -3430,26 +3430,26 @@ STRINGTABLE
 BEGIN
     IDS_REMOVEFILESTOBIN    "RemoveFilesToBin"
     IDS_MINIMULEAUTOCLOSE_TIP 
-                            "La ventana de MiniMule seguirá siendo visible hasta que se cierre.\nConfigurar este valor a 0 para que se cierre automáticamente la ventana cuando\nel cursor es movido fuera de la ventana. Parecido a un tooltip.\n(Por defecto = 1)"
+                            "La ventana de MiniMule seguirá siendo visible hasta que se cierre.\nConfigurar este valor a 0 para que se cierre automáticamente la ventana cuando\nel cursor es movido fuera de la ventana. Parecido a un tooltip.\n(Por defecto: 1)"
     IDS_MINIMULETRANSPARENCY_TIP 
-                            "Controla la transparencia de la ventana de MiniMule. 0 significa opacidad\ny 100 es translúcida.\n(Por defecto = 0), posiblemente requiera reiniciar"
-    IDS_CREATECRASHDUMP_TIP "Cuando esta llave es activada, eMule automáticamente guarda un registro de\ndesplome si eMule sufre una caída inexplicable. Esto puede ayudar a los desarrolladores\npara solucionar el problema. El registro del desplome es guardado en la carpeta de instalación\nde eMule, llamada 'eMule-version-number-Modversion.dmp'\nSi sufre problemas de desplome de eMule, configura a 1 esta llave y reporta al foro del\nMorph (o envíalo a leukhe\\@gmail.com) con los detalles\nPor defecto: desactivado (Se recomienda activar esta opción)"
-    IDS_CHECKCOMCTL32_TIP   "Suprime la advertencia sobre una versión antigua del dll.\nEsto puede suceder cuando se está usando una versión de Windows que no ha sido actualizada.\neMule puede trabajar sin la actualización, pero no es lo correcto. Puedes descargar la\nactualización del dll en Microsoft.\nPor defecto = 1"
-    IDS_CHECKSHELL32_TIP    "Suprime la advertencia sobre una versión antigua del Windows Shell (pre Internet Explorer 4)\nAlgunas funciones integradas del Windows Shell pueden no funcionar. La mejor solución, es actualizar el\nshell.dll que viene como parte del Internet Explorer.\nPor defecto = 1"
-    IDS_IGNOREINSTANCES_TIP "Permite la ejecución de varios eMule a la vez.\nNota:\nPara ejecutar 2 eMules en la misma máquina, deben estar\ninstaladas en diferentes carpetas, deben tener carpetas\ntemporales diferentes y también los puertos usados por cada eMule deben\nser diferentes y únicos. No es recomendable ejecutar 2 eMules\na no ser que sea con propósitos de pruebas.\nPor defecto = 0"
+                            "Controla la transparencia de la ventana de MiniMule. 0 significa opacidad\ny 100 es translúcida.\n(Por defecto: 0), posiblemente requiera reiniciar"
+    IDS_CREATECRASHDUMP_TIP "Cuando esta llave es activada, eMule automáticamente guarda un registro de\ndesplome si eMule sufre una caída inexplicable. Esto puede ayudar a los desarrolladores\npara solucionar el problema. El registro del desplome es guardado en la carpeta de instalación\nde eMule, llamada 'eMule-version-number-Modversion.dmp'\nSi sufre problemas de desplome de eMule, configura a 1 esta llave y reporta al foro del\nMorph (o envíalo a leukhe\\@gmail.com) con los detalles\nPor defecto: Desactivado (Se recomienda activar esta opción)"
+    IDS_CHECKCOMCTL32_TIP   "Suprime la advertencia sobre una versión antigua del dll.\nEsto puede suceder cuando se está usando una versión de Windows que no ha sido actualizada.\neMule puede trabajar sin la actualización, pero no es lo correcto. Puedes descargar la\nactualización del dll en Microsoft.\nPor defecto: 1"
+    IDS_CHECKSHELL32_TIP    "Suprime la advertencia sobre una versión antigua del Windows Shell (pre Internet Explorer 4)\nAlgunas funciones integradas del Windows Shell pueden no funcionar. La mejor solución, es actualizar el\nshell.dll que viene como parte del Internet Explorer.\nPor defecto: 1"
+    IDS_IGNOREINSTANCES_TIP "Permite la ejecución de varios eMule a la vez.\nNota:\nPara ejecutar 2 eMules en la misma máquina, deben estar\ninstaladas en diferentes carpetas, deben tener carpetas\ntemporales diferentes y también los puertos usados por cada eMule deben\nser diferentes y únicos. No es recomendable ejecutar 2 eMules\na no ser que sea con propósitos de pruebas.\nPor defecto: 0"
     IDS_NOTIFIERMAILENCRYPTCERTNAME_TIP 
                             "Nombre del certificado para la encriptación de las notificaciones por email con S/MIME. Los certificados serán bloqueados en las ventanas de direcciones locales"
     IDS_MEDIAINFO_MEDIAINFODLLPATH_TIP 
-                            "Este ajuste indicará a eMule dónde encontrar el mediainfo.dll. Por defecto está en el\ndirectorio de eMule. Necesitarás ajustar estar preferencias si quieres salvar el DLL\nen un directorio diferente.\nPor defecto = MEDIAINFO.DLL"
-    IDS_MEDIAINFO_RIFF_TIP  "Usa el mediainfo dll para encontrar si el archivo es un archivo 'avi'.\nPor defecto = 1"
+                            "Este ajuste indicará a eMule dónde encontrar el mediainfo.dll. Por defecto está en el\ndirectorio de eMule. Necesitarás ajustar estar preferencias si quieres salvar el DLL\nen un directorio diferente.\nPor defecto: MEDIAINFO.DLL"
+    IDS_MEDIAINFO_RIFF_TIP  "Usa el mediainfo dll para encontrar si el archivo es un archivo 'avi'.\nPor defecto: 1"
     IDS_MEDIAINFO_ID3LIB_TIP 
-                            "Manda al eMule comprobar los archivos mpeg (mp1, mp2, mp3, mpa) por la cabecera mpeg.\nMeta data es mostrado en los detalles del archivo de\nla ventana de diálogo. ID3Lib o mediainfo.dll es usado para esto.\nPor defecto = 1"
+                            "Manda al eMule comprobar los archivos mpeg (mp1, mp2, mp3, mpa) por la cabecera mpeg.\nMeta data es mostrado en los detalles del archivo de\nla ventana de diálogo. ID3Lib o mediainfo.dll es usado para esto.\nPor defecto: 1"
     IDS_MAXLOGBUFF_TIP      "Define la cantidad de memoria del sistema que eMule usa para mostrar los registros.\nPara Windows 98 | ME un valor por defecto de 64 kB es reservado, para Win 2k|XP\nes de 128 kB. En Win98|ME el buffer no ha de ser mayor de 64 kB.\nLos registros son rotatorios, es decir, si el buffer está casi completo\nun mensaje antiguo es eliminado cuando llega uno nuevo (FIFO)"
-    IDS_MAXCHATHISTORY_TIP  "Define el número máximo de líneas salvadas en el historial de mensajes del IRC.\nDespués de este valor, es eliminado el mensaje más antiguo\ncuando llega uno nuevo (FIFO - First In First Out).\nPor defecto = 100"
+    IDS_MAXCHATHISTORY_TIP  "Define el número máximo de líneas salvadas en el historial de mensajes del IRC.\nDespués de este valor, es eliminado el mensaje más antiguo\ncuando llega uno nuevo (FIFO - First In First Out).\nPor defecto: 100"
     IDS_PREVIEWSMALLBLOCKS_TIP 
                             "Esta función sólo debe activarse (=1) si se usa VLC -\nVideoLAN Client para la vista previa de archivos. Permite una vista previa multimedia\nen archivos de por lo menos 16 kB de .mpeg o 256 kB\npara los demás formatos multimedia (.avi, CD-Images con contenido\nmultimedia) que ha sido descargada. Usando esta opción, la opción de 'Crear una copia de seguridad\npara previsualizar' ha de ser desactivada en el diálogo 'Reproductor de Video'.\nCompruebe que la versión de VLC sea 8.5 o mayor parece que\ntiene algunos problemas con los índices rotos"
     IDS_RESTORELASTMAINWNDDLG_TIP 
-                            "El eMule recuerda que ventana\n(KAD, Servidores, Tráfico, ha sido abierta, antes de que la aplicación sea cerrada\ny la restaura. Por defecto = deseleccionada"
+                            "El eMule recuerda que ventana\n(KAD, Servidores, Tráfico, ha sido abierta, antes de que la aplicación sea cerrada\ny la restaura. Por defecto: deseleccionada"
   	IDS_STATIC_ICON         "Mostrar siempre el icono de la bandeja de sistema"
 	  IDS_COMPRESSLEVEL       "Nivel de Compresión (1-9) "
 	  IDS_COMPRESSLEVEL_TIP   "Reducir el nivel de Compresión de los datos comprimibles.\nSe salva un poco de CPU, pero es necesario enviar mayor cantidad de datos.\nEs muy útil para conexiones muy rápidas.\n1 = usa menos CPU, menor compresión\n9 = mejor compresión (por defecto)"
@@ -3459,12 +3459,12 @@ END
 
 STRINGTABLE
 BEGIN
-		IDS_USECOMPRESS_TIP 		"Opción que desactiva la compresión de todos los datos del usuario.\nÚtil para servidores con velocidad muy alta (>~ 100mbit)\nEsta opción no se guarda, para hacer permanente esta opción\nes necesario añadir la línea UseCompression= en el archivo preferences.ini\nPor defecto = activado (¡¡Recomendado!!)"
+		IDS_USECOMPRESS_TIP 		"Opción que desactiva la compresión de todos los datos del usuario.\nÚtil para servidores con velocidad muy alta (>~ 100mbit)\nEsta opción no se guarda, para hacer permanente esta opción\nes necesario añadir la línea UseCompression= en el archivo preferences.ini\nPor defecto: activado (¡¡Recomendado!!)"
 		IDS_SVC_CURRENT_STATUS_LABEL "Estado actual"
 		IDS_TEST_NOTIFICATION   "Test"
 		IDS_SERVER_REQUIREOBFUSCATION "Requiere conexión ofuscada a los servidores"
 		IDS_SERVER_REQUIREOBFUSCATION_TIP "Requiere conexiones ofuscadas con los servidores.\nCualquier servidor que no soporta la ofuscación\nserá ignorado. Y sucede que el servidor falso\nno soporta la conexión ofuscada cuando se introduce\nesta opción. Compruebe que es imposible conectar\na un servidor hasta que no se consiga un encriptado válido"
-		IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Muestra un registro extra cuando se busca.\nTambién se incluye en el resultado de la búsqueda.\n(Por defecto = 0, no se guarda, edita el archivo preferences.ini para hacer del cambio permanente)"
+		IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP "Muestra un registro extra cuando se busca.\nTambién se incluye en el resultado de la búsqueda.\n(Por defecto: 0, no se guarda, edita el archivo preferences.ini para hacer del cambio permanente)"
 		IDS_USEUSERSORTEDSERVERLIST "UserSortedServerList"
 END
   
@@ -3499,14 +3499,14 @@ BEGIN
 			IDS_UPNP_INFO_NONEED    "Fallido o no necesario"
 			IDS_ERR_NOVALIDSTATICSERVERSFOUND  "Servidores estáticos no válidos en la búsqueda de la lista de servidores"
 			IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND  "Servidores ofuscados no válidos al intentar conectarse con la llave en la búsquedas (actualizar la lista de servidores o activa el UDP)"
-			IDS_ZZRATIO_TIP         "ZZRatio está activado a partir de este momento. El ratio de esta sesión está visible por\nuna 'R' en la barra de estado. Tu descarga <b>media</b>no excederá\n3 veces tu subida cuando esté activado.\nSolución:<b>Sube más</b> o sube durantemás tiempo.\nLa razón por la cuál se activa el ratio, se puede ver pasando el ratón por encima de la R\nen la barra de estado"
+			IDS_ZZRATIO_TIP         "zzRatio está activado a partir de este momento. El ratio de esta sesión está visible por\nuna 'R' en la barra de estado. Tu descarga <b>media</b>no excederá\n3 veces tu subida cuando esté activado.\nSolución:<b>Sube más</b> o sube durantemás tiempo.\nLa razón por la cuál se activa el ratio, se puede ver pasando el ratón por encima de la R\nen la barra de estado"
 END
 
 STRINGTABLE
 BEGIN
 	IDS_DEBUGSEARCHDETAILLEVEL    "DebugSearchDetailLevel"
     IDS_CRYPTTCPPADDINGLENGTH	  "CryptTCPPaddingLength=[1-254]"
-	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "La cantidad de octetos al azar a la cual se agrega tráfico ofuscado. (Por defecto = 128). \nValores bajos suponen menos sobrecarga (prueba con 16), valores altos mejoran el sistema de ofuscación"
+	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "La cantidad de octetos al azar a la cual se agrega tráfico ofuscado. (Por defecto: 128). \nValores bajos suponen menos sobrecarga (prueba con 16), valores altos mejoran el sistema de ofuscación"
 	IDS_FOLLOW_THE_MAJORITY_TIP 
                             "Renombra Automáticamente tu archivo con el nombre usado por la mayoría de clientes,\npuede ser activado directamente con el botón derecho o desactivado en cualquier operación de renombrado"
     IDS_FOLLOW_THE_MAJORITY "Seguir a la Mayoría"
@@ -3519,9 +3519,15 @@ BEGIN
 	IDS_PW_EMAILNOTIFICATIONS "Notificaciones via Email"
 	IDS_PW_SENDERADDRESS    "Dirección remitente:"
 	IDS_PW_SMTPSERVER       "Servidor SMTP:"
-
-
 END
+
+STRINGTABLE 
+BEGIN
+    IDS_DISABLECATCOLORS      "Desactivar los colores de categorías"
+    IDS_DISABLECATCOLOR_TIP    "Desactivar los colores en el texto de las categorías en la pestaña de la ventana de Transferencias"
+    IDS_CHANGEUSERASSERVICE    "Tienes que cambiar el nombre de usuario del servicio manualmente, o guardar los archivos de configuración en el directorio del programa"
+END
+
 #endif    // Spanish (Castilian) resources
 /////////////////////////////////////////////////////////////////////////////
 
