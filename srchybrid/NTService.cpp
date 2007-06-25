@@ -287,8 +287,6 @@ int CmdInstallService(bool b_autostart)
         return 10;
     }
     _tcscat(szPath,_T(" AsAService")); 
-	
-
     schSCManager = OpenSCManager(
                         NULL,                   // machine (NULL == local)
                         NULL,                   // database (NULL == default)

@@ -887,8 +887,8 @@ void CDownloadQueue::Process(){
 		downspeed = (UINT)((maxDownload*100)/(datarate+1));
 		if (downspeed < 50)
 			downspeed = 50;
-		else if (downspeed > 200)
-			downspeed = 200;
+		/*else if (downspeed > 200) Morph 10.0
+			downspeed = 200;*/
 	}
 	// ZZ:UploadSpeedSense <--
 

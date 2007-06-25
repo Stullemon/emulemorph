@@ -252,7 +252,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-	m_strCurVersionLong += _T(" alpha6");
+	m_strCurVersionLong += _T(" alpha3");
 #endif
 
 	// create the protocol version number
@@ -762,6 +762,7 @@ bool CemuleApp::ProcessCommandline()
 		LPCTSTR pszParam = __targv[i];
 		if (pszParam[0] == _T('-') || pszParam[0] == _T('/')){
 			pszParam++;
+		}
     	//MORPH START leuk_he:run as ntservice v1..
 		if (_tcscmp(pszParam, _T("install"))==0)  {CmdInstallService();bExitParam = true; }
         if (_tcscmp(pszParam, _T("uninstall"))==0){CmdRemoveService();bExitParam = true; }
@@ -776,7 +777,6 @@ bool CemuleApp::ProcessCommandline()
 
 			if (_tcsicmp(pszParam, _T("AutoStart")) == 0)
 				m_bAutoStart = true;
-		}
 	}
 
 	CCommandLineInfo cmdInfo;
@@ -856,7 +856,9 @@ bool CemuleApp::ProcessCommandline()
 				PassLinkToWebService(sendstruct.dwData,*command);
                 // MORPH leuk_he:run as ntservice v1.. END
 			// Don't start if we were invoked with 'exit' command.
-			if (command->CompareNoCase(_T("exit")) == 0) {
+			if (  (command->CompareNoCase(_T("exit")) == 0)||
+                  (command->CompareNoCase(_T("uninstall")) == 0))
+			{
 				delete command;
 				return true;
 			}

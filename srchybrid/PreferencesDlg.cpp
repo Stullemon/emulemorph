@@ -243,8 +243,6 @@ BOOL CPreferencesDlg::OnInitDialog()
 			
 	}
 
-	Localize();	
-	m_slideBar.SetFocus(); //MORPH - Preferences groups [ePlus/Sirob]
 
 	//MORPH START - Added by SiRoB, Load a jpg
 	CBitmap bmp;
@@ -261,6 +259,9 @@ BOOL CPreferencesDlg::OnInitDialog()
 		m_banner.Attach(this, KCSB_ATTACH_RIGHT);
 		//Commander - Added: Preferences Banner [TPT] - End
 	}
+	Localize();			  // Morph: move after load jpg.  (xman) 
+	m_slideBar.SetFocus(); //MORPH - Preferences groups [ePlus/Sirob]
+
 	return bResult;
 }
 

@@ -1902,6 +1902,13 @@ LRESULT CemuleDlg::OnFileAllocExc(WPARAM wParam,LPARAM lParam)
 	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN || !theApp.downloadqueue->IsPartFile((CPartFile*)wParam)) { //MORPH - Flush Thread
 		if (error != NULL)
 			error->Delete();
+		//MORPH START - Added by SiRoB, Flush Thread
+		if (theApp.downloadqueue->IsPartFile((CPartFile*)wParam)) {
+			delete[] ((CPartFile*)wParam)->m_FlushSetting->changedPart;
+			delete ((CPartFile*)wParam)->m_FlushSetting;
+			((CPartFile*)wParam)->m_FlushSetting = NULL;
+		}
+		//MORPH END   - Added by SiRoB, Flush Thread
 		return FALSE;
 	}
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown

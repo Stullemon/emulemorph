@@ -6078,7 +6078,7 @@ BEGIN
     IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
                             "No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
     IDS_DEBUGSEARCHDETAILLEVEL "DebugSearchDetailLevel"
-    IDS_CRYPTTCPPADDINGLENGTH "CryptTCPPaddingLength=[1-256]"
+    IDS_CRYPTTCPPADDINGLENGTH "CryptTCPPaddingLength=[1-254]"
     IDS_CRYPTTCPPADDINGLENGTH_TIP 
                             "The amount of random bytes that is added to obfucsated traffic. (default 128). \nLow values means less overhead (try 16), higher values means better obfuscation."
 END
@@ -6102,9 +6102,7 @@ STRINGTABLE
 BEGIN
     IDS_DISABLECATCOLORS	   "Disable category colors"
     IDS_DISABLECATCOLOR_TIP    "Disable category colors in text tab of the transfer window"
-	IDS_CHANGEUSERASSERVICE    "You will have to change the user login of the service manually, or save config files in a program directory"
-    IDS_MORPHWIZ_GUI            "Mod options"
-    IDS_MORPHWIZ_NEXT		    "On Finishing of wizard" 
+	IDS_CHANGEUSERASSERVICE    "You will have to change the user login of the service manually, or save config files in a program directory"   
 END
 
 

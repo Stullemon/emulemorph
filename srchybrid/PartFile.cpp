@@ -3056,14 +3056,7 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 
 					if(curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
 					{
-						//MORPH START - Changed by SiRoB, Occurate download limiter
-						/*
 						uint32 limit = curClientReducedDownload*cur_datarate/1000;
-						*/
-						DWORD duration = dwCurTick-LastTimeProcessCalled;
-						if (duration > 999) duration = 999;
-						uint32 limit = curClientReducedDownload*cur_datarate/(1000-duration);		
-						//MORPH END  - Changed by SiRoB, Occurate download limiter
 							
 						if(limit<1000 && curClientReducedDownload == 200)
 							limit +=1000;
@@ -3160,14 +3153,7 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 						//MORPH END   - Changed by Stulle, No zz ratio for http traffic
 						if (curClientReducedDownload && cur_src->GetDownloadState() == DS_DOWNLOADING)
 						{
-							//MORPH START - Changed by SiRoB, Occurate download limiter
-							/*
 							uint32 limit = curClientReducedDownload*cur_datarate/1000; //(uint32)(((float)reducedownload/100)*cur_datarate)/10;		
-							*/
-							DWORD duration = dwCurTick-LastTimeProcessCalled;
-							if (duration > 999) duration = 999;
-							uint32 limit = curClientReducedDownload*cur_datarate/(1000-duration);		
-							//MORPH END  - Changed by SiRoB, Occurate download limiter
 							
 							if (limit < 1000 && curClientReducedDownload == 200)
 								limit += 1000;
@@ -3374,7 +3360,6 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 			theApp.emuledlg->transferwnd->UpdateCatTabTitles();
 	}
 
-	LastTimeProcessCalled = dwCurTick; //MORPH - Added by SiRoB, Occurate download limiter
 	return datarate = datarateX;//MORPH - Changed by SiRoB,  -Fix-
 }
 
@@ -4829,7 +4814,7 @@ void CPartFile::ResumeFile(bool resort)
 		return;
 	if (status==PS_ERROR && m_bCompletionError){
 		ASSERT( gaplist.IsEmpty() );
-		if (gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushThread) { //MORPH - Changed by SiRoB, Flush Thread
+		if (gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushSetting) { //MORPH - Changed by SiRoB, Flush Thread
 			// rehashing the file could probably be avoided, but better be in the safe side..
 			m_bCompletionError = false;
 			CompleteFile(false);
@@ -5749,11 +5734,13 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			HANDLE hThread = pThread->m_hThread;
 			// 2 minutes to let the thread finish
 			pThread->SetThreadPriority(THREAD_PRIORITY_NORMAL); 
+			((CPartFileFlushThread*) m_FlushThread)->StopFlush();
 			if (WaitForSingleObject(hThread, 120000) == WAIT_TIMEOUT) {
 				AddDebugLogLine(true, _T("Flushing (force=true) failed.(%s)"), GetFileName(), m_nTotalBufferData, m_BufferedData_list.GetCount(), m_uTransferred, m_nLastBufferFlushTime);
 				TerminateThread(hThread, 100); // Should never happen
 				ASSERT(0);
 			}
+			m_FlushThread = NULL;
 		}
 		if (m_FlushSetting != NULL) //We noramly flushed something to disk
 			FlushDone();
@@ -5808,10 +5795,12 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 		m_FlushSetting->bForceICH = bForceICH;
 		m_FlushSetting->changedPart = changedPart;
 		if (forcewait == false) {
+			if (m_FlushThread == NULL) {
 			m_FlushThread = AfxBeginThread(RUNTIME_CLASS(CPartFileFlushThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
+				((CPartFileFlushThread*) m_FlushThread)->ResumeThread();
+			}
 			if (m_FlushThread) {
 				((CPartFileFlushThread*) m_FlushThread)->SetPartFile(this);
-				((CPartFileFlushThread*) m_FlushThread)->ResumeThread();
 				return;
 			}
 		}
@@ -6156,8 +6145,12 @@ IMPLEMENT_DYNCREATE(CPartFileFlushThread, CWinThread)
 void CPartFileFlushThread::SetPartFile(CPartFile* partfile)
 {
 	m_partfile = partfile;
+	pauseEvent.SetEvent();
 }	
-
+void CPartFileFlushThread::StopFlush() {
+	doRun = false;
+	pauseEvent.SetEvent();
+}	
 int CPartFileFlushThread::Run()
 {
 	DbgSetThreadName("Partfile-Flushing");
@@ -6169,8 +6162,11 @@ int CPartFileFlushThread::Run()
 		return 0;
 	// SLUGFILLER: SafeHash
 
+	doRun = true;
+	pauseEvent.Lock();
+	
 	//theApp.QueueDebugLogLine(false,_T("FLUSH:Start (%s)"),m_partfile->GetFileName()/*, CastItoXBytes(myfile->m_iAllocinfo, false, false)*/ );
-
+	while(doRun) {
 	try{
 		CSingleLock sLock1(&(theApp.hashing_mut), TRUE); //MORPH - Wait any Read/Write access (hashing or download stuff) before flushing
 		m_partfile->WriteToDisk();
@@ -6178,31 +6174,29 @@ int CPartFileFlushThread::Run()
 	catch (CFileException* error)
 	{
 		VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FILEALLOCEXC,(WPARAM)m_partfile,(LPARAM)error) );
-		delete[] m_partfile->m_FlushSetting->changedPart;
-		delete m_partfile->m_FlushSetting;
-		m_partfile->m_FlushSetting = NULL;
-		m_partfile->m_FlushThread = NULL;
 		return 1;
 	}
 #ifndef _DEBUG
 	catch(...)
 	{
 		VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FILEALLOCEXC,(WPARAM)m_partfile,0) );
-		delete[] m_partfile->m_FlushSetting->changedPart;
-		delete m_partfile->m_FlushSetting;
-		m_partfile->m_FlushSetting = NULL;
-		m_partfile->m_FlushThread = NULL;
 		return 2;
 	}
 #endif
-	m_partfile->m_FlushThread = NULL;
 	VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FLUSHDONE,0,(LPARAM)m_partfile) );
 	//theApp.QueueDebugLogLine(false,_T("FLUSH:End (%s)"),m_partfile->GetFileName());
+		pauseEvent.Lock();
+	}
 	return 0;
 }
 //MORPH END  - Added by SiRoB, Flush Thread
 void CPartFile::FlushBuffersExceptionHandler(CFileException* error)
 {
+//MORPH START - Added by SiRoB, Flush Thread
+	delete[] m_FlushSetting->changedPart;
+	delete m_FlushSetting;
+	m_FlushSetting = NULL;
+//MORPH END   - Added by SiRoB, Flush Thread
 	if (thePrefs.IsCheckDiskspaceEnabled() && error->m_cause == CFileException::diskFull)
 	{
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_OUTOFSPACE), GetFileName());
@@ -6273,7 +6267,7 @@ void CPartFile::FlushBuffersExceptionHandler()
 UINT AFX_CDECL CPartFile::AllocateSpaceThread(LPVOID lpParam)
 {
 	DbgSetThreadName("Partfile-Allocate Space");
-	InitThreadLocale();
+	//InitThreadLocale(); //Performance killer
 
 	// SLUGFILLER: SafeHash
 	CReadWriteLock lock(&theApp.m_threadlock);
@@ -7741,7 +7735,7 @@ void CPartFile::PartHashFinished(UINT  partnumber, bool corrupt)
 		if (theApp.emuledlg->IsRunning())	// may be called during shutdown!
 		{
 			// Is this file finished?
-			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushThread) //MORPH - Changed by SiRoB, Flush Thread
+			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushSetting) //MORPH - Changed by SiRoB, Flush Thread
 				CompleteFile(false);	// Recheck all hashes, because loaded data is trusted based on file-date
 		}
 	}
@@ -7797,7 +7791,7 @@ void CPartFile::PartHashFinishedAICHRecover(UINT partnumber, bool corrupt)
 
 		if (theApp.emuledlg->IsRunning()){
 			// Is this file finished?
-			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushThread) //MORPH - Changed by SiRoB, Flush Thread
+			if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushSetting) //MORPH - Changed by SiRoB, Flush Thread
 				CompleteFile(false);	// Recheck all hashes, because loaded data is trusted based on file-date
 		}
 	}
@@ -7868,7 +7862,7 @@ void CPartFile::ParseICHResult()
 
 	if (theApp.emuledlg->IsRunning()){ // may be called during shutdown!
 		// Is this file finished?
-		if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushThread) //MORPH - Changed by SiRoB, Flush Thread
+		if (!m_PartsHashing && gaplist.IsEmpty() && !m_nTotalBufferData && !m_FlushSetting) //MORPH - Changed by SiRoB, Flush Thread
 			CompleteFile(false);	// Recheck all hashes, because loaded data is trusted based on file-date
 	}
 }

@@ -84,6 +84,10 @@ protected:
 	// khaos::accuratetimerem+
 	int m_iTimeRemainingMode;
 	// khaos::accuratetimerem-
+	// MORPH START leuk_he disable catcolor
+	bool m_bDisableCatColors;
+	// MORPH END   leuk_he disable catcolor
+    
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	bool m_bUseICS; //MORPH - Added by SIRoB, ICS Optional
 	bool m_bHighProcess; //MORPH - Added by IceCream, high process priority
@@ -174,6 +178,11 @@ protected:
 	HTREEITEM m_htiTimeRemAverage;
 	HTREEITEM m_htiTimeRemRealTime;
 	// khaos::accuratetimerem-
+	// MORPH START leuk_he disable catcolor
+	HTREEITEM m_htiDisableCatColors;
+	// MORPH END   leuk_he disable catcolor
+
+
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	HTREEITEM m_htiUseICS; //MORPH - Added by SIRoB, ICS Optional
 	HTREEITEM m_htiHighProcess; //MORPH - Added by IceCream, high process priority

@@ -272,6 +272,9 @@ void CPPgNTService::OnBnClickedInstall()
 	  FillStatus();
       CheckDlgButton(IDC_SVC_SETTINGS, BST_CHECKED);
  	  SetModified();
+    	if (thePrefs.m_nCurrentUserDirMode == 2) // my documents and running as a service is not a good idea. but leave it to user
+				AfxMessageBox (	  GetResString(IDS_CHANGEUSERASSERVICE),MB_OK);
+
    }
  else
 	 SetDlgItemText(IDC_SVC_CURRENT_STATUS,GetResString(IDS_SVC_INSTALLFAILED)); 

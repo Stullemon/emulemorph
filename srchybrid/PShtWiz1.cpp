@@ -820,6 +820,8 @@ BOOL CPPgWiz7Morph::OnInitDialog()
 	GetDlgItem(IDC_MORPHWIZ_SHOWLESS)->SetWindowText(GetResString(IDS_MORPHWIZ_SHOWLESS));
 	GetDlgItem(IDC_MORPHWIZ_NET1)->SetWindowText(GetResString(IDS_MORPHWIZ_NET1));
 	GetDlgItem(IDC_MORPHWIZ_IMPORT)->SetWindowText(GetResString(IDS_MORPHWIZ_IMPORT)); 
+	GetDlgItem(IDC_MORPHWIZ_GUI)->SetWindowText(GetResString(IDS_MORPHWIZ_GUI)); 
+	GetDlgItem(IDC_MORPHWIZ_NEXT)->SetWindowText(GetResString(IDS_MORPHWIZ_NEXT)); 
 	return TRUE;
 }
 

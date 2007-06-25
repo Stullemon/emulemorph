@@ -16,6 +16,8 @@
 #include "DownloadQueue.h" //MORPH - Added by Stulle, Global Source Limit
 #include ".\ppgmorph.h"
 #include "Ntservice.h"
+#include "TransferWnd.h" // MORPH START leuk_he disable catcolor
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -224,6 +226,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		//m_ctrlTreeOptions.Expand(m_htiSAC, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiAdvA4AFMode, TVE_EXPAND);
 		//MORPH END - Added by SiRoB, khaos::categorymod+
+		
+
 		// khaos::accuratetimerem+
 		m_htiTimeRemainingMode = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_REMTIMEAVRREAL), iImgTimeRem, m_htiDM);
 		m_htiTimeRemBoth = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_BOTH), m_htiTimeRemainingMode, m_iTimeRemainingMode == 0);
@@ -236,6 +240,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiEnableDownloadInRed = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_RED), m_htiDisp, m_bEnableDownloadInRed); //MORPH - Added by SiRoB, show download in Bold
 		m_htiEnableDownloadInBold = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DOWNLOAD_IN_BOLD), m_htiDisp, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
 		m_htiShowClientPercentage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CLIENTPERCENTAGE), m_htiDisp, m_bShowClientPercentage);
+		// MORPH START leuk_he disable catcolor
+       m_htiDisableCatColors= m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLECATCOLORS), m_htiDisp, m_bDisableCatColors);
+	   // MORPH END   leuk_he disable catcolor
+
 		//MORPH START - Added by SiRoB, Datarate Average Time Management
 		m_htiDownloadDataRateAverageTime = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DATARATEAVERAGETIME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDisp);
 		m_ctrlTreeOptions.AddEditBox(m_htiDownloadDataRateAverageTime, RUNTIME_CLASS(CNumTreeOptionsEdit));
@@ -401,6 +409,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableDownloadInRed, m_bEnableDownloadInRed); //MORPH - Added by IceCream, show download in red
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableDownloadInBold, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowClientPercentage, m_bShowClientPercentage);
+	// MORPH START leuk_he disable catcolor
+    DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisableCatColors, m_bDisableCatColors); //MORPH - Added by SiRoB, show download in Bold
+   // MORPH END   leuk_he disable catcolor
+
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiLeecher, m_bEnableAntiLeecher); //MORPH - Added by IceCream, enable Anti-leecher
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiInfiniteQueue, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -491,6 +503,10 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bEnableDownloadInRed = thePrefs.enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	m_bEnableDownloadInBold = thePrefs.m_bShowActiveDownloadsBold; //MORPH - Added by SiRoB, show download in Bold
 	m_bShowClientPercentage = thePrefs.m_bShowClientPercentage;
+	// MORPH START leuk_he disable catcolor
+	m_bDisableCatColors   =  thePrefs.m_bDisableCatColors ;
+	// MORPH START leuk_he disable catcolor
+
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	m_iDownloadDataRateAverageTime = thePrefs.m_iDownloadDataRateAverageTime/1000;
 	m_iUploadDataRateAverageTime = thePrefs.m_iUploadDataRateAverageTime/1000;
@@ -599,6 +615,14 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.enableDownloadInRed = m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	thePrefs.m_bShowActiveDownloadsBold = m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	thePrefs.m_bShowClientPercentage = m_bShowClientPercentage;
+	// MORPH START leuk_he disable catcolor
+	if ( thePrefs.m_bDisableCatColors   !=  m_bDisableCatColors) {
+		thePrefs.m_bDisableCatColors   =  m_bDisableCatColors ;
+		theApp.emuledlg->transferwnd->UpdateCatTabTitles();
+	}
+	//to call.UpdateCatTabTitles
+	// MORPH START leuk_he disable catcolor
+
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	bool updateLegend = false;
 	updateLegend = thePrefs.m_iDownloadDataRateAverageTime/1000 != m_iDownloadDataRateAverageTime;
@@ -948,6 +972,8 @@ void CPPgMorph::Localize(void)
         SetTool(m_htiGlobalDataRatePowerShare,IDS_DATARATEPOWERSHARE_TIP);
 		SetTool(m_htiCompressLevel,IDS_COMPRESSLEVEL_TIP);
         SetTool(m_htiUseCompression,IDS_USECOMPRESS_TIP);
+		SetTool(m_htiDisableCatColors,IDS_DISABLECATCOLOR_TIP);
+		
 	}
 
 }

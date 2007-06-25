@@ -580,6 +580,14 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					if (file == NULL)
 						client->CheckFailedFileIdReqs(cfilehash);
 					client->ProcessFileStatus(false, &data, file);
+
+                    //MORPH START - ZZUL_20070513-2310
+			if(client->GetDownloadState() == DS_DOWNLOADING) {
+                        AddDebugLogLine(false, _T("Checking if we should send block request, since OP_FILESTATUS was received when client->GetDownloadState() == DS_DOWNLOADING() %s"), client->DbgGetClientInfo());
+                        client->SendBlockRequests();
+                    }
+			//MORPH END  - ZZUL_20070513-2310
+
 					break;
 				}
 				case OP_STARTUPLOADREQ:
@@ -677,7 +685,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					//         is the same in all reqblocks, it won't be rejected.  
 					//         With this a client might be in a waiting queue with a high 
 					//         priority but download block of a file set to a lower priority.
-					else if(md4cmp(reqfilehash, client->GetUploadFileID()) != 0 && md4cmp(reqfilehash, tempfileid) != 0 && client->GetSessionUp() == 0){
+					else if(md4cmp(reqfilehash, client->GetUploadFileID()) != 0 && md4cmp(reqfilehash, tempfileid) != 0){
 						// client requested another file than it queued up for. Try to decide if the swith should be allowed.
 						bool allowSwitch = false;
 
@@ -712,6 +720,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 								AddDebugLogLine(false, GetResString(IDS_TRIEDDLOTHERFILE), 
 									client->GetUserName(), md4str(uploadFileId), md4str(reqfilehash));
 
+                                if(client->GetSessionUp() == 0) {
 								// Remove client from the upload queue
 								theApp.uploadqueue->RemoveFromUploadQueue(client, GetResString(IDS_IPSTOPPEDOTHFILE), true, true);
 	
@@ -723,6 +732,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 								client->SetUploadFileID(currequpfile);
 							}
 						}
+					}
 					}
 					//MORPH END - Added by SiRoB, ZZ Upload System
 					for (int i = 0; i < ARRSIZE(auStartOffsets); i++)
@@ -1592,6 +1602,14 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 									DebugRecv("OP_MPFileStatus", client, packet);
 
 								client->ProcessFileStatus(false, &data_in, reqfile);
+
+                                //MORPH START - ZZUL_20070513-2310
+				if(client->GetDownloadState() == DS_DOWNLOADING) {
+                                    AddDebugLogLine(false, _T("Checking if we should send block request, since OP_FILESTATUS in OP_MULTIPACKETANSWER was received when client->GetDownloadState() == DS_DOWNLOADING() %s"), client->DbgGetClientInfo());
+                                    client->SendBlockRequests();
+                                }
+				//MORPH END  - ZZUL_20070513-2310
+
 								break;
 							}
 							case OP_AICHFILEHASHANS:
@@ -2614,8 +2632,7 @@ SocketSentBytes CClientReqSocket::SendControlData(uint32 maxNumberOfBytesToSend,
     /*zz*/if (returnStatus.success) {
         if(returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)
         ResetTimeOutTimer();
-    }
-	if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
+    } else if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
         CString pstrReason = GetErrorMessage(returnStatus.errorThatOccured, 1);
         theApp.QueueDebugLogLine(false,_T("CClientReqSocket::SendControlData: An error has occured: %s Client: %s"), pstrReason, DbgGetClientInfo());
     }
@@ -2628,8 +2645,7 @@ SocketSentBytes CClientReqSocket::SendFileAndControlData(uint32 maxNumberOfBytes
 	/*zz*/if (returnStatus.success) {
         if(returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)
         ResetTimeOutTimer();
-    }
-	if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
+    } else if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
         CString pstrReason = GetErrorMessage(returnStatus.errorThatOccured, 1);
         theApp.QueueDebugLogLine(false,_T("CClientReqSocket::SendFileAndControlData: An error has occured: %s Client: %s"), pstrReason, DbgGetClientInfo());
     }

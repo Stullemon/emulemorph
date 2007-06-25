@@ -2,8 +2,6 @@
 //
 #include "it_IT.h"
 
-#define MOD_VERSION "MorphXT 10.0" // Added by FrankyFive
-
 #define APSTUDIO_READONLY_SYMBOLS
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -998,7 +996,7 @@ BEGIN
     IDS_WIDTH               "Larghezza"
     IDS_FPS                 "FPS" //!
     IDS_CHANNELS            "Canali"
-    IDS_SAMPLERATE          "Campionam."
+    IDS_SAMPLERATE          "Campionamento"
     IDS_HEIGHT              "Altezza"
     IDS_SHAREDFILES_FAILED  "Impossibile recuperare la lista dei File condivisi di ""%s"""
     IDS_SHAREDFILES_REQUEST "Richiesta della Lista del File condivisi di ""%s"" in corso..."
@@ -1880,18 +1878,8 @@ END
 
 STRINGTABLE 
 BEGIN
-//    IDS_UPNPSTART           "Usa l'UPnP per impostare le porte"
-//    IDS_UPNPSETUP           "Sto provando ad impostare l'apertura delle porte con l'UPnP..."
-//    IDS_UPNPFAILED          "L'UPnP non è riuscito ad aprire le porte, provare ad aprirle manualmente se necessario!"
-//    IDS_UPNPSUCCESS         "L'UPnP ha impostato con successo l'apertura delle porte %u (TCP) e %u (UDP)"
     IDS_FO_PREFBUTTON_NEW   "Apri le porte sul Firewall di WinXP SP1"
-//    IDS_UPNP_NOSERVICE      "Il servizio Host dell'UPnP non è in esecuzione, l'UPnP non verrà utilizzato"
-//    IDS_DELAYEDBYUPNP       "La connessione alla rete è stata ritardata poiché l'UPnP è occupato nel configurare l'apertura delle porte."
-//    IDS_DELAYEDBYUPNP2      "Attendere alcuni secondi, eMule si connetterà non appena l'UPnP avrà terminato."
-//    IDS_UPNP                "UPnP" //!
-//    IDS_UPNPCLOSEONEXIT     "Rimuovi l'apertura delle porte tramite UPnP all'uscita da eMule"
-//    IDS_UPNPSKIPWANIP       "Salta l'impostazione del WAN IP"
-//    IDS_UPNPSKIPWANPPP      "Salta l'impostazione del WAN PPP"
+    IDS_UPNP                "Universal Plug and Play (UPnP)"
     IDS_SHAREEMULELABEL     "Condividendo eMule con gli utenti degli altri computer"
     IDS_SHAREEMULEMULTI     "Ogni utente ha la sua propria configurazione e File in Download"
     IDS_SHAREEMULEPUBLIC    "Ogni utente ha la stessa configurazione e File in Download"
@@ -2480,7 +2468,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP                "Universal Plug and Play (UPnP)"
     IDS_UPNP_INIT           "UPnP: Avviato su %s:%d, ricerca periferiche..."
     IDS_UPNP_FAILEDINIT     "UPnP: Inizializzazione fallita dell'UPnP sulla porta %d [%s]"
     IDS_UPNP_PUBLICIP       "UPnP: Il tuo IP è un IP pubblico di internet, l'UPnP verrà disabilitato"
@@ -3156,6 +3143,10 @@ STRINGTABLE
 BEGIN
     IDC_USERNAME_A_TIP      "Nome Utente del Proxy"
     IDC_PASSWORD_TIP        "Password del Proxy"
+END
+
+STRINGTABLE 
+BEGIN
     IDC_UPDATEFAKELISTSTART_TIP 
                             "Prova ad aggiornare la lista prima di connettersi alla rete"
 END
@@ -3429,7 +3420,7 @@ BEGIN
     IDS_ALLOWEDIPS          "IP WebServer consentiti (separati da ;)"
     IDS_ALLOWEDIPS_TIP      "Indirizzi IP dei WebServer ai quali è possibile connettersi, separati da ';'"
     IDS_STATIC_ICON         "Mostra sempre la TrayIcon"
-    IDS_COMPRESSLEVEL       "CompressLevel (1-9)"
+    IDS_COMPRESSLEVEL       "Livello Compressione (1-9)"
     IDS_COMPRESSLEVEL_TIP   "Riduce il livello di compressione dei dati comprimibili. L'utilizzo di CPU è leggermente\nridotto, ma saranno richiesti più dati da inviare. Utile per reti ad altissima velocità.\n1 = usa meno CPU, compressione minore\n9 = usa più CPU, migliore compressione.\n(Default=9 - raccomandato!)"
 END
 
@@ -3461,7 +3452,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_USECOMPRESS         "UseCompression (sessione)"
+    IDS_USECOMPRESS         "Usa Compressione (sessione)"
     IDS_USECOMPRESS_TIP     "Opzione per disabilitare la compressione per tutti i dati utente. Utile per reti\nad altissima velocità (>~ 100mbit). Questa opzione non verrà salvata, per renderla\npermanente devi aggiungere 'UseCompression=' nel File 'preferences.ini'.\n(Default=attivato - raccomandato!)"
     IDS_SVC_CURRENT_STATUS_LABEL "Stato Attuale"
     IDS_USEUSERSORTEDSERVERLIST_TIP
@@ -3497,6 +3488,10 @@ BEGIN
                             "Nessun Server statico a cui connettersi è stato trovato nella lista Server"
     IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
 	                    "Nessun Server offuscato con chiave a cui connettersi è stato trovato nella lista Server (ricarica la lista Server o abilita l'UDP)"
+    IDS_DEBUGSEARCHDETAILLEVEL "DebugSearchDetailLevel"
+    IDS_CRYPTTCPPADDINGLENGTH "CryptTCPPaddingLength=[1-254]"
+    IDS_CRYPTTCPPADDINGLENGTH_TIP
+                            "Il quantitativo di Byte casuali che saranno aggiunti al traffico offuscato (Default 128).\nValori bassi implicano un minore OverHead (prova 16), valori alti inducono un migliore offuscamento"
 END
 
 STRINGTABLE 
@@ -3512,9 +3507,13 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPNP_INFO_NONEED    "Tentativo fallito o non necessario"
-    IDS_DEBUGSEARCHDETAILLEVEL "DebugSearchDetailLevel"
-    IDS_CRYPTTCPPADDINGLENGTH  "CryptTCPPaddingLength=[1-256]"
-    IDS_CRYPTTCPPADDINGLENGTH_TIP "Il quantitativo di Byte casuali che saranno aggiunti al traffico offuscato (Default 128).\nValori bassi implicano un minore OverHead (prova 16), valori alti inducono un migliore offuscamento"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DISABLECATCOLORS    "Disabilita i colori della categoria"
+    IDS_DISABLECATCOLOR_TIP "Disabilita i colori della categoria nel testo del Tab della finestra Trasferimenti"
+    IDS_CHANGEUSERASSERVICE "Dovrai cambiare manualmente il Login dell'utente del servizio, o salvare i File di configurazione in una cartella del programma"
 END
 
 #endif    // Italian (Italy) resources

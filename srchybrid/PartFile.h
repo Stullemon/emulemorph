@@ -433,7 +433,6 @@ private:
 	uint64	m_uCompressionGain;
 	uint32	m_uPartsSavedDueICH;
 	uint32	datarate;
-	DWORD	LastTimeProcessCalled; //MORPH - Added by SiRoB, Occurate download limiter
 	CString	m_fullname;
 	CString	m_partmetfilename;
 	uint64	m_uTransferred;
@@ -489,7 +488,9 @@ private:  //morph
     DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
 	
 	//MORPH START - Added by SiRoB, Flush Thread
+public:
 	FlushDone_Struct* m_FlushSetting;
+private:
 	CCriticalSection m_BufferedData_list_Locker;
 	//MORPH END   - Added by SiRoB, Flush Thread
 
@@ -587,7 +588,10 @@ public:
 	virtual	BOOL	InitInstance() {return true;}
 	virtual int		Run();
 	void	SetPartFile(CPartFile* pOwner);
+	void	StopFlush();
 private:
 	CPartFile*				m_partfile;
+	CEvent					pauseEvent;
+	bool			doRun;
 };
 //MORPH END   - Added by SiRoB, Flush Thread

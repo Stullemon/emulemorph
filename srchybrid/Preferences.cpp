@@ -556,6 +556,12 @@ uint8	CPreferences::m_iStartDLInEmptyCats;
 bool	CPreferences::m_bRespectMaxSources;
 bool	CPreferences::m_bUseAutoCat;
 // khaos::categorymod-
+
+// MORPH START leuk_he disable catcolor
+bool   CPreferences::m_bDisableCatColors;
+// MORPH END   leuk_he disable catcolor
+	
+
 // khaos::kmod+
 bool	CPreferences::m_bShowA4AFDebugOutput;
 bool	CPreferences::m_bSmartA4AFSwapping;
@@ -2444,6 +2450,9 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("StartDLInEmptyCats"), m_iStartDLInEmptyCats,_T("eMule"));
 	ini.WriteBool(_T("UseAutoCat"), m_bUseAutoCat,_T("eMule"));
 	// khaos::categorymod-
+	// MORPH START leuk_he disable catcolor
+	ini.WriteBool(_T("DisableCatColors"), m_bDisableCatColors,_T("eMule"));
+	// MORPH END   leuk_he disable catcolor
 	// khaos::kmod+
 	ini.WriteBool(_T("SmartA4AFSwapping"), m_bSmartA4AFSwapping,_T("eMule"));
 	ini.WriteInt(_T("AdvancedA4AFMode"), m_iAdvancedA4AFMode,_T("eMule"));
@@ -3299,6 +3308,10 @@ void CPreferences::LoadPreferences()
 	m_iStartDLInEmptyCats=(uint8)ini.GetInt(_T("StartDLInEmptyCats"), 0);
 	m_bUseAutoCat=ini.GetBool(_T("UseAutoCat"), true);
 	// khaos::categorymod-
+	// MORPH START leuk_he disable catcolor
+	m_bDisableCatColors=ini.GetBool(_T("DisableCatColors"), false);
+	// MORPH END   leuk_he disable catcolor
+	
 	// khaos::kmod+
 	m_bUseSaveLoadSources=ini.GetBool(_T("UseSaveLoadSources"), true);
 	m_bRespectMaxSources=ini.GetBool(_T("RespectMaxSources"), true);

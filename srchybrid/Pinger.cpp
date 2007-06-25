@@ -360,9 +360,15 @@ PingStatus Pinger::PingUDP(uint32 lAddr, uint32 ttl, bool doLog) {
 		if (nRet==SOCKET_ERROR) { 
 			DWORD lastError = WSAGetLastError();
             PingStatus returnValue;
+            if(lastError == WSAETIMEDOUT) {
 			returnValue.success = false;
 			returnValue.delay = TIMEOUT;
+                returnValue.error = IP_REQ_TIMED_OUT;
+            } else {
 			returnValue.error = lastError;
+			    returnValue.success = false;
+			    returnValue.delay = TIMEOUT;
+            }
 			//if (toNowTimeOut < 3) toNowTimeOut++;
 			//	lastTimeOut = 3;
 			return returnValue;

@@ -323,7 +323,7 @@ BOOL CEMSocket::AsyncSelect(long lEvent){
 
 void CEMSocket::OnReceive(int nErrorCode){
 	// the 2 meg size was taken from another place
-	static char GlobalReadBuffer[2000000];
+	static char GlobalReadBuffer[10*1024*1024];
 
 	// Check for an error code
 	if(nErrorCode != 0){
@@ -364,7 +364,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 		return;
 	}
 #if !defined DONT_USE_SOCKET_BUFFERING
-	uint32 recvbufferlimit = (ret + m_uCurrentRecvBufferSize)/2;
+	uint32 recvbufferlimit = 2*ret;
 	if (recvbufferlimit > (10*1024*1024)) {
 		recvbufferlimit = (10*1024*1024);
 	} else if (recvbufferlimit < 2600) {
@@ -504,7 +504,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 
 void CEMSocket::SetDownloadLimit(uint32 limit){	
 	// MOD BEGIN netfinity: Accumulate download limits
-/*(original code)
+/*(original code) 
 	downloadLimit = limit;
 	downloadLimitEnable = true;	
 */

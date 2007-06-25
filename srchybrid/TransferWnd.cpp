@@ -1149,7 +1149,10 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			{
 				theApp.emuledlg->searchwnd->UpdateCatTabs();
 				m_dlTab.InsertItem(newindex,thePrefs.GetCategory(newindex)->strTitle);
-				m_dlTab.SetTabTextColor(newindex, thePrefs.GetCatColor(newindex) );
+				// MORPH START leuk_he disable catcolor
+				if ( !thePrefs.m_bDisableCatColors)
+				// MORPH END   leuk_he disable catcolor
+					m_dlTab.SetTabTextColor(newindex, thePrefs.GetCatColor(newindex) );
 				EditCatTabLabel(newindex);
 				thePrefs.SaveCats();
 				VerifyCatTabSize();
@@ -1173,7 +1176,10 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			if (dialog.DoModal() == IDOK)
 			{
 				EditCatTabLabel(rightclickindex, thePrefs.GetCategory(rightclickindex)->strTitle);
-				m_dlTab.SetTabTextColor(rightclickindex, thePrefs.GetCatColor(rightclickindex) );
+				// MORPH START leuk_he disable catcolor
+				if ( !thePrefs.m_bDisableCatColors)
+				// MORPH END   leuk_he disable catcolor
+					m_dlTab.SetTabTextColor(rightclickindex, thePrefs.GetCatColor(rightclickindex) );
 				theApp.emuledlg->searchwnd->UpdateCatTabs();
 				theApp.emuledlg->transferwnd->downloadlistctrl.UpdateCurrentCategoryView();
 				thePrefs.SaveCats();
@@ -1428,7 +1434,10 @@ void CTransferWnd::UpdateCatTabTitles(bool force)
 		//EditCatTabLabel(i,/*(i==0)? GetCatTitle( thePrefs.GetCategory(0)->filter ):*/thePrefs.GetCategory(i)->strTitle);
 		EditCatTabLabel(i, thePrefs.GetCategory(i)->strTitle);
 		//MORPH END   - Changed by SiRoB, Due to Khaos Category
-		m_dlTab.SetTabTextColor(i, thePrefs.GetCatColor(i) );
+		// MORPH START leuk_he disable catcolor
+			if ( !thePrefs.m_bDisableCatColors)
+		// MORPH END   leuk_he disable catcolor
+	    m_dlTab.SetTabTextColor(i, thePrefs.GetCatColor(i) );
 	}
 }
 

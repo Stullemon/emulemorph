@@ -730,6 +730,10 @@ public:
 	static uint8		m_iAdvancedA4AFMode; // 0 = disabled, 1 = balance, 2 = stack
 	static bool		m_bUseSaveLoadSources;
 	// khaos::categorymod-
+	// MORPH START leuk_he disable catcolor
+	static	bool   m_bDisableCatColors;
+    // MORPH END   leuk_he disable catcolor
+	
 	// khaos::accuratetimerem+
 	static uint8		m_iTimeRemainingMode; // 0 = both, 1 = real time, 2 = average
 	// khaos::accuratetimerem-
@@ -951,12 +955,15 @@ public:
 	friend class CPPgTweaks;
 	friend class CPPgDisplay;
 	friend class CPPgSecurity;
+
 	friend class CPPgScheduler;
 	friend class CPPgDebug;
 	friend class CPPgMorph; //MORPH - Added by SiRoB, Morph Prefs
 	friend class CPPgMorph2; //MORPH - Added by SiRoB, Morph Prefs
 	//friend class CPPgMorph3; //Commander - Added: Morph III
 	friend class CPPgEastShare; //EastShare - Added by Pretender, ES Prefs
+	friend class CPPgNTService; // leuk_he run as ntservice
+
 	
 	CPreferences();
 	~CPreferences();
