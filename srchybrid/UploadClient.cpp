@@ -361,18 +361,18 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 {
 	if (eNewState != m_nUploadState)
 	{
+		//MORPH START - ReadBlockFromFileThread
+		if (m_readblockthread) {
+			m_readblockthread->StopReadBlock();
+			m_readblockthread = NULL;
+		}
+		//MORPH END   - ReadBlockFromFileThread
 		if (m_nUploadState == US_UPLOADING)
 		{
 			// Reset upload data rate computation
 			m_nUpDatarate = 0;
 			m_nSumForAvgUpDataRate = 0;
 			m_AvarageUDR_list.RemoveAll();
-			//MORPH START - ReadBlockFromFileThread
-			if (m_readblockthread) {
-				m_readblockthread->StopReadBlock();
-				m_readblockthread = NULL;
-			}
-			//MORPH END   - ReadBlockFromFileThread
 		}
 		if (eNewState == US_UPLOADING) {
 			m_fSentOutOfPartReqs = 0;

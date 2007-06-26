@@ -248,7 +248,7 @@ private:
 	CString			fullname;
 	CSyncObject*	m_lockhandle;
 	CEvent			pauseEvent;
-	bool			doRun;
+	volatile bool	doRun;
 };
 //MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 

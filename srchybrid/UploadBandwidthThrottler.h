@@ -90,6 +90,7 @@ private:
 	
 	CCriticalSection sendLocker;
     CCriticalSection tempQueueLocker;
+    CCriticalSection sendBytesLocker;
 
     CEvent* threadEndedEvent;
     CEvent* pauseEvent;

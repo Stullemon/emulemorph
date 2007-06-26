@@ -549,10 +549,17 @@ void CSharedFilesCtrl::UpdateFile(const CKnownFile* file)
 	
 	if(!file || !theApp.emuledlg->IsRunning())
 		return;
+
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->sharedfileswnd || IsWindowVisible() == FALSE )
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
+
 	m_updatethread->AddItemToUpdate((LPARAM)file);
 	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
 }
 //MORPH END - UpdateItemThread
+
 int CSharedFilesCtrl::FindFile(const CKnownFile* pFile)
 {
 	LVFINDINFO find;

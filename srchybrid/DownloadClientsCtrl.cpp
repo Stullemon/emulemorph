@@ -271,7 +271,7 @@ void CDownloadClientsCtrl::RefreshClient(CUpDownClient* client)
 		return;
 
 	//MORPH START - SiRoB, Don't Refresh item if not needed 
-	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd  || theApp.emuledlg->transferwnd->downloadclientsctrl.IsWindowVisible() == false ) 
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd  || IsWindowVisible() == FALSE ) 
 		return; 
 	//MORPH END   - SiRoB, Don't Refresh item if not needed 
 

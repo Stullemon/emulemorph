@@ -937,8 +937,8 @@ void CDownloadQueue::Process(){
 	if (m_bIsZZRatioInWork){
 		if (downspeed < 50)
 			downspeed = 50;
-		else if (downspeed > 200)
-			downspeed = 200;
+		/*else if (downspeed > 200) Morph 10.0
+			downspeed = 200; */
 	}	
 	//MORPH START - Removed by SiRoB, sum datarate calculated for each file
 	/*

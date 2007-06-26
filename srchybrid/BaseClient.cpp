@@ -3305,7 +3305,7 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 	if (s != NULL) {
 		if (m_pPCDownSocket)
 			s = m_pPCDownSocket;
-#ifdef _DEBUG
+#ifndef _RELEASE
 		strState.AppendFormat(_T(",BUF:%u"), socket->GetRecvBufferSize());
 #endif 
 	}

@@ -309,6 +309,11 @@ void CServerListCtrl::RefreshServer(const CServer* server)
 	if (!server || !theApp.emuledlg->IsRunning())
 		return;
 
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->serverwnd || IsWindowVisible() == FALSE )
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
+
 	//MORPH START- UpdateItemThread
 	/*
 	LVFINDINFO find;
@@ -1112,6 +1117,15 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 	if (!lpDrawItemStruct->itemData)
 		return;
+
+	//MORPH START - Added by SiRoB, Don't draw hidden Rect
+	RECT clientRect;
+	GetClientRect(&clientRect);
+	CRect cur_rec(lpDrawItemStruct->rcItem);
+	if (cur_rec.top >= clientRect.bottom || cur_rec.bottom <= clientRect.top)
+		return;
+	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
+	
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this ) || (GetStyle() & LVS_SHOWSELALWAYS));
 	const CServer* server = (CServer*)lpDrawItemStruct->itemData;
@@ -1134,7 +1148,11 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		odc->SetBkColor(GetBkColor());
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
+	//MORPH - Moved by SiRoB, Don't draw hidden Rect
+	/*
 	RECT cur_rec = lpDrawItemStruct->rcItem;
+	*/
+
     // leuke_he  ipfilter servers . 
 	COLORREF crOldTextColor ;
 	if ((server->GetFailedCount() >= thePrefs.GetDeadServerRetries()) || 

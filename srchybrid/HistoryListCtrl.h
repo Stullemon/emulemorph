@@ -56,7 +56,10 @@ protected:
 	void ShowFileDialog(CTypedPtrList<CPtrList, CKnownFile*>& aFiles, UINT uPshInvokePage = 0);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+	//MORPH START- UpdateItemThread
+	/*
 	int FindFile(const CKnownFile* pFile);
+	*/
 
 private:
 	CTitleMenu	m_HistoryMenu;

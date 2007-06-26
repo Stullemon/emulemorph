@@ -444,6 +444,11 @@ void CSearchListCtrl::UpdateSearch(CSearchFile* toupdate)
 	
 	if (!toupdate || !theApp.emuledlg->IsRunning())
 		return;
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->searchwnd || IsWindowVisible() == FALSE )
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
+
 	//MORPH START - UpdateItemThread
 	/*
 	LVFINDINFO find;
@@ -1347,6 +1352,15 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		return;
 	if (!lpDrawItemStruct->itemData)
 		return;
+
+	//MORPH START - Added by SiRoB, Don't draw hidden Rect
+	RECT clientRect;
+	GetClientRect(&clientRect);
+	CRect cur_rec(lpDrawItemStruct->rcItem);
+	if (cur_rec.top >= clientRect.bottom || cur_rec.bottom <= clientRect.top)
+		return;
+	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
+
 	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
 	BOOL bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
 	if (lpDrawItemStruct->itemState & ODS_SELECTED) {
@@ -1360,7 +1374,10 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CSearchFile* content = (CSearchFile*)lpDrawItemStruct->itemData;
 	CMemDC dc(odc, &lpDrawItemStruct->rcItem);
 	CFont* pOldFont = dc.SelectObject(GetFont());
+	//MORPH - Moved by SiRoB, Don't draw hidden Rect
+	/*
 	CRect cur_rec(lpDrawItemStruct->rcItem);
+	*/
 	COLORREF crOldTextColor = dc.SetTextColor((!g_bLowColorDesktop || (lpDrawItemStruct->itemState & ODS_SELECTED) == 0) ? GetSearchItemColor(content) : m_crHighlightText);
 
 	int iOldBkMode;

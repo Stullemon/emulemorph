@@ -322,8 +322,20 @@ void CHistoryListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	if( !lpDrawItemStruct->itemData)
 		return;
 
-	//set up our ficker free drawing
+	//MORPH START - Added by SiRoB, Don't draw hidden Rect
+	RECT clientRect;
+	GetClientRect(&clientRect);
 	CRect rcItem(lpDrawItemStruct->rcItem);
+	if (rcItem.top >= clientRect.bottom || rcItem.bottom <= clientRect.top)
+		return;
+	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
+
+	//set up our ficker free drawing
+	
+	//MORPH - Moved by SiRoB, Don't draw hidden Rect
+	/*
+	CRect rcItem(lpDrawItemStruct->rcItem);
+	*/
 	CDC *oDC = CDC::FromHandle(lpDrawItemStruct->hDC);
 	COLORREF crOldDCBkColor = oDC->SetBkColor(m_crWindow);
 	CMemDC pDC(oDC, &rcItem);	
@@ -942,18 +954,6 @@ void CHistoryListCtrl::UpdateFile(const CKnownFile* file)
 			theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
 	}
 }
-*/
-void CHistoryListCtrl::UpdateFile(const CKnownFile* file)
-{
-	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
-	
-	if(!file || !theApp.emuledlg->IsRunning())
-		return;
-	m_updatethread->AddItemToUpdate((LPARAM)file);
-	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
-}
-//MORPH END - UpdateItemThread
-
 int CHistoryListCtrl::FindFile(const CKnownFile* pFile)
 {
 	LVFINDINFO find;
@@ -961,6 +961,23 @@ int CHistoryListCtrl::FindFile(const CKnownFile* pFile)
 	find.lParam = (LPARAM)pFile;
 	return FindItem(&find);
 }
+*/
+void CHistoryListCtrl::UpdateFile(const CKnownFile* file)
+{
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
+	
+	if(!file || !theApp.emuledlg->IsRunning())
+		return;
+
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->sharedfileswnd || IsWindowVisible() == FALSE )
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
+
+	m_updatethread->AddItemToUpdate((LPARAM)file);
+	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+}
+//MORPH END - UpdateItemThread
 
 void CHistoryListCtrl::ShowFileDialog(CTypedPtrList<CPtrList, CKnownFile*>& aFiles, UINT uPshInvokePage)
 {

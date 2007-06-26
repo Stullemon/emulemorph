@@ -338,6 +338,12 @@ void CUploadListCtrl::RefreshClient(const CUpDownClient* client)
 	// someone points out what is going wrong.. Also, it will still assert in debug mode..
 	if( !theApp.emuledlg->IsRunning())
 		return;
+
+	//MORPH START - SiRoB, Don't Refresh item if not needed
+	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || IsWindowVisible() == FALSE )
+		return;
+	//MORPH END   - SiRoB, Don't Refresh item if not needed
+
 	//MORPH START- UpdateItemThread
 	/*
 	LVFINDINFO find;

@@ -6421,19 +6421,20 @@ void CPartFile::UpdateFileRatingCommentAvail(bool bForceUpdate)
 
 void CPartFile::UpdateDisplayedInfo(bool /*force*/)
 {
+	if (theApp.emuledlg->IsRunning()) {
 	//MORPH START - UpdateItemThread
 	/*
-	if (theApp.emuledlg->IsRunning()) {
 		DWORD curTick = ::GetTickCount();
 
         if(force || curTick-m_lastRefreshedDLDisplay > MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+m_random_update_wait) {
 			theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(this);
 			m_lastRefreshedDLDisplay = curTick;
 		}
-	}
 	*/
+
 	theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(this);
 	//MORPH END  - UpdateItemThread
+}
 }
 
 // khaos::kmod+ Make these settings for auto-priority customizable in preferences.
