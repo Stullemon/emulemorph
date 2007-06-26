@@ -116,6 +116,7 @@ CPPgMorph::CPPgMorph()
 	m_htiUseCompression=NULL ;// morph Use compress 
 
 	m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
+	m_htiDisableCatColors = NULL;
 	m_htiClientQueueProgressBar = NULL; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	m_htiFriend = NULL;
@@ -1018,6 +1019,7 @@ void CPPgMorph::OnDestroy()
 	m_htiUpSecu = NULL;
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, enable Anti-leecher
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, enable Anti-CreditHack
+	m_htiDisableCatColors = NULL;
 	m_htiClientQueueProgressBar = NULL; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
 	m_htiDownloadDataRateAverageTime = NULL;

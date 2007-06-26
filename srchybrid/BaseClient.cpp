@@ -1507,7 +1507,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	CTag tagName(CT_NAME, (!m_bGPLEvildoer) ? thePrefs.GetUserNick() : _T("Please use a GPL-conform version of eMule") );
 	*/
 	CString m_strTemp = thePrefs.GetUserNick();
-	m_strTemp.AppendFormat(_T("\x20\xABs\xBB"), theApp.m_strModVersion);
+	m_strTemp.AppendFormat(_T("\x20\xAB%s\xBB"), theApp.m_strModVersion);
 	CTag tagName(CT_NAME, (!m_bGPLEvildoer) ? m_strTemp : _T("Please use a GPL-conform version of eMule") );
 	//MOPRH END   - Anti ModID Faker [Xman]
 	tagName.WriteTagToFile(data, utf8strRaw);
@@ -3848,8 +3848,7 @@ bool CUpDownClient::GetOldMorph()
 	if	(// pre 10.0
 			GetModClient() == MOD_MORPH || // MorphXT
 			GetModClient() == MOD_STULLE || // MorphXT based
-			GetModClient() == MOD_EASTSHARE || // MorphXT based
-			StrStrI(m_strModVersion,_T("Most Wanted")) // MorphXT based
+			GetModClient() == MOD_EASTSHARE || MorphXT based
 		)
 		return true; // it's an old morph
 
