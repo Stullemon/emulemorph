@@ -932,7 +932,7 @@ void CUploadQueue::Process() {
 	while(Pos != NULL){
         // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(Pos);
-		if (cur_client->GetUploadState() != US_UPLOADING)
+		if (cur_client->GetUploadState() != US_UPLOADING || !cur_client->HasBlocks())
 			waitingtimebeforeopeningnewslot <<= 1;
 	}
 	bool bCanAddNewSlot = (theApp.listensocket->GetTotalHalfCon() < thePrefs.GetMaxHalfConnections()) && (GetTickCount() - m_nLastStartUpload > waitingtimebeforeopeningnewslot);
@@ -2125,20 +2125,17 @@ void CUploadQueue::ReSortUploadSlots(bool force) {
 }
 
 void CUploadQueue::CheckForHighPrioClient() {
-    //NO Pending
-	/*
     // PENDING: Each 3 seconds
     DWORD curTick = ::GetTickCount();
     if(curTick - m_dwLastCheckedForHighPrioClient >= 3*1000) {
         m_dwLastCheckedForHighPrioClient = curTick;
-	*/
         bool added = true;
         while(added) {
 			for (uint32 classID = 0; classID < LAST_CLASS; classID++)
 				ForceNewClient(false, classID);
             added = AddUpNextClient(_T("High prio client (i.e. friend/powershare)."), NULL, true);
         }
-	//}
+	}
 }
 
 //MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
