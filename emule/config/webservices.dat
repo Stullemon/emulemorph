@@ -28,7 +28,8 @@ eMule Morph (En), http://emulemorph.sourceforge.net/
 #eD2k history2,http://62.241.53.2/cgi-bin/ed2khistory?ed2k=#hashid
 Stats tothbenedek,http://tothbenedek.hu/ed2kstats/ed2k?hash=#hashid
 edkfakes,http://www.edkfakes.info/action.php?link=#filesize:#hashid
-DF Check,http://donkeyfakes.net/fakes.php?referer=emule&hash=#hashid&size=#filesize&name=#filename
-DF Report,http://donkeyfakes.net/report.php?hash=#hashid&size=#filesize&name=#filename
+#OFFLINE 28 JUNE 2007 ? 
+#DF Check,http://donkeyfakes.net/fakes.php?referer=emule&hash=#hashid&size=#filesize&name=#filename 
+#DF Report,http://donkeyfakes.net/report.php?hash=#hashid&size=#filesize&name=#filename
 Fake Check Bitzi,http://bitzi.com/lookup/ed2k:#hashid?ref=eMule
 
