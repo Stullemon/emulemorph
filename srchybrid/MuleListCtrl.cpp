@@ -1638,7 +1638,6 @@ int CUpdateItemThread::Run() {
 		queueditemlocker.Lock();
 		while (queueditem.GetCount()) {
 			LPARAM item = queueditem.RemoveHead();
-			queueditemlocker.Unlock();
 			update_info_struct* update_info;
 			if (ListItems.Lookup(item, update_info)) {
 				update_info->bNeedToUpdate = true;
@@ -1648,14 +1647,11 @@ int CUpdateItemThread::Run() {
 				update_info->bNeedToUpdate = true;
 				ListItems.SetAt(item, update_info);
 			}
-			queueditemlocker.Lock();
 		}
 		queueditemlocker.Unlock();
-
 		updateditemlocker.Lock();
 		while (updateditem.GetCount()) {
 			LPARAM item = updateditem.RemoveHead();
-			updateditemlocker.Unlock();
 			update_info_struct* update_info;
 			if (!ListItems.Lookup(item, update_info)) {
 				update_info = new update_info_struct;
@@ -1663,7 +1659,6 @@ int CUpdateItemThread::Run() {
 				ListItems.SetAt(item, update_info);
 			}
 			update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000));
-			updateditemlocker.Lock();
 		}
 		updateditemlocker.Unlock();
 		DWORD wecanwait = (DWORD)-1;
@@ -1674,7 +1669,6 @@ int CUpdateItemThread::Run() {
 		{
 			ListItems.GetNextAssoc( pos, item, update_info );
 			if (update_info->dwUpdate < GetTickCount() && update_info->bNeedToUpdate) {
-				if (update_info->dwUpdate + MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE > GetTickCount()) { //check if not too much time occured before to prevent overload
 				LVFINDINFO find;
 				find.flags = LVFI_PARAM;
 				find.lParam = (LPARAM)item;
@@ -1684,9 +1678,6 @@ int CUpdateItemThread::Run() {
 				update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000));
 				update_info->bNeedToUpdate = false;
 				wecanwait = min(wecanwait,1000);
-				} else { //we couldn't process it before du to cpu load, so delay the update
-					update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE;
-				}
 			} else if (update_info->dwUpdate > GetTickCount()) {
 				wecanwait = min(wecanwait,update_info->dwUpdate-GetTickCount());
 			} else {

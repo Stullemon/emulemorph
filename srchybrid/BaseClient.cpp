@@ -3848,7 +3848,7 @@ bool CUpDownClient::GetOldMorph()
 	if	(// pre 10.0
 			GetModClient() == MOD_MORPH || // MorphXT
 			GetModClient() == MOD_STULLE || // MorphXT based
-			GetModClient() == MOD_EASTSHARE || MorphXT based
+			GetModClient() == MOD_EASTSHARE //|| MorphXT based
 		)
 		return true; // it's an old morph
 

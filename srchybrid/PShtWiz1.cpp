@@ -663,7 +663,7 @@ public:
 		m_iSafeServerConnect = 0;
 		m_iKademlia = 1;
 		m_iED2K = 1;
-		m_iReqObfus = 1; // // MORPH lh require obfuscated server connection
+		m_iReqObfus = thePrefs.m_bCryptLayerRequiredStrictServer ; // // MORPH lh require obfuscated server connection, default 
 	}
 	virtual ~CPPgWiz1Server();
 	virtual BOOL OnInitDialog();
@@ -697,7 +697,7 @@ CPPgWiz1Server::CPPgWiz1Server()
 	m_iKademlia = 1;
 	m_iED2K = 1;
 	m_pbUDPDisabled = NULL;
-	m_iReqObfus = 1; // // MORPH lh require obfuscated server connection
+	m_iReqObfus = thePrefs.m_bCryptLayerRequiredStrictServer; // // MORPH lh require obfuscated server connection
 }
 
 CPPgWiz1Server::~CPPgWiz1Server()
@@ -1045,7 +1045,7 @@ int FirstTimeWizard() //lh ftw
 	thePrefs.SetSafeServerConnectEnabled(page6.m_iSafeServerConnect!=0);
 	thePrefs.SetNetworkKademlia(page6.m_iKademlia!=0);
 	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);
-	thePrefs.m_bCryptLayerRequiredStrictServer =(page6.m_iReqObfus!=0); // // MORPH lh require obfuscated server connection
+	thePrefs.m_bCryptLayerRequiredStrictServer = (page6.m_iReqObfus!=0); // // MORPH lh require obfuscated server connection
 	thePrefs.SetExtControls(page6b.m_iShowMoreControls!=0 );
 	thePrefs.SetLessControls(page6b.m_iShowLessControls!=0); // MORPH START show less controls
 

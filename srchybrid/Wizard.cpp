@@ -68,7 +68,7 @@ void CConnectionWizardDlg::DoDataExchange(CDataExchange* pDX)
 
 void CConnectionWizardDlg::OnBnClickedApply()
 {
-	if (m_provider.GetSelectionMark() == 0){
+	if (m_provider.GetSelectionMark() == 1){ //// MORPH : leuk_he: swith 1 and 0 since morph works much better with limits set correct
 		// change the upload/download to unlimited and dont touch other stuff, keep the default values
 		thePrefs.maxGraphUploadRate = UNLIMITED;
 		thePrefs.maxGraphDownloadRate = 96;
@@ -304,9 +304,12 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 	m_provider.InsertColumn(1, GetResString(IDS_WIZ_DOWN), LVCFMT_LEFT, 85);
 	m_provider.InsertColumn(2, GetResString(IDS_WIZ_UP), LVCFMT_LEFT, 85);
 	m_provider.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
+     
+	// MORPH START: leuk_he: swith 1 and 0 since morph works much better with limits set correct
+	m_provider.InsertItem(0, GetResString(IDS_WIZARD_CUSTOM));m_provider.SetItemText(1,1,GetResString(IDS_WIZARD_ENTERBELOW));m_provider.SetItemText(1,2,GetResString(IDS_WIZARD_ENTERBELOW));
+	m_provider.InsertItem(1, GetResString(IDS_UNKNOWN));m_provider.SetItemText(0,1,_T(""));m_provider.SetItemText(0,2,_T(""));
+	// MORPH END : leuk_he: swith 1 and 0 since morph works much better with limits set correct
 
-	m_provider.InsertItem(0, GetResString(IDS_UNKNOWN));m_provider.SetItemText(0,1,_T(""));m_provider.SetItemText(0,2,_T(""));
-	m_provider.InsertItem(1, GetResString(IDS_WIZARD_CUSTOM));m_provider.SetItemText(1,1,GetResString(IDS_WIZARD_ENTERBELOW));m_provider.SetItemText(1,2,GetResString(IDS_WIZARD_ENTERBELOW));
 	m_provider.InsertItem(2,_T("56-k Modem"));m_provider.SetItemText(2,1,_T("56"));m_provider.SetItemText(2,2,_T("56"));
 	m_provider.InsertItem(3,_T("ISDN"));m_provider.SetItemText(3,1,_T("64"));m_provider.SetItemText(3,2,_T("64"));
 	m_provider.InsertItem(4,_T("ISDN 2x"));m_provider.SetItemText(4,1,_T("128"));m_provider.SetItemText(4,2,_T("128"));
@@ -333,18 +336,21 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 
 	Localize();
 
+	OnNMClickProviders(NULL, NULL)   ; // MORPH
 	return TRUE;
 }
 
-void CConnectionWizardDlg::OnNMClickProviders(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CConnectionWizardDlg::OnNMClickProviders(NMHDR* /*pNMHDR*/, LRESULT* /* pResult */ )
 {
 	SetCustomItemsActivation();
 
 	UINT up, down;
 	switch (m_provider.GetSelectionMark())
 	{
-		case  0: down=   0;up=   0; break;
-		case  1: down= ((thePrefs.maxGraphDownloadRate * 1024) + 500) / 1000 * 8; up= ((thePrefs.GetMaxGraphUploadRate(true) * 1024) + 500) / 1000 * 8; break;
+		// MORPH START: leuk_he: swith 1 and 0 since morph works much better with limits set correct
+		case  1: down=   0;up=   0; break;
+		case  0: down= ((thePrefs.maxGraphDownloadRate * 1024) + 500) / 1000 * 8; up= ((thePrefs.GetMaxGraphUploadRate(true) * 1024) + 500) / 1000 * 8; break;
+		// MORPH END: leuk_he: swith 1 and 0 since morph works much better with limits set correct
 		case  2: down=   56;	up=   33; break;
 		case  3: down=   64;	up=   64; break;
 		case  4: down=  128;	up=  128; break;
@@ -368,7 +374,7 @@ void CConnectionWizardDlg::OnNMClickProviders(NMHDR* /*pNMHDR*/, LRESULT* pResul
 	SetDlgItemInt(IDC_WIZ_TRUEUPLOAD_BOX, up, FALSE);
 	CheckRadioButton(IDC_KBITS, IDC_KBYTES, IDC_KBITS);
 
-	*pResult = 0;
+	//*pResult = 0;
 }
 
 void CConnectionWizardDlg::Localize()
@@ -387,7 +393,7 @@ void CConnectionWizardDlg::Localize()
 
 void CConnectionWizardDlg::SetCustomItemsActivation()
 {
-	BOOL bActive = m_provider.GetSelectionMark() == 1;
+	BOOL bActive = m_provider.GetSelectionMark() == 0; // MORPH leuk_he swtcih 1 and 0 
 	GetDlgItem(IDC_WIZ_TRUEUPLOAD_BOX)->EnableWindow(bActive);
 	GetDlgItem(IDC_WIZ_TRUEDOWNLOAD_BOX)->EnableWindow(bActive);
 	GetDlgItem(IDC_KBITS)->EnableWindow(bActive);
