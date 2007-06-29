@@ -825,9 +825,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 //	      return returnVal;
 //    }
 
-	sendLocker.Lock();
 	if (byConnected == ES_DISCONNECTED) {
-		sendLocker.Unlock();
 		SocketSentBytes returnVal = { false, 0, 0 };
 		return returnVal;
 	}
@@ -858,6 +856,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 		maxNumberOfBytesToSend = GetNextFragSize(maxNumberOfBytesToSend, minFragSize);
 
 		bool bWasLongTimeSinceSend = (::GetTickCount() - lastCalledSend) >= 1000;
+        sendLocker.Lock();
 
 #if !defined DONT_USE_SOCKET_BUFFERING
 		ASSERT (sendblenWithoutControlPacket <= sendblen-sent);
@@ -988,6 +987,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 #endif
 			}
 
+              sendLocker.Unlock();
 			// At this point we've got a packet to send in sendbuffer. Try to send it. Loop until entire packet
 			// is sent, or until we reach maximum bytes to send for this call, or until we get an error.
 			// NOTE! If send would block (returns WSAEWOULDBLOCK), we will return from this method INSIDE this loop.
@@ -1047,7 +1047,7 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 						busyLocker.Unlock();
 
 						//m_wasBlocked = true;
-						sendLocker.Unlock();
+						//endLocker.Unlock();
 						//MORPH - Changed by SiRoB, Take into account IP+TCP Header
 						/*
 						SocketSentBytes returnVal = { true, sentStandardPacketBytesThisCall, sentControlPacketBytesThisCall };
@@ -1221,10 +1221,10 @@ SocketSentBytes CEMSocket::Send(uint32 maxNumberOfBytesToSend, uint32 minFragSiz
 			}
 
 			// lock before checking the loop condition
-//			sendLocker.Lock();
+			sendLocker.Lock();
 		}
 
-//        sendLocker.Unlock();
+        sendLocker.Unlock();
 	}
 
 	//!onlyAllowedToSendControlPacket means we still got the socket in Standardlist
