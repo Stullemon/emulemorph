@@ -1976,10 +1976,14 @@ protected:
 	static	Preferences_Ext_Struct* prefsExt;
 	static	WORD m_wWinVer;
 	static	CArray<Category_Struct*,Category_Struct*> catMap;
+	/* Morph START MOre dirs
 	static	CString	m_astrDefaultDirs[13];
 	static	bool	m_abDefaultDirsCreated[13];
+	*/
+	static	CString	m_astrDefaultDirs[EMULE_FEEDSDIR+1];
+	static	bool	m_abDefaultDirsCreated[EMULE_FEEDSDIR+1];
 	static	int		m_nCurrentUserDirMode; // Only for PPgTweaks
-	
+    /* Morph END More dirs
 	static void	CreateUserHash();
 	static void	SetStandartValues();
 	static int	GetRecommendedMaxConnections();

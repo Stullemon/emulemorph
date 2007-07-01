@@ -53,9 +53,13 @@ CPreferences thePrefs;
 
 bool CPreferences::m_bUseCompression;//Xman disable compression
 //Xman disable compression
-
+/* MORPH : more dirs
 CString CPreferences::m_astrDefaultDirs[13];
 bool	CPreferences::m_abDefaultDirsCreated[13] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+*/
+CString CPreferences::m_astrDefaultDirs[EMULE_FEEDSDIR+1];
+bool	CPreferences::m_abDefaultDirsCreated[EMULE_FEEDSDIR+1] = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+// MORPH END : more dirs
 int		CPreferences::m_nCurrentUserDirMode = -1;
 int		CPreferences::m_iDbgHeap;
 CString	CPreferences::strNick;
