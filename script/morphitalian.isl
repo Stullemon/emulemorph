@@ -15,5 +15,5 @@ italian.locofdata=Posizione dei File dati
 italian.progdir=Installa i File di configurazione e i File dati in una sottocartella del programma (Default)
 italian.appdir=Installa i File dati nella cartella dei File condivisi
 italian.userdocdir=Installa i File dati nella cartella principale dei File utente
-italian.othertasks=Other tasks
+italian.othertasks=Altri strumenti
 
