@@ -2,7 +2,7 @@
 
 french.tasks_assocurl=Associer avec les liens Ed2k et .emulecollection.
 french.tasks_firewall=Ajouter une exception dans le Pare-feu Windows
-french.dialog_firewall=mpossible d'ajouter emule dans le firewall de windows.%nMerci d'ajouter  emule dans la liste du firewall de windows.
+french.dialog_firewall=impossible d'ajouter emule dans le firewall de windows.%nMerci d'ajouter  emule dans la liste du firewall de windows.
 
 french.languagesupport=dll de langue autre que l'anglais
 french.configfiles=Fichiers supplèmentaires de configuration, fichiers ipfilter et iptocountry
