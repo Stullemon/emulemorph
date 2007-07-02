@@ -1,24 +1,30 @@
 --------------------------------------
-Changelog for eMule 0.47c MorphXT v10.1 installer
+Changelog for eMule 0.48a MorphXT v10.2
+--------------------------------------
+xx-07-2007
+FIX: xmlnews feeddirectory corrected. (since 10.0) 
+
+--------------------------------------
+Changelog for eMule 0.48a MorphXT v10.1 installer
 --------------------------------------
 29-06-2007
 Add: More detailed installation options. see http://wiki.emule-web.de/index.php/Morph_installation_guide
-Add: Support for the new shared usage option  http://www.emule-project.net/home/perl/help.cgi?l=1&rm=show_topic&topic_id=1259
+Add: Installer support for the new shared usage option  http://www.emule-project.net/home/perl/help.cgi?l=1&rm=show_topic&topic_id=1259
 
 --------------------------------------
 Changelog for eMule 0.48a MorphXT v10.1
 --------------------------------------
 29-06-2007
 FIX: Do not save obfuscated sources.
-FIX: layout of messages tab. 
-FIX: chrash on "open incoming directory" on category.
-ADD: some donwnload optimiztions (when downloading at really high speeds) 
-ADD: preference for disable color on categories tab.
-CHANGE: add a warning when using config in my_documents combined with NTservice.
-CHANGE: webservice.dat updated with some fake reporting services. 
-CHANGE: don't update display for notdisplayed fields. 
-CHANGE: spellcheck of tooltips [albion] 
-CHANGE: UploadBandWidth updated with zz code arround stat locker
+FIX: Layout of messages tab. 
+FIX: Chrash on "open incoming directory" on category.
+ADD: Some donwnload optimizations (when downloading at really high speeds) 
+ADD: Preference for disable color on categories tab.
+CHANGE: Add a warning when using config in my_documents combined with NTservice.
+CHANGE: Webservice.dat updated with some fake reporting services. 
+CHANGE: Don't update display for notdisplayed fields. 
+CHANGE: Spellcheck of tooltips [albion] 
+CHANGE: UploadBandwidth updated with zz code arround stat locker
 CHANGE: Behaviour of network wizard, "custom" speed now default.
 
 --------------------------------------
