@@ -1013,17 +1013,23 @@ int FirstTimeWizard() //lh ftw
 	page6b.m_iShowLessControls = thePrefs.IsLessControls(); // MORPH START show less controls
     page6b.m_iShowMoreControls = thePrefs.IsExtControlsEnabled(); // MORPH startup wizard
 
-	uint16 oldtcpport=thePrefs.GetPort();
-	uint16 oldudpport=thePrefs.GetUDPPort();
+	/* MORPH only when changed. (RANDOMIZE PORTS) */
+	uint16 oldtcpport=thePrefs.GetPort(false,true);
+	uint16 oldudpport=thePrefs.GetUDPPort(false,true);
+	/* MORPH only when changed.  */
 
 	int iResult = sheet.DoModal();
 	if (iResult == IDCANCEL) {
 
 		// restore port settings?
+		/* MORPH only when changed...(required icw wiht random ports)  */
+		if (thePrefs.GetPort(false,true)!=oldtcpport || thePrefs.GetUDPPort(false,true)!=oldudpport){
 		thePrefs.port=oldtcpport;
 		thePrefs.udpport=oldudpport;
 		theApp.listensocket->Rebind() ;
 		theApp.clientudp->Rebind();
+		}
+		/* MOPRH END only when changed */
 
 		return FALSE;
 	}
