@@ -1007,7 +1007,11 @@ void CUploadQueue::Process() {
 			/*
 			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || cur_client->GetSlotNumber() <= GetActiveUploadsCount() || ForceNewClient(true)) {
 			*/
-			if(!cur_client->IsScheduledForRemoval() || m_lastproccesstick-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID()) || ForceNewClient(true, cur_client->GetClassID())) {
+		if(!cur_client->IsScheduledForRemoval() || m_lastproccesstick-m_nLastStartUpload <= SEC2MS(11)&& cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID())+ 2 ||   
+			m_lastproccesstick-m_nLastStartUpload <= SEC2MS(1) && cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID())+ 10 ||
+			!cur_client->GetScheduledRemovalLimboComplete() ||  
+			m_lastproccesstick-m_nLastStartUpload <= 150  ||
+			cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID()) || ForceNewClient(true, cur_client->GetClassID())) {
 				cur_client->SendBlockData();
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
