@@ -1,12 +1,12 @@
 echo running for release in:
-muleversion/muleversion
+export DESTDIR="`muleversion/muleversion.exe|sed \"s/ //g\"`"
+echo $DESTDIR
 echo continue = enter Break=stop
 read conti
 set -x
 ./ufind crypto51 srchybrid id3lib png Resizablelib zlib  -type d -print|grep -vi CVS|grep -vi Release|grep -vi Debug|grep -vi BETA |grep -v .svn >dirlist.txt
 ./ufind crypto51 srchybrid id3lib png Resizablelib zlib  -name "*.cpp" -print -o -name "*.c" -print -o -name "*.rc" -print -o -name "*.jpg" -print -o -name "*fest" -print -o -name "*bin" -print -o -name "*.h" -print -o -name "emule.sln" -print -o -name "LICENCE" -print -o -name "*.rc2" -print -o -name "*.rc" -print -o -name "*.pdf" -print -o -name "*.asm" -print -o -name "*.y" -print -o -name "*.l" -print -o -name "*hpp" -print -o -name "*.htm" -print -o -name "*bmp" -print -o -name "*.avi" -print -o -name "*.gif" -print -o -name "*.ICO" -print -o -name "READ*" -o -name "LICENSE" -print -o -name "THANKS" -o -name "Artistic-License.txt" -print -o -name "License.txt" -print -o -name "Changelog" -o -name "NEWS" -print -o -name "*.ico" -print -o -name "*.inl" -print -o -name "*.vcproj" -print |grep -v BuildLog.htm >srclist.txt
 ./ufind zlib/contrib/masmx86 -type f -print |grep -v CVS >>srclist.txt
-export DESTDIR="`muleversion/muleversion.exe`"
 mkdir "$DESTDIR"
 mkdir "$DESTDIR/srchybrid"
 for i in `cat dirlist.txt`
@@ -24,7 +24,7 @@ cp -Rp emule/*.*  staging
 rm -rf "$DESTDIR/emule/CVS" "$DESTDIR/emule/config/CVS" "$DESTDIR/emule/webserver/CVS" "$DESTDIR/emule/wapserver/CVS"
 rm -rf staging/emule/CVS staging/emule/config/CVS staging/emule/webserver/CVS staging/emule/wapserver/CVS 
 mkdir "$DESTDIR/emule/lang"
-cp -p srchybrid/lang/dynamic/*.dll "$DESTDIR/emule/lang"
+cp -p srchybrid/lang/dynamic/*.dll "$DESTDIR/emule/lang" 
 cp -p srchybrid/lang/dynamic/*.dll staging/lang
 cp -p srchybrid/Release/emule.exe "$DESTDIR/emule/eMule.exe"
 cp -p srchybrid/Release/emule.exe staging/eMule.exe
