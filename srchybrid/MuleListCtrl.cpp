@@ -1669,15 +1669,19 @@ int CUpdateItemThread::Run() {
 		{
 			ListItems.GetNextAssoc( pos, item, update_info );
 			if (update_info->dwUpdate < GetTickCount() && update_info->bNeedToUpdate) {
-				LVFINDINFO find;
-				find.flags = LVFI_PARAM;
-				find.lParam = (LPARAM)item;
-				int found = m_listctrl->FindItem(&find);   // assert on shutdown? 
-				if (found != -1)
-					m_listctrl->Update(found);
-				update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000));
-				update_info->bNeedToUpdate = false;
-				wecanwait = min(wecanwait,1000);
+				if (update_info->dwUpdate + 2* MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE > GetTickCount()) { //check if not too much time occured before to prevent overload
+					LVFINDINFO find;
+					find.flags = LVFI_PARAM;
+					find.lParam = (LPARAM)item;
+					int found = m_listctrl->FindItem(&find);   // assert on shutdown? 
+					if (found != -1)
+						m_listctrl->Update(found);
+					update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE+(uint32)(rand()/(RAND_MAX/1000));
+					update_info->bNeedToUpdate = false;
+					wecanwait = min(wecanwait,1000);
+				} else { //we couldn't process it before du to cpu load, so delay the update
+					update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE;
+				}
 			} else if (update_info->dwUpdate > GetTickCount()) {
 				wecanwait = min(wecanwait,update_info->dwUpdate-GetTickCount());
 			} else {
