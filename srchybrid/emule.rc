@@ -5430,7 +5430,7 @@ BEGIN
     IDS_ANTI_CREDITHACK_TIP "Prevents our credits/userhash from being stolen (default:activated)"
     IDS_INFINITEQUEUE_TIP   "Give our queue an unlimited size"
     IDS_DONTREMOVESPARETRICKLESLOT_TIP 
-                            "If Morph opens extra trickle(slow upload) slots,\ndisabling this option will close those slots when\nno longer needed and put the users back in the \nqueue without losing position"
+                            "If Morph opens extra trickle(slow upload) slots,\ndisabling this option will close those slots when\nno longer needed and put the users back in the \nqueue without losing position.\nEnabling this option disables slotfocus\n"
 END
 
 STRINGTABLE 
@@ -6105,7 +6105,11 @@ BEGIN
 	IDS_CHANGEUSERASSERVICE    "You will have to change the user login of the service manually, or save config files in a program directory"   
 END
 
-
+STRINGTABLE 
+BEGIN
+   IDS_USSPINGDATASIZE		"ICMP data size (0=default 0..64 allowed)" 
+   IDS_PINGDATASIZE_TIP            "Some firewalls/routers do not reply proper to icmp ping\nrequest with datasize 0. THis option allows you to set a\nsmall data size to work arround these buggy router"
+END
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////

@@ -3643,7 +3643,8 @@
 #define IDS_UPNP_INFODISABLED           31254
 #define IDS_UPNP_INFOSTANDBY            31255
 #define IDS_UPNP_INFO_NONEED            31256
-
+#define IDS_USSPINGDATASIZE			    31257
+#define IDS_PINGDATASIZE_TIP            31258
 
 // Next default values for new objects
 // 
