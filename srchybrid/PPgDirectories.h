@@ -36,3 +36,28 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnBnClickedSeltempdiradd();
 };
+// MOROPH START sharesubdir
+class CAddSharedDirDialog : public CDialog
+{
+	DECLARE_DYNAMIC(CAddSharedDirDialog )
+
+public:
+	CAddSharedDirDialog (LPTSTR  sUnc,bool bSubdir,CWnd* pParent = NULL);   //  constructor
+//	virtual ~CAddSharedDirDialog ();
+	virtual BOOL OnInitDialog();
+	afx_msg void OnOK();
+	enum { IDD = IDD_ADDSHAREDIR };
+private:
+	CString m_sUnc;
+	bool m_bSubdir ;
+
+public:
+	CString GetUNC () { return m_sUnc; } ;
+	bool    GetSubDir () { return m_bSubdir ;}  ;
+
+protected:
+	DECLARE_MESSAGE_MAP()
+
+};
+// MOROPH END sharesubdir
+

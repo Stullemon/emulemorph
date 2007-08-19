@@ -67,7 +67,11 @@ BOOL CPPgDirectories::OnInitDialog()
 	CWaitCursor curWait; // initialization of that dialog may take a while..
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
+	// SLUGFILLER START: shareSubdir remove - removed double init
+	/*
 	m_ShareSelector.Init();	
+   SLUGFILLER END: shareSubdir  */
+
 
 	((CEdit*)GetDlgItem(IDC_INCFILES))->SetLimitText(509);
 	((CEdit*)GetDlgItem(IDC_TEMPFILES))->SetLimitText(509);
@@ -95,8 +99,10 @@ void CPPgDirectories::LoadSettings(void)
 	}
 
 	GetDlgItem(IDC_TEMPFILES)->SetWindowText(tempfolders);
-
+/* sharesubdir
 	m_ShareSelector.SetSharedDirectories(&thePrefs.shareddir_list);
+*/
+	m_ShareSelector.SetSharedDirectories(&thePrefs.shareddir_list, &thePrefs.sharedsubdir_list);	// SLUGFILLER: shareSubdir
 	FillUncList();
 }
 
@@ -115,6 +121,22 @@ void CPPgDirectories::OnBnClickedSeltempdir()
 	if(SelectDir(GetSafeHwnd(),buffer,GetResString(IDS_SELECT_TEMPDIR)))
 		GetDlgItem(IDC_TEMPFILES)->SetWindowText(buffer);
 }
+
+// SLUGFILLER START: shareSubdir - don't double-share UNC
+static bool FindStringNoCase(const CStringList &list, CString string) {
+	if (string.Right(1) != '\\')
+		string += '\\';
+	for (POSITION pos = list.GetHeadPosition(); pos != NULL; )
+	{
+		CString str = list.GetNext(pos);
+		if (str.Right(1) != '\\')
+			str += '\\';
+		if (str.CompareNoCase(string) == 0)
+			return true;
+	}
+	return false;
+}
+// SLUGFILLER END: shareSubdir
 
 BOOL CPPgDirectories::OnApply()
 {
@@ -217,13 +239,39 @@ BOOL CPPgDirectories::OnApply()
 	theApp.AddIncomingFolderIcon();
 	theApp.AddTempFolderIcon();
 	}
-	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
+	// SLUGFILLER START: shareSubdir
+	m_ShareSelector.GetSharedDirectories(&thePrefs.shareddir_list, &thePrefs.sharedsubdir_list);
+	thePrefs.inactive_shareddir_list.RemoveAll();
+	thePrefs.inactive_sharedsubdir_list.RemoveAll();
+    for (int i = 0; i < m_ctlUncPaths.GetItemCount(); i++){
+		CString unc = m_ctlUncPaths.GetItemText(i, 0);
+		bool    sharesub= (m_ctlUncPaths.GetItemText(i, 1).Compare(_T("+")) ==0);
+		if (!PathFileExists(unc))	// only add directories which still exist
+		{   if  (sharesub) // maintain inactive dir list
+				thePrefs.inactive_sharedsubdir_list.AddTail(unc);
+		    else
+		 		thePrefs.inactive_shareddir_list.AddTail(unc);
+			continue;
+		}
+		if (FindStringNoCase(thePrefs.shareddir_list, unc))	// don't double-share UNC
+			continue; // log?
+		// TODO: Could be indirectly shared via subdir. We should probably check for that too.
+		if  (sharesub) // maintain inactive dir list
+			thePrefs.sharedsubdir_list.AddTail(unc);
+		else
+			thePrefs.shareddir_list.AddTail(unc);
+	}
 
+	FillUncList();
+	// SLUGFILLER END: shareSubdir
+
+	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
+/* old Code sharesubdir 
 	thePrefs.shareddir_list.RemoveAll();
 	m_ShareSelector.GetSharedDirectories(&thePrefs.shareddir_list);
 	for (int i = 0; i < m_ctlUncPaths.GetItemCount(); i++)
 		thePrefs.shareddir_list.AddTail(m_ctlUncPaths.GetItemText(i, 0));
-
+   end sharesubdir old code*/
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 	/*
 	// check shared directories for reserved folder names
@@ -292,17 +340,76 @@ void CPPgDirectories::Localize(void)
 void CPPgDirectories::FillUncList(void)
 {
 	m_ctlUncPaths.DeleteAllItems();
-
+	// SLUGFILLER START: shareSubdir remove - don't refill list, use it only for adding
+/* old code
 	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition(); pos != 0; )
 	{
 		CString folder = thePrefs.shareddir_list.GetNext(pos);
 		if (PathIsUNC(folder))
 			m_ctlUncPaths.InsertItem(0, folder);
 	}
+ end old code */
+	//inactive sharelist	 HIER WAS IK
+	for (POSITION pos = thePrefs.inactive_shareddir_list.GetHeadPosition(); pos != 0; )
+	{
+		CString folder = thePrefs.inactive_shareddir_list.GetNext(pos);
+		{
+		  int nIndex = m_ctlUncPaths.InsertItem(0,folder);
+          m_ctlUncPaths.SetItemText(nIndex,1,L" ");
+		}
+	}
+	for (POSITION pos = thePrefs.inactive_sharedsubdir_list.GetHeadPosition(); pos != 0; )
+	{
+		CString folder = thePrefs.inactive_sharedsubdir_list.GetNext(pos);
+    	int nIndex = m_ctlUncPaths.InsertItem(0,folder);
+         m_ctlUncPaths.SetItemText(nIndex,1,L"+");
+	}
+
 }
+
+
+IMPLEMENT_DYNAMIC(CAddSharedDirDialog, CDialog)
+
+CAddSharedDirDialog::CAddSharedDirDialog(LPTSTR sUnc,bool bSubdir,CWnd* pParent /*=NULL*/)
+	: CDialog(CAddSharedDirDialog::IDD, pParent)
+{
+	m_sUnc=sUnc;
+	m_bSubdir=bSubdir;
+} // ssd
+
+BOOL CAddSharedDirDialog::OnInitDialog(){
+	CDialog::OnInitDialog();
+	InitWindowStyles(this);
+	SetWindowText(GetResString(IDS_ADDSHAREDIR));
+
+	CheckDlgButton(IDC_SHAREWITHSUBDIR, m_bSubdir ? BST_CHECKED : BST_UNCHECKED);
+
+	GetDlgItem(IDC_TEXTSHRETOADD)->SetWindowText(GetResString(IDS_TEXTSHRETOADD));
+	GetDlgItem(IDC_SHAREWITHSUBDIR)->SetWindowText(GetResString(IDS_SHAREWITHSUBDIR));
+	GetDlgItem(IDC_INPUTTEXT)->SetWindowText(m_sUnc);
+
+
+	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
+
+	return TRUE;
+}
+
+
+BEGIN_MESSAGE_MAP(CAddSharedDirDialog, CDialog)
+END_MESSAGE_MAP()
+
+void CAddSharedDirDialog::OnOK()
+{	
+	GetDlgItem(IDC_INPUTTEXT)->GetWindowText ( m_sUnc);
+	m_bSubdir = IsDlgButtonChecked(IDC_SHAREWITHSUBDIR)!=0;
+
+	CDialog::OnOK();
+} // ssd
 
 void CPPgDirectories::OnBnClickedAddUNC()
 {
+
+   /* old code, replace by dialog that contains "include subdir"  checkbox
 	InputBox inputbox;
 	inputbox.SetLabels(GetResString(IDS_UNCFOLDERS), GetResString(IDS_UNCFOLDERS), _T("\\\\Server\\Share"));
 	if (inputbox.DoModal() != IDOK)
@@ -314,20 +421,48 @@ void CPPgDirectories::OnBnClickedAddUNC()
 		AfxMessageBox(GetResString(IDS_ERR_BADUNC), MB_ICONERROR);
 		return;
 	}
-
+	 end old code */
+  // MORPH START SHARESUBDIR 
+	CAddSharedDirDialog AddSharedDirDialog(_T("\\\\Server\\Share"),false);
+	int result = AddSharedDirDialog.DoModal();
+		if (result != IDOK) 
+			return;
+	CString unc=AddSharedDirDialog.GetUNC();
+	bool   bsharesubdir=AddSharedDirDialog.GetSubDir();
+  // MORPH END SHARESUBDIR
 	if (unc.Right(1) == _T("\\"))
 		unc.Delete(unc.GetLength()-1, 1);
 
+// MORPH START SHARESUBDIR 
+	if (bsharesubdir) {
+		for (POSITION pos = thePrefs.sharedsubdir_list.GetHeadPosition();pos != 0;){
+			if (unc.CompareNoCase(thePrefs.sharedsubdir_list.GetNext(pos))==0)
+				//	 message that it is already shared? 
+				return;
+			}
+		}
+	else {
+  // MORPH END SHARESUBDIR 
 	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition();pos != 0;){
 		if (unc.CompareNoCase(thePrefs.shareddir_list.GetNext(pos))==0)
 			return;
 	}
+	} // ssd
 	for (int posi = 0; posi < m_ctlUncPaths.GetItemCount(); posi++){
 		if (unc.CompareNoCase(m_ctlUncPaths.GetItemText(posi, 0)) == 0)
 			return;
 	}
 
+   /* old code:
 	m_ctlUncPaths.InsertItem(m_ctlUncPaths.GetItemCount(), unc);
+   end old code */ 
+  // MOROPH START sharesubdir
+	int nIndex=m_ctlUncPaths.InsertItem(m_ctlUncPaths.GetItemCount(), unc);
+	if (bsharesubdir) 
+	    m_ctlUncPaths.SetItemText(nIndex,1,L"+");
+	else
+		m_ctlUncPaths.SetItemText(nIndex,1,L" ");
+// MOROPH END sharesubdir
 	SetModified();
 }
 

@@ -441,9 +441,9 @@ int		CPreferences::m_iDynUpPingToleranceMilliseconds;
 bool	CPreferences::m_bDynUpUseMillisecondPingTolerance;
 //MORPH START - Added by SiRoB, USSLog
 bool	CPreferences::m_bDynUpLog;
-sint64   CPreferences::m_iSlotdelayms;  // leuk_he temporary tuning UBWT
 //MORPH END   - Added by SiRoB, USSLog
 bool	CPreferences::m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
+short   CPreferences::m_sPingDataSize;  //MORPH leuk_he ICMP ping datasize <> 0 setting
 //MORPH START - Added by Commander, ClientQueueProgressBar
 bool CPreferences::m_bClientQueueProgressBar;
 //MORPH END - Added by Commander, ClientQueueProgressBar
@@ -626,6 +626,10 @@ bool    CPreferences::m_bA4AFSaveCpu;
 // ZZ:DownloadManager <--
 bool    CPreferences::m_bHighresTimer;
 CStringList CPreferences::shareddir_list;
+CStringList CPreferences::sharedsubdir_list;	// SLUGFILLER: shareSubdir
+CStringList CPreferences::inactive_shareddir_list;	  // inactive sharesubdier
+CStringList CPreferences::inactive_sharedsubdir_list;	// inactive sharesubdier
+
 CStringList CPreferences::addresses_list;
 CString CPreferences::m_strFileCommentsFilePath;
 Preferences_Ext_Struct* CPreferences::prefsExt;
@@ -2529,6 +2533,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("USSLog"), m_bDynUpLog,_T("eMule"));
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
 	ini.WriteBool(_T("USSUDP_FORCE"), m_bUSSUDP,_T("eMule")); //MORPH - Added by SiRoB, USS UDP preferency
+	ini.WriteInt(_T("USSPingDataSize"), (int)m_sPingDataSize); // MORPH leuk_he ICMP ping datasize <> 0 setting
     ini.WriteBool(_T("ShowClientPercentage"),m_bShowClientPercentage);  //Commander - Added: Client Percentage
 
     //Commander - Added: Invisible Mode [TPT] - Start
@@ -2787,11 +2792,11 @@ void CPreferences::LoadPreferences()
 	//MORPH END   - Added by SiRoB, (SUC) & (USS)
 	maxupload=ini.GetInt(L"MaxUpload",UNLIMITED); //MORPH uint16 is not enough
 	if (maxupload > maxGraphUploadRate && maxupload != UNLIMITED)
-		maxupload = (maxGraphUploadRate * .8); //MORPH uint16 is not enough
+		maxupload = (maxGraphUploadRate  / 5 * 4); //MORPH uint16 is not enough
 	
 	maxdownload=ini.GetInt(L"MaxDownload", UNLIMITED); //MORPH uint16 is not enough
 	if (maxdownload > maxGraphDownloadRate && maxdownload != UNLIMITED)
-		maxdownload = (maxGraphDownloadRate * .8); //MORPH uint16 is not enoug
+		maxdownload = (maxGraphDownloadRate /5 * 4); //MORPH uint16 is not enoug
 	maxconnections=ini.GetInt(L"MaxConnections",GetRecommendedMaxConnections());
 	maxhalfconnections=ini.GetInt(L"MaxHalfConnections",9);
 	m_bConditionalTCPAccept = ini.GetBool(L"ConditionalTCPAccept", false);
@@ -3110,8 +3115,13 @@ void CPreferences::LoadPreferences()
 		ff.Close();
 	}
 
-	messageFilter=ini.GetStringLong(L"MessageFilter",L"Your client has an infinite queue|Your client is connecting too fast|fastest download speed|DI-Emule|eMule FX|ZamBoR 2"); // leuk_he: add some known spammers
+	messageFilter=ini.GetStringLong(L"MessageFilter",L"Your client has an infinite queue|Your client is connecting too fast|fastest download speed|DI-Emule|eMule FX|ZamBoR 2|HyperMmu|Ultra"); // leuk_he: add some known spammers
+	/* MORPH START modified commentfilter
 	commentFilter = ini.GetStringLong(L"CommentFilter",L"http://|https://|ftp://|www.|ftp.");
+	*/
+	commentFilter = ini.GetStringLong(L"CommentFilter",L"http://|https://|ftp://|www.|ftp.|hypermu");
+	// MORPH END modified commentfilter 
+
 	commentFilter.MakeLower();
 	filenameCleanups=ini.GetStringLong(L"FilenameCleanups",L"http|www.|.com|.de|.org|.net|shared|powered|sponsored|sharelive|filedonkey|saugstube|eselfilme|eseldownloads|emulemovies|spanishare|eselpsychos.de|saughilfe.de|goldesel.6x.to|freedivx.org|elitedivx|deviance|-ftv|ftv|-flt|flt");
 	m_iExtractMetaData = ini.GetInt(L"ExtractMetaData", 1); // 0=disable, 1=mp3, 2=MediaDet
@@ -3373,9 +3383,9 @@ void CPreferences::LoadPreferences()
 
 	//MORPH START - Added by SiRoB,  USS log flag
 	m_bDynUpLog = ini.GetBool(_T("USSLog"), true);
-	m_iSlotdelayms = min(max(ini.GetInt(_T("Slotdelayms"),250),50),3000); // leuk_he temporary tuning flag, max value = 3000 min = 50, values 200 till 1000 are ok.
 	//MORPH END   - Added by SiRoB,  USS log flag
 	m_bUSSUDP = ini.GetBool(_T("USSUDP_FORCE"), false); //MORPH - Added by SiRoB, USS UDP preferency
+    m_sPingDataSize = ini.GetInt(L"USSPingDataSize", 0); //MORPH leuk_he ICMP ping datasize <> 0 setting
 	m_bA4AFSaveCpu = ini.GetBool(L"A4AFSaveCpu", false); // ZZ:DownloadManager
     m_bHighresTimer = ini.GetBool(L"HighresTimer", false);
 	m_bRunAsUser = ini.GetBool(L"RunAsUnprivilegedUser", false);

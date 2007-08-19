@@ -2168,6 +2168,22 @@ BEGIN
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP,26,190,159,10
 END
 
+IDD_ADDSHAREDIR DIALOGEX 0, 0, 277, 70
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
+    WS_SYSMENU
+CAPTION "Add share or UNC manually"
+FONT 8, "MS Shell Dlg", 0, 0, 0x0
+BEGIN
+    LTEXT           "Share to add",
+                    IDC_TEXTSHRETOADD,2,2,275,11
+    EDITTEXT        IDC_INPUTTEXT,2,14,275,12,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,172,50,50,14,BS_FLAT
+    PUSHBUTTON      "Cancel",IDCANCEL,226,50,50,14,BS_FLAT
+    CONTROL         "Share with subdirectories",
+                    IDC_SHAREWITHSUBDIR,"Button",BS_AUTOCHECKBOX | BS_FLAT | 
+                    WS_TABSTOP,0,32,275,10
+END
+
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -2606,6 +2622,11 @@ BEGIN
     IDD_WIZ1_PORTS, DIALOG
     BEGIN
         BOTTOMMARGIN, 150
+    END
+
+    IDD_ADDSHAREDIR, DIALOG
+    BEGIN
+        BOTTOMMARGIN, 64
     END
 END
 #endif    // APSTUDIO_INVOKED
@@ -6091,6 +6112,7 @@ BEGIN
     IDS_UPNP_INFOENABLED    ",enabled\r\n"
     IDS_UPNP_INFODISABLED   ",disabled\r\n"
     IDS_UPNP_INFOSTANDBY    "No Device detected\r\n"
+    IDS_UPNP_INFO_NONEED    "Failed or not needed"
 END
 
 STRINGTABLE 

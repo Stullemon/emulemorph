@@ -786,7 +786,7 @@ public:
 	static  bool	m_bDynUpUseMillisecondPingTolerance;
 	static bool		m_bDynUpLog;
     static bool		m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
-	static sint64   m_iSlotdelayms;  //leuk_he temporary tunne UWB
+	static short    m_sPingDataSize;  //MORPH leuk_he ICMP ping datasize <> 0 setting
 	//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
 
     //Commander - Added: Invisible Mode [TPT] - Start
@@ -1984,7 +1984,7 @@ protected:
 	static	CString	m_astrDefaultDirs[EMULE_FEEDSDIR+1];
 	static	bool	m_abDefaultDirsCreated[EMULE_FEEDSDIR+1];
 	static	int		m_nCurrentUserDirMode; // Only for PPgTweaks
-    // Morph END More dirs - by pindakaasmod
+    // Morph END More dirs
 	static void	CreateUserHash();
 	static void	SetStandartValues();
 	static int	GetRecommendedMaxConnections();

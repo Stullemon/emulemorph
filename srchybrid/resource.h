@@ -3569,6 +3569,7 @@
 #define IDS_WIZARDREQUIREOBFUSCATED     30801
 #define IDD_WIZ8_MORPH                  30802
 #define IDC_MORPHWIZ_GUI                30803
+#define IDD_ADDSHAREDIR                 30803
 #define IDC_MORPHWIZ_SHOWMORE           30804
 #define IDC_MORPHWIZ_SHOWLESS           30805
 #define IDC_MORPHWIZ_NEXT               30806
