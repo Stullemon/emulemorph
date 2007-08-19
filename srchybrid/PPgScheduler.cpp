@@ -42,16 +42,35 @@ BEGIN_MESSAGE_MAP(CPPgScheduler, CPropertyPage)
 	ON_NOTIFY(NM_DBLCLK, IDC_SCHEDACTION, OnNMDblclkActionlist)
 	ON_NOTIFY(NM_RCLICK, IDC_SCHEDACTION, OnNMRclickActionlist)
 	ON_BN_CLICKED(IDC_NEW, OnBnClickedAdd)
+/* MORPH START  leuk_he: Remove 2nd apply in scheduler
 	ON_BN_CLICKED(IDC_APPLY, OnBnClickedApply)
+	 MORPH END leuk_he: Remove 2nd apply in scheduler */
 	ON_BN_CLICKED(IDC_REMOVE, OnBnClickedRemove)
 	ON_BN_CLICKED(IDC_ENABLE, OnEnableChange)
 	ON_BN_CLICKED(IDC_CHECKNOENDTIME, OnDisableTime2)
+// MORPH START  leuk_he: Remove 2nd apply in scheduler
+	ON_NOTIFY(LVN_ITEMCHANGING, IDC_SCHEDLIST, OnListItemChanging)
+	ON_EN_CHANGE(IDC_ENABLE, OnSettingsChange)
+	ON_EN_CHANGE(IDC_ENABLE, OnSettingsChange)
+	ON_EN_CHANGE(IDC_S_ENABLE, OnSettingsChange)
+	ON_EN_CHANGE(IDC_S_TITLE, OnSettingsChange)
+	ON_EN_CHANGE(IDC_ENABLE, OnSettingsChange)
+	ON_CBN_SELCHANGE(IDC_TIMESEL, OnSettingsChange)
+	ON_NOTIFY(DTN_DATETIMECHANGE,IDC_DATETIMEPICKER1, OnSettingsChangeTime)
+	ON_NOTIFY(DTN_DATETIMECHANGE,IDC_DATETIMEPICKER2, OnSettingsChangeTime)
+	ON_EN_CHANGE(IDC_CHECKNOENDTIME, OnSettingsChange)
+// MORPH END leuk_he: Remove 2nd apply in scheduler
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CPPgScheduler::CPPgScheduler()
 	: CPropertyPage(CPPgScheduler::IDD)
 {
+// MORPH START  leuk_he: Remove 2nd apply in scheduler
+	modified=0;
+	bSuppressModifications=0;
+	
+// MORPH END leuk_he: Remove 2nd apply in scheduler
 }
 
 CPPgScheduler::~CPPgScheduler()
@@ -107,7 +126,9 @@ void CPPgScheduler::Localize(void)
 		GetDlgItem(IDC_STATIC_S_TIME)->SetWindowText(GetResString(IDS_TIME));
 		
 		GetDlgItem(IDC_STATIC_S_ACTION)->SetWindowText(GetResString(IDS_ACTION));
+     /* MORPH START  leuk_he: Remove 2nd apply in scheduler 
 		GetDlgItem(IDC_APPLY)->SetWindowText(GetResString(IDS_PW_APPLY));
+    /* MORPH START  leuk_he: Remove 2nd apply in scheduler */
 		GetDlgItem(IDC_REMOVE)->SetWindowText(GetResString(IDS_REMOVE));
 		GetDlgItem(IDC_NEW)->SetWindowText(GetResString(IDS_NEW));
 		GetDlgItem(IDC_CHECKNOENDTIME)->SetWindowText(GetResString(IDS_CHECKNOENDTIME));
@@ -120,13 +141,48 @@ void CPPgScheduler::Localize(void)
 	}
 }
 
-void CPPgScheduler::OnNMDblclkList(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
+// MORPH START  leuk_he: Remove 2nd apply in scheduler
+/*  old code:
+void CPPgScheduler::OnNMDblclkList(NMHDR*  pNMHDR , LRESULT*  pResult )
 {
 	if (m_list.GetSelectionMark()>-1) LoadSchedule(m_list.GetSelectionMark());
 }
+ new code: */
+
+// Handle Changes of the focus on the list.
+void CPPgScheduler::OnListItemChanging(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	if(((NM_LISTVIEW*)pNMHDR)->uNewState & LVIS_SELECTED && !(((NM_LISTVIEW*)pNMHDR)->uOldState & LVIS_SELECTED))
+		OnNMDblclkList(pNMHDR,pResult)	;
+}
+
+// MORPH START  leuk_he: Remove 2nd apply in scheduler continue:
+void CPPgScheduler::OnNMDblclkList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+{  
+	// If there are modifications you first need to appy before 
+	// an other schedule can be select. 
+	if (m_list.GetSelectionMark()>-1) 
+		if (!modified) {   miActiveSelection=m_list.GetSelectionMark() ;
+			               LoadSchedule(miActiveSelection);
+		}
+		else // reset to previous selection and tell the user once he should apply
+		{   static bool WarnOnce=false;
+			//m_list.SetSelectionMark(prevsel);
+ 	        // m_list.SetItemState(miActiveSelection,LVIS_SELECTED, LVIS_SELECTED);
+			if (!WarnOnce) {
+				MessageBox(GetResString(IDS_SCHED_WARN_APPLY), //Press Ok or Apply before selecting an other schedule"
+					   GetResString(IDS_SCHED_WARN_APPLY_TITLE ));
+				WarnOnce=true;
+			}
+			*pResult=TRUE;
+		}
+}
+// MORPH END leuk_he: Remove 2nd apply in scheduler 
 
 void CPPgScheduler::LoadSchedule(int index) {
-
+// MORPH START  leuk_he: Remove 2nd apply in scheduler
+  bSuppressModifications=true;	
+// MORPH END leuk_he: Remove 2nd apply in scheduler
 	Schedule_Struct* schedule=theApp.scheduler->GetSchedule(index);
 	GetDlgItem(IDC_S_TITLE)->SetWindowText(schedule->title);
 
@@ -154,12 +210,17 @@ void CPPgScheduler::LoadSchedule(int index) {
 		m_actions.SetItemText(i,1,schedule->values[i]);
 		m_actions.SetItemData(i,schedule->actions[i]);
 	}
+// MORPH START  leuk_he: Remove 2nd apply in scheduler
+	bSuppressModifications=false;	
+// MORPH END leuk_he: Remove 2nd apply in scheduler
 }
 
 void CPPgScheduler::FillScheduleList() {
 
 	m_list.DeleteAllItems();
-	
+// MORPH START  leuk_he: Remove 2nd apply in scheduler
+    bSuppressModifications=true;
+//MORPH END leuk_he: Remove 2nd apply in scheduler	
 	for (uint8 index=0;index<theApp.scheduler->GetCount();index++) {
 		m_list.InsertItem(index , theApp.scheduler->GetSchedule(index)->title );
 		CTime time(theApp.scheduler->GetSchedule(index)->time);
@@ -173,11 +234,21 @@ void CPPgScheduler::FillScheduleList() {
 		m_list.SetItemState(0, LVIS_SELECTED, LVIS_SELECTED);
 		LoadSchedule(0);
 	}
+// MORPH START  leuk_he: Remove 2nd apply in scheduler
+	bSuppressModifications=false;
+//MORPH END leuk_he: Remove 2nd apply in scheduler
 }
 
 void CPPgScheduler::OnBnClickedAdd()
 {
 	int index;
+// MORPH START  leuk_he: Remove 2nd apply in scheduler
+   if (modified) 
+		{   MessageBox(GetResString(IDS_SCHED_WARN_APPLY), //Press Ok or Apply before selecting an other schedule"
+					   GetResString(IDS_SCHED_WARN_APPLY_TITLE ));
+            return;
+		}
+// MORPH END leuk_he: Remove 2nd apply in scheduler
 	Schedule_Struct* newschedule=new Schedule_Struct();
 	newschedule->day=0;
 	newschedule->enabled=false;
@@ -191,11 +262,29 @@ void CPPgScheduler::OnBnClickedAdd()
 	m_list.SetSelectionMark(index);
 
 	RecheckSchedules();
+// MORPH START  leuk_he: Remove 2nd apply in scheduler
+  miActiveSelection  =index;
+	SetModified();
+// MORPH END leuk_he: Remove 2nd apply in scheduler
 }
 
+// MORPH START  leuk_he: Remove 2nd apply in scheduler
+void CPPgScheduler::SetModified(bool bChanged){
+	if (!bSuppressModifications)
+	{   CPropertyPage::SetModified(bChanged);
+		modified=bChanged;
+	}
+}
+// MORPH END leuk_he: Remove 2nd apply in scheduler
+
+/* MORPH START  leuk_he: Remove 2nd apply in scheduler
 void CPPgScheduler::OnBnClickedApply()
 {
 	int index=m_list.GetSelectionMark();
+*/
+BOOL CPPgScheduler::OnApply(){
+	int index=miActiveSelection	;
+// MORPH END leuk_he: Remove 2nd apply in scheduler
 
 	if (index>-1) {
 		Schedule_Struct* schedule=theApp.scheduler->GetSchedule(index);
@@ -236,23 +325,39 @@ void CPPgScheduler::OnBnClickedApply()
 		m_list.SetItemText(index, 2, timeS);
 	}
 	RecheckSchedules();
+  // MORPH START  leuk_he: Remove 2nd apply in scheduler
+  SetModified(false);
+	return CPropertyPage::OnApply();
+  // MORPH END leuk_he: Remove 2nd apply in scheduler
+
 }
 
 void CPPgScheduler::OnBnClickedRemove()
 {
+  /*MORPH START  leuk_he: Remove 2nd apply in scheduler
 	int index=m_list.GetSelectionMark();
+ */
+	int index=miActiveSelection;
+ // MORPH END leuk_he: Remove 2nd apply in scheduler
+  
 
 	if (index!=-1) theApp.scheduler->RemoveSchedule(index);
 	FillScheduleList();
 	theApp.scheduler->RestoreOriginals();
 
 	RecheckSchedules();
+  // MORPH START  leuk_he: Remove 2nd apply in scheduler
+  miActiveSelection  =m_list.GetSelectionMark() ;
+  SetModified();
+  // MORPH END leuk_he: Remove 2nd apply in scheduler
+	
+
 }
 
+/* MORPH START  leuk_he: Remove 2nd apply in scheduler
 BOOL CPPgScheduler::OnApply(){
-	SetModified(FALSE);
-	return CPropertyPage::OnApply();
 }
+   MORPH END leuk_he: Remove 2nd apply in scheduler*/
 
 CString CPPgScheduler::GetActionLabel(int index) {
 	switch (index) {
@@ -274,6 +379,7 @@ CString CPPgScheduler::GetActionLabel(int index) {
 		case ACTION_BACKUP  	: return GetResString(IDS_SCHED_BACKUP);
 		case ACTION_UPDIPCONF	: return GetResString(IDS_SCHED_UPDATE_IPCONFIG);
 		case ACTION_UPDFAKES	: return GetResString(IDS_SCHED_UPDATE_FAKES);
+		case ACTION_RELOAD		: return GetResString(IDS_SF_RELOAD); // MORPH add teload on schedule
 		// [end] MIghty Knife
 	}
 	return _T(""); //MORPH - Modified by IceCream, return a CString
@@ -301,7 +407,7 @@ void CPPgScheduler::OnNMDblclkActionlist(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	if (m_actions.GetSelectionMark()!=-1) {
 		int ac=m_actions.GetItemData(m_actions.GetSelectionMark());
 		// Mighty Knife: actions without parameters
-		if (ac < ACTION_BACKUP || ac > ACTION_UPDFAKES) {
+		if (ac < ACTION_BACKUP || ac > ACTION_RELOAD) {
 			if (ac!=6 && ac!=7) OnCommand(MP_CAT_EDIT,0);
 		} 
 		// [end] Mighty Knife
@@ -329,7 +435,7 @@ void CPPgScheduler::OnNMRclickActionlist(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	bool isParameterless = false;
 	if (m_actions.GetSelectionMark()!=-1) {
 		int ac=m_actions.GetItemData(m_actions.GetSelectionMark());
-		if (ac>=ACTION_BACKUP && ac<=ACTION_UPDFAKES) isParameterless=true;
+		if (ac>=ACTION_BACKUP && ac<=IDS_SF_RELOAD) isParameterless=true;
 	}
 	// [end] Mighty Knife
 
@@ -362,6 +468,7 @@ void CPPgScheduler::OnNMRclickActionlist(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_BACKUP,GetResString(IDS_SCHED_BACKUP));
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_UPDFAKES,GetResString(IDS_SCHED_UPDATE_FAKES));
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_UPDIPCONF,GetResString(IDS_SCHED_UPDATE_IPCONFIG));
+	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_RELOAD,GetResString(IDS_SF_RELOAD));
 	// [end] MIghty Knife
 
 	m_ActionMenu.AddMenuTitle(GetResString(IDS_ACTION));
@@ -399,26 +506,38 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 		int action=wParam-MP_SCHACTIONS;
 		int i=m_actions.GetItemCount();
 		m_actions.InsertItem(i,GetActionLabel(action));
+    // MORPH START  leuk_he: Remove 2nd apply in scheduler
+		SetModified();
+    // MORPH END leuk_he: Remove 2nd apply in scheduler
 		m_actions.SetItemData(i,action);
 		m_actions.SetSelectionMark(i);
 		if (action<6)
 			OnCommand(MP_CAT_EDIT,0);
-		// Mighty Knife: parameterless schedule events
-		if (action>=ACTION_BACKUP && action<=ACTION_UPDFAKES) {
+		// Mighty Knife START: parameterless schedule events
+		if (action>=ACTION_BACKUP && action<=ACTION_RELOAD) {
 			m_actions.SetItemText(i,1,_T("-"));
 			// Small warning message
 			if (action == ACTION_UPDIPCONF || action == ACTION_UPDFAKES) {
 				XMessageBox (NULL,GetResString (IDS_SCHED_UPDATE_WARNING),
 							 GetResString (IDS_WARNING),MB_OK | MB_ICONINFORMATION,NULL);
 			}
+			CTime myTime1 ;m_time.GetTime(myTime1);  // MORPH add check for one time events
+			CTime myTime2 ;m_timeTo.GetTime(myTime2);
+			if ( myTime1!= myTime2) // leuk_he: warn because will be executeed every minute! 
+				if(XMessageBox (NULL,GetResString(IDS_SCHED_WARNENDTIME),
+				   GetResString (IDS_WARNING),MB_OKCANCEL| MB_ICONINFORMATION,NULL)== IDOK)
+					 m_timeTo.SetTime(&myTime1); // On ok reset end time. 
 		}
-		// [end] Mighty Knife
+		//  Mighty Knife END
 	}
 	else if (wParam>=MP_SCHACTIONS+20 && wParam<=MP_SCHACTIONS+80)
 	{
 	   CString newval;
 		newval.Format(_T("%i"),wParam-MP_SCHACTIONS-22);
 	   m_actions.SetItemText(item,1,newval);
+     // MORPH START  leuk_he: Remove 2nd apply in scheduler
+	   SetModified();
+     // lhane
    }
 	else if (wParam == ID_HELP)
 	{
@@ -444,6 +563,9 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 				inputbox.DoModal();
 				CString res=inputbox.GetInput();
 				if (!inputbox.WasCancelled()) m_actions.SetItemText(item,1,res);
+         // MORPH START  leuk_he: Remove 2nd apply in scheduler
+				SetModified();
+        //MORPH END leuk_he: Remove 2nd apply in schedulerd
 			}
 			break; 
         }
@@ -455,6 +577,9 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 				if (ix!=-1) {
 					m_actions.DeleteItem(ix);
 				}
+        // MORPH START  leuk_he: Remove 2nd apply in scheduler
+				SetModified();
+        // MORPH END leuk_he: Remove 2nd apply in scheduler
 			}
 			break;
 		}
@@ -472,7 +597,9 @@ void CPPgScheduler::OnEnableChange() {
 	
 	RecheckSchedules();
 	theApp.emuledlg->preferenceswnd->m_wndConnection.LoadSettings();	
-	SetModified();
+  /* MORPH START  leuk_he: Remove 2nd apply in scheduler
+	SetModified(); // MORPH (RE)MOVED
+   MORPH END leuk_he: Remove 2nd apply in scheduler   */ 
 }
 
 void CPPgScheduler::OnDisableTime2() {

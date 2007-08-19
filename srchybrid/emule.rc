@@ -457,7 +457,7 @@ BEGIN
     EDITTEXT        IDC_VIDEOPLAYER_ARGS,10,208,211,12,ES_AUTOHSCROLL
     CONTROL         "Create file backup for preview",IDC_VIDEOBACKUP,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,10,224,195,8
-    GROUPBOX        "Static",IDC_LBL_MISC,4,60,223,104
+    GROUPBOX        "Miscellaneous",IDC_LBL_MISC,4,60,223,104
 END
 
 IDD_PPG_DIRECTORIES DIALOGEX 0, 0, 231, 241
@@ -1139,7 +1139,7 @@ BEGIN
     CONTROL         "",IDC_SCHEDACTION,"SysListView32",LVS_REPORT | 
                     LVS_SHOWSELALWAYS | LVS_ALIGNLEFT | LVS_NOSORTHEADER | 
                     WS_BORDER | WS_TABSTOP,10,160,211,61
-    PUSHBUTTON      "Apply",IDC_APPLY,164,223,58,12
+    //PUSHBUTTON      "Apply",IDC_APPLY,164,223,58,12
     GROUPBOX        "Details",IDC_STATIC_DETAILS,4,92,223,147
     LTEXT           "Title",IDC_STATIC_S_TITLE,11,114,38,8,0,WS_EX_RIGHT
     LTEXT           "Time:",IDC_STATIC_S_TIME,11,128,38,8,0,WS_EX_RIGHT
@@ -6095,6 +6095,17 @@ END
 
 STRINGTABLE 
 BEGIN
+   IDS_ADDSHAREDIR    "Add share or UNC manually"
+   IDS_TEXTSHRETOADD  "Share to add"
+   IDS_SHAREWITHSUBDIR	 "Share with subdirectories"
+   IDS_SUBDIRS "Subdirs"
+   IDS_UNCLIST_INACTIVE  "Inactive shares"
+   IDS_SCHED_RELOAD "Scheduler:Reload shared files"
+    IDS_SCHED_WARNENDTIME   "End time should be equal to start time for one time events"
+   IDS_SCHED_WARN_APPLY "Press Ok or Apply before selecting an other schedule"
+   IDS_SCHED_WARN_APPLY_TITLE "Warning"
+
+
     IDS_UPNP_INFO_NONEED    "Failed or not needed"
 END
 

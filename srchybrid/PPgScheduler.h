@@ -20,6 +20,13 @@ protected:
 	CDateTimeCtrl m_timeTo;
 	CListCtrl m_list;
 	CListCtrl m_actions;
+  // MORPH START  leuk_he: Remove 2nd apply in scheduler
+	virtual void SetModified(bool bChanged=1);
+	bool modified;
+	bool bSuppressModifications;
+	int miActiveSelection; // remember active selection. 
+  // MORPH END leuk_he: Remove 2nd apply in scheduler
+
 
 	CString GetActionLabel(int index);
 	CString GetDayLabel(int index);
@@ -35,7 +42,12 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnNMDblclkList(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnBnClickedAdd();
+  /* MORPH START leuk_he: Remove 2nd apply in scheduler
 	afx_msg void OnBnClickedApply();
+  */
+	afx_msg void OnListItemChanging(NMHDR* /*pNMHDR*/, LRESULT* pResult) ;
+	afx_msg void OnSettingsChangeTime(NMHDR *, LRESULT *) {SetModified();}
+  // MORPH END leuk_he: Remove 2nd apply in scheduler
 	afx_msg void OnBnClickedRemove();
 	afx_msg void OnSettingsChange() {SetModified();}
 	afx_msg void OnEnableChange();

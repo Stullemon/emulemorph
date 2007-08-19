@@ -29,6 +29,7 @@
 #include "ipfilter.h"
 #include "fakecheck.h"
 #include "log.h"
+#include "SharedFileList.h"  // MORPH add reload shared files on schedule
 // [end] Mighty Knife
 
 #ifdef _DEBUG
@@ -321,6 +322,11 @@ void CScheduler::ActivateSchedule(int index,bool makedefault) {
 					AddLogLine (false,GetResString (IDS_SCHED_UPDATE_FAKES_LOG));
 					theApp.FakeCheck->DownloadFakeList();
 				} break;
+			case ACTION_RELOAD : { // leuk_he reload on schedule
+					AddLogLine (false,GetResString (IDS_SCHED_RELOAD));
+					theApp.sharedfiles->Reload();
+				} break;
+
 
 			// [end] Mighty Knife
 
