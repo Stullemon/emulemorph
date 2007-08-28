@@ -1525,6 +1525,7 @@ void CSearchResultsWnd::DeleteAllSearches()
 	searchlistctrl.DeleteAllItems();
 	ShowSearchSelector(false);
 	searchselect.DeleteAllItems();
+	searchlistctrl.NoTabs(); //MORPH bengarchy bugfix: Prevent slow search result not getting a tab  http://forum.emule-project.net/index.php?showtopic=127905. 
 
 	CWnd* pWndFocus = GetFocus();
 	m_pwndParams->m_ctlMore.EnableWindow(FALSE);
