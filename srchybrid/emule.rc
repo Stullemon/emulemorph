@@ -107,7 +107,7 @@ BEGIN
                     LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
                     WS_BORDER | WS_TABSTOP,5,234,500,43
     LTEXT           "Clients on queue:",IDC_QUEUECOUNT_LABEL,6,280,87,8
-    LTEXT           "0",IDC_QUEUECOUNT,100,280,89,8
+    LTEXT           "0",IDC_QUEUECOUNT,96,280,95,8
     PUSHBUTTON      "Refresh",IDC_QUEUE_REFRESH_BUTTON,437,278,68,11,NOT 
                     WS_VISIBLE
     CONTROL         "",IDC_DOWNLOADCLIENTS,"SysListView32",LVS_REPORT | 
@@ -440,7 +440,7 @@ BEGIN
                     100,209,10
     CONTROL         "Start next paused file when a file completes",
                     IDC_STARTNEXTFILE,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    10,110,209,10
+                    10,110,211,10
     CONTROL         "Prefer same category",IDC_STARTNEXTFILECAT,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,22,120,197,10
     CONTROL         "Only same category",IDC_STARTNEXTFILECAT2,"Button",
@@ -806,13 +806,13 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     LTEXT           "Static",IDC_WARNING,4,2,213,39
     CONTROL         "",IDC_EXT_OPTS,"SysTreeView32",TVS_SHOWSELALWAYS | 
-                    WS_BORDER | WS_TABSTOP | 0x800,4,46,223,142
-    LTEXT           "File buffer size",IDC_FILEBUFFERSIZE_STATIC,4,192,213,8
+                    WS_BORDER | WS_TABSTOP | 0x800,4,42,223,184
+    LTEXT           "File buffer size",IDC_FILEBUFFERSIZE_STATIC,4,235,213,8
     CONTROL         "",IDC_FILEBUFFERSIZE,"msctls_trackbar32",WS_TABSTOP,9,
-                    202,211,11
-    LTEXT           "Queue size",IDC_QUEUESIZE_STATIC,4,215,213,8
+                    245,211,11
+    LTEXT           "Queue size",IDC_QUEUESIZE_STATIC,4,258,213,8
     CONTROL         "",IDC_QUEUESIZE,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    WS_TABSTOP,9,225,211,11
+                    WS_TABSTOP,9,268,211,11
 END
 
 IDD_ADDFRIEND DIALOGEX 0, 0, 269, 172
@@ -1913,7 +1913,7 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
-                    WS_BORDER | WS_TABSTOP,7,46,216,204
+                    WS_BORDER | WS_TABSTOP,7,46,216,230
     LTEXT           "Static",IDC_WARNINGMORPH,7,7,213,39
 END
 
@@ -1924,7 +1924,7 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_MORPH_OPTS,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_DISABLEDRAGDROP | 
-                    WS_BORDER | WS_TABSTOP,7,46,216,204
+                    WS_BORDER | WS_TABSTOP,7,46,216,230
     LTEXT           "Static",IDC_WARNINGMORPH,7,7,213,39
 END
 
@@ -1992,8 +1992,8 @@ BEGIN
                     WS_TABSTOP,14,67,74,10
     CONTROL         "*.part.met",IDC_PARTMET,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,14,82,74,10
-    DEFPUSHBUTTON   "Select All",IDC_SELECTALL,169,55,44,14,BS_FLAT
-    PUSHBUTTON      "Backup Now",IDC_BACKUPNOW,169,78,44,14,BS_FLAT | 
+    DEFPUSHBUTTON   "Select All",IDC_SELECTALL,149,55,64,14,BS_FLAT
+    PUSHBUTTON      "Backup Now",IDC_BACKUPNOW,149,78,64,14,BS_FLAT | 
                     WS_DISABLED
     CONTROL         "Auto Backup on Exit",IDC_AUTOBACKUP,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,14,118,87,10
@@ -2008,7 +2008,7 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_EASTSHARE_OPTS,"SysTreeView32",
                     TVS_DISABLEDRAGDROP | WS_BORDER | WS_TABSTOP,7,46,216,
-                    204
+                    230
     LTEXT           "Static",IDC_WARNINGEASTSHARE,7,7,213,39
 END
 
@@ -2118,7 +2118,7 @@ CAPTION "emulEspana"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_EXT_OPTS,"SysTreeView32",TVS_DISABLEDRAGDROP | 
-                    WS_BORDER | WS_TABSTOP,7,46,216,204
+                    WS_BORDER | WS_TABSTOP,7,46,216,230
     LTEXT           "Static",IDC_WARNING,7,7,213,39
 END
 
@@ -2839,6 +2839,7 @@ BEGIN
     IDS_SHAREDFOLDERS       "Shared folders"
     IDS_VIEW1               "View "
     IDS_VIEW2               " (Not shared)"
+	IDS_VIEW3               " (shared with subdir)"
     IDS_PRIOLOW             "Low"
     IDS_PRIONORMAL          "Normal"
     IDS_PRIOHIGH            "High"
@@ -6123,12 +6124,9 @@ BEGIN
    IDS_SUBDIRS "Subdirs"
    IDS_UNCLIST_INACTIVE  "Inactive shares"
    IDS_SCHED_RELOAD "Scheduler:Reload shared files"
-    IDS_SCHED_WARNENDTIME   "End time should be equal to start time for one time events"
+   IDS_SCHED_WARNENDTIME   "End time should be equal to start time for one time events"
    IDS_SCHED_WARN_APPLY "Press Ok or Apply before selecting an other schedule"
    IDS_SCHED_WARN_APPLY_TITLE "Warning"
-
-
-    IDS_UPNP_INFO_NONEED    "Failed or not needed"
 END
 
 STRINGTABLE 
@@ -6142,6 +6140,28 @@ STRINGTABLE
 BEGIN
    IDS_USSPINGDATASIZE		"ICMP data size (0=default 0..64 allowed)" 
    IDS_PINGDATASIZE_TIP            "Some firewalls/routers do not reply proper to icmp ping\nrequest with datasize 0. THis option allows you to set a\nsmall data size to work arround these buggy router"
+END
+
+STRINGTABLE 
+BEGIN
+  IDS_INCFILES_TIP "Specifies the directory to which completed downloads are moved.\nif the default path is changed an existing folder  that you can \nwrite into must be entered. eMule will not create this directory.\nYou can override this setting per category in the transfer window\nby choosing a different	Incoming Files category folder.\nYour Incoming Files folder will be shared."
+  IDS_TEMPFILES_TIP "This option specifies the directory, or directories, where the\ndownloads in progress are stored. Because of the concurrent \ndownload system, eMule creates dummy files (*.part) of the\nsize the finished download will have. You can configure eMule\nto use only the size the file currently has by enabling the 'Sparse'\noption in Extended (only works on NTFS filesystems, under \nwindows 2000 and XP, not vista).   You can add multiple \ndirectories by clicking the [+] button, next to the browse button \n(visible only with 'show more controls'). \nThe tempdir for a file is selected as follows:\n1. On same drive as incoming and enough space for all downloading\n2. Enough space for all downloading\n3. Most actual free space \nNote that it does not make sense to put multiple temp dir on\nthe same drive letter.\n"
+  IDS_SHARESELECTOR_TIP "Select Additional shared directories and shared network paths here. \nIf you press the control key while selecting a directory it is shared including\nit (future) subdirectories."
+  IDS_UNCLIST_TIP "Shares that were once shared but were not readable when eMule was started.\nThey will be tried again when pressing apply. This can be shares or network drives.\nNote that shares that time-out share can increase the startup time"
+  IDS_UNCADD_TIP "Manually add shares. Useful for network shares that are not yet listed in the shareselector"
+  IDS_UNCREM_TIP "remove the current selected inactive share"
+
+  IDS_ENABLE_SCHED_TIP "Enable the scheduler.\nWhen disabled no of the events defined here will happen\n(default: disabled , dont forget to enable)"
+  IDS_REMOVE_SCHED_TIP "Remove the current selected starttime event"
+  IDS_NEW_SCHED_TIP "Create a new action event"
+  IDS_SCHEDLIST_TIP "Displays the defined action profile. \nUse NEW to add events and REMOVE button to delete lines\nyou will have to apply after each line or else selection of an other item might fail"
+  IDS_S_ENABLE_TIP "Enable this current profile action"
+  IDS_S_TITLE_TIP "Edit the name of the current profile action"
+  IDS_TIMESEL_SCHED_TIP "Select how often a event happens"
+  IDS_DATETIMEPICKER1_TIP "Start time"
+  IDS_DATETIMEPICKER2_TIP "End time. Note that of event that happen once like\nupdate of ipfilter the endtime should be equal to the start time"
+  IDS_CHECKNOENDTIME_SCHED_TIP "event has no end"
+  IDS_SCHEDACTION_TIP "Right-click this window to add/remove actions from the current profile\nSome actions have parameters that can be edited"
 END
 
 #endif    // English (U.S.) resources
