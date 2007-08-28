@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "PreferencesDlg.h"
 #include "InputBox.h"
 #include "emuledlg.h"
@@ -64,11 +65,15 @@ BEGIN_MESSAGE_MAP(CPPgScheduler, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgScheduler::CPPgScheduler()
+        : CPPgtooltipped (CPPgScheduler::IDD) 
+ /*leuk_he  tooltipped 
 	: CPropertyPage(CPPgScheduler::IDD)
+ */ leuk_he  tooltipped 
 {
 // MORPH START  leuk_he: Remove 2nd apply in scheduler
 	modified=0;
 	bSuppressModifications=0;
+	miActiveSelection=-1;
 	
 // MORPH END leuk_he: Remove 2nd apply in scheduler
 }
@@ -105,6 +110,7 @@ BOOL CPPgScheduler::OnInitDialog()
 	m_actions.InsertColumn(0, GetResString(IDS_ACTION) ,LVCFMT_LEFT,150,0);
 	m_actions.InsertColumn(1,GetResString(IDS_VALUE),LVCFMT_LEFT,80,1);
 
+	InitTooltips(); //leuk_he tooltipped
 	Localize();
 	CheckDlgButton(IDC_ENABLE,thePrefs.IsSchedulerEnabled());
 	FillScheduleList();
@@ -138,6 +144,23 @@ void CPPgScheduler::Localize(void)
 			m_timesel.AddString(GetDayLabel(i));
 		m_timesel.SetCurSel(0);
 		if (m_list.GetSelectionMark()!=-1) m_timesel.SetCurSel(theApp.scheduler->GetSchedule(m_timesel.GetCurSel())->day);
+
+		// leuk_he tooltipped
+		SetTool(IDC_ENABLE,IDS_ENABLE_SCHED_TIP);
+		SetTool(IDC_REMOVE,IDS_REMOVE_SCHED_TIP);
+		SetTool(IDC_NEW,IDS_NEW_SCHED_TIP);
+		SetTool(IDC_SCHEDLIST,IDS_SCHEDLIST_TIP);
+		SetTool(IDC_S_ENABLE,IDS_S_ENABLE_TIP);
+		SetTool(IDC_S_TITLE,IDS_S_TITLE_TIP);
+		SetTool(IDC_TIMESEL,IDS_TIMESEL_SCHED_TIP);
+		SetTool(IDC_DATETIMEPICKER1,IDS_DATETIMEPICKER1_TIP);
+		SetTool(IDC_DATETIMEPICKER2,IDS_DATETIMEPICKER2_TIP);
+		SetTool(IDC_CHECKNOENDTIME,IDS_CHECKNOENDTIME_SCHED_TIP);
+		SetTool(IDC_SCHEDACTION,IDS_SCHEDACTION_TIP);
+    // leuk_he tooltips end
+
+
+
 	}
 }
 
@@ -182,6 +205,7 @@ void CPPgScheduler::OnNMDblclkList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 void CPPgScheduler::LoadSchedule(int index) {
 // MORPH START  leuk_he: Remove 2nd apply in scheduler
   bSuppressModifications=true;	
+  GetDlgItem(IDC_S_TITLE)->SetWindowText(_T("")); // clear
 // MORPH END leuk_he: Remove 2nd apply in scheduler
 	Schedule_Struct* schedule=theApp.scheduler->GetSchedule(index);
 	GetDlgItem(IDC_S_TITLE)->SetWindowText(schedule->title);
@@ -220,6 +244,7 @@ void CPPgScheduler::FillScheduleList() {
 	m_list.DeleteAllItems();
 // MORPH START  leuk_he: Remove 2nd apply in scheduler
     bSuppressModifications=true;
+	m_actions.DeleteAllItems(); // clear
 //MORPH END leuk_he: Remove 2nd apply in scheduler	
 	for (uint8 index=0;index<theApp.scheduler->GetCount();index++) {
 		m_list.InsertItem(index , theApp.scheduler->GetSchedule(index)->title );
@@ -248,6 +273,8 @@ void CPPgScheduler::OnBnClickedAdd()
 					   GetResString(IDS_SCHED_WARN_APPLY_TITLE ));
             return;
 		}
+	m_actions.DeleteAllItems(); // clear
+	
 // MORPH END leuk_he: Remove 2nd apply in scheduler
 	Schedule_Struct* newschedule=new Schedule_Struct();
 	newschedule->day=0;
@@ -259,13 +286,16 @@ void CPPgScheduler::OnBnClickedAdd()
 
 	index=theApp.scheduler->AddSchedule(newschedule);
 	m_list.InsertItem(index , newschedule->title );
-	m_list.SetSelectionMark(index);
-
-	RecheckSchedules();
+	miActiveSelection  =index;
 // MORPH START  leuk_he: Remove 2nd apply in scheduler
+	GetDlgItem(IDC_S_TITLE)->SetWindowText(newschedule->title);
   miActiveSelection  =index;
 	SetModified();
 // MORPH END leuk_he: Remove 2nd apply in scheduler
+ 	m_list.SetSelectionMark(index);
+
+	RecheckSchedules();
+
 }
 
 // MORPH START  leuk_he: Remove 2nd apply in scheduler

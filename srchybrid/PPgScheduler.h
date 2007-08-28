@@ -1,6 +1,12 @@
 #pragma once
 
+
+// MORPH START leuk_he tooltipped
+/*
 class CPPgScheduler : public CPropertyPage
+*/
+class CPPgScheduler : public CPPgtooltipped  
+// MORPH END leuk_he tooltipped
 {
 	DECLARE_DYNAMIC(CPPgScheduler)
 
