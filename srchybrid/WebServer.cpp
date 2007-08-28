@@ -625,9 +625,10 @@ void CWebServer::ProcessURL(ThreadData Data)
 
 			if(_IsLoggedIn(Data, lSession))
 			{
-				//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
-				//if (_ParseURL(Data.sURL, _T("w")) == "close" && IsSessionAdmin(Data,sSession) && thePrefs.GetWebAdminAllowedHiLevFunc() )
-				if (_ParseURL(Data.sURL, _T("w")) == "close" && IsSessionAdmin(Data,sSession,2) )
+				/*MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+				if (_ParseURL(Data.sURL, _T("w")) == "close" && IsSessionAdmin(Data,sSession) && thePrefs.GetWebAdminAllowedHiLevFunc() )
+				*/
+				if (_ParseURL(Data.sURL, _T("w")) == "close" && IsSessionAdmin(Data,sSession,3) )
 					//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 				{
 					theApp.m_app_state = APP_STATE_SHUTTINGDOWN;
@@ -2878,10 +2879,12 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 		//CPartFile *found_file = theApp.downloadqueue->GetFileByID(_GetFileHash(dwnlf.sFileHash, FileHashA4AF));
 
 		dwnlf.sFileInfo.Replace(_T("\\"),_T("\\\\"));
+
 		CString strFInfo = dwnlf.sFileInfo;
+		strFInfo.Replace(_T("'"),_T("&#8217;"));
 		strFInfo.Replace(_T("\n"), _T("\\n"));
-		dwnlf.sFileInfo.Replace(_T("\n"), _T("<br>"));
-		dwnlf.sFileInfo.Replace(_T("'"),_T("&#8217;"));
+
+		dwnlf.sFileInfo.Replace(_T("\n"), _T("<br />"));
 
 		if (!dwnlf.iComment) {
 			HTTPProcessData.Replace(_T("[HASCOMMENT]"), _T("<!--") );	
@@ -2978,12 +2981,6 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 		else
 			HTTPProcessData.Replace(_T("[ShortFileName]"), _T(""));
 
-/*		leuk_he: test this code! 
-        CString sTooltip = dwnlf.sFileInfo;
-		sTooltip.Replace(_T("\n"), _T("<br>"));
-		sTooltip.Replace(_T("'"), _T("&#8217;"));
-        HTTPProcessData.Replace(_T("[FileInfo]"), sTooltip);
-        */
 		HTTPProcessData.Replace(_T("[FileInfo]"), dwnlf.sFileInfo);
 		fTotalSize += dwnlf.m_qwFileSize;
 
@@ -3072,8 +3069,9 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 		else
 			HTTPProcessData.Replace(_T("[Category]"), _T(""));
 
-//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
-		//InsertCatBox(HTTPProcessData,0,_T(""),false,false,session,dwnlf.sFileHash);		
+/*MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+		InsertCatBox(HTTPProcessData,0,_T(""),false,false,session,dwnlf.sFileHash);		
+*/
 		InsertCatBox(HTTPProcessData,0,_T(""),false,false,session,dwnlf.sFileHash,false,Rights);
 //MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 
@@ -4078,11 +4076,15 @@ CString CWebServer::_GetAddServerBox(ThreadData Data)
 	CString Out = pThis->m_Templates.sAddServerBox;
 	if(_ParseURL(Data.sURL, _T("addserver")) == "true")
 	{
-		if (!_ParseURL(Data.sURL, _T("serveraddr")).IsEmpty() && !_ParseURL(Data.sURL, _T("serverport")).IsEmpty())
+		CString strServerAddress = _ParseURL(Data.sURL, _T("serveraddr")).Trim();
+		CString strServerPort = _ParseURL(Data.sURL, _T("serverport")).Trim();
+		if (!strServerAddress.IsEmpty() && !strServerPort.IsEmpty())
 		{
-
-			CServer* nsrv = new CServer((uint16)_tstoi(_ParseURL(Data.sURL, _T("serverport"))), _ParseURL(Data.sURL, _T("serveraddr")));
-			nsrv->SetListName(_ParseURL(Data.sURL, _T("servername")));
+			CString strServerName = _ParseURL(Data.sURL, _T("servername")).Trim();
+			if (strServerName.IsEmpty())
+				strServerName = strServerAddress;
+			CServer* nsrv = new CServer((uint16)_tstoi(strServerPort), strServerAddress);
+			nsrv->SetListName(strServerName);
 			if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(nsrv,true)) {
 				delete nsrv;
 				Out.Replace(_T("[Message]"), _GetPlainResString(IDS_ERROR));
@@ -4102,7 +4104,7 @@ CString CWebServer::_GetAddServerBox(ThreadData Data)
 				if(_ParseURL(Data.sURL, _T("addtostatic")) == _T("true"))
 				{
 					_AddToStatic(_ParseURL(Data.sURL, _T("serveraddr")),_tstoi(_ParseURL(Data.sURL, _T("serverport"))));
-					resultlog += _T("<br>");
+					resultlog += _T("<br />");
 					resultlog += _SpecialChars(theApp.emuledlg->GetLastLogEntry() ); //Pick-up last line of the log
 				}
 				resultlog = resultlog.TrimRight('\n');
@@ -4168,7 +4170,7 @@ CString CWebServer::_GetLog(ThreadData Data)
 		theApp.emuledlg->ResetLog();
 
 	Out.Replace(_T("[Clear]"), _GetPlainResString(IDS_PW_RESET));
-	Out.Replace(_T("[Log]"), _SpecialChars(theApp.emuledlg->GetAllLogEntries(),false)+ _T("<br><a name=\"end\"></a>") );
+	Out.Replace(_T("[Log]"), _SpecialChars(theApp.emuledlg->GetAllLogEntries(),false)+ _T("<br /><a name=\"end\"></a>") );
 	Out.Replace(_T("[Session]"), sSession);
 
 	return Out;
@@ -4189,7 +4191,7 @@ CString CWebServer::_GetServerInfo(ThreadData Data)
 		theApp.emuledlg->ResetServerInfo();
 
 	Out.Replace(_T("[Clear]"), _GetPlainResString(IDS_PW_RESET));
-	Out.Replace(_T("[ServerInfo]"), _SpecialChars(theApp.emuledlg->GetServerInfoText(),false )+ _T("<br><a name=\"end\"></a>") );
+	Out.Replace(_T("[ServerInfo]"), _SpecialChars(theApp.emuledlg->GetServerInfoText(),false )+ _T("<br /><a name=\"end\"></a>") );
 	Out.Replace(_T("[Session]"), sSession);
 
 	return Out;
@@ -4209,7 +4211,7 @@ CString CWebServer::_GetDebugLog(ThreadData Data)
 		theApp.emuledlg->ResetDebugLog();
 
 	Out.Replace(_T("[Clear]"), _GetPlainResString(IDS_PW_RESET));
-	Out.Replace(_T("[DebugLog]"), _SpecialChars(theApp.emuledlg->GetAllDebugLogEntries() ,false)+ _T("<br><a name=\"end\"></a>") );
+	Out.Replace(_T("[DebugLog]"), _SpecialChars(theApp.emuledlg->GetAllDebugLogEntries() ,false)+ _T("<br /><a name=\"end\"></a>") );
 	Out.Replace(_T("[Session]"), sSession);
 
 	return Out;
@@ -4237,7 +4239,7 @@ CString CWebServer::_GetKadDlg(ThreadData Data)
 
 	//if (!thePrefs.GetNetworkKademlia()) {
 	//	CString buffer;
-	//	buffer.Format(_T("<br><center>[KADDEACTIVATED]</center>")  );
+	//	buffer.Format(_T("<br /><center>[KADDEACTIVATED]</center>")  );
 	//	return buffer;
 	//}
 
@@ -4275,7 +4277,7 @@ CString CWebServer::_GetKadDlg(ThreadData Data)
 		if (Kademlia::CKademlia::IsFirewalled()) {
 			Out.Replace(_T("[KADSTATUS]"), GetResString(IDS_FIREWALLED));
 			buffer.Format(_T("<a href=\"?ses=%s&w=kad&c=rcfirewall\">%s</a>"), sSession , GetResString(IDS_KAD_RECHECKFW) );
-			buffer.AppendFormat(_T("<br><a href=\"?ses=%s&w=kad&c=disconnect\">%s</a>"), sSession , GetResString(IDS_IRC_DISCONNECT) );
+			buffer.AppendFormat(_T("<br /><a href=\"?ses=%s&w=kad&c=disconnect\">%s</a>"), sSession , GetResString(IDS_IRC_DISCONNECT) );
 		} else {
 
 			Out.Replace(_T("[KADSTATUS]"), GetResString(IDS_CONNECTED));
@@ -4295,11 +4297,11 @@ CString CWebServer::_GetKadDlg(ThreadData Data)
 
 	// kadstats	
 	// labels
-	buffer.Format(_T("%s<br>%s"),GetResString(IDS_KADCONTACTLAB), GetResString(IDS_KADSEARCHLAB));
+	buffer.Format(_T("%s<br />%s"),GetResString(IDS_KADCONTACTLAB), GetResString(IDS_KADSEARCHLAB));
 	Out.Replace(_T("[KADSTATSLABELS]"),buffer);
 
 	// numbers
-	buffer.Format(_T("%i<br>%i"),	theApp.emuledlg->kademliawnd->GetContactCount(), 
+	buffer.Format(_T("%i<br />%i"),	theApp.emuledlg->kademliawnd->GetContactCount(), 
 									theApp.emuledlg->kademliawnd->searchList->GetItemCount());
 	Out.Replace(_T("[KADSTATSDATA]"),buffer);
 
@@ -4426,6 +4428,11 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 
 	CString m_sTestURL;
 	m_sTestURL.Format(PORTTESTURL, thePrefs.GetPort(),thePrefs.GetUDPPort(), thePrefs.GetLanguageID() );
+
+	// the portcheck will need to do an obfuscated callback too if obfuscation is requested, so we have to provide our userhash so it can create the key
+	if (thePrefs.IsClientCryptLayerRequested())
+		m_sTestURL += _T("&obfuscated_test=") + md4str(thePrefs.GetUserHash());
+
 	Out.Replace(_T("[CONNECTIONTESTLINK]"), m_sTestURL);
 	Out.Replace(_T("[CONNECTIONTESTLABEL]"), GetResString(IDS_CONNECTIONTEST)); 
 
@@ -4754,7 +4761,7 @@ CString CWebServer::_GetDownloadGraph(ThreadData Data, CString filehash)
 
 	if (pPartFile == NULL || !pPartFile->IsPartFile())
 	{
-		Out.AppendFormat(pThis->m_Templates.sProgressbarImgsPercent+_T("<br>"), progresscolor[10], pThis->m_Templates.iProgressbarWidth);
+		Out.AppendFormat(pThis->m_Templates.sProgressbarImgsPercent+_T("<br />"), progresscolor[10], pThis->m_Templates.iProgressbarWidth);
 		Out.AppendFormat(pThis->m_Templates.sProgressbarImgs,progresscolor[0], pThis->m_Templates.iProgressbarWidth);
 	}
 	else
@@ -4767,7 +4774,7 @@ CString CWebServer::_GetDownloadGraph(ThreadData Data, CString filehash)
 
 		int		compl = static_cast<int>((pThis->m_Templates.iProgressbarWidth / 100.0) * pPartFile->GetPercentCompleted());
 
-		Out.AppendFormat(pThis->m_Templates.sProgressbarImgsPercent+_T("<br>"),
+		Out.AppendFormat(pThis->m_Templates.sProgressbarImgsPercent+_T("<br />"),
 			progresscolor[(compl > 0) ? 10 : 11], (compl > 0) ? compl : 5);
 
 		for (uint16 i=0;i<pThis->m_Templates.iProgressbarWidth;i++)
@@ -5008,8 +5015,9 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 
 
 	if (thePrefs.GetCatCount()>1) 
-//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
-		//InsertCatBox(Out,0,pThis->m_Templates.sCatArrow,false,false,sSession,_T(""));
+/*MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+	InsertCatBox(Out,0,pThis->m_Templates.sCatArrow,false,false,sSession,_T(""));
+*/
 		InsertCatBox(Out,0,pThis->m_Templates.sCatArrow,false,false,sSession,_T(""),false, Rights);
 //MORPH END [ionix] - iONiX::Advanced WebInterface Account Management		
 	else Out.Replace(_T("[CATBOX]"),_T(""));
@@ -5485,7 +5493,9 @@ void CWebServer::ProcessFileReq(ThreadData Data) {
 	}
 	else {
 		Data.pSocket->SendReply( "HTTP/1.1 404 File not found\r\n" );
-		AddDebugLogLine(false, _T("Webserver: 404: %s, file not found"),filename);
+    // MORPH one extra debug line:
+    theApp.QueueDebugLogLine(false,false, _T("Webserver: 404: %s, file not found"),filename);
+    // end
 	}
 }
 
@@ -5606,7 +5616,6 @@ CString CWebServer::_GetCommentlist(ThreadData Data)
 
 	return Out;
 }
-
 //MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
 bool CWebServer::GetWebServLogin(const CString& user, const CString& pass, WebServDef& Def)
 {
