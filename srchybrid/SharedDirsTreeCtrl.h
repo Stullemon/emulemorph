@@ -92,6 +92,7 @@ protected:
 	afx_msg void	OnLvnBegindrag(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void	OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void	OnCancelMode();
+	afx_msg LRESULT OnFoundNetworkDrive(WPARAM wParam,LPARAM lParam);	// SLUGFILLER: shareSubdir - Multi-threading
 
 	CTitleMenu			m_SharedFilesMenu;
 	CTitleMenu			m_ShareDirsMenu;
@@ -101,6 +102,7 @@ protected:
 	CDirectoryItem*		m_pDraggingItem;
 	CSharedFilesCtrl*	m_pSharedFilesCtrl;
 	CStringList			m_strliSharedDirs;
+	CStringList			m_strliSharedDirsSubdir;	// SLUGFILLER: shareSubdir - second list
 	CStringList			m_strliCatIncomingDirs;
 	CImageList			m_imlTree;
 
@@ -112,7 +114,10 @@ private:
 	bool	FileSystemTreeHasSubdirectories(CString strDir);
 	bool	FileSystemTreeHasSharedSubdirectory(CString strDir);
 	void	FileSystemTreeAddSubdirectories(CDirectoryItem* pRoot);
+  /* old code sharesubdir
 	bool	FileSystemTreeIsShared(CString strDir);
+  */
+	bool	FileSystemTreeIsShared(CString strDir, bool bCheckParent = false, bool bCheckIncoming = false,bool bOnlySubdir = false);	// SLUGFILLER: shareSubdir - allow checking indirect share
 	void	FileSystemTreeUpdateBoldState(CDirectoryItem* pDir = NULL);
 	void	FileSystemTreeSetShareState(CDirectoryItem* pDir, bool bShared, bool bSubDirectories);
 
@@ -125,6 +130,16 @@ private:
 	bool			m_bCreatingTree;
 	bool			m_bUseIcons;
 	CMap<int, int, int, int> m_mapSystemIcons;
+	// SLUGFILLER START: shareSubdir - multi-threaded magic
+	static UINT EnumNetworkDrivesThreadProc(LPVOID pParam);
+	void EnumNetworkDrives(NETRESOURCE *source);
+	// SLUGFILLER END: shareSubdir
+ // SLUGFILLER START: shareSubdir - locks and lists
+	CStringList		NetworkDrives;
+	CCriticalSection NetworkDrivesLock;
+	CEvent*			NetworkThreadOffline;
+	bool			NetworkThreadRun;
+	// SLUGFILLER END: shareSubdir
 };
 
 

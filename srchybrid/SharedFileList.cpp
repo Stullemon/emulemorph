@@ -358,6 +358,21 @@ void CSharedFileList::CopySharedFileMap(CMap<CCKey,const CCKey&,CKnownFile*,CKno
 	}
 }
 
+// SLUGFILLER START: shareSubdir
+static bool FindStartingWith(CStringList *in, CString find){
+	for (POSITION pos = in->GetHeadPosition();pos != 0;)
+		if (find.Find(in->GetNext(pos)) == 0)
+			return true;
+	return false;
+}
+
+static void FilterStartingWith(CStringList *in, CString find){
+	POSITION pos1, pos2;
+	for (pos1 = in->GetHeadPosition();(pos2 = pos1) != 0;)
+		if (in->GetNext(pos1).Find(find) == 0)
+			in->RemoveAt(pos2);
+}
+// SLUGFILLER END: shareSubdir
 void CSharedFileList::FindSharedFiles()
 {
 	// SLUGFILLER: SafeHash
@@ -413,12 +428,43 @@ void CSharedFileList::FindSharedFiles()
 	CString tempDir;
 	CString ltempDir;
 	
+	// SLUGFILLER START: shareSubdir
+	CStringList l_sAddedWithSubdir;	
+
+	// Doing the double list thing.
+	for (POSITION pos = thePrefs.sharedsubdir_list.GetHeadPosition();pos != 0;)
+	{
+		tempDir = thePrefs.sharedsubdir_list.GetNext(pos);
+		ltempDir = tempDir;
+		ltempDir.MakeLower();
+		if (ltempDir.Right(1)!=_T("\\"))
+			ltempDir+=_T("\\");
+
+		if( !FindStartingWith(&l_sAddedWithSubdir, ltempDir) ) { // Why yes, this isn't a standard function, however did you guess?
+			FilterStartingWith(&l_sAddedWithSubdir, ltempDir);	// Instead of flushing right away, we also need forward checking
+			l_sAddedWithSubdir.AddHead( ltempDir );
+		}
+	}
+	for (POSITION pos = l_sAddedWithSubdir.GetHeadPosition();pos != 0;l_sAddedWithSubdir.GetNext(pos))	// Fully filtered, now we flush
+		AddFilesFromDirectory(l_sAddedWithSubdir.GetAt(pos), true);
+
+	tempDir=thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
+	if (tempDir.Right(1)!=_T("\\"))
+		tempDir+=_T("\\");
+	tempDir.MakeLower();
+	if( !FindStartingWith(&l_sAddedWithSubdir, tempDir) ) {
+		l_sAdded.AddHead( tempDir );
+	  	AddFilesFromDirectory(tempDir);
+	}
+	// SLUGFILLER EMD: shareSubdir
+/* old code:
 	tempDir = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 	if (tempDir.Right(1)!=_T("\\"))
 		tempDir+=_T("\\");
 	AddFilesFromDirectory(tempDir);
 	tempDir.MakeLower();
 	l_sAdded.AddHead( tempDir );
+ end old code*/
 
 	for (int ix=1;ix<thePrefs.GetCatCount();ix++)
 	{
@@ -429,10 +475,13 @@ void CSharedFileList::FindSharedFiles()
 		ltempDir.MakeLower();
 
 		if( l_sAdded.Find( ltempDir ) ==NULL ) {
+		if( l_sAdded.Find( ltempDir ) == NULL && //ssd
+			!FindStartingWith(&l_sAddedWithSubdir, ltempDir) ) {	// SLUGFILLER: shareSubdir
 			l_sAdded.AddHead( ltempDir );
 			AddFilesFromDirectory(tempDir);
 		}
 	}
+	} // ssd
 
 	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition();pos != 0;)
 	{
@@ -442,7 +491,11 @@ void CSharedFileList::FindSharedFiles()
 		ltempDir= tempDir;
 		ltempDir.MakeLower();
 
+     /* old code ssd
 		if( l_sAdded.Find( ltempDir ) ==NULL ) {
+    */
+		if( l_sAdded.Find( ltempDir ) == NULL && //sharesubdir
+			!FindStartingWith(&l_sAddedWithSubdir, ltempDir) ) {	// SLUGFILLER: shareSubdir
 			l_sAdded.AddHead( ltempDir );
 			AddFilesFromDirectory(tempDir);
 		}
@@ -475,8 +528,10 @@ void CSharedFileList::FindSharedFiles()
 	// [end] Mighty Knife
 
 }
-
+/* old code	 ssd
 void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
+*/
+void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory, bool bWithSubdir)	// SLUGFILLER: shareSubdir
 {
 	CFileFind ff;
 	
@@ -486,11 +541,30 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 	if (end)
 		return;
 
+	// SLUGFILLER START: shareSubdir
+	CString realDirName;
+	int realDirNameSize = GetLongPathName(rstrDirectory, NULL, 0);
+	GetLongPathName(rstrDirectory, realDirName.GetBuffer(realDirNameSize), realDirNameSize);
+	realDirName.ReleaseBuffer();
+	// SLUGFILLER END: shareSubdir
 	while (!end)
 	{
 		end = !ff.FindNextFile();
+    /* old code:
 		if (ff.IsDirectory() || ff.IsDots() || ff.IsSystem() || ff.IsTemporary() || ff.GetLength()==0 || ff.GetLength()>MAX_EMULE_FILE_SIZE)
 			continue;
+    */
+		// SLUGFILLER START: shareSubdir - recursive call
+		if (ff.IsDots() || ff.IsSystem() || ff.IsTemporary())
+			continue; // skip
+		if (ff.IsDirectory()){
+			if (bWithSubdir)
+				AddFilesFromDirectory(ff.GetFilePath().GetBuffer(), true);
+			continue; //ssd
+		}
+		if (  ff.GetLength()==0 || ff.GetLength()>MAX_EMULE_FILE_SIZE) //ssd
+			continue; //ssd
+    // SLUGFILLER: shareSubdir
 
 		// ignore real(!) LNK files
 		TCHAR szExt[_MAX_EXT];
@@ -569,7 +643,10 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 			}
 			else
 			{
+			/* old code ssd
 				toadd->SetPath(rstrDirectory);
+       */
+				toadd->SetPath(realDirName);	// SLUGFILLER: shareSubdir
 				toadd->SetFilePath(ff.GetFilePath());
 				AddFile(toadd);
 			}
@@ -580,7 +657,10 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 			// SLUGFILLER: SafeHash - don't double hash, MY way
 			if (!IsHashing(rstrDirectory, ff.GetFileName()) && !theApp.downloadqueue->IsTempFile(rstrDirectory, ff.GetFileName()) && !thePrefs.IsConfigFile(rstrDirectory, ff.GetFileName())){
 			UnknownFile_Struct* tohash = new UnknownFile_Struct;
+				/* ssd
 				tohash->strDirectory = rstrDirectory;
+        */
+				tohash->strDirectory = realDirName;	// SLUGFILLER: shareSubdir
 				tohash->strName = ff.GetFileName();
 				waitingforhash_list.AddTail(tohash);
 				}
@@ -728,6 +808,20 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 			break;
 		}
 	}
+	// SLUGFILLER START: shareSubdir
+	if (dontadd) {
+		for (POSITION pos = thePrefs.sharedsubdir_list.GetHeadPosition(); pos != 0; ) {
+			CString subdir = thePrefs.sharedsubdir_list.GetNext(pos);
+			int len = subdir.GetLength();
+			if (file->GetPath().GetLength() > len && file->GetPath()[len-1] != _T('\\') && file->GetPath()[len] != _T('\\'))
+				continue;
+			if (CompareDirectories(subdir, file->GetPath().Left(subdir.GetLength())))
+				continue;
+			dontadd = false;
+			break;
+		}
+	}
+	// SLUGFILLER END: shareSubdir
 	if (dontadd) {
 		RemoveFromHashing(file);
 		if (!IsFilePtrInList(file) && !theApp.knownfiles->IsFilePtrInList(file))

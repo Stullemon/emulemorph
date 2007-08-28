@@ -681,7 +681,7 @@ void CDirectoryTreeCtrl::AddShare(CString strDir)
 {
 */
 // SLUGFILLER: shareSubdir - this is where the split really takes place
-void CDirectoryTreeCtrl::AddShare(CString strDir, bool bWithSubdir) /ssd
+void CDirectoryTreeCtrl::AddShare(CString strDir, bool bWithSubdir) //ssd
 { //ssd
 	if (strDir.Right(1) != _T('\\'))
 		strDir += _T('\\');
@@ -843,7 +843,7 @@ void CDirectoryTreeCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 		CString strDisplayPath(m_lstSharedSubdir.GetNext(pos));
 		PathRemoveBackslash(strDisplayPath.GetBuffer(strDisplayPath.GetLength()));
 		strDisplayPath.ReleaseBuffer();
-		SharedMenu.AppendMenu(MF_STRING,MP_SHAREDFOLDERS_FIRST+iCnt, GetResString(IDS_VIEW1) + strDisplayPath + L"IDS_VIEW3" /*GetResString(IDS_VIEW3)*/);
+		SharedMenu.AppendMenu(MF_STRING,MP_SHAREDFOLDERS_FIRST+iCnt, GetResString(IDS_VIEW1) + strDisplayPath + GetResString(IDS_VIEW3) /*GetResString(IDS_VIEW3)*/);
 		bMenuIsEmpty = false;
 	}
 	// SLUGFILLER END: shareSubdir

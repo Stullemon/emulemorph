@@ -55,7 +55,10 @@ public:
 	int		GetCount()	{return m_Files_map.GetCount(); }
 	int		GetHashingCount()	{return waitingforhash_list.GetCount()+currentlyhashing_list.GetCount(); }	// SLUGFILLER SafeHash
 	void	UpdateFile(CKnownFile* toupdate);
+  /* old code
 	void	AddFilesFromDirectory(const CString& rstrDirectory);
+  */
+	void	AddFilesFromDirectory(const CString& rstrDirectory, bool bWithSubdir = false);	// SLUGFILLER: shareSubdir
 	void	AddFileFromNewlyCreatedCollection(const CString& path, const CString& fileName);
 	void	HashFailed(UnknownFile_Struct* hashed);		// SLUGFILLER: SafeHash
 	void	FileHashingFinished(CKnownFile* file);
