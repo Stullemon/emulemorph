@@ -2787,9 +2787,9 @@ BEGIN
     IDS_PW_SCORE_TIP        "Usa la priorità dei Server per connetterti prima a quelli\ncon un valore più alto"
     IDS_MANUALSERVERHIGHPRIO_TIP 
                             "Dai un'alta priorità ai Server aggiunti manualmente"
-    IDS_EDITLIST_TIP        "Edita il File 'address.dat' per aggiornare la lista Server\nall'avvio di eMule. Dovresti inserire qualcosa in 'address.dat' se\ndecidi di attivare questa funzione"
+    IDS_EDITLIST_TIP        "Edita il File 'addresses.dat' per aggiornare la lista Server\nall'avvio di eMule. Dovresti inserire qualcosa in 'addresses.dat' se\ndecidi di attivare questa funzione"
     IDS_PW_AUTOCONNECTSTATICONLY_TIP 
-                            "Connettiti soltanto ad un Server statico. Se non ci sono Server statici\nla connessione automatica non andrà a buon fine"
+                            "Consente soltanto la connessione ad un Server statico. Se non sono stati impostati Server\nstatici la connessione automatica non andrà a buon fine"
     IDS_MAXCONNECTIONSSWITCHBORDER_TIP 
                             "Massima connessione concomitante per passare tra USS e SUC.\nUSS e migliore in presenza di poche connessioni, SUC necessita di\nmolte connessioni per determinare una buona media"
     IDS_SUC_TIP             "Usa lo Smart Upload Control.\nIl tempo tra l'invio e la ricezione di un pacchetto al Client è\nutilizzato per trovare il ritardo della linea.\n     Vantaggio: Nessun OverHead\n     Svantaggio: richiede Client attivi per misurare la velocità"
@@ -2841,7 +2841,7 @@ BEGIN
     IDS_ANTI_CREDITHACK_TIP "Previene il furto dei propri crediti/HashUtente (Default: attivo)"
     IDS_INFINITEQUEUE_TIP   "Dai alla tua coda d'attesa una dimensione illimitata"
     IDS_DONTREMOVESPARETRICKLESLOT_TIP 
-                            "Se la Morph apre degli Slot in Standby (Upload lento),\ndisabilitando questa funzione verranno chiusi\nquegli Slot non più necessari e verranno riaccoddati\ngli utenti senza perdere la posizione"
+                            "Se la Morph apre degli Slot in Standby (Upload lento),\ndisabilitando questa funzione verranno chiusi quegli\nSlot non più necessari e verranno riaccoddati gli utenti\nsenza perdere la posizione.\nAbilitando questa funzione verrà disabilitato lo SlotFocus"
 END
 
 STRINGTABLE 
@@ -2884,7 +2884,7 @@ BEGIN
                             "Se crei una nuova Categoria tramite la finestra di dialogo per la selezione\ndella Categoria, quando aggiungi più File in Pausa, il numero di File qui\nindicato inizierà il Download (Default: 0, disabilitato)"
     IDS_A4AF_SMARTSWAP_TIP  "Attiva la gestione <b>A</b>sked <b>4</b>for <b>A</b>nonther <b>F</b>ile"
     IDS_A4AF_SHOWDEBUG_TIP  "Mostra i messaggi dell'A4AF nel Registro Approfondito\nse il medesimo è stato abilitato"
-    IDS_A4AF_ADVMODE_TIP    "Opzioni sulla gestione di fonti che hanno più File richiesti disponibili"
+    IDS_A4AF_ADVMODE_TIP    "Opzioni extra sulla gestione di fonti tra più File"
     IDS_A4AF_DISABLED_TIP   "Disabilita la gestione extra per A4AF"
     IDS_A4AF_BALANCE_TIP    "Distribuisci equamente le fonti A4AF tra i File"
     IDS_A4AF_STACK_TIP      "Sposta tutte le fonti A4AF su un unico File"
@@ -2899,7 +2899,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_COMMUNITYTAG_TIP    "Le etichette della Comunità che vengono riconosciute dalle etichette di altri\nutenti. Es., ad un utente <i>FrankyFive[<b>NWO</b>]</i> verrà riconosciuta\nla Comunità 'NWO' che tu hai inserito qui. L'etichetta della Comunità è utile\nsoltanto per mostrare i file condivisi alla Comunità, e non per avvantaggiare\nin qualche modo gli utenti che ne fanno parte. Per mostrare i File condivisi\ndevi impostare opportunamente la condivisione file su 'Individuale'. Non devi\nimpostare l'etichetta [COMUNITA'] nel tuo nome utente, nè verrà aggiunta da\nquesta impostazione" 
+    IDS_COMMUNITYTAG_TIP    "Le etichette della Comunità sono usate per identificare l'utente come parte di una 'comunità'.\nEs., un utente <i>FrankyFive[<b>NWO</b>]</i> verrà riconosciuto come parte della 'comunità'\nse avrai inserito qui il testo 'NWO'. L'etichetta della Comunità è utile soltanto per\nmostrare i file condivisi alla Comunità, e non per avvantaggiare in qualche modo gli utenti\nche ne fanno parte. Per mostrare i File condivisi devi impostare opportunamente la condivisione\nfile su 'Individuale'. Non devi impostare l'etichetta [COMUNITA'] nel tuo nome utente, nè\nverrà aggiunta da questa impostazione" 
     IDS_MORPH_RFHA_TIP      "Registra le attività dei File in Hashing nel registro"
     IDS_MORPH_RAIF_TIP      "Registra l'aggiunta e la rimozione degli amici nel registro"
     IDS_MORPH_KSSERV_SIP    "Se un Server Statico nella lista server viene esaminato, il numero massimo\ndi tentativi verrà ignorato ed il Server non verrà rimosso"
@@ -2949,25 +2949,25 @@ BEGIN
     IDS_PW_AUTOCON_TIP      "Ti connette automaticamente alla rete eD2K e/o Kad"
     IDS_PW_RECON_TIP        "Prova automaticamente a riconnetterti alla rete eD2K quando viene persa\nla connessione al Server"
     IDS_WIZARD_TIP          "Mostra il Wizard di avvio utilizzato per impostare la tua connessione ad Internet.\nEseguendo il Wizard verranno aggiornati alcuni valori in questa finestra con valori\ncorretti. Il Wizard di avvio completo può essere avviato dal menu 'Strumenti'"
-    IDS_UDPDISABLED_TIP     "Disabilita il traffico sulla porta UDP.\nSe la tua connessione ad Internet (Router) diventa instabile dal\ntraffico UDP c'è un'opzione per disabilitare l'UDP. Questo utilizzerà\nmolto OverHead ma eMule funzionerà ugualmente"
+    IDS_UDPDISABLED_TIP     "Disabilita il traffico sulla porta UDP.\nSe la tua connessione ad Internet (Router) diventa instabile in seguito al\ntraffico UDP c'è un'opzione per disabilitare l'UDP. Verrà generato\nmolto OverHead ma eMule funzionerà ugualmente"
     IDS_STARTTEST_TIP       "Avvia un Browser che si connetterà ad emule-project.net per verificare se le\nporte di eMule sono raggiungibili da un Server Web. eMule potrebbe funzionare\nugualmente se le porte non sono raggiungibili ma sarà più lento. Se il test\ndella connessione fallisce controlla se qualcosa stia bloccando il traffico\nin entrata da Internet"
     IDS_RANDOMPORTS_TIP     "Invece di impostare le porte manualmente usa porte casuali comprese tra un\nminimo e un massimo. Assicurati che queste porte siano raggiungibili da Internet\ntramite connessione diretta o usando l'uPnP (controlla le impostazioni\n'emulEespana') per aprire le porte nel tuo Router"
     IDS_MINPORT_TIP         "Numero minimo di porta usato per selezionare una porta casuale.\nAlcuni Provider bloccano le porte inferiori a 1024"
     IDS_MAXPORT_TIP         "Numero massimo di porta usato per selezionare una porta casuale."
-    IDC_DOWNLOAD_CAP_TIP    "La velocità massima teorica in Download della tua connessione ad\nInternet in kilobyte per secondo. Verrà utilizzata per calcolare la\nscala nella finestra delle statistiche e non verrà inviata agli altri Client"
-    IDC_UPLOAD_CAP_TIP      "La velocità massima teorica in Upload della tua connessione ad\nInternet in kilobyte per secondo. Verrà utilizzata per calcolare la\nscala nella finestra delle statistiche e non verrà inviata agli altri Client"
+    IDC_DOWNLOAD_CAP_TIP    "La velocità massima teorica in Download della tua connessione ad\nInternet in kilobyte per secondo. Verrà utilizzata per calcolare la\nscala del grafico nella finestra delle statistiche e non verrà\ninviata agli altri Client"
+    IDC_UPLOAD_CAP_TIP      "La velocità massima teorica in Upload della tua connessione ad\nInternet in kilobyte per secondo. Verrà utilizzata per calcolare la\nscala del grafico nella finestra delle statistiche e non verrà inviata\nagli altri Client"
 END
 
 STRINGTABLE 
 BEGIN
-    IDC_PORT_TIP            "Numero di porta TCP che eMule usa per comunicare.\nPuò essere qualsiasi numero tra 1 e 65535 non utilizzato da nessun'altra\napplicazione in esecuzione.\nPotrai connetterti a più Client se la porta sarà raggiungibile da Internet,\n indicato da un ID Alto/freccia verde sulla barra di stato (se correttamente\nconfigurata nel Router e aperta nel Firewall). Le porte 80 o 8080 (http)\npotrebbero darti un piccolo incremento nella WebCache, la porta 1755 è\nutilizzata da molte persone pensando funzioni meglio, ma una porta vale l'altra"
+    IDC_PORT_TIP            "Numero di porta TCP che eMule usa per comunicare.\nPuò essere qualsiasi numero tra 1 e 65535 non utilizzato da nessun'altra\napplicazione in esecuzione.\nPotrai connetterti a più Client se la porta sarà raggiungibile da Internet,\n indicato da un ID Alto/freccia verde sulla barra di stato (se correttamente\nconfigurata nel Router e aperta nel Firewall). La porta 1755 è\nutilizzata da molte persone pensando funzioni meglio, ma una porta vale l'altra"
     IDC_UDPPORT_TIP         "Numero di porta UDP che eMule usa per comunicare.\nPuò essere qualsiasi numero tra 1 e 65535 non utilizzato da nessun'altra\napplicazione in esecuzione.\nPuò anche essere la stessa della TCP in quanto usa un protocollo differente.\n Configurala nel Router e aprila nel Firewall per ottenere prestazioni migliori"
     IDC_MAXSOURCEPERFILE_TIP 
                             "Il massimo numero di fonti che eMule collezionerà per un File.\nNota che la Morph ha anche un'opzione nella impostazioni 'Morph' per abilitare\nun HardLimit globale che definisce un limite complessivo per tutti i File invece\ndi un limite di fonti per singolo File"
     IDC_MAXCON_TIP          "Numero massimo di connessioni TCP/IP simultanee che eMule effettuerà.\nRiduci questo numero se riscontri problemi alla rete, incrementalo per trovare\nle fonti più velocemente. (Dai anche un'occhiata a conn/5sec per fonti nello\nstato 'trope connessioni')"
     IDC_NETWORK_KADEMLIA_TIP 
                             "Attiva la rete Kademlia priva di Server.\nQuesta rete trova le fonti in maniera più efficiente per i piccoli File\ne non dipende dai Server poichè ogni Client eMule sarà un piccolo Server.\nQuesta rete usa il protocollo UDP"
-    IDC_NETWORK_ED2K_TIP    "Attiva la rete Server eD2K.\nUn certo numero di Server centralizzati conservano i dati di dove i File\npotranno essere trovati nella rete. Assicurati di conetterti ad un buon\nServer (che restituisce risultati di ricerca appropriati). Questo protocollo\nè compatibile con più Client del Kad ma è dipendente dalla qualità dei Server"
+    IDC_NETWORK_ED2K_TIP    "Attiva la rete Server eD2K.\nUn certo numero di Server centralizzati conservano i dati relativi su dove i File\npotranno essere trovati nella rete. Assicurati di conetterti ad un buon\nServer (che restituisce risultati di ricerca appropriati). Questo protocollo\nè compatibile con più Client del Kad ma è dipendente dalla qualità dei Server"
     IDS_QL_USERNAME_TIP     "Il nome utente che verrà visualizzato agli altri utenti.\nInserisci qui il tuo Spam o il [nome della comunità]"
     IDS_PW_LANG_TIP         "La lingua dell'interfaccia.\neMule scaricherà una dll e la inserirà nella sua cartella 'lang'\nse selezioni una lingua che non è già stata installata. Le dll per\nle estensioni della Morph dovranno essere scaricate ed\ninstallate manualmente nella cartella 'lang' o tramite l'Installer della Morph.\n(questo Tooltip è una estensione della Morph)"
     IDS_PW_BEEP_TIP         "Emette un Beep in caso di errori"
@@ -2999,12 +2999,12 @@ BEGIN
     IDS_HIDEOVERSHARES_TIP  "Bilancia l'invio delle parti di un File.\nVerranno nascoste agli utenti delle parti che sono state inviate molto\npiù di altre. Questo farà si che gli utenti richiedano altre parti meno\ncondivise. Alcune parti saranno comunque visibili"
     IDS_SELECTIVESHARE_TIP  "Puoi scegliere di nascondere le parti più condivise rivelando rivelando\nuna sola parte per ogni utente, cominciando da quelle meno inviate, e tenendo\nin considerazione le parti già offerte quando è stata scelta la successiva.\n'Over Share prima di nascondere le parti' non deve essere disabilitata per fare\nin modo che funzioni questa opzione. (Default: disabilitato)"
     IDS_SHAREONLYTHENEED_TIP 
-                            "Nasconde le parti già richieste dai Client nella tua coda. eMule analizzerà\nla tua coda di Upload per verificare la presenza di altri Client che possano\naver richiesto la stessa parte. In tal caso, eMule nasconderà le parti ottenute\nda almeno un utente e mostrerà quelle non possedute da nessuno. Sono le sezioni\nviola nella barra di diffusione. Ce ne sarà sempre una visibile."
+                            "Nasconde le parti già richieste dai Client nella tua coda. eMule analizzerà\nla tua coda di Upload per verificare se tutti i Client possano aver richiesto\nla stessa parte. In tal caso, eMule nasconderà le parti ottenute da almeno un\nutente e mostrerà quelle non possedute da nessuno. Sono le sezioni viola nella\nbarra di diffusione. Ce ne sarà sempre una visibile."
     IDS_POWERSHARE_TIP2     "Le impostazioni per il PowerShare \ndanno una priorità assoluta \n ad un File senza la necessità di\n eliminare dalla condivisione altri File"
     IDS_POWERSHARE_DISABLED_TIP 
                             "Non attiva il PowerShare se non viene impostato\nmanualmente per uno specifico File"
     IDS_POWERSHARE_ACTIVATED_TIP 
-                            "Attiva il PowerShare a meno che un File non abbia\nun'altra modalità selezionata"
+                            "Attiva il PowerShare a meno che non venga impostata\nmanualmente un'altra modalità"
 END
 
 STRINGTABLE 
@@ -3059,7 +3059,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP_ENABLE_TIP     "Apre le porte nel Router del tuo pc.\nDevi abilitare l'uPnP nel tuo Router. Non hai bisogno di selezionare questa\nopzione se le hai già aperte manualmente o non hai un Router. Raccomandato\nse usi le 'Porte casuali' (Default: autorileva)"
+    IDS_UPNP_ENABLE_TIP     "Apre le porte nel Router del tuo pc.\nDevi abilitare l'uPnP nel tuo Router. Non hai bisogno di abilitare questa\nimpostazione se le hai già aperte manualmente o non hai un Router. Raccomandato\nse usi le 'Porte casuali' (Default: autorileva)"
     IDS_UPNP_ENABLEWEB_TIP  "Apre le porte nel Router utilizzate dal WebServer in modo che\nsia raggiungibile da Internet"
     WAP_TIP                 "Il Wireless Application Protocol (WAP) è uno standard internazionale per\nle applicazioni che usano le comunicazioni senza filo (per esempio,\nl'accesso ad Internet dai telefoni cellulari)"
     ENABLEWAP_TIP           "Attiva l'interfaccia Wap"
@@ -3102,7 +3102,7 @@ BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES_TIP 
                             "Inizia a scaricare un File soltanto se è stato visto completo almeno una\nvolta. Questo previene che tu possa incominciare il Download di un File che\nnon potrà mai essere completato, ma può ritardare il Download di un File\nse richiedi più File dalla sola fonte completa"
     IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP 
-                            "Salva il tempo di attesa in coda per l'Upload.\nFondamentalmente, questa funzione permette ad un Client di conservare il tempo\ndi attesa della precedente coda inattiva per l'Upload per la successiva sessione\ndi attesa in coda, fin quando qualcuno non riesce ad atraversare la coda di Upload,\nun po' come usare una borsa da ginnastica o un qualche altro articolo per tenere\nil posto in fila - se non sei lì, la borsa rimane là e le persone si muovono attorno\nad essa (per lo meno in un mondo civilizzato ideale) (Default: abilitato)"
+                            "Salva il tempo di attesa in coda per l'Upload.\nQuando chiudi eMule, il tempo di attesa dei tuoi Client in coda per l'Upload\nverrà memorizzato. Se incontrerai uno di questi Client la volta successiva che\navvierai eMule, verranno aggiunti alla tua coda di attesa considerando il loro\ntempo di attesa memorizzato in precedenza, invece che essere aggiunti nuovamente\ncon tempo di attesa pari a 0"
     IDS_ENABLE_CHUNKDOTS_TIP "Mostra dei punti sulla barra del progresso ogni 9.28 MB (una parte completa)"
     IDS_ECFEF_TIP           "Una coda per File, tutti i File hanno le stesse possibilità. Cambia la\npriorità di ogni File in base ai dati inviati e alle richieste nella\nsessione corrente"
     IDS_IP2COUNTRY_TIP      "Mostra nomi e bandiere delle nazioni nel dettaglio dei Client nella finestra\nTrasferimenti. È necessario aggiornare il File 'ip-to-country.csv' dalle\nimpostazioni 'Morph Update' per mostrare le nazioni corrette in base a\ncongetture fatte sul numero IP del Client"
@@ -3121,17 +3121,17 @@ BEGIN
                             "Inizio:100, Min:10, Max:5000,\nRapporto = +6 per MB inviato e -2 per MB scaricato,\nbonus +100 se invii più di 1MB\nbasso valore se invii almeno 1MB, rapporto = 50"
     IDS_PAYBACKFIRST_TIP    "Apre uno Slot in PowerShare per contraccambiare immediatamente il Client per\ni dati inviati. Funziona soltanto sui File completi, non su File scaricati\nin maniera parziale"
     IDS_PAYBACKFIRSTLIMI_TIP 
-                            "Quanto il Client ti deve aver inviato (quanto hai scaricato da lui)\nprima che il contraccambio incominci"
+                            "La quantità in eccesso che il Client ti deve aver inviato e dopo che hai scaricato da lui,\nprima che il contraccambio incominci"
     IDS_EXPIRED_KNOWN_TIP   "Cancella i File .met se un File non è stato visto per xxx giorni (recupera\nspazio su disco). Applicabile per i File 'known*.met'. Non impostare mai\nun valore troppo basso (meno di 30)"
     IDS_FOLLOW_THE_MAJORITY_TIP 
-                            "Rinomina automaticamente i tuoi File con quello maggiormente usato, può essere attivato\ndirettamente tramite click sul tasto destro del mouse o disabilitato tramite una qualsiasi\noperazione di cambio nome"
+                            "Rinomina automaticamente i tuoi File con quello maggiormente usato, può essere anche attivato\ndirettamente tramite click sul tasto destro del mouse o disabilitato tramite una qualsiasi\noperazione di cambio nome"
     IDS_FAIR_PLAY_TIP       "Invia almeno una copia del File scaricato con una maggiore priorità"
 END
 
 STRINGTABLE 
 BEGIN
     IDC_FILTERSERVERBYIPFILTE_TIP 
-                            "Applica i seguenti filtri anche per i Server (raccomandato).\nSe impostato, i Server filtrati saranno colorati in grigio ed impossibili\nda contattare. Disabilitando questa impostazione potrai connetterti ai\nServer filtrati ma potrai ottenere un ID Basso"
+                            "Applica i seguenti filtri anche per i Server (raccomandato).\nSe impostato, i Server filtrati saranno colorati in grigio ed impossibili\nda contattare. Disabilitando questa impostazione potrai connetterti ai\nServer filtrati ma potrai ottenere un falso ID Alto"
     IDC_STATIC_FILTERLEVE_TIP 
                             "Livello del filtro che verrà applicato.\nOgni voce del File 'ipfilter.dat' ha un (possibile) valore. Inserisci il\nvalore 0 per disabilitare i filtri temporaneamente, raccomandato per testare\nle porte in apertura, o cancella il File 'ipfilter.dat' per risparmiare memoria)\n(Default: 127).\nNella lista meuh4567 usata dal Morph Update i seguenti livelli sono disponibili,\nda 0 per un numero massimo di fonti a 254 se si è un po' paranoici"
     IDC_RELOADFILTE_TIP     "Carica il File nuovamente in memoria"
@@ -3430,8 +3430,8 @@ BEGIN
     IDS_MINIMULEAUTOCLOSE_TIP 
                             "La finestra MiniMule rimane generalmente visibile fino alla sua chiusura manuale.\nImpostando questo valore a 0 verrà chiusa automaticamente quando il cursore sarà\nposizionato fuori dalla finestra. Come un Tooltip.\n(Default=1)"
     IDS_MINIMULETRANSPARENCY_TIP 
-                            "Controlla la trasparenza della finestra del MiniMule.\n0 indica opaco e 100 trasparente.\n(Default=0), potrebbe richiedere il riavvio"
-    IDS_CREATECRASHDUMP_TIP "Quando questa opzione è abilitata, eMule salverà automaticamente un Crash Dump qualora\nsi chiudesse inaspettatamente. Questo può aiutare gli sviluppatori a rintracciare il\nproblema. Il File Dump, chiamato 'eMule-version-number-Modversion.dmp', verrà salvato\nnella cartella di installazione di eMule. Se hai problemi di Crash seleziona questa opzione\ne riferisci il problema al forum Morph (o manda una mail a leukhe\\@gmail.com) con i dettagli.\n(Default=non selezionato)"
+                            "Controlla la trasparenza della finestra del MiniMule.\n0 e 100 indicano opaco e 1 trasparente.\n(Default=0), potrebbe richiedere il riavvio"
+    IDS_CREATECRASHDUMP_TIP "Quando questa opzione è abilitata, eMule salverà automaticamente un Crash Dump qualora\nsi chiudesse inaspettatamente. Questo può aiutare gli sviluppatori a rintracciare il\nproblema. Il File Dump, chiamato 'eMule-version-number-Modversion.dmp', verrà salvato\nnella cartella di installazione di eMule. Se hai problemi di Crash seleziona questa opzione\ne riferisci il problema al forum Morph (o manda una mail a leukhe\\@gmail.com) con i dettagli.\n(Default=non selezionato/disabilitato)"
     IDS_CHECKCOMCTL32_TIP   "Disattiva il messaggio di avviso circa una vecchia versione della 'common dialog dll'. Può servire se usi una versione di Windows non aggiornata.\neMule potrebbe funzionare senza l'aggiornamento ma non molto bene. Puoi scaricare la libreria aggiornata dal sito Microsoft.\n(Default=selezionato)"
     IDS_CHECKSHELL32_TIP    "Disattiva il messaggio di avviso circa una vecchia versione della Shell di Windows\n(precedente ad Internet Explorer 4). Alcune funzioni integrate nella Shell di Windows\nporebbero non funzionare. È consigliabile aggiornare il file 'shell.dll' distribuito\ncome parte di Internet Explorer.\n(Default=selezionato)"
     IDS_IGNOREINSTANCES_TIP "Abilita l'esecuzione di istanze muliple di eMule.\nNote:\nPer eseguire due eMule sullo stesso Computer, è necessario che siano installati su\ncartelle differenti, devono avere differenti cartelle temporanee ed anche le porte\nutilizzate da ogni eMule devono essere differenti. Non è consigliabile eseguire due\neMule contemporaneamente se non per effettuare dei test.\n(Default=0)"
@@ -3467,7 +3467,7 @@ BEGIN
     IDS_WIZ8_MORPH          "Opzioni MorphXT"
     IDS_MORPHWIZ_GUI        "Opzioni Mod"
     IDS_MORPHWIZ_SHOWMORE   "Mostra più controlli (Controlli Avanzati)"
-    IDS_MORPHWIZ_SHOWLESS   "Mostra meno controlli (Semplificato/Principiante)"
+    IDS_MORPHWIZ_SHOWLESS   "Mostra meno controlli (Semplificato)"
     IDS_MORPHWIZ_NEXT       "Al completamento del Wizard"
     IDS_MORPHWIZ_NET1       "Esegui la configurazione guidata delle velocità di UP/Down di Internet"
 END
@@ -3502,11 +3502,20 @@ BEGIN
     IDS_UPNP_INFOENABLED    ",abilitato\r\n"
     IDS_UPNP_INFODISABLED   ",disabilitato\r\n"
     IDS_UPNP_INFOSTANDBY    "Nessuna periferica rilevata\r\n"
+    IDS_UPNP_INFO_NONEED    "Tentativo fallito o non necessario"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP_INFO_NONEED    "Tentativo fallito o non necessario"
+   IDS_ADDSHAREDIR    "Aggiungi condivisione o UNC manualmente"
+   IDS_TEXTSHRETOADD  "Condivisione da aggiungere"
+   IDS_SHAREWITHSUBDIR	 "Condividi con le sottocartelle"
+   IDS_SUBDIRS "Sottocartelle"
+   IDS_UNCLIST_INACTIVE  "Condivisioni Inattive"
+   IDS_SCHED_RELOAD "Pianificatore: Ricarica i File Condivisi"
+   IDS_SCHED_WARNENDTIME   "Il tempo di fine dovrebbe essere uguale al tempo d'inizio per gli eventi singoli"
+   IDS_SCHED_WARN_APPLY "Premi Ok o Applica prima di selezionare un'altra operazione"
+   IDS_SCHED_WARN_APPLY_TITLE "Attenzione"
 END
 
 STRINGTABLE 
@@ -3514,6 +3523,12 @@ BEGIN
     IDS_DISABLECATCOLORS    "Disabilita i colori della categoria"
     IDS_DISABLECATCOLOR_TIP "Disabilita i colori della categoria nel testo del Tab della finestra Trasferimenti"
     IDS_CHANGEUSERASSERVICE "Dovrai cambiare manualmente il Login dell'utente del servizio, o salvare i File di configurazione in una cartella del programma"
+END
+
+STRINGTABLE 
+BEGIN
+   IDS_USSPINGDATASIZE		"Dimensione dati ICMP (0=Default, 0..64 Consentito)" 
+   IDS_PINGDATASIZE_TIP            "Alcuni Firewall/Router non rispondono correttamente alla richiesta di Ping\ndell'ICMP con dimensione dati pari a 0. Questa opzione dà la possibilità\ndi impostare una piccola dimensione dati per aggirare il problema di\nquesti router"
 END
 
 #endif    // Italian (Italy) resources

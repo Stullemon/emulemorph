@@ -1938,16 +1938,6 @@ BEGIN
                             "Importeren geslaagd. %i delen zijn geïmporteerd in %s."
 END
 
-STRINGTABLE 
-BEGIN
-    IDS_PW_WEBCACHE         "WebCache"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WrongPortforWebcache 
-                            "WebCache Download uitgeschakeld: Alleen verkeer op de poorten 21, 70, 80, 210, 443, 563 en in het bereik van 1025 tot 65535 worden gecached. Gebruik een van deze poorten om WebCache te kunnen activeren"
-END
 
 STRINGTABLE 
 BEGIN
@@ -2568,9 +2558,6 @@ BEGIN
     IDS_AUTOUPIP2COUNTRY    "Update Ip-to-country.csv bij opstarten"
     IDS_UPDATEIPCURL        "Update"
     IDS_CLIENTQUEUEPROGRESSBAR "Toon vorderingen van client wachtlijst"
-    IDS_WEBCACHE_NOSUPPORT  "Niet ondersteund"
-    IDS_STATS_SUCCESSFULLWC "Succesvolle WC-DL/WC-Aanvragen:"
-    IDS_STATS_FAILEDWC      "Mislukte WC-DL/WC-Aanvragen:"
 END
 
 STRINGTABLE 
@@ -2609,40 +2596,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_WEBCACHE_ISP        "ISP Proxyserver Instellingen"
-    IDS_WC_PORT             "Poort"
-    IDS_WC_ADDRESS          "Adres"
-    IDS_WC_CONTROLS         "WebCache Instellingen"
-    IDS_WC_ENABLE           "Activeer WebCached Downloads"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_WC_WRONGPORT        "Je gebruikt een TCP poort die gewoonlijk niet wordt gecached door ISP proxy-servers. Verander je TCP poorten naar 21, 70, 80, 210, 443 563  of 1025-65535 om WebCache downloads te kunnen inschakelen!"
-    IDS_WC_AUTO             "Detecteer WebCache Automatisch"
-    IDS_WC_NRBLOCKS         "Aantal blokken om te downloaden voor herverbinden met proxy (kan het ongewild verbreken van verbinding oplossen)"
-    IDS_WC_BLOCK            "180k-Blokken"
-    IDS_WC_TIMEOUT          "Extra lange timeout voor WebCache verbindingen"
-    IDS_WC_LOCAL            "Deze WebCache cached geen verkeer binnen dezelfde ISP"
-    IDS_WC_SUBMIT_EMAIL     "Leg deze instellingen per email voor"
-    IDS_WC_LINK             "Link: "
-    IDS_WC_PERSISTENT       "Blijvende verbindingen voor proxy downloads"
-    IDS_WC_ADVANCED         "Geavanc. instellingen"
-    IDS_WC_TEST             "Test WebCache configuratie. Kan mogelijk 30 seconden duren"
-    IDS_WC_HIDE_ADV         "Verberg geavanceerde instellingen"
-    IDS_WC_SUBMIT_WEB       "Leg WebCache info voor via webformulier"
-    IDS_WC_SOURCES          "WebCache Mogelijk"
-    IDS_WC_UPDATESETTING    "Update WebCache instellingen automatisch"
-END
-
-STRINGTABLE 
-BEGIN
-    IDS_LOG_WCEVENTS        "Log WebCache Gebeurtenissen"
-    IDS_LOG_IACH            "Log IACH Gebeurtenissen"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_IMPORTPARTS         "Importeer delen in bestand..."
     IDS_INITIATEREHASH      "Start rehash"
 END
@@ -2661,13 +2614,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CRC_SUFFIX          "Achterzetsel om toe te voegen aan het eind van de bestandsnaam achter de CRC32:"
-    IDS_COUNTWCSESSIONSTATS "Tel WC-Sessies bij sessie stats"
-    IDS_WEBCACHE_NOPROXY    "geen proxy ingesteld"
-    IDS_CD_WCSUCCFAIL       "Succesvol/Mislukt:"
-    IDS_CD_WCTRUSTSENDER    "Is vertrouwde OHCB zender:"
-    IDS_WCDOWNL             "nog niet werkend"
-    IDS_WC_REQ_SUCC         "WC Succes/Gevraagd:"
-    IDS_WC_DOWNLOADED       "WC-Download:"
     IDS_CRC32_TITLE         "CRC32 naar bestandsnaam"
     IDS_LOG_IPFILTER_LOADED "Geladen IP filters van ""%s"" in %ums"
     IDS_LOG_IPFILTER_INFO   "Geanalyseerde regels:%u  Gevonden IP bereiken:%u  Dupliceer:%u  Samengevoegd:%u"
