@@ -3684,7 +3684,14 @@
 #define IDS_USSPINGDATASIZE			    31269
 #define IDS_PINGDATASIZE_TIP            31270
 #define IDS_VIEW3                       31271 
+#define IDS_OVERWRITE1                  31272
+#define IDS_OVERWRITE2                  31273   
+#define IDS_BACKUPERROR					31274  
+#define IDS_BACKUP_PART					31275   
+#define IDS_BACKUP_PART_W				31276   
+#define IDS_BACKUP_COMPLETE				31277   
 
+	
 
 
 

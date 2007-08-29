@@ -6162,6 +6162,14 @@ BEGIN
   IDS_DATETIMEPICKER2_TIP "End time. Note that of event that happen once like\nupdate of ipfilter the endtime should be equal to the start time"
   IDS_CHECKNOENDTIME_SCHED_TIP "event has no end"
   IDS_SCHEDACTION_TIP "Right-click this window to add/remove actions from the current profile\nSome actions have parameters that can be edited"
+
+  IDS_OVERWRITE1          "File %s Already Exists. OverWrite It?"
+  IDS_OVERWRITE2          "OverWrite?"    
+  IDS_BACKUPERROR         "Error encountered during backup"
+  IDS_BACKUP_PART         "Because of their size, backing up *.part files may take a few minutes.\nAre you sure you want to do this?"
+  IDS_BACKUP_PART_W       "Are you sure?"
+  IDS_BACKUP_COMPLETE     "File(s) Copied Successfully."
+
 END
 
 #endif    // English (U.S.) resources

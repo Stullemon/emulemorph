@@ -151,14 +151,14 @@ void CPPgBackup::OnBnClickedBackupnow()
 
 	if (IsDlgButtonChecked(IDC_PART)!=0)
 	{
-		_stprintf(buffer,_T("Because of their size, backing up *.part files may take a few minutes.\nAre you sure you want to do this?"));
-		if(MessageBox(buffer,_T("Are you sure?"),MB_ICONQUESTION|MB_YESNO)== IDYES)
+		_stprintf(buffer,GetResString(IDS_BACKUP_PART  ) );		//"Because of their size, backing up *.part files may take a few minutes.\nAre you sure you want to do this?"
+		if(MessageBox(buffer,GetResString(IDS_BACKUP_PART_W),MB_ICONQUESTION|MB_YESNO)== IDYES)
 			Backup2(_T("*.part"));
 		CheckDlgButton(IDC_PART,BST_UNCHECKED);
 
 	}
 
-	MessageBox(_T("File(s) Copied Successfully."), _T("BackUp complete."), MB_OK);
+	MessageBox(_GetResString(IDS_BACKUP_COMPLETE), _T("BackUp complete."), MB_OK); //"File(s) Copied Successfully."
 	y2All = FALSE;
 }
 
@@ -205,8 +205,8 @@ void CPPgBackup::Backup(LPCTSTR extensionToBack, BOOL conFirm)
 			{
 				if (y2All == FALSE)
 				{
-					_stprintf(buffer, _T("File %s Already Exists. OverWrite It?"), FileData.cFileName);
-					int rc = ::XMessageBox(m_hWnd,buffer,_T("OverWrite?"),MB_YESNO|MB_YESTOALL|MB_ICONQUESTION);
+					_stprintf(buffer, GetResString(IDS_OVERWRITE1), FileData.cFileName);
+					int rc = ::XMessageBox(m_hWnd,buffer,GetResString(IDS_OVERWRITE2),MB_YESNO|MB_YESTOALL|MB_ICONQUESTION);
 					if (rc == IDYES)
 						OverWrite = TRUE;
 					else if (rc == IDYESTOALL)
@@ -248,7 +248,7 @@ void CPPgBackup::Backup(LPCTSTR extensionToBack, BOOL conFirm)
 		error = TRUE;
 	} 
 	if (error)
-		MessageBox(_T("Error encountered during backup"),_T("Error"),MB_OK);
+		MessageBox(GetResString(IDS_BACKUPERROR	),_T("Error"),MB_OK);
 }
 
 
@@ -300,8 +300,8 @@ void CPPgBackup::Backup2(LPCTSTR extensionToBack)
 		{  
 				if (y2All == FALSE)
 				{
-					_stprintf(buffer, _T("File %s Already Exists. OverWrite It?"), FileData.cFileName);
-					int rc = ::XMessageBox(m_hWnd,buffer,_T("OverWrite?"),MB_YESNO|MB_YESTOALL|MB_ICONQUESTION);
+					_stprintf(buffer, GetResString(IDS_OVERWRITE1), FileData.cFileName);
+					int rc = ::XMessageBox(m_hWnd,buffer,GetResString(IDS_OVERWRITE2) ,MB_YESNO|MB_YESTOALL|MB_ICONQUESTION);
 					if (rc == IDYES)
 						OverWrite = TRUE;
 					else if (rc == IDYESTOALL)
@@ -456,7 +456,7 @@ void CPPgBackup::Backup3()
 		error = TRUE;
 	} 
 	if (error)
-		MessageBox(_T("Error encountered during backup"),_T("Error"),MB_OK);
+		MessageBox(GetResString(IDS_BACKUPERROR),_T("Error_"),MB_OK);
 }
 
 void CPPgBackup::Localize(void)
