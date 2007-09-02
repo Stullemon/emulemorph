@@ -495,7 +495,7 @@ public:
 
     uint64          GetCurrentSessionLimit() const
                     {
-                        return (uint64)SESSIONMAXTRANS*(m_curSessionAmountNumber+1)+1*1024;
+                        return (uint64)SESSIONMAXTRANS*(m_curSessionAmountNumber+1);
                     }
 
 	bool			ProcessExtendedInfo(CSafeMemFile* packet, CKnownFile* tempreqfile);
@@ -532,7 +532,7 @@ public:
 	void			UnscheduleForRemoval() {
 						m_bScheduledForRemoval = false;
 
-                        if(GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
+                        if(GetQueueSessionPayloadUp() >= GetCurrentSessionLimit()) { //MORPH - Fix
                             m_curSessionAmountNumber++;
                         }
 					}
@@ -544,7 +544,7 @@ public:
 	LPCTSTR			GetScheduledRemovalDebugReason() const { return m_pszScheduledForRemovalDebugReason; }
     CString         GetScheduledRemovalDisplayReason() const { return m_strScheduledForRemovalDisplayReason; }
 
-	bool			GetScheduledRemovalLimboComplete() { return m_bScheduledForRemoval && ::GetTickCount()-m_bScheduledForRemovalAtTick > SEC2MS(10); }
+	bool			GetScheduledRemovalLimboComplete() { return m_bScheduledForRemoval && (GetQueueSessionPayloadUp() >= GetCurrentSessionLimit() ||       m_bScheduledForRemovalWillKeepWaitingTimeIntact && ::GetTickCount()-m_bScheduledForRemovalAtTick > SEC2MS(10)); }
 	DWORD			GetScheduledForRemovalAtTick() {return m_bScheduledForRemovalAtTick;} //MORPH Added by SiRoB
 	//MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 

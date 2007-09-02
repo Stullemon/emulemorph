@@ -18,6 +18,7 @@
 #include "emule.h"
 #include "emuledlg.h"
 #include "SharedFilesWnd.h"
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
 #include "PPgDirectories.h"
 #include "otherfunctions.h"
 #include "InputBox.h"
@@ -47,7 +48,8 @@ BEGIN_MESSAGE_MAP(CPPgDirectories, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgDirectories::CPPgDirectories()
-	: CPropertyPage(CPPgDirectories::IDD)
+	: CPPgtooltipped (CPPgDirectories::IDD) //leuk_he  tooltipped 
+		//: CPropertyPage(CPPgServer::IDD) leuk_he  tooltipped 
 {
 }
 
@@ -75,12 +77,18 @@ BOOL CPPgDirectories::OnInitDialog()
 
 	((CEdit*)GetDlgItem(IDC_INCFILES))->SetLimitText(509);
 	((CEdit*)GetDlgItem(IDC_TEMPFILES))->SetLimitText(509);
+/* old version: on column
 	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCFOLDERS), LVCFMT_LEFT, 280, -1); 
+*/
+	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCLIST_INACTIVE  ), LVCFMT_LEFT, 270, -1);  // sharesubdir ==> this can be better
+	m_ctlUncPaths.InsertColumn(1,GetResString(IDS_SUBDIRS), LVCFMT_LEFT); // sharesubdir + column for inactive shares
+
 	m_ctlUncPaths.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
 	GetDlgItem(IDC_SELTEMPDIRADD)->ShowWindow(thePrefs.IsExtControlsEnabled()?SW_SHOW:SW_HIDE);
 
 	LoadSettings();
+	InitTooltips(); //leuk_he tooltipped
 	Localize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -334,6 +342,21 @@ void CPPgDirectories::Localize(void)
 		GetDlgItem(IDC_SELINCDIR)->SetWindowText(GetResString(IDS_PW_BROWSE));
 		GetDlgItem(IDC_SELTEMPDIR)->SetWindowText(GetResString(IDS_PW_BROWSE));
 		GetDlgItem(IDC_SHARED_FRM)->SetWindowText(GetResString(IDS_PW_SHARED));
+
+		// leuk_he tooltipped start
+		SetTool(  IDC_INCFILES,  IDS_INCFILES_TIP);
+		SetTool(  IDC_SELINCDIR,IDS_INCFILES_TIP );
+		SetTool(  IDC_TEMPFILES,IDS_TEMPFILES_TIP );
+  	SetTool(  IDC_SELTEMPDIR ,IDS_TEMPFILES_TIP );
+		SetTool(  IDC_SELTEMPDIRADD ,IDS_TEMPFILES_TIP);
+		SetTool(  IDC_SHARESELECTOR ,IDS_SHARESELECTOR_TIP );
+		SetTool(  IDC_UNCLIST ,IDS_UNCLIST_TIP );
+		SetTool(  IDC_UNCADD ,IDS_UNCADD_TIP );
+		SetTool(  IDC_UNCREM ,IDS_UNCREM_TIP );
+		// leuk_he tooltipped end
+
+
+
 	}
 }
 

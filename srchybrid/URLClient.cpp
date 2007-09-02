@@ -159,8 +159,9 @@ bool CUrlClient::SendHttpBlockRequests()
 	/*
 	CreateBlockRequests(PARTSIZE / EMBLOCKSIZE);
 	*/
-	CreateBlockRequests(GetDownloadDatarateAVG()/(3*EMBLOCKSIZE)+1);
-	//MORPH END   - Enhanced DBR
+	//CreateBlockRequests(GetDownloadDatarateAVG()/(3*EMBLOCKSIZE)+1); morph
+	CreateBlockRequests(PARTSIZE / EMBLOCKSIZE); // original. 
+	//MORPH END   - Enhanced DBR 
 	if (m_PendingBlocks_list.IsEmpty()){
 		SetDownloadState(DS_NONEEDEDPARTS);
 		SwapToAnotherFile(_T("A4AF for NNP file. UrlClient::SendHttpBlockRequests()"), true, false, false, NULL, true, true);
@@ -202,6 +203,11 @@ bool CUrlClient::SendHttpBlockRequests()
 	strHttpRequest.AppendFormat("Connection: Keep-Alive\r\n");
 	strHttpRequest.AppendFormat("Host: %s\r\n", m_strHostA);
 	strHttpRequest.AppendFormat("\r\n");
+
+	AddDebugLogLine(false, _T("http trsnasfer from SendHttpBlockRequests %s"),(CString) strHttpRequest);
+
+		if (thePrefs.GetDebugSourceExchange())
+			AddDebugLogLine(false, _T("SXSend (%s): Client source request; %s, File=\"%s\""),SupportsSourceExchange2() ? _T("Version 2") : _T("Version 1"), DbgGetClientInfo(), reqfile->GetFileName());
 
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		Debug(_T("Sending HTTP request:\n%hs"), strHttpRequest);

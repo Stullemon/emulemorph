@@ -69,6 +69,7 @@ CPPgMorph::CPPgMorph()
     m_htiUSSGoingUpDivider = NULL;
     m_htiUSSGoingDownDivider = NULL;
     m_htiUSSNumberOfPings = NULL;
+	m_htiPingDataSize = NULL; //MORPH leuk_he ICMP ping datasize <> 0 setting
 	m_htiMinUpload = NULL;
 	m_htiUpSecu = NULL;
 	m_htiDlSecu = NULL;
@@ -285,6 +286,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiDynUpUSS = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_USS), m_htiDYNUP, m_iDynUpMode == 2);
 		m_htiUSSLog = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_LOG), m_htiDynUpUSS, m_bUSSLog);
 		m_htiUSSUDP = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_UDP), m_htiDynUpUSS, m_bUSSUDP); //MORPH - Added by SiRoB, USS UDP preferency
+		
 		// EastShare START - Added by TAHO, USS limit
 		m_htiUSSLimit = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USS_USEMAXPING), m_htiDynUpUSS, m_bUSSLimit);
 		//Buffer.Format("Max ping value (ms): ",800); //modified by Pretender
@@ -305,7 +307,9 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		Buffer.Format(GetResString(IDS_USS_NUMBEROFPINGS),1);
 		m_htiUSSNumberOfPings = m_ctrlTreeOptions.InsertItem(Buffer, TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUpUSS);
 		m_ctrlTreeOptions.AddEditBox(m_htiUSSNumberOfPings, RUNTIME_CLASS(CNumTreeOptionsEdit));
-		
+        m_htiPingDataSize = m_ctrlTreeOptions.InsertItem(GetResString(IDS_USSPINGDATASIZE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUpUSS);// MORPH leuk_he ICMP ping datasize <> 0 setting
+		m_ctrlTreeOptions.AddEditBox(m_htiPingDataSize , RUNTIME_CLASS(CNumTreeOptionsEdit)); //MORPH leuk_he ICMP ping datasize <> 0 setting
+        
 		//MORPH START - Added by Yun.SF3, Auto DynUp changing
 		m_htiDynUpAutoSwitching = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_AUTODYNUPSWITCHING), m_htiDYNUP, m_iDynUpMode == 3);
 		Buffer.Format(GetResString(IDS_MAXCONNECTIONSSWITCHBORDER), 20);
@@ -397,6 +401,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLog, m_bUSSLog);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSUDP, m_bUSSUDP); //MORPH - Added by SiRoB, USS UDP preferency
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, 	m_htiPingDataSize , m_sPingDataSize); // MORPH leuk_he ICMP ping datasize <> 0 setting
+
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUSSLimit, m_bUSSLimit); // EastShare - Added by TAHO, USS limit
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSPingLimit, m_iUSSPingLimit); // EastShare - Added by TAHO, USS limit
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSPingTolerance, m_iUSSPingTolerance);
@@ -494,6 +500,7 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iSUCDrift = thePrefs.m_iSUCDrift;;
 	m_bUSSLog = thePrefs.m_bDynUpLog;
 	m_bUSSUDP = thePrefs.m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
+	m_sPingDataSize = thePrefs.m_sPingDataSize; // MORPH leuk_he ICMP ping datasize <> 0 setting
 	m_bUSSLimit = thePrefs.m_bDynUpUseMillisecondPingTolerance; // EastShare - Added by TAHO, USS limit
 	m_iUSSPingLimit = thePrefs.m_iDynUpPingToleranceMilliseconds; // EastShare - Added by TAHO, USS limit
     m_iUSSPingTolerance = thePrefs.m_iDynUpPingTolerance;
@@ -606,6 +613,9 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_iSUCDrift = m_iSUCDrift;
 	thePrefs.m_bDynUpLog = m_bUSSLog;
 	thePrefs.m_bUSSUDP = m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
+	if ( m_sPingDataSize < 0 ) m_sPingDataSize=0;   // MORPH leuk_he ICMP ping datasize <> 0 setting
+	if ( m_sPingDataSize  > 65) m_sPingDataSize=64; //MORPH leuk_he ICMP ping datasize <> 0 setting
+	thePrefs.m_sPingDataSize =	(short) m_sPingDataSize; //MORPH leuk_he ICMP ping datasize <> 0 setting
 	thePrefs.m_bDynUpUseMillisecondPingTolerance = m_bUSSLimit; // EastShare - Added by TAHO, USS limit
 	thePrefs.m_iDynUpPingToleranceMilliseconds = m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
     thePrefs.m_iDynUpPingTolerance = m_iUSSPingTolerance;
@@ -974,6 +984,7 @@ void CPPgMorph::Localize(void)
 		SetTool(m_htiCompressLevel,IDS_COMPRESSLEVEL_TIP);
         SetTool(m_htiUseCompression,IDS_USECOMPRESS_TIP);
 		SetTool(m_htiDisableCatColors,IDS_DISABLECATCOLOR_TIP);
+		SetTool(m_htiPingDataSize,IDS_PINGDATASIZE_TIP);   //MORPH leuk_he ICMP ping datasize <> 0 setting
 		
 	}
 

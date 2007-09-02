@@ -96,7 +96,7 @@
 #define RSAKEYSIZE				384		//384 bits
 #define	MAX_SOURCES_FILE_SOFT	750
 #define	MAX_SOURCES_FILE_UDP	50
-#define SESSIONMAXTRANS			(PARTSIZE+20*1024) // "Try to send complete chunks" always sends this amount of data
+#define SESSIONMAXTRANS			PARTSIZE // "Try to send complete chunks" always sends this amount of data
 #define SESSIONMAXTIME			HR2MS(1)	//1 hour
 #define	MAXFILECOMMENTLEN		50
 #define	PARTSIZE				9728000ui64

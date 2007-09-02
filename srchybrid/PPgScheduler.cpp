@@ -68,7 +68,7 @@ CPPgScheduler::CPPgScheduler()
         : CPPgtooltipped (CPPgScheduler::IDD) 
  /*leuk_he  tooltipped 
 	: CPropertyPage(CPPgScheduler::IDD)
- */ leuk_he  tooltipped 
+ */ //leuk_he  tooltipped 
 {
 // MORPH START  leuk_he: Remove 2nd apply in scheduler
 	modified=0;

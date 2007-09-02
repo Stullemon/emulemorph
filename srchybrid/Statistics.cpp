@@ -301,24 +301,24 @@ void CStatistics::RecordRate()
 // Changed these two functions (khaos)...
 float CStatistics::GetAvgDownloadRate(int averageType)
 {
-	DWORD running;
+	float running; // Morph: leuk_he: DWORD to  float cast. to prevent overflow. 
 	switch (averageType)
 	{
 		case AVG_SESSION:
 			if (theStats.transferStarttime == 0)
 				return 0.0F;
-			running = (GetTickCount() - theStats.transferStarttime) / 1000;
+			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;
 			if (running < 5)
 				return 0.0F;
-			return (float)(theStats.sessionReceivedBytes / 1024) / running;
+			return (float)(theStats.sessionReceivedBytes / 1024.0f ) / running; 
 
 		case AVG_TOTAL:
 			if (theStats.transferStarttime == 0)
 				return thePrefs.GetConnAvgDownRate();
-			running = (GetTickCount() - theStats.transferStarttime) / 1000;
+			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;
 			if (running < 5)
 				return thePrefs.GetConnAvgDownRate();
-			return (((float)(theStats.sessionReceivedBytes / 1024) / running) + thePrefs.GetConnAvgDownRate()) / 2.0F;
+			return (((float)(theStats.sessionReceivedBytes / 1024.0f) / running) + thePrefs.GetConnAvgDownRate()) / 2.0F;
 
 		default:
 			if (downrateHistory.size() == 0)

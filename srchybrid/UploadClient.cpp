@@ -1231,7 +1231,7 @@ uint32 CUpDownClient::SendBlockData(){
             //    wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
             //}
 
-            if(!IsScheduledForRemoval() && /*wasRemoved == false &&*/ GetQueueSessionPayloadUp() > GetCurrentSessionLimit()) {
+			if(!IsScheduledForRemoval() && /*wasRemoved == false &&*/ GetQueueSessionPayloadUp()+3072 > GetCurrentSessionLimit()) {//MORPH - Schedule before the limit, slot will be removed when limit is passed
                 // Should we end this upload?
 
 				//EastShare Start - added by AndCycle, Pay Back First

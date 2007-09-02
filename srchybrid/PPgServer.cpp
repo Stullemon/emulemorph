@@ -19,7 +19,6 @@
 #include "emuleDlg.h"
 #include "ServerWnd.h"
 #include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
-#include "PPGtooltipped.h"  //leuk_he tooltipped
 #include "PPgServer.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"

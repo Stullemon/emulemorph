@@ -27,6 +27,7 @@ protected:
 	int m_iSUCDrift;
 	bool m_bUSSLog;
 	bool m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
+	int m_sPingDataSize; //MORPH leuk_he ICMP ping datasize <> 0 setting (short but no DX macro for that) 
 	int m_iUSSPingLimit; // EastShare - Added by TAHO, USS limit
     int m_iUSSPingTolerance;
     int m_iUSSGoingUpDivider;
@@ -119,6 +120,7 @@ protected:
 	HTREEITEM m_htiEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	HTREEITEM m_htiEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
 	HTREEITEM m_htiShowClientPercentage;
+	HTREEITEM m_htiPingDataSize;   //MORPH leuk_he ICMP ping datasize <> 0 setting
 	//MORPH START - Added by Stulle, Global Source Limit
 	HTREEITEM m_htiGlobalHlGroup;
 	HTREEITEM m_htiGlobalHL;

@@ -89,7 +89,7 @@ bool CAddFileThread::SR13_ImportParts(){
 	//	uint16 badpartsuccess=0;
 
 	CFile f;
-	if(!f.Open(m_strImport, CFile::modeRead  | CFile::shareDenyWrite)){
+	if(!f.Open(m_strImport, CFile::modeRead |CFile::shareDenyNone   )){
 		LogError(LOG_STATUSBAR, GetResString(IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE), m_strImport);
 		return false;
 	}

@@ -541,15 +541,14 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 	while(pos != NULL && foundposition == false) {
 		CUpDownClient* uploadingClient = uploadinglist.GetAt(pos);
 
-		if(uploadingClient->GetClassID() < classID || //to work arround scheduled slot put at the wrong place in ps class that use sub class (internal priority)
+		if( uploadingClient->GetClassID() < classID || //to work arround scheduled slot put at the wrong place in ps class that use sub class (internal priority)
 			uploadingClient->GetClassID() == classID &&
-		   (uploadingClient->IsScheduledForRemoval() == false && newclient->IsScheduledForRemoval() == true ||
-		   uploadingClient->IsScheduledForRemoval() && uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && newclient->IsScheduledForRemoval() && newclient->GetScheduledUploadShouldKeepWaitingTime() == false ||
-		   uploadingClient->IsScheduledForRemoval() == newclient->IsScheduledForRemoval() &&
-		   (!uploadingClient->IsScheduledForRemoval() /*&& !newclient->IsScheduledForRemoval()*/ || uploadingClient->GetScheduledUploadShouldKeepWaitingTime() == newclient->GetScheduledUploadShouldKeepWaitingTime()) &&
-		    (uploadingClient->IsScheduledForRemoval() && !uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && uploadingClient->GetScheduledForRemovalAtTick() >= newclient->GetScheduledForRemovalAtTick() || //Keep Order For completing scheduled slot
-			 (!uploadingClient->IsScheduledForRemoval() || uploadingClient->GetScheduledUploadShouldKeepWaitingTime() && uploadingClient->GetScheduledForRemovalAtTick() <= newclient->GetScheduledForRemovalAtTick()) //Keep Order For completing scheduled slot
-			)
+			(uploadingClient->IsScheduledForRemoval() == false ||
+			 uploadingClient->IsScheduledForRemoval() == newclient->IsScheduledForRemoval() &&
+			 (uploadingClient->GetScheduledUploadShouldKeepWaitingTime() ||
+		      uploadingClient->GetScheduledUploadShouldKeepWaitingTime() == newclient->GetScheduledUploadShouldKeepWaitingTime() &&
+			  uploadingClient->GetScheduledForRemovalAtTick() <= newclient->GetScheduledForRemovalAtTick() //Keep Order For completing scheduled slot
+			 )
 			)
 		   )
 		{
@@ -932,7 +931,7 @@ void CUploadQueue::Process() {
 	while(Pos != NULL){
         // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(Pos);
-		if (cur_client->GetUploadState() != US_UPLOADING || !cur_client->HasBlocks())
+		if (cur_client->GetUploadState() != US_UPLOADING)
 			waitingtimebeforeopeningnewslot <<= 1;
 	}
 	bool bCanAddNewSlot = (theApp.listensocket->GetTotalHalfCon() < thePrefs.GetMaxHalfConnections()) && (GetTickCount() - m_nLastStartUpload > waitingtimebeforeopeningnewslot);
@@ -1007,17 +1006,13 @@ void CUploadQueue::Process() {
 			/*
 			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || cur_client->GetSlotNumber() <= GetActiveUploadsCount() || ForceNewClient(true)) {
 			*/
-		if(!cur_client->IsScheduledForRemoval() || m_lastproccesstick-m_nLastStartUpload <= SEC2MS(11)&& cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID())+ 2 ||   
-			m_lastproccesstick-m_nLastStartUpload <= SEC2MS(1) && cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID())+ 10 ||
-			!cur_client->GetScheduledRemovalLimboComplete() ||  
-			m_lastproccesstick-m_nLastStartUpload <= 150  ||
-			cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID()) || ForceNewClient(true, cur_client->GetClassID())) {
+			if(!cur_client->IsScheduledForRemoval() || !cur_client->GetScheduledRemovalLimboComplete() || cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID()) || ForceNewClient(true, cur_client->GetClassID())) {
 				cur_client->SendBlockData();
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
 				RemoveFromUploadQueue(cur_client, (CString)_T("Scheduled for removal: ") + cur_client->GetScheduledRemovalDebugReason(), true, keepWaitingTime);
 				AddClientToQueue(cur_client,keepWaitingTime,keepWaitingTime);
-                m_nLastStartUpload = m_lastproccesstick-SEC2MS(9);
+				m_nLastStartUpload = m_lastproccesstick-SEC2MS(9);
 			}
 		}
 	}
@@ -1053,13 +1048,9 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	uint32 AllowedClientDatarate[NB_SPLITTING_CLASS];
 	theApp.lastCommonRouteFinder->GetClassByteToSend(AllowedDatarate,AllowedClientDatarate);
 	uint32 remaindatarateforcurrentclass = datarate_USS;   //datarate is too fast;
-	uint32 TotalSlots =0;
-	for(uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
-	{ if (i ==classID) 
-	       TotalSlots +=curUploadSlots;
-   	  else TotalSlots +=GetEffectiveUploadListCount(i);
-	}
-	switch (classID) {
+	uint32 TotalSlots =uploadinglist.GetCount();
+
+	 switch (classID) {
 		case 2:
 			if (remaindatarateforcurrentclass>powershareDatarate)
 				remaindatarateforcurrentclass -= powershareDatarate;
@@ -1223,7 +1214,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			//already on queue
             // VQB LowID Slot Patch, enhanced in ZZUL
             if (addInFirstPlace == false && client->HasLowID() &&
-                client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick && /*AcceptNewClient() &&*/
+				client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick && /*AcceptNewClient() &&*/
 				(AcceptNewClient(LAST_CLASS) && !(client->IsFriend() && client->GetFriendSlot()) && !client->IsPBForPS() ||
 				 AcceptNewClient(1) && client->IsPBForPS() ||
 				 AcceptNewClient(0) && client->IsFriend() && client->GetFriendSlot())) //MORPH - Added by SiRoB, Upload Splitting Class
@@ -1419,7 +1410,7 @@ void CUploadQueue::ScheduleRemovalFromUploadQueue(CUpDownClient* client, LPCTSTR
     client->ScheduleRemovalFromUploadQueue(pszDebugReason, strDisplayReason, earlyabort);
 	MoveDownInUploadQueue(client);
 
-    m_nLastStartUpload = ::GetTickCount();
+    //m_nLastStartUpload = ::GetTickCount(); //MORPH - To avoid waiting 10" before opening a new slot due to completing
 }
 //MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
@@ -1525,9 +1516,13 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			}
 
 		//MORPH START - Added by SiRoB, Upload Splitting Class
+		/*
 		for (uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
 			m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[i] = 0;
 		memset(m_abAddClientOfThisClass, 0, sizeof(m_abAddClientOfThisClass));
+		*/
+		if (m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] > m_aiSlotCounter[classID])
+			m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] = m_aiSlotCounter[classID];
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
 
 		//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)

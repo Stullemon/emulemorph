@@ -1643,7 +1643,7 @@ int CUpdateItemThread::Run() {
 				update_info->bNeedToUpdate = true;
 			} else {
 				update_info = new update_info_struct;
-				update_info->dwUpdate = 0;
+				update_info->dwUpdate = GetTickCount();
 				update_info->bNeedToUpdate = true;
 				ListItems.SetAt(item, update_info);
 			}
@@ -1668,8 +1668,10 @@ int CUpdateItemThread::Run() {
 		while (pos != NULL)
 		{
 			ListItems.GetNextAssoc( pos, item, update_info );
-			if (update_info->dwUpdate < GetTickCount() && update_info->bNeedToUpdate) {
-				if (update_info->dwUpdate + 2* MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE > GetTickCount()) { //check if not too much time occured before to prevent overload
+			if (update_info->dwUpdate > GetTickCount()) {
+				wecanwait = min(wecanwait,update_info->dwUpdate-GetTickCount());
+			} else if (update_info->dwUpdate <= GetTickCount() && update_info->bNeedToUpdate) {
+				if (update_info->dwUpdate + MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE > GetTickCount()) { //check if not too much time occured before to prevent overload
 					LVFINDINFO find;
 					find.flags = LVFI_PARAM;
 					find.lParam = (LPARAM)item;
@@ -1682,8 +1684,6 @@ int CUpdateItemThread::Run() {
 				} else { //we couldn't process it before du to cpu load, so delay the update
 					update_info->dwUpdate = GetTickCount()+MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE;
 				}
-			} else if (update_info->dwUpdate > GetTickCount()) {
-				wecanwait = min(wecanwait,update_info->dwUpdate-GetTickCount());
 			} else {
 				ListItems.RemoveKey(item);
 				delete update_info;

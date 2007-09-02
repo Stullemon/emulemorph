@@ -1,7 +1,13 @@
 #pragma once
 #include "DirectoryTreeCtrl.h"
 
+
+// MORPH START leuk_he tooltipped
+/*
 class CPPgDirectories : public CPropertyPage
+*/
+class CPPgDirectories : public CPPgtooltipped  
+// MORPH END leuk_he tooltipped
 {
 	DECLARE_DYNAMIC(CPPgDirectories)
 

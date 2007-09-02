@@ -2747,7 +2747,7 @@ void CUpDownClient::SetRequestFile(CPartFile* pReqFile)
 	if (pReqFile != reqfile || reqfile == NULL)
 		ResetFileStatusInfo();
 	//MORPH START - Added by SiRoB, Keep A4AF infos
-	if (reqfile != reqfile) {
+	if (pReqFile != reqfile) {
 		uint8* PartStatus;
 		if (pReqFile == NULL) {
 			if(m_PartStatus_list.Lookup(reqfile,PartStatus)){

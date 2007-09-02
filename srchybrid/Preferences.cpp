@@ -861,6 +861,13 @@ void CPreferences::Init()
 						toadd.Append(L"\\");
 				shareddir_list.AddHead(toadd);
 			}
+      // MORPH START sharesubdir 
+			else
+			{   theApp.QueueLogLine(false,_T("Dir %s Added to inaccesable directories") , toadd);  // Note thate queue need to be used because logwindow is not initialized (logged time is wrong)
+				inactive_shareddir_list.AddHead(toadd); // sharedsubdir inactive
+			}
+      // MORPH END sharesubdir 
+
 		}
 		}
 		catch (CFileException* ex) {
@@ -870,6 +877,50 @@ void CPreferences::Init()
 		sdirfile->Close();
 	}
 	delete sdirfile;
+	
+	// SLUGFILLER START: shareSubdir
+	// shared directories with subdirectories
+    TCHAR * fullpath = new TCHAR[_tcslen(GetMuleDirectory(EMULE_CONFIGDIR) ) + MAX_PATH];
+	_stprintf(fullpath, _T("%s\\sharedsubdir.ini"), GetMuleDirectory(EMULE_CONFIGDIR) );
+	sdirfile = new CStdioFile();
+	bIsUnicodeFile = IsUnicodeFile(fullpath); // check for BOM
+	// open the text file either in ANSI (text) or Unicode (binary), this way we can read old and new files
+	// with nearly the same code..
+	if (sdirfile->Open(fullpath, CFile::modeRead | CFile::shareDenyWrite | (bIsUnicodeFile ? CFile::typeBinary : 0)))
+	{
+		try {
+			if (bIsUnicodeFile)
+				sdirfile->Seek(sizeof(WORD), SEEK_CUR); // skip BOM
+
+			CString toadd;
+			while (sdirfile->ReadString(toadd))
+			{
+				toadd.Trim(_T("\r\n")); // need to trim '\r' in binary mode
+				TCHAR szFullPath[MAX_PATH];
+				if (PathCanonicalize(szFullPath, toadd))
+					toadd = szFullPath;
+
+				if (_taccess(toadd, 0) == 0) { // only add directories which still exist
+					if (toadd.Right(1) != _T('\\'))
+						toadd.Append(_T("\\"));
+					sharedsubdir_list.AddHead(toadd);
+				}
+				else  {
+					   theApp.QueueLogLine(false,_T("Dir %s Added to inaccesable directories with subdir") , toadd); 
+					inactive_sharedsubdir_list.AddHead(toadd);	// sharedsubdir	inactive 
+				}
+
+			}
+		}
+		catch (CFileException* ex) {
+			ASSERT(0);
+			ex->Delete();
+		}
+		sdirfile->Close();
+	}
+	delete sdirfile;
+	delete[] fullpath;
+	// SLUGFILLER END: shareSubdir
 	
 	// serverlist addresses
 	// filename update to reasonable name
@@ -1853,6 +1904,12 @@ bool CPreferences::Save(){
 				sdirfile.WriteString(shareddir_list.GetNext(pos));
 				sdirfile.Write(L"\r\n", sizeof(TCHAR)*2);
 			}
+      // MORPH START sharesubdir inactive shares 
+			for (POSITION pos = inactive_shareddir_list.GetHeadPosition();pos != 0;){  // inactive sharedir
+				sdirfile.WriteString(inactive_shareddir_list.GetNext(pos).GetBuffer());
+				sdirfile.Write(_T("\r\n"), sizeof(TCHAR)*2);
+			}
+       // MORPH EEND sharesubdir 
 			if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
 				sdirfile.Flush(); // flush file stream buffers to disk buffers
 				if (_commit(_fileno(sdirfile.m_pStream)) != 0) // commit disk buffers to disk
@@ -1871,6 +1928,47 @@ bool CPreferences::Save(){
 	else
 		error = true;
 
+	// SLUGFILLER START: shareSubdir
+	TCHAR *fullpath = new TCHAR[_tcslen(GetMuleDirectory(EMULE_CONFIGDIR)) + 19];
+	_stprintf(fullpath, _T("%s\\sharedsubdir.ini"), GetMuleDirectory(EMULE_CONFIGDIR));
+	if (sdirfile.Open(fullpath, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite | CFile::typeBinary))
+	{
+		try{
+			// write Unicode byte-order mark 0xFEFF
+			WORD wBOM = 0xFEFF;
+			sdirfile.Write(&wBOM, sizeof(wBOM));
+
+			for (POSITION pos = sharedsubdir_list.GetHeadPosition();pos != 0;){
+				sdirfile.WriteString(sharedsubdir_list.GetNext(pos).GetBuffer());
+				sdirfile.Write(_T("\r\n"), sizeof(TCHAR)*2);
+			}
+			if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
+				sdirfile.Flush(); // flush file stream buffers to disk buffers
+			}
+			for (POSITION pos = inactive_sharedsubdir_list.GetHeadPosition();pos != 0;){  // inactive sharesubdir
+				sdirfile.WriteString(inactive_sharedsubdir_list.GetNext(pos).GetBuffer());
+				sdirfile.Write(_T("\r\n"), sizeof(TCHAR)*2);
+			}
+			if (thePrefs.GetCommitFiles() >= 2 || (thePrefs.GetCommitFiles() >= 1 && !theApp.emuledlg->IsRunning())){
+				sdirfile.Flush(); // flush file stream buffers to disk buffers
+				if (_commit(_fileno(sdirfile.m_pStream)) != 0) // commit disk buffers to disk
+					AfxThrowFileException(CFileException::hardIO, GetLastError(), sdirfile.GetFileName());
+			}
+			sdirfile.Close();
+		}
+		catch(CFileException* error){
+			TCHAR buffer[MAX_CFEXP_ERRORMSG];
+			error->GetErrorMessage(buffer,ARRSIZE(buffer));
+			if (thePrefs.GetVerbose())
+				AddDebugLogLine(true,_T("Failed to save %s - %s"), fullpath, buffer);
+			error->Delete();
+		}
+	}
+	else
+		error = true;
+	delete[] fullpath;
+	fullpath=NULL;
+	// SLUGFILLER END: shareSubdir
 	::CreateDirectory(GetMuleDirectory(EMULE_INCOMINGDIR), 0);
 	::CreateDirectory(GetTempDir(),0);
 	return error;
@@ -3867,7 +3965,12 @@ void CPreferences::LoadCats()
 
 		AddCat(newcat);
 		if (!PathFileExists(newcat->strIncomingPath))
-			::CreateDirectory(newcat->strIncomingPath, 0);
+			//MORPH START: test if directory was succesfuly create else yell in log
+			if (::CreateDirectory(newcat->strIncomingPath, 0)!= 0 ){
+				newcat->strIncomingPath = GetMuleDirectory(EMULE_INCOMINGDIR); // MORPH
+			    theApp.QueueLogLine(true,_T("incoming directory  %s of category %s not found ") , newcat->strIncomingPath, newcat->strTitle );  // Note that  queue need to be used because logwindow is not initialized (logged time is wrong)
+			}
+			//MORPH	END
 	}
 }
 // khaos::categorymod-

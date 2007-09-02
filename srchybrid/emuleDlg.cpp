@@ -1683,6 +1683,8 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 		     theApp.m_app_state = APP_STATE_SHUTTINGDOWN; // do no ask to close
 			 OnClose(); 
 			 return true;}
+		if (clcommand==_T("reload")) {theApp.downloadqueue->StartNextFile(); return true;} // morph relaod shared files
+			 theApp.sharedfiles->Reload();
 		// MORPH END	  do not ask exit from command prompt.
 		if (clcommand==_T("restore")) {RestoreWindow();return true;}
 		if (clcommand==_T("reloadipf")) {theApp.ipfilter->LoadFromDefaultFile(); return true;}

@@ -846,6 +846,10 @@ public:
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	static	CStringList shareddir_list;
+    static	CStringList sharedsubdir_list;	// SLUGFILLER: shareSubdir
+	static	CStringList inactive_shareddir_list; // sharedsubdir inactive 
+    static	CStringList inactive_sharedsubdir_list;	// sharedsubdir inactive
+    
 	static	CStringList addresses_list;
 
 	static	int		m_iDbgHeap;
