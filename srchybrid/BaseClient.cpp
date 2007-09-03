@@ -59,6 +59,7 @@
 #include "ClientUDPSocket.h"
 #include "shahashset.h"
 #include "Log.h"
+#include "libald.h" //MORPH - Added by Stulle, AppleJuice Detection [Xman]
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -406,6 +407,10 @@ LPCTSTR CUpDownClient::TestLeecher(){
 		return _T("Fake MODSTRING");
 	}else if (m_nClientVersion > MAKE_CLIENT_VERSION(0, 30, 0) && m_byEmuleVersion > 0 && m_byEmuleVersion != 0x99 && m_clientSoft == SO_EMULE){
 		return _T("Fake emuleVersion");
+	//MORPH START - Added by Stulle, AppleJuice Detection [Xman]
+	}else if(CheckUserHash()){
+		return _T("AppleJuice");
+	//MORPH END   - Added by Stulle, AppleJuice Detection [Xman]
 	}else if(m_clientSoft == SO_EMULE && !m_pszUsername){
 		return _T("Empty Nick");
 	//MORPH START - Added by Stulle, Morph Leecher Detection
@@ -3888,3 +3893,49 @@ float CUpDownClient::GetModVersion(CString modversion) const
 	return (float)_tstof(modversion.Mid(theApp.m_uModLength));
 }
 //MORPH END   - Anti ModID Faker [Xman]
+
+//MORPH START - Added by Stulle, AppleJuice Detection [Xman]
+#define AJ_MD5_BUFFER_SIZE	92				// The buffer is always this length exactly
+
+bool CUpDownClient::CheckUserHash()
+{
+	const PBYTE userhash=(PBYTE)GetUserHash();
+	int buflen;
+	BOOL bIsApplejuice = FALSE;
+	BYTE AJByte;
+	BYTE md5_hashval[16];
+	BYTE buffer[AJ_MD5_BUFFER_SIZE + 2];	// Need 2 extra bytes because _tprintf()
+	_TCHAR FormatString[] =	L"@ppl"			// adds a terminating UNICODE NULL char
+		L"%.2X%.2X%.2X%.2X%.2X%.2X%.2X%.2X"
+		L" uf€ablE "
+		L"%.2X%.2X%.2X%.2X%.2X%.2X%.2X"
+		L" 89";
+
+
+	buflen = _stprintf(	(TCHAR *) buffer,
+		FormatString,
+		userhash[0], userhash[1], userhash[2], userhash[3],
+		userhash[4], userhash[5], userhash[6], userhash[7],
+		userhash[9], userhash[10], userhash[11], userhash[12],
+		userhash[13], userhash[14], userhash[15]
+		);
+
+
+		// Hash the data in the buffer using the MD5 algorithm
+
+		if (MD5_FUNCTION(buffer, buflen * sizeof(TCHAR), md5_hashval)) {
+
+
+			AJByte = ((md5_hashval[4] & 0x0F) << 4) | (md5_hashval[12] & 0x0F);
+
+
+			bIsApplejuice = (userhash[8] == AJByte);
+		}
+
+		//return bIsApplejuice;
+		if(bIsApplejuice)
+			return true;
+		else
+			return false;
+}
+//MORPH END   - Added by Stulle, AppleJuice Detection [Xman]

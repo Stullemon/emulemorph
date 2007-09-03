@@ -390,6 +390,9 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\MD5_CAPI.cpp">
+			</File>
+			<File
 				RelativePath="MD5Sum.cpp">
 			</File>
 			<File
@@ -863,6 +866,9 @@
 			</File>
 			<File
 				RelativePath="LastCommonRouteFinder.h">
+			</File>
+			<File
+				RelativePath=".\libald.h">
 			</File>
 			<File
 				RelativePath="ListenSocket.h">

@@ -10,6 +10,7 @@ REMOVED: Second appy button on schedule options screen [leuk_he]
 ADD: Scheduler:Reload shared files action [leuk_he]
 ADD:"emule.exe reload" rescan shared directory.
 ADD: USS:option to set icmp data size to workarround some buggy firewalls(ping -l option)
+ADD: AppleJuice detection [Xman/Anonymous Anti-Leecher]
 
 various code optimizations. 
 --------------------------------------
