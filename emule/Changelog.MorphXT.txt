@@ -3,6 +3,7 @@ Changelog for eMule 0.48a MorphXT v10.2
 --------------------------------------
 xx-08-2007
 FIX: xmlnews feeddirectory corrected. (since 10.0) 
+FIX: rollback to 9.6 statistics code (splitter bug)
 CHANGED: upload completing slots behaviour. 
 CHANGED: upload tuned. 
 CHANGED: if "don't remove spare trickle" is enabled slotfocus is disabled. 

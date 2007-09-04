@@ -168,9 +168,13 @@ BOOL CStatisticsDlg::OnInitDialog()
 	GetDlgItem(IDC_SCOPE_U)->GetWindowRect(rcUp);
 	GetDlgItem(IDC_SCOPE_U)->DestroyWindow();
 	ScreenToClient(rcUp);
+	// MORPH START - statistic fix [bluesonicboy]
+	/*
 	// compensate rounding errors due to dialog units, make each of the 3 panes with same height
 	rcUp.top = rcDown.bottom + 4;
 	rcUp.bottom = rcUp.top + rcDown.Height();
+	*/
+	// MORPH END   - statistic fix [bluesonicboy]
 	m_UploadOMeter.Create(WS_VISIBLE | WS_CHILD, rcUp, this, IDC_SCOPE_U);
 	SetARange(false, thePrefs.GetMaxGraphUploadRate(true));
 	m_UploadOMeter.SetYUnits(GetResString(IDS_KBYTESPERSEC));
@@ -180,9 +184,13 @@ BOOL CStatisticsDlg::OnInitDialog()
 	GetDlgItem(IDC_STATSSCOPE)->GetWindowRect(rcConn);
 	GetDlgItem(IDC_STATSSCOPE)->DestroyWindow();
 	ScreenToClient(rcConn);
+	// MORPH START - statistic fix [bluesonicboy]
+	/*
 	// compensate rounding errors due to dialog units, make each of the 3 panes with same height
 	rcConn.top = rcUp.bottom + 4;
 	rcConn.bottom = rcConn.top + rcDown.Height();
+	*/
+	// MORPH END   - statistic fix [bluesonicboy]
 	m_Statistics.Create(WS_VISIBLE | WS_CHILD, rcConn, this, IDC_STATSSCOPE);
 	m_Statistics.SetRanges(0, thePrefs.GetStatsMax()) ;
 	m_Statistics.autofitYscale=false;
@@ -223,10 +231,16 @@ BOOL CStatisticsDlg::OnInitDialog()
 	ScreenToClient(rcStat);
 		
 	//vertical splitter
+	// MORPH START - statistic fix [bluesonicboy]
+	/*	
 	rcSpl.left = rcTree.right;
 	rcSpl.right = rcSpl.left + 4;
 	rcSpl.top = rcW.top + 2;
 	rcSpl.bottom = rcW.bottom - 5;
+	*/
+	rcSpl.left=rcTree.right+1; rcSpl.right=rcSpl.left+4; rcSpl.top=rcW.top+2; rcSpl.bottom=rcW.bottom-5;
+	// MORPH END   - statistic fix [bluesonicboy]
+
 	m_wndSplitterstat.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT);
 	int PosStatVinitX = rcSpl.left;
 	int PosStatVnewX = thePrefs.GetSplitterbarPositionStat()*rcW.Width()/100;
@@ -243,10 +257,20 @@ BOOL CStatisticsDlg::OnInitDialog()
 	//HR splitter
 	rcSpl.left=rcDown.left;
 	rcSpl.right=rcDown.right;
+	// MORPH START - statistic fix [bluesonicboy]
+	/*	
 	rcSpl.top = rcDown.bottom;
+	*/
+	rcSpl.top=rcDown.bottom+1;
+	// MORPH END   - statistic fix [bluesonicboy]
 	rcSpl.bottom=rcSpl.top+4; 
 	m_wndSplitterstat_HR.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT_HR);
+
+	// MORPH START - statistic fix [bluesonicboy]
+	/*
 	int PosStatVinitZ = rcSpl.top;
+	*/
+	// MORPH END   - statistic fix [bluesonicboy]
 	int PosStatVnewZ = thePrefs.GetSplitterbarPositionStat_HR()*rcW.Height()/100;
 	int maxZ = rcW.bottom-14;
 	int minZ = 0;
@@ -258,13 +282,34 @@ BOOL CStatisticsDlg::OnInitDialog()
 	rcSpl.bottom = PosStatVnewZ+4;
 	m_wndSplitterstat_HR.MoveWindow(rcSpl);
 
+	// MORPH START - statistic fix [bluesonicboy]
+    //   Init. Pos. fix - Set Download Scope relative to this splitter, right and left are set
+    //   top will always be 0. Also set Upload Scope top position bottom will be set later.
+     if(rcSpl.top) 
+		 rcDown.bottom = rcSpl.top - 1;
+     else            
+		 rcDown.bottom = 0;
+      m_DownloadOMeter.MoveWindow(rcDown);
+      rcUp.top = rcSpl.bottom + 1;
+	// MORPH END   - statistic fix [bluesonicboy]
+
 	//HL splitter
 	rcSpl.left=rcUp.left;
 	rcSpl.right=rcUp.right;
+	// MORPH START - statistic fix [bluesonicboy]
+	/*	
 	rcSpl.top = rcUp.bottom;
+	*/
+	rcSpl.top=rcUp.bottom+1;
+	// MORPH END   - statistic fix [bluesonicboy]
 	rcSpl.bottom=rcSpl.top+4;
 	m_wndSplitterstat_HL.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT_HL);
+
+	// MORPH START - statistic fix [bluesonicboy]
+	/*
 	int PosStatVinitY = rcSpl.top;
+	*/
+	// MORPH END   - statistic fix [bluesonicboy]
 	int PosStatVnewY = thePrefs.GetSplitterbarPositionStat_HL()*rcW.Height()/100;
 	int maxY = rcW.bottom-9;
 	int minY = 10;
@@ -276,9 +321,25 @@ BOOL CStatisticsDlg::OnInitDialog()
 	rcSpl.bottom = PosStatVnewY+4;
 	m_wndSplitterstat_HL.MoveWindow(rcSpl);
 
+	// MORPH START - statistic fix [bluesonicboy]
+    //  Init. Pos. fix - Set Upload Scope bottom relative to this splitter, right and left are set.
+     //                                      Also set Connection Scope Top relative to this splitter; bottom, right and left are set.
+        if(rcSpl.top) rcUp.bottom = rcSpl.top - 1;
+          else            rcUp.bottom = 0;
+        if(rcUp.top > rcUp.bottom) rcUp.top = rcUp.bottom;
+        m_UploadOMeter.MoveWindow(rcUp);
+        rcStat.top = rcSpl.bottom + 1;
+        if(rcStat.top > rcStat.bottom) rcStat.top = rcStat.bottom;
+        m_Statistics.MoveWindow(rcStat);
+
 	DoResize_V(PosStatVnewX - PosStatVinitX);
+	// MORPH START - statistic fix [bluesonicboy]
+	/*
 	DoResize_HL(PosStatVnewY - PosStatVinitY);
 	DoResize_HR(PosStatVnewZ - PosStatVinitZ);
+	*/ 
+	// MORPH END   - statistic fix [bluesonicboy]
+
 
 	Localize();
 	ShowStatistics(true);
@@ -458,10 +519,19 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
   
 			if (rcW.Width()>0) 
 			{
+				// MORPH START - statistic fix [bluesonicboy]
+				/*
 					rcSpl.left = rctree.right;
 				rcSpl.right=rcSpl.left+4;
 				rcSpl.top=rcW.top+2;
 					rcSpl.bottom = rcW.bottom - 5;
+				*/
+				rcSpl.left=rctree.right+1;
+				rcSpl.right=rcSpl.left+4;
+				rcSpl.top=rcW.top+2;
+				rcSpl.bottom=rcW.bottom-6;
+				// MORPH END   - statistic fix [bluesonicboy]
+
 				m_wndSplitterstat.MoveWindow(rcSpl,true);
 			}
 		}
@@ -480,10 +550,19 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
   
 			if (rcW.Height()>0) 
 			{
+					// MORPH START - statistic fix [bluesonicboy]
+					/*
 					rcSpl.left = rcUp.left;
 					rcSpl.right = rcUp.right;
 					rcSpl.top = rcUp.bottom;
 					rcSpl.bottom = rcUp.bottom + 4;
+					*/
+					rcSpl.left=rcUp.left+2;
+					rcSpl.right=rcUp.right-2;
+					rcSpl.top=rcUp.bottom+1;
+					rcSpl.bottom=rcUp.bottom+5;
+					// MORPH END   - statistic fix [bluesonicboy]
+
 				m_wndSplitterstat_HL.MoveWindow(rcSpl,true);
 			}
 		}
@@ -501,10 +580,19 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
   
 			if (rcW.Height()>0) 
 			{
+					// MORPH START - statistic fix [bluesonicboy]
+					/*
 					rcSpl.left = rcDown.left;
 					rcSpl.right = rcDown.right;
 					rcSpl.top = rcDown.bottom;
 					rcSpl.bottom = rcDown.bottom + 4;
+					*/
+					rcSpl.left=rcDown.left+2;
+					rcSpl.right=rcDown.right-2;
+					rcSpl.top=rcDown.bottom+1;
+					rcSpl.bottom=rcDown.bottom+5;
+					// MORPH END   - statistic fix [bluesonicboy]
+
 				m_wndSplitterstat_HR.MoveWindow(rcSpl,true);
 			}
 		}
@@ -553,10 +641,15 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 					ScreenToClient(rcTree);
 					ScreenToClient(rcDown);
 					long splitposstat=thePrefs.GetSplitterbarPositionStat()*rcW.Width()/100;
+					// MORPH START - statistic fix [bluesonicboy]
+					/*
 					rcSpl.left = splitposstat; 
 					rcSpl.right = rcSpl.left + 4; 
 					rcSpl.top = rcW.top + 2; 
 					rcSpl.bottom = rcW.bottom - 5;
+					*/
+					rcSpl.left=splitposstat; rcSpl.right=rcSpl.left+4; rcSpl.top=rcW.top+2; rcSpl.bottom=rcW.bottom-5;
+					// MORPH END   - statistic fix [bluesonicboy]
     				m_wndSplitterstat.MoveWindow(rcSpl,true);
 					m_wndSplitterstat.SetRange(rcW.left+11, rcW.right-11);
 				}
@@ -575,10 +668,15 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 					long splitposstat=thePrefs.GetSplitterbarPositionStat()*rcW.Width()/100;
 					long splitposstat_HR=thePrefs.GetSplitterbarPositionStat_HR()*rcW.Height()/100;
 					long splitposstat_HL=thePrefs.GetSplitterbarPositionStat_HL()*rcW.Height()/100;
+					// MORPH START - statistic fix [bluesonicboy]
+					/*
 					rcSpl.left = splitposstat + 7;
 					rcSpl.right = rcW.right - 14; 
 					rcSpl.top = splitposstat_HR; 
 					rcSpl.bottom = rcSpl.top + 4;
+					*/
+					rcSpl.left=splitposstat+7; rcSpl.right=rcW.right-14; rcSpl.top=splitposstat_HR; rcSpl.bottom=rcSpl.top+4;
+					// MORPH END   - statistic fix [bluesonicboy]
 					m_wndSplitterstat_HR.MoveWindow(rcSpl,true);
 					m_wndSplitterstat_HR.SetRange(rcW.top+3, splitposstat_HL-4);
 				}
@@ -597,10 +695,15 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 					long splitposstat=thePrefs.GetSplitterbarPositionStat()*rcW.Width()/100;
 					long splitposstat_HR=thePrefs.GetSplitterbarPositionStat_HR()*rcW.Height()/100;
 					long splitposstat_HL=thePrefs.GetSplitterbarPositionStat_HL()*rcW.Height()/100;
+					// MORPH START - statistic fix [bluesonicboy]
+					/*
 					rcSpl.left = splitposstat + 7; 
 					rcSpl.right = rcW.right - 14; 
 					rcSpl.top = splitposstat_HL; 
 					rcSpl.bottom = rcSpl.top + 4;
+					*/
+					rcSpl.left=splitposstat+7; rcSpl.right=rcW.right-14; rcSpl.top=splitposstat_HL; rcSpl.bottom=rcSpl.top+4;
+					// MORPH END   - statistic fix [bluesonicboy]
 					m_wndSplitterstat_HL.MoveWindow(rcSpl,true);
 					m_wndSplitterstat_HL.SetRange(splitposstat_HR+14, rcW.bottom-7);
 				}
