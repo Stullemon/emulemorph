@@ -171,6 +171,9 @@ void CDownloadListCtrl::Init()
 	//MORPH START - Added by SiRoB, IP2Country
 	InsertColumn(15, GetResString(IDS_COUNTRY) ,LVCFMT_LEFT, 100);
 	//MORPH END   - Added by SiRoB, IP2Country
+	//MORPH START - Added by SiRoB, IP2Country
+	InsertColumn(16, GetResString(IDS_FD_DOWNLOADSTARTED) ,LVCFMT_LEFT, 100);
+	//MORPH END   - Added by SiRoB, IP2Country
 	SetAllIcons();
 	Localize();
 	LoadSettings();
@@ -365,6 +368,11 @@ void CDownloadListCtrl::Localize()
 	pHeaderCtrl->SetItem(15, &hdi);
 	//MORPH END   - Added by SiRoB, IP2Country
 
+    //MORPH START - download added
+	strRes = GetResString(	IDS_FD_DOWNLOADSTARTED);
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
+	pHeaderCtrl->SetItem(16, &hdi);
+	//MORPH END   - download added
 	CreateMenues();
 	ShowFilesCount();
 }
@@ -899,6 +907,17 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 			}
 			break;
 		// khaos::accuratetimerem-
+		// MORPH START download added
+			case 16: // File created = download added
+			if (!IsColumnHidden(16)) {
+				if(lpPartFile->GetCrCFileDate()!=NULL )
+					buffer=lpPartFile->GetCrCFileDate().Format( thePrefs.GetDateTimeFormat());
+				else
+					buffer.Format(_T("%s"),GetResString(IDS_NEVER));
+				dc->DrawText(buffer,buffer.GetLength(),const_cast<LPRECT>(lpRect), DLC_DT_TEXT);
+			}
+			break;
+	     // MORPH END download added
 		}
 	}
 }
@@ -3215,6 +3234,16 @@ int CDownloadListCtrl::Compare(const CPartFile* file1, const CPartFile* file2, L
 				comp=0;
 			break;
 		// khaos::categorymod-
+		//MORPH START download added 
+		case 16: 
+			if (file1->GetCrCFileDate() > file2->GetCrCFileDate())
+				comp=1;
+			else if(file1->GetCrCFileDate() < file2->GetCrCFileDate())
+				comp=-1;
+			else
+				comp=0;
+			break;
+		// MORPH END download added
 		// SLUGFILLER: DLsortFix
 		case 99:	// met file name asc, only available as last-resort sort to make sure no two files are equal
 			comp=CompareLocaleStringNoCase(file1->GetFullName(), file2->GetFullName());
