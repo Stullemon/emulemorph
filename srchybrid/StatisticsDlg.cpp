@@ -155,6 +155,8 @@ BOOL CStatisticsDlg::OnInitDialog()
 	CreateMyTree();
 
 	// Setup download-scope
+	// MORPH START - statistic fix [bluesonicboy]
+	/*
 	CRect rcDown;
 	GetDlgItem(IDC_SCOPE_D)->GetWindowRect(rcDown);
 	GetDlgItem(IDC_SCOPE_D)->DestroyWindow();
@@ -168,30 +170,45 @@ BOOL CStatisticsDlg::OnInitDialog()
 	GetDlgItem(IDC_SCOPE_U)->GetWindowRect(rcUp);
 	GetDlgItem(IDC_SCOPE_U)->DestroyWindow();
 	ScreenToClient(rcUp);
-	// MORPH START - statistic fix [bluesonicboy]
-	/*
 	// compensate rounding errors due to dialog units, make each of the 3 panes with same height
 	rcUp.top = rcDown.bottom + 4;
 	rcUp.bottom = rcUp.top + rcDown.Height();
-	*/
-	// MORPH END   - statistic fix [bluesonicboy]
 	m_UploadOMeter.Create(WS_VISIBLE | WS_CHILD, rcUp, this, IDC_SCOPE_U);
+	*/
+	CRect rect;
+	GetDlgItem(IDC_SCOPE_D)->GetWindowRect(rect) ;
+	GetDlgItem(IDC_SCOPE_D)->DestroyWindow();
+	ScreenToClient(rect) ;
+	m_DownloadOMeter.Create(WS_VISIBLE | WS_CHILD, rect, this, IDC_SCOPE_D);
+	SetARange(true,thePrefs.GetMaxGraphDownloadRate());
+	m_DownloadOMeter.SetYUnits(GetResString(IDS_KBYTESPERSEC));
+	
+	// Setup upload-scope
+	GetDlgItem(IDC_SCOPE_U)->GetWindowRect(rect) ;
+	GetDlgItem(IDC_SCOPE_U)->DestroyWindow();
+	ScreenToClient(rect) ;
+	m_UploadOMeter.Create(WS_VISIBLE | WS_CHILD, rect, this, IDC_SCOPE_U);
+	// MORPH END   - statistic fix [bluesonicboy]
 	SetARange(false, thePrefs.GetMaxGraphUploadRate(true));
 	m_UploadOMeter.SetYUnits(GetResString(IDS_KBYTESPERSEC));
 	
 	// Setup additional graph-scope
+	// MORPH START - statistic fix [bluesonicboy]
+	/*
 	CRect rcConn;
 	GetDlgItem(IDC_STATSSCOPE)->GetWindowRect(rcConn);
 	GetDlgItem(IDC_STATSSCOPE)->DestroyWindow();
 	ScreenToClient(rcConn);
-	// MORPH START - statistic fix [bluesonicboy]
-	/*
 	// compensate rounding errors due to dialog units, make each of the 3 panes with same height
 	rcConn.top = rcUp.bottom + 4;
 	rcConn.bottom = rcConn.top + rcDown.Height();
-	*/
-	// MORPH END   - statistic fix [bluesonicboy]
 	m_Statistics.Create(WS_VISIBLE | WS_CHILD, rcConn, this, IDC_STATSSCOPE);
+	*/
+	GetDlgItem(IDC_STATSSCOPE)->GetWindowRect(rect) ;
+	GetDlgItem(IDC_STATSSCOPE)->DestroyWindow();
+	ScreenToClient(rect) ;
+	m_Statistics.Create(WS_VISIBLE | WS_CHILD, rect, this, IDC_STATSSCOPE);
+	// MORPH END   - statistic fix [bluesonicboy]
 	m_Statistics.SetRanges(0, thePrefs.GetStatsMax()) ;
 	m_Statistics.autofitYscale=false;
 	// Set the trend ratio of the Active Connections trend in the Connection Statistics scope.
@@ -216,7 +233,12 @@ BOOL CStatisticsDlg::OnInitDialog()
 	EnableWindow( TRUE );
 
 	m_ilastMaxConnReached = 0;
+	// MORPH START - statistic fix [bluesonicboy]
+	/*
 	CRect rcW,rcSpl,rcTree,rcStat;
+	*/
+	CRect rcW,rcSpl,rcTree,rcDown,rcUp,rcStat;
+	// MORPH END   - statistic fix [bluesonicboy]
 	
 	GetWindowRect(rcW);
 	ScreenToClient(rcW);
@@ -239,9 +261,9 @@ BOOL CStatisticsDlg::OnInitDialog()
 	rcSpl.bottom = rcW.bottom - 5;
 	*/
 	rcSpl.left=rcTree.right+1; rcSpl.right=rcSpl.left+4; rcSpl.top=rcW.top+2; rcSpl.bottom=rcW.bottom-5;
+	m_wndSplitterstat.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT);
 	// MORPH END   - statistic fix [bluesonicboy]
 
-	m_wndSplitterstat.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT);
 	int PosStatVinitX = rcSpl.left;
 	int PosStatVnewX = thePrefs.GetSplitterbarPositionStat()*rcW.Width()/100;
 	int maxX = rcW.right-13;
