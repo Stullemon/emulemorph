@@ -1,19 +1,18 @@
 --------------------------------------
 Changelog for eMule 0.48a MorphXT v10.2
 --------------------------------------
-xx-08-2007
+05-09-2007
 FIX: xmlnews feeddirectory corrected. (since 10.0) 
-FIX: rollback to 9.6 statistics code (splitter bug)
 CHANGED: upload completing slots behaviour. 
-CHANGED: upload tuned. 
-CHANGED: if "don't remove spare trickle" is enabled slotfocus is disabled. 
-REMOVED: Second appy button on schedule options screen [leuk_he]
+ADD: Sharesubdir. Remember what directories are shared including subdir, share new subdirs when added (Slugfiller)
+ADD: inactive UNC path/unplugged removable harddrives are remembered. 
 ADD: Scheduler:Reload shared files action [leuk_he]
 ADD:"emule.exe reload" rescan shared directory.
 ADD: USS:option to set icmp data size to workarround some buggy firewalls(ping -l option)
 ADD: AppleJuice detection [Xman/Anonymous Anti-Leecher]
+REMOVED: second apply button on schedule options screen [leuk_he]
 
-various code optimizations. 
++various code optimizations. 
 --------------------------------------
 Changelog for eMule 0.48a MorphXT v10.1 installer
 --------------------------------------
