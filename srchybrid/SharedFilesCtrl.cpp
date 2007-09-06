@@ -251,6 +251,34 @@ CSharedFilesCtrl::CSharedFilesCtrl()
 CSharedFilesCtrl::~CSharedFilesCtrl()
 {
 	delete m_pToolTip;
+	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
+	//MORPH START - Added by SiRoB, Keep Prermission Flag
+	if (m_PermMenu) VERIFY( m_PermMenu.DestroyMenu() );
+	//MORPH END   - Added by SiRoB, Keep Prermission Flag
+	//MORPH START - Added by SiRoB, ZZ Upload System
+	if (m_PowershareMenu) VERIFY( m_PowershareMenu.DestroyMenu() );
+	//MORPH END - Added by SiRoB, ZZ Upload System
+	//MORPH START - Added by SiRoB, POWERSHARE LImit
+	if (m_PowerShareLimitMenu) VERIFY( m_PowerShareLimitMenu.DestroyMenu() );
+	//MORPH END   - Added by SiRoB, POWERSHARE Limit
+	// ==> Limit PS by amount of data uploaded - Stulle
+	if (m_PsAmountLimitMenu) VERIFY( m_PsAmountLimitMenu.DestroyMenu() );
+	// <== Limit PS by amount of data uploaded - Stulle
+	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	if(m_SpreadbarMenu)	VERIFY(m_SpreadbarMenu.DestroyMenu());
+	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	//MORPH START - Added by SiRoB, HIDEOS
+	if (m_HideOSMenu) VERIFY( m_HideOSMenu.DestroyMenu() );
+	if (m_SelectiveChunkMenu) VERIFY( m_SelectiveChunkMenu.DestroyMenu() );
+	//MORPH END   - Added by SiRoB, HIDEOS
+	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+	if (m_ShareOnlyTheNeedMenu) VERIFY( m_ShareOnlyTheNeedMenu.DestroyMenu() );
+	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+	//MORPH START - Added by SiRoB, CRC32-Tag
+	if (m_CRC32Menu) VERIFY( m_CRC32Menu.DestroyMenu() );
+	//MORPH END   - Added by SiRoB, CRC32-Tag
+	if (m_CollectionsMenu) VERIFY( m_CollectionsMenu.DestroyMenu() );
+	if (m_SharedFilesMenu) VERIFY( m_SharedFilesMenu.DestroyMenu() );
 }
 
 void CSharedFilesCtrl::Init()

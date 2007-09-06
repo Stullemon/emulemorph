@@ -100,6 +100,7 @@ CTransferWnd::~CTransferWnd()
 	// khaos::categorymod+
 	VERIFY(m_mnuCatPriority.DestroyMenu());
 	VERIFY(m_mnuCatViewFilter.DestroyMenu());
+	VERIFY(m_mnuCatA4AF.DestroyMenu());
 	VERIFY(m_mnuCategory.DestroyMenu());
 	// khaos::categorymod-
 }
