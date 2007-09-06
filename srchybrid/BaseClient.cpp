@@ -408,7 +408,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 	}else if (m_nClientVersion > MAKE_CLIENT_VERSION(0, 30, 0) && m_byEmuleVersion > 0 && m_byEmuleVersion != 0x99 && m_clientSoft == SO_EMULE){
 		return _T("Fake emuleVersion");
 	//MORPH START - Added by Stulle, AppleJuice Detection [Xman]
-	}else if(IsEmuleClient && CheckUserHash()){	// aj is a gpl violator.  BAD!	they should release full sources. just ban client < AJ 2.1.2
+	}else if(IsEmuleClient() && CheckUserHash()){	// aj is a gpl violator.  BAD!	they should release full sources. just ban client < AJ 2.1.2
 		return _T("AppleJuice");
 	//MORPH END   - Added by Stulle, AppleJuice Detection [Xman]
 	}else if(m_clientSoft == SO_EMULE && !m_pszUsername){
