@@ -2,7 +2,8 @@
 ; use codepage 1250 to edit (not utf8 or unicode) 
 
 polish.languagesupport=Pliki dla jêzyków innych ni¿ angielski
-polish.configfiles=Dodatkowy plik ustawieñ, oraz IPfilter i IPtoCountry
+polish.configfiles=Dodatkowy plik ustawieñ, oraz IPtoCountry
+polish.configfilesipf=Dodatkowy plik ustawieñ, oraz IPfilter 
 polish.tparty=Narzêdzia z innych projektów
 polish.mediainfo=Mediainfo.dll dla uzyskania dodatkowych informacji o plikach multimedialnych
 polish.unrar=Unrar.dll dla pewnego pobierania

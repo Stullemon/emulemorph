@@ -5,7 +5,8 @@ german.dialog_firewall=Setup konnte keine Ausnamhe f¨¹r eMule in der Windows Fir
 german.tasks_assocurl=Ed2k-Links nehmen und  .emulecollection.
 
 german.languagesupport=Sprach DLL (nicht Englisch)
-german.configfiles=Zusätzliche Konfigurationsdateien, IP-Filter und IP-zu-Land Dateien
+german.configfiles=Zusätzliche Konfigurationsdateien, IP-zu-Land Dateien
+german.configfilesipf=Zusätzliche Konfigurationsdateien, IP-Filter 
 german.tparty=Werkzeuge von anderen Projekten
 german.mediainfo=Mediainfo.dll um Extrainformationen aus Mediendateien zu extrahieren
 german.unrar=Unrar.dll für bestimmte Downaloads.

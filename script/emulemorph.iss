@@ -15,8 +15,8 @@ DirExistsWarning=No
 DefaultDirName={pf}\eMule
 DefaultGroupName=eMule
 AllowNoIcons=yes
-; gpl:
-LicenseFile=..\staging\license.txt
+; gpl:   no accept is required, see point 5 of the gpl
+InfoBeforeFile=..\staging\license.txt
 WizardImageFile=MorphBanner.bmp
 WizardImageStretch=no
 
@@ -26,22 +26,34 @@ OutputBaseFilename=morphemuleversion-installer
 SetupIconFile=..\srchybrid\res\mod\installerico.ico
 Compression=lzma
 SolidCompression=yes
+;emule does not work on win98 due to high "rc" resource usage.
+minversion=0,4.0
+
+
+PrivilegesRequired=poweruser
+
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
 ;Name: "dutch"; MessagesFile: "compiler:Languages\Dutch.isl"
-Name: "german"; MessagesFile: "compiler:Languages\German.isl";LicenseFile: "..\staging\license-GER.txt"
-Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl" ;LicenseFile: "..\staging\license-IT.txt"
-Name: "spanish"; MessagesFile: "SpanishStd-2-5.1.0.isl" ;LicenseFile: "..\staging\license-SP.txt"
+Name: "german"; MessagesFile: "compiler:Languages\German.isl";InfoBeforeFile: "..\staging\license-GER.txt"
+Name: "italian"; MessagesFile: "compiler:Languages\Italian.isl" ;InfoBeforeFile: "..\staging\license-IT.txt"
+Name: "spanish"; MessagesFile: "SpanishStd-2-5.1.0.isl" ;InfoBeforeFile: "..\staging\license-SP.txt"
 Name: "polish"; MessagesFile: "compiler:Languages\Polish.isl"
-Name: "french";  MessagesFile: "compiler:Languages\French.isl";LicenseFile: "..\staging\license-FR.txt"
-Name: "BrazilianPortuguese" ;MessagesFile: "compiler:Languages\BrazilianPortuguese.isl";LicenseFile: "..\staging\license-PT_BR.txt"
-Name: "ChineseSimpl" ;MessagesFile: "ChineseSimp-11-5.1.0.isl"
+Name: "french";  MessagesFile: "compiler:Languages\French.isl";InfoBeforeFile: "..\staging\license-FR.txt"
+Name: "BrazilianPortuguese" ;MessagesFile: "compiler:Languages\BrazilianPortuguese.isl";InfoBeforeFile: "..\staging\license-PT_BR.txt"
+Name: "ChineseSimpl" ;MessagesFile: "ChineseSimp-11-5.1.0.isl"              ;InfoBeforeFile: "..\staging\lincesne-cn.txt"
 
 [Dirs]
-Name: "{app}\config"        ; Permissions:users-modify
-Name: "{app}\temp"          ; Permissions:users-modify
-Name: "{app}\incoming"      ; Permissions:users-modify
+;make dir writeable for other users than administrator
+Name: "{app}\config"        ; Permissions:users-modify    ;components:  configfiles ;tasks:progsdir
+Name: "{app}\temp"          ; Permissions:users-modify    ;tasks:progsdir
+Name: "{app}\incoming"      ; Permissions:users-modify    ;tasks:progsdir
+
+Name: "{commonappdata}\eMule\config"        ; Permissions:users-modify    ;components:  configfiles ;tasks:commonapp
+Name: "{commonappdata}\eMule\temp"          ; Permissions:users-modify    ;tasks:commonapp
+Name: "{commonappdata}\eMule\incoming"      ; Permissions:users-modify    ;tasks:commonapp
+; DO not make dir for user directory userwrteable since that would be openeing up the system to not permitted users.
 
 [Files]
 ;todo show correct languge in startup
@@ -65,48 +77,132 @@ Source: "..\staging\license-PT_PT.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\license-RU.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\license-SP.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\license-TR.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\staging\eMule.chm"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist
-Source: "..\staging\eMule.1031.chm"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist
-Source: "..\staging\readme.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\staging\unrar.dll"; DestDir: "{app}"
-Source: "..\staging\unrarlicense.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\staging\mediainfo.dll"; DestDir: "{app}";  Flags: ignoreversion onlyifdoesntexist
-Source: "..\staging\mediainfo_ReadMe_DLL.txt"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist
-Source: "..\staging\emule\config\AC_ServerMetURLs.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
-Source: "..\staging\emule\config\AC_SearchStrings.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist  ; Permissions:users-modify
-Source: "..\staging\emule\config\countryflag.dll"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\emule\config\countryflag32.dll"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\emule\config\eMule Light.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\emule\config\Multiuser eMule.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\emule\config\eMule.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\emule\config\startup.wav"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\emule\config\webcaches.xml"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\emule\config\webservices.dat"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\emule\config\XMLNews.dat"; DestDir: "{app}\config"; Flags: ignoreversion
-Source: "..\staging\emule\config\server.met"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
-Source: "..\staging\emule\config\addresses.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
-Source: "..\staging\emule\config\ip-to-country.csv"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
-Source: "..\staging\emule\config\ipfilter.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
-Source: "..\staging\emule\config\staticservers.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify
-; to assing correct rights:
-Source: "..\staging\emule\config\preferences.ini"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist uninsneveruninstall  ; Permissions:users-modify
-Source: "..\staging\lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\staging\webserver\*"; DestDir: "{app}\webserver"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "..\staging\wapserver\*"; DestDir: "{app}\wapserver"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "..\eMuleShellExt\Release\eMuleShellExt.dll"; DestDir: "{app}" ; Flags: regserver ignoreversion ;Tasks: shellextention
-Source: "..\eMuleShellExt\doc\eMule Shell Extension.htm"; DestDir: "{app}" ; Flags: ignoreversion;Tasks: shellextention
-Source: "..\eMuleShellExt\doc\eMule Shell Extension-DE.PNG"; DestDir: "{app}" ; Flags: ignoreversion;Tasks: shellextention
+Source: "..\staging\readme.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\staging\eMule.chm"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist ; components:   helpfiles
+Source: "..\staging\eMule.1031.chm"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist ; components:   helpfiles
+Source: "..\staging\unrar.dll"; DestDir: "{app}" ;components: tpartytools\unrar
+Source: "..\staging\unrarlicense.txt"; DestDir: "{app}"; Flags: ignoreversion ;components: tpartytools\unrar
+Source: "..\staging\mediainfo.dll"; DestDir: "{app}";  Flags: ignoreversion onlyifdoesntexist; components:   tpartytools\mediainfo
+Source: "..\staging\mediainfo_ReadMe_DLL.txt"; DestDir: "{app}"; Flags: ignoreversion  onlyifdoesntexist; components:   tpartytools\mediainfo
+; shell extension files
+Source: "..\eMuleShellExt\Release\eMuleShellExt.dll"; DestDir: "{app}" ; Flags: regserver ignoreversion ;components: shellextention
+Source: "..\eMuleShellExt\doc\eMule Shell Extension.htm"; DestDir: "{app}" ; Flags: ignoreversion;components: shellextention
+Source: "..\eMuleShellExt\doc\eMule Shell Extension-DE.PNG"; DestDir: "{app}" ; Flags: ignoreversion;components: shellextention
 
+Source: "..\staging\lang\*"; DestDir: "{app}\lang"; Flags: ignoreversion recursesubdirs createallsubdirs  ; Components: langs ;tasks:progsdir
+
+; task: config is in progdir:
+Source: "..\staging\emule\config\AC_ServerMetURLs.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:progsdir
+Source: "..\staging\emule\config\AC_SearchStrings.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist  ; Permissions:users-modify ;components:  configfiles ;tasks:progsdir
+Source: "..\staging\emule\config\countryflag.dll"; DestDir: "{app}\config"; Flags: ignoreversion ;tasks:progsdir
+Source: "..\staging\emule\config\countryflag32.dll"; DestDir: "{app}\config"; Flags: ignoreversion ;tasks:progsdir
+Source: "..\staging\emule\config\eMule Light.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion ;tasks:progsdir
+Source: "..\staging\emule\config\Multiuser eMule.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion ;tasks:progsdir
+Source: "..\staging\emule\config\eMule.tmpl"; DestDir: "{app}\config"; Flags: ignoreversion ;tasks:progsdir
+Source: "..\staging\emule\config\startup.wav"; DestDir: "{app}\config"; Flags: ignoreversion ;tasks:progsdir
+Source: "..\staging\emule\config\webservices.dat"; DestDir: "{app}\config"; Flags: ignoreversion; components:  configfiles ;tasks:progsdir
+Source: "..\staging\emule\config\XMLNews.dat"; DestDir: "{app}\config"; Flags: ignoreversion  ;components:  configfiles ;tasks:progsdir
+Source: "..\staging\emule\config\server.met"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;tasks:progsdir
+Source: "..\staging\emule\config\addresses.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:progsdir
+Source: "..\staging\emule\config\ip-to-country.csv"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:progsdir
+Source: "..\staging\emule\config\ipfilter.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfilesipf ;tasks:progsdir
+Source: "..\staging\emule\config\staticservers.dat"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify;components:  configfiles ;tasks:progsdir
+
+
+; to assing correct rights:
+Source: "..\staging\emule\config\preferences.ini"; DestDir: "{app}\config"; Flags: ignoreversion onlyifdoesntexist uninsneveruninstall  ; Permissions:users-modify ;tasks:progsdir
+
+;appdir
+Source: "..\staging\emule\config\AC_ServerMetURLs.dat"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:commonapp
+Source: "..\staging\emule\config\AC_SearchStrings.dat"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist  ; Permissions:users-modify ;components:  configfiles ;tasks:commonapp
+Source: "..\staging\emule\config\countryflag.dll"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion ;tasks:commonapp
+Source: "..\staging\emule\config\countryflag32.dll"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion;tasks:commonapp
+Source: "..\staging\emule\config\eMule Light.tmpl"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion ;tasks:commonapp
+Source: "..\staging\emule\config\Multiuser eMule.tmpl"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion ;tasks:commonapp
+Source: "..\staging\emule\config\eMule.tmpl"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion ;tasks:commonapp
+Source: "..\staging\emule\config\startup.wav"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion ;tasks:commonapp
+Source: "..\staging\emule\config\webservices.dat"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion; components:  configfiles ;tasks:commonapp
+Source: "..\staging\emule\config\XMLNews.dat"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion  ;components:  configfiles ;tasks:commonapp
+Source: "..\staging\emule\config\server.met"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;tasks:commonapp
+Source: "..\staging\emule\config\addresses.dat"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:commonapp
+Source: "..\staging\emule\config\ip-to-country.csv"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:commonapp
+Source: "..\staging\emule\config\ipfilter.dat"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfilesipf ;tasks:commonapp
+Source: "..\staging\emule\config\staticservers.dat"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify;components:  configfiles ;tasks:commonapp
+; to assing correct rights:
+Source: "..\staging\emule\config\preferences.ini"; DestDir: "{commonappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist uninsneveruninstall  ; Permissions:users-modify ;tasks:commonapp
+
+;mydocuments   xp
+Source: "..\staging\emule\config\AC_ServerMetURLs.dat"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\AC_SearchStrings.dat"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist  ; Permissions:users-modify ;components:  configfiles ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\countryflag.dll"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\countryflag32.dll"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\eMule Light.tmpl"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\Multiuser eMule.tmpl"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\eMule.tmpl"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\startup.wav"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\webservices.dat"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion; components:  configfiles ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\XMLNews.dat"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion  ;components:  configfiles ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\server.met"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\addresses.dat"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\ip-to-country.csv"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\ipfilter.dat"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfilesipf ;tasks:userdata ;OnlyBelowVersion: 0,6;
+Source: "..\staging\emule\config\staticservers.dat"; DestDir: "{userappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify;components:  configfiles ;tasks:userdata ;OnlyBelowVersion: 0,6;
+
+
+;mydocuments   vista
+Source: "..\staging\emule\config\AC_ServerMetURLs.dat"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\AC_SearchStrings.dat"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist  ; Permissions:users-modify ;components:  configfiles ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\countryflag.dll"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\countryflag32.dll"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\eMule Light.tmpl"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\Multiuser eMule.tmpl"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\eMule.tmpl"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\startup.wav"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\webservices.dat"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion; components:  configfiles ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\XMLNews.dat"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion  ;components:  configfiles ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\server.met"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;tasks:userdata;minversion: 0,6
+Source: "..\staging\emule\config\addresses.dat"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:userdata;minversion: 0,6
+Source: "..\staging\emule\config\ip-to-country.csv"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfiles ;tasks:userdata ;minversion: 0,6
+Source: "..\staging\emule\config\ipfilter.dat"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify ;components:  configfilesipf ;tasks:userdata;minversion: 0,6
+Source: "..\staging\emule\config\staticservers.dat"; DestDir: "{localappdata}\eMule\config"; Flags: ignoreversion onlyifdoesntexist ; Permissions:users-modify;components:  configfiles ;tasks:userdata;minversion: 0,6
 
 
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
+[components]
+Name: "Main"; Description: "{cm:corefiles}"; Types: full compact custom; FLAGS: fixed
+Name: "helpfiles"; Description: "{cm:helpfile}";  Types: full
+Name: "langs"; Description: "{cm:languagesupport}";  Types: full
+Name: "shellextention"; Description: "{cm:shellextention}"; Types: full
+Name: "configfiles"; Description: "{cm:configfiles}"; Types: full
+Name: "configfilesipf"; Description: "{cm:configfilesipf}";
+;Types: full Not because ipfilter is too old at current release speed
+Name: "tpartytools"; Description: "{cm:tparty}"; Types: full
+Name: "tpartytools\mediainfo"; Description: "{cm:mediainfo}"; Types: full
+Name: "tpartytools\unrar"; Description: "{cm:unrar}"; Types: full
+
+
 [Tasks]
+; trick it here: since i connot find documentatuib how to set a check box programmatically from
+; pascal script there are just 3 instances with a different check to set the default according
+; to the current regististry (default is progsdir)
+Name: "progsdir" ;  Description:  "{cm:progdir}" ; Check:UsePublicUserDirectories2; GroupDescription: "{cm:locofdata}";Flags:  exclusive
+Name: "commonapp" ; Description: "{cm:appdir}" ;  Check:UsePublicUserDirectories2 ; GroupDescription: "{cm:locofdata}"; Flags:  exclusive  unchecked;MinVersion: 0,6.0
+Name: "userdata"  ; Description: "{cm:userdocdir}"; Check:UsePublicUserDirectories2; GroupDescription: "{cm:locofdata}";Flags: exclusive unchecked
+
+Name: "progsdir" ;  Description:  "{cm:progdir}" ; Check:UsePublicUserDirectories1; GroupDescription: "{cm:locofdata}";Flags:  exclusive unchecked
+Name: "commonapp" ; Description: "{cm:appdir}" ;  Check:UsePublicUserDirectories1 ; GroupDescription: "{cm:locofdata}"; Flags:  exclusive  ;MinVersion: 0,6.0
+Name: "userdata"  ; Description: "{cm:userdocdir}"; Check:UsePublicUserDirectories1; GroupDescription: "{cm:locofdata}";Flags: exclusive unchecked
+
+Name: "progsdir" ;  Description:  "{cm:progdir}" ; Check:UsePublicUserDirectories0; GroupDescription: "{cm:locofdata}";Flags:  exclusive  unchecked
+Name: "commonapp" ; Description: "{cm:appdir}" ;  Check:UsePublicUserDirectories0 ; GroupDescription: "{cm:locofdata}"; Flags:  exclusive  unchecked;MinVersion: 0,6.0
+Name: "userdata"  ; Description: "{cm:userdocdir}"; Check:UsePublicUserDirectories0; GroupDescription: "{cm:locofdata}";Flags: exclusive
+;; - end trick with CHECK
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; flags: unchecked
 Name: "firewall"; Description: "{cm:tasks_firewall}"; MinVersion: 0,5.01sp2
-Name: "urlassoc"; Description: "{cm:tasks_assocurl}"; GroupDescription: "Other tasks:"
-Name: "shellextention"; Description: "{cm:shellextention}"; GroupDescription: "Other tasks:" ; Flags: unchecked ;MinVersion: 0,5.01
-
+Name: "urlassoc"; Description: "{cm:tasks_assocurl}"; GroupDescription: {cm:othertasks}
 
 [INI]
 Filename: "{app}\emulemorphhome.url"; Section: "InternetShortcut"; Key: "URL"; String: "http://emulemorph.sourceforge.net/"
@@ -115,7 +211,7 @@ Filename: "{app}\emulemorphhome.url"; Section: "InternetShortcut"; Key: "URL"; S
 Name: "{group}\eMule MorphXT"; Filename: "{app}\emule.exe" ; Comment: "eMule MorphXT"
 Name: "{group}\{cm:ProgramOnTheWeb,eMule Morph}"; Filename: "{app}\emulemorphhome.url"
 Name: "{group}\{cm:UninstallProgram,eMule}"; Filename: "{uninstallexe}"
-Name: "{group}\Shell extension doc" ; Filename: "{app}\eMule Shell Extension.htm"; Tasks: shellextention
+Name: "{group}\Shell extension doc" ; Filename: "{app}\eMule Shell Extension.htm"; components: shellextention
 Name: "{userdesktop}\eMule"; Filename: "{app}\emule.exe"; Tasks: desktopicon
 
 [Registry]
@@ -130,23 +226,29 @@ Root: HKCR; Subkey: "eMule"; ValueType: string; ValueName: ""; ValueData: "eMule
 Root: HKCR; Subkey: "eMule\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\eMule.exe,1";  Tasks: urlassoc
 Root: HKCR; Subkey: "eMule\shell\open\Command"; ValueType: string; ValueData: "{app}\emule.exe ""%1"""; Flags: uninsdeletekey;  Tasks: urlassoc
 ; shell extension uninstall:
-Root: HKCR; Subkey: ".met"; ValueType: string; ValueName: ""; ValueData: "metfile "; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: ".part"; ValueType: string; ValueName: ""; ValueData: "partfile "; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "CLSID\{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}"; ValueName: ""; ValueData: "eMule shell extension";  ValueType: string; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "CLSID\{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}\InprocServer32"; ValueName: ""; ValueData: "{app}\eMuleShellExt.dll";  ValueType: string; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "CLSID\{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}\InprocServer32"; ValueName: "ThreadingModel"; ValueData: "Both";  ValueType: string; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "metfile"; ValueType: string; ValueName: "Details"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "metfile"; ValueType: string; ValueName: "infoTip"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "metfile"; ValueType: string; ValueName: "Tileinfo"; ValueData: "prop:DocTitle;Size"; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "metfile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\eMuleShellExt.dll,-201"; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "partfile\ShellEx\PropertyHandler"; ValueType: string; ValueName: "" ;ValueData: "{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}}";   Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "partfile"; ValueType: string; ValueName: "Details"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "partfile"; ValueType: string; ValueName: "infoTip"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "partfile"; ValueType: string; ValueName: "Tileinfo"; ValueData: "prop:DocTitle;Size"; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "partfile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\eMuleShellExt.dll,-202"; Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "partfile\ShellEx\PropertyHandler"; ValueType: string; ValueName: "" ;ValueData: "{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}";   Flags: uninsdeletevalue;Tasks: shellextention
-Root: HKCR; Subkey: "Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved"; ValueType: string; ValueName: "{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}" ;ValueData: "eMule shell extension";   Flags: uninsdeletevalue;Tasks: shellextention
+Root: HKCR; Subkey: ".met"; ValueType: string; ValueName: ""; ValueData: "metfile "; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: ".part"; ValueType: string; ValueName: ""; ValueData: "partfile "; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "CLSID\{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}"; ValueName: ""; ValueData: "eMule shell extension";  ValueType: string; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "CLSID\{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}\InprocServer32"; ValueName: ""; ValueData: "{app}\eMuleShellExt.dll";  ValueType: string; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "CLSID\{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}\InprocServer32"; ValueName: "ThreadingModel"; ValueData: "Both";  ValueType: string; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "metfile"; ValueType: string; ValueName: "Details"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "metfile"; ValueType: string; ValueName: "infoTip"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "metfile"; ValueType: string; ValueName: "Tileinfo"; ValueData: "prop:DocTitle;Size"; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "metfile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\eMuleShellExt.dll,-201"; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "partfile\ShellEx\PropertyHandler"; ValueType: string; ValueName: "" ;ValueData: "{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}}";   Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "partfile"; ValueType: string; ValueName: "Details"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "partfile"; ValueType: string; ValueName: "infoTip"; ValueData: "prop:DocTitle;Artist;Album;Duration;Bitrate;Write"; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "partfile"; ValueType: string; ValueName: "Tileinfo"; ValueData: "prop:DocTitle;Size"; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "partfile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\eMuleShellExt.dll,-202"; Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "partfile\ShellEx\PropertyHandler"; ValueType: string; ValueName: "" ;ValueData: "{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}";   Flags: uninsdeletevalue;components: shellextention
+Root: HKCR; Subkey: "Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved"; ValueType: string; ValueName: "{{5F081689-CE7D-43E7-8B11-DAD99A4A96D6}" ;ValueData: "eMule shell extension";   Flags: uninsdeletevalue;components: shellextention
+; datadir
 
+Root: HKCU; Subkey: "SOFTWARE\eMule";  Flags: uninsdeletekey;
+;install correct value based on task:
+Root: HKCU; Subkey: "SOFTWARE\eMule"; ValueType: dword; ValueName:  "UsePublicUserDirectories"; ValueData: 002 ; Flags: uninsdeletekey;  Tasks: progsdir
+Root: HKCU; Subkey: "SOFTWARE\eMule"; ValueType: dword; ValueName:  "UsePublicUserDirectories"; ValueData: 001 ; Flags: uninsdeletekey;  Tasks: commonapp
+Root: HKCU; Subkey: "SOFTWARE\eMule"; ValueType: dword; ValueName:  "UsePublicUserDirectories"; ValueData: 000 ; Flags: uninsdeletekey;  Tasks: userdata
 
 [Run]
 ;Not in vista because install runs as admin.
@@ -165,30 +267,22 @@ Type: files; Name: "{app}\emulemorphhome.url"
 ; This section specifies phrazes and words not specified in the ISL files
 ; Avoid customizing the ISL files since they will change with each version of Inno Setup.
 ; English
-tasks_firewall=Add an exception to the Windows Firewall
-dialog_firewall=Setup failed to add eMule to the Windows Firewall.%nPlease add eMule to the exception list manually.
 ;dutch.tasks_firewall=Voeg een uitzonderings regel toe aan de windows firewall.
 ;dutch.dialog_firewall=Setup heeft emule niet als uitzondering aan de Windows Firewall kunnen toevoegen .%nWellicht moet u dit nog handmatig doen.
-spanish.tasks_firewall=A?adir una excepción al Cortafuegos de Windows
-spanish.dialog_firewall=No se pudo a?adir eMule al Cortafuegos de Windows.%nA?ada el eMule a la lista del cortafuegos manualmente.
-french.tasks_firewall=Ajouter une exception dans le Pare-feu Windows
-french.dialog_firewall=mpossible d'ajouter emule dans le firewall de windows.%nMerci d'ajouter  emule dans la liste du firewall de windows.
-german.tasks_firewall=Eine Ausnahme für Windows Firewall erstellen
-german.dialog_firewall=Setup konnte keine Ausnamhe für eMule in der Windows Firewall hinzufügen.%nBitte eMule manuell auf die Liste der Ausnahmen setzen.
-BrazilianPortuguese.tasks_firewall=Adiciona uma exce??o ao Firewall do Windows
-BrazilianPortuguese.dialog_firewall=O Setup falhou ao adicionar o eMule ao Firewall do Windows.%nPor favor adicione o eMule na lista de exce??es manualmente.
-tasks_assocurl=Registers eMule to take ed2k-Links and .emulecollection.
 ;dutch.assocurl=eD2K links doorsturen naar eMule.
-spanish.assocurl=Capturar enlaces Ed2k and .emulecollection.
-french.assocurl=Associer avec les liens Ed2k et .emulecollection.
-german.assocurl=Ed2k-Links nehmen und  .emulecollection.
-BrazilianPortuguese.assocurl=BrazilianPortuguese.assocurl=Associar com links ED2K e arquivos .emulecollection
-ChineseSimpl.assocurl="?M Ed2k 3sμ22￡￥í??áp"
-shellextention=Install shell extention for .met and .part files.
-italian.shellextention=Installa shell extention per i file .met e .part.
-spanish.shellextention=en el núcleo, los archivos con extensiones .met y .part.
-BrazilianPortuguese.shellextention=Instalar a extens鉶 shell para os ficheiros .met e .part
-ChineseSimpl.shellextention=让游览器为.met和.part文件显示更多信息。
+
+
+#include "morphenglish.isl"
+
+;translations in sepeate file now 10.1
+
+#include "emulemorphchinese.iss"
+#include "morphpolish.isl"
+#include "morphitalian.isl"
+#include "morphspanish.isl"
+#include "morphgerman.isl"
+#include "morphportugesebr.isl"
+#include "morphfrench.isl"
 
 ; Code sections need to be the last section in a script or the compiler will get confused
 [Code]
@@ -197,8 +291,68 @@ const
   NET_FW_SCOPE_ALL = 0;
   NET_FW_IP_VERSION_ANY = 2;
 var
-  //Installed: Boolean;
   FirewallFailed: string;
+  registrychecked: Boolean;
+  UsePublicUserDirectories: Cardinal;
+
+Procedure ReadRegInternal() ;
+begin
+   UsePublicUserDirectories:=2;
+   RegQueryDWordValue(HKEY_CURRENT_USER, 'SOFTWARE\eMule',
+          'UsePublicUserDirectories',UsePublicUserDirectories);
+    registrychecked:=true;
+ end;
+          
+
+function UsePublicUserDirectories2(): Boolean;
+begin
+  if not registrychecked then begin
+    ReadRegInternal()
+   end;
+   if UsePublicUserDirectories = 2 then
+   begin
+   Result:= true;
+   end
+    else
+    begin
+       Result:= False;
+    end
+  end;
+
+function UsePublicUserDirectories1(): Boolean;
+begin
+  if not registrychecked then begin
+    ReadRegInternal()
+   end;
+   if UsePublicUserDirectories = 1 then
+   begin
+   Result:= true;
+   end
+    else
+    begin
+       Result:= False;
+    end
+  end;
+
+
+  function UsePublicUserDirectories0(): Boolean;
+begin
+  if not registrychecked then begin
+    ReadRegInternal()
+   end;
+   if UsePublicUserDirectories = 0 then
+   begin
+   Result:= true;
+   end
+    else
+    begin
+       Result:= False;
+    end
+  end;
+
+
+
+
 
 Procedure CurStepChanged(CurStep: TSetupStep);
 var
@@ -210,9 +364,19 @@ var
   //Reset: boolean;
 Begin
   if CurStep=ssPostInstall then begin
-  // debug:
-      pref := ExpandConstant('{app}\config\preferences.ini');
-
+       if IsTaskSelected('progsdir') then
+        begin
+         pref := ExpandConstant('{app}\config\preferences.ini');
+       end;
+        if IsTaskSelected('commonapp') then
+        begin
+           pref := ExpandConstant('{commonappdata}\eMule\config\preferences.ini');
+       end;
+       if IsTaskSelected('userdata') then   //; todo vista dir for userdata
+       begin
+           pref := ExpandConstant('{userappdata}\eMule\config\preferences.ini');
+       end;
+    
     if CompareText(activelanguage,'dutch')=0 then
        if  not IniKeyExists('eMule', 'Language', pref) then
        begin
@@ -264,7 +428,5 @@ Begin
 
 //  ;if CurStep=ssDone then Reset := ResetLanguages;
 End;
-
-
 
 

@@ -7,7 +7,8 @@ othertasks=Other tasks
 tasks_assocurl=Registers eMule to take ed2k-Links and .emulecollection
 
 languagesupport=Language dll other than english
-configfiles=extra configuration files, ipfilter and iptocountry files
+configfiles=extra configuration files,  iptocountry file
+configfilesipf=extra configuration files, ipfilter 
 tparty=Tools from other projects
 mediainfo=Mediainfo.dll to extract extra information from media files
 unrar=Unrar.dll for certain downloads

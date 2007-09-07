@@ -6,7 +6,8 @@ spanish.tasks_assocurl=Capturar enlaces eD2K y .emulecollection
 spanish.shellextention=Los archivos con extensiones .met y .part, estarán en el núcleo del programa
 
 spanish.languagesupport=Archivos dll de idiomas extra aparte de Inglés
-spanish.configfiles=Archivos de configuración extra, archivos IPFilter y IPtoCountry
+spanish.configfiles=Archivos de configuración extra, archivos IPtoCountry
+spanish.configfilesipf=Archivos de configuración extra, archivos IPFilter 
 spanish.tparty=Herramientas de otros proyectos
 spanish.mediainfo=Mediainfo.dll para extraer información extra de los archivos multimedia
 spanish.unrar=Unrar.dll para ciertas descargas

@@ -6,7 +6,8 @@ BrazilianPortuguese.dialog_firewall=O Setup falhou ao adicionar o eMule ao Firew
 BrazilianPortuguese.assocurl=BrazilianPortuguese.assocurl=Associar com links ED2K e arquivos .emulecollection
 
 BrazilianPortuguese.languagesupport=Suporte a línguas além do Inglês
-BrazilianPortuguese.configfiles=arquivos de configuração extras, ipfilter e iptocountry
+BrazilianPortuguese.configfiles=arquivos de configuração extras, iptocountry
+BrazilianPortuguese.configfilesipf=arquivos de configuração extras, ipfilter 
 BrazilianPortuguese.tparty=Ferramentas de outros projetos
 BrazilianPortuguese.mediainfo=Mediainfo.dll para extrair informações de arquivos de mídia
 BrazilianPortuguese.unrar=Unrar.dll para certos downloads.
