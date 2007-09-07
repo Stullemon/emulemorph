@@ -225,6 +225,7 @@ BEGIN
     IDS_SHAREDFOLDERS       "Cartelle condivise"
     IDS_VIEW1               "Vedi "
     IDS_VIEW2               " (Non condiviso)"
+    IDS_VIEW3               " (Condiviso con sottocartelle)"
     IDS_PRIOLOW             "Bassa"
     IDS_PRIONORMAL          "Normale"
     IDS_PRIOHIGH            "Alta"
@@ -3529,6 +3530,36 @@ STRINGTABLE
 BEGIN
    IDS_USSPINGDATASIZE		"Dimensione dati ICMP (0=Default, 0..64 Consentito)" 
    IDS_PINGDATASIZE_TIP            "Alcuni Firewall/Router non rispondono correttamente alla richiesta di Ping\ndell'ICMP con dimensione dati pari a 0. Questa opzione dà la possibilità\ndi impostare una piccola dimensione dati per aggirare il problema di\nquesti router"
+END
+
+STRINGTABLE 
+BEGIN
+  IDS_INCFILES_TIP "Specifica la cartella dove saranno spostati i File completi. Se il percorso predefinito\nviene cambiato, dovrà essere specificata una cartella esistente dove andare a scrivere i\ndati. eMule non creerà questa cartella. Puoi specificare questa impostazione per ogni\ncategoria nella finestra trasferimenti scegliendo una differente cartella per i File\ncompletati della categoria. I tuoi File nella cartella dei File completati verranno\ncondivisi"
+  IDS_TEMPFILES_TIP "Specifica la cartella o le cartelle dove verranno salvati i File in Download. In base\nal sistema di Download simultaneo, eMule creerà dei File temporanei vuoti (*.part)\ndi dimensione pari a quella che avranno una volta completi. Puoi configurare eMule\nin modo che abbiano soltanto la dimensione minima dove andare ad aggiungere i dati\ndi volta in volta man mano che vengono scaricati, abilitando l'opzione 'Sparse' in\n'Opzioni Avanzate' (funziona soltanto su File di sistema NTFS, sotto Windows 2000 e\nXP, non Vista). Puoi aggiungere cartelle multiple cliccando sul pulsante '[+]' vicino\nal pulsante 'Sfoglia...' (visibile soltanto se l'opzione 'Mostra più controlli' è\nabilitata).\nLa cartella temporanea per un File verrà scelta nel modo seguente:\n1. Nello stesso Drive dei File completati e spazio sufficiente per tutti i Download\n2. Spazio sufficiente per tutti i Download\n3. Il più spazio libero disponibile.\nConsidera che non ha senso usare più cartelle di File temporanei sullo stesso Drive"
+  IDS_SHARESELECTOR_TIP "Seleziona cartelle condivise addizionali e percorsi di rete condivisi. Se premi il\ntasto Control mentre selezioni una cartella, verrà condivisa includendo le sue (future)\nsottocartelle"
+  IDS_UNCLIST_TIP "File o Cartelle che una volta erano condivisi ma non più leggibili quando eMule è stato\navviato. Verranno ricontrollati una volta premuto 'Applica'. Possono essere anche Drive\no percorsi di rete"
+  IDS_UNCADD_TIP "Aggiunge manualmente le condivisioni. Utile per le reti condivise che non sono visualizzate\nnella lista delle condivisioni"
+  IDS_UNCREM_TIP "Rimuove la condivisione inattiva attualmente selezionata"
+
+  IDS_ENABLE_SCHED_TIP "Abilita le Operazioni Pianificate.\nSe disabilitato, nessuno degli eventi in lista verranno avviati\n(Default: disabilitato, non dimenticare di abilitarlo)"
+  IDS_REMOVE_SCHED_TIP "Rimuove l'evento attualmente selezionato"
+  IDS_NEW_SCHED_TIP "Crea un nuovo evento"
+  IDS_SCHEDLIST_TIP "Mostra le azioni che sono state definite. Usa il pulsante 'Nuovo' per aggiungere eventi\ne il pulsante 'Rimuovi' per eliminarli"
+  IDS_S_ENABLE_TIP "Abilita il profilo attualmente visualizzato"
+  IDS_S_TITLE_TIP "Modifica il nome del profilo attualmente visualizzato"
+  IDS_TIMESEL_SCHED_TIP "Specifica quanto spesso l'evento si deve verificare"
+  IDS_DATETIMEPICKER1_TIP "Ora di inizio"
+  IDS_DATETIMEPICKER2_TIP "Ora di fine. Considera che se un evento si verifica una sola volta, come l'aggiornamento\ndell'IPFilter, l'ora di fine dovrebbe essere uguale all'ora di inizio"
+  IDS_CHECKNOENDTIME_SCHED_TIP "L'evento non ha una fine"
+  IDS_SCHEDACTION_TIP "Mediante Click col tasto destro del mouse in questa finestra è possibile\naggiungere/rimuovere azioni al profilo corrente. Alcune azioni hanno parametri\nche possono essere modificati"
+
+  IDS_OVERWRITE1          "Il File %s esiste già. Vuoi sovrascriverlo?"
+  IDS_OVERWRITE2          "Sovrascrivere?"    
+  IDS_BACKUPERROR         "È stato riscontrato un errore durante il Backup."
+  IDS_BACKUP_PART         "A causa della loro dimensione, il Backup dei File *.part potrebbe richiedere alcuni minuti.\nSei sicuro di volerlo fare?"
+  IDS_BACKUP_PART_W       "Sei sicuro?"
+  IDS_BACKUP_COMPLETE     "File Copiato/i con Successo."
+
 END
 
 #endif    // Italian (Italy) resources

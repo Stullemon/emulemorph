@@ -626,7 +626,7 @@ BEGIN
     IDS_EMULEW              "Pulsa "
     IDS_EMULEW2             "para comprobar si hay una nueva versión"
     IDS_EMULEW3             "aquí"
-    IDS_PW_MAXSOURCES       "Max fuentes/archivo"
+    IDS_PW_MAXSOURCES       "Máx fuentes/archivo"
     IDS_SHAREDFILESCOUNT    "Nº de archivos compartidos: %i"
     IDS_SF_SIZE             "Total de archivos compartidos: %s"
     IDS_ERR_BADPORT         "Nº de puerto erróneo"
@@ -884,7 +884,7 @@ STRINGTABLE
 BEGIN
     IDS_PW_UNLIMITED        "Ilimitado"
     IDS_PW_MINREC           "Mínimo recomendado\t%i "
-    IDS_PW_UA               "Velocidad max de subida/descarga"
+    IDS_PW_UA               "Velocidad máx de subida/descarga"
     IDS_PW_PA               "Velocidad mín. subida/descarga"
     IDS_IRC_IGNOREINFOMESSAGE "Ignorar mensajes de información"
     IDS_CONNECTIONLOST      "Conexión perdida"
@@ -960,7 +960,7 @@ BEGIN
     IDS_PW_UAP              "Añadir nuevos archivos compartidos con auto prioridad"
     IDS_MAXCLIENT           "Número máximo de usuarios"
     IDS_PW_TWEAK            "Opciones adicionales"
-    IDS_TWEAKS_WARNING      "Advertencia:  No cambies estos parmetros a menos que sepas lo que ests haciendo. De lo contrario puedes empeorar las cosas.\neMule funciona bien sin modificar estos parmetros"
+    IDS_TWEAKS_WARNING      "Advertencia:  No cambies estos parámetros a menos que sepas lo que estás haciendo. De lo contrario puedes hacer que empeore los resultados de eMule.\neMule funciona bien sin modificar estos parámetros"
     IDS_ADDAFRIEND          "Añadir Amigo"
     IDS_PAF_REQINFO         "Información requerida"
     IDS_PAF_MOREINFO        "Información adicional"
@@ -1065,7 +1065,7 @@ BEGIN
     IDS_WEB_GZIP_COMPRESSION "Compresión Gzip"
     IDS_WEB_GZIP_COMMENT    "Ahorra tráfico, especialmente en gráficos"
     IDS_WEB_REFRESH_TIME    "Tiempo de refresco de las páginas"
-    IDS_WEB_REFRESH_COMMENT "Tiempo en segundos (cero=Desactivado):"
+    IDS_WEB_REFRESH_COMMENT "Tiempo en segundos (cero = Desactivado):"
     IDS_SV_URL              "URL"
     IDS_WS_RELOAD_TMPL      "Plantilla"
     IDS_SV_DEBUGLOG         "Registro de depuración"
@@ -1162,11 +1162,11 @@ BEGIN
     IDS_STATS_OVRHD         "Excedente"
     IDS_STATS_RECORDS       "Records"
     IDS_STATS_COMPDL        "Descargas completas"
-    IDS_STATS_SVRECWORKING  "Max Servidores activos"
-    IDS_STATS_SVRECUSERS    "Max Usuarios conectados"
+    IDS_STATS_SVRECWORKING  "Máx Servidores activos"
+    IDS_STATS_SVRECUSERS    "Máx Usuarios conectados"
     IDS_SEARCH_TEXT         "Buscar"
-    IDS_STATS_SVRECFILES    "Max Archivos disponibles"
-    IDS_STATS_SHRECNUM      "Max Archivos compartidos"
+    IDS_STATS_SVRECFILES    "Máx Archivos disponibles"
+    IDS_STATS_SHRECNUM      "Máx Archivos compartidos"
     IDS_SEARCH_COLUMN       "Buscar en columna"
     IDS_STATS_SHRECSIZE     "Mayor cantidad compartida"
     IDS_STATS_SHRECASIZE    "Promedio de archivo mayor"
@@ -1219,8 +1219,8 @@ BEGIN
     IDS_STATS_DOWNTIME      "Tiempo de Descarga"
     IDS_STATS_UPTIME        "Tiempo de Subida"
     IDS_STATS_TOTALSRVDUR   "Duración total del Servidor"
-    IDS_STATS_MAXAVGUL      "Max Promedio de Subida"
-    IDS_STATS_MAXUL         "Max Índice de Subida"
+    IDS_STATS_MAXAVGUL      "Máx Promedio de Subida"
+    IDS_STATS_MAXUL         "Máx Índice de Subida"
     IDS_STATS_AVGDLTIME     "Promedio de descarga"
     IDS_STATS_PRTDEF        "Por defecto"
     IDS_STATS_PRTOTHER      "Otro"
@@ -1360,7 +1360,7 @@ STRINGTABLE
 BEGIN
     IDS_HASHINGFILESCOUNT   " (dividiendo %u)"
     IDS_CHECKDISKSPACE      "Comprobar espacio en disco"
-    IDS_YOURHOSTNAME        "Nombre de host (dirección de Red) para enlaces eD2K propios"
+    IDS_YOURHOSTNAME        "Nombre de Host (dirección de Red) para enlaces eD2K propios"
     IDS_INSUFFICIENT        "Espacio en disco insuficiente"
     IDS_MINFREEDISKSPACE    "Mín. espacio libre en disco [MB]"
     IDS_WARNING             "Precaución"
@@ -1400,7 +1400,7 @@ STRINGTABLE
 BEGIN
     IDS_DYNUP_GOINGUPDIVIDER "Aumentar velocidad"
     IDS_DYNUP_GOINGDOWNDIVIDER "Disminuir velocidad"
-    IDS_DYNUP_NUMBEROFPINGS "Número max de pings de promedio"
+    IDS_DYNUP_NUMBEROFPINGS "Número máx de pings de promedio"
     IDS_DYNUP_MINUPLOAD     "Velocidad de subida permitida más baja"
     IDS_ESTTIMELEFT         "Tiempo restante estimado:"
     IDS_TRANSFER_RATE_LABEL "Índice de transferencia:"
@@ -1641,7 +1641,7 @@ BEGIN
     IDS_IRC_EMULEPROTO_ALLOWADDFRIEND 
                             "Permitir a un usuario añadirte como amigo"
     IDS_SOURCESWAPBLOCKED   "Intercambio bloqueado"
-    IDS_A4AF_CHECK_THIS_NOW "Comprobar esta fuente ahora (debug)"
+    IDS_A4AF_CHECK_THIS_NOW "Comprobar esta fuente ahora (depurar)"
     IDS_STATS_FRATIO        "Sesión Índice SU:DE (Excluidas Subidas a amigos):"
     IDS_STATS_UDATA_FRIENDS "Datos subidos a puestos reservados de amigos (Sesión): %s"
     IDS_IMP_ERR_BADFORMAT   "Archivo temp con formato erróneo o desconocido"
@@ -1674,7 +1674,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CHAT_IDENT          "Identificación:"
-    IDS_MAXHALFOPENCONS     "Max conexiones a medio abrir"
+    IDS_MAXHALFOPENCONS     "Máx conexiones a medio abrir"
     IDS_WIZ_STARTWITHWINDOWS 
                             "Activa esta opción si quieres que eMule se inicie con Windows. (Por defecto: Desactivado)"
     IDS_KAD_WAITCBK         "Esperando respuesta KAD"
@@ -1952,11 +1952,11 @@ BEGIN
                             "Comprobar disponibilidad antes de empezar a bajar"
     IDS_DL_FORCE            "Forzar Descarga"
     IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Guardar Tiempo de Espera en Cola"
-    IDS_DATEFILENAMELOG     "Logear Nombre de Archivo en fecha "
+    IDS_DATEFILENAMELOG     "Registrar el Nombre de Archivo con fecha "
     IDS_ECFEF               "Mismas Posibilidades Para Cada Archivo"
     IDS_ALL_TIME            "Todo El Tiempo"
     IDS_COPYFEEDBACK        "Copiar Respuestas al Portapapeles"
-    IDS_ANTILEECHERLOG      "[Anti-leechermods] El usuario %s ha sido baneado temporalmente por tener una actividad sospechosamente parecida a la de un leecher"
+    IDS_ANTILEECHERLOG      "[Anti-LeecherMods] El usuario %s ha sido baneado temporalmente por tener una actividad sospechosamente parecida a la de un leecher"
 END
 
 STRINGTABLE 
@@ -1964,7 +1964,7 @@ BEGIN
     IDS_DOWNLOAD_IN_RED     "Mostrar en Rojo archivos descargandose"
     IDS_UPSLOTNUMBER        "Slot #"
     IDS_STATS_LEECHERCLIENTS "Leechers: %u"
-    IDS_WARNINGMORPH        "Advertencia:  No cambies estos parámetros a menos que sepas lo que estás haciendo. No hagas el karmazen que puedes empeorar las cosas.\neMule funciona bien sin modificar estos parámetros"
+    IDS_WARNINGMORPH        "Advertencia:  No cambies estos parámetros a menos que sepas lo que estás haciendo. De lo contrario puedes hacer que empeore los resultados de eMule.\neMule funciona bien sin modificar estos parámetros"
     IDS_DM                  "Administración de Descargas"
     IDS_SCC                 "Control de Categorías Inteligente (SCC)"
     IDS_SAC                 "Control de A4AF Inteligente (SAC)"
@@ -1980,7 +1980,7 @@ BEGIN
     IDS_POWERSHARE_COLUMN_LABEL "PowerShare"
     IDS_POWERSHARE_PREFIX   "PS"
     IDS_POWERSHARE          "PowerShare"
-    IDS_SF_UPLOADED_PARTS   "Spread bar (Historial de partes subidas)"
+    IDS_SF_UPLOADED_PARTS   "SpreadBar (Historial de partes subidas)"
 END
 
 STRINGTABLE 
@@ -2085,8 +2085,8 @@ BEGIN
     IDS_SUC_PITCH           "Pitch (Por defecto %i)"
     IDS_SUC_DRIFT           "Drift (Por defecto %i)"
     IDS_SHOWSECUREDCONNECTION "Mostrar conexión de usuario seguro"
-    IDS_SUC_LOG             "Mostrar actividad en el log del debug"
-    IDS_A4AF_SHOWDEBUG      "Mostrar actividad en el log del debug"
+    IDS_SUC_LOG             "Mostrar actividad en el registro de depuración"
+    IDS_A4AF_SHOWDEBUG      "Mostrar actividad en el registro de depuración"
 END
 
 STRINGTABLE 
@@ -2197,32 +2197,32 @@ STRINGTABLE
 BEGIN
     IDS_USS                 "Sensor de Velocidad de Subida (USS)"
     IDS_USS_ENABLED         "Activar"
-    IDS_USS_LOG             "Mostrar actividad en el log del debug"
+    IDS_USS_LOG             "Mostrar actividad en el registro de depuración"
     IDS_USS_PINGTOLERANCE   "Tolerancia del Ping (en %%) (Por defecto %i)"
-    IDS_USS_GOINGUPDIVIDER  "Lentitud de ascenso (Por defecto %i)"
-    IDS_USS_GOINGDOWNDIVIDER "Lentitud de descenso (Por defecto %i)"
-    IDS_USS_NUMBEROFPINGS   "Número maximo de pings de media (Por defecto %i)"
-    IDS_USSFINDLASTCOMMON   "Sensor de Velocidad de Subida (USS): Iniciando traceroutes para encontrar último host en común"
-    IDS_USSFOUNDLASTCOMMON  "Sensor de Velocidad de Subida (USS): Último host en común encontrado. ÚltimoHostEnComún: %s @ TTL: %i HostToPing: %s"
+    IDS_USS_GOINGUPDIVIDER  "Tiempo Reacción Aumento Velocidad Subida en ms (Por defecto %i)"
+    IDS_USS_GOINGDOWNDIVIDER "Tiempo Reacción Disminución Velocidad Subida en ms (Por defecto %i)"
+    IDS_USS_NUMBEROFPINGS   "Número máximo de pings de media (Por defecto %i)"
+    IDS_USSFINDLASTCOMMON   "Sensor de Velocidad de Subida (USS): Iniciando traceroutes para encontrar último Host en común"
+    IDS_USSFOUNDLASTCOMMON  "Sensor de Velocidad de Subida (USS): Último Host en común encontrado. ÚltimoHostEnComún: %s @ TTL: %i HostToPing: %s"
     IDS_USSSTARTLOWPING     "Sensor de Velocidad de Subida (USS): Buscando un valor inicial para pings más bajos..."
-    IDS_USSCOLLECTINGHOSTS  "Sensor de Velocidad de Subida (USS): Intento #%i. Coleccionando hosts..."
-    IDS_USSENOUGHHOSTS      "Sensor de Velocidad de Subida (USS): Tengo suficientes hosts. Listando los hosts a los que se les hará traceroutes:"
+    IDS_USSCOLLECTINGHOSTS  "Sensor de Velocidad de Subida (USS): Intento #%i. Coleccionando Hosts..."
+    IDS_USSENOUGHHOSTS      "Sensor de Velocidad de Subida (USS): Tengo suficientes Hosts. Listando los Hosts a los que se les hará traceroutes:"
     IDS_USSHOSTLISTING      "Sensor de Velocidad de Subida (USS): Host #%i: %s"
     IDS_USSLOWESTPING       "Sensor de Velocidad de Subida (USS): Ping más bajo: %i más"
     IDS_USSREADY            "Sensor de Velocidad de Subida (USS): Hecho con preparaciones. Iniciando control de velocidad de subida"
-    IDS_USSCANTPING         "Sensor de Velocidad de Subida (USS): ¡Fallado ping #%i al host! (TTL: %i IP: %s Error: %i). Durmiendo 1 segundo antes de volver a intentar. Información de error a continuación"
+    IDS_USSCANTPING         "Sensor de Velocidad de Subida (USS): ¡Fallado ping #%i al Host! (TTL: %i IP: %s Error: %i). Durmiendo 1 segundo antes de volver a intentar. Información de error a continuación"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_USSCANTPINGREMOVE   "Sensor de Velocidad de Subida (USS): ¡Error al hacer ping a un host! (TTL: %i IP: %s Error: %i). Eliminando este host y reiniciando la colección de hosts. Información de error a continuación"
-    IDS_USSHOSTTOOCLOSE     "Sensor de Velocidad de Subida (USS): ¡El host estaba demasiado cerca! (TTL: %i IP: %s status: %i). Eliminando este host y reiniciando la colección de hosts"
+    IDS_USSCANTPINGREMOVE   "Sensor de Velocidad de Subida (USS): ¡Error al hacer ping a un Host! (TTL: %i IP: %s Error: %i). Eliminando este Host y reiniciando la colección de Hosts. Información de error a continuación"
+    IDS_USSHOSTTOOCLOSE     "Sensor de Velocidad de Subida (USS): ¡El Host estaba demasiado cerca! (TTL: %i IP: %s status: %i). Eliminando este Host y reiniciando la colección de Hosts"
     IDS_USSHOSTTTL          "Sensor de Velocidad de Subida (USS): Host en TTL %i: %s"
     IDS_USSPINGFAILED       "Sensor de Velocidad de Subida (USS): Ping #%i fallido. Razón para ello a continuación"
     IDS_USSNEWTRACEROUTE    "Sensor de Velocidad de Subida (USS): La Topologia de la red ha cambiado. TTL: %i IP esperada: %s Recibio IP: %s Se hara un nuevo traceroute"
     IDS_USSPINGNUMCONTINUE  "Sensor de Velocidad de Subida (USS): Ping #%i correcto. Continuando"
     IDS_USSNEWLOWEST        "Sensor de Velocidad de Subida (USS): Nuevo ping más bajo: %i más. Anterior: %i más"
-    IDS_USSPINGFAILDIS      "Sensor de Velocidad de Subida (USS): Pinging falló demasiadas veces. Desactivando el Sensor de Velocidad de Upload (USS)"
+    IDS_USSPINGFAILDIS      "Sensor de Velocidad de Subida (USS): Pinging falló demasiadas veces. Desactivando el Sensor de Velocidad de Subida (USS)"
     IDS_USSPINGERPINGREPLY  "Sensor de Velocidad de Subida (USS): Respuesta de %s: bytes=%d tiempo=%ldms TTL=%i"
     IDS_USSPINGERWSASFAI    "Pinger: WSAStartup() fallido, err: %d\n"
     IDS_USSPINGERLOADLIB    "Pinger: LoadLibrary() fallido: No pudo localizar ICMP.DLL!"
@@ -2234,7 +2234,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_USS_UDP             "Forzar ping UDP"
-    IDS_UPSTOPPEDLEECHER    "Sesión de subida no ha podido iniciarse. El usuario tiene pinta de ser un leecher"
+    IDS_UPSTOPPEDLEECHER    "Sesión de subida no ha podido iniciarse. El usuario actua como un leecher"
     IDS_IPSTOPPEDOTHFILE    "Sesión de subida no ha podido iniciarse. El usuario intentó bajarse un archivo que no era el que se había previsto en la lista de espera"
     IDS_NEWMSGFROM          "Nuevo mensaje de '%s' (IP:%s)"
     IDS_FILTEREDFROM        "Mensaje filtrado de '%s' (IP:%s)"
@@ -2343,7 +2343,7 @@ BEGIN
     IDS_MORPH_RFHA          "Informar de Actividades de Hashing"
     IDS_MORPH_RAIF          "Informar de Actividades en la lista de amigos"
     IDS_MORPH_KSSERV        "No eliminar servidores estáticos de la lista de servidores durante la ejecución"
-    IDS_MORPH_LOG           "Log del MorphXT"
+    IDS_MORPH_LOG           "Registro del MorphXT"
 END
 
 STRINGTABLE 
@@ -2508,7 +2508,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_MAXPORT             "Puerto Max"
+    IDS_MAXPORT             "Puerto Máx"
     IDS_RANDOMPORTSRESETTIME 
                             "Tiempo (en segundos) de reinicio seguro de puertos aleatorios"
     IDS_ICFSUPPORT          "Activar soporte para el CortaFuegos de Windows (ICF)"
@@ -2539,7 +2539,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_WAP_FILLEDGRAPHS    "Gráficos rellenos"
-    IDS_WAP_LOGSSIZE        "Tamaño de Logs"
+    IDS_WAP_LOGSSIZE        "Tamaño de los Registros"
     IDS_WAP_ITEMSPERPAGE    "Objetos por página"
     IDS_WAP_HOME            "Inicio"
     IDS_WAP_BACK            "Atrás"
@@ -2645,7 +2645,7 @@ BEGIN
     IDS_LOG_FC_INFO         "Encontrada Referencia de Fake:%u  Duplicado:%u  Combinado:%u"
     IDS_LOG_FC_ERR1         "No se pudo extraer el archivo de comprobador de Fakes del ZIP descargado (""%s"")"
     IDS_LOG_FC_ERR2         "El archivo de comprobado de Fakes ""%s"" descargado es un ZIP que tiene un contenido distinto al esperado"
-    IDS_MASSRENAME_TITLE    "Renombrar-Masivo"
+    IDS_MASSRENAME_TITLE    "Renombrado-Masivo"
     IDS_LOG_CRC32_WRN1      "Alerta: Un archivo con el que el CRC32 debería ser calculado ya no está siendo compartido. Por ello el cálculo no se ha realizado"
     IDS_LOG_CRC32_WRN2      "Alerta: El archivo '%s' ya no está siendo compartido. Por ello el cálculo del CRC32 no ha podido realizarse"
     IDS_LOG_CRC32_WRN3      "Alerta: No se pudo abrir el archivo '%s' para poder calcular el CRC32. Archivo no analizado"
@@ -2722,7 +2722,7 @@ BEGIN
     IDS_ZZRATIO_DISABLED    "no está activado"
     IDS_ZZRATIO_CHECK1      "Se ha llegado al Ratio 1:3"
     IDS_ZZRATIO_CHECK2      "PowerSharing archivo incompleto"
-    IDS_ZZRATIO_CHECK3      "Usando el slot de amigo y velocidad de transmisión global>3KB/s"
+    IDS_ZZRATIO_CHECK3      "Usando el slot de amigo y velocidad de transmisión global > 3KB/s"
     IDS_ZZRATIO_CHECK4      "Límite de Subida por debajo de 10KB/s"
     IDS_ZZRATIO_CHECK5      "Subida Media por debajo de 10KB/s"
 END
@@ -2760,12 +2760,12 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SLOT_LIMIT_NUM      "Max nº de slots (60-255)"
+    IDS_SLOT_LIMIT_NUM      "Máx nº de slots (60-255)"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_GLOBAL_HL           "Límite F.Global"
+    IDS_GLOBAL_HL           "Límite de Fuentes Global"
     IDS_GLOBAL_HL_LIMIT     "Límite de Fuentes Global"
 END
 
@@ -2781,7 +2781,7 @@ BEGIN
     IDS_LOG_SERVER_FILTERED "Servidor eliminado en %s de la lista '%s': en ipfilter '%s'"
     IDC_ENABLEPROXY_TIP     "Utiliza esta opción si la única manera que tienes de conectarte a internet es mediante un proxy. Esto siempre causará ID Baja (no óptimo).\n<b>ADVERTENCIA</b>\nSólo introduzca un proxy si está completamente seguro de tener uno\ny de que puede proveer la información correcta.\nLos proxies apenas se usan en PCs para el hogar\ny no ofrecen ninguna ventaja fuera de la LAN.\nRouters y modems no son proxies. No confundir ésta opción con la del WebCaché que se encuentra en otro apartado posterior"
     IDC_PROXYTYPE_TIP       "Ponga el protocolo del proxy.\nLa precedencia de la velocidad del protocolo proxy es como sigue:\n1. SOCKS 4a (mayor velocidad por menor encabezado)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (peor velocidad por gran encabezado)"
-    IDC_PROXYNAME_TIP       "Nombre del host o dirección IP del proxy"
+    IDC_PROXYNAME_TIP       "Nombre del Host o dirección IP del proxy"
     IDC_PROXYPORT_TIP       "Puerto por el que se comunica el proxy.\nSuele ser el 1080 para socks y 80 o 8080 para http"
     IDC_ENABLEAUTH_TIP      "Habilita esto si necesitas loguearte al proxy\nNótese que para http sólo está\nsoportada la autentificación básica (Microsoft NTLM no)"
 END
@@ -2805,7 +2805,7 @@ BEGIN
                             "Límite máximo para pasar de USS a SUC y viceversa\nUSS es mejor con cuando hay pocos slots abiertos,\nSUC necesita abrir muchos slots para determinar una buena media"
     IDS_SUC_TIP             "Usar el Control de Subida Inteligente (SUC)\nPros: Sin tráfico extra (no hace pings)\nContras: necesita clientes activos para poder encontrar la velocidad óptima"
     IDC_USS_TIP             "Hace pings al último\nrouter límite común de tu ISP (para tres clientes aleatorios)\npara determinar el tiempo de reacción de tu conexión"
-    IDC_SUC_LOG_TIP         "Registrar en el Log del MorphXT (Información Extra Avanzada)"
+    IDC_SUC_LOG_TIP         "Registrar en el Registro del MorphXT (Información Extra Avanzada)"
     IDS_SUC_HIGH_TIP        "Si la respuesta media del cliente supera este valor la velocidad de subida comenzará a descender"
 END
 
@@ -2817,7 +2817,7 @@ BEGIN
     IDS_DEFAULT_TIP         "IDS_DEFAULT_TIP"
     IDS_UM_TIP              "Direccion de la subida:\ncontrol de slot, deteccion de la\nanchura de banda de subida"
     IDS_DYNUPLOAD_TIP       "Variar la velocidad de subida de forma automatica\ndetectando la anchura de banda disponible"
-    IDS_SECURITY_TIP        "Opciones de seguridad: Anti-leecher & Anti-hackeo de créditos"
+    IDS_SECURITY_TIP        "Opciones de seguridad: Anti-Leecher & Anti-Hackeo de créditos"
     IDS_PW_DISPLAY_TIP      "Como mostrar algunos articulos\nen la ventana de descarga"
     IDS_PW_FRIENDS_TIP      "Ajustes de la velocidad de los slots para los amigos.\nPuedes hacer amigo a un usuario y después establecer un slot de amigos\npara empezar una descarga directa"
     IDS_POWERSHARE_TIP      "PowerShare es un slot de alta prioridad de subida, para lanzar archivos con pocas fuentes completas.\nAjustes de la velocidad"
@@ -2830,16 +2830,16 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SUC_LOW_TIP         "Si el tiempo de reacción del cliente está por debajo de este valor, se aumenta el upload"
+    IDS_SUC_LOW_TIP         "Si el tiempo de reacción del cliente está por debajo de este valor, se aumenta la velocidad de subida"
     IDS_SUC_PITCH_TIP       "Pitch"
     IDS_SUC_DRIFT_TIP       "Drift"
     IDS_USS_LOG_TIP         "Registra la actividad del USS en el Registro del Morph"
     IDS_USS_PINGTOLERANCE_TIP 
-                            "Valores grandes da al ping mayor tolerancia antes que el upload cambie"
+                            "Valores grandes da al ping mayor tolerancia antes que la velocida de subida cambie"
     IDS_USS_GOINGUPDIVIDER_TIP 
-                            "Velocidad en más segundos para reaccionar con una velocidad mayor que el upload"
+                            "Velocidad en ms (milisegundos) para reaccionar con una velocidad mayor que la actual de subida"
     IDS_USS_GOINGDOWNDIVIDER_TIP 
-                            "Velocidad en más segundos para reaccionar con una velocidad menor que el upload"
+                            "Velocidad en ms (milisegundos) para reaccionar con una velocidad menor que la actual de subida"
     IDS_USS_NUMBEROFPINGS_TIP 
                             "Valor del ping para usar como promedio\nUn valor bajo(1) hace responder muy rápidamente pero no podrá avanzar.\nUn valor alto hace que el USS reaccione demasiado lento"
     IDS_MINUPLOAD_TIP       "Velocidad mínima de subida que mantendrá el USS/SUC en caso de estar saturado el ancho de banda"
@@ -2913,14 +2913,14 @@ BEGIN
     IDS_COMMUNITYTAG_TIP    "Las etiquetas de la comunidad son reconocidas en otras etiquetas,\npor ejemplo: un usuario <i>Guijarrelson[<b>Webcache.com.es</b>]</i>\nserá aqui reconocido como una\ncomunidad de etiqueta 'NWO'. La comunidad solamente se usa para mostrar al resto de la\ncomunidad los ficheros compartidos (¡Ningun estimulo para la comunidad!). Para mostrar los archivos\ncompartidos lo tienes que establecer en las preferencias de los archivos, el Morph permite mostrar los archivos de forma\nindividual. Tu no tienes lo tienes que fijar la [etiqueta] en tu nombre, la etiqueta también será agregado por\neste ajuste"
     IDS_MORPH_RFHA_TIP      "Informar de las actividades que realiza el Hashing"
     IDS_MORPH_RAIF_TIP      "Añadir y quitar las actividades de los amigos en el registro"
-    IDS_MORPH_KSSERV_SIP    "Si un servidor estático de la lista de servidores ha pasado\nel número maximo de intentos de conexión, se deshabilita\nen vez de eliminarlo de la lista, hasta reiniciar el eMule"
+    IDS_MORPH_KSSERV_SIP    "Si un servidor estático de la lista de servidores ha pasado\nel número máximo de intentos de conexión, se deshabilita\nen vez de eliminarlo de la lista, hasta reiniciar el eMule"
     IDS_GLOBAL_HL_TIP       "El límite global es un límite para el número total de fuentes, en vez\nde aplicar un límite de fuentes por archivo, lo que normalmente\nhace el eMule"
     IDS_SUC_ENABLED_TIP     "Permitir el hardlimit global en vez de las fuentes por archivo"
     IDS_GLOBAL_HL_LIMIT_TIP "Valor para el límite global, depende de la disponibilidad\nde la velocidad de subida/bajada y de la latencia.\nUn valor normal seria, entre 3000 y 6000"
     IDS_MAXDATARATEFRIEND_TIP 
-                            "Flujo maximo de datos para los amigos (% de la subida)\ncuando usemos USS/SUC. Si la subida a los amigos sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro"
+                            "Flujo máximo de datos para los amigos (% de la subida)\ncuando usemos USS/SUC. Si la subida a los amigos sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro"
     IDS_MAXDATARATEPOWERSHARE_TIP 
-                            "Flujo maximo de datos para el PowerShare (% de la subida),\nsi la subida con PowerShare sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro"
+                            "Flujo máximo de datos para el PowerShare (% de la subida),\nsi la subida con PowerShare sobrepasa este porcentaje,\neste porcentaje se usa en lugar de otro"
 END
 
 STRINGTABLE 
@@ -2929,7 +2929,7 @@ BEGIN
     IDS_NEVER_TIP1          "Comportamiento normal. Opción buena cuando no se cuelga"
     IDS_META_DATA_ID3LIB_TIP "Usa la librería id3"
     IDS_LOG2DISK_TIP        "Guardar el registro normal en el directorio 'logs' de eMule.\nCon esto podemos ver lo que sucede con el eMule cuando el ordenador\nes apagado inesperadamente."
-    IDS_DATEFILENAMELOG_TIP "Guarda el archivo de registro en el directorio de logs en el formato:\neMule - YYYY.MM.DD.log"
+    IDS_DATEFILENAMELOG_TIP "Guarda el archivo de registro en el directorio 'logs' en el formato:\neMule - YYYY.MM.DD.log"
     IDS_VERBOSE_TIP         "Opciones del registro de depuración. Mensajes de depuración para eliminar ciertos errores del programa"
     IDS_ENABLED_TIP         "Muestra mensajes de registro en la pestaña de Información Extra"
     IDS_LOG_LEVEL_TIP       "1 = muestra sólo los mensajes importantes... 5 = muestra más mensajes"
@@ -2949,7 +2949,7 @@ BEGIN
     IDS_PW_CON_CAPFRM_TIP   "En este grupo puedes completar la capacidad de tu conexión de red a Internet.\nEstos datos no se utilizan para enviar informacion al servidor, si no que se utilizan para\ndibujar la grafica de forma correcta en la ventana de estadisticas"
     IDS_PW_CON_LIMITFRM_TIP "Si creas una nueva categoría en el diálogo de\nSeleccionar Categoría, cuando agregues múltiples archivos en el estado pausado\nlos archivos añadidos serán comenzados (Por defecto:0, desactivado)"
     IDS_PW_DOWNL_TIP        "Habilitar un límite superior para la descarga, eMule no descargará a más velocidad que este límite.\nObservar que si la subida es demasiado lenta (menos de 10KB/s), el límite de la velocidad de descarga\nse ve disminuido por un coeficiente de tu subida"
-    IDS_PW_UPL_TIP          "Habilitar un límite de subida (cuando esta deshabilitado, el eMule\nintentará determinar la velocidad de subida optima por medio del sensor de subida).\nFijar el límite al 80% teorico de tu velocidad de subida.\nSi fijas este límite al maximo de tu conexión puede llegar a ser inestable,\nsi lo limitas a un valor demasiado bajo, no conseguiras créditos para ganar puestos en la cola\nde descarga. Un valor por debajo de 10KB/s limita tu descarga con un coeficiente"
+    IDS_PW_UPL_TIP          "Habilitar un límite de subida (cuando esta deshabilitado, el eMule\nintentará determinar la velocidad de subida optima por medio del sensor de subida).\nFijar el límite al 80% teorico de tu velocidad de subida.\nSi fijas este límite al máximo de tu conexión puede llegar a ser inestable,\nsi lo limitas a un valor demasiado bajo, no conseguiras créditos para ganar puestos en la cola\nde descarga. Un valor por debajo de 10KB/s limita tu descarga con un coeficiente"
     IDS_NETWORK_TIP         "Habilita como minimo una red que permita al eMule encontrar fuentes y\npublicar tus archivos en Internet, se recomienda habilitar las dos"
     IDS_SHOWOVERHEAD_TIP    "Mostrar el ancho de banda actual, (ancho de banda excedente) en la barra de estado.\nLos gastos de banda indirectos de eD2K realmente no se utilizan para transferir archivos, pero\nse envian datos como: la parte a transferir, la cola, etc"
 END
@@ -3041,7 +3041,7 @@ STRINGTABLE
 BEGIN
     IDS_TCPIP_CONNS_TIP     "Ajustes del protocolo TCP/IP"
     IDS_MAXCON5SECLABEL_TIP "Numero de nuevas conexiones que el eMule puede abrir durante\n5 segundos, (Por defecto: 20). Si aumentas este valor, también tienes que\naumentar el valor de conexiones a medio abrir"
-    IDS_MAXHALFOPENCONS_TIP "Si aumentas el número de nuevas conexiones a abrir durante 5 segundos\ntambien tienes que aumentar el maximo número de conexiones a medio abrir,\npero para un valor muy alto de estos, tienes que reconfigurar el parche\ntcp/ip.sys(XPSP2), para que no se sobrecarge el router. El aumento de este valor\nhace que el eMule se conecte más rápidamente con las fuentes 'demasiadas conexiones abiertas'"
+    IDS_MAXHALFOPENCONS_TIP "Si aumentas el número de nuevas conexiones a abrir durante 5 segundos\ntambien tienes que aumentar el máximo número de conexiones a medio abrir,\npero para un valor muy alto de estos, tienes que reconfigurar el parche\ntcp/ip.sys(XPSP2), para que no se sobrecarge el router. El aumento de este valor\nhace que el eMule se conecte más rápidamente con las fuentes 'demasiadas conexiones abiertas'"
     IDS_CONDTCPACCEPT_TIP   "Rechazar conexiones rápidamente utiliza un método más eficiente para rechazar\nintentos de conexión entrantes de clientes prohibidos y/o clientes cuya IP se encuentra\nen la lista del filto de IPs. Esta utiliza una caracteristica especial del winsock llamada 'SO_CONDITIONAL_ACCEPT'\nque conlleva menos gastos indirectos del TCP, en el caso de que se rechace la conexión,\npero causa un aumento de uso de CPU la busqueda del IP, si el cliente es rechazado"
 END
 
@@ -3117,20 +3117,20 @@ BEGIN
     IDS_ENABLE_CHUNKDOTS_TIP 
                             "Mostrar puntos en la barra de progreso para cada paquete, 9,28Mb"
     IDS_ECFEF_TIP           "Una cola para todos los archivos con las mismas posibilidades.\nCambia la prioridad de cada archivo basado en los datos y peticiones\nde subida en esta sesion"
-    IDS_IP2COUNTRY_TIP      "Nombres y banderas de cada pais, en los detalles del cliente en la ventana\nde transferencias. Necesitas un archivo actualizado de country.csv que lo puedes\ndescargar o actualizar en Morph Update para mostrar correctamente los datos basados\nen la localizacion estimada del número IP de la persona"
+    IDS_IP2COUNTRY_TIP      "Nombres y banderas de cada país, en los detalles del cliente en la ventana\nde transferencias. Necesitas un archivo actualizado de country.csv que lo puedes\ndescargar o actualizar en Morph Update para mostrar correctamente los datos basados\nen la localizacion estimada del número IP de la persona"
     IDS_DISABLED_TIP        "Sin letras de paises. (deshabilitar la columna del pais en el siguiente inicio)"
     IDS_COUNTRYNAME_SHOWFLAG_TIP 
-                            "Mostar la bandera del pais en la columna de pais o al principio de la línea"
+                            "Mostar la bandera del pais en la columna de país o al principio de la línea"
     IDS_CREDIT_SYSTEM_TIP   "Que sistema de créditos usas. Para el funcionamiento del Morph se requiere un sistema.\nLa prioridad de avance en tu cola de subida depende del sistema de credito que elijas"
-    IDS_OFFICIAL_CREDIT_TIP "Inicio:1 Min: 1 max: 10\nRatio1 = Total subido x 2 / Total descargado\nRatio2 = SQRT(Total subido + 2 )\nSe comparan los dos coeficientes y el valor más bajo se utiliza como coeficiente\nmodificador. Tambien existen algunas condiciones límite:\n      Subida total menor que 1MB => Modificador = 1\n      Descarga total = 0 => Modificador = 10"
+    IDS_OFFICIAL_CREDIT_TIP "Inicio:1 Mín: 1 Máx: 10\nRatio1 = Total subido x 2 / Total descargado\nRatio2 = SQRT(Total subido + 2 )\nSe comparan los dos coeficientes y el valor más bajo se utiliza como coeficiente\nmodificador. Tambien existen algunas condiciones límite:\n      Subida total menor que 1MB => Modificador = 1\n      Descarga total = 0 => Modificador = 10"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOVELACE_CREDIT_TIP "Inicio:1 Max:100 Min:0.1 Ratio:1:1.5\n1-modificador=100*((1-1/(1+exp((3*{MB Subido}^2-{MB descargado}^2)/1000)))^6.6667)\nTan solo los clientes que usan el 'SecureHash' pueden conseguir un multiplicador de 100, todos los\ndemas se quedaran en 10. La gran diferencia con el sistema de créditos oficial, es que\nlos créditos se evaluan en diferencias y no en coeficientes. Usando el sistema oficial\nobtienes los mejores créditos después de generar un nuevo Hash de usuario (cuando\nhaces una instalacion limpia). Con este sistema de créditos consigues mejores\ncréditos cuantos más MB subas"
-    IDS_PAWCIO_CREDIT_TIP   "Inicio:3 Min:1 Max:100.\nRatio = 3 * Descargado / Subido - Para nuevos clientes (Datos descargados y subidos menor que 1MB)\nratio = 3.0 (en vez de 1.0) - Si has recibido más de 1MB de alguien pero no han dado cualquier cosa al usuario, este\nconsigue un ratio = 100.0 - Pequeña prima para aquellos clientes que te han dado muchos MB:\n- Si tu recibes 100MB entonces el usuario recibe un ratio = 50.0"
+    IDS_LOVELACE_CREDIT_TIP "Inicio:1 Máx:100 Mín:0.1 Ratio:1:1.5\n1-modificador=100*((1-1/(1+exp((3*{MB Subido}^2-{MB descargado}^2)/1000)))^6.6667)\nTan solo los clientes que usan el 'SecureHash' pueden conseguir un multiplicador de 100, todos los\ndemas se quedaran en 10. La gran diferencia con el sistema de créditos oficial, es que\nlos créditos se evaluan en diferencias y no en coeficientes. Usando el sistema oficial\nobtienes los mejores créditos después de generar un nuevo Hash de usuario (cuando\nhaces una instalacion limpia). Con este sistema de créditos consigues mejores\ncréditos cuantos más MB subas"
+    IDS_PAWCIO_CREDIT_TIP   "Inicio:3 Mín:1 Máx:100.\nRatio = 3 * Descargado / Subido - Para nuevos clientes (Datos descargados y subidos menor que 1MB)\nratio = 3.0 (en vez de 1.0) - Si has recibido más de 1MB de alguien pero no han dado cualquier cosa al usuario, este\nconsigue un ratio = 100.0 - Pequeña prima para aquellos clientes que te han dado muchos MB:\n- Si tu recibes 100MB entonces el usuario recibe un ratio = 50.0"
     IDS_EASTSHARE_CREDIT_TIP 
-                            "Inicio:100 min: 10 max: 5000\nRatio = +6 por MB subido y -2 por descargado\nbonus  +100 si subes 1MB+\nvalor bajo si subes por debajo de tus posibilidades 1MB+, ratio = 50"
+                            "Inicio:100 mín: 10 máx: 5000\nRatio = +6 por MB subido y -2 por descargado\nbonus  +100 si subes 1MB+\nvalor bajo si subes por debajo de tus posibilidades 1MB+, ratio = 50"
     IDS_PAYBACKFIRST_TIP    "Abrir un slot con PowerShare para subir datos inmediatamente a un cliente.\nTrabaja solo sobre archivos descargados completamente y no sobre los que estan parcialmente descargados"
     IDS_PAYBACKFIRSTLIMI_TIP 
                             "Sube el nivel de MB que tenemos que dar al cliente antes de que nosotros\nempecemos a descargar de el"
@@ -3211,7 +3211,7 @@ BEGIN
     IDS_SHOWCATINFO_TIP     "Se muestran dos valores (x/y) a la derecha del nombre de la categoria.\nEl primer valor (x) es el número de descargas activas y el segundo (y) el\nnumero total de archivos en la categoria"
     IDS_REPAINTGRAPHS_TIP   "El eMule se puede congelar cuando tiene que redibujar un grafico al cambiar el tamaño\nde la ventana. Esto pasa porque tiene que redibujar la grafica con los datos guardados.\nSi esta activada esta opción, los graficos son borrados y empiezan de cero cuando\nse cambia el tamaño de la ventana"
     IDC_SELECT_HYPERTEXT_FONT_TIP 
-                            "Este botón abre un dialogo para elegir la fuente, el estilo\ny el color del texto en la ventana de servidores, las lineas de mensajes y la\nventana del IRC"
+                            "Este botón abre un diálogo para elegir la fuente, el estilo\ny el color del texto en la ventana de servidores, las lineas de mensajes y la\nventana del IRC"
     IDS_AUTOREMOVEFD_TIP    "Cuando el eMule termina de descargar un archivo, la barra de progreso se pone\nde color verde. Esta opción limpia automáticamente todas los archivos que ya\nestan completamente descargados de la lista de descargas de la ventana de tráfico"
 END
 
@@ -3532,8 +3532,51 @@ END
 
 STRINGTABLE 
 BEGIN
-   IDS_USSPINGDATASIZE		"Tamaño del Ping ICMP[0-64] (Por defecto 0)"
+   IDS_USSPINGDATASIZE		"Tamaño del Ping ICMP[0-64] (Por defecto: 0)"
    IDS_PINGDATASIZE_TIP     "Algunos firewalls/routers no contestan apropiadamente a la petición de ping\ndel tipo ICMP con un tamaño de datos de 0. Esta opción te permite configurar un\ntamaño más pequeño del ping para trabajar con tu router defectuoso. (Por defecto: 0)"
+END
+
+STRINGTABLE 
+BEGIN
+  IDS_INCFILES_TIP 			"Especifica el directorio a donde serán movidas las descargas completadas.\nSi el directorio por defecto es cambiado a una carpeta existente que puedes\nescribir, debes introducirla. eMule no creará este directorio.\nPuedes eliminar esta opción por categoría en la ventana de Transferencias\neligiendo otra carpeta de archivos entrantes diferente por categoría.\nTu carpeta de archivos entrantes será compartida."
+  IDS_TEMPFILES_TIP 		"Esta opción especifica el directorio, o directorios, donde las\ndescargas en progreso se almacenarán. Debido al sistema\nde descargas simultáneasm, eMule crea archivos simulados (*.part) con el\ntamaño de la descarga que tendrá al finalizar. Pues configurar el eMule\npara usar sólamente el tamaño del archivo que tiene actualmente activando la opción\nde archivos 'dispersos' en las Opciones Adicionales (solamente funciona en el sistema de archivos NTFS, bajo\nWindows 2000 y XP, no en Vista). Puedes añadir múltiples directorios\nclickeando el botón [+], cerca de la barra de navegación\n(visible únicamente con 'Mostrar más controles').\nEl directorio temporal para cada archivo se selecciona como sigue:\n1. En el mismo dispositivo que los archivos entrantes y el espacio libre para todas las descargas\n2. Espacio libre para todas las descargas\n3. La mayoría del espacio libre\nObserva que no tiene sentido poner múltiples directorios temporales en la\nmisma letra de dispositivo."
+  IDS_SHARESELECTOR_TIP 	"Selecciona Directorios Compartidos Adicionales y directorios en red aquí.\nSi pulsas el tick (llave de control) seleccionando un directorio que es compartido\nincluyendo los subdirectorios (en el futuro)."
+  IDS_UNCLIST_TIP 			"Comparte los directorios que una vez fueron compartidos, pero no fueron legibles cuando eMule estaba iniciándose.\nSe volverá a intentar leerlos otra vez cuando se presione Aplicar. Pueden ser directorios compartidos o dispositivos en red.\nObserva que ese tiempo de espera puede aumentar el tiempo de inicio de eMule"
+  IDS_UNCADD_TIP 			"Añadir manualmente directorios compartidos. Muy útil para compartir directorios en red que no son mostrados en la de directorios locales"
+  IDS_UNCREM_TIP 			"Elimina el directorio compartido seleccionado"
+
+  IDS_ENABLE_SCHED_TIP 		"Activa el Programador.\nCuando está desactivado, no se realizará niguno de los eventos configurados\n(Por defecto: Desactivado, no olvides activarlo)"
+  IDS_REMOVE_SCHED_TIP 		"Elimina la hora de comienzo del evento seleccionado"
+  IDS_NEW_SCHED_TIP 		"Crear un nuevo evento de acción"
+  IDS_SCHEDLIST_TIP 		"Muestra el perfil de acciones actual.\nUsa los botones de NUEVO para añadir eventos y ELIMINAR para eliminar líneas.\nDeberás aplicar los cambios después de cada línea modificada o la selección de otra línea podría fallar"
+  IDS_S_ENABLE_TIP 			"Activar el perfil actual de acción"
+  IDS_S_TITLE_TIP 			"Edita el nombre del perfil actual de acción"
+  IDS_TIMESEL_SCHED_TIP 	"Seleccionar cuántas veces se realiza el evento"
+  IDS_DATETIMEPICKER1_TIP 	"Hora de comienzo"
+  IDS_DATETIMEPICKER2_TIP 	"Hora de finalización. Observa que si el evento sucede una única vez\ncomo la actualización del IPFilter, la hora de comienzo y la de finalización, han de ser iguales"
+  IDS_CHECKNOENDTIME_SCHED_TIP "El evento no ha terminado"
+  IDS_SCHEDACTION_TIP 		"El botón derecho en esta ventana crea/elimina las acciones del perfil actual.\nAlgunas acciones tienen parámetros que pueden ser editados"
+
+  IDS_OVERWRITE1          "El archivo %s ya existe. ¿Sobrescribir?"
+  IDS_OVERWRITE2          "¿Sobrescribir?"    
+  IDS_BACKUPERROR         "Se ha encontrado un error mientras se hacía el BackUp"
+  IDS_BACKUP_PART         "Debido a su tamaño, el BackUp de los archivos *.part puede durar unos minutos.\n¿Está seguro de querer hacerlo?"
+  IDS_BACKUP_PART_W       "¿Estás seguro?"
+  IDS_BACKUP_COMPLETE     "Archivo(s) Copiados Satisfactoriamente."
+
+END
+
+STRINGTABLE 
+BEGIN
+   IDS_ADDSHAREDIR    	"Añadir directorio compartido o UNC manualmente"
+   IDS_TEXTSHRETOADD  	"Directorio compartido a añadir"
+   IDS_SHAREWITHSUBDIR	"Compartir con subdirectorios"
+   IDS_SUBDIRS 			"Subdirectorios"
+   IDS_UNCLIST_INACTIVE  "Directorios compartidos inactivos"
+   IDS_SCHED_RELOAD 	"Programador: Recargar archivos compartidos"
+   IDS_SCHED_WARNENDTIME   "La hora de finalización debe ser igual que la hora de comienzo para un evento único"
+   IDS_SCHED_WARN_APPLY 	"Pulsa Aceptar o Aplicar antes de seleccionar otra programación"
+   IDS_SCHED_WARN_APPLY_TITLE 	"Atención"
 END
 
 #endif    // Spanish (Castilian) resources

@@ -226,6 +226,7 @@ BEGIN
     IDS_SHAREDFOLDERS       "共享目录"
     IDS_VIEW1               "查看 "
     IDS_VIEW2               "(未共享)"
+    IDS_VIEW3               "(同时共享子目录)"
     IDS_PRIOLOW             "低"
     IDS_PRIONORMAL          "普通"
     IDS_PRIOHIGH            "高"
@@ -3505,7 +3506,7 @@ END
 STRINGTABLE 
 BEGIN
 	IDS_DEBUGSEARCHDETAILLEVEL    "详细搜索级别"
-    IDS_CRYPTTCPPADDINGLENGTH	  "协议加密长度=[1-256]"
+	IDS_CRYPTTCPPADDINGLENGTH	 "协议加密长度=[1-254]"
 	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "用于协议加密的随机字节的数量(默认为128). \n较小的数值意味着较少的额外带宽消耗(如16), \n较大的数值意味着较好的加密效果."
 END
 
@@ -3515,6 +3516,55 @@ BEGIN
     IDS_DISABLECATCOLOR_TIP    "禁止在传输窗口中的标题页对不同的类别采用不同的颜色"
     IDS_CHANGEUSERASSERVICE    "你必须手动更改登录服务的用户, \n或者把配置文件保存在程序目录下"
 END
+
+STRINGTABLE
+BEGIN
+    IDS_ADDSHAREDIR    "手动添加本机或局域网内的共享文件夹"1
+    IDS_TEXTSHRETOADD   "添加共享"
+    IDS_SHAREWITHSUBDIR   "连同子目录一起共享"
+    IDS_SUBDIRS "子目录"
+    IDS_UNCLIST_INACTIVE  "无效的共享目录"
+    IDS_SCHED_RELOAD "计划任务: 刷新共享文件"
+    IDS_SCHED_WARNENDTIME   "若只想运行一次, 停止的时间需与开始的时间相同"
+    IDS_SCHED_WARN_APPLY "在选择另一个计划任务前，请按'确定'或'应用'"
+    IDS_SCHED_WARN_APPLY_TITLE "警告"
+END
+
+
+STRINGTABLE
+BEGIN
+    IDS_USSPINGDATASIZE          "ICMP 数据长度 (默认为0, 可设为0-64之间的值)"
+    IDS_PINGDATASIZE_TIP         "在ICMP数据长度为0的时候,\n某些防火墙/路由器不能作出正确的回应.\n这个选项将允许你设置一个较小的数值来对付路由器."
+END
+ 
+STRINGTABLE
+BEGIN
+    IDS_INCFILES_TIP "下载完成的文件将会移动到此处指定的文件夹.\n如果默认的文件夹被移动或删除, \n则必须输入一个有效的文件夹, eMule不会自动创建.\n可以在传输窗口为未完成文件指定分类而绕过此处设置.\n下载文件夹将自动共享."
+    IDS_TEMPFILES_TIP "指定下载中的临时文件所在的一个或多个文件夹.\n由于下载体系的需要, eMule将按照下载文件的大小建立临时文件.\n但也可通过在扩展设置中启用'稀疏文件'使临时文件仅按实际大小占用空间.\n(仅限于NTFS磁盘格式, Windows 2000或XP系统, vista不支持).\n可以点击'浏览'旁边的+号来添加多个临时文件文件夹.\n(只有在启用了'显示更多选项'时才会出现)\n临时文件文件夹按以下方式选定:\n1. 在空间足够的情况下, 和下载文件夹位于同一分区\n2. 空间足以完成全部下载的分区\n3. 拥有最大可用空间的分区\n注意: 在同一分区建立多个临时文件夹没有意义."
+    IDS_SHARESELECTOR_TIP "选择位于本机或局域网内的其它共享文件夹. \n如果在点选的同时按住control键, \n被选中的文件夹下的子文件夹也将一起共享."
+    IDS_UNCLIST_TIP "曾经共享过, 但在eMule本次启动时无法访问的文件夹.\n点击'确定'或'应用时将再次尝试共享.\n这里出现的可以是文件夹或网络驱动器.\n注意: 共享无效的文件夹可能延长eMule启动时间"
+    IDS_UNCADD_TIP "手动添加文件夹, 适用于未在'共享目录'窗口中出现的局域网共享目录"
+    IDS_UNCREM_TIP "移除选定的无效共享文件夹"
+    IDS_ENABLE_SCHED_TIP "启用计划任务.\n一旦禁用, 此处指定的任务将不会启动.\n(默认设置: 禁用, 要记得启用喔)"
+    IDS_REMOVE_SCHED_TIP "删除选定的计划任务"
+    IDS_NEW_SCHED_TIP "创建新的计划任务"
+    IDS_SCHEDLIST_TIP "计划任务的详情. \n可以'新建'或'删除'已有的任务.\n操作之后必须'应用', 否则可能会失效"
+    IDS_S_ENABLE_TIP "启用当前的计划任务"
+    IDS_S_TITLE_TIP "修改计划任务的名称"
+    IDS_TIMESEL_SCHED_TIP "设置计划任务的频率"
+    IDS_DATETIMEPICKER1_TIP "开始时间"
+    IDS_DATETIMEPICKER2_TIP "结束时间. 注意: 只执行一次的任务(例如升级ipfilter),\n开始时间需和结束时间保持一致"
+    IDS_CHECKNOENDTIME_SCHED_TIP "任务不会自动结束"
+    IDS_SCHEDACTION_TIP "在这个窗口点击右键, 可在当前任务增加或减少动作.\n某些动作的参数是可以修改的"
+    IDS_OVERWRITE1          "文件 %s 已经存在. 是否覆盖?"
+    IDS_OVERWRITE2          "是否覆盖?"
+    IDS_BACKUPERROR         "备份发生错误"
+    IDS_BACKUP_PART         "备份 *.part 文件可能需要几分钟的时间, 视文件大小而定.\n是否确定要备份这些文件?"
+    IDS_BACKUP_PART_W       "是否确定?"
+    IDS_BACKUP_COMPLETE     "文件备份完成"
+ 
+END
+
 
 
 #endif    // Chinese (P.R.C.) resources
