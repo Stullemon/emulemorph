@@ -392,7 +392,6 @@ void CSharedFileList::FindSharedFiles()
 		// They must not be deleted when the CRC32-Thread writes the CRC into the object !
 		CSingleLock sLockCRC32 (&FileListLockMutex,true);
 		// [end] Mighty Knife
-
 		CSingleLock listlock(&m_mutWriteList);
 		
 		POSITION pos = m_Files_map.GetStartPosition();
@@ -409,7 +408,6 @@ void CSharedFileList::FindSharedFiles()
 			m_UnsharedFiles_map.SetAt(CSKey(cur_file->GetFileHash()), true);
 			listlock.Lock();
 			m_Files_map.RemoveKey(key);
-
 			m_dwFile_map_updated = GetTickCount(); //MOPRH - Added by SiRoB, Optimization requpfile
 			listlock.Unlock();
 		}
@@ -474,14 +472,16 @@ void CSharedFileList::FindSharedFiles()
 		ltempDir=tempDir;
 		ltempDir.MakeLower();
 
+		/*  MORPH START sharesubdir
 		if( l_sAdded.Find( ltempDir ) ==NULL ) {
+		*/
 		if( l_sAdded.Find( ltempDir ) == NULL && //ssd
 			!FindStartingWith(&l_sAddedWithSubdir, ltempDir) ) {	// SLUGFILLER: shareSubdir
+			// 	 MORPH END sharesubdir
 			l_sAdded.AddHead( ltempDir );
 			AddFilesFromDirectory(tempDir);
 		}
 	}
-	} // ssd
 
 	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition();pos != 0;)
 	{
@@ -491,11 +491,12 @@ void CSharedFileList::FindSharedFiles()
 		ltempDir= tempDir;
 		ltempDir.MakeLower();
 
-     /* old code ssd
+     /* MOPRH START sharesubdir
 		if( l_sAdded.Find( ltempDir ) ==NULL ) {
-    */
+     end old code */
 		if( l_sAdded.Find( ltempDir ) == NULL && //sharesubdir
 			!FindStartingWith(&l_sAddedWithSubdir, ltempDir) ) {	// SLUGFILLER: shareSubdir
+			// MOPRH END sharesubdir
 			l_sAdded.AddHead( ltempDir );
 			AddFilesFromDirectory(tempDir);
 		}
@@ -519,16 +520,18 @@ void CSharedFileList::FindSharedFiles()
 				waitingforhash_list.GetNext (p);
 			}
 		}
-		HashNextFile();
+			HashNextFile(); //ssd
 						  // so i moved the call into this if clause. This also removes
 					      // an unnecessary message "All files hashed", which is added to
 						  // the log there.
 	}
-	// HashNextFile();
+	/*
+	HashNextFile();
+	*/
 	// [end] Mighty Knife
 
 }
-/* old code	 ssd
+/* old code	 sharesubdir:
 void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory)
 */
 void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory, bool bWithSubdir)	// SLUGFILLER: shareSubdir
@@ -550,7 +553,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory, bool b
 	while (!end)
 	{
 		end = !ff.FindNextFile();
-    /* old code:
+    /* share subdir old code:
 		if (ff.IsDirectory() || ff.IsDots() || ff.IsSystem() || ff.IsTemporary() || ff.GetLength()==0 || ff.GetLength()>MAX_EMULE_FILE_SIZE)
 			continue;
     */
@@ -643,9 +646,9 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory, bool b
 			}
 			else
 			{
-			/* old code ssd
+			/* old code share subdir 
 				toadd->SetPath(rstrDirectory);
-       */
+           */
 				toadd->SetPath(realDirName);	// SLUGFILLER: shareSubdir
 				toadd->SetFilePath(ff.GetFilePath());
 				AddFile(toadd);
@@ -654,13 +657,16 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory, bool b
 		else
 		{
 			//not in knownfilelist - start adding thread to hash file if the hashing of this file isnt already waiting
-			// SLUGFILLER: SafeHash - don't double hash, MY way
+			/* SLUGFILLER: SafeHash - don't double hash, MY way
+			if (!IsHashing(rstrDirectory, ff.GetFileName()) && !thePrefs.IsTempFile(rstrDirectory, ff.GetFileName())){
+			*/
 			if (!IsHashing(rstrDirectory, ff.GetFileName()) && !theApp.downloadqueue->IsTempFile(rstrDirectory, ff.GetFileName()) && !thePrefs.IsConfigFile(rstrDirectory, ff.GetFileName())){
 			UnknownFile_Struct* tohash = new UnknownFile_Struct;
-				/* ssd
+				/* MORPH START sharesubdir odl code:
 				tohash->strDirectory = rstrDirectory;
-        */
+        	    */
 				tohash->strDirectory = realDirName;	// SLUGFILLER: shareSubdir
+				// MORPH end sharesubdir
 				tohash->strName = ff.GetFileName();
 				waitingforhash_list.AddTail(tohash);
 				}
@@ -721,6 +727,9 @@ void CSharedFileList::RepublishFile(CKnownFile* pFile)
 
 bool CSharedFileList::AddFile(CKnownFile* pFile)
 {
+	/* morph SafeHash - use GetED2KPartCount
+	ASSERT( pFile->GetHashCount() == pFile->GetED2KPartHashCount() );
+	*/
 	ASSERT( pFile->GetHashCount() == pFile->GetED2KPartCount() );	// SLUGFILLER: SafeHash - use GetED2KPartCount
 	ASSERT( !pFile->IsKindOf(RUNTIME_CLASS(CPartFile)) || !STATIC_DOWNCAST(CPartFile, pFile)->hashsetneeded );
 
@@ -735,10 +744,10 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 		return false;
 	}
 	m_UnsharedFiles_map.RemoveKey(CSKey(pFile->GetFileHash()));	
-	// SLUGFILLER: mergeKnown
+	// SLUGFILLER START: mergeKnown
 	pFile->SetLastSeen();	// okay, we see it
 	theApp.knownfiles->MergePartFileStats(pFile);	// if this is a part file, find the matching known file and merge statistics
-	// SLUGFILLER: mergeKnown
+	// SLUGFILLER END: mergeKnown
 	CSingleLock listlock(&m_mutWriteList);
 	listlock.Lock();	
 	m_Files_map.SetAt(key, pFile);
@@ -784,7 +793,7 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 	ASSERT( !IsFilePtrInList(file) );
 	ASSERT( !theApp.knownfiles->IsFilePtrInList(file) );
 
-	// SLUGFILLER: SafeHash
+	// SLUGFILLER START: SafeHash
 	//Borschtsch
 	bool dontadd = true;
 	if (!CompareDirectories(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR), file->GetPath()))
@@ -830,7 +839,7 @@ void CSharedFileList::FileHashingFinished(CKnownFile* file)
 			ASSERT(0);
 		return;
 	}
-	// SLUGFILLER: SafeHash
+	// SLUGFILLER END: SafeHash
 
 	CKnownFile* found_file = GetFileByID(file->GetFileHash());
 	if (found_file == NULL)
@@ -878,7 +887,9 @@ void CSharedFileList::Reload()
 	m_keywords->RemoveAllKeywordReferences();	
 	FindSharedFiles();
 	m_keywords->PurgeUnreferencedKeywords();
-	// SLUGFILLER: SafeHash remove - check moved up
+	/* SLUGFILLER: SafeHash remove - check moved up
+	if (output)
+	*/
 		output->ReloadFileList();
 }
 
@@ -886,7 +897,10 @@ void CSharedFileList::SetOutputCtrl(CSharedFilesCtrl* in_ctrl)
 {
 	output = in_ctrl;
 	output->ReloadFileList();
-	Reload();		// SLUGFILLER: SafeHash - load shared files after everything
+	/* official 
+	HashNextFile();		// SLUGFILLER: SafeHash - if hashing not yet started, start it now
+	*/
+	Reload();		// MORPH SLUGFILLER: SafeHash - load shared files after everything
 }
 
 uint8 GetRealPrio(uint8 in)
