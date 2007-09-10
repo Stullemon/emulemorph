@@ -104,7 +104,7 @@ BOOL CServerSocket::OnHostNameResolved(const SOCKADDR_IN *pSockAddr)
 
 void CServerSocket::OnConnect(int nErrorCode)
 {
-	//CEMSocket::OnConnect(nErrorCode);
+	/*MORPH*/CEMSocket::OnConnect(nErrorCode);
 	//CAsyncSocketEx::OnConnect(nErrorCode);
 
 	switch (nErrorCode)
