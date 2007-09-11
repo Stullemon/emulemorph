@@ -61,7 +61,12 @@ void CServerConnect::TryAnotherConnectionRequest()
 				{
 					// 05-Nov-2003: If we have a very short server list, we could put serious load on those few servers
 					// if we start the next connection tries without waiting.
-					LogWarning(LOG_STATUSBAR, GetResString(IDS_OUTOFSERVERS));
+							// MORPH START more specific error message
+			          	if (thePrefs.IsServerCryptLayerRequiredStrict())
+				       		LogWarning(LOG_STATUSBAR, GetResString(IDS_OUTOFSERVERS_O)); //"Failed to connect obfuscated to  servers with obfuscation key. Making another pass."
+		       		else
+				       //	MORPH END more specific error message 
+         					LogWarning(LOG_STATUSBAR, GetResString(IDS_OUTOFSERVERS));
 					AddLogLine(false, GetResString(IDS_RECONNECT), CS_RETRYCONNECTTIME);
 					m_uStartAutoConnectPos = 0; // default: start at 0
 					VERIFY( (m_idRetryTimer = SetTimer(NULL, 0, 1000*CS_RETRYCONNECTTIME, RetryConnectTimer)) != NULL );
@@ -141,6 +146,7 @@ void CServerConnect::ConnectToServer(CServer* server, bool multiconnect, bool bN
 	//START MORPH lh require obfuscated server connection  
 	if (thePrefs.IsServerCryptLayerRequiredStrict() && 
 		(bNoCrypt ||!(server->SupportsObfuscationTCP()))) {
+		LogWarning(LOG_STATUSBAR, GetResString(IDS_NO_OBFUSCATION_KEY));
 		ASSERT(thePrefs.IsServerCryptLayerRequiredStrict()==true); // IsServerCryptLayerRequiredStrict, obfuscation required for server should have been handled elsewere. stacktrace!
 		return;
 	}

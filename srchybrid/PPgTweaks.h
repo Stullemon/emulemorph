@@ -107,6 +107,19 @@ protected:
     CString m_sAllowedIPs;
 	int m_iDebugSearchResultDetailLevel;
 	int m_iCryptTCPPaddingLength ;
+	bool m_bAdjustNTFSDaylightFileTime; //neo offcial pref II
+	CString m_strDateTimeFormat;
+	CString m_strDateTimeFormat4Log;
+	COLORREF m_crLogError;
+	COLORREF m_crLogWarning;
+	COLORREF m_crLogSuccess;
+	bool m_bShowVerticalHourMarkers;
+	bool m_bReBarToolbar;
+	bool m_bIconflashOnNewMessage;
+	bool m_bShowCopyEd2kLinkCmd;
+	bool m_dontcompressavi;
+	bool m_ICH;
+
     // continue extra official preferences....
 	HTREEITEM m_hti_advanced;
     HTREEITEM m_hti_bMiniMuleAutoClose;
@@ -144,6 +157,18 @@ protected:
 	HTREEITEM m_hti_UseUserSortedServerList;
 	HTREEITEM m_hti_DebugSearchResultDetailLevel;
 	HTREEITEM m_htiCryptTCPPaddingLength;
+	HTREEITEM m_htiAdjustNTFSDaylightFileTime;	  //neo offcial pref II
+	HTREEITEM m_htidatetimeformat;
+	HTREEITEM m_htidatetimeformat4log;
+	HTREEITEM m_htiLogError;
+	HTREEITEM m_htiLogWarning;
+	HTREEITEM m_htiLogSuccess;
+	HTREEITEM m_htiShowVerticalHourMarkers;
+	HTREEITEM m_htiReBarToolbar;
+	HTREEITEM m_htiIconflashOnNewMessage;
+	HTREEITEM m_htiShowCopyEd2kLinkCmd;
+	HTREEITEM m_htidontcompressavi;
+	HTREEITEM m_htiICH;
 	// MORPH END  leuk_he Advanced official preferences. 
 	
 

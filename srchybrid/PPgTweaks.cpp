@@ -240,6 +240,18 @@ CPPgTweaks::CPPgTweaks()
 	m_hti_AllowedIPs=NULL;
 	m_hti_DebugSearchResultDetailLevel=NULL;
 	m_htiCryptTCPPaddingLength=NULL;
+	m_htidatetimeformat = NULL;
+	m_htidatetimeformat4log = NULL;
+	m_htiLogError = NULL;
+	m_htiLogWarning = NULL;
+	m_htiLogSuccess = NULL;
+	m_htidontcompressavi = NULL;
+	m_htiShowCopyEd2kLinkCmd = NULL;
+	m_htiIconflashOnNewMessage = NULL;
+	m_htiReBarToolbar = NULL;
+	m_htiICH = NULL;
+	m_htiShowVerticalHourMarkers = NULL;
+  m_htiAdjustNTFSDaylightFileTime = NULL;
 	//MORPH END  leuk_he Advanced official preferences.
 }
 
@@ -437,6 +449,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 
 		m_hti_HighresTimer=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_HIGHRESTIMER),m_hti_advanced,m_bHighresTimer);
 		m_hti_TrustEveryHash=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_TRUSTEVERYHASH),m_hti_advanced,m_bTrustEveryHash);
+		m_htiICH = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_ICH), m_hti_advanced, m_ICH);
+
 
 		m_hti_InspectAllFileTypes=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_INSPECTALLFILETYPES),m_hti_advanced,m_iInspectAllFileTypes);
 		m_hti_maxmsgsessions=m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXMSGSESSIONS),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
@@ -455,7 +469,24 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiCryptTCPPaddingLength=m_ctrlTreeOptions.InsertItem(GetResString(IDS_CRYPTTCPPADDINGLENGTH),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_htiCryptTCPPaddingLength, RUNTIME_CLASS(CNumTreeOptionsEdit));													   
 
+		m_htiAdjustNTFSDaylightFileTime = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_ADJUSTNTFSDAYLIGHTFILETIME), m_hti_advanced, m_bAdjustNTFSDaylightFileTime);
+		m_htidatetimeformat = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_DATETIMEFORMAT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_htidatetimeformat, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htidatetimeformat4log = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_DATETIMEFORMAT4LOG), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_htidatetimeformat4log, RUNTIME_CLASS(CNumTreeOptionsEdit));
 
+
+		m_htiLogError = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_LOGERROR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddColorSelector(m_htiLogError, RUNTIME_CLASS(CTreeOptionsBrowseButton));
+		m_htiLogWarning = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_LOGWARNING), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddColorSelector(m_htiLogWarning, RUNTIME_CLASS(CTreeOptionsBrowseButton));
+		m_htiLogSuccess = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_LOGSUCCESS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddColorSelector(m_htiLogSuccess, RUNTIME_CLASS(CTreeOptionsBrowseButton));
+		m_htiShowVerticalHourMarkers = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_SHOWVERTICALHOURMARKERS), m_hti_advanced, m_bShowVerticalHourMarkers);
+   	    m_htiReBarToolbar = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_REBARTOOLBAR), m_hti_advanced, m_bReBarToolbar);		
+    	m_htiIconflashOnNewMessage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_ICON_FLASH_ON_NEW_MESSAGE), m_hti_advanced, m_bIconflashOnNewMessage);
+		m_htiShowCopyEd2kLinkCmd = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_SHOWCOPYED2KLINK), m_hti_advanced, m_bShowCopyEd2kLinkCmd);
+		m_htidontcompressavi = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_DONTCOMPRESSAVI), m_hti_advanced, m_dontcompressavi);
 
 		if (m_bExtControls) // show more controls --> still possible to manully expand. 
 			m_ctrlTreeOptions.Expand(m_hti_advanced, TVE_EXPAND);
@@ -621,6 +652,19 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if(m_hti_DebugSearchResultDetailLevel) DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_DebugSearchResultDetailLevel,m_iDebugSearchResultDetailLevel); //TODO: check string for ip
 	if (m_htiCryptTCPPaddingLength) { DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_htiCryptTCPPaddingLength,m_iCryptTCPPaddingLength );
 									  DDV_MinMaxInt(pDX, m_iCryptTCPPaddingLength , 1,256);}
+
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAdjustNTFSDaylightFileTime, m_bAdjustNTFSDaylightFileTime);
+	DDX_Text(pDX, IDC_EXT_OPTS, m_htidatetimeformat, m_strDateTimeFormat);
+	DDX_Text(pDX, IDC_EXT_OPTS, m_htidatetimeformat4log, m_strDateTimeFormat4Log);
+	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogError, m_crLogError);
+	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogWarning, m_crLogWarning);
+	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogSuccess, m_crLogSuccess);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiShowVerticalHourMarkers, m_bShowVerticalHourMarkers);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiICH, m_ICH);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htidontcompressavi, m_dontcompressavi);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiShowCopyEd2kLinkCmd, m_bShowCopyEd2kLinkCmd);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiIconflashOnNewMessage, m_bIconflashOnNewMessage);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiReBarToolbar, m_bReBarToolbar);
     // MORPH END  leuk_he Advanced official preferences.
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -739,6 +783,18 @@ BOOL CPPgTweaks::OnInitDialog()
            m_sAllowedIPs= m_sAllowedIPs+ _T(";") + ipstr(thePrefs.GetAllowedRemoteAccessIPs()[i]);
 	m_iDebugSearchResultDetailLevel=thePrefs.GetDebugSearchResultDetailLevel();
 	m_iCryptTCPPaddingLength  = thePrefs.GetCryptTCPPaddingLength();
+	m_bAdjustNTFSDaylightFileTime = thePrefs.m_bAdjustNTFSDaylightFileTime;
+	m_strDateTimeFormat = thePrefs.m_strDateTimeFormat;
+	m_strDateTimeFormat4Log = thePrefs.m_strDateTimeFormat4Log;
+	m_crLogError = thePrefs.m_crLogError;
+	m_crLogWarning = thePrefs.m_crLogWarning;
+	m_crLogSuccess = thePrefs.m_crLogSuccess;
+	m_ICH = thePrefs.ICH;
+	m_dontcompressavi = thePrefs.dontcompressavi;
+	m_bShowCopyEd2kLinkCmd = thePrefs.m_bShowCopyEd2kLinkCmd;
+	m_bIconflashOnNewMessage = thePrefs.m_bIconflashOnNewMessage;
+	m_bShowVerticalHourMarkers = thePrefs.m_bShowVerticalHourMarkers;
+	m_bReBarToolbar = thePrefs.m_bReBarToolbar;
 	// MORPH END  leuk_he Advanced official preferences.
 
 	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
@@ -947,6 +1003,19 @@ BOOL CPPgTweaks::OnApply()
 	}
 	thePrefs.m_iDebugSearchResultDetailLevel=m_iDebugSearchResultDetailLevel;
 	thePrefs.m_byCryptTCPPaddingLength=m_iCryptTCPPaddingLength ;
+    thePrefs.m_bAdjustNTFSDaylightFileTime = m_bAdjustNTFSDaylightFileTime;
+	thePrefs.m_strDateTimeFormat = m_strDateTimeFormat;
+	thePrefs.m_strDateTimeFormat4Log = m_strDateTimeFormat4Log;
+	thePrefs.m_crLogError = m_crLogError;
+	thePrefs.m_crLogWarning = m_crLogWarning;
+	thePrefs.m_crLogSuccess = m_crLogSuccess;
+
+	thePrefs.ICH = m_ICH;
+	thePrefs.dontcompressavi = m_dontcompressavi;
+	thePrefs.m_bShowCopyEd2kLinkCmd = m_bShowCopyEd2kLinkCmd;
+	thePrefs.m_bIconflashOnNewMessage = m_bIconflashOnNewMessage;
+	thePrefs.m_bShowVerticalHourMarkers = m_bShowVerticalHourMarkers;
+	thePrefs.m_bReBarToolbar = m_bReBarToolbar;
 	//MORPH END  leuk_he Advanced official preferences.
 
 

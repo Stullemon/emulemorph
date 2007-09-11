@@ -6170,6 +6170,25 @@ BEGIN
   IDS_BACKUP_PART_W       "Are you sure?"
   IDS_BACKUP_COMPLETE     "File(s) Copied Successfully."
 
+  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME "Adjust NTFS daylight file time"
+  IDS_X_PEERCACHESHOW     "Show PeerCache informations"
+  IDS_X_DATETIMEFORMAT    "Date&Time format"
+  IDS_X_DATETIMEFORMAT4LOG "Date&Time format for log"
+  IDS_X_LOGWARNING        "Log warning color"
+  IDS_X_LOGSUCCESS        "Log success color"
+  IDS_X_LOGERROR          "Log error color"
+  IDS_X_ICH               "Intelligent Corruption Handing (ICH)"
+  IDS_X_DONTCOMPRESSAVI   "Don't compress avi"
+  IDS_X_SHOWCOPYED2KLINK  "Show 'copy ed2k link' command"
+  IDS_X_ICON_FLASH_ON_NEW_MESSAGE "Flash tray icon on new message"
+  IDS_X_SHOWVERTICALHOURMARKERS "Stats- Show vertical hour markers"
+  IDS_X_REBARTOOLBAR      "* ReBar Toolbar"
+END
+
+STRINGTABLE 
+BEGIN
+  IDS_OUTOFSERVERS_O "Failed to connect obfuscated to  servers with obfuscation key. Making another pass."
+  IDS_NO_OBFUSCATION_KEY "Server has no obfuscation key."
 END
 
 #endif    // English (U.S.) resources
