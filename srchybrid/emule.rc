@@ -6189,6 +6189,7 @@ STRINGTABLE
 BEGIN
   IDS_OUTOFSERVERS_O "Failed to connect obfuscated to  servers with obfuscation key. Making another pass."
   IDS_NO_OBFUSCATION_KEY "Server has no obfuscation key."
+  IDS_URL_FOR_UPDATING_IP2COUNTRY "File-URL for updating"
 END
 
 #endif    // English (U.S.) resources
