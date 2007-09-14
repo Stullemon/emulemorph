@@ -261,9 +261,6 @@ CSharedFilesCtrl::~CSharedFilesCtrl()
 	//MORPH START - Added by SiRoB, POWERSHARE LImit
 	if (m_PowerShareLimitMenu) VERIFY( m_PowerShareLimitMenu.DestroyMenu() );
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
-	// ==> Limit PS by amount of data uploaded - Stulle
-	if (m_PsAmountLimitMenu) VERIFY( m_PsAmountLimitMenu.DestroyMenu() );
-	// <== Limit PS by amount of data uploaded - Stulle
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	if(m_SpreadbarMenu)	VERIFY(m_SpreadbarMenu.DestroyMenu());
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file

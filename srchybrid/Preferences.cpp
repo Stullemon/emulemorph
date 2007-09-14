@@ -2327,12 +2327,17 @@ void CPreferences::SavePreferences()
     ini.WriteBool(L"PreferRestrictedOverUser",m_bPreferRestrictedOverUser);
 	ini.WriteBool(L"UserSortedServerList",m_bUseUserSortedServerList);
 	ini.WriteInt(L"CryptTCPPaddingLength",m_byCryptTCPPaddingLength);
+    ini.WriteBool(L"DontCompressAvi",dontcompressavi);
+    ini.WriteBool(L"ShowCopyEd2kLinkCmd",m_bShowCopyEd2kLinkCmd);
+    ini.WriteBool(L"IconflashOnNewMessage",m_bIconflashOnNewMessage);
+    ini.WriteBool(L"ReBarToolbar",m_bReBarToolbar);
 	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
 	CString WriteAllowedIPs ;
 	if (GetAllowedRemoteAccessIPs().GetCount() > 0)
 		for (int i = 0; i <  GetAllowedRemoteAccessIPs().GetCount(); i++)
            WriteAllowedIPs = WriteAllowedIPs  + _T(";") + ipstr(GetAllowedRemoteAccessIPs()[i]);
     ini.WriteString(L"AllowedIPs",WriteAllowedIPs);  // End Seciotn Webserver
+    ini.WriteBool(L"ShowVerticalHourMarkers",m_bShowVerticalHourMarkers,L"Statistics");
 
 	// MORPH END  leuk_he Advanced official preferences. 
 
