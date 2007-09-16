@@ -13,10 +13,11 @@ for i in `cat dirlist.txt`
 do
 mkdir "$DESTDIR/$i"
 done
-for i in `cat srclist.txt`
-do
-cp -p $i "$DESTDIR/$i"
-done
+#for i in `cat srclist.txt`
+#do
+#cp -p $i "$DESTDIR/$i"
+#done
+cat srclist.txt|xargs -i cp -p {} "$DESTDIR/{}"
 cp srchybrid/ptreads/pthreads/*.* "$DESTDIR/srchybrid/pthreads/pthreads/"
 cp emule/Changelog.MorphXT.txt emule/license.txt readme.txt Packag_Licences_Readme.html "$DESTDIR"
 cp -Rp eMule "$DESTDIR"
