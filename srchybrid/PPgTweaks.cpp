@@ -203,6 +203,7 @@ CPPgTweaks::CPPgTweaks()
 	iServerUDPPort=65535;
 	m_bRemoveFilesToBin=false;
 	m_iDebugSearchResultDetailLevel=0;
+
 	// continue extra official preferences....
 	m_hti_advanced=NULL;
 	m_hti_bMiniMuleAutoClose=NULL;
@@ -240,7 +241,6 @@ CPPgTweaks::CPPgTweaks()
 	m_hti_AllowedIPs=NULL;
 	m_hti_DebugSearchResultDetailLevel=NULL;
 	m_htiCryptTCPPaddingLength=NULL;
-	m_htidatetimeformat = NULL;
 	m_htidatetimeformat4log = NULL;
 	m_htiLogError = NULL;
 	m_htiLogWarning = NULL;
@@ -251,7 +251,8 @@ CPPgTweaks::CPPgTweaks()
 	m_htiReBarToolbar = NULL;
 	m_htiICH = NULL;
 	m_htiShowVerticalHourMarkers = NULL;
-  m_htiAdjustNTFSDaylightFileTime = NULL;
+    m_htiAdjustNTFSDaylightFileTime = NULL;
+    m_htidontcompressavi = NULL;
 	//MORPH END  leuk_he Advanced official preferences.
 }
 
@@ -436,8 +437,6 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_hti_sTxtEditor= m_ctrlTreeOptions.InsertItem(GetResString(IDS_TXTEDITOR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
 		m_ctrlTreeOptions.AddFileEditBox(m_hti_sTxtEditor,RUNTIME_CLASS(CTreeOptionsEdit), RUNTIME_CLASS(CTreeOptionsBrowseButton));
 
-		m_hti_sNotifierMailEncryptCertName= m_ctrlTreeOptions.InsertItem(GetResString(IDS_NOTIFIERMAILENCRYPTCERTNAME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
-		m_ctrlTreeOptions.AddEditBox(m_hti_sNotifierMailEncryptCertName, RUNTIME_CLASS(CTreeOptionsEditEx));
 
 		m_hti_sdatetimeformat= m_ctrlTreeOptions.InsertItem(GetResString(IDS_DATETIMEFORMAT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_hti_sdatetimeformat, RUNTIME_CLASS(CTreeOptionsEditEx));
@@ -470,10 +469,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiCryptTCPPaddingLength, RUNTIME_CLASS(CNumTreeOptionsEdit));													   
 
 		m_htiAdjustNTFSDaylightFileTime = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_ADJUSTNTFSDAYLIGHTFILETIME), m_hti_advanced, m_bAdjustNTFSDaylightFileTime);
-		m_htidatetimeformat = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_DATETIMEFORMAT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
-		m_ctrlTreeOptions.AddEditBox(m_htidatetimeformat, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htidatetimeformat4log = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_DATETIMEFORMAT4LOG), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
-		m_ctrlTreeOptions.AddEditBox(m_htidatetimeformat4log, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_ctrlTreeOptions.AddEditBox(m_htidatetimeformat4log, RUNTIME_CLASS(CTreeOptionsEditEx));
 
 
 		m_htiLogError = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_LOGERROR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
@@ -654,7 +651,6 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 									  DDV_MinMaxInt(pDX, m_iCryptTCPPaddingLength , 1,256);}
 
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAdjustNTFSDaylightFileTime, m_bAdjustNTFSDaylightFileTime);
-	DDX_Text(pDX, IDC_EXT_OPTS, m_htidatetimeformat, m_strDateTimeFormat);
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htidatetimeformat4log, m_strDateTimeFormat4Log);
 	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogError, m_crLogError);
 	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogWarning, m_crLogWarning);
@@ -1002,7 +998,8 @@ BOOL CPPgTweaks::OnApply()
 		strIP = m_sAllowedIPs.Tokenize(L";", iPos);
 	}
 	thePrefs.m_iDebugSearchResultDetailLevel=m_iDebugSearchResultDetailLevel;
-	thePrefs.m_byCryptTCPPaddingLength=m_iCryptTCPPaddingLength ;
+	if (m_iCryptTCPPaddingLength > 255 ) m_iCryptTCPPaddingLength=255;
+	thePrefs.m_byCryptTCPPaddingLength=(uint8)m_iCryptTCPPaddingLength ;
     thePrefs.m_bAdjustNTFSDaylightFileTime = m_bAdjustNTFSDaylightFileTime;
 	thePrefs.m_strDateTimeFormat = m_strDateTimeFormat;
 	thePrefs.m_strDateTimeFormat4Log = m_strDateTimeFormat4Log;
@@ -1194,6 +1191,17 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_hti_AllowedIPs,IDS_ALLOWEDIPS);
 		SetTool(m_hti_DebugSearchResultDetailLevel,IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP); 
 		SetTool(m_htiCryptTCPPaddingLength,IDS_CRYPTTCPPADDINGLENGTH_TIP);
+		SetTool(m_htiAdjustNTFSDaylightFileTime, IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP);
+		SetTool(m_htidatetimeformat4log ,IDS_DATETIMEFORMAT_TIP);
+		SetTool(m_htiLogError  ,  IDS_X_LOGERROR_TIP );
+		SetTool(m_htiLogWarning ,IDS_X_LOGERROR_TIP );
+		SetTool(m_htiLogSuccess,IDS_X_LOGERROR_TIP );
+		SetTool(m_htiShowVerticalHourMarkers,IDS_X_SHOWVERTICALHOURMARKERS_TIP);
+		SetTool(m_htiReBarToolbar ,IDS_X_REBARTOOLBAR_TIP);
+		SetTool(m_htiIconflashOnNewMessage,IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP);
+		SetTool(m_htiShowCopyEd2kLinkCmd, IDS_X_SHOWCOPYED2KLINK_TIP);
+		SetTool(m_htidontcompressavi,IDS_X_DONTCOMPRESSAVI_TIP);
+
 		//MORPH END leuk_he tooltipped
 
 	}

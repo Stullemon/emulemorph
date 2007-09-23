@@ -2238,7 +2238,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"AdvancedSpamFilter",m_bAdvancedSpamfilter);
 	ini.WriteBool(L"ShowDwlPercentage",m_bShowDwlPercentage);
 	ini.WriteBool(L"RemoveFilesToBin",m_bRemove2bin);
-	//ini.WriteBool(L"ShowCopyEd2kLinkCmd",m_bShowCopyEd2kLinkCmd);
+	ini.WriteBool(L"ShowCopyEd2kLinkCmd",m_bShowCopyEd2kLinkCmd); // morph enable this saving. advanced offficial settings
 	ini.WriteBool(L"AutoArchivePreviewStart", m_bAutomaticArcPreviewStart);
 
 	// Toolbar
@@ -2327,10 +2327,12 @@ void CPreferences::SavePreferences()
     ini.WriteBool(L"PreferRestrictedOverUser",m_bPreferRestrictedOverUser);
 	ini.WriteBool(L"UserSortedServerList",m_bUseUserSortedServerList);
 	ini.WriteInt(L"CryptTCPPaddingLength",m_byCryptTCPPaddingLength);
+   ini.WriteBool(L"AdjustNTFSDaylightFileTime",m_bAdjustNTFSDaylightFileTime); 
     ini.WriteBool(L"DontCompressAvi",dontcompressavi);
     ini.WriteBool(L"ShowCopyEd2kLinkCmd",m_bShowCopyEd2kLinkCmd);
     ini.WriteBool(L"IconflashOnNewMessage",m_bIconflashOnNewMessage);
     ini.WriteBool(L"ReBarToolbar",m_bReBarToolbar);
+    ini.WriteBool(L"ShowVerticalHourMarkers",m_bShowVerticalHourMarkers,L"Statistics" ); // section statistics
 	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
 	CString WriteAllowedIPs ;
 	if (GetAllowedRemoteAccessIPs().GetCount() > 0)

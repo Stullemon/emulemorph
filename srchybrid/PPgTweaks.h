@@ -158,7 +158,6 @@ protected:
 	HTREEITEM m_hti_DebugSearchResultDetailLevel;
 	HTREEITEM m_htiCryptTCPPaddingLength;
 	HTREEITEM m_htiAdjustNTFSDaylightFileTime;	  //neo offcial pref II
-	HTREEITEM m_htidatetimeformat;
 	HTREEITEM m_htidatetimeformat4log;
 	HTREEITEM m_htiLogError;
 	HTREEITEM m_htiLogWarning;
