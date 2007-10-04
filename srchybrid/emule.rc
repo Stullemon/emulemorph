@@ -243,18 +243,24 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_SCOPE_U,"Static",SS_ETCHEDFRAME | SS_NOTIFY | 
                     SS_RIGHTJUST | SS_REALSIZEIMAGE | SS_SUNKEN | NOT 
-                    WS_VISIBLE,221,95,284,92
+                    WS_VISIBLE,221,97,284,93
     CONTROL         "",IDC_STATSSCOPE,"Static",SS_ETCHEDFRAME | SS_NOTIFY | 
-                    SS_SUNKEN | NOT WS_VISIBLE,221,190,284,91
+                    SS_SUNKEN | NOT WS_VISIBLE,221,194,284,93
     CONTROL         "",IDC_SCOPE_D,"Static",SS_ETCHEDFRAME | SS_NOTIFY | 
-                    SS_SUNKEN | NOT WS_VISIBLE,221,0,284,92
+                    SS_SUNKEN | NOT WS_VISIBLE,221,0,284,93
     CONTROL         "",IDC_STATTREE,"SysTreeView32",TVS_HASBUTTONS | 
-                    TVS_HASLINES | TVS_SHOWSELALWAYS | WS_BORDER | 
-                    WS_TABSTOP,5,18,213,263
+                    TVS_HASLINES | TVS_DISABLEDRAGDROP | TVS_SHOWSELALWAYS | 
+                    WS_TABSTOP | 0x800,5,18,211,269,WS_EX_STATICEDGE
+    CONTROL         "",IDC_SPLITTER_STAT,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,217,6,5,281
+    CONTROL         "",IDC_SPLITTER_STAT_HL,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,221,190,284,5
+    CONTROL         "",IDC_SPLITTER_STAT_HR,"Static",SS_BLACKFRAME | NOT 
+                    WS_VISIBLE,221,92,284,5
     CONTROL         "Statistics Last Reset: #date#",IDC_STATIC_LASTRESET,
-                    "Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,23,7,
-                    184,8
-    PUSHBUTTON      "v",IDC_BNMENU,6,4,14,13
+                    "Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | WS_GROUP,20,7,
+                    195,8
+    PUSHBUTTON      "v",IDC_BNMENU,3,4,14,13,BS_FLAT
 END
 
 IDD_PPG_STATS DIALOGEX 0, 0, 231, 193
@@ -509,23 +515,23 @@ BEGIN
     CONTROL         "disable",IDC_UDPDISABLE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,83,120,51,9
     PUSHBUTTON      "Test ports",IDC_STARTTEST,14,132,71,14,BS_FLAT
-    EDITTEXT        IDC_MAXSOURCEPERFILE,14,188,38,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_MAXSOURCEPERFILE,14,200,38,12,ES_AUTOHSCROLL | 
                     ES_NUMBER
-    EDITTEXT        IDC_MAXCON,120,188,38,12,ES_AUTOHSCROLL | ES_NUMBER
+    EDITTEXT        IDC_MAXCON,120,200,38,12,ES_AUTOHSCROLL | ES_NUMBER
     CONTROL         "Autoconnect on startup",IDC_AUTOCONNECT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,211,138,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,223,138,10
     CONTROL         "Reconnect on loss",IDC_RECONN,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,7,223,140,10
+                    WS_TABSTOP,7,235,140,10
     CONTROL         "Show overhead bandwidth",IDC_SHOWOVERHEAD,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,7,235,139,10
-    PUSHBUTTON      "Wizard...",IDC_WIZARD,7,251,65,14,BS_FLAT
+                    BS_AUTOCHECKBOX | WS_TABSTOP,7,247,139,10
+    PUSHBUTTON      "Wizard...",IDC_WIZARD,7,263,65,14,BS_FLAT
     CONTROL         "Kad",IDC_NETWORK_KADEMLIA,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,158,227,57,10
+                    WS_TABSTOP,158,239,57,10
     CONTROL         "eD2K",IDC_NETWORK_ED2K,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,158,241,58,10
-    GROUPBOX        "Clientport:",IDC_CLIENTPORT_FRM,7,91,216,73,BS_FLAT
-    GROUPBOX        "Max sources/file",IDC_MAXSRC_FRM,7,165,93,40,BS_FLAT
-    GROUPBOX        "Max. connections:",IDC_MAXCONN_FRM,113,165,110,40,
+                    WS_TABSTOP,158,253,58,10
+    GROUPBOX        "Clientport:",IDC_CLIENTPORT_FRM,7,91,216,85,BS_FLAT
+    GROUPBOX        "Max sources/file",IDC_MAXSRC_FRM,7,177,93,40,BS_FLAT
+    GROUPBOX        "Max. connections:",IDC_MAXCONN_FRM,113,177,110,40,
                     BS_FLAT
     GROUPBOX        "Capacities:",IDC_CAPACITIES_FRM,7,7,67,80,BS_FLAT
     CONTROL         "Download",IDC_DCAP_LBL,"Static",SS_LEFTNOWORDWRAP | 
@@ -537,13 +543,15 @@ BEGIN
     GROUPBOX        "Limits:",IDC_LIMITS_FRM,80,7,143,80,BS_FLAT
     RTEXT           "KB/s",IDC_KBS1,188,18,33,8
     RTEXT           "KB/s",IDC_KBS4,188,58,33,8
-    LTEXT           "Hard limit",IDC_MAXSRCHARD_LBL,14,176,82,8
+    LTEXT           "Hard limit",IDC_MAXSRCHARD_LBL,14,188,82,8
     LTEXT           "UDP",IDC_UDPPORTLABEL,14,120,23,8
-    LTEXT           "Static",IDC_MAXCONLABEL,120,176,86,8
+    LTEXT           "Static",IDC_MAXCONLABEL,120,188,86,8
     LTEXT           "TCP",IDC_STATIC,14,103,24,8
-    GROUPBOX        "Network",IDC_CONNECTION_NETWORK,149,209,74,56,BS_FLAT
+    GROUPBOX        "Network",IDC_CONNECTION_NETWORK,149,221,74,56,BS_FLAT
     PUSHBUTTON      "Open these ports on WinXP SP1 firewall",IDC_OPENPORTS,
-                    14,149,202,12,WS_DISABLED
+                    14,159,202,12,WS_DISABLED
+    CONTROL         "Use UPnP to setup portforwardings",IDC_PREF_UPNPONSTART,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,12,148,208,10
     CONTROL         "IDS_RANDOMPORTS",IDC_RANDOMPORTS,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,120,102,96,10
     EDITTEXT        IDC_MINPORT,176,117,38,12,ES_RIGHT | ES_AUTOHSCROLL | 
@@ -4507,6 +4515,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_UPNPSTART           "Use UPnP to setup ports"
     IDS_FO_PREFBUTTON_NEW   "Open ports on WinXP SP1 firewall"
     IDS_UPNP                "Universal Plug and Play (UPnP)"
     IDS_SHAREEMULELABEL     "Sharing eMule with other computer users"
@@ -6202,6 +6211,20 @@ BEGIN
 	IDS_X_DONTCOMPRESSAVI_TIP   "normally all file data is compressed before transfering,\nexcept for rar, zip and some other archive formats\nThis options disables compressing avi files like rar files\nFOr high speed upload links this increases performance, but\nfor some avi file some possible compression is lost.\n(default= false). Note that morph has the option to\ndisable/decrease compression  for all files."
 
 END
+STRINGTABLE 
+BEGIN
+  IDS_UPNPDETECTSTATUS "wizard auto detect status"
+  IDS_DETECTUPNP_TIP  "Current status of automatic upnp detection in startup wizard\n2: ReDetect upnp on next start(only usefule value to set to 2)\n0: upnp gateway detected.\n-1: Not detected.\n-2:Detection disabled on non local lan address\n-10:Not needed.(other values ignored)"
+  IDS_UPNPPORT_TIP  "Port upnp uses. DO NOT FORWARD THIS PORT (default 0=automatic)"
+  IDS_UPNPCLEARONCLOSE_TIP "enabled=create static portmapping and close on exit\ndisabled=create dynamic portmapping and do not close on exit"
+  IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "Forward only ports on the first device found\nNote that some windows installations return\na Residential gateway device that is NOT a\ninternet device. Defaut: disabled"
+  IDS_UPNPCLOSEONEXIT "Close Ports on exit"
+  IDS_UPNPLIMITTOFIRSTCONNECTION "Forward ports only on first connection"
+  IDS_UPNFORCEUPDATE "Force periodic updates"
+  IDS_UPNFORCEUPDATE_TIP "Instead of checking on the internet gateway device\nif a portmapping rule still  exists, just add a \nmapping every 10 minutes (default = disabled!)"
+END
+
+
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
