@@ -1048,22 +1048,25 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 
 	//Check if the portmaping already exists
 	UPNPNAT_FULLMAPPING fullMapping;
-	if(GetSpecificPortMappingEntryFromService(srv, mapping, &fullMapping, false) == UNAT_OK){
+	if((thePrefs.m_bUPnPForceUpdate==0) && GetSpecificPortMappingEntryFromService(srv, mapping, &fullMapping, false) == UNAT_OK){
 		if(fullMapping.internalClient == GetLocalIPStr()){
 			if(fullMapping.description.Left(7).MakeLower() != _T("emule (")){
-				if(thePrefs.GetUPnPVerboseLog())
+				if(thePrefs.GetUPnPVerboseLog())  {
 					theApp.QueueDebugLogLine(false,_T("UPnP: Couldn't add mapping: \"%s\". The port %d is already mapped to other application (\"%s\" on %s:%d). [%s]"), desc, mapping->externalPort, fullMapping.description, fullMapping.internalClient, fullMapping.internalPort, srv->ServiceType);
+				};
 				return UNAT_NOT_OWNED_PORTMAPPING;
 			}
 			else{
 				if(fullMapping.enabled == TRUE && fullMapping.leaseDuration == 0){
 					if(bIsUpdating){
-						if(thePrefs.GetUPnPVerboseLog())
-							theApp.QueueDebugLogLine(false, _T("UPnP: The port mapping \"%s\" don't needs an update. [%s]"), desc, srv->ServiceType);
+						if(thePrefs.GetUPnPVerboseLog()) {
+							theApp.QueueDebugLogLine(false, _T("UPnP: The port mapping \"%s\" don't need an update. [%s]"), desc, srv->ServiceType);
+						}
 					}
-					else
-						if(thePrefs.GetUPnPVerboseLog())
-							theApp.QueueDebugLogLine(false,_T("UPnP: The port mapping \"%s\" don't needs an update. [%s]"), desc, srv->ServiceType);
+					else 
+						if(thePrefs.GetUPnPVerboseLog()) {
+							theApp.QueueDebugLogLine(false,_T("UPnP: The port mapping \"%s\" don't need to be recreated. [%s]"), desc, srv->ServiceType);
+						};
 					//Mapping is already OK
 					return UNAT_OK;
 				}
@@ -1140,23 +1143,26 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 		//This can be changed if we tried with an static port mapping
 		if(rc == UPNP_E_SUCCESS){
 			Status = UNAT_OK;
-
-
-			if(bUpdate)
+			if(bUpdate)	{
 				if(thePrefs.GetUPnPVerboseLog())
 					theApp.QueueDebugLogLine(false, _T("UPnP: Updated port mapping \"%s\" (%s). [%s]"), desc, _T("Static"), srv->ServiceType);
-			else
-				if(thePrefs.GetUPnPVerboseLog())
+			}
+			else{
+				if(thePrefs.GetUPnPVerboseLog()) {
 					theApp.QueueDebugLogLine(false, _T( "UPnP: Added port mapping \"%s\" (%s). [%s]"), desc, _T("Static"), srv->ServiceType);
+				};
+			}
 		}
 		else{
 			if(bIsUpdating){
 				if(thePrefs.GetUPnPVerboseLog())
 					theApp.QueueDebugLogLine(false, _T("UPnP: Failed to add port mapping \"%s\" [%s] [%s]"), desc, srv->ServiceType, GetErrDescription(RespNode, rc));
 			}
-			else
-				if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: Failed to add port mapping \"%s\" [%s] [%s]"), desc, srv->ServiceType, GetErrDescription(RespNode, rc));		}
+			else {
+				if(thePrefs.GetUPnPVerboseLog()) 
+					theApp.QueueDebugLogLine(false, _T("UPnP: Failed to add port mapping \"%s\" [%s] [%s]"), desc, srv->ServiceType, GetErrDescription(RespNode, rc));		
+			}
+		}
 	}
 	else{
 		Status = UNAT_OK;
