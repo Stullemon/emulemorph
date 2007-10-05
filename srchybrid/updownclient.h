@@ -206,17 +206,16 @@ enum EChunkStatus{
 
 //MORPH START - Added by Stulle, Mod Icons
 enum EModClient{
-	MOD_NONE			= 0,
-	MOD_MORPH			= 1,
-	MOD_SCAR			= 2,
-	MOD_STULLE			= 3,
-	MOD_MAXMOD			= 4,
-	MOD_XTREME			= 5,
-	MOD_EASTSHARE		= 6,
-	MOD_IONIX			= 7,
-	MOD_CYREX			= 8,
-	MOD_NEXTEMF			= 9,
-	MOD_NEO				= 10
+	MOD_NONE,
+	MOD_MORPH,
+	MOD_SCAR,
+	MOD_STULLE,
+	MOD_XTREME,
+	MOD_EASTSHARE,
+	MOD_EMF,
+	MOD_NEO,
+	MOD_MEPHISTO,
+	MOD_XRAY
 };
 //MORPH END   - Added by Stulle, Mod Icons
 

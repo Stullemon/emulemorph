@@ -133,13 +133,12 @@ void CDownloadClientsCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("Morph")));
 	m_ImageList.Add(CTempIconLoader(_T("SCARANGEL")));
 	m_ImageList.Add(CTempIconLoader(_T("STULLE")));
-	m_ImageList.Add(CTempIconLoader(_T("MAXMOD")));
 	m_ImageList.Add(CTempIconLoader(_T("XTREME")));
 	m_ImageList.Add(CTempIconLoader(_T("EASTSHARE")));
-	m_ImageList.Add(CTempIconLoader(_T("IONIX")));
-	m_ImageList.Add(CTempIconLoader(_T("CYREX")));
-	m_ImageList.Add(CTempIconLoader(_T("NEXTEMF")));
+	m_ImageList.Add(CTempIconLoader(_T("EMF")));
 	m_ImageList.Add(CTempIconLoader(_T("NEO")));
+	m_ImageList.Add(CTempIconLoader(_T("MEPHISTO")));
+	m_ImageList.Add(CTempIconLoader(_T("XRAY")));
 	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("OverlayObfu"))), 2);

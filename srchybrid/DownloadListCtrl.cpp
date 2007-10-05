@@ -261,13 +261,12 @@ void CDownloadListCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("Morph"))); //25
 	m_ImageList.Add(CTempIconLoader(_T("SCARANGEL"))); //26
 	m_ImageList.Add(CTempIconLoader(_T("STULLE"))); //27
-	m_ImageList.Add(CTempIconLoader(_T("MAXMOD"))); //28
-	m_ImageList.Add(CTempIconLoader(_T("XTREME"))); //29
-	m_ImageList.Add(CTempIconLoader(_T("EASTSHARE"))); //30
-	m_ImageList.Add(CTempIconLoader(_T("IONIX"))); //31
-	m_ImageList.Add(CTempIconLoader(_T("CYREX"))); //32
-	m_ImageList.Add(CTempIconLoader(_T("NEXTEMF"))); //33
-	m_ImageList.Add(CTempIconLoader(_T("NEO"))); //34
+	m_ImageList.Add(CTempIconLoader(_T("XTREME"))); //28
+	m_ImageList.Add(CTempIconLoader(_T("EASTSHARE"))); //29
+	m_ImageList.Add(CTempIconLoader(_T("EMF"))); //30
+	m_ImageList.Add(CTempIconLoader(_T("NEO"))); //31
+	m_ImageList.Add(CTempIconLoader(_T("MEPHISTO"))); //32
+	m_ImageList.Add(CTempIconLoader(_T("XRAY"))); //33
 	//MORPH END   - Added by SiRoB, More client
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();

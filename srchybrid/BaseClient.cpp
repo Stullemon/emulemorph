@@ -671,20 +671,18 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 						m_uModClient = MOD_SCAR;
 					else if(StrStrI(m_strModVersion,_T("StulleMule"))!=0)
 						m_uModClient = MOD_STULLE;
-					else if(StrStrI(m_strModVersion,_T("MAXmod"))!=0)
-						m_uModClient = MOD_MAXMOD;
 					else if(StrStrI(m_strModVersion,_T("Xtreme"))!=0)
 						m_uModClient = MOD_XTREME;
 					else if(StrStrI(m_strModVersion,_T("EastShare"))!=0)
 						m_uModClient = MOD_EASTSHARE;
-					else if(StrStrI(m_strModVersion,_T("iONiX"))!=0)
-						m_uModClient = MOD_IONIX;
-					else if(StrStrI(m_strModVersion,_T("Cyrex2001"))!=0)
-						m_uModClient = MOD_CYREX;
-					else if(StrStrI(m_strModVersion,_T("NextEMF"))!=0)
-						m_uModClient = MOD_NEXTEMF;
+					else if(StrStrI(m_strModVersion,_T("eMuleFuture"))!=0)
+						m_uModClient = MOD_EMF;
 					else if(StrStrI(m_strModVersion,_T("Neo Mule"))!=0)
 						m_uModClient = MOD_NEO;
+					else if(StrStrI(m_strModVersion,_T("Mephisto"))!=0)
+						m_uModClient = MOD_MEPHISTO;
+					else if(StrStrI(m_strModVersion,_T("X-Ray"))!=0)
+						m_uModClient = MOD_XRAY;
 					else
 						m_uModClient = MOD_NONE;
 					//MOPRH END   - Added by Stulle, Mod Icons
@@ -1375,20 +1373,18 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 						m_uModClient = MOD_SCAR;
 					else if(StrStrI(m_strModVersion,_T("StulleMule"))!=0)
 						m_uModClient = MOD_STULLE;
-					else if(StrStrI(m_strModVersion,_T("MAXmod"))!=0)
-						m_uModClient = MOD_MAXMOD;
 					else if(StrStrI(m_strModVersion,_T("Xtreme"))!=0)
 						m_uModClient = MOD_XTREME;
 					else if(StrStrI(m_strModVersion,_T("EastShare"))!=0)
 						m_uModClient = MOD_EASTSHARE;
-					else if(StrStrI(m_strModVersion,_T("iONiX"))!=0)
-						m_uModClient = MOD_IONIX;
-					else if(StrStrI(m_strModVersion,_T("Cyrex2001"))!=0)
-						m_uModClient = MOD_CYREX;
-					else if(StrStrI(m_strModVersion,_T("NextEMF"))!=0)
-						m_uModClient = MOD_NEXTEMF;
+					else if(StrStrI(m_strModVersion,_T("eMuleFuture"))!=0)
+						m_uModClient = MOD_EMF;
 					else if(StrStrI(m_strModVersion,_T("Neo Mule"))!=0)
 						m_uModClient = MOD_NEO;
+					else if(StrStrI(m_strModVersion,_T("Mephisto"))!=0)
+						m_uModClient = MOD_MEPHISTO;
+					else if(StrStrI(m_strModVersion,_T("X-Ray"))!=0)
+						m_uModClient = MOD_XRAY;
 					else
 						m_uModClient = MOD_NONE;
 					//MOPRH END   - Added by Stulle, Mod Icons
@@ -3893,6 +3889,7 @@ float CUpDownClient::GetModVersion(CString modversion) const
 	return (float)_tstof(modversion.Mid(theApp.m_uModLength));
 }
 //MORPH END   - Anti ModID Faker [Xman]
+
 //MORPH START - Added by Stulle, AppleJuice Detection [Xman]
 #define AJ_MD5_BUFFER_SIZE	92				// The buffer is always this length exactly
 
