@@ -45,8 +45,28 @@ protected:
 	HTREEITEM	m_htiUPnP;
 	HTREEITEM	m_htiUPnPWeb;
 	//HTREEITEM	m_htiUPnPTryRandom;
-	bool		m_bUPnP;
+	//bool		m_bUPnP;
 	bool		m_bUPnPWeb;
+	
+	int m_iUPnPPort;
+	bool m_bUPnPClearOnClose;
+    bool m_bUPnPLimitToFirstConnection;
+	int m_iDetectuPnP; // allowed values: 
+    /*#define UPNP_DO_AUTODETECT 2
+    #define UPNP_DETECTED 0
+    #define UPNP_NOT_DETECTED -1 
+	#define UPNP_NO_DETECTEDTION -2 
+    #define UPNP_NOT_NEEDED -10
+	*/
+	HTREEITEM	m_htiUPnPPort;
+	HTREEITEM	m_htiUPnPClearOnClose;
+    HTREEITEM	m_htiUPnPLimitToFirstConnection;
+	HTREEITEM	m_htiDetectuPnP; // allowed values: 
+
+    bool m_bUPnPForceUpdate;
+	HTREEITEM	m_htiUPnPForceUpdate;
+
+
 	//BOOL		m_bUPnPTryRandom;
 	// End MoNKi
 

@@ -332,21 +332,21 @@ float CStatistics::GetAvgDownloadRate(int averageType)
 
 float CStatistics::GetAvgUploadRate(int averageType)
 {
-	DWORD running;
+	double running; // morph
 	switch (averageType)
 	{
 		case AVG_SESSION:
 			if (theStats.transferStarttime == 0)
 				return 0.0F;
-			running = (GetTickCount() - theStats.transferStarttime) / 1000;
+			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;
 			if (running < 5)
 				return 0.0F;
-			return (float)(theStats.sessionSentBytes / 1024) / running;
+			return (float)(theStats.sessionSentBytes / 1024.0f) / running;
 
 		case AVG_TOTAL:
 			if (theStats.transferStarttime == 0)
 				return thePrefs.GetConnAvgUpRate();
-			running = (GetTickCount() - theStats.transferStarttime) / 1000;
+			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;
 			if (running < 5)
 				return thePrefs.GetConnAvgUpRate();
 			return (((float)(theStats.sessionSentBytes / 1024) / running) + thePrefs.GetConnAvgUpRate()) / 2.0F;

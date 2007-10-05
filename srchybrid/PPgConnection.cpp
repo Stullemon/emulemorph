@@ -64,9 +64,11 @@ BEGIN_MESSAGE_MAP(CPPgConnection, CPropertyPage)
 	ON_BN_CLICKED(IDC_NETWORK_KADEMLIA, OnSettingsChange)
 	ON_WM_HELPINFO()
 	ON_BN_CLICKED(IDC_OPENPORTS, OnBnClickedOpenports)
+	ON_BN_CLICKED(IDC_PREF_UPNPONSTART, OnSettingsChange)
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
 	ON_BN_CLICKED(IDC_RANDOMPORTS, OnRandomPortsChange)
 	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+
 END_MESSAGE_MAP()
 
 
@@ -326,6 +328,17 @@ void CPPgConnection::LoadSettings(void)
 		m_minRndPortSpin.EnableWindow(thePrefs.GetUseRandomPorts());
 		m_maxRndPortSpin.EnableWindow(thePrefs.GetUseRandomPorts());
 		//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
+   /* upnp would work on win95 on morph... if morph did work on win95 ;) 
+		if (thePrefs.GetWindowsVersion() != _WINVER_95_ && thePrefs.GetWindowsVersion() != _WINVER_98_ && thePrefs.GetWindowsVersion() != _WINVER_NT4_)
+			GetDlgItem(IDC_PREF_UPNPONSTART)->EnableWindow(true);
+		else
+			GetDlgItem(IDC_PREF_UPNPONSTART)->EnableWindow(false);
+    */
+
+		if (thePrefs.IsUPnPEnabled())
+			CheckDlgButton(IDC_PREF_UPNPONSTART, 1);
+		else
+			CheckDlgButton(IDC_PREF_UPNPONSTART, 0);
 
 		ShowLimitValues();
 		OnLimiterChange();
@@ -547,6 +560,15 @@ BOOL CPPgConnection::OnApply()
 		}
 	}
 	// End emulEspaña
+  
+ /* MORPH START unpnp */
+	if((BOOL)thePrefs.IsUPnPEnabled() != (IsDlgButtonChecked(IDC_PREF_UPNPONSTART) != 0) )
+	{
+  		theApp.m_UPnP_IGDControlPoint->SetUPnPNat((IsDlgButtonChecked(IDC_PREF_UPNPONSTART) != 0)); // and start/stop nat. 
+	}
+/* MORPH END unpnp */
+
+  theApp.scheduler->SaveOriginals();
 
 	SetModified(FALSE);
 	LoadSettings();
@@ -588,6 +610,7 @@ void CPPgConnection::Localize(void)
 		GetDlgItem(IDC_UDPDISABLE)->SetWindowText(GetResString(IDS_UDPDISABLED));
 		GetDlgItem(IDC_OPENPORTS)->SetWindowText(GetResString(IDS_FO_PREFBUTTON));
 		SetDlgItemText(IDC_STARTTEST, GetResString(IDS_STARTTEST) );
+		GetDlgItem(IDC_PREF_UPNPONSTART)->SetWindowText(GetResString(IDS_UPNPSTART));
 		//MORPH START - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
 		GetDlgItem(IDC_RANDOMPORTS)->SetWindowText(GetResString(IDS_RANDOMPORTS));
 		GetDlgItem(IDC_LBL_MIN)->SetWindowText(GetResString(IDS_MINPORT));
@@ -630,7 +653,9 @@ void CPPgConnection::Localize(void)
 		SetTool(IDC_MAXPORT,IDS_MAXPORT_TIP);
 		SetTool(IDC_NETWORK_KADEMLIA,IDC_NETWORK_KADEMLIA_TIP);
 		SetTool(IDC_NETWORK_ED2K,IDC_NETWORK_ED2K_TIP);
-        //MORPH END leuk_he tooltipped
+		SetTool(IDC_PREF_UPNPONSTART,IDS_UPNP_ENABLE_TIP);
+		//MORPH END leuk_he tooltipped
+
 	}
 }
 

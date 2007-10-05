@@ -1188,7 +1188,7 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_hti_UseUserSortedServerList,IDS_USEUSERSORTEDSERVERLIST_TIP);
 		SetTool(m_hti_PreferRestrictedOverUser,IDS_PREFERRESTRICTEDOVERUSER_TIP);
 		SetTool(m_hti_WebFileUploadSizeLimitMB ,IDS_WEBFILEUPLOADSIZELIMITMB_TIP);
-		SetTool(m_hti_AllowedIPs,IDS_ALLOWEDIPS);
+		SetTool(m_hti_AllowedIPs,IDS_ALLOWEDIPS_TIP);
 		SetTool(m_hti_DebugSearchResultDetailLevel,IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP); 
 		SetTool(m_htiCryptTCPPaddingLength,IDS_CRYPTTCPPADDINGLENGTH_TIP);
 		SetTool(m_htiAdjustNTFSDaylightFileTime, IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP);

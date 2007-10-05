@@ -225,7 +225,6 @@ BEGIN
     IDS_SHAREDFOLDERS       "Cartelle condivise"
     IDS_VIEW1               "Vedi "
     IDS_VIEW2               " (Non condiviso)"
-    IDS_VIEW3               " (Condiviso con sottocartelle)"
     IDS_PRIOLOW             "Bassa"
     IDS_PRIONORMAL          "Normale"
     IDS_PRIOHIGH            "Alta"
@@ -494,7 +493,7 @@ BEGIN
     IDS_SPEED_LIMITS        "Limiti di Velocità"
     IDS_CAPACITY_LIMITS     "Limiti di Banda"
     IDS_ADMIN               "Amministratore"
-    IDS_ACCESSDENIED        "Acceesso negato!"
+    IDS_ACCESSDENIED        "Accesso negato!"
     IDS_WEB_LOWUSER         "Ospite"
     IDS_WEB_ERR_CANTLOAD    "Impossibile caricare il modello: apertura del File %s non riuscita"
     IDS_GLOBALSEARCH        "Globale (Server)"
@@ -1023,7 +1022,7 @@ BEGIN
     IDS_ERR_CORRUPTCOMPRPKG "Ricevuto un pacchetto compresso corrotto da %s (errore %u)"
     IDS_ERR_EMFRIENDSINVALID
                             "Il File ""emfriends.met"" non è valido o è corrotto!"
-    IDS_ERR_READEMFRIENDS   "Errore sconoscito durante la lettura del File ""emfriends.met"": %s"
+    IDS_ERR_READEMFRIENDS   "Errore sconosciuto durante la lettura del File ""emfriends.met"": %s"
     IDS_ERR_KNOWNSERVERINFOREC "Ricevute delle Informazioni sul Server sconosciute!"
     IDS_WIZ_DOWN            "Down (kBit/s)" //!
 END
@@ -1073,7 +1072,7 @@ BEGIN
     IDS_SHOWOVERHEAD        "Mostra OverHead"
     IDS_UPDOWNSMALL         "Up: %.1f | Down: %.1f" //!
     IDS_EDITLIST            "Lista..."
-    IDS_SP_ICONBAR          "Barra della Velocità nel'icona del System Tray"
+    IDS_SP_ICONBAR          "Barra della Velocità nell'icona del System Tray"
     IDS_RATINGRECV          "Dai un voto al File ricevuto ""%s"": %u"
     IDS_DESCRIPTIONRECV     "Descrizione per il File ricevuto ""%s"": %s"
     IDS_WEBSERVICES         "Risorse Web"
@@ -1237,7 +1236,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FILTERFILENAMEWORD  "Inserisci le parole da filtrare, seperate da |"
+    IDS_FILTERFILENAMEWORD  "Inserisci le parole da filtrare, separate da |"
     IDS_FNFILTERTITLE       "Modifica filtro delle parole per pulizia Nomi File"
     IDS_CHANGECATVIEW       "Seleziona Filtro Visuale"
     IDS_STATUS_NOTCOMPLETED "Incompleto"
@@ -1495,7 +1494,7 @@ BEGIN
     IDS_IMP_STEPREADPF      "Lettura cartella File .part"
     IDS_IMP_STEPBASICINF    "Ricevimento informazioni base dai File .part"
     IDS_IMP_STEPCRDESTFILE  "Creazione File .part di destinazione"
-    IDS_IMP_LOADDATA        "Caricamento dati File .part oringinario (%u di %u)"
+    IDS_IMP_LOADDATA        "Caricamento dati File .part originario (%u di %u)"
     IDS_IMP_SAVEDATA        "Salvataggio dei blocchi di dati nel nuovo File .part unico (%u di %u)"
     IDS_IMP_IOERROR         "Errore nel File durante la conversione del File .part"
     IDS_IMP_GETPFINFO       "Ricevimento informazioni dal File .part originario"
@@ -1548,7 +1547,7 @@ STRINGTABLE
 BEGIN
     IDS_TEXTLABELS          "Opzioni Etichette"
     IDS_ENABLETEXTLABELS    "Visualizza Etichette"
-    IDS_CUSTOMIZETOOLBAR    "Personalizza Barra degli Strumenti..."
+    IDS_CUSTOMIZETOOLBAR    "Personalizza la Barra degli Strumenti..."
     IDS_MINBITRATE          "Bitrate Min. [kBit/s]"
     IDS_KAD_RECHECKFW       "Ricontrolla Firewall"
     IDS_SHAREDTITLE         "File eD2K | Kad"
@@ -1588,7 +1587,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_RADCLIENTS          "Dai Client Conosciuti"
-    IDS_KADUDPPORTERR       "La porta UDP usata dalla rete Kad è in confilitto con quella usata da eMule per il Protocollo Esteso o per la connessione ai Server. La porta è stata cambiata con la %u."
+    IDS_KADUDPPORTERR       "La porta UDP usata dalla rete Kad è in conflitto con quella usata da eMule per il Protocollo Esteso o per la connessione ai Server. La porta è stata cambiata con la %u."
     IDS_CONFIRM_FILEDELETE  "Vuoi veramente rimuovere tutti i File selezionati dal disco?"
     IDS_OPENFOLDER          "Apri Cartella"
     IDS_RUNASUSER           "Esegui eMule come utente non privilegiato"
@@ -1692,7 +1691,7 @@ BEGIN
     IDS_STATS_MINORCLIENTS  "Secondari"
     IDS_AICH_SYNCTOTAL      "Trovati %u File senza un valido HashSet AICH, sarà ora avviato il Re-Hash di questi File"
     IDS_AICH_CALCFILE       "Calcolo dell'Hash AICH per il File %s in corso"
-    IDS_AICH_WARNUSER       "Dalla versione 0.44a eMule usa un Hash dei File addizionale che apporta un aiuto sostanziale nel ridurre la perdita dei dati quando vengono rilevate parti corrotte. Siccome hai effettuato un aggiornamento da una versione precente, eMule ha bisogno di effettuare il Re-Hash di tutti i tuoi File Condivisi per calcolare il nuovo Hash. Questo potrebbe richiedere qualche minuto ma verrà effettuato una sola volta.  "
+    IDS_AICH_WARNUSER       "Dalla versione 0.44a eMule usa un Hash dei File addizionale che apporta un aiuto sostanziale nel ridurre la perdita dei dati quando vengono rilevate parti corrotte. Siccome hai effettuato un aggiornamento da una versione precedente, eMule ha bisogno di effettuare il Re-Hash di tutti i tuoi File Condivisi per calcolare il nuovo Hash. Questo potrebbe richiedere qualche minuto ma verrà effettuato una sola volta.  "
     IDS_AICH_WORKED         "L'AICH ha recuperato con successo %s di %s dalla parte n°%u per %s"
     IDS_SOURCECLIENT        "Fonte Client"
     IDS_USERSIP             "IP Utente"
@@ -1867,7 +1866,7 @@ BEGIN
     IDS_UNKNOWNFILEEXT      "Estensione File sconosciuta"
     IDS_ENABLEMINIMULE      "Attiva il MiniMule"
     IDS_DISABLE_AUTOARCHPREV 
-                            "Disattiva l'anteprima automatica dell'archivio nei dattagli del File"
+                            "Disattiva l'anteprima automatica dell'archivio nei dettagli del File"
     IDS_US_STALLEDW4BR      "In Stallo! In attesa per richiesta blocco."
     IDS_US_STALLEDREADINGFDISK "In Stallo! Lettura dal disco."
     IDS_SERVERFEATURE_INTTYPETAGS "Tag di tipo intero"
@@ -1879,6 +1878,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_UPNPSTART           "Usa l'UPnP per impostare le porte"
     IDS_FO_PREFBUTTON_NEW   "Apri le porte sul Firewall di WinXP SP1"
     IDS_UPNP                "Universal Plug and Play (UPnP)"
     IDS_SHAREEMULELABEL     "Condividendo eMule con gli utenti degli altri computer"
@@ -1898,6 +1898,11 @@ BEGIN
 END
 
 //////////////////////////// MorphXT strings //////////////////////////////////
+
+STRINGTABLE 
+BEGIN
+    IDS_VIEW3               " (Condiviso con sottocartelle)"
+END
 
 STRINGTABLE 
 BEGIN
@@ -3125,7 +3130,7 @@ BEGIN
                             "La quantità in eccesso che il Client ti deve aver inviato e dopo che hai scaricato da lui,\nprima che il contraccambio incominci"
     IDS_EXPIRED_KNOWN_TIP   "Cancella i File .met se un File non è stato visto per xxx giorni (recupera\nspazio su disco). Applicabile per i File 'known*.met'. Non impostare mai\nun valore troppo basso (meno di 30)"
     IDS_FOLLOW_THE_MAJORITY_TIP 
-                            "Rinomina automaticamente i tuoi File con quello maggiormente usato, può essere anche attivato\ndirettamente tramite click sul tasto destro del mouse o disabilitato tramite una qualsiasi\noperazione di cambio nome"
+                            "Rinomina automaticamente i tuoi File con quello maggiormente usato, può essere anche attivato\ndirettamente tramite Click sul tasto destro del mouse o disabilitato tramite una qualsiasi\noperazione di cambio nome"
     IDS_FAIR_PLAY_TIP       "Invia almeno una copia del File scaricato con una maggiore priorità"
 END
 
@@ -3195,7 +3200,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_PW_TRAY_TIP         "eMule non verrà minimizzato nella barra applicazioni ma nel Tray se l'opzione\nè selezionata. Una opzione extra verrà mostrata nella barra di Windows per\nminimizzare al tray se l'opzione è deselezionata"
-    IDS_PW_DBLCLICK_TIP     "Questa opzione, se selezionata, attiva il doppio click (invece del singolo\nclick)per espandere e mostrare la lista delle fonti di un download nella\nfinestra Trasferimenti"
+    IDS_PW_DBLCLICK_TIP     "Questa opzione, se selezionata, attiva il Doppio Click (invece del Singolo\nClick)per espandere e mostrare la lista delle fonti di un download nella\nfinestra Trasferimenti"
     IDS_3DDEP_TIP           "La barra modifica il livello di sfumatura 3D della Barra del Progresso"
     IDS_UPDATEQUEUE_TIP     "Le informazioni mostrate nella coda di attesa non verranno aggiornate\nfrequentemente, utilizzando meno risorse della CPU"
     IDS_SHOWRATEONTITLE_TIP "Mostra le attuali velocità di Download e Upload\nnella barra del titolo di eMule"
@@ -3369,7 +3374,7 @@ BEGIN
     IDS_RTLWINDOWSLAYOUT_TIP 
                             "Aggiunge il supporto in lettura da destra a sinistra ad eMule.\nUtile per lingue come ebraico, ecc."
     IDS_PREVIEWONICONDBLCLK_TIP 
-                            "Se questa opzione è abilitata, un doppio Click sull'icona di un File nella finestra\nTrasferimenti, richiemerà il comando Anteprima. Funzionerà soltanto se l'opzione\n'Doppio Click per espandere la lista dei Download' è disattivata in 'Opzioni -> Aspetto'"
+                            "Se questa opzione è abilitata, un Doppio Click sull'icona di un File nella finestra\nTrasferimenti, richiemerà il comando Anteprima. Funzionerà soltanto se l'opzione\n'Doppio Click per espandere la lista dei Download' è disattivata in 'Opzioni -> Aspetto'"
     IDS_INTERNETSECURITYZONE_TIP 
                             "Le aree di sicurezza come per le impostazioni di sicurezza di Internet Explorer.\nDefinisce quali funzionalità sono abilitate nel codice html. Attinente per la\nfinestra MiniMule.\nAbilitati=<b>Non Attendibile</b>|Internet|Intranet|Attendibile|ComputerLocale"
     IDS_TXTEDITOR_TIP       "Puoi inserire qui l'applicazione predefinita per modificare i File 'webservices.dat'\ne 'IPFilter.dat'. Specifica il percorso completo del nuovo eseguibile se non vuoi usare\nil Blocco Note di Windows"
@@ -3560,6 +3565,47 @@ BEGIN
   IDS_BACKUP_PART_W       "Sei sicuro?"
   IDS_BACKUP_COMPLETE     "File Copiato/i con Successo."
 
+  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME "Aggiusta l'ora legale nei File su NTFS"
+  IDS_X_PEERCACHESHOW     "Mostra informazioni sulla PeerCache"
+  IDS_X_DATETIMEFORMAT    "Formato Data&Ora"
+  IDS_X_DATETIMEFORMAT4LOG "Formato Data&Ora per il registro"
+  IDS_X_LOGWARNING        "Colore messaggi di avvertimento nel registro"
+  IDS_X_LOGSUCCESS        "Colore messaggi di successo nel registro"
+  IDS_X_LOGERROR          "Colore messaggi di errore nel registro"
+  IDS_X_ICH               "Gestione Intelligente della Corruzione (ICH)"
+  IDS_X_DONTCOMPRESSAVI   "Non comprimere gli avi"
+  IDS_X_SHOWCOPYED2KLINK  "Mostra il comando 'Copia Link eD2K negli appunti (HTML)'"
+  IDS_X_ICON_FLASH_ON_NEW_MESSAGE "Trayicon lampeggiante su nuovo messaggio"
+  IDS_X_SHOWVERTICALHOURMARKERS "Statistiche - Mostra i marcatori verticali per l'orario"
+  IDS_X_REBARTOOLBAR      "disabilita alcune opzioni della Barra degli Strumenti"
+END
+
+STRINGTABLE 
+BEGIN
+  IDS_OUTOFSERVERS_O "Connessione offuscata fallita ai Server con chiave di offuscamento. Sto creando un altro permesso."
+  IDS_NO_OBFUSCATION_KEY "Il Server non ha una chiave di offuscamento."
+  IDS_URL_FOR_UPDATING_IP2COUNTRY "URL del File per l'aggiornamento"
+
+  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP "Se un File è situato su un sistema NTFS, l'ora nel File viene modificata di un'ora se\nl'ora legale è attiva. Vedi KB 129574. (Default=abilitato)"
+	IDS_X_LOGERROR_TIP "Imposta il colore delle linee nel registro della finestra 'Server'"
+    IDS_X_SHOWVERTICALHOURMARKERS_TIP "Mostra una linea verticale ogni ora nella finestra delle statistiche.\nRidimensiona la finestra delle statistiche per vedere l'effetto. (Default=abilitato)"
+	IDS_X_REBARTOOLBAR_TIP      "Serve a disabilitare alcune opzioni nella barra degli strumenti come:\nAggiunta della freccia di supporto: Se la barra degli strumenti è troppo\npiccola per visualizzare tutti i pulsanti, verrà mostrata una doppia freccia\n(icona '>>') all'estrema destra che aprirà un menu con i pulsanti di comando\nrimananeti.\nTooltip per i titoli dei pulsanti troncati e nella modalità 'Nessuna etichetta'\ndella barra degli strumenti.\nI pulsanti possono essere spostati e/o rimossi dalla barra degli strumenti\ntenendo premuti i tasti Ctrl+Alt mentre si trascina un pulsante con il mouse.\n(Default=abilitato)"
+	IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "Fa lampeggiare l'icona nel System Tray quando viene ricevuto un nuovo messaggio.\n(Default=abilitato)"
+	IDS_X_SHOWCOPYED2KLINK_TIP "Mostra la voce di menu 'Copia Link eD2K negli appunti (HTML)' nella finestra dei File condivisi invece di 'Link eD2K...'. (Default=disabilitato)"
+	IDS_X_DONTCOMPRESSAVI_TIP   "Normalmente tutti i dati di un File vengono compressi prima di essere inviati,\nad eccezione dei rar, zip ed altri formati di File archivio. Questa opzione\ndisabilita la compressione per i File avi come per i File rar. Per i Link in Upload\nad alta velocità è possibile ottenere un incremento di prestazioni, ma per alcuni\nFile avi si potrebbe verificare una possibile perdita di compressione.\n(Default=disabilitato). Nota che la Morph ha l'opzione per disabilitare/ridurre la\ncompressione per tutti i File"
+
+END
+STRINGTABLE 
+BEGIN
+  IDS_UPNPDETECTSTATUS "Wizard autorilevamento stato"
+  IDS_DETECTUPNP_TIP  "Stato attuale del rilevamento automatico dell'uPnP nel Wizard di avvio:\n2: Rileva nuovamente l'uPnP al prossimo avvio (il solo valore utile da impostare a 2).\n0: Rilevato il gateway dell'uPnP.\n-1: Non rilevato.\n-2: Rilevamento disabilitato sugli indirizzi LAN non locali.\n-10: Non necessario. (Altri valori vengono ignorati)"
+  IDS_UPNPPORT_TIP  "Utilizzo della porta uPnP. NON APRIRE QUESTA PORTA (Default=0,automatico)"
+  IDS_UPNPCLEARONCLOSE_TIP "Abilitato=crea una mappatura statica della porta e la chiude in uscita.\nDisabilitato=crea una mappatura dinamica della porta e non la chiude in uscita"
+  IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "Apre le porte soltanto sulla prima periferica trovata. Nota che alcune installazioni\ndi Windows restituiscono una periferica che non è quella per la connessione ad\nInternet. (Defaut=disabilitato)"
+  IDS_UPNPCLOSEONEXIT "Chiudi le porte in uscita"
+  IDS_UPNPLIMITTOFIRSTCONNECTION "Apri le porte solo alla prima connessione"
+  IDS_UPNFORCEUPDATE "Forza l'aggiornamento periodico"
+  IDS_UPNFORCEUPDATE_TIP "Invece di verificare sulla periferica per Internet se esiste una regola per la\nmappatura della porta, effettua una mappatura ogni 10 minuti (Default=disabilitato)"
 END
 
 #endif    // Italian (Italy) resources

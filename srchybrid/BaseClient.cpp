@@ -3893,7 +3893,6 @@ float CUpDownClient::GetModVersion(CString modversion) const
 	return (float)_tstof(modversion.Mid(theApp.m_uModLength));
 }
 //MORPH END   - Anti ModID Faker [Xman]
-
 //MORPH START - Added by Stulle, AppleJuice Detection [Xman]
 #define AJ_MD5_BUFFER_SIZE	92				// The buffer is always this length exactly
 

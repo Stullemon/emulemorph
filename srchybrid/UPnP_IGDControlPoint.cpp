@@ -1138,7 +1138,7 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 
 			rc = UpnpSendAction( m_ctrlPoint,CT2CA(srv->ControlURL),
 				CT2CA(srv->ServiceType), NULL, actionNode, &RespNode);
-		}
+			}
 
 		//This can be changed if we tried with an static port mapping
 		if(rc == UPNP_E_SUCCESS){
@@ -1166,12 +1166,14 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 	}
 	else{
 		Status = UNAT_OK;
-		if(bUpdate)
+		if(bUpdate)	{
 			if(thePrefs.GetUPnPVerboseLog())
 					theApp.QueueDebugLogLine(false,_T("UPnP: Updated port mapping \"%s\" (%s). [%s]"), desc, _T("Dynamic"), srv->ServiceType);
-		else
+		}
+		else {
 			if(thePrefs.GetUPnPVerboseLog())
 					theApp.QueueDebugLogLine(false,_T( "UPnP: Added port mapping \"%s\" (%s). [%s]"), desc, _T("Dynamic"), srv->ServiceType);
+		}
 	}
 
     if( RespNode )

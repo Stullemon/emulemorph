@@ -73,7 +73,7 @@ private:
     UINT RunInternal();
 
     void RemoveFromAllQueues(ThrottledControlSocket* socket, bool lock); // ZZ:UploadBandWithThrottler (UDP)
-	bool RemoveFromStandardListNoLock(ThrottledFileSocket* socket);
+	bool RemoveFromStandardListNoLock(ThrottledFileSocket* socket, bool resort = false); //MORPH - Changed by SiRoB & AndCycle, Upload Splitting Class
     
     uint32 CalculateChangeDelta(uint32 numberOfConsecutiveChanges) const;
 

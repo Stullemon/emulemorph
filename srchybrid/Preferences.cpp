@@ -691,6 +691,7 @@ bool	CPreferences::enableNEWS;
 	bool	CPreferences::m_bUPnPLimitToFirstConnection;
 	bool	CPreferences::m_bUPnPClearOnClose;
 	int     CPreferences::m_iDetectuPnP; //leuk_he autodetect in startup wizard
+	bool    CPreferences::m_bUPnPForceUpdate;
 	// End MoNKi
 //MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
@@ -2415,13 +2416,14 @@ void CPreferences::SavePreferences()
 
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	ini.WriteBool(_T("UPnPNAT"), m_bUPnPNat, _T("eMule"));
-	ini.WriteBool(_T("UPnPNAT_Web"), m_bUPnPNatWeb, _T("eMule"));
-	ini.WriteBool(_T("UPnPVerbose"), m_bUPnPVerboseLog, _T("eMule"));
-	ini.WriteInt(_T("UPnPPort"), m_iUPnPPort, _T("eMule"));
-	ini.WriteBool(_T("UPnPClearOnClose"), m_bUPnPClearOnClose, _T("eMule"));
-	ini.WriteBool(_T("UPnPLimitToFirstConnection"), m_bUPnPLimitToFirstConnection, _T("eMule"));
-	ini.WriteInt(_T("UPnPDetect"), m_iDetectuPnP, _T("eMule")); // 
-	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
+	ini.WriteBool(_T("UPnPNAT_Web"), m_bUPnPNatWeb);
+	ini.WriteBool(_T("UPnPVerbose"), m_bUPnPVerboseLog);
+	ini.WriteInt(_T("UPnPPort"), m_iUPnPPort);
+	ini.WriteBool(_T("UPnPClearOnClose"), m_bUPnPClearOnClose);
+	ini.WriteBool(_T("UPnPLimitToFirstConnection"), m_bUPnPLimitToFirstConnection);
+	ini.WriteInt(_T("UPnPDetect"), m_iDetectuPnP); // 
+	ini.WriteBool(_T("UPnPForceUpdate"), m_bUPnPForceUpdate);
+		//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
   
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
 	ini.WriteBool(_T("RandomPorts"), m_bRndPorts, _T("eMule"));
@@ -3650,6 +3652,7 @@ void CPreferences::LoadPreferences()
 	m_bUPnPLimitToFirstConnection = ini.GetBool(_T("UPnPLimitToFirstConnection"), false, _T("eMule"));
 	m_bUPnPClearOnClose = ini.GetBool(_T("UPnPClearOnClose"), true, _T("eMule"));
     SetUpnpDetect(ini.GetInt(_T("uPnPDetect"), UPNP_DO_AUTODETECT, _T("eMule"))); //leuk_he autodetect upnp in wizard
+    m_bUPnPForceUpdate=ini.GetBool(_T("UPnPForceUpdate"), false);
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]

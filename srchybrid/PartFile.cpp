@@ -2189,31 +2189,25 @@ uint64 CPartFile::GetRemainingAvailableData(const uint8* srcstatus) const
 				uTotalGapSizeInCommun += pGap->end%PARTSIZE + 1;
 		}
 	}
-
 	for (POSITION pos = requestedblocks_list.GetHeadPosition(); pos != NULL;) {
 		const Requested_Block_Struct* block = requestedblocks_list.GetNext(pos);
 		uint16 i = (uint16)(block->StartOffset/PARTSIZE);
 		uint16 end_chunk = (uint16)(block->EndOffset/PARTSIZE);
 		if (i == end_chunk) {
 			if (srcstatus[i]&SC_AVAILABLE)
-				uTotalGapSizeInCommun -= block->EndOffset - block->StartOffset + 1 - block->transferred;
+				uTotalGapSizeInCommun -= block->transferred;
 		} else {
 			uint64 reservedblock = PARTSIZE - block->StartOffset%PARTSIZE;
 			if (reservedblock > block->transferred) {
-				reservedblock = reservedblock - block->transferred;
 				if (srcstatus[i]&SC_AVAILABLE)
-					uTotalGapSizeInCommun -= reservedblock;
+					uTotalGapSizeInCommun -= block->transferred;
 				reservedblock = 0;
 			} else
 				reservedblock = block->transferred - reservedblock;
 			while (++i < end_chunk) {
-				if (PARTSIZE > reservedblock) {
-					reservedblock = PARTSIZE - reservedblock;
-					if (srcstatus[i]&SC_AVAILABLE)
-						uTotalGapSizeInCommun -= reservedblock;
-					reservedblock = 0;
-				} else
-					reservedblock = reservedblock - PARTSIZE;
+				if (srcstatus[i]&SC_AVAILABLE)
+					uTotalGapSizeInCommun -= reservedblock;
+				reservedblock = 0;
 			}
 			if (srcstatus[end_chunk]&SC_AVAILABLE)
 				uTotalGapSizeInCommun -= block->EndOffset%PARTSIZE + 1 - reservedblock;
@@ -3852,10 +3846,20 @@ bool CPartFile::GetNextRequestedBlockICS(CUpDownClient* sender, Requested_Block_
 	bytesPerRequest = min(max(sender->GetSessionPayloadDown(), 10240), sourceDatarate * timeToFileCompletion / 2);
 	//MORPH END   - Enhanced DBR
 
-	if (bytesPerRequest > 3*EMBLOCKSIZE) {
-		*count = min((uint16)(bytesPerRequest/(3*EMBLOCKSIZE)), *count); //MORPH - Added by SiRoB, Enhanced DBR
+	if (!sender->IsEmuleClient()) { // to prevent aborted download for non emule client that do not support huge downloaded block
+		if (bytesPerRequest > EMBLOCKSIZE) {
+			*count = min((uint16)ceil((double)bytesPerRequest/EMBLOCKSIZE), *count);
+			bytesPerRequest = EMBLOCKSIZE;
+		} else {
+			*count = min(2,*count);
+		}
+	} else if (bytesPerRequest > 3*EMBLOCKSIZE) {
+		*count = min((uint16)ceil((double)bytesPerRequest/(3*EMBLOCKSIZE)), *count);
 		bytesPerRequest = 3*EMBLOCKSIZE;
+	} else {
+		*count = min(2,*count);
 	}
+
 
 	if (bytesPerRequest < 10240)
 	{
@@ -5796,7 +5800,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 		m_FlushSetting->changedPart = changedPart;
 		if (forcewait == false) {
 			if (m_FlushThread == NULL) {
-			m_FlushThread = AfxBeginThread(RUNTIME_CLASS(CPartFileFlushThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
+				m_FlushThread = AfxBeginThread(RUNTIME_CLASS(CPartFileFlushThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
 				((CPartFileFlushThread*) m_FlushThread)->ResumeThread();
 			}
 			if (m_FlushThread) {
@@ -6728,8 +6732,13 @@ bool CPartFile::GetNextRequestedBlock(CUpDownClient* sender,
 	bytesPerRequest = min(max(sender->GetSessionPayloadDown(), 10240), sourceDatarate * timeToFileCompletion / 2);
 	//MORPH END   - Enhanced DBR
 
+	if (!sender->IsEmuleClient()) { // to prevent aborted download for non emule client that do not support huge downloaded block
+		*count = min((uint16)ceil((double)bytesPerRequest/EMBLOCKSIZE), *count); //MORPH - Added by SiRoB, Enhanced DBR
+		if (bytesPerRequest > EMBLOCKSIZE)
+			bytesPerRequest = EMBLOCKSIZE;
+	}
 	if (bytesPerRequest > 3*EMBLOCKSIZE) {
-		*count = min((uint16)(bytesPerRequest/(3*EMBLOCKSIZE)),*count); //MORPH - Added by SiRoB, Enhanced DBR
+		*count = min((uint16)ceil((double)bytesPerRequest/(3*EMBLOCKSIZE)), *count); //MORPH - Added by SiRoB, Enhanced DBR
 		bytesPerRequest = 3*EMBLOCKSIZE;
 	}
 

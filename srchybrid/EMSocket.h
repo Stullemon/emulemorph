@@ -108,7 +108,6 @@ protected:
 	
 	virtual void	DataReceived(const BYTE* pcData, UINT uSize);
 	virtual bool	PacketReceived(Packet* packet) = 0;
-	virtual void    OnConnect(int nErrorCode);
 	virtual void	OnError(int nErrorCode) = 0;
 	virtual void	OnClose(int nErrorCode);
 	virtual void	OnSend(int nErrorCode);	
@@ -185,6 +184,7 @@ private:
     // NOTE: These variables are only allowed to be accessed when the accesser has the sendLocker lock.
 	CTypedPtrList<CPtrList, Packet*> controlpacket_queue;
 	CList<StandardPacketQueueEntry> standartpacket_queue;
+    bool m_bConnectionIsReadyForSend;
     // End sendLocker access only
 
 	CCriticalSection statsLocker;

@@ -77,15 +77,25 @@ CPPgEmulespana::CPPgEmulespana()
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	m_htiUPnPGroup = NULL;
-	m_htiUPnP = NULL;
+//	m_htiUPnP = NULL;
 	m_htiUPnPWeb = NULL;
 	//m_htiUPnPTryRandom = NULL;
-	m_bUPnP = false;
+//	m_bUPnP = false;
 	m_bUPnPWeb = false;
 	// MORPH START leuk_he upnp bindaddr    	
     m_dwUpnpBindAddr = 0; 
     m_htiUpnpBinaddr = NULL;
 	// MORPH END leuk_he upnp bindaddr    	
+	m_iUPnPPort=0;
+	m_bUPnPClearOnClose=TRUE;
+    m_bUPnPLimitToFirstConnection=false;
+	m_iDetectuPnP=0;
+	m_htiUPnPPort=NULL;
+	m_htiUPnPClearOnClose=NULL;
+    m_htiUPnPLimitToFirstConnection=NULL;;
+	m_htiDetectuPnP=NULL;
+	m_bUPnPForceUpdate=false;
+	m_htiUPnPForceUpdate=NULL;
 	//m_bUPnPTryRandom = false;
 	// End MoNKi
 
@@ -143,7 +153,8 @@ CPPgEmulespana::CPPgEmulespana()
 	m_htiCustomIncomingIcon = NULL;
 	m_bCustomIncomingIcon = false;
 	// End MoNKi
-*/
+
+    */
 }
 
 CPPgEmulespana::~CPPgEmulespana()
@@ -207,13 +218,21 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 			iImgUPnP = piml->Add(CTempIconLoader(_T("UPNP")));
 		}
 		m_htiUPnPGroup = m_ctrlTreeOptions.InsertGroup(_T("Universal Plug & Play (UPnP)"), iImgUPnP,  TVI_ROOT); // leuk_he item ->group
-		m_htiUPnP = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLE), m_htiUPnPGroup, m_bUPnP);
+//		m_htiUPnP = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLE), m_htiUPnPGroup, m_bUPnP);
   		m_htiUPnPWeb = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLEWEB), m_htiUPnPGroup, m_bUPnPWeb);
 		// MORPH START leuk_he upnp bindaddr
          m_htiUpnpBinaddr =	 m_ctrlTreeOptions.InsertItem(GetResString(IDS_UPNPBINDADDR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUPnPGroup);
 		 m_ctrlTreeOptions.AddIPAddress(m_htiUpnpBinaddr , RUNTIME_CLASS(CTreeOptionsIPAddressCtrl));
         //MORPH END leuk_he upnp binaddr
-        m_ctrlTreeOptions.Expand(m_htiUPnPGroup, TVE_EXPAND);
+ 		m_htiUPnPPort= m_ctrlTreeOptions.InsertItem(GetResString(IDS_PORT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUPnPGroup);
+        m_ctrlTreeOptions.AddEditBox(m_htiUPnPPort, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiUPnPClearOnClose = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNPCLOSEONEXIT), m_htiUPnPGroup, m_bUPnPClearOnClose);
+		m_htiUPnPLimitToFirstConnection = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNPLIMITTOFIRSTCONNECTION ), m_htiUPnPGroup, m_bUPnPLimitToFirstConnection);
+		m_htiDetectuPnP= m_ctrlTreeOptions.InsertItem(GetResString(IDS_UPNPDETECTSTATUS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUPnPGroup);
+        m_ctrlTreeOptions.AddEditBox(m_htiDetectuPnP, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiUPnPForceUpdate= m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNFORCEUPDATE), m_htiUPnPGroup, m_bUPnPForceUpdate);
+
+		m_ctrlTreeOptions.Expand(m_htiUPnPGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiUPnP, TVE_EXPAND);
 		// End MoNKi
 
@@ -274,14 +293,17 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 	// End MoNKi
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnP, m_bUPnP);
+	//DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnP, m_bUPnP);
 	//DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPTryRandom, m_bUPnPTryRandom);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPWeb, m_bUPnPWeb);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPWeb, m_bUPnPWeb);
 	// MORPH start leuke_he upnp bindaddr
 	DDX_TreeIPAddress(pDX, IDC_EXT_OPTS,m_htiUpnpBinaddr  , m_dwUpnpBindAddr);
   	// MORPH end leuke_he upnp bindaddr
-    
+		DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiUPnPPort, m_iUPnPPort);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPClearOnClose, m_bUPnPClearOnClose);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPWeb, m_bUPnPWeb);
+	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDetectuPnP, m_iDetectuPnP);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPForceUpdate, m_bUPnPForceUpdate);
 
 	//m_ctrlTreeOptions.SetCheckBoxEnable(m_htiUPnPTryRandom, m_bUPnP);
 	// End MoNKi
@@ -447,10 +469,9 @@ void CPPgEmulespana::Localize()
         SetTool(m_htiICFSupportClearAtEnd,CLEARMAPTIP);
         SetTool(m_htiICFSupportServerUDP,ADDMPATIP);
         SetTool(m_htiUPnPGroup ,UPNP_GROUP_TIP);
-        SetTool(m_htiUPnP,IDS_UPNP_ENABLE_TIP);
+        //SetTool(m_htiUPnP,IDS_UPNP_ENABLE_TIP);
         SetTool(m_htiUPnPWeb,IDS_UPNP_ENABLEWEB_TIP);
         SetTool(m_htiUpnpBinaddr,IDS_UPNPBINDADDR_TIP);
-		//SetTool(m_htipnpBindAddrIsDhcp,IDS_BINDADDRDHCP_TIP);
         SetTool(m_htiWapRoot,WAP_TIP);
         SetTool(m_htiWapEnable ,ENABLEWAP_TIP);
         SetTool(m_htiWapTemplate,TEMPLATE_TIP);
@@ -458,6 +479,12 @@ void CPPgEmulespana::Localize()
         SetTool(m_htiWapPass,WAPPASS_TIP);
         SetTool(m_htiWapLowEnable ,WAPLOW1_TIP);
         SetTool(m_htiWapLowPass,WAPLOWPASS_TIP);
+
+		SetTool(m_htiUPnPPort,IDS_UPNPPORT_TIP);
+		SetTool(m_htiUPnPClearOnClose,IDS_UPNPCLEARONCLOSE_TIP);
+		SetTool(m_htiUPnPLimitToFirstConnection,IDS_UPNPLIMITTOFIRSTCONNECTION_TIP);
+		SetTool(m_htiDetectuPnP,IDS_DETECTUPNP_TIP);
+		SetTool(m_htiUPnPForceUpdate,IDS_UPNFORCEUPDATE_TIP);
 
      //MORPH END leuk_he tooltipped
 	
@@ -681,16 +708,29 @@ BOOL CPPgEmulespana::OnApply()
 	// End MoNKi
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	if((BOOL)thePrefs.IsUPnPEnabled() != m_bUPnP ||
+	/*if((BOOL)thePrefs.IsUPnPEnabled() != m_bUPnP ||
 		(BOOL)thePrefs.GetUPnPNatWeb() != m_bUPnPWeb)
 	{
 		theApp.m_UPnP_IGDControlPoint->SetUPnPNat(m_bUPnP); // and start/stop nat. 
 		thePrefs.SetUPnPNatWeb(m_bUPnPWeb);
 	}
+	*/
+    if ((BOOL)thePrefs.GetUPnPNatWeb() != m_bUPnPWeb)
+	{
+		theApp.m_UPnP_IGDControlPoint->SetUPnPNat(thePrefs.IsUPnPEnabled()); // and start/stop nat. 
+		thePrefs.SetUPnPNatWeb(m_bUPnPWeb);
+	}
 	// MORPH START leuk_he upnp bindaddr
 	thePrefs.SetUpnpBindAddr(m_dwUpnpBindAddr);// Note: read code in thePrefs..
 	// MORPH END  leuk_he upnp bindaddr
-
+	if (m_iUPnPPort>-1  && m_iUPnPPort < 65535)
+	    thePrefs.SetUPnPPort((uint16)m_iUPnPPort );
+	thePrefs.SetUPnPClearOnClose (m_bUPnPClearOnClose);
+    thePrefs.SetUPnPLimitToFirstConnection(m_bUPnPLimitToFirstConnection);
+	if (m_iDetectuPnP==2 || m_iDetectuPnP==0 || m_iDetectuPnP==-1 ||m_iDetectuPnP==-2 ||m_iDetectuPnP==-10)
+		thePrefs.SetUpnpDetect(m_iDetectuPnP); // other values are undefined. 
+	thePrefs.m_bUPnPForceUpdate=thePrefs.m_bUPnPForceUpdate;
+	
 	// End MoNKi
 
 /*Commented by SiRoB
@@ -812,13 +852,17 @@ BOOL CPPgEmulespana::OnInitDialog()
 	// End MoNKi
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	m_bUPnP = thePrefs.IsUPnPEnabled();
+//	m_bUPnP = thePrefs.IsUPnPEnabled();
 	m_bUPnPWeb = thePrefs.GetUPnPNatWeb();
 	// End MoNKi
     // MORPH START leuk_he upnp bindaddr
 	m_dwUpnpBindAddr=thePrefs.GetUpnpBindAddr();
 	// MORPH END  leuk_he upnp bindaddr
-
+	m_iUPnPPort = thePrefs.GetUPnPPort();
+	m_bUPnPClearOnClose = thePrefs.GetUPnPClearOnClose();
+	m_bUPnPLimitToFirstConnection=thePrefs.GetUPnPLimitToFirstConnection();
+	m_iDetectuPnP=thePrefs.GetUpnpDetect(); // allowed values: 
+	m_bUPnPForceUpdate=thePrefs.m_bUPnPForceUpdate; 
 /*Commented by SiRoB
 	// Added by MoNKi [MoNKi: -Support for High Contrast Mode-]
 	m_bHighContrast = thePrefs.GetHighContrastSupport();
