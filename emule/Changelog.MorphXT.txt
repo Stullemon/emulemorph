@@ -1,8 +1,29 @@
 --------------------------------------
-Changelog for eMule 0.48a MorphXT v10.x
+Changelog for eMule 0.48a MorphXT v10.4
 --------------------------------------
-XX-XX-2007
-FIX: Memleaks [fafner]
+06-10-2007
+
+CHANGE: USC: tuned upload:
+CHANGE: USC: Upload speed sense is fucntioning again. 
+CHANGE: USC: Don't remove spare trickle slot disables slotfocus. 
+ADD: uPnP: Add some option to gui and move main setting to connenction settings like official.
+FIX: Advanced prefs. save the options added in 10.3.
+ADD: Chinese traditional translation, ZH_TW (eastshare) 
+CHANGE: Updated modicons [stulle]
+CHANGE: The binary release has a server.met file included. 
+--------------------------------------
+Changelog for eMule 0.48a MorphXT v10.3
+--------------------------------------
+11-09-2007
+FIX: Connect to not obfuscated servers (since 10.2)
+ADD: Some advanced official preferences. 
+FIX: Memleaks (fafner)
+
+--------------------------------------
+Changelog for eMule 0.48a MorphXT v10.2 installer
+--------------------------------------
+08-09-2007
+Add: Check for win98, do not allow to install. 
 
 --------------------------------------
 Changelog for eMule 0.48a MorphXT v10.2
