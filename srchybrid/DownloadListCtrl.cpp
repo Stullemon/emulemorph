@@ -267,6 +267,7 @@ void CDownloadListCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("NEO"))); //31
 	m_ImageList.Add(CTempIconLoader(_T("MEPHISTO"))); //32
 	m_ImageList.Add(CTempIconLoader(_T("XRAY"))); //33
+	m_ImageList.Add(CTempIconLoader(_T("MAGIC"))); //34
 	//MORPH END   - Added by SiRoB, More client
 	// Mighty Knife: Community icon
 	m_overlayimages.DeleteImageList ();

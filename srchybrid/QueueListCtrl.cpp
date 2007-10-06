@@ -164,6 +164,7 @@ void CQueueListCtrl::SetAllIcons()
 	imagelist.Add(CTempIconLoader(_T("NEO")));
 	imagelist.Add(CTempIconLoader(_T("MEPHISTO")));
 	imagelist.Add(CTempIconLoader(_T("XRAY")));
+	imagelist.Add(CTempIconLoader(_T("MAGIC")));
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("OverlayObfu"))), 2);
 	imagelist.SetOverlayImage(imagelist.Add(CTempIconLoader(_T("OverlaySecureObfu"))), 3);

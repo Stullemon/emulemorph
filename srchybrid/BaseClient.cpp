@@ -683,6 +683,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 						m_uModClient = MOD_MEPHISTO;
 					else if(StrStrI(m_strModVersion,_T("X-Ray"))!=0)
 						m_uModClient = MOD_XRAY;
+					else if(StrStrI(m_strModVersion,_T("Magic Angel"))!=0)
+						m_uModClient = MOD_MAGIC;
 					else
 						m_uModClient = MOD_NONE;
 					//MOPRH END   - Added by Stulle, Mod Icons
@@ -1385,6 +1387,8 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 						m_uModClient = MOD_MEPHISTO;
 					else if(StrStrI(m_strModVersion,_T("X-Ray"))!=0)
 						m_uModClient = MOD_XRAY;
+					else if(StrStrI(m_strModVersion,_T("Magic Angel"))!=0)
+						m_uModClient = MOD_MAGIC;
 					else
 						m_uModClient = MOD_NONE;
 					//MOPRH END   - Added by Stulle, Mod Icons

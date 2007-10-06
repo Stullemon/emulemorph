@@ -139,6 +139,7 @@ void CDownloadClientsCtrl::SetAllIcons()
 	m_ImageList.Add(CTempIconLoader(_T("NEO")));
 	m_ImageList.Add(CTempIconLoader(_T("MEPHISTO")));
 	m_ImageList.Add(CTempIconLoader(_T("XRAY")));
+	m_ImageList.Add(CTempIconLoader(_T("MAGIC")));
 	//MORPH END   - Added by SiRoB, More client & Credit Overlay Icon
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("ClientSecureOvl"))), 1);
 	m_ImageList.SetOverlayImage(m_ImageList.Add(CTempIconLoader(_T("OverlayObfu"))), 2);

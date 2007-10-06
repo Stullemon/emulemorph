@@ -2463,7 +2463,8 @@ XTREME                  ICON                    "res\\MOD\\xtreme.ico"
 SCARANGEL               ICON                    "res\\MOD\\ScarAngel.ico"
 MEPHISTO                ICON                    "res\\MOD\\mephisto.ico"
 XRAY                    ICON                    "res\\MOD\\xray.ico"
-ZZRATIO                 ICON                    "res\\mod\\zzratio.ico"
+MAGIC                   ICON                    "res\\MOD\\MagicAngel.ico"
+ZZRATIO                 ICON                    "res\\MOD\\zzratio.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //

@@ -215,7 +215,8 @@ enum EModClient{
 	MOD_EMF,
 	MOD_NEO,
 	MOD_MEPHISTO,
-	MOD_XRAY
+	MOD_XRAY,
+	MOD_MAGIC
 };
 //MORPH END   - Added by Stulle, Mod Icons
 
