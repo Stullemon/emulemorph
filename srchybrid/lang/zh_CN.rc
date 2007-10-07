@@ -2123,9 +2123,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_RECONNECTONLOWID    "LowID尝试重新连接"
-    IDS_UPNPSTART           "使用UPnP来设置端口"  //"Use UPnP to setup ports"
+    IDS_UPNPSTART           "使用UPnP来设置端口映射"  //"Use UPnP to setup ports"
     IDS_UPNPSETUP           "正在尝试通过UPnP建立端口映射..."  //"Trying to setup port forwardings with UPnP..."
-    IDS_UPNPFAILED          "UPnP端口映射设置,如果需要的话请自行设置这些端口映射!"  //"UPnP failed to setup port forwardings, please forward those ports manually if necessary!"
+    IDS_UPNPFAILED          "UPnP端口映射设置,如果需要的话请自行设置端口映射!"  //"UPnP failed to setup port forwardings, please forward those ports manually if necessary!"
     IDS_UPNPSUCCESS         "UPnP成功建立了端口%u(TCP) 和 %u(UDP)的端口映射"  //"UPnP successfully set up forwardings for ports %u (TCP) and %u (UDP)"
     IDS_FO_PREFBUTTON_NEW   "打开WinXP SP1防火墙的端口"  //"Open ports on WinXP SP1 firewall"
     IDS_UPNP_NOSERVICE      "UPnP Device Host服务未运行,跳过UPnP设置"  //"UPnP Device Host service is not running, skipping UPnP setup"
@@ -3519,8 +3519,8 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_ADDSHAREDIR    "手动添加本机或局域网内的共享文件夹"1
-    IDS_TEXTSHRETOADD   "添加共享"
+    IDS_ADDSHAREDIR    "手动添加本机或局域网内的共享文件夹"
+    IDS_TEXTSHRETOADD  "添加共享"
     IDS_SHAREWITHSUBDIR   "连同子目录一起共享"
     IDS_SUBDIRS "子目录"
     IDS_UNCLIST_INACTIVE  "无效的共享目录"
@@ -3562,8 +3562,49 @@ BEGIN
     IDS_BACKUP_PART         "备份 *.part 文件可能需要几分钟的时间, 视文件大小而定.\n是否确定要备份这些文件?"
     IDS_BACKUP_PART_W       "是否确定?"
     IDS_BACKUP_COMPLETE     "文件备份完成"
+    IDS_X_ADJUSTNTFSDAYLIGHTFILETIME "调整夏令时(NTFS分区文件)"
+    IDS_X_PEERCACHESHOW     "显示缓存文件的信息"
+    IDS_X_DATETIMEFORMAT    "日期时间格式"
+    IDS_X_DATETIMEFORMAT4LOG "日志文件中的日期时间格式"
+    IDS_X_LOGWARNING        "警告信息字色"
+    IDS_X_LOGSUCCESS        "成功信息字色"
+    IDS_X_LOGERROR          "错误信息字色"
+    IDS_X_ICH               "智能恢复错误数据 (ICH)"
+    IDS_X_DONTCOMPRESSAVI   "不压缩avi"
+    IDS_X_SHOWCOPYED2KLINK  "显示'复制ed2k链接'命令"
+    IDS_X_ICON_FLASH_ON_NEW_MESSAGE "收到新消息时闪烁任务栏图标"
+    IDS_X_SHOWVERTICALHOURMARKERS "在统计信息窗口显示垂直线"
+    IDS_X_REBARTOOLBAR      "禁用一些工具条选项"
  
-END
+ 
+ END
+ 
+ STRINGTABLE
+ BEGIN
+    IDS_OUTOFSERVERS_O "无法通过密钥连接到服务器, 另行尝试."
+    IDS_NO_OBFUSCATION_KEY "服务器没有密钥."
+    IDS_URL_FOR_UPDATING_IP2COUNTRY "用于更新的网址"
+    IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP "如果文件位于NTFS分区且启用了夏令时,\n这个选项将把文件时间修正一小时.\n默认设置 = 启用"
+    IDS_X_LOGERROR_TIP "在服务器面板显示的日志中使用的文字颜色."
+    IDS_X_SHOWVERTICALHOURMARKERS_TIP "每小时在统计信息状态显示一条垂直线.\n改变统计信息的窗口大小可以看到效果\n(默认设置: 启用)"
+    IDS_X_REBARTOOLBAR_TIP      "反选可禁用某些工具条选项, 例如:\n增加对延伸箭头的支持: \n如果工具条的长度不足以显示所有选项,\n工具条的右端将出现一个延伸箭头 ('>>'图标) ,\n点击之后就可以看到其余的选项;\n为被缩减了文字的工具条按钮或\n在'无标签'模式下的工具条提供文字提示;\n可通过在鼠标拖曳的同时按住Ctrl+Alt键\n增加或删除任务栏按钮;\n按钮大小更接近于Windows浏览器等.\n(默认设置: 勾选)"
+    IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "在收到新的消息时闪烁位于任务栏的eMule图标. \n(默认设置=启用)"
+    IDS_X_SHOWCOPYED2KLINK_TIP "在'共享文件'窗口, 显示'复制文件链接到剪贴板'选项\n而不是传统的'显示ed2k 链接'选项. (默认设置 = 关闭)"
+    IDS_X_DONTCOMPRESSAVI_TIP   "一般来说, 所有的文件数据在传输前都会进行压缩,\n除了rar, zip或其它压缩文件.\n这个选项将禁止对avi文件的数据进行压缩.\n对于高速上传的链接可提升性能,\n但也可能因此失去一些可以压缩的数据.\n(默认设置 = 禁用). \n注意: Morph允许对全部文件启用或禁用数据压缩"
+ 
+ END
+ STRINGTABLE
+ BEGIN
+    IDS_UPNPDETECTSTATUS "向导自动检测状态"
+    IDS_DETECTUPNP_TIP  "启动向导自动检测到的当前upnp状态\n2: 下次启动时再次检测upnp(仅当设置为2时有效)\n0: 检测到upnp网关.\n-1: 未检测到upnp网关.\n-2:无本地网络地址, 禁用\n-10:不需要.\n(注意: 除以上数值外的数值将被忽略)"
+    IDS_UPNPPORT_TIP  "upnp使用的端口. 注意不要被其它程序占用!\n(默认设置: 0, 自动分配端口)"
+    IDS_UPNPCLEARONCLOSE_TIP "启用: 开放固定端口并在退出程序时关闭\n禁用：创建动态端口, 退出时不关闭"
+    IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "仅对检测到的第一个设备开放端口\n注意: 某些windows安装程序会误报本地网关设备\n默认设置: 关闭"
+    IDS_UPNPLIMITTOFIRSTCONNECTION "仅为首个连接开放端口"
+    IDS_UPNFORCEUPDATE "强制按时刷新端口"
+    IDS_UPNFORCEUPDATE_TIP "每隔10分钟强制分配upnp端口,\n而不首先检测是否已存在端口开放规则\n (默认设置 = 禁用!)"
+ END
+
 
 
 
