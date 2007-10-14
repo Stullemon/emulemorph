@@ -1972,7 +1972,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			m_FileMenu.EnableMenuItem(MP_RESUME, iFilesToResume > 0 ? MF_ENABLED : MF_GRAYED);
 
 			//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
-			m_FileMenu.EnableMenuItem(MP_FORCE,iFileNotSeenCompleteSource > 0 ? MF_GRAYED : MF_ENABLED);
+			m_FileMenu.EnableMenuItem(MP_FORCE,iFileNotSeenCompleteSource > 0 ? MF_ENABLED : MF_GRAYED);
 			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 
 			//EastShare Start - FollowTheMajority by AndCycle
