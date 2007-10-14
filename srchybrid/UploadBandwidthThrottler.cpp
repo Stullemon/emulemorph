@@ -679,6 +679,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					sint64 limit = -((sint64)2000*allowedDataRate);
 					if (realBytesToSpendClass[classID] < limit)
 						realBytesToSpendClass[classID] = limit;
+					else if (realBytesToSpendClass[classID] > 999)
+						realBytesToSpendClass[classID] = 999;
 					if (_I64_MAX/timeSinceLastLoop > allowedDataRate && _I64_MAX-allowedDataRate*timeSinceLastLoop > realBytesToSpendClass[classID]) {
 						realBytesToSpendClass[classID] += allowedDataRate*timeSinceLastLoop;
 					} else {
@@ -769,6 +771,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									sint64 limit = -((sint64)2000*((allowedclientdatarate == _UI32_MAX || bUploadUnlimited)?doubleSendSize:allowedclientdatarate));
 									if (stat->realBytesToSpend < limit)
 										stat->realBytesToSpend = limit;
+									else if (stat->realBytesToSpend > 999)
+										stat->realBytesToSpend = 999;
+									
 									if (_I64_MAX/timeSinceLastLoop > stat->realBytesToSpend && _I64_MAX-allowedclientdatarate*timeSinceLastLoop > stat->realBytesToSpend)
 										stat->realBytesToSpend += allowedclientdatarate*timeSinceLastLoop;
 									else
@@ -908,8 +913,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									m_highestNumberOfFullyActivatedSlotsClass[classID] = slotCounterClass[classID]+1;
 									sendBytesLocker.Unlock();
 							    }
-								if (realBytesToSpendClass[classID] > 999)
-									realBytesToSpendClass[classID] = 999;
 							} else {
 								dwLastFullBandwidthSpent[classID] = thisLoopTick; 
 							}
@@ -917,8 +920,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 							sendBytesLocker.Lock();
 							m_highestNumberOfFullyActivatedSlotsClass[classID] = 1;
 							sendBytesLocker.Unlock();
-							if (realBytesToSpendClass[classID] > 999)
-								realBytesToSpendClass[classID] = 999;
 						}
 					} else {
 							dwLastFullBandwidthSpent[classID] = thisLoopTick;
