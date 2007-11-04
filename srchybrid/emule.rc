@@ -6224,6 +6224,12 @@ BEGIN
   IDS_UPNFORCEUPDATE_TIP "Instead of checking on the internet gateway device\nif a portmapping rule still  exists, just add a \nmapping every 10 minutes (default = disabled!)"
 END
 
+STRINGTABLE 
+BEGIN
+   IDS_DONOTWATCHCLIP "Stop watching clipboard"
+   IDS_DONOTWATCHCLIP_TIP "One or more of the links that is copied from the clipboard.\nCheck this option to disable watching of the clipboard.\npress cancel to not paste the link. \nEnter or select a catagory and press ok to insert the links"
+
+END
 
 
 #endif    // English (U.S.) resources
