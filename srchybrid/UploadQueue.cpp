@@ -662,7 +662,7 @@ uint32 CUploadQueue::GetEffectiveUploadListCount(uint32 classID) {
         // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetPrev(pos);
 
-		//week need to remove all slot that are not in our desired class or are scheduledslot
+		//we need to remove all slot that are not in our desired class or are scheduledslot
 		/*MORPH*/if(cur_client->GetClassID() != classID || cur_client->IsScheduledForRemoval()) { 
             count++;
         }
@@ -926,7 +926,7 @@ void CUploadQueue::Process() {
 
 	//MORPH START - Upload Splitting Class
 	DWORD waitingtimebeforeopeningnewslot = 1000;
-	if  (GetDatarate() >  1000000) waitingtimebeforeopeningnewslot = 100;
+	if  (GetDatarate() >  1000000) waitingtimebeforeopeningnewslot = 100;	 // we need to open slots quicker on very high speed lines
 	if  (GetDatarate() >  10000000) waitingtimebeforeopeningnewslot = 10;
 	// The loop that feeds the upload slots with data.
 	POSITION Pos = uploadinglist.GetHeadPosition();
@@ -934,13 +934,16 @@ void CUploadQueue::Process() {
         // Get the client. Note! Also updates pos as a side effect.
 		CUpDownClient* cur_client = uploadinglist.GetNext(Pos);
 		if (cur_client->GetUploadState() != US_UPLOADING)
-			waitingtimebeforeopeningnewslot <<= 1;
+			waitingtimebeforeopeningnewslot *= 2; // still initiating slots. 
 	}
 	bool bCanAddNewSlot = (theApp.listensocket->GetTotalHalfCon() < thePrefs.GetMaxHalfConnections()) && (GetTickCount() - m_nLastStartUpload > waitingtimebeforeopeningnewslot);
 	if (bCanAddNewSlot)
 	//MORPH END   - Upload Splitting Class
 		CheckForHighPrioClient();
-	
+
+	// recheck, since CheckForHighPrioClient could have added slot. 
+	 bCanAddNewSlot = (theApp.listensocket->GetTotalHalfCon() < thePrefs.GetMaxHalfConnections()) && (GetTickCount() - m_nLastStartUpload > waitingtimebeforeopeningnewslot);
+
 	//MORPH START - Upload Splitting Class
 	uint32 needToaddmoreslot = false;
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
@@ -1014,7 +1017,7 @@ void CUploadQueue::Process() {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
 				RemoveFromUploadQueue(cur_client, (CString)_T("Scheduled for removal: ") + cur_client->GetScheduledRemovalDebugReason(), true, keepWaitingTime);
 				AddClientToQueue(cur_client,keepWaitingTime,keepWaitingTime);
-				m_nLastStartUpload = m_lastproccesstick-SEC2MS(9);
+				m_nLastStartUpload = m_lastproccesstick-SEC2MS(9); //no more needed?
 			}
 		}
 	}
@@ -1086,9 +1089,9 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	if (
 		 thePrefs.GetSlotLimitThree() &&
 	    (
-			curUploadSlots > (remaindatarateforcurrentclass/min(2*currentclientdatarateclass/3,UPLOAD_CHECK_CLIENT_DR)) //Limiting by remaining datarate for a class
+			curUploadSlots >= (remaindatarateforcurrentclass/min(2*currentclientdatarateclass/3,UPLOAD_CHECK_CLIENT_DR)) //Limiting by remaining datarate for a class
 			||
-			curUploadSlots > (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
+			curUploadSlots >= (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
 		 ) ||
 		 
 		 //==MagicAngel=> Fix Completing Bug - Stulle idea :) - evcz
@@ -1126,8 +1129,11 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 		}
 		if (!simulateScheduledClosingOfSlot) {
 			//Mark the class to be able to receive a slot or not
-			if ((classID==2) & (thePrefs.GetMaxGlobalDataRatePowerShare()>=100))
-				m_abAddClientOfThisClass[1] = needtoaddslot; //if PS % =100 force powershare slots... 
+/*			if ((classID==2) && (thePrefs.GetMaxGlobalDataRatePowerShare()>=100) && 
+				   m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[1] + 
+				   m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[2] >= m_aiSlotCounter[1] + m_aiSlotCounter[2]   )
+				m_abAddClientOfThisClass[1] = needtoaddslot; //if PS % =100 force one more powershare slots... well, if USC did not do this. 
+				*/
 			m_abAddClientOfThisClass[classID] = needtoaddslot;
 		}
 		return needtoaddslot;
@@ -1792,11 +1798,22 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 				theApp.serverconnect->TryAnotherConnectionRequest();
 
 			theApp.listensocket->UpdateConnectionsStatus();
+			/*	MORPH START removed leuk_he clipboard chain instead of timer
 			if (thePrefs.WatchClipboard4ED2KLinks()) {
 				// TODO: Remove this from here. This has to be done with a clipboard chain
 				// and *not* with a timer!!
 				theApp.SearchClipboard();		
+
 			}
+			 end commented out */
+			{ static uint32 m_nLastChained=::GetTickCount();
+			  if (::GetTickCount() - m_nLastChained > MIN2MS(5)) {
+         		theApp.emuledlg->SetClipboardWatch(thePrefs.WatchClipboard4ED2KLinks()); //	reinsert ourself in the clipboard chain see, note in SetClipboardWatch
+				m_nLastChained=::GetTickCount();
+			  }
+			}
+			//	MORPH END leuk_he clipboard chain instead of timer
+
 
 			if (theApp.serverconnect->IsConnecting())
 				theApp.serverconnect->CheckForTimeout();

@@ -329,7 +329,15 @@ public:
 	// [end] Mighty Knife
 	// MORPH START show less controls
 	void ShowLessControls(bool enable);
-	// MORPH START show less controls
+	// MORPH END less controls
+	// MORPH START leuk_he clipboard chain instead of timer
+	void SetClipboardWatch(bool enable);
+	HWND m_hwndClipChainNext;
+	afx_msg void OnDrawClipboard( );
+	afx_msg void OnChangeCbChain(HWND hWndRemove, HWND hWndAfter);
+	// MORPH END leuk_he clipboard chain instead of timer
+	
+
 };
 
 

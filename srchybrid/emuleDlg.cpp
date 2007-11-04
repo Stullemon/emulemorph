@@ -171,6 +171,9 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_WM_SHOWWINDOW()
 	ON_WM_DESTROY()
 	ON_WM_SETTINGCHANGE()
+	ON_WM_DRAWCLIPBOARD() // clipboard chain
+	ON_WM_CHANGECBCHAIN()  // clipboard chain
+
 	ON_MESSAGE(WM_HOTKEY, OnHotKey)	//Commander - Added: Invisible Mode [TPT]
 
 	///////////////////////////////////////////////////////////////////////////
@@ -189,7 +192,6 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_NOTIFY_EX_RANGE(RBN_CHEVRONPUSHED, 0, 0xFFFF, OnChevronPushed)
 
 	ON_REGISTERED_MESSAGE(UWM_ARE_YOU_EMULE, OnAreYouEmule)
-	ON_REGISTERED_MESSAGE(UWM_RESTORE_WINDOW_IM, OnRestoreWindowInvisibleMode) //Commander - Added: Invisible Mode [TPT]
 	ON_BN_CLICKED(IDC_HOTMENU, OnBnClickedHotmenu)
 
 	///////////////////////////////////////////////////////////////////////////
@@ -205,7 +207,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(WEB_ADDDOWNLOADS, OnWebAddDownloads)
 	ON_MESSAGE(WEB_CATPRIO, OnWebSetCatPrio)
 	ON_MESSAGE(WEB_ADDREMOVEFRIEND, OnAddRemoveFriend)
-
+	ON_REGISTERED_MESSAGE(UWM_RESTORE_WINDOW_IM, OnRestoreWindowInvisibleMode) //Commander - Added: Invisible Mode [TPT]
 	ON_MESSAGE(WEB_COPYDATA, OnWMData) // run as a ntservice v1
 	ON_MESSAGE(UM_SERVERSTATUS, OnServiceStatus) // run as a ntservice v1
 
@@ -300,6 +302,7 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 	m_bConnectRequestDelayedForUPnP = false;
 #endif
 	b_HideApp = false; //MORPH - Added by SiRoB, Toggle Show Hide window
+	m_hwndClipChainNext=NULL; // MORPH leuk_he clipboard chain instead of timer
 }
 
 CemuleDlg::~CemuleDlg()
@@ -687,6 +690,8 @@ BOOL CemuleDlg::OnInitDialog()
 	AfxBeginThread(RUNTIME_CLASS(CAICHSyncThread), THREAD_PRIORITY_BELOW_NORMAL,0);
 	*/
 
+	SetClipboardWatch(thePrefs.WatchClipboard4ED2KLinks());  // MORPH leuk_he clipboard chain instead of timer
+
 	// debug info
 	DebugLog(_T("Using '%s' as config directory"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)); 
 	return TRUE;
@@ -807,6 +812,9 @@ void CALLBACK CemuleDlg::StartupTimer(HWND /*hwnd*/, UINT /*uiMsg*/, UINT /*idEv
 
 				if (!bError) // show the success msg, only if we had no serious error
 					AddLogLine(true, GetResString(IDS_MAIN_READY) + _T(" %s"),theApp.m_strCurVersionLong + _T(" [") + theApp.m_strModLongVersion + _T("]"),GetResString(IDS_TRANSVERSION));  //MORPH - Changed by milobac, Translation version info
+/*
+					AddLogLine(true, GetResString(IDS_MAIN_READY), theApp.m_strCurVersionLong);
+*/
 
 				// SLUGFILLER: SafeHash remove - moved down
 				/*
@@ -880,6 +888,7 @@ void CemuleDlg::StopTimer()
 	
 	if (thePrefs.UpdateNotify())
 		DoVersioncheck(false);
+
 	//MORPH START - Added by SiRoB, New Version check
 	if (thePrefs.UpdateNotify())
 		DoMVersioncheck(false);
@@ -2057,6 +2066,7 @@ void CemuleDlg::OnDestroy()
 	// after 1-2 seconds after WM_DESTROY! So, we can not use WM_DESTROY for any lengthy
 	// shutdown actions in that case.
 	CTrayDialog::OnDestroy();
+	SetClipboardWatch(false); //	MORPH leuk_he clipboard chain instead of timer
 }
 
 bool CemuleDlg::CanClose()
@@ -2068,7 +2078,7 @@ bool CemuleDlg::CanClose()
 		if (ExitDlg.DoModal()!= IDYES) {
 	    	return false;
 		}
-	   /*
+	   /* old code:
 	    if (AfxMessageBox(GetResString(IDS_MAIN_EXIT), MB_YESNO | MB_DEFBUTTON2) == IDNO)
 			return false;
 	    */
@@ -3398,7 +3408,6 @@ LRESULT CemuleDlg::OnMVersionCheckResponse(WPARAM /*wParam*/, LPARAM lParam)
 	return 0;
 }
 //MORPH END   - Added by SiRoB, New Version check
-
 void CemuleDlg::ShowSplash()
 {
 	ASSERT( m_pSplashWnd == NULL );
@@ -4276,3 +4285,49 @@ void CemuleDlg::ShowLessControls (bool enable) {
  setcolumns(&( sharedfileswnd->sharedfilesctrl),_T("0,0,0,0,0,1,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,1"),enable);
 }
 // MORPH END show less controls
+
+
+// MORPH START leuk_he clipboard chain instead of timer
+void CemuleDlg::SetClipboardWatch(bool enable)
+	{
+		if (enable) {
+			// add me to chain.
+			/*   Some apps,  WinXP's remote desktop for one, don't play nice with
+            the chain.  
+
+            It might be possible to detect if we're still in the
+            chain by calling
+               SendMessage (GetClipboardViewer(), WM_DRAWCLIPBOARD, 0, 0);
+            and then seeing if we get the WM_DRAWCLIPBOARD message.
+            That, however, might be more expensive than just removing and re-adding 
+            ourselves back into the chain.
+         */
+			if (m_hwndClipChainNext)
+                  ChangeClipboardChain(m_hwndClipChainNext); // remove (!)
+			m_hwndClipChainNext=SetClipboardViewer(); // (re) add
+		}
+		else{
+			// Remove from clipboard chain
+			if (m_hwndClipChainNext) {
+				ChangeClipboardChain(m_hwndClipChainNext);
+				m_hwndClipChainNext=NULL;
+			}
+		}
+	}
+
+	afx_msg void CemuleDlg::OnDrawClipboard( )
+	{
+		if (thePrefs.WatchClipboard4ED2KLinks()) { // always true if we are here
+				theApp.SearchClipboard();		//scan the clipboard txt for ed2k file links/
+			}
+	}
+
+	afx_msg void CemuleDlg::OnChangeCbChain(HWND hWndRemove, HWND hWndAfter){
+        CDialog::OnChangeCbChain(hWndRemove, hWndAfter);
+    	// Update next_in_chain window handle
+	    m_hwndClipChainNext = hWndAfter;
+	}
+        
+	// MORPH END leuk_he clipboard chain instead of timer
+
+

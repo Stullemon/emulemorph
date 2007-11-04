@@ -195,10 +195,13 @@ BOOL CPPgFiles::OnApply()
 		thePrefs.m_btransferfullchunks = false;
 
 
+
 	if(IsDlgButtonChecked(IDC_WATCHCB))
 		thePrefs.watchclipboard = true;
 	else
 		thePrefs.watchclipboard = false;
+
+	theApp.emuledlg->SetClipboardWatch(thePrefs.watchclipboard); //	MORPH leuk_he clipboard chain instead of timer
 
 	if(IsDlgButtonChecked(IDC_REMEMBERDOWNLOADED))
 		thePrefs.SetRememberDownloadedFiles(true);
