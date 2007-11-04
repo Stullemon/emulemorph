@@ -142,7 +142,7 @@ BEGIN
     IDS_ERR_EMPTYADRESSESDAT "No hay una dirección de una lista de servidores en 'addresses.dat'. Por favor, introduce una dirección válida de lista de servidores en este archivo para actualizar automáticamente tu lista de servidores"
     IDS_ERR_BADSERVERMETVERSION "¡Versiontag no válida en server.met (0x%X)!"
     IDS_SERVERSFOUND        "Encontrados %i servidores en server.met"
-    IDS_SERVERSADDED        "%d servidores añadidos, %d eliminados"
+    IDS_SERVERSADDED        "%d servidores añadidos, %d descartados (Existentes/Inválidos)"
     IDS_ERR_BADSERVERLIST   "Error: archivo server.met corrupto, imposible cargar lista de servidores"
     IDS_ERR_FILEERROR_SERVERMET "Error de archivo al leer server.met: %s, no es posible cargar la lista de servidores"
 END
@@ -365,7 +365,7 @@ BEGIN
     IDS_QUEUESIZE           "Tamaño cola de espera"
     IDS_ERR_OPEN            "Error al abrir el archivo pedido"
     IDS_ERR_CLIENTERRORED   "El cliente '%s' caus un error al empaquetar (%s) - desconectando cliente"
-    IDS_ERR_REQ_FNF         "No se encontr el archivo pedido"
+    IDS_ERR_REQ_FNF         "No se encontró el archivo pedido"
     IDS_DESC                "Descripcin: %s"
     IDS_PORT                "Puerto"
     IDS_ERR_NOVALIDSERVERSFOUND "No se encontraron servidores válidos a los que conectarse en la lista de servidores"
@@ -1880,7 +1880,7 @@ STRINGTABLE
 BEGIN
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES "Comprobar disponibilidad antes de empezar a bajar"
     IDS_DL_FORCE            "Forzar Descarga"
-    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Guardar Tiempo de Espera en Cola"
+    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME "Guardar el tiempo de espera en cola (SUQWT) de otros clientes"
     IDS_DATEFILENAMELOG     "Registrar el Nombre de Archivo con fecha "
     IDS_ECFEF               "Mismas Posibilidades Para Cada Archivo"
     IDS_ALL_TIME            "Todo El Tiempo"
@@ -1988,7 +1988,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CAT_SETORDER        "Poner prioridad lineal"
-    IDS_CAT_ORDER           "Introduzca un entero mayor o igual a cero.  Valores negativos reanudan al primero"
+    IDS_CAT_ORDER           "Introduzca un entero mayor o igual a cero. Valores bajos se reanudan primero"
     IDS_CAT_PAUSEDSHOWN     " | Pausados visibles"
     IDS_CAT_PAUSEDHIDDEN    " | Pausados invisibles"
     IDS_CAT_COLCATEGORY     "Categoría"
@@ -2041,7 +2041,7 @@ STRINGTABLE
 BEGIN
     IDS_CAT_AUTOCAT         "Máscara de filtro avanzada (separador: | )"
     IDS_CAT_USEAUTOCAT      "Añadir nuevas descargas a categorías usando filtros de vista"
-    IDS_SLS_USESLS          "Activar guardado y cargado de fuentes"
+    IDS_SLS_USESLS          "Guardar y cargar tus fuentes en un archivo (válido durante 30 min)"
     IDS_CAT_MERGE           "Emerger categoría"
     IDS_CAT_GROUP           "Grupo"
     IDS_CAT_RESUMEFILEONLYINSAMECAT "Reanudar archivo pausado solo en una misma categoría"
@@ -2112,10 +2112,10 @@ BEGIN
     IDS_FEEDBACK_COMPLETE   "Fuentes Completas Estimadas: %i"
     IDS_COPYFEEDBACK_US     "Copiar Respuestas al Portapapeles (US)"
     IDS_UPDATEFAKES         "Actualizar"
-    IDS_FAKECHECKUPERROR    "Error al actualizar la lista de fakes"
-    IDS_HTTP_FAKECHECKCAPTION "Actualizando lista de fakes"
-    IDS_UPDATEFAKECHECKONSTART "Actualizar lista de fakes al inicio"
-    IDS_FAKELIST_PERCENTAGE "Actualizando lista de fakes: %s%% de %s completado"
+    IDS_FAKECHECKUPERROR    "Error al actualizar el archivo fakes.dat"
+    IDS_HTTP_FAKECHECKCAPTION "Actualizando fakes.dat"
+    IDS_UPDATEFAKECHECKONSTART "Actualizar fakes.dat al inicio"
+    IDS_FAKELIST_PERCENTAGE "Actualizando fakes.dat: %s%% de %s completado"
     IDS_CHECKFAKE           "Comprobar fake"
     IDS_REMAININGSIZE       "Tamaño restante"
     IDS_RELOADSHARE         "Actualizar Archivos Compartidos"
@@ -2174,7 +2174,7 @@ STRINGTABLE
 BEGIN
     IDS_DWLSESSIONENDED     "Sesión de descarga finalizada. Usuario: %s Razón: %s"
     IDS_BANHASHCHANGED      "Cliente: %s (%s), Razón baneo: HashUsuario cambiado"
-    IDS_BANHASHCHANGEDT     "Cliente: %s (%s), Razón baneo: HashUsuario cambiado (Encontrado en ListaDeClientesRastreados)"
+    IDS_BANHASHCHANGEDT     "Cliente: %s (%s), Razón baneo: HashUsuario cambiado (Encontrado en Lista De Clientes Rastreados)"
     IDS_BANHASHINVALID      "Cliente: %s (%s), Razón baneo: HashUsuario no válido"
     IDS_LOWIDRETRYING       "ID-baja -- Intentándolo otra vez (quedan %i intentos)"
     IDS_IPFILTEREDSRV       "Fuente de IPfiltrada IP=%s (%s) recibido del servidor"
@@ -2206,7 +2206,7 @@ BEGIN
     IDS_RATIO_CREDIT        "Crédito por Ratio"
     IDS_EASTSHARE_CREDIT    "EastShare"
     IDS_PREFER_SHARE_ALL    "Preferir Compartir Toda La Lista"
-    IDS_MET_FILE_CONTROL    "Control de Archivos .met (¡cuidadín con cambiar algun valor!)"
+    IDS_MET_FILE_CONTROL    "Control de Archivos .met (Cuidado con modificar este valor)"
     IDS_EXPIRED_KNOWN       "Tiempo concurrido de Archivos Conocidos (días) (Por defecto: 0)"
     IDS_DELETEFILE          "Eliminar Archivo"
     IDS_PAWCIO_CREDIT       "Pawcio"
@@ -2235,7 +2235,7 @@ BEGIN
     IDS_REMOVEALLFRIENDSLOT "Eliminar todos los slots para Amigos"
     IDS_INFINITEQUEUE       "Lista de Espera Infinita"
     IDS_PAYBACKFIRSTLIMIT   "Cantidad antes de accionar (Por defecto: 10MB)"
-    IDS_ENABLE_CHUNKDOTS    "Activar PuntosDeTrozos en la barra de progreso"
+    IDS_ENABLE_CHUNKDOTS    "Activar Puntos de Trozos en la barra de progreso"
     IDS_COMMUNITY           "Comunidad"
     IDS_COMMUNITYTAG        "Etiquetas de Comunidad (separados por '|')"
     IDS_INVISIBLEMODE       "Modo Invisible"
@@ -2308,7 +2308,7 @@ STRINGTABLE
 BEGIN
     IDS_INVMODE_GROUP       "Modo Invisible"
     IDS_INVMODE             "Activar Modo Invisible"
-    IDS_INVMODE_HOTKEY      "Seleccionar los hotkey para mostrar/esconder la ventana"
+    IDS_INVMODE_HOTKEY      "Teclas que muestra/oculta la ventana"
     IDS_INVMODE_MODKEY      "Keys Modificadores:"
     IDS_INVMODE_VKEY        "Key:"
     IDS_DATARATEAVERAGETIME "Velocidad media de transmisión de datos (Por defecto: 30s)"
@@ -2367,9 +2367,9 @@ BEGIN
     IDS_CHECKCHARACTERREPLACE "Reemplazar caracteres:"
     IDS_REPLACECHAR         "Reemplazar"
     IDS_REPLACECHARBY       "por"
-    IDS_SC_ADD              "&Add"
-    IDS_SC_EDIT             "&Edit"
-    IDS_SC_DELETE           "&Delete"
+    IDS_SC_ADD              "&Añadir"
+    IDS_SC_EDIT             "&Editar"
+    IDS_SC_DELETE           "&Borrar"
     IDS_SEARCHFORCHAR       "Buscar"
     IDS_REPLACEBYCHAR       "Reemplazar por"
     IDS_SC_HEADLINE         "Limpieza simple"
@@ -2389,14 +2389,14 @@ STRINGTABLE
 BEGIN
     IDS_CRC32_ABORT         "Cancelar cálculo"
     IDS_DONTREMOVESPARETRICKLESLOT "No eliminar slot de reserva"
-    IDS_MINDATARATEFRIEND   "Flujo de datos Global (0kB/s = ilimitado, 1...3kB/s = sin zzRatio)"
-    IDS_MINDATARATEPOWERSHARE "Flujo de datos Global (0kB/s = ilimitado)"
-    IDS_MAXCLIENTDATARATEFRIEND  "Máximo flujo de datos por Usuario (0kB/s = ilimitado)"
-    IDS_MAXCLIENTDATARATEPOWERSHARE "Máximo flujo de datos por Usuario (0kB/s = ilimitado)"
-    IDS_MAXCLIENTDATARATE   "Máximo flujo de datos por Usuario (0kB/s = ilimitado)"
+    IDS_MINDATARATEFRIEND   "Flujo de datos Global [Slot Amigo] (0kB/s = ilimitado, 1...3kB/s = sin zzRatio)"
+    IDS_MINDATARATEPOWERSHARE "Flujo de datos Global [Slot PS] (0kB/s = ilimitado)"
+    IDS_MAXCLIENTDATARATEFRIEND  "Máximo flujo de datos por Usuario [Slot Amigo] (0kB/s = ilimitado)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE "Máximo flujo de datos por Usuario [Slot PS] (0kB/s = ilimitado)"
+    IDS_MAXCLIENTDATARATE   "Máximo flujo de datos por Usuario [Slot Normal] (0kB/s = ilimitado)"
     IDS_DISPLAYFUNNYNICK    "Habilitar FunnyNick"
-    IDS_MAXDATARATEFRIEND   "Límite de flujo de datos Global máximo (% respecto a la velocidad de subida)"
-    IDS_MAXDATARATEPOWERSHARE "Límite de flujo de datos Global máximo (% respecto a la velocidad de subida)"
+    IDS_MAXDATARATEFRIEND   "Límite de flujo de datos Global máximo [Slot Amigo] (% respecto a la velocidad de subida)"
+    IDS_MAXDATARATEPOWERSHARE "Límite de flujo de datos Global máximo [Slot PS] (% respecto a la velocidad de subida)"
     IDS_HIDDEN              "Oculto"
 END
 
@@ -2485,7 +2485,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_AUTOUPIP2COUNTRY    "Actualizar Ip-to-country.csv al inicio"
+    IDS_AUTOUPIP2COUNTRY    "Actualizar IP_to_country.csv al inicio"
     IDS_UPDATEIPCURL        "Actualizar"
     IDS_CLIENTQUEUEPROGRESSBAR "Ver progreso de la lista de espera del usuario"
 END
@@ -2609,11 +2609,11 @@ STRINGTABLE
 BEGIN
     IDS_IP2COUNTRY_INFO     "Líneas analizadas:%u  Se encontró rangos de IPCountry:%u  Duplicados:%u  Combinados:%u"
     IDS_IP2COUNTRY_FLAGLOAD "Banderas Cargadas"
-    IDS_IP2COUNTRY_FILELOAD "Archivo IP2Country descargado"
-    IDS_IP2COUNTRY_FLAGUNLD "IP2Country descargado"
-    IDS_IP2COUNTRY_DWNFILE  "Descargando archivo IP2Country"
-    IDS_IP2COUNTRY_UPUNLOAD "IP2Country.csv descargado debido a actualización en proceso"
-    IDS_IP2COUNTRY_UPLOAD   "IP2Country.csv cargado después de haberse actualizado con éxito"
+    IDS_IP2COUNTRY_FILELOAD "Archivo IP_to_country.csv descargado"
+    IDS_IP2COUNTRY_FLAGUNLD "IP_to_country.csv descargado"
+    IDS_IP2COUNTRY_DWNFILE  "Descargando archivo IP_to_country.csv"
+    IDS_IP2COUNTRY_UPUNLOAD "IP_to_country.csv descargado debido a actualización en proceso"
+    IDS_IP2COUNTRY_UPLOAD   "IP_to_country.csv cargado después de haberse actualizado con éxito"
     IDS_HASHING_COMPLETED   "Completado el Hashing del archivo '%s'"
     IDS_HASHING_COMPLETED2  "Hashing de nuevos archivos completado"
     IDS_HASHING_NEWFILE     "Archivo nuevo: '%s'"
@@ -2670,7 +2670,7 @@ STRINGTABLE
 BEGIN
     IDS_SLOT_LIMIT_GROUP    "Limitador de slots"
     IDS_SLOT_LIMIT_NONE     "Sin límite"
-    IDS_SLOT_LIMIT_THREE    "Subida/3kbps"
+    IDS_SLOT_LIMIT_THREE    "Subida / 3 Kbps"
     IDS_SLOT_LIMIT_NUM_B    "Limitar a x slots"
 END
 
@@ -2814,9 +2814,9 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_EXTRACT_META_DATA_TIP "Extrae el id3 y el bitrate de los archivos"
+    IDS_EXTRACT_META_DATA_TIP "Extrae el ID3 y el bitrate de los archivos"
     IDS_NEVER_TIP1          "Comportamiento normal. Opción buena cuando no se cuelga"
-    IDS_META_DATA_ID3LIB_TIP "Usa la librería id3"
+    IDS_META_DATA_ID3LIB_TIP "Usa la librería ID3"
     IDS_LOG2DISK_TIP        "Guardar el registro normal en el directorio 'logs' de eMule.\nCon esto podemos ver lo que sucede con el eMule cuando el ordenador\nes apagado inesperadamente."
     IDS_DATEFILENAMELOG_TIP "Guarda el archivo de registro en el directorio 'logs' en el formato:\neMule - YYYY.MM.DD.log"
     IDS_VERBOSE_TIP         "Opciones del registro de depuración. Mensajes de depuración para eliminar ciertos errores del programa"
@@ -2985,7 +2985,7 @@ BEGIN
     IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP "Guarda el tiempo de espera en tu cola. Básicamente te permite que el tiempo muerto\nque tarda en formarse la cola de subida, se vea reducido al ser guardado, y aunque tu\ndesaparezcas tu puesto en la cola este reservado, por defecto esta activado"
     IDS_ENABLE_CHUNKDOTS_TIP "Mostrar puntos en la barra de progreso para cada paquete, 9,28Mb"
     IDS_ECFEF_TIP           "Una cola para todos los archivos con las mismas posibilidades.\nCambia la prioridad de cada archivo basado en los datos y peticiones\nde subida en esta sesion"
-    IDS_IP2COUNTRY_TIP      "Nombres y banderas de cada país, en los detalles del cliente en la ventana\nde transferencias. Necesitas un archivo actualizado de country.csv que lo puedes\ndescargar o actualizar en MorphXT Update para mostrar correctamente los datos basados\nen la localizacion estimada del número IP de la persona"
+    IDS_IP2COUNTRY_TIP      "Nombres y banderas de cada país, en los detalles del cliente en la ventana\nde transferencias. Necesitas un archivo actualizado de IP_to_country.csv que lo puedes\ndescargar o actualizar en MorphXT Update para mostrar correctamente los datos basados\nen la localizacion estimada del número IP de la persona"
     IDS_DISABLED_TIP        "Sin letras de paises. (deshabilitar la columna del pais en el siguiente inicio)"
     IDS_COUNTRYNAME_SHOWFLAG_TIP "Mostar la bandera del pais en la columna de país o al principio de la línea"
     IDS_CREDIT_SYSTEM_TIP   "Que sistema de créditos usas. Para el funcionamiento del MorphXT se requiere un sistema.\nLa prioridad de avance en tu cola de subida depende del sistema de credito que elijas"
@@ -3135,8 +3135,8 @@ BEGIN
     IDS_DOWNHISTORY_CLEAR_QUESTION  "¿Está seguro de querer limpiar el historial de descargas?"
     IDS_UPDATEFAKELISTWEEK  "Actualizar semanalmente"
     IDS_AUTOUPIPFILTERWEEK  "Actualizar semanalmente"
-    IDS_UPDATEFAKELISTWEEK_TIP  "Añadir una entrada en el Programador para actualizar el\n<b>fakelist.dat</b> desde la URL una vez por semana.\nEl Programador está activado.\nEsto funcionará solamente si MorphXT se está ejecutando al mismo tiempo.\nPuedes modificar la hora en la que lo actualizará\nen las preferencias del Programador"
-    IDS_UPDATEIPFILTERWEEK_TIP "Añadir una entrada en el Programador para actualizar el\n<b>ipfilter.dat</b> desde la URL una vez por semana.\nEl Programador está activado.\nEsto funcionará solamente si MorphXT se está ejecutando al mismo tiempo.\nPuedes modificar la hora en la que lo actualizará\nen las preferencias del Programador"
+    IDS_UPDATEFAKELISTWEEK_TIP  "Añadir una entrada en el Programador para actualizar\n<b>fakes.dat</b> desde la URL una vez por semana.\nEl Programador está activado.\nEsto funcionará solamente si MorphXT se está ejecutando al mismo tiempo.\nPuedes modificar la hora en la que lo actualizará\nen las preferencias del Programador"
+    IDS_UPDATEIPFILTERWEEK_TIP "Añadir una entrada en el Programador para actualizar\n<b>ipfilter.dat</b> desde la URL una vez por semana.\nEl Programador está activado.\nEsto funcionará solamente si MorphXT se está ejecutando al mismo tiempo.\nPuedes modificar la hora en la que lo actualizará\nen las preferencias del Programador"
     IDS_SCHEDTEXT           "Añadido por el MorphXT AutoUpdate"
 END
 
@@ -3444,9 +3444,6 @@ BEGIN
   IDS_UPNFORCEUPDATE 		"Forzar actualizaciones periódicas"
   IDS_UPNFORCEUPDATE_TIP 	"En vez de comprobar en el dispositivo de la puerta de enlace de Internet\nsi una regla de redirección de puertos existe, simplemente añade\nun mapeo cada 10 minutos (Por defecto: Desactivado)"
 END
-
-    //IDS_UPNPCLOSEONEXIT     "Eliminar las redirecciones de puertos de UPnP al salir"
-	//IDS_UPNPSTART           "Utilizar UPnP para redirigir los puertos"
 #endif    // Spanish (Castilian) resources
 /////////////////////////////////////////////////////////////////////////////
 
