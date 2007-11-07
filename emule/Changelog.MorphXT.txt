@@ -1,4 +1,17 @@
 --------------------------------------
+Changelog for eMule 0.48a MorphXT v10.5
+--------------------------------------
+xx-11-2007
+
+CHANGE: USC: tuned upload.
+FIX: USC: fix extreme slot explosion bug for ps 100%.
+CHANGE: Clipboard watch uses clipboard chain, save a bit of cpu. [leuk_he]
+CHANGE: Clipboard ed2k link file watch  now queues into morph category selection.
+FIX: rare heap corruption when safeconnnect is disabled. (netfinity)
+CHANGE: update Safekad to warpf 0.3a.9 beta  (netfinity)
+ADD: USS: initial  TTL (stulle/MonKi)
+
+--------------------------------------
 Changelog for eMule 0.48a MorphXT v10.4
 --------------------------------------
 06-10-2007
