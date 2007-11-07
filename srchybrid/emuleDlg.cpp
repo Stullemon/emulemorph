@@ -4320,6 +4320,9 @@ void CemuleDlg::SetClipboardWatch(bool enable)
 		if (thePrefs.WatchClipboard4ED2KLinks()) { // always true if we are here
 				theApp.SearchClipboard();		//scan the clipboard txt for ed2k file links/
 			}
+    	if (NULL != m_hwndClipChainNext)
+	    	::SendMessage(m_hwndClipChainNext, WM_DRAWCLIPBOARD, 0, 0); //pass message on to next application. 
+
 	}
 
 	afx_msg void CemuleDlg::OnChangeCbChain(HWND hWndRemove, HWND hWndAfter){
