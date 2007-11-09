@@ -3720,8 +3720,8 @@
 #define IDS_UPNFORCEUPDATE_TIP 31294
 #define IDS_DONOTWATCHCLIP    31295
 #define IDS_DONOTWATCHCLIP_TIP 31296
-
-
+#define  IDS_USS_INITIAL_TTL 31297
+#define  IDS_USS_INITIAL_TTL_TIP  31298
 
 
 // Next default values for new objects

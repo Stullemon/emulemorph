@@ -6228,8 +6228,10 @@ STRINGTABLE
 BEGIN
    IDS_DONOTWATCHCLIP "Stop watching clipboard"
    IDS_DONOTWATCHCLIP_TIP "One or more of the links that is copied from the clipboard.\nCheck this option to disable watching of the clipboard.\npress cancel to not paste the link. \nEnter or select a catagory and press ok to insert the links"
-
+   IDS_USS_INITIAL_TTL     "Initial TTL" // [MoNKi: -USS initial TTL-] - Stulle
+   IDS_USS_INITIAL_TTL_TIP	"In finding the last common router Skip the first n routers\nThis might be usefule if the providers blocks pings at the\ninternel routers. Test this with the 'tracert' command. Default =0, \nIf you go higher than 8 you have a strange ISP network. max = 20\n20 is not recommended. Setting a too high value will cause\n'Network topology has changed.' verbose messages. Loosing the \neffectiveness  of the USS"
 END
+
 
 
 #endif    // English (U.S.) resources
