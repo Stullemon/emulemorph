@@ -44,6 +44,8 @@ there client on the eMule forum..
 #include "../../emuledlg.h"
 #include "../../kademliawnd.h"
 
+#include "NetF/SafeKad.h" // netfinity: Enable tracking of bad nodes
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -56,6 +58,8 @@ CContact::~CContact()
 {
 	if (m_bGuiRefs)
 		theApp.emuledlg->kademliawnd->ContactRem(this);
+	if (m_bSafeKadRefs) // netfinity: Safe KAD - If this contacts IP is tracked, then remove it from tracking
+		safeKad.UntrackContact(this);
 }
 
 CContact::CContact()
@@ -98,6 +102,8 @@ void CContact::InitContact()
 	m_tExpires = 0;
 	m_tLastTypeSet = time(NULL);
 	m_bGuiRefs = 0;
+	m_bSafeKadRefs = 0; // netfinity: Safe KAD - IP tracking
+	m_bCandidate = true; // netfinity: Safe KAD - Require usefulness check before accepting this node
 	m_uInUse = 0;
 	m_tCreated = time(NULL);
 	m_bCheckKad2 = true;
@@ -208,12 +214,20 @@ void CContact::UpdateType()
 			break;
 		case 1:
 			m_byType = 1;
-			m_tExpires = (time_t)(time(NULL) + HR2S(1.5));
+			m_tExpires = (time_t)(time(NULL) + MIN2MS(90) );
 			break;
 		default:
 			m_byType = 0;
 			m_tExpires = time(NULL) + HR2S(2);
 	}
+// BEGIN netfinity: Safe KAD - Candidates cannot be less than type 3 until proven useful
+	if (m_bCandidate == true)
+	{
+		m_byType = 3;
+		m_tExpires = time(NULL) + MIN2S(2);
+	}
+// END netfinity: Safe KAD - Candidates cannot be less than type 3 until proven useful
+
 	theApp.emuledlg->kademliawnd->ContactRef(this);
 }
 

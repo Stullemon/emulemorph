@@ -46,7 +46,7 @@ namespace Kademlia
 			~CRoutingBin();
 		private:
 			CRoutingBin();
-			bool AddContact(CContact* pContact);
+			bool AddContact(CContact* pContact, bool validate = true); // netfinity: Safe KAD - Split and consolidate operations will be unreliable if the add operation fails
 			void SetAlive(CContact* pContact);
 			void SetTCPPort(uint32 uIP, uint16 uUDPPort, uint16 uTCPPort);
 			void RemoveContact(CContact *pContact);

@@ -101,7 +101,8 @@ namespace Kademlia
 			void Process_KADEMLIA_PUBLISH_NOTES_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_FIREWALLED_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_FIREWALLED_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
-			void Process_KADEMLIA_FIREWALLED_ACK_RES (uint32 uLenPacket);
+			/* void Process_KADEMLIA_FIREWALLED_ACK_RES (uint32 uLenPacket); */
+			void Process_KADEMLIA_FIREWALLED_ACK_RES (uint32 uLenPacket, uint32 uIP, uint16 uUDPPort); // netf
 			void Process_KADEMLIA_FINDBUDDY_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_FINDBUDDY_RES (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);
 			void Process_KADEMLIA_CALLBACK_REQ (const byte* pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort);

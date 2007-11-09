@@ -54,6 +54,8 @@ there client on the eMule forum..
 #include "../../Log.h"
 #include "../../KnownFileList.h"
 
+#include "NetF/SafeKad.h" // netfinity: Enable tracking of bad nodes
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -108,7 +110,13 @@ CSearch::~CSearch()
 
 	// Decrease the use count for any contacts that are in your contact list.
 	for (ContactMap::iterator itContactMap = m_mapInUse.begin(); itContactMap != m_mapInUse.end(); ++itContactMap)
-		((CContact*)itContactMap->second)->DecUse();
+	{
+		// BEGIN netfinity: Safe KAD - Increase type counter for contacts that didn't respond (or was useful, if candidate) during the search
+		if (m_mapTried.count(itContactMap->first) > 0 && (itContactMap->second->GetCandidate() == true ? m_mapUseful.count(itContactMap->first) > 0 : m_mapResponded.count(itContactMap->first) > 0))
+			itContactMap->second->CheckingType();
+		// END netfinity: Safe KAD - Increase type counter for contacts that didn't respond during the search
+		itContactMap->second->DecUse();
+	}
 
 	// Delete any temp contacts..
 	for (ContactList::const_iterator itContactList = m_listDelete.begin(); itContactList != m_listDelete.end(); ++itContactList)
@@ -135,16 +143,43 @@ void CSearch::Go()
 	{
 		CUInt128 uDistance(CKademlia::GetPrefs()->GetKadID());
 		uDistance.Xor(m_uTarget);
-		CKademlia::GetRoutingZone()->GetClosestTo(3, m_uTarget, uDistance, 50, &m_mapPossible, true, true);
-	}
-	if (!m_mapPossible.empty())
-	{
+// BEGIN netfinity: Safe KAD - 
+		// Choose only validated (type <= 2) nodes closest to the distance point unless NODE search
+		if(m_uType != NODE)
+			CKademlia::GetRoutingZone()->GetClosestTo(2, m_uTarget, uDistance, 50, &m_mapPossible, true, true);
+		// If less than 50 nodes was returned then choose any (type <= 3) nodes closest to the distance point
+		if (m_mapPossible.size() < 50)
+		{
+			for (ContactMap::iterator itContactMap = m_mapPossible.begin(); itContactMap != m_mapPossible.end(); ++itContactMap)
+				itContactMap->second->DecUse();
+			CKademlia::GetRoutingZone()->GetClosestTo(3, m_uTarget, uDistance, 50, &m_mapPossible, true, true);
+		}
+
 		//Lets keep our contact list entries in mind to dec the inUse flag.
 		for (ContactMap::iterator itContactMap = m_mapPossible.begin(); itContactMap != m_mapPossible.end(); ++itContactMap)
 			m_mapInUse[itContactMap->first] = itContactMap->second;
 
 		ASSERT(m_mapPossible.size() == m_mapInUse.size());
 
+		// Skip the first N nodes for NODE searches unless this is node validation
+		// This should help against holes gettin created in the network, as the nodes closest to another node are often bogus
+		// This could be used for NODECOMPLETE too, but one have to be careful here so we don't miss any nodes close to ourselves
+		if(m_uType == NODE && m_mapPossible.size() > 0 && m_mapPossible.begin()->first != m_uTarget)
+		{
+			int skipNodes = min((int) m_mapPossible.size() - 1, rand() % 5);
+			for (ContactMap::iterator itContacts = m_mapPossible.begin(); itContacts != m_mapPossible.end();)
+			{
+				if (skipNodes > 0)
+					m_mapPossible.erase(itContacts++);
+				else
+					 break;
+				--skipNodes;
+			}
+		}
+// END netfinity: Safe KAD
+	}
+	if (!m_mapPossible.empty())
+	{
 		// Take top ALPHA_QUERY to start search with.
 		int iCount;
 		
@@ -166,6 +201,7 @@ void CSearch::Go()
 			++itContactMap2;
 		}
 	}
+
 	// Update search for the GUI
 	theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 }
@@ -231,51 +267,176 @@ void CSearch::JumpStart()
 		return;
 	}
 
+	// netfinity: Safe KAD - We never jump start NODE searches as they are supposed to just test one contact
+	if (m_uType == NODE)
+		return;
+
 	// If we had a response within the last 3 seconds, no need to jumpstart the search.
-	if (m_uLastResponse + SEC(3) > (uint32)time(NULL))
+	// netfinity: If we already have all responses then go on with the storing unless we already begun storing
+	if (m_uLastResponse + SEC(3) > (uint32)time(NULL) && (m_mapResponded.size() < m_mapTried.size() || m_uTotalRequestAnswers > 0 || m_uAnswers > 0))
 		return;
 
 	// Search for contacts that can be used to jumpstart a stalled search.
-	while(!m_mapPossible.empty())
-	{
-		// Get a contact closest to our target.
-		CContact* pContact = m_mapPossible.begin()->second;
+	// netfinity: Safe KAD - Avoid wasting resources on unnecessary store operations
+	int iCanStore = 5; // Limit to max 5 store operations per call
+	bool bHasTried = false;
 
+	for (ContactMap::iterator itPossibleMap = m_mapPossible.begin(); itPossibleMap != m_mapPossible.end();)
+	{
+		CUInt128 uDistance = itPossibleMap->first;
+		CContact* pContact = itPossibleMap->second;
+		++itPossibleMap;
+
+		// BEGIN netfinity: Safe KAD - Calculate the search distance (we want to know all contacts among the 3 closest)
+		CUInt128 uSearchDistance = GetSearchDistance();
+
+		// netfinity: Safe KAD - Iterate until the minimum search distance has been covered
+		if (bHasTried && uDistance > uSearchDistance)
+			break;
+		// netfinity: Safe KAD - We can have gotten new knowledge about bad nodes since we added these on the list
+		else if (safeKad.IsBadNode(pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetClientID()))
+		{
+			// Erase all references to this one (will allow the Kad ID to be tried again against another node)
+			m_mapPossible.erase(uDistance);
+			m_mapTried.erase(uDistance);
+			m_mapRetried.erase(uDistance);
+			m_mapResponded.erase(uDistance);
+			m_mapUseful.erase(uDistance);
+			if (::thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("Search Manager: Removing contact(IP=%s) - Identified as bad node") , ipstr(ntohl(pContact->GetIPAddress())));
+		}
 		// Have we already tried to contact this node.
-		if (m_mapTried.count(m_mapPossible.begin()->first) > 0)
+		else if (m_mapTried.count(uDistance) > 0)
 		{
 			// Did we get a response from this node, if so, try to store or get info.
-			if(m_mapResponded.count(m_mapPossible.begin()->first) > 0)
-				StorePacket();
-			// Remove from possible list.
-			m_mapPossible.erase(m_mapPossible.begin());
+			if (m_mapResponded.count(uDistance) > 0)
+			{
+				if (iCanStore > 0) // netfinity: Safe KAD - Avoid unnecessary storing if not among the best
+				{
+					StorePacket(pContact);
+					// Remove from possible list.
+					m_mapPossible.erase(uDistance);
+					--iCanStore; // netfinity: Safe KAD - Reduce the allowed storing count
+				}
+			}
+			// BEGIN netfinity: Sometimes it's good to try twice
+			else if (m_mapRetried.count(uDistance) == 0 && uDistance <= uSearchDistance)
+			{
+				// Add to tried list.
+				m_mapRetried[uDistance] = pContact;
+				// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
+				// Send request
+				SendFindValue(pContact);
+				// netfinity: We don't bother changing the bCanStore and bHasTried here, as this node is probably dead
+			}
+			else
+			{
+				// Remove from possible list.
+				m_mapPossible.erase(uDistance);
+			}
+			// END netfinity: Sometimes it's good to try twice
 		}
 		else
 		{
 			// Add to tried list.
-			m_mapTried[m_mapPossible.begin()->first] = pContact;
+			m_mapTried[uDistance] = pContact;
 			// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
 			// Send request
 			SendFindValue(pContact);
-			break;
+			// netfinity: Safe KAD - There appears to still be some nodes that are closer than those responded, so stop storing for now to save resources
+			iCanStore = 0;
+			bHasTried = true;
 		}
 	}
 }
 
 void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *plistResults)
 {
-	if(plistResults)
+	if (plistResults)
 		m_uLastResponse = time(NULL);
 
 	// Remember the contacts to be deleted when finished
 	for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
 		m_listDelete.push_back(*itContactList);
 
+	// netfinity: Safe KAD - We need this to add responding nodes to the routing table
+	CRoutingZone *pRoutingZone = CKademlia::GetRoutingZone();
+
+	//Find contact that is responding.
+	CUInt128 uFromDistance;
+	CContact* pFromContact = NULL;
+	for (ContactMap::const_iterator itContactMap = m_mapTried.begin(); itContactMap != m_mapTried.end(); ++itContactMap)
+	{
+		if ((itContactMap->second->GetIPAddress() == uFromIP) && (itContactMap->second->GetUDPPort() == uFromPort))
+		{
+			uFromDistance = itContactMap->first;
+			pFromContact = itContactMap->second;
+		}
+	}
+	// netfinity: Safe KAD - Since we retry contacts we might get double responses
+	if (pFromContact == NULL || m_mapResponded.count(uFromDistance) > 0)
+	{
+		delete plistResults;
+		return;
+	}
+
+
+	// netfinity: Safe KAD - Remember as useful and clear candidate flag if node answers with something of value
+	if (plistResults->size() > 0)
+	{
+		m_mapUseful[uFromDistance] = pFromContact;
+		pFromContact->SetCandidate(false);
+	}
+
+// BEGIN netfinity: Safe KAD - Trim the response list to the amount requested
+	int maxNodes = 2;
+	switch(m_uType)
+	{
+		case NODE:
+		case NODECOMPLETE:
+			maxNodes = KADEMLIA_FIND_NODE;
+			break;
+		case FILE:
+		case KEYWORD:
+		case FINDSOURCE:
+		case NOTES:
+			maxNodes = KADEMLIA_FIND_VALUE;
+			break;
+		case FINDBUDDY:
+		case STOREFILE:
+		case STOREKEYWORD:
+		case STORENOTES:
+			maxNodes = KADEMLIA_STORE;
+			break;
+	}
+
+	for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end();)
+	{
+		if (maxNodes > 0)
+			 ++itContactList;
+		else
+			plistResults->erase(itContactList++);
+		--maxNodes;
+	}
+// END netfinity: Safe KAD - Trim the response list to the amount requested
+
 	// Not interested in responses for FIND_NODE.
 	// Once we get a results we stop the search.
 	// These contacts are added to contacts by UDPListener.
 	if (m_uType == NODE)
 	{
+// BEGIN netfinity: Safe KAD - Add the responses to the routing table unless this was an usefulness check
+		if (m_uTarget != pFromContact->GetClientID())
+		{
+			for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
+			{
+				// Get next result
+				CContact* pContact = *itContactList;
+				pRoutingZone->AddUnfiltered(pContact->GetClientID(), pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetTCPPort(), pContact->GetVersion(), false, true);
+			}
+		}
+// END netfinity: Safe KAD - Add the responses to the routing table
+
 		// Note we got an answer
 		m_uAnswers++;
 		// We clear the possible list to force the search to stop.
@@ -289,78 +450,99 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 
 	try
 	{
-		//Find contact that is responding.
-		for (ContactMap::const_iterator itContactMap = m_mapTried.begin(); itContactMap != m_mapTried.end(); ++itContactMap)
+		// Add to list of people who responded
+		m_mapResponded[uFromDistance] = pFromContact;
+		// netfinity: Safe KAD - This seems to be a good node so add it if possible to the routing table
+		if (plistResults->size() > 0) // Contacts that did't have any valid contacts to give aren't very useful to keep
 		{
-			CUInt128 uFromDistance(itContactMap->first);
-			CContact* pFromContact = itContactMap->second;
+			pRoutingZone->AddUnfiltered(pFromContact->GetClientID(), pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), pFromContact->GetTCPPort(), pFromContact->GetVersion(), false, true);
+			CContact* pStoredContact = pRoutingZone->GetContact(pFromContact->GetClientID());
+			if (pStoredContact != NULL)
+				pStoredContact->SetCandidate(false); // We already know this contact is useful
+		}
 
-			if ((pFromContact->GetIPAddress() == uFromIP) && (pFromContact->GetUDPPort() == uFromPort))
+		ContactMap mapBest; // netfinity: Safe KAD - Take only the best contacts from this response
+
+		// Loop through their responses
+		for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
+		{
+			// Get next result
+			CContact* pContact = *itContactList;
+
+			// Calc distance this result is to the target.
+			CUInt128 uDistance(pContact->GetClientID());
+			uDistance.Xor(m_uTarget);
+
+			// Ignore this contact if already know or tried it.
+// BEGIN netfinity: Safe KAD - There may be a contact on the list with the same ID, but that turned out as bad which allow us to replace it
+			CContact* pExistingContact = NULL;
+			if (m_mapPossible.count(uDistance) > 0)
+				pExistingContact = m_mapPossible[uDistance];
+			if (pExistingContact == NULL && m_mapTried.count(uDistance) > 0)
+				pExistingContact = m_mapTried[uDistance];
+
+			if (pExistingContact != NULL)
 			{
-				// Add to list of people who responded
-				m_mapResponded[uFromDistance] = pFromContact;
-
-				// Loop through their responses
-				for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
+				if (safeKad.IsBadNode(pExistingContact->GetIPAddress(), pExistingContact->GetUDPPort(), pExistingContact->GetClientID()) && pExistingContact != pFromContact)
 				{
-					// Get next result
-					CContact* pContact = *itContactList;
+					// Erase all references to the old one
+					m_mapPossible.erase(uDistance);
+					m_mapTried.erase(uDistance);
+					m_mapRetried.erase(uDistance); // netfinity: Sometimes it's good to try twice
+					m_mapResponded.erase(uDistance);
+					m_mapUseful.erase(uDistance);
+					if (::thePrefs.GetLogFilteredIPs())
+						AddDebugLogLine(false, _T("Search Manager: Replacing contact(IP=%s) - Identified as bad node") , ipstr(ntohl(pExistingContact->GetIPAddress())));
+				}
+				else
+					continue;
+			}
+// END netfinity: Safe KAD - There may be a contact on the list with the same ID, but that turned out as bad which allow us to replace it
 
-					// Calc distance this result is to the target.
-					CUInt128 uDistance(pContact->GetClientID());
-					uDistance.Xor(m_uTarget);
+			// Add to possible
+			m_mapPossible[uDistance] = pContact;
 
-					// Ignore this contact if already know or tried it.
-					if (m_mapPossible.count(uDistance) > 0)
-						continue;
-					if (m_mapTried.count(uDistance) > 0)
-						continue;
+			// netfinity: Safe KAD - Calculate the search distance (we want to know all contacts among the 3 closest)
+			CUInt128 uSearchDistance = GetSearchDistance();
 
-					// Add to possible
-					m_mapPossible[uDistance] = pContact;
-
-					// Verify if the result is closer to the target then the one we just checked.
-					if (uDistance < uFromDistance)
+			// Verify if the result is closer to the target then the one we just checked.
+			// netfinity: The wider search criteria is in case we hit right on the spot with the first try
+			if (uDistance < uSearchDistance) 
+			{
+				// The top APLPHA_QUERY of results are used to determine if we send a request.
+				if (mapBest.size() < ALPHA_QUERY)
+				{
+					mapBest[uDistance] = pContact;
+				}
+				else
+				{
+					ContactMap::iterator itContactMapBest = mapBest.end();
+					itContactMapBest--;
+					if (uDistance < itContactMapBest->first)
 					{
-						// The top APLPHA_QUERY of results are used to determine if we send a request.
-						bool bTop = false;
-						if (m_mapBest.size() < ALPHA_QUERY)
-						{
-							bTop = true;
-							m_mapBest[uDistance] = pContact;
-						}
-						else
-						{
-							ContactMap::iterator itContactMapBest = m_mapBest.end();
-							itContactMapBest--;
-							if (uDistance < itContactMapBest->first)
-							{
-								// Prevent having more then ALPHA_QUERY within the Best list.
-								m_mapBest.erase(itContactMapBest);
-								m_mapBest[uDistance] = pContact;
-								bTop = true;
-							}
-						}
-
-						if(bTop)
-						{
-							// We determined this contact is a canditate for a request.
-							// Add to the tried list.
-							m_mapTried[uDistance] = pContact;
-							// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
-							// Send request
-							SendFindValue(pContact);
-						}
+						// Prevent having more then ALPHA_QUERY within the Best list.
+						mapBest.erase(itContactMapBest);
+						mapBest[uDistance] = pContact;
 					}
 				}
-				// Complete node search, just increase the answers and update the GUI
-				if( m_uType == NODECOMPLETE )
-				{
-					m_uAnswers++;
-					theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
-				}
-				break;
 			}
+		}
+		// BEGIN netfinity: Safe KAD - Process the best contacts
+		for (ContactMap::iterator itContactMapBest = mapBest.begin(); itContactMapBest != mapBest.end(); ++itContactMapBest)
+		{
+			// We determined this contact is a canditate for a request.
+			// Add to the tried list.
+			m_mapTried[itContactMapBest->first] = itContactMapBest->second;
+			// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
+			// Send request
+			SendFindValue(itContactMapBest->second);
+		}
+		// END netfinity: Safe KAD - Process the best contacts
+		// Complete node search, just increase the answers and update the GUI
+		if( m_uType == NODECOMPLETE )
+		{
+			m_uAnswers++;
+			theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 		}
 	}
 	catch (...)
@@ -368,16 +550,22 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 		AddDebugLogLine(false, _T("Exception in CSearch::ProcessResponse"));
 	}
 	delete plistResults;
+
+	// netfinity: Do we have all responses, if so start processing them (rarely happens, but who knows)
+	if (m_mapResponded.size() == m_mapTried.size())
+		JumpStart();
 }
 
-void CSearch::StorePacket()
+// netfinity: Allow storing for any contact, not just the one on top of the list (simplifies coding)
+void CSearch::StorePacket(CContact* pContact)
 {
 	ASSERT(!m_mapPossible.empty());
 
 	// This method is currently only called by jumpstart so only use best possible.
-	ContactMap::const_iterator itContactMap = m_mapPossible.begin();
-	CUInt128 uFromDistance(itContactMap->first);
-	CContact* pFromContact = itContactMap->second;
+	//ContactMap::const_iterator itContactMap = m_mapPossible.begin();
+	CUInt128 uFromDistance(pContact->GetClientID() /*itContactMap->first*/);
+	uFromDistance.Xor(m_uTarget);
+	CContact* pFromContact = pContact; //itContactMap->second;
 
 	// Make sure this is a valid Node to store too.
 	// Shouldn't LAN IPs already be filtered?
@@ -418,7 +606,7 @@ void CSearch::StorePacket()
 					m_pfileSearchTerms.WriteUInt8(1);
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_REQ(File)", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort()); // netf
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -1477,3 +1665,54 @@ void CSearch::SetSearchTermData( uint32 uSearchTermDataSize, LPBYTE pucSearchTer
 	m_pucSearchTermsData = new BYTE[uSearchTermDataSize];
 	memcpy(m_pucSearchTermsData, pucSearchTermsData, uSearchTermDataSize);
 }
+
+// BEGIN netfinity: Calculate the search distance (we want to know all contacts among the 3 closest)
+CUInt128 CSearch::GetSearchDistance()
+{
+	CUInt128 uSearchDistance;
+	int iCheckCount = 0;
+	if (time(NULL) - m_tCreated < 3)
+	{
+		// During initial phase we have to look for the closest possible ones
+		for (ContactMap::const_iterator itPossibleMap = m_mapPossible.begin(); itPossibleMap != m_mapPossible.end(); ++itPossibleMap)
+		{
+			if (itPossibleMap->first > uSearchDistance)
+				uSearchDistance = itPossibleMap->first;
+			++iCheckCount;
+			if (iCheckCount >= ALPHA_QUERY)
+				break;
+		}
+	}
+	else
+	{
+		iCheckCount = 0;
+		for (ContactMap::const_iterator itUsefulMap = m_mapUseful.begin(); itUsefulMap != m_mapUseful.end(); ++itUsefulMap)
+		{
+			// Search among the best useful nodes
+			if (itUsefulMap->first > uSearchDistance )
+				uSearchDistance = itUsefulMap->first;
+			++iCheckCount;
+			// Stop if limit is reached or the search tolerance is exceeded
+			if (iCheckCount >= ALPHA_QUERY || uSearchDistance.Get32BitChunk(0) > SEARCHTOLERANCE)
+				break;
+		}
+		if (iCheckCount < ALPHA_QUERY)
+		{
+			iCheckCount = 0;
+			for (ContactMap::const_iterator itTriedMap = m_mapTried.begin(); itTriedMap != m_mapTried.end(); ++itTriedMap)
+			{
+				// Search among the best tried
+				if (itTriedMap->first > uSearchDistance)
+					uSearchDistance = itTriedMap->first;
+				++iCheckCount;
+				// Stop if limit is reached or the search tolerance is exceeded
+				if (iCheckCount >= (ALPHA_QUERY + 2) || uSearchDistance.Get32BitChunk(0) > SEARCHTOLERANCE)
+					break;
+			}
+		}
+	}
+	return uSearchDistance;
+}
+// END netfinity: Calculate the search distance (we want to know all contacts among the 3 closest)
+
+

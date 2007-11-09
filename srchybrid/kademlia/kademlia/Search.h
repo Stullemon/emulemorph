@@ -50,7 +50,7 @@ namespace Kademlia
 			uint32 GetAnswers() const;
 			uint32 GetKadPacketSent() const {return m_uKadPacketSent;}
 			uint32 GetRequestAnswer() const {return m_uTotalRequestAnswers;}
-			void StorePacket();
+			void StorePacket(CContact* pContact); // netf
 			const CString& GetFileName() const {return m_sFileName;}
 			void SetFileName(const CString& sFileName) {m_sFileName = sFileName;}
 			CUInt128 GetTarget() const {return m_uTarget;}
@@ -90,6 +90,8 @@ namespace Kademlia
 			void SendFindValue(CContact* pContact);
 			void PrepareToStop();
 
+			CUInt128 GetSearchDistance(); // netfinity: Safe KAD - Calculate the search coverage to find the 3 "alive" closest nodes
+
 			bool m_bStoping;
 			time_t m_tCreated;
 			uint32 m_uType;
@@ -108,8 +110,10 @@ namespace Kademlia
 			UIntList m_listFileIDs;
 			ContactMap m_mapPossible;
 			ContactMap m_mapTried;
+			ContactMap m_mapRetried; // netfinity: Safe KAD - Sometimes it's good to try twice
 			ContactMap m_mapResponded;
-			ContactMap m_mapBest;
+			ContactMap m_mapUseful; // netfinity: Safe KAD - Track the nodes who gave us some contacts (not filtered)
+			//ContactMap m_mapBest; // netfinity: Safe KAD - Obsoleted
 			ContactList m_listDelete;
 			ContactMap m_mapInUse;
 	};

@@ -38,7 +38,10 @@ there client on the eMule forum..
 #include "./RoutingBin.h"
 #include "./Contact.h"
 #include "../kademlia/Defines.h"
+#include "../kademlia/SearchManager.h"
 #include "../../Log.h"
+
+#include "NetF/SafeKad.h" // netfinity: Enable tracking of bad nodes
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -73,29 +76,40 @@ CRoutingBin::~CRoutingBin()
 	}
 }
 
-bool CRoutingBin::AddContact(CContact *pContact)
+bool CRoutingBin::AddContact(CContact *pContact, bool validate) // netfinity: Safe KAD - Split and consolidate operations will be unreliable if the add operation fails
 {
 	ASSERT(pContact != NULL);
 	// Check if we already have a contact with this ID in the list.
 	CContact *pContactTest = GetContact(pContact->GetClientID());
-	if (pContactTest == NULL)
+	if (!validate || pContactTest == NULL) // netfinity: Safe KAD - Split and consolidate operations will be unreliable if the add operation fails
 	{
-		// BEGIN netfinity: Safe KAD - Only two nodes per IP range and bucket, unless closer
-		int	nSimilarIPs = 0;
-		for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
+		// BEGIN netfinity: Safe KAD - Restrict how many contacts that can be stored for certain IP (range)
+		if (validate)
 		{
-			if ((((*itContactList)->GetIPAddress() & 0xFFFFF000) == (pContact->GetIPAddress() & 0xFFFFF000)) && ((*itContactList)->GetDistance() < pContact->GetDistance()))
-				++nSimilarIPs;
+			// Only store one contact per IP
+			if (safeKad.IsIPInUse(pContact->GetIPAddress()))
+			{
+				AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - Already 1 contact stored with this IP") , ipstr(ntohl(pContact->GetIPAddress())));
+				return false;
+			}
+			// Only two nodes per IP range and bucket, unless closer
+			int	nSimilarIPs = 0;
+			for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
+			{
+				if ((((*itContactList)->GetIPAddress() & 0xFFFFF000) == (pContact->GetIPAddress() & 0xFFFFF000)) && ((*itContactList)->GetDistance() < pContact->GetDistance()))
+					++nSimilarIPs;
+				}
+			if (nSimilarIPs >= 2)
+			{
+				AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - Already 2 contacts in bucket with similar IP's that are closer") , ipstr(ntohl(pContact->GetIPAddress())));
+				return false;
+			}
 		}
-		if (nSimilarIPs >= 2)
-		{
-			AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - Already 2 contacts in bucket with similar IP's that are closer") , ipstr(ntohl(pContact->GetIPAddress())));
-			return false;
-		}
-		// END netfinity: Safe KAD - Only two nodes per IP range and bucket, unless closer
+		// END netfinity: Safe KAD - Restrict how many contacts that can be stored for certain IP (range) 
 		// If not full, add to end of list
-		if ( m_listEntries.size() < K)
+		if (!validate || m_listEntries.size() < K) // netfinity: Safe KAD - Split and consolidate operations will be unreliable if the add operation fails
 		{
+			safeKad.TrackContact(pContact); // netfinity: Safe KAD - Keep track that this IP is in use
 			m_listEntries.push_back(pContact);
 			return true;
 		}

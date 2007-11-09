@@ -52,6 +52,8 @@ there client on the eMule forum..
 #include "../../opcodes.h"
 #include "../../ipfilter.h"
 
+#include "NetF/SafeKad.h" // netfinity: Enable tracking of bad nodes
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -73,7 +75,7 @@ void CKademliaUDPListener::Bootstrap(LPCTSTR szHost, uint16 uUDPPort, bool bKad2
 		hostent *php = gethostbyname(T2CA(szHost));
 		if (php == NULL)
 			return;
-		memcpy (&uRetVal, php->h_addr, sizeof(uRetVal));
+		memcpy(&uRetVal, php->h_addr, sizeof(uRetVal));
 	}
 	else
 		uRetVal = inet_addr(T2CA(szHost));
@@ -83,7 +85,7 @@ void CKademliaUDPListener::Bootstrap(LPCTSTR szHost, uint16 uUDPPort, bool bKad2
 // Used by Kad1.0 and Kad 2.0
 void CKademliaUDPListener::Bootstrap(uint32 uIP, uint16 uUDPPort, bool bKad2)
 {
-	if(bKad2)
+	if (bKad2)
 	{
 		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 			DebugSend("KADEMLIA2_BOOTSTRAP_REQ", uIP, uUDPPort);
@@ -101,7 +103,7 @@ void CKademliaUDPListener::Bootstrap(uint32 uIP, uint16 uUDPPort, bool bKad2)
 // Used by Kad1.0 and Kad 2.0
 void CKademliaUDPListener::SendMyDetails(byte byOpcode, uint32 uIP, uint16 uUDPPort, bool bKad2)
 {
-	if(bKad2)
+	if (bKad2)
 	{
 		byte byPacket[1024];
 		CByteIO byteIOResponse(byPacket, sizeof(byPacket));
@@ -187,6 +189,15 @@ void CKademliaUDPListener::ProcessPacket(const byte* pbyData, uint32 uLenData, u
 	CKademlia::GetPrefs()->SetLastContact();
 	if( bCurCon != CKademlia::GetPrefs()->HasHadContact())
 		theApp.emuledlg->ShowConnectionState();
+
+// BEGIN netfinity: Safe KAD - Ignore blacklisted contacts
+	if (safeKad.IsBanned(uIP))
+	{
+		AddDebugLogLine(false, _T("ProcessPacket: Ignored Kad packet(IP=%s) - Blacklisted") , ipstr(ntohl(uIP)));
+		return;
+	}
+// END netfinity: Safe KAD - Ignore blacklisted contacts
+
 
 	byte byOpcode = pbyData[1];
 	const byte *pbyPacketData = pbyData + 2;
@@ -350,7 +361,7 @@ void CKademliaUDPListener::ProcessPacket(const byte* pbyData, uint32 uLenData, u
 		case KADEMLIA_FIREWALLED_ACK_RES:
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 				DebugRecv("KADEMLIA_FIREWALLED_ACK_RES", uIP, uUDPPort);
-			Process_KADEMLIA_FIREWALLED_ACK_RES(uLenPacket);
+			Process_KADEMLIA_FIREWALLED_ACK_RES(uLenPacket, uIP, uUDPPort);
 			break;
 		case KADEMLIA_FINDBUDDY_REQ:
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
@@ -389,25 +400,38 @@ void CKademliaUDPListener::ProcessPacket(const byte* pbyData, uint32 uLenData, u
 // Used only for Kad1.0
 void CKademliaUDPListener::AddContact(const byte *pbyData, uint32 uLenData, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, bool bUpdate, bool bAdd, CUInt128 uExpectedID) // netfinity: Safe KAD
 {
-	CSafeMemFile fileIO( pbyData, uLenData);
+	CSafeMemFile fileIO(pbyData, uLenData);
 	CUInt128 uID;
 	fileIO.ReadUInt128(&uID);
 	(void)fileIO.ReadUInt32();
 	(void)fileIO.ReadUInt16();
-	if( uTCPPort )
+	if (uTCPPort)
 		(void)fileIO.ReadUInt16();
 	else
 		uTCPPort = fileIO.ReadUInt16();
 	(void)fileIO.ReadUInt8();
 	// netfinity: Safe KAD - Check if we expected another Kad ID
 	if (uExpectedID != CUInt128() && uExpectedID != uID)
+	{
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("KADEMLIA_REQ/RES: Ignored kad contact(IP=%s) - ID different from the one expected") , ipstr(ntohl(uIP)));
+		safeKad.TrackNode(uIP, uUDPPort, uID); // Keep this information for the next encounter
 		return;
+	}
+	if (safeKad.IsBadNode(uIP, uUDPPort, uID, true))
+	{
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("KADEMLIA_REQ/RES: Ignored kad contact(IP=%s) - Identified as bad node") , ipstr(ntohl(uIP)));
+		return;
+	}
 	// netfinity: Safe KAD - Check against manufactured Kad ID's
 	CUInt128 uDistance;
 	CKademlia::GetPrefs()->GetKadID(&uDistance);
 	uDistance.Xor(uID);
 	if (uDistance.IsGoodRandom())
 		CKademlia::GetRoutingZone()->Add(uID, uIP, uUDPPort, uTCPPort, 0, bUpdate, bAdd); // netfinity: Safe KAD
+	else if (::thePrefs.GetLogFilteredIPs())
+		AddDebugLogLine(false, _T("KADEMLIA_REQ/RES: Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with own ID)") , ipstr(ntohl(uIP)));
 }
 
 // Used only for Kad2.0
@@ -419,7 +443,7 @@ void CKademliaUDPListener::AddContact_KADEMLIA2 (const byte* pbyData, uint32 uLe
 	uint16 uTCPPort = byteIO.ReadUInt16();
 	uint8 uVersion = byteIO.ReadByte();
 	uint8 uTags = byteIO.ReadByte();
-	while(uTags)
+	while (uTags)
 	{
 		CKadTag* pTag = byteIO.ReadTag();
 		delete pTag;
@@ -427,13 +451,24 @@ void CKademliaUDPListener::AddContact_KADEMLIA2 (const byte* pbyData, uint32 uLe
 	}
 	// netfinity: Safe KAD - Check if we expected another Kad ID
 	if (uExpectedID != CUInt128() && uExpectedID != uID)
+	{
+		AddDebugLogLine(false, _T("KADEMLIA2_REQ/RES: Ignored kad contact(IP=%s) - ID different from the one expected") , ipstr(ntohl(uIP)));
+		safeKad.TrackNode(uIP, uUDPPort, uID); // Keep this information for the next encounter
 		return;
+	}
+	if (safeKad.IsBadNode(uIP, uUDPPort, uID, true))
+	{
+		AddDebugLogLine(false, _T("KADEMLIA2_REQ/RES: Ignored kad contact(IP=%s) - Identified as bad node") , ipstr(ntohl(uIP)));
+		return;
+	}
 	// netfinity: Safe KAD - Check against manufactured Kad ID's
 	CUInt128 uDistance;
 	CKademlia::GetPrefs()->GetKadID(&uDistance);
 	uDistance.Xor(uID);
 	if (uDistance.IsGoodRandom())
 		CKademlia::GetRoutingZone()->Add(uID, uIP, uUDPPort, uTCPPort, uVersion, bUpdate, bAdd); // netfinity: Safe KAD
+	else if (::thePrefs.GetLogFilteredIPs())
+		AddDebugLogLine(false, _T("KADEMLIA2_REQ/RES: Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with own ID)") , ipstr(ntohl(uIP)));
 }
 
 // Used only for Kad1.0
@@ -455,6 +490,8 @@ void CKademliaUDPListener::AddContacts( const byte *pbyData, uint32 uLenData, ui
 		uDistance.Xor(uID);
 		if (uDistance.IsGoodRandom())
 			pRoutingZone->Add(uID, uIP, uUDPPort, uTCPPort, 0, bUpdate, bAdd); // netfinity: Safe KAD
+		else if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with own ID)") , ipstr(ntohl(uIP)));
 	}
 }
 
@@ -468,6 +505,13 @@ void CKademliaUDPListener::Process_KADEMLIA_BOOTSTRAP_REQ (const byte *pbyPacket
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	if (IsOnTrackList(uIP, uUDPPort, KADEMLIA_BOOTSTRAP_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	// Add the sender to the list of contacts
 	// netfinity: Safe KAD - Only add if new, otherwise do nothing
@@ -510,6 +554,14 @@ void CKademliaUDPListener::Process_KADEMLIA_BOOTSTRAP_REQ (const byte *pbyPacket
 // Used only for Kad2.0
 void CKademliaUDPListener::Process_KADEMLIA2_BOOTSTRAP_REQ (uint32 uIP, uint16 uUDPPort)
 {
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	if (IsOnTrackList(uIP, uUDPPort, KADEMLIA2_BOOTSTRAP_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
+
 	// Get some contacts to return
 	ContactList contacts;
 	uint16 uNumContacts = (uint16)CKademlia::GetRoutingZone()->GetBootstrapContacts(&contacts, 20);
@@ -611,10 +663,18 @@ void CKademliaUDPListener::Process_KADEMLIA_HELLO_REQ (const byte *pbyPacketData
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
-
-	// netfinity: Safe KAD - Only add if new, otherwise do nothing
-	// This may help against fake nodes with fake IP's as an attacker will not be able to keep them alive
-	AddContact(pbyPacketData, uLenPacket, uIP, uUDPPort, 0, false, true);
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	CUInt128 uSender;
+	if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_HELLO_REQ, &uSender, true)){
+		// netfinity: Safe KAD - Only add if new, otherwise do nothing
+		// This may help against fake nodes with fake IP's as an attacker will not be able to keep them alive
+		AddContact(pbyPacketData, uLenPacket, uIP, uUDPPort, 0, false, true);
+	} else {
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("***NOTE: Possible message bounce detected in %hs!"), __FUNCTION__);
+		AddContact(pbyPacketData, uLenPacket, uIP, uUDPPort, 0, false, false, uSender);
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	// Send response
 	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
@@ -629,9 +689,18 @@ void CKademliaUDPListener::Process_KADEMLIA_HELLO_REQ (const byte *pbyPacketData
 // Used in Kad2.0 only
 void CKademliaUDPListener::Process_KADEMLIA2_HELLO_REQ (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
-	// netfinity: Safe KAD - Only add if new, otherwise do nothing
-	// This may help against fake nodes with fake IP's as an attacker will not be able to keep them alive
-	AddContact_KADEMLIA2(pbyPacketData, uLenPacket, uIP, uUDPPort, false, true);
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	CUInt128 uSender;
+	if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA2_HELLO_REQ, &uSender, true)){
+		// netfinity: Safe KAD - Only add if new, otherwise do nothing
+		// This may help against fake nodes with fake IP's as an attacker will not be able to keep them alive
+		AddContact_KADEMLIA2(pbyPacketData, uLenPacket, uIP, uUDPPort, false, true);
+	} else {
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("***NOTE: Possible message bounce detected in %hs!"), __FUNCTION__);
+		AddContact_KADEMLIA2(pbyPacketData, uLenPacket, uIP, uUDPPort, false, false, uSender);
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 		DebugSend("KADEMLIA2_HELLO_RES", uIP, uUDPPort);
@@ -645,8 +714,8 @@ void CKademliaUDPListener::Process_KADEMLIA2_HELLO_REQ (const byte *pbyPacketDat
 // Used in Kad1.0 only
 void CKademliaUDPListener::Process_KADEMLIA_HELLO_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
-	CUInt128 uTarget; // netf
-	if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_HELLO_REQ, &uTarget)){ // netf
+	CUInt128 uTarget;
+	if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_HELLO_REQ, &uTarget)){
 		CString strError;
 		strError.Format(_T("***NOTE: Received unrequested response packet, size (%u) in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
@@ -667,13 +736,12 @@ void CKademliaUDPListener::Process_KADEMLIA_HELLO_RES (const byte *pbyPacketData
 // Used in Kad2.0 only
 void CKademliaUDPListener::Process_KADEMLIA2_HELLO_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
-	CUInt128 uTarget; // netf
-	if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA2_HELLO_REQ, &uTarget)){ // netf
+	CUInt128 uTarget;
+	if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA2_HELLO_REQ, &uTarget)){
 		CString strError;
 		strError.Format(_T("***NOTE: Received unrequested response packet, size (%u) in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
-
 
 	// netfinity: Safe KAD - Just update don't add the contact
 	// If the node isn't the one we looked for it is probably fake and we don't want more fake node ID's
@@ -715,6 +783,9 @@ void CKademliaUDPListener::Process_KADEMLIA_REQ (const byte *pbyPacketData, uint
 		throw strError;
 	}
 
+	// netfinty: Used by Safe KAD further down
+	CUInt128 uSender;
+
 	//This is the target node trying to be found.
 	CUInt128 uTarget;
 	fileIO.ReadUInt128(&uTarget);
@@ -754,6 +825,13 @@ void CKademliaUDPListener::Process_KADEMLIA_REQ (const byte *pbyPacketData, uint
 
 		SendPacket(&fileIO2, KADEMLIA_RES, uIP, uUDPPort);
 	}
+	// netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA_REQ, &uSender) && uSender == uCheck)
+	{
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("KADEMLIA_REQ:  Message bounce detected! Blacklisting (IP=%s)") , ipstr(ntohl(uIP)));
+		safeKad.BanIP(uIP);	
+	}
 }
 
 // Used in Kad2.0 only
@@ -769,6 +847,9 @@ void CKademliaUDPListener::Process_KADEMLIA2_REQ (const byte *pbyPacketData, uin
 		strError.Format(_T("***NOTE: Received wrong type (0x%02x) in %hs"), byType, __FUNCTION__);
 		throw strError;
 	}
+
+	// netfinty: Used by Safe KAD further down
+	CUInt128 uSender;
 
 	//This is the target node trying to be found.
 	CUInt128 uTarget;
@@ -810,12 +891,19 @@ void CKademliaUDPListener::Process_KADEMLIA2_REQ (const byte *pbyPacketData, uin
 
 		SendPacket(&fileIO2, KADEMLIA2_RES, uIP, uUDPPort);
 	}
+	// netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA2_REQ, &uSender) && uSender == uCheck)
+	{
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("KADEMLIA2_REQ:  Message bounce detected! Blacklisting (IP=%s)") , ipstr(ntohl(uIP)));
+		safeKad.BanIP(uIP);	
+	}
 }
 
 // Used in Kad1.0 only
 void CKademliaUDPListener::Process_KADEMLIA_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
-	CUInt128 uSender; // netf
+	CUInt128 uSender;
 	// Verify packet is expected size
 	if (uLenPacket < 17)
 	{
@@ -823,7 +911,7 @@ void CKademliaUDPListener::Process_KADEMLIA_RES (const byte *pbyPacketData, uint
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
-	else if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_REQ, &uSender)){ // netf
+	else if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_REQ, &uSender)){
 		CString strError;
 		strError.Format(_T("***NOTE: Received unrequested response packet, size (%u) in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
@@ -878,28 +966,32 @@ void CKademliaUDPListener::Process_KADEMLIA_RES (const byte *pbyPacketData, uint
 			fileIO.ReadUInt8();
 			uint32 uhostIPResult = ntohl(uIPResult);
 			// BEGIN netfinity: Safe KAD
-			// Don't let a node loop to itself
-			if (uIP == uIPResult && uUDPPort == uUDPPortResult)
-				continue;
-			// Only allow one node per IP range
-			if (uProcessedIPs.Find(uIPResult & 0xFFFFF000))
+			// Check against node track list
+			if (safeKad.IsBadNode(uIPResult, uUDPPortResult, uIDResult))
 			{
 				iFiltered++;
 				if (::thePrefs.GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - IP to similar to an already processed contact") , ipstr(ntohl(uIPResult)));
+					AddDebugLogLine(false, _T("KADEMLIA_RES: Ignored kad contact(IP=%s) - Identified as bad node") , ipstr(ntohl(uIP)));
 				continue;
 			}
-			uProcessedIPs.AddTail(uIPResult & 0xFFFFF000);
+			// Don't let a node loop to own subnet
+			if ((uIP & 0xFFFFF000) == (uIPResult & 0xFFFFF000))
+			{
+				iFiltered++;
+				if (::thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("KADEMLIA_RES: Ignored kad contact(IP=%s) - IP to similar with sender") , ipstr(ntohl(uIPResult)));
+				continue;
+			}
 			// Check against manufactured Kad ID's
 			CUInt128 uDistanceResult;
-			// Test #1 Construct of own ID
+			// Test #1 Construct of own ID (this one is unlikely)
 			CKademlia::GetPrefs()->GetKadID(&uDistanceResult);
 			uDistanceResult.Xor(uIDResult);
 			if (!uDistanceResult.IsGoodRandom() && uIDResult != CKademlia::GetPrefs()->GetKadID())
 			{
 				iFiltered++;
 				if (::thePrefs.GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with own ID)") , ipstr(ntohl(uIPResult)));
+					AddDebugLogLine(false, _T("KADEMLIA_RES: Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with own ID)") , ipstr(ntohl(uIPResult)));
 				continue;
 			}
 			// Test #2 Construct of target ID
@@ -909,10 +1001,10 @@ void CKademliaUDPListener::Process_KADEMLIA_RES (const byte *pbyPacketData, uint
 			{
 				iFiltered++;
 				if (::thePrefs.GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with target ID)") , ipstr(ntohl(uIPResult)));
+					AddDebugLogLine(false, _T("KADEMLIA_RES: Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with target ID)") , ipstr(ntohl(uIPResult)));
 				continue;
 			}
-			// Test #3 Construct of sender ID
+			// Test #3 Construct of sender ID (this one is very likely)
 			if (uSender != CUInt128())
 			{
 				uDistanceResult=uSender;
@@ -921,28 +1013,38 @@ void CKademliaUDPListener::Process_KADEMLIA_RES (const byte *pbyPacketData, uint
 				{
 					iFiltered++;
 					if (::thePrefs.GetLogFilteredIPs())
-						AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with sender ID)") , ipstr(ntohl(uIPResult)));
+						AddDebugLogLine(false, _T("KADEMLIA_RES: Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with sender ID)") , ipstr(ntohl(uIPResult)));
 					continue;
 				}
 			}
+			// Only allow one node per IP range
+			if (uProcessedIPs.Find(uIPResult & 0xFFFFF000))
+			{
+				iFiltered++;
+				if (::thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("KADEMLIA_RES: Ignored kad contact(IP=%s) - IP to similar to an already processed contact") , ipstr(ntohl(uIPResult)));
+				continue;
+			}
+			uProcessedIPs.AddTail(uIPResult & 0xFFFFF000);
 			// END nefinity: Safe KAD
 			if (::IsGoodIPPort(uhostIPResult, uUDPPortResult))
 			{
 				if (!::theApp.ipfilter->IsFiltered(uhostIPResult)) {
-					pRoutingZone->AddUnfiltered(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, 0, false);
+					// netfinity: Safe KAD - Adding of nodes are now made by the search manager
+					//pRoutingZone->AddUnfiltered(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, 0, false);
 					pResults->push_back(new CContact(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, uTarget, 0));
 				}
 				else
 				{
 					if (::thePrefs.GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Ignored kad contact (IP=%s) - IP filter (%s)") , ipstr(uhostIPResult), ::theApp.ipfilter->GetLastHit());
+						AddDebugLogLine(false, _T("KADEMLIA_RES: Ignored kad contact (IP=%s) - IP filter (%s)") , ipstr(uhostIPResult), ::theApp.ipfilter->GetLastHit());
 					iFiltered++; // netfinity: Safe KAD - Just for statistics
 				}
 			}
 			else
 			{
 				if (::thePrefs.GetLogFilteredIPs())
-				AddDebugLogLine(false, _T("Ignored kad contact (IP=%s) - Bad IP"), ipstr(uhostIPResult));
+					AddDebugLogLine(false, _T("KADEMLIA_RES: Ignored kad contact (IP=%s) - Bad IP"), ipstr(uhostIPResult));
 				iFiltered++; // netfinity: Safe KAD - Just for statistics
 			}
 		}
@@ -950,7 +1052,7 @@ void CKademliaUDPListener::Process_KADEMLIA_RES (const byte *pbyPacketData, uint
 		if (iFiltered)
 		{
 			if (::thePrefs.GetLogFilteredIPs())
-				AddDebugLogLine(false, _T("Filtered %u contacts out of %u") , (int) iFiltered , (int) uNumContacts);
+				AddDebugLogLine(false, _T("KADEMLIA_RES: Filtered %u contacts out of %u") , (int) iFiltered , (int) uNumContacts);
 		}
 	}
 	catch(...)
@@ -966,8 +1068,8 @@ void CKademliaUDPListener::Process_KADEMLIA_RES (const byte *pbyPacketData, uint
 // Used in Kad2.0 only
 void CKademliaUDPListener::Process_KADEMLIA2_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
-	CUInt128 uSender; // netf
-	if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA2_REQ, &uSender)){ // netf
+	CUInt128 uSender;
+	if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA2_REQ, &uSender)){
 		CString strError;
 		strError.Format(_T("***NOTE: Received unrequested response packet, size (%u) in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
@@ -1022,18 +1124,22 @@ void CKademliaUDPListener::Process_KADEMLIA2_RES (const byte *pbyPacketData, uin
 			uint8 uVersion = fileIO.ReadUInt8();
 			uint32 uhostIPResult = ntohl(uIPResult);
 			// BEGIN netfinity: Safe KAD
-			// Don't let a node loop to itself
-			if (uIP == uIPResult && uUDPPort == uUDPPortResult)
-				continue;
-			// Only allow one node per IP range
-			if (uProcessedIPs.Find(uIPResult & 0xFFFFF000))
+			// Check against node track list
+			if (safeKad.IsBadNode(uIPResult, uUDPPortResult, uIDResult))
 			{
 				iFiltered++;
 				if (::thePrefs.GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - IP to similar to an already processed contact") , ipstr(ntohl(uIPResult)));
+					AddDebugLogLine(false, _T("KADEMLIA2_RES: Ignored kad contact(IP=%s) - Identified as bad node") , ipstr(ntohl(uIP)));
 				continue;
 			}
-			uProcessedIPs.AddTail(uIPResult & 0xFFFFF000);
+			// Don't let a node loop to own subnet
+			if ((uIP & 0xFFFFF000) == (uIPResult & 0xFFFFF000))
+			{
+				iFiltered++;
+				if (::thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("KADEMLIA_RES: Ignored kad contact(IP=%s) - IP to similar with sender") , ipstr(ntohl(uIPResult)));
+				continue;
+			}
 			// Check against manufactured Kad ID's
 			CUInt128 uDistanceResult;
 			// Test #1 Construct of own ID
@@ -1043,7 +1149,7 @@ void CKademliaUDPListener::Process_KADEMLIA2_RES (const byte *pbyPacketData, uin
 			{
 				iFiltered++;
 				if (::thePrefs.GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with own ID)") , ipstr(ntohl(uIPResult)));
+					AddDebugLogLine(false, _T("KADEMLIA2_RES: Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with own ID)") , ipstr(ntohl(uIPResult)));
 				continue;
 			}
 			// Test #2 Construct of target ID
@@ -1053,7 +1159,7 @@ void CKademliaUDPListener::Process_KADEMLIA2_RES (const byte *pbyPacketData, uin
 			{
 				iFiltered++;
 				if (::thePrefs.GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with target ID)") , ipstr(ntohl(uIPResult)));
+					AddDebugLogLine(false, _T("KADEMLIA2_RES: Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with target ID)") , ipstr(ntohl(uIPResult)));
 				continue;
 			}
 			// Test #3 Construct of sender ID
@@ -1065,28 +1171,38 @@ void CKademliaUDPListener::Process_KADEMLIA2_RES (const byte *pbyPacketData, uin
 				{
 					iFiltered++;
 					if (::thePrefs.GetLogFilteredIPs())
-						AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with sender ID)") , ipstr(ntohl(uIPResult)));
+						AddDebugLogLine(false, _T("KADEMLIA2_RES: Ignored kad contact(IP=%s) - ID has to low uniqueness (to much in common with sender ID)") , ipstr(ntohl(uIPResult)));
 					continue;
 				}
 			}
+			// Only allow one node per IP range
+			if (uProcessedIPs.Find(uIPResult & 0xFFFFF000))
+			{
+				iFiltered++;
+				if (::thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("KADEMLIA2_RES: Ignored kad contact(IP=%s) - IP to similar to an already processed contact") , ipstr(ntohl(uIPResult)));
+				continue;
+			}
+			uProcessedIPs.AddTail(uIPResult & 0xFFFFF000);
 			// END nefinity: Safe KAD
 			if (::IsGoodIPPort(uhostIPResult, uUDPPortResult))
 			{
 				if (!::theApp.ipfilter->IsFiltered(uhostIPResult)) {
-					pRoutingZone->AddUnfiltered(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, uVersion, false);
+					// netfinity: Safe KAD - Adding of nodes are now made by the search manager
+					//pRoutingZone->AddUnfiltered(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, uVersion, false);
 					pResults->push_back(new CContact(uIDResult, uIPResult, uUDPPortResult, uTCPPortResult, uTarget, uVersion));
 				}
 				else
 				{
 					if (::thePrefs.GetLogFilteredIPs())
-					AddDebugLogLine(false, _T("Ignored kad contact (IP=%s) - IP filter (%s)") , ipstr(uhostIPResult), ::theApp.ipfilter->GetLastHit());
+						AddDebugLogLine(false, _T("KADEMLIA2_RES: Ignored kad contact (IP=%s) - IP filter (%s)") , ipstr(uhostIPResult), ::theApp.ipfilter->GetLastHit());
 					iFiltered++; // netfinity: Safe KAD - Just for statistics
-			}
+				}
 			}
 			else
 			{
 				if (::thePrefs.GetLogFilteredIPs())
-				AddDebugLogLine(false, _T("Ignored kad contact (IP=%s) - Bad IP"), ipstr(uhostIPResult));
+					AddDebugLogLine(false, _T("KADEMLIA2_RES: Ignored kad contact (IP=%s) - Bad IP"), ipstr(uhostIPResult));
 				iFiltered++; // netfinity: Safe KAD - Just for statistics
 			}
 		}
@@ -1094,7 +1210,7 @@ void CKademliaUDPListener::Process_KADEMLIA2_RES (const byte *pbyPacketData, uin
 		if (iFiltered)
 		{
 			if (::thePrefs.GetLogFilteredIPs())
-				AddDebugLogLine(false, _T("Filtered %u contacts out of %u") , (int) iFiltered , (int) uNumContacts);
+				AddDebugLogLine(false, _T("KADEMLIA2_RES: Filtered %u contacts out of %u") , (int) iFiltered , (int) uNumContacts);
 		}
 	}
 	catch(...)
@@ -1352,6 +1468,13 @@ void CKademliaUDPListener::Process_KADEMLIA_SEARCH_REQ (const byte *pbyPacketDat
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA_SEARCH_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	CSafeMemFile fileIO( pbyPacketData, uLenPacket);
 	CUInt128 uTarget;
@@ -1409,6 +1532,14 @@ void CKademliaUDPListener::Process_KADEMLIA_SEARCH_REQ (const byte *pbyPacketDat
 // Used in Kad2.0 only
 void CKademliaUDPListener::Process_KADEMLIA2_SEARCH_KEY_REQ (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	if (IsOnTrackList(uIP, uUDPPort, KADEMLIA2_SEARCH_KEY_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
+
 	CSafeMemFile fileIO( pbyPacketData, uLenPacket);
 	CUInt128 uTarget;
 	fileIO.ReadUInt128(&uTarget);
@@ -1449,6 +1580,14 @@ void CKademliaUDPListener::Process_KADEMLIA2_SEARCH_KEY_REQ (const byte *pbyPack
 // Used in Kad2.0 only
 void CKademliaUDPListener::Process_KADEMLIA2_SEARCH_SOURCE_REQ (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	if (IsOnTrackList(uIP, uUDPPort, KADEMLIA2_SEARCH_SOURCE_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
+
 	CSafeMemFile fileIO( pbyPacketData, uLenPacket);
 	CUInt128 uTarget;
 	fileIO.ReadUInt128(&uTarget);
@@ -1578,6 +1717,13 @@ void CKademliaUDPListener::Process_KADEMLIA_PUBLISH_REQ (const byte *pbyPacketDa
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA_PUBLISH_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	//Used Pointers
 	CIndexed *pIndexed = CKademlia::GetIndexed();
@@ -1762,6 +1908,13 @@ void CKademliaUDPListener::Process_KADEMLIA2_PUBLISH_KEY_REQ (const byte *pbyPac
 	if( CKademlia::GetPrefs()->GetFirewalled() )
 		//We are firewalled. We should not index this entry and give publisher a false report.
 		return;
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA2_PUBLISH_KEY_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	CByteIO byteIO(pbyPacketData, uLenPacket);
 	CUInt128 uFile;
@@ -1881,6 +2034,13 @@ void CKademliaUDPListener::Process_KADEMLIA2_PUBLISH_SOURCE_REQ (const byte *pby
 	if( CKademlia::GetPrefs()->GetFirewalled() )
 		//We are firewalled. We should not index this entry and give publisher a false report.
 		return;
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA2_PUBLISH_SOURCE_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	CByteIO byteIO(pbyPacketData, uLenPacket);
 	CUInt128 uFile;
@@ -2011,7 +2171,7 @@ void CKademliaUDPListener::Process_KADEMLIA_PUBLISH_RES (const byte *pbyPacketDa
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
-	else if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_PUBLISH_REQ)){ // netf
+	else if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_PUBLISH_REQ)){
 		CString strError;
 		strError.Format(_T("***NOTE: Received unrequested response packet, size (%u) in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
@@ -2035,7 +2195,7 @@ void CKademliaUDPListener::Process_KADEMLIA_PUBLISH_RES (const byte *pbyPacketDa
 // Used only by Kad2.0
 void CKademliaUDPListener::Process_KADEMLIA2_PUBLISH_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
-	if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA2_PUBLISH_KEY_REQ) && !IsOnTrackList(uIP, uUDPPort, KADEMLIA2_PUBLISH_SOURCE_REQ) && !IsOnTrackList(uIP, uUDPPort, KADEMLIA2_PUBLISH_NOTES_REQ)){ // netf
+	if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA2_PUBLISH_KEY_REQ) && !IsOnTrackList(uIP, uUDPPort, KADEMLIA2_PUBLISH_SOURCE_REQ) && !IsOnTrackList(uIP, uUDPPort, KADEMLIA2_PUBLISH_NOTES_REQ)){
 		CString strError;
 		strError.Format(_T("***NOTE: Received unrequested response packet, size (%u) in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
@@ -2057,6 +2217,13 @@ void CKademliaUDPListener::Process_KADEMLIA_SEARCH_NOTES_REQ (const byte *pbyPac
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA_SEARCH_NOTES_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	CSafeMemFile fileIO( pbyPacketData, uLenPacket);
 	CUInt128 uTarget;
@@ -2071,6 +2238,14 @@ void CKademliaUDPListener::Process_KADEMLIA_SEARCH_NOTES_REQ (const byte *pbyPac
 // Used only by Kad2.0
 void CKademliaUDPListener::Process_KADEMLIA2_SEARCH_NOTES_REQ (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	if (IsOnTrackList(uIP, uUDPPort, KADEMLIA2_SEARCH_NOTES_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
+
 	CSafeMemFile fileIO(pbyPacketData, uLenPacket);
 	CUInt128 uTarget;
 	fileIO.ReadUInt128(&uTarget);
@@ -2079,7 +2254,7 @@ void CKademliaUDPListener::Process_KADEMLIA2_SEARCH_NOTES_REQ (const byte *pbyPa
 }
 
 // Used only by Kad1.0
-void CKademliaUDPListener::Process_KADEMLIA_SEARCH_NOTES_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort) // netf
+void CKademliaUDPListener::Process_KADEMLIA_SEARCH_NOTES_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
 	// Verify packet is expected size
 	if (uLenPacket < 37)
@@ -2148,6 +2323,13 @@ void CKademliaUDPListener::Process_KADEMLIA_PUBLISH_NOTES_REQ (const byte *pbyPa
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA_PUBLISH_NOTES_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	if( CKademlia::GetPrefs()->GetFirewalled() )
 		//We are firewalled. We should not index this entry and give publisher a false report.
@@ -2215,6 +2397,13 @@ void CKademliaUDPListener::Process_KADEMLIA2_PUBLISH_NOTES_REQ (const byte *pbyP
 	if( CKademlia::GetPrefs()->GetFirewalled() )
 		//We are firewalled. We should not index this entry and give publisher a false report.
 		return;
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA2_PUBLISH_NOTES_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	CByteIO byteIO(pbyPacketData, uLenPacket);
 	CUInt128 uTarget;
@@ -2305,7 +2494,7 @@ void CKademliaUDPListener::Process_KADEMLIA2_PUBLISH_NOTES_REQ (const byte *pbyP
 }
 
 // Used only by Kad1.0
-void CKademliaUDPListener::Process_KADEMLIA_PUBLISH_NOTES_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort) // netf
+void CKademliaUDPListener::Process_KADEMLIA_PUBLISH_NOTES_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
 	// Verify packet is expected size
 	if (uLenPacket < 16)
@@ -2314,7 +2503,7 @@ void CKademliaUDPListener::Process_KADEMLIA_PUBLISH_NOTES_RES (const byte *pbyPa
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
-	else if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_PUBLISH_NOTES_REQ)){ // netf
+	else if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_PUBLISH_NOTES_REQ)){
 		CString strError;
 		strError.Format(_T("***NOTE: Received unrequested response packet, size (%u) in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
@@ -2345,6 +2534,14 @@ void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_REQ (const byte *pbyPacke
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA_FIREWALLED_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
+
 
 	CSafeMemFile fileIO(pbyPacketData, uLenPacket);
 	uint16 uTCPPort = fileIO.ReadUInt16();
@@ -2365,7 +2562,7 @@ void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_REQ (const byte *pbyPacke
 }
 
 // Used by Kad1.0 and Kad2.0
-void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort) // netf
+void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_RES (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
 	// Verify packet is expected size
 	if (uLenPacket != 4)
@@ -2374,6 +2571,13 @@ void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_RES (const byte *pbyPacke
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
+// BEGIN netfinity: Safe KAD - Also check for this in the firewall tests
+	else if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_FIREWALLED_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Received unrequested response packet, size (%u) in %hs"), uLenPacket, __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Also check for this in the firewall tests
 	else if (!theApp.clientlist->IsKadFirewallCheckIP(ntohl(uIP))){
 		CString strError;
 		strError.Format(_T("Received unrequested firewall response packet in %hs"), __FUNCTION__);
@@ -2383,17 +2587,25 @@ void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_RES (const byte *pbyPacke
 	CSafeMemFile fileIO(pbyPacketData, uLenPacket);
 	uint32 uFirewalledIP = fileIO.ReadUInt32();
 
+// BEGIN netfinity: Safe KAD - Additional bounce protection, check that the IP is not the one of the sender
+	if (uIP == uFirewalledIP){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Additional bounce protection, check that the IP is not the one of the sender
+
 	//Update con state only if something changes.
 	if( CKademlia::GetPrefs()->GetIPAddress() != uFirewalledIP )
 	{
-		CKademlia::GetPrefs()->SetIPAddress(uFirewalledIP); 
+		CKademlia::GetPrefs()->SetIPAddress(uFirewalledIP);
 		theApp.emuledlg->ShowConnectionState();
 	}
 	CKademlia::GetPrefs()->IncRecheckIP();
 }
 
 // Used by Kad1.0 and Kad2.0
-void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_ACK_RES (uint32 uLenPacket)
+void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_ACK_RES (uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
 	// Verify packet is expected size
 	if (uLenPacket != 0)
@@ -2402,6 +2614,13 @@ void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_ACK_RES (uint32 uLenPacke
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
+// BEGIN netfinity: Safe KAD - Also check for this in the firewall tests
+	else if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_FIREWALLED_REQ)){
+		CString strError;
+		strError.Format(_T("***NOTE: Received unrequested response packet, size (%u) in %hs"), uLenPacket, __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Also check for this in the firewall tests
 
 	CKademlia::GetPrefs()->IncFirewalled();
 }
@@ -2416,6 +2635,13 @@ void CKademliaUDPListener::Process_KADEMLIA_FINDBUDDY_REQ (const byte *pbyPacket
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA_FINDBUDDY_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	if( CKademlia::GetPrefs()->GetFirewalled() )
 		//We are firewalled but somehow we still got this packet.. Don't send a response..
@@ -2458,7 +2684,7 @@ void CKademliaUDPListener::Process_KADEMLIA_FINDBUDDY_RES (const byte *pbyPacket
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
-	else if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_FINDBUDDY_REQ)){ // netf
+	else if (!IsOnTrackList(uIP, uUDPPort, KADEMLIA_FINDBUDDY_REQ)){
 		CString strError;
 		strError.Format(_T("***NOTE: Received unrequested response packet, size (%u) in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
@@ -2485,7 +2711,7 @@ void CKademliaUDPListener::Process_KADEMLIA_FINDBUDDY_RES (const byte *pbyPacket
 }
 
 // Used by Kad1.0 and Kad2.0
-void CKademliaUDPListener::Process_KADEMLIA_CALLBACK_REQ (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort) // netf
+void CKademliaUDPListener::Process_KADEMLIA_CALLBACK_REQ (const byte *pbyPacketData, uint32 uLenPacket, uint32 uIP, uint16 uUDPPort)
 {
 	// Verify packet is expected size
 	if (uLenPacket < 34)
@@ -2494,15 +2720,22 @@ void CKademliaUDPListener::Process_KADEMLIA_CALLBACK_REQ (const byte *pbyPacketD
 		strError.Format(_T("***NOTE: Received wrong size (%u) packet in %hs"), uLenPacket, __FUNCTION__);
 		throw strError;
 	}
+// BEGIN netfinity: Safe KAD - Message bounce protection
+	else if (IsOnTrackList(uIP, uUDPPort, KADEMLIA_CALLBACK_REQ, NULL, true)){
+		CString strError;
+		strError.Format(_T("***NOTE: Possible message bounce detected in %hs! Ignoring packet."), __FUNCTION__);
+		throw strError;
+	}
+// END netfinity: Safe KAD - Message bounce protection
 
 	CUpDownClient* pBuddy = theApp.clientlist->GetBuddy();
-	if( pBuddy != NULL )
+	if (pBuddy != NULL)
 	{
 		CSafeMemFile fileIO(pbyPacketData, uLenPacket);
 		CUInt128 uCheck;
 		fileIO.ReadUInt128(&uCheck);
-		//		JOHNTODO: Begin filtering bad buddy ID's..
-		//		CUInt128 bud(buddy->GetBuddyID());
+		//JOHNTODO: Begin filtering bad buddy ID's..
+		//CUInt128 bud(buddy->GetBuddyID());
 		CUInt128 uFile;
 		fileIO.ReadUInt128(&uFile);
 		uint16 uTCP = fileIO.ReadUInt16();
@@ -2515,12 +2748,12 @@ void CKademliaUDPListener::Process_KADEMLIA_CALLBACK_REQ (const byte *pbyPacketD
 		fileIO2.WriteUInt32(uIP);
 		fileIO2.WriteUInt16(uTCP);
 		Packet* pPacket = new Packet(&fileIO2, OP_EMULEPROT, OP_CALLBACK);
-			if (thePrefs.GetDebugClientKadUDPLevel() > 0 || thePrefs.GetDebugClientTCPLevel() > 0)
-				DebugSend("OP_CALLBACK", pBuddy);
-			theStats.AddUpDataOverheadFileRequest(pPacket->size);
-			pBuddy->socket->SendPacket(pPacket);
-		}
+		if (thePrefs.GetDebugClientKadUDPLevel() > 0 || thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP_CALLBACK", pBuddy);
+		theStats.AddUpDataOverheadFileRequest(pPacket->size);
+		pBuddy->socket->SendPacket(pPacket);
 	}
+}
 
 void CKademliaUDPListener::Process_KADEMLIA2_PING (uint32 uIP, uint16 uUDPPort){
 	SendNullPacket(KADEMLIA2_PONG, uIP, uUDPPort); 
@@ -2536,7 +2769,7 @@ void CKademliaUDPListener::SendPacket(const byte *pbyData, uint32 uLenData, uint
 		ASSERT(0);
 		return;
 	}
-	AddTrackedPacket(uDestinationHost, uDestinationPort, pbyData[1]); // netf
+	AddTrackedPacket(uDestinationHost, uDestinationPort, pbyData[1]);
 	Packet* pPacket = new Packet(OP_KADEMLIAHEADER);
 	pPacket->opcode = pbyData[1];
 	pPacket->pBuffer = new char[uLenData+8];
@@ -2550,7 +2783,7 @@ void CKademliaUDPListener::SendPacket(const byte *pbyData, uint32 uLenData, uint
 
 void CKademliaUDPListener::SendPacket(const byte *pbyData, uint32 uLenData, byte byOpcode, uint32 uDestinationHost, uint16 uDestinationPort)
 {
-	AddTrackedPacket(uDestinationHost, uDestinationPort, byOpcode); // netf
+	AddTrackedPacket(uDestinationHost, uDestinationPort, byOpcode);
 	Packet* pPacket = new Packet(OP_KADEMLIAHEADER);
 	pPacket->opcode = byOpcode;
 	pPacket->pBuffer = new char[uLenData];
@@ -2623,7 +2856,7 @@ void CKademliaUDPListener::SendPacket(CSafeMemFile *pbyData, byte byOpcode, CCon
 	if( pPacket->size > 200 )
 		pPacket->PackPacket();
 	theStats.AddUpDataOverheadKad(pPacket->size);
-	theApp.clientudp->SendPacket(pPacket, ntohl(uDestinationHost), uDestinationPort, false, NULL, true, 0);
+	theApp.clientudp->SendPacket(pPacket, ntohl(uDestinationHost), uDestinationPort, false, NULL, true ,0);
 }
 
 void CKademliaUDPListener::AddTrackedPacket(uint32 dwIP, uint16 uPort, uint8 byOpcode, CUInt128 uID){
@@ -2639,7 +2872,7 @@ void CKademliaUDPListener::AddTrackedPacket(uint32 dwIP, uint16 uPort, uint8 byO
 
 bool CKademliaUDPListener::IsOnTrackList(uint32 dwIP, uint16 uPort, uint8 byOpcode, CUInt128* uID, bool bDontRemove){
 	for (POSITION pos = listTrackedRequests.GetHeadPosition(); pos != NULL; listTrackedRequests.GetNext(pos)){
-		if (listTrackedRequests.GetAt(pos).dwIP == dwIP && listTrackedRequests.GetAt(pos).uPort == uPort && listTrackedRequests.GetAt(pos).byOpcode == byOpcode && ::GetTickCount() - listTrackedRequests.GetAt(pos).dwInserted < SEC2MS(180)){ // netf
+		if (listTrackedRequests.GetAt(pos).dwIP == dwIP && listTrackedRequests.GetAt(pos).uPort == uPort && listTrackedRequests.GetAt(pos).byOpcode == byOpcode && ::GetTickCount() - listTrackedRequests.GetAt(pos).dwInserted < SEC2MS(180)){
 			if (uID != NULL)
 				*uID = listTrackedRequests.GetAt(pos).uID;
 			if (!bDontRemove)
@@ -2649,3 +2882,4 @@ bool CKademliaUDPListener::IsOnTrackList(uint32 dwIP, uint16 uPort, uint8 byOpco
 	}
 	return false;
 }
+// END netfinity: Safe KAD - Track on port number too and keep ID for future reference

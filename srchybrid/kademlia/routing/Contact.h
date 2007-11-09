@@ -42,6 +42,7 @@ namespace Kademlia
 	{
 			friend class CRoutingZone;
 			friend class CRoutingBin;
+			friend class CSafeKad; // netfinity: Track contact IP usage
 		public:
 			~CContact();
 			CContact();
@@ -72,6 +73,8 @@ namespace Kademlia
 			bool InUse();
 			void IncUse();
 			void DecUse();
+			void SetCandidate(bool bCandidate) {m_bCandidate = bCandidate;} // netfinity: Safe KAD - Does this node need to prove worthiness
+			bool GetCandidate() const {return m_bCandidate;} // netfinity: Safe KAD - Does this node need to prove worthiness
 			uint8 GetVersion() const;
 			void SetVersion(uint8 uVersion);
 			time_t GetCreatedTime() const;
@@ -92,6 +95,8 @@ namespace Kademlia
 			byte m_byType;
 			uint8 m_uVersion;
 			bool m_bGuiRefs;
+			bool m_bSafeKadRefs; // netfinity: Safe KAD - Is this contacts IP tracked
+			bool m_bCandidate; // netfinity: Safe KAD - This node need to prove worthiness
 			bool m_bCheckKad2;
 	};
 }

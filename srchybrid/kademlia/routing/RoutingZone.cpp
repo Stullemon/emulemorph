@@ -63,6 +63,8 @@ there client on the eMule forum..
 #include "../../Log.h"
 #include "../../ipfilter.h"
 
+#include "NetF/SafeKad.h" // netfinity: Enable tracking of bad nodes
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -221,6 +223,11 @@ void CRoutingZone::ReadFile()
 								// This was not a dead contact, Inc counter if add was successful
 								if (AddUnfiltered(uID, uIP, uUDPPort, uTCPPort, uContactVersion, false))
 									uValidContacts++;
+// BEGIN netfinity: Safe KAD - Loaded nodes are expected to be useful
+								CContact* pStoredContact = GetContact(uID);
+								if (pStoredContact != NULL)
+									pStoredContact->SetCandidate(false); // We already know this contact is useful
+// END netfinity: Safe KAD - Loaded nodes are expected to be useful
 							}
 						}
 					}
@@ -326,7 +333,7 @@ bool CRoutingZone::Add(CContact* pContact, bool bUpdate, bool bAdd) // netfinity
 {
 	// If we are not a leaf, call add on the correct branch.
 	if (!IsLeaf())
-		return m_pSubZones[pContact->GetDistance().GetBitNumber(m_uLevel)]->Add(pContact, bUpdate);
+		return m_pSubZones[pContact->GetDistance().GetBitNumber(m_uLevel)]->Add(pContact, bUpdate, bAdd); // netf
 	else
 	{
 		// Do we already have a contact with this KadID?
@@ -340,8 +347,18 @@ bool CRoutingZone::Add(CContact* pContact, bool bUpdate, bool bAdd) // netfinity
 				pContactUpdate->SetTCPPort(pContact->GetTCPPort());
 				pContactUpdate->SetVersion(pContact->GetVersion());
 				m_pBin->SetAlive(pContactUpdate);
+// BEGIN netfinity: Safe KAD - Check node usefulness
+				if (pContactUpdate->GetCandidate() == true)
+					CSearchManager::FindNode(pContactUpdate->GetClientID(), false);
+// END netfinity: Safe KAD - Check node usefulness
 				theApp.emuledlg->kademliawnd->ContactRef(pContactUpdate);
 			}
+// BEGIN netfinity: Safe KAD - Update version if not known even thought update is not allowed
+			else if (pContactUpdate->GetVersion() == 0)
+			{
+				pContactUpdate->SetVersion(pContact->GetVersion());	
+			}
+// END netfinity: Safe KAD - Update version if not known even thought update is not allowed
 			return false;
 		}
 		else if (m_pBin->GetRemaining() && bAdd) // netfinity: Safe KAD - Don't add if it was an update only call
@@ -445,7 +462,7 @@ void CRoutingZone::Split()
 	for (ContactList::const_iterator itContactList = listEntries.begin(); itContactList != listEntries.end(); ++itContactList)
 	{
 		int iSuperZone = (*itContactList)->m_uDistance.GetBitNumber(m_uLevel);
-		m_pSubZones[iSuperZone]->m_pBin->AddContact(*itContactList);
+		m_pSubZones[iSuperZone]->m_pBin->AddContact(*itContactList, false); // netfinity: Safe KAD - Split operations will be unreliable if the add operation fails
 	}
 	m_pBin->m_bDontDeleteContacts = true;
 	delete m_pBin;
@@ -474,9 +491,9 @@ uint32 CRoutingZone::Consolidate()
 			m_pSubZones[0]->m_pBin->GetEntries(&list0);
 			m_pSubZones[1]->m_pBin->GetEntries(&list1);
 			for (ContactList::const_iterator itContactList = list0.begin(); itContactList != list0.end(); ++itContactList)
-				m_pBin->AddContact(*itContactList);
+				m_pBin->AddContact(*itContactList, false); // netfinity: Safe KAD - Consolidate operations will be unreliable if the add operation fails
 			for (ContactList::const_iterator itContactList = list1.begin(); itContactList != list1.end(); ++itContactList)
-				m_pBin->AddContact(*itContactList);
+				m_pBin->AddContact(*itContactList, false); // netfinity: Safe KAD - Consolidate operations will be unreliable if the add operation fails
 		}
 		m_pSubZones[0]->m_pSuperZone = NULL;
 		m_pSubZones[1]->m_pSuperZone = NULL;
@@ -559,9 +576,20 @@ void CRoutingZone::OnSmallTimer()
 	ContactList listEntries;
 	// Remove dead entries
 	m_pBin->GetEntries(&listEntries);
-	for (ContactList::iterator itContactList = listEntries.begin(); itContactList != listEntries.end(); ++itContactList)
+	for (ContactList::iterator itContactList = listEntries.begin(); itContactList != listEntries.end();)
 	{
-		pContact = *itContactList;
+		pContact = *(itContactList++); // netfinity: Deleting a list entry at the iterator position invalidates the iterator, therefore we increment it
+		// BEGIN netfinity: Safe KAD - Remove bad nodes
+		// Check against node track list
+		if (safeKad.IsBadNode(pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetClientID()) && !pContact->InUse())
+	{
+			if (::thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("Removing contact(IP=%s) - Identified as bad node") , ipstr(ntohl(pContact->GetIPAddress())));
+			m_pBin->RemoveContact(pContact);
+			delete pContact;
+			continue;
+		}
+		// END netfinity: Safe KAD - Remove bad nodes
 		if ( pContact->GetType() == 4)
 		{
 			if (((pContact->m_tExpires > 0) && (pContact->m_tExpires <= tNow)))
