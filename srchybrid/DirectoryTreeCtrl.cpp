@@ -911,7 +911,7 @@ void CDirectoryTreeCtrl::OnTvnDeleteItem(NMHDR *pNMHDR, LRESULT *pResult)
 static CStringList NetworkDrives;
 static CCriticalSection NetworkDrivesLock;
 
-LRESULT CDirectoryTreeCtrl::OnFoundNetworkDrive(WPARAM wParam,LPARAM lParam){
+LRESULT CDirectoryTreeCtrl::OnFoundNetworkDrive(WPARAM /* wParam*/,LPARAM /*lParam*/){
 	NetworkDrivesLock.Lock();
 	while (!NetworkDrives.IsEmpty())
 		AddChildItem(NULL, NetworkDrives.RemoveHead());

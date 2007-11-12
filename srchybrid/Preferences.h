@@ -927,6 +927,9 @@ public:
 	static bool m_bStaticIcon; //MORPH - Added, Static Tray Icon
 
 	static int m_iServiceStartupMode; // MORPH leuk_he:run as ntservice v1..
+	// ==> [MoNKi: -USS initial TTL-] - Stulle
+	static uint8	m_iUSSinitialTTL;
+	// <== [MoNKi: -USS initial TTL-] - Stulle
 
 	enum Table
 	{
@@ -2081,6 +2084,11 @@ public:
 	//MORPH END   - Added by Stulle, Global Source Limit
 
 	static bool		GetStaticIcon()				{return m_bStaticIcon;} //MORPH - Added, Static Tray Icon
+	// ==> [MoNKi: -USS initial TTL-] - Stulle
+	static void		SetUSSInitialTTL(uint8 i)		{ m_iUSSinitialTTL = i; }
+	static uint8	GetUSSInitialTTL()				{ return m_iUSSinitialTTL; }
+	// <== [MoNKi: -USS initial TTL-] - Stulle
+
 };
 
 extern CPreferences thePrefs;

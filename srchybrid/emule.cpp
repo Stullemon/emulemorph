@@ -74,6 +74,7 @@
 #ifdef USE_OFFICIAL_UPNP
 #include "UPnPFinder.h"
 #endif
+#include "ed2kLink.h" // morph - CATEGORY SELECTION CLIPNOARD
 #include "fakecheck.h" //MORPH - Added by SiRoB
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
 #include "Ini2.h"
@@ -994,6 +995,7 @@ bool CemuleApp::CopyTextToClipboard(CString strText)
 		if (EmptyClipboard())
 		{
 			if (hGlobalT){
+				IgnoreClipboardLinks(strText); // MORPH moved clipboard chain
 				if (SetClipboardData(CF_UNICODETEXT, hGlobalT) != NULL){
 					iCopied++;
 				}
@@ -1003,6 +1005,7 @@ bool CemuleApp::CopyTextToClipboard(CString strText)
 				}
 			}
 			if (hGlobalA){
+				IgnoreClipboardLinks(strText); // MORPH moved clipboard chain
 				if (SetClipboardData(CF_TEXT, hGlobalA) != NULL){
 					iCopied++;
 				}
@@ -1026,8 +1029,10 @@ bool CemuleApp::CopyTextToClipboard(CString strText)
 			hGlobalA = NULL;
 		}
 	}
+	/* MORPH start moved to before setclipboarddata 
 	else
-		IgnoreClipboardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
+        IgnoreClipboardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
+	 MORPH end  moved to before setclipboarddata  */
 
 	return (iCopied != 0);
 }
@@ -1787,7 +1792,7 @@ CTempIconLoader::~CTempIconLoader()
 		VERIFY( DestroyIcon(m_hIcon) );
 }
 
-void CemuleApp::AddEd2kLinksToDownload(CString strLinks, int cat)
+void CemuleApp::AddEd2kLinksToDownload(CString strLinks, int cat,bool fromclipboard)
 {
 	int curPos = 0;
 	CString strTok = strLinks.Tokenize(_T(" \t\r\n"), curPos); // tokenize by whitespaces
@@ -1808,7 +1813,7 @@ void CemuleApp::AddEd2kLinksToDownload(CString strLinks, int cat)
 					*/
 					// pFileLink IS NOT A LEAK, DO NOT DELETE.
 					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(strTok.Trim());
-					downloadqueue->AddFileLinkToDownload(pFileLink, cat, true);
+					downloadqueue->AddFileLinkToDownload(pFileLink, cat, true,fromclipboard);
 					//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 				}
 				else
@@ -1857,14 +1862,13 @@ void CemuleApp::SearchClipboard()
 			strLinksDisplay = strLinks.Left(512) + _T("...");
 		else
 			strLinksDisplay = strLinks;
+		//MORPH START - Changed by Sirob,leuk_he, force Selection category support khaos::categorymod+
+		/*
 		if (AfxMessageBox(GetResString(IDS_ADDDOWNLOADSFROMCB) + _T("\r\n") + strLinksDisplay, MB_YESNO | MB_TOPMOST) == IDYES)
-			//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
-			/*
 			AddEd2kLinksToDownload(pszTrimmedLinks, 0);
 			*/
-			AddEd2kLinksToDownload(pszTrimmedLinks, -1);
-			/**/
-			//MORPH END  - Changed by SiRoB, Selection category support khaos::categorymod+
+		  AddEd2kLinksToDownload(strLinks, -1, true);
+		//MORPH END  - Changed by leuk_he, Selection category support khaos::categorymod+
 	}
 	m_strLastClipboardContents = strLinks; // Save the unmodified(!) clipboard contents
 	m_bGuardClipboardPrompt = false;

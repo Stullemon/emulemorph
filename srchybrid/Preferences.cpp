@@ -758,6 +758,10 @@ int CPreferences::m_iServiceStartupMode; // MORPH leuk_he:run as ntservice v1..
 
 bool CPreferences::m_bStaticIcon; //MORPH - Added, Static Tray Icon
 
+// ==> [MoNKi: -USS initial TTL-] - Stulle
+uint8	CPreferences::m_iUSSinitialTTL;
+// <== [MoNKi: -USS initial TTL-] - Stulle
+
 CPreferences::CPreferences()
 {
 #ifdef _DEBUG
@@ -1134,7 +1138,7 @@ uint8 CPreferences::IsZZRatioDoesWork(){
 //MORPH - Added by SiRoB, ZZ ratio
 
 UINT CPreferences::GetMaxDownload(){	 //MORPH  uint16 is not enough
-    return (GetMaxDownloadInBytesPerSec()/1024); //MORPH  uint16 is not enough
+    return ((UINT)GetMaxDownloadInBytesPerSec()/1024); //MORPH  uint16 is not enough
 }
 
 uint64 CPreferences::GetMaxDownloadInBytesPerSec(bool dynamic){
@@ -2659,6 +2663,10 @@ void CPreferences::SavePreferences()
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	ini.WriteInt(_T("ServiceStartupMode"),m_iServiceStartupMode); // MORPH leuk_he:run as ntservice v1..
 	ini.WriteBool(_T("StaticIcon"),m_bStaticIcon); //MORPH - Added, Static Tray Icon
+// ==> [MoNKi: -USS initial TTL-] - Stulle
+	ini.WriteInt(_T("USSInitialTTL"), m_iUSSinitialTTL, _T("StulleMule"));
+	// <== [MoNKi: -USS initial TTL-] - Stulle
+
 }
 
 void CPreferences::ResetStatsColor(int index)
@@ -3222,7 +3230,7 @@ void CPreferences::LoadPreferences()
 		ff.Close();
 	}
 
-	messageFilter=ini.GetStringLong(L"MessageFilter",L"Your client has an infinite queue|Your client is connecting too fast|fastest download speed|DI-Emule|eMule FX|ZamBoR 2|HyperMmu|Ultra"); // leuk_he: add some known spammers
+	messageFilter=ini.GetStringLong(L"MessageFilter",L"Your client has an infinite queue|Your client is connecting too fast|fastest download speed|DI-Emule|eMule FX|ZamBoR 2|HyperMu|Ultra"); // leuk_he: add some known spammers
 	/* MORPH START modified commentfilter
 	commentFilter = ini.GetStringLong(L"CommentFilter",L"http://|https://|ftp://|www.|ftp.");
 	*/
@@ -3746,6 +3754,10 @@ void CPreferences::LoadPreferences()
    	m_bUseCompression=ini.GetBool(L"UseCompression",true);//Xman disable compression
 	GetServiceStartupMode(); //inistialize m_iServiceStartupMode  MORPH run as a service v1 
 	m_bStaticIcon=ini.GetBool(L"StaticIcon",false); //MORPH - Added, Static Tray Icon
+
+	// ==> [MoNKi: -USS initial TTL-] - Stulle
+	m_iUSSinitialTTL = (uint8)ini.GetInt(_T("USSInitialTTL"), 1,_T("StulleMule"));
+	// <== [MoNKi: -USS initial TTL-] - Stulle
 
    LoadCats();
 	SetLanguage();

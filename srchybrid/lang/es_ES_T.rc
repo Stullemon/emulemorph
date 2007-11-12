@@ -1377,8 +1377,8 @@ BEGIN
     IDS_ERR_FAILEDDOWNLOADLANG "¡Error al descargar e instalar el idioma seleccionado (archivo dll) desde %s!"
     IDS_ERR_BADFOLDER       "Carpeta no válida.\nNo puede crearse la carpeta. Comprobar Nombre y Localización"
     IDS_AUTOREMOVEFD        "Limpiar automáticamente descargas completas"
-    IDS_MM_BLOCK            "3 intentos erróneos de conexión a MobileMule - ¡cualquier intento posterior será bloqueado durante 10 min.!"
-    IDS_MM_NEWUSER          "Nuevo usuario conectado con éxito al Servidor-MobileMule"
+    IDS_MM_BLOCK            "3 intentos erróneos de conexión a eMuleMóvil - ¡cualquier intento posterior será bloqueado durante 10 min.!"
+    IDS_MM_NEWUSER          "Nuevo usuario conectado con éxito al Servidor-eMuleMóvil"
 END
 
 STRINGTABLE 
@@ -2695,7 +2695,7 @@ BEGIN
     IDC_MSGONLYSEC_SEC      "Sólo serán aceptados los mensajes de clientes con una identificación segura"
     IDC_ADVSPAMFILTER_TIP   "Mensajes duplicados o mensajes a los que no contestas tras unos pocos mensajes serán considerados como spam y se baneará al cliente"
     IDS_LOG_SERVER_FILTERED "Servidor eliminado en %s de la lista '%s': en ipfilter '%s'"
-    IDC_ENABLEPROXY_TIP     "Utiliza esta opción si la única manera que tienes de conectarte a Internet es mediante un proxy. Esto siempre causará ID Baja (no óptimo).\n<b>ADVERTENCIA</b>\nSólo introduzca un proxy si está completamente seguro de tener uno\ny de que puede proveer la información correcta.\nLos proxies apenas se usan en PCs para el hogar\ny no ofrecen ninguna ventaja fuera de la LAN.\nRouters y modems no son proxies. No confundir ésta opción con la del WebCaché que se encuentra en otro apartado posterior"
+    IDC_ENABLEPROXY_TIP     "Utiliza esta opción si la única manera que tienes de conectarte a Internet es mediante un proxy. Esto siempre causará ID Baja (no óptimo).\n<b>ADVERTENCIA</b>\nSólo introduzca un proxy si está completamente seguro de tener uno\ny de que puede proveer la información correcta.\nLos proxies apenas se usan en PCs para el hogar\ny no ofrecen ninguna ventaja fuera de la LAN.\nRouters y modems no son proxies."
     IDC_PROXYTYPE_TIP       "Ponga el protocolo del proxy.\nLa precedencia de la velocidad del protocolo proxy es como sigue:\n1. SOCKS 4a (mayor velocidad por menor encabezado)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (peor velocidad por gran encabezado)"
     IDC_PROXYNAME_TIP       "Nombre del Host o dirección IP del proxy"
     IDC_PROXYPORT_TIP       "Puerto por el que se comunica el proxy.\nSuele ser el 1080 para socks y 80 o 8080 para http"
@@ -2726,9 +2726,9 @@ STRINGTABLE
 BEGIN
     IDS_DM_TIP              "Configuraciones extras relacionadas con la Descarga:\nCategorías, ventana de descarga, SelecciónInteligenteDeTrozos (ICS)"
     IDS_SCC_TIP             "Cómo manejar las categorías en la ventana de transferencias"
-    IDS_SAC_TIP             "Dirección de las fuentes que tienen archivos múltiples (<b>A</b>sked <b>4</b> for <b>A</b>nother <b>F</b>ile)\n&Pequeño control af4f.\nLa traducción literal es preguntar por otro archivo"
+    IDS_SAC_TIP             "Dirección de las fuentes que tienen archivos múltiples (<b>A</b>sked <b>4</b> for <b>A</b>nother <b>F</b>ile)\nLa traducción literal es preguntar por otro archivo"
     IDS_DEFAULT_TIP         "IDS_DEFAULT_TIP"
-    IDS_UM_TIP              "Direccion de la subida:\ncontrol de slot, deteccion de la\nanchura de banda de subida"
+    IDS_UM_TIP              "Dirección de la subida:\ncontrol de slot, deteccion de la\nanchura de banda de subida"
     IDS_DYNUPLOAD_TIP       "Variar la velocidad de subida de forma automatica\ndetectando la anchura de banda disponible"
     IDS_SECURITY_TIP        "Opciones de seguridad: Anti-Leecher & Anti-Hackeo de créditos"
     IDS_PW_DISPLAY_TIP      "Como mostrar algunos articulos\nen la ventana de descarga"
@@ -2859,14 +2859,14 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDC_PORT_TIP            "Numero de puerto para el acceso del TCP que utiliza el eMule.\nEste puede ser cualquier número comprendido entre 1 y 65535 por lo que otra\naplicacion no puede usar este puerto. Puedes conectar con más clientes si el puerto\nes accesible desde Internet, indicado por una flecha de hacia arriba verde\nen la barra de estado (si esta redireccionado correctamente en el router y abierto en\ntu firewall). Con el puerto 80 o 8080 (HTTP) puedes conseguir una ayuda\ndel Webcaché (Para más información entra www.webcache.com.es), el puerto 1755\nes un puerto recomendado para la gente que sufre priorizacion de paquetes,\npero cualquier número te servirá"
-    IDC_UDPPORT_TIP         "Numero de puerto para el acceso del UDP que utiliza el eMule.\nEste puede ser cualquier número comprendido entre 1 y 65535 por lo que otra\naplicacion no puede usar este puerto. Puede ser incluso el mismo que el TCP, ya que\neste utiliza diferente protocolo. Redireccionar el puerto del router y firewall\npara un funcionamiento óptimo"
+    IDC_PORT_TIP            "Numero de puerto para el acceso del TCP que utiliza el eMule.\nEste puede ser cualquier número comprendido entre 1 y 65535 por lo que otra\naplicacion no puede usar este puerto. Puedes conectar con más clientes si el puerto\nes accesible desde Internet, indicado por una flecha de hacia arriba verde\nen la barra de estado (si esta redireccionado correctamente en el router y abierto en\ntu firewall).\nEl puerto 1755 es un puerto recomendado para la gente que sufre priorizacion de paquetes,\npero cualquier número te servirá. (Para más información entra http://spanishmorphxt.activofoto.com)"
+    IDC_UDPPORT_TIP         "Numero de puerto para el acceso del UDP que utiliza el eMule.\nEste puede ser cualquier número comprendido entre 1 y 65535 por lo que otra\naplicacion no puede usar este puerto. Puede ser incluso el mismo que el TCP, ya que\neste utiliza diferente protocolo. Redireccionar el puerto del router y firewall\npara un funcionamiento óptimo. (Para más información entra http://spanishmorphxt.activofoto.com)"
     IDC_MAXSOURCEPERFILE_TIP "El máximo número de fuentes que el eMule cogerá para un archivo.\nObservar que el MorphXT también tiene la opción en los ajustes del MorphXT, de activar\nun límite global que defina un límite máximo para todas las fuentes de los archivos\nen lugar de ajustar el máximo por archivo"
     IDC_MAXCON_TIP          "Numero máximo de conexiones simultáneas TCP/IP que el eMule puede hacer.\nReduce este número si tienes problemas en la red, aumenta este número para\nencontrar fuentes más rápidamente, (Mirar también la opción conexiones/5 segundos\npara las fuentes en estado 'demasiadas conexiones'"
     IDC_NETWORK_KADEMLIA_TIP  "Permitir la red KAD. Esta red encuentra mejor las fuentes para archivos pequeños\ny no es dependiente del servidor, puesto que cada uno de los clientes eMule, será\nun pequeño servidor. Esta red usa el protocolo UDP"
     IDC_NETWORK_ED2K_TIP    "Permitir la red eD2K. Muchos de los servidores centralizados mantienen los datos\nde los archivos donde pueden ser localizados en la red. Asegurate de conectarte\na un buen servidor (Este te devolverá los resultados apropiados de la busqueda).\nEste protocolo es compatible con los clientes que la red KAD, pero depende de la\ncalidad de los servidores"
     IDS_QL_USERNAME_TIP     "El nombre de usuario que se exhibe a otros usuarios.\nPon tu publicidad o [el nombre de tu comunidad]\nPor ejemplo: <b>nombre_usuario [SpanishMorphXT]</b>"
-    IDS_PW_LANG_TIP         "Lenguaje del interface. El eMule descargara una libreria (dll) y lo pondrá en el directorio 'lang' si\nhas selecionado un idioma que no este instalado todavia. Las librerias para las extensiones\ndel MorphXT no se descargan y se deben poner manualmente en el directorio 'lang' o\ninstalar alli por el instalador del MorphXT"
+    IDS_PW_LANG_TIP         "Lenguaje de la interfaz gráfica. El eMule descargara una libreria (dll) y lo pondrá en el directorio 'lang' si\nhas selecionado un idioma que todavía no este instalado. Las librerias para las extensiones\ndel MorphXT no se descargan y se deben poner manualmente en el directorio 'lang' o\ninstalar alli por el instalador del MorphXT.\n\nCreado por <b>guijarrelson™</b>: http://spanishmorphxt.activoforo.com"
     IDS_PW_BEEP_TIP         "Señal sonora al producirse un error"
     IDS_PW_PROMPT_TIP       "Preguntar ¿Quieres realmente cerrar el eMule? cuando intentes cerrar el eMule"
     IDS_PW_SPLASH_TIP       "Mostrar la ventana de inicio al comenzar el eMule"
@@ -2875,13 +2875,13 @@ END
 STRINGTABLE 
 BEGIN
     IDS_PW_FRONT_TIP        "Poner el eMule en segundo o en primer plano\nsi añades un link desde tu explorador"
-    IDS_PREF_ONLINESIG_TIP  "Escribir onlinesig.dat en el directorio del eMule donde\notras aplicaciones lo pueden leer y traducir en una bandera\no una firma para un foro. (Solamente visible en opciones\nadicionales-> mostrar más controles)"
+    IDS_PREF_ONLINESIG_TIP  "Escribir onlinesig.dat en el directorio del eMule donde\notras aplicaciones lo pueden leer y traducir en una bandera\no una firma para un foro. (Solamente visible en:\nOpciones Adicionales -> Mostrar más controles)"
     IDS_PREF_STARTMIN_TIP   "Cuando el eMule se inicia, empezar con la ventana minimizada.\nSi el modo invisible está activado en el arranque estarán ocultas y tendrás que\npinchar en la llave invisible para mostrar tu eMule"
     IDS_WEBSVEDIT_TIP       "Editar el archivo webservices.dat para asociar un articulo de menu\nen el archivo con un Servicio Web en línea"
     IDS_ED2KLINKFIX_TIP     "Reasociar los link eD2K de todas las ventanas para abrirse con esta aplicación.\nSi esto falla una primera vez 'linkkiller.exe' presionar este boton otra vez.\nEsto puede fallar si el eMule funciona en modo seguro"
     IDS_CHECK4UPDATE_TIP    "Dejar que el eMule comprueba cada x dias para saber si hay nuevas\nversiones de eMule y MorphXT"
     IDS_STARTWITHWINDOWS_TIP "Iniciar eMule cuando se inicie Windows. eMule se agrega al registro de Windows en\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
-    IDS_PW_STARTUPSOUND_TIP "Tocar <i>startup.wav</i> del directorio config\nen el inicio del eMule"
+    IDS_PW_STARTUPSOUND_TIP "Reproducir el archivo <i>startup.wav</i> del directorio config\nen el inicio del eMule"
     IDC_INVISIBLE_MODE_KEY_COMBO_TIP "Teclas que hay que pulsar para activar el modo invisible"
     IDS_INVMODE_TIP         "Activar el modo invisible en el eMule. Observar que el eMule permanece visible\nen la lista de procesos del administrador de tareas y un buen administrador de redes\npuede encontrar tu eMule funcionando en tu ordenador"
 END
@@ -2908,7 +2908,7 @@ BEGIN
     IDS_FSTATUS_EVER_TIP    "Todos los archivos son publicos, si el permiso\nindividual de cada archivo esta permitido"
     IDS_FSTATUS_FRIENDSONLY_TIP "Solamente tus amigos pueden ver tu lista de archivos"
     IDS_HIDDEN_TIP          "Todos los archivos compartidos estan ocultos"
-    IDS_COMMUNITY_TIP       "Solo la gente de tu comunidad (cadena definida en MorphXT -> community) \ntienen permiso para ver tu lista archivos"
+    IDS_COMMUNITY_TIP       "Solo la gente de tu comunidad (cadena definida en MorphXT -> Comunidad) \ntienen permiso para ver tu lista archivos"
     IDS_PW_DISPLAY_TIP2     "Ajustes visuales"
     IDS_FOLDERICON_TIP      "Cambiar el icono de carpeta en el explorador por un icono del\neMule, en las carpetas de entrada y temporal.\n(Por defecto, son las carpetas de archivos entrantes (Por defecto: incoming)\ny las temporales (Por defecto: temp) de la carpeta de eMule)"
 END
@@ -2979,7 +2979,7 @@ STRINGTABLE
 BEGIN
     IDC_WSRELOADTMPL_TIP    "Recarga la plantilla"
     IDC_TMPLBROWSE_TIP      "Busca en el sistema de archivos la plantilla que contiene\nel codigo html para el Servidor Web"
-    IDC_GUIDELINK_TIP       "Abre la guia del movileMule en una ventana del navegador\nhttp://mobil.emule-project.net/"
+    IDC_GUIDELINK_TIP       "Abre la guia del eMuleMóvil en una ventana del navegador\nhttp://mobil.emule-project.net/"
     IDS_PREFER_SHARE_ALL_TIP"Conectar primero con los servidores que pueden manejar el número de archivos\nque tu puedes compartir, para que todos tengan las mismas posibilidades"
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES_TIP "Comenzar a descargar un archivo tan solo si este se ha visto completo por lo menos\nuna vez, pero por fuerza la descarga se retrasa si se piden muchas solicitudes\nde tan solo una fuente completa"
     IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP "Guarda el tiempo de espera en tu cola. Básicamente te permite que el tiempo muerto\nque tarda en formarse la cola de subida, se vea reducido al ser guardado, y aunque tu\ndesaparezcas tu puesto en la cola este reservado, por defecto esta activado"
@@ -3008,7 +3008,7 @@ BEGIN
     IDC_STATIC_FILTERLEVE_TIP "Nivel de las entradas del filtro son aplicadas.\nCada entrada del ipfilter.dat tiene un (posible) valor,\nintroduciendo el valor 0, desactiva temporalmente el filtro de IPs.\n0 Se recomienda para testear puertos abiertos, o elimina\nipfilter.dat para preservar memoria. (Por defecto: 127)\nLa lista usada para el filtro en MorphXT es de meuh4567\nlos siguientes niveles permiten\nel máximo número de fuentes para el valor 0, 254 para algo de paranoia"
     IDC_RELOADFILTE_TIP     "Carga el archivo otra vez en memoria"
     IDC_EDITFILTE_TIP       "Edita ipfilter.dat con el block de notas"
-    IDC_LOADUR_TIP          "Carga un flitro de IPs desde la dirección http mostrada aquí.\nPuesdes encontrar una lista de bloqueados en<a=""http://www.bluetack.co.uk""> http://bluetack.co.uk</a>\nMorph Update ofrece una lista completa de bloqueados también.\nzip & rar (necesario el archivo unrar.dll) es también soportado\n(Utilizar solamente uno de éstos)"
+    IDC_LOADUR_TIP          "Carga un flitro de IPs desde la dirección http mostrada aquí.\nPuesdes encontrar una lista de bloqueados en http://bluetack.co.uk\nMorph Update también ofrece una lista completa de bloqueados.\nTambién son soportados zip & rar (necesario el archivo unrar.dll)\n(Utilizar solamente uno de éstos)"
 END
 
 STRINGTABLE 
@@ -3197,7 +3197,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_NOMINIMIZE          "No, a la bandeja"
-    IDS_YESSERVICETIP       "Si el servicio de eMule está instalado en esta sesión, es detenido\ny eMule comenzará a ejecutarse como un servicio de ventanas\nen segundo plano (use RUN->SERVICE.MSC para controlarlo)"
+    IDS_YESSERVICETIP       "Si el servicio de eMule está instalado en esta sesión, es detenido\ny eMule comenzará a ejecutarse como un servicio de ventanas\nen segundo plano (use Inicio -> Ejecutar -> service.msc para controlarlo)"
     IDS_NOMINIMIZETIP       "No apagar, pero minimizar a la bandeja del sistema"
 END
 
@@ -3216,7 +3216,7 @@ BEGIN
     IDS_REMOVEFILESTOBIN_TIP "Esta opción afecta a la función Borrar del disco del menu del botón derecho\nde la ventana de Compartidos. Si está desactivada, los archivos son eliminados permanentemente\ndel disco sin moverlos a la Papelera de Reciclaje"
     IDS_ADVANCEDPREFS       "Preferencias Avanzadas (Preferences.ini)"
     IDS_ADVANCEDPREFS_TIP   "Preferencias de menor importancia para la optimización avanzada.\nTambién soportado en el eMule Oficial editando el archivo\npreferences.ini"
-    IDS_TRUSTEVERYHASH      "Confiar en cada AICH Hash (sesión actual)"
+    IDS_TRUSTEVERYHASH      "Confiar en cada Hash AICH (sesión actual)"
     IDS_INSPECTALLFILETYPES "Inspeccionar cada cabecera de los archivos para determinar el tipo de archivo"
 END
 
@@ -3415,17 +3415,17 @@ END
 
 STRINGTABLE 
 BEGIN
-  IDS_OUTOFSERVERS_O "Fallo en la conexión ofuscada con los servidores con la llave de ofuscación. Haciendo otra vuelta."
-  IDS_NO_OBFUSCATION_KEY "El Servidor no tiene una llave de ofuscación."
+  IDS_OUTOFSERVERS_O 		"Fallo en la conexión ofuscada con los servidores con la llave de ofuscación. Haciendo otra vuelta."
+  IDS_NO_OBFUSCATION_KEY 	"El Servidor no tiene una llave de ofuscación."
   IDS_URL_FOR_UPDATING_IP2COUNTRY "Archivo vía URL para actualiazar"
 END
 
 STRINGTABLE
 BEGIN
   IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP "Si un archivo está en una partición NTFS la hora del archivo es modificada en una hora\nsi el cambio horario de verano está activado. Busca en la base de datos de Microsoft: KB 129574\n(Por defecto: Activado)"
-  IDS_X_LOGERROR_TIP	 "Color de las líneas del registro en el panel de registro de los Servidores."
+  IDS_X_LOGERROR_TIP		"Color de las líneas del registro en el panel de registro de los Servidores."
   IDS_X_SHOWVERTICALHOURMARKERS_TIP "Muestra una línea vertical en la ventana de estadísticas a cada hora.\nCambia el tamaño de la ventana de estadísticas para ver el efecto. (Por defecto: Activada)"
-  IDS_X_REBARTOOLBAR_TIP  "Opción que desactiva algunas opciones de la barra de herramientas como:\nAñadir soporte de extensión del menú: Si la barra de herramientas es demasiado pequeña para mostrar todos los botones,\nuna flecha (icono '>>') se muestra en cada menú, a la derecha, que abre otro menú\ncon los botones de comandos restantes.\nLos Tooltips para los títulos de los botones suprimidos y en el modo de la barra de herramientas 'Sin Etiquetas'.\nLos botones pueden ser movidos y/oeliminados de la barra de herramientas manteniendo pulsadas las teclas\nCtrl+Alt mientras se eliminan los botones con el ratón.\nEl tamaño de los botones es similar a Windows Explorer.\n(Por defecto: Activado)"
+  IDS_X_REBARTOOLBAR_TIP  	"Opción que desactiva algunas opciones de la barra de herramientas como:\nAñadir soporte de extensión del menú: Si la barra de herramientas es demasiado pequeña para mostrar todos los botones,\nuna flecha (icono '>>') se muestra en cada menú, a la derecha, que abre otro menú\ncon los botones de comandos restantes.\nLos Tooltips para los títulos de los botones suprimidos y en el modo de la barra de herramientas 'Sin Etiquetas'.\nLos botones pueden ser movidos y/oeliminados de la barra de herramientas manteniendo pulsadas las teclas\nCtrl+Alt mientras se eliminan los botones con el ratón.\nEl tamaño de los botones es similar a Windows Explorer.\n(Por defecto: Activado)"
   IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "El icono de la bandeja del sistema emite un flash cuando se recibe un mensaje nuevo. (Por defecto: Activado)"
   IDS_X_SHOWCOPYED2KLINK_TIP "En la ventana de archivos Compartidos, muestra la opción de ""Copiar enlace al portapapeles""\nen el menú contextual en la zona de los 'eD2K links....'. (Por defecto: Desactivado)"
   IDS_X_DONTCOMPRESSAVI_TIP  "Normalmente todos los archivos de datos están comprimidos antes de transferirlos,\nexcepto los rar, zip y otro tipo de formatos de archivos.\nEsta opción deshabilita la compresión de los archivos avi como los archivos rar.\nPara velocidades altas de subida, esta opción aumenta las prestaciones,\npero para algunos archivos avi posiblemente se pierda algún poco de compresión.\n(Por defecto: Desactivado). Observa que MorphXT tiene una opción para\ndesactivar/disminuir la compresión para todos los archivos"
@@ -3444,6 +3444,15 @@ BEGIN
   IDS_UPNFORCEUPDATE 		"Forzar actualizaciones periódicas"
   IDS_UPNFORCEUPDATE_TIP 	"En vez de comprobar en el dispositivo de la puerta de enlace de Internet\nsi una regla de redirección de puertos existe, simplemente añade\nun mapeo cada 10 minutos (Por defecto: Desactivado)"
 END
+
+STRINGTABLE
+BEGIN
+    IDS_DONOTWATCHCLIP 		"Parar de monitorizar el portapapeles"
+    IDS_DONOTWATCHCLIP_TIP 	"Uno o más elinks son copiados del portapapeles.\nActiva esta opción para que eMule deje de monitorizar el portapapeles.\nPulsa Cancelar para no pegar el elink.\nIntroduce o selecciona una categoría y pulsa OK para añadir los elinks"
+    IDS_USS_INITIAL_TTL     "TTL Inicial" // [MoNKi: -USS initial TTL-] - Stulle
+    IDS_USS_INITIAL_TTL_TIP      "En busca del último router en común, ignora los primeros n routers\nEsto puede ser muy útil si el proveedor bloquea pings a los routers de Internet.\nHaz un test con el comando 'tracert'. Por defecto: 0\nSi configuras el TTL por encima de 8, tienes una topología de red muy atípica. Máximo = 20\nNo es recomendable configurarlo a 20. Configurándolo con un valor demasiado\nalto, puede causar los siguientes mensajes en el registro del MorphXT: 'Network topology has changed.' (La topología de red ha cambiado)\nperdiendo la efectividad del USS"
+END
+
 #endif    // Spanish (Castilian) resources
 /////////////////////////////////////////////////////////////////////////////
 

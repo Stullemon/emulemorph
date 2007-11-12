@@ -149,7 +149,7 @@ public:
 	virtual BOOL IsIdleMessage(MSG *pMsg);
 
 	// ed2k link functions
-	void		AddEd2kLinksToDownload(CString strLinks, int cat);
+	void		AddEd2kLinksToDownload(CString strLinks, int cat, bool fromclipboard=false);
 	void		SearchClipboard();
 	void		IgnoreClipboardLinks(CString strLinks) {m_strLastClipboardContents = strLinks;}
 	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+

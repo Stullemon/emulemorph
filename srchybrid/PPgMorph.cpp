@@ -70,6 +70,9 @@ CPPgMorph::CPPgMorph()
     m_htiUSSGoingDownDivider = NULL;
     m_htiUSSNumberOfPings = NULL;
 	m_htiPingDataSize = NULL; //MORPH leuk_he ICMP ping datasize <> 0 setting
+	// ==> [MoNKi: -USS initial TTL-] - Stulle
+	m_htiUSSTTL = NULL;
+	// <== [MoNKi: -USS initial TTL-] - Stulle
 	m_htiMinUpload = NULL;
 	m_htiUpSecu = NULL;
 	m_htiDlSecu = NULL;
@@ -309,6 +312,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiUSSNumberOfPings, RUNTIME_CLASS(CNumTreeOptionsEdit));
         m_htiPingDataSize = m_ctrlTreeOptions.InsertItem(GetResString(IDS_USSPINGDATASIZE), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUpUSS);// MORPH leuk_he ICMP ping datasize <> 0 setting
 		m_ctrlTreeOptions.AddEditBox(m_htiPingDataSize , RUNTIME_CLASS(CNumTreeOptionsEdit)); //MORPH leuk_he ICMP ping datasize <> 0 setting
+		// ==> [MoNKi: -USS initial TTL-] - Stulle
+		m_htiUSSTTL = m_ctrlTreeOptions.InsertItem(GetResString(IDS_USS_INITIAL_TTL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUpUSS);
+		m_ctrlTreeOptions.AddEditBox(m_htiUSSTTL, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		// <== [MoNKi: -USS initial TTL-] - Stulle
         
 		//MORPH START - Added by Yun.SF3, Auto DynUp changing
 		m_htiDynUpAutoSwitching = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_AUTODYNUPSWITCHING), m_htiDYNUP, m_iDynUpMode == 3);
@@ -409,6 +416,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSGoingUpDivider, m_iUSSGoingUpDivider);
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSGoingDownDivider, m_iUSSGoingDownDivider);
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSNumberOfPings, m_iUSSNumberOfPings);
+	// ==> [MoNKi: -USS initial TTL-] - Stulle
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiUSSTTL, m_iUSSTTL);
+	DDV_MinMaxInt(pDX, m_iUSSTTL, 1, 20);
+	// <== [MoNKi: -USS initial TTL-] - Stulle
 	
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMinUpload, m_iMinUpload);
 	DDV_MinMaxInt(pDX, m_iMinUpload, 1, thePrefs.GetMaxGraphUploadRate(false));
@@ -507,6 +518,9 @@ BOOL CPPgMorph::OnInitDialog()
     m_iUSSGoingUpDivider = thePrefs.m_iDynUpGoingUpDivider;
     m_iUSSGoingDownDivider = thePrefs.m_iDynUpGoingDownDivider;
     m_iUSSNumberOfPings = thePrefs.m_iDynUpNumberOfPings;
+	// ==> [MoNKi: -USS initial TTL-] - Stulle
+	m_iUSSTTL = thePrefs.GetUSSInitialTTL();
+	// <== [MoNKi: -USS initial TTL-] - Stulle
 	m_iMinUpload = thePrefs.minupload;
 	m_bEnableDownloadInRed = thePrefs.enableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	m_bEnableDownloadInBold = thePrefs.m_bShowActiveDownloadsBold; //MORPH - Added by SiRoB, show download in Bold
@@ -622,6 +636,9 @@ BOOL CPPgMorph::OnApply()
     thePrefs.m_iDynUpGoingUpDivider = m_iUSSGoingUpDivider;
     thePrefs.m_iDynUpGoingDownDivider = m_iUSSGoingDownDivider;
     thePrefs.m_iDynUpNumberOfPings = m_iUSSNumberOfPings;
+	// ==> [MoNKi: -USS initial TTL-] - Stulle
+	thePrefs.SetUSSInitialTTL((uint8)m_iUSSTTL);
+	// <== [MoNKi: -USS initial TTL-] - Stulle
 	thePrefs.SetMinUpload(m_iMinUpload);
 	thePrefs.enableDownloadInRed = m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	thePrefs.m_bShowActiveDownloadsBold = m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
@@ -848,6 +865,11 @@ void CPPgMorph::Localize(void)
 		if (m_htiClientQueueProgressBar) {m_ctrlTreeOptions.SetItemText(m_htiClientQueueProgressBar, GetResString(IDS_CLIENTQUEUEPROGRESSBAR));//MORPH - Added by Commander, ClientQueueProgressBar
 									      SetTool(m_htiClientQueueProgressBar,IDS_CLIENTQUEUEPROGRESSBAR_TIP);
 		}
+		// ==> [MoNKi: -USS initial TTL-] - Stulle
+		if (m_htiUSSTTL) {m_ctrlTreeOptions.SetEditLabel(m_htiUSSTTL, GetResString(IDS_USS_INITIAL_TTL));
+		SetTool(m_htiUSSTTL,IDS_USS_INITIAL_TTL_TIP); }
+		// <== [MoNKi: -USS initial TTL-] - Stulle
+
 		if (m_htiMinUpload) m_ctrlTreeOptions.SetEditLabel(m_htiMinUpload, GetResString(IDS_MINUPLOAD));
 		if (m_htiEnableDownloadInRed) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInRed, GetResString(IDS_DOWNLOAD_IN_RED)); //MORPH - Added by IceCream, show download in red
 		if (m_htiEnableDownloadInBold) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInBold, GetResString(IDS_DOWNLOAD_IN_BOLD)); //MORPH - Added by SiRoB, show download in Bold
@@ -1017,6 +1039,9 @@ void CPPgMorph::OnDestroy()
     m_htiUSSGoingUpDivider = NULL;
     m_htiUSSGoingDownDivider = NULL;
     m_htiUSSNumberOfPings = NULL;
+	// ==> [MoNKi: -USS initial TTL-] - Stulle
+	m_htiUSSTTL = NULL;
+	// <== [MoNKi: -USS initial TTL-] - Stulle
 	m_htiMinUpload = NULL;
 	m_htiDlSecu = NULL;
 	m_htiDisp = NULL;

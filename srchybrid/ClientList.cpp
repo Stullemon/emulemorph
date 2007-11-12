@@ -328,8 +328,12 @@ CUpDownClient* CClientList::FindClientByIP(uint32 clientip, UINT port) const
 	for (POSITION pos = list.GetHeadPosition(); pos != NULL;)
 	{
 		CUpDownClient* cur_client = list.GetNext(pos);
-		if (cur_client->GetIP() == clientip && cur_client->GetUserPort() == port)
-			return cur_client;
+	//	if (cur_client->GetIP() == clientip && cur_client->GetUserPort() == port)
+	//		return cur_client;
+		 if (cur_client->GetConnectIP() == clientip && cur_client->GetUserPort() == port) //SDT: error? (GetIP() doesn't work) - 0920
+		 {	//ASSERT(cur_client->GetConnectIP()== cur_client->GetIP()   ) ;   // Official uses getip? do we have  a bug here?
+            return cur_client;
+			}
 	}
 	return 0;
 }
@@ -350,8 +354,10 @@ CUpDownClient* CClientList::FindClientByIP(uint32 clientip) const
 	for (POSITION pos = list.GetHeadPosition(); pos != NULL;)
 	{
 		CUpDownClient* cur_client = list.GetNext(pos);
-		if (cur_client->GetIP() == clientip)
+		if (cur_client->GetIP() == clientip){
+			ASSERT(cur_client->GetConnectIP()== cur_client->GetIP()   ) ; // Official uses getip? do we have  a bug here?
 			return cur_client;
+		}
 	}
 	return 0;
 }
@@ -361,8 +367,10 @@ CUpDownClient* CClientList::FindClientByIP_UDP(uint32 clientip, UINT nUDPport) c
 	for (POSITION pos = list.GetHeadPosition(); pos != NULL;)
 	{
 		CUpDownClient* cur_client = list.GetNext(pos);
-		if (cur_client->GetIP() == clientip && cur_client->GetUDPPort() == nUDPport)
-			return cur_client;
+		if (cur_client->GetConnectIP() == clientip && cur_client->GetUDPPort() == nUDPport)
+		{	ASSERT(cur_client->GetConnectIP()== cur_client->GetIP()   ) ;
+         	return cur_client;
+		}
 	}
 	return 0;
 }
@@ -383,8 +391,11 @@ CUpDownClient* CClientList::FindClientByIP_KadPort(uint32 ip, uint16 port) const
 	for (POSITION pos = list.GetHeadPosition(); pos != NULL;)
 	{
 		CUpDownClient* cur_client = list.GetNext(pos);
-		if (cur_client->GetIP() == ip && cur_client->GetKadPort() == port)
+		if (cur_client->GetConnectIP() == ip && cur_client->GetKadPort() == port)
+		{   
+			ASSERT(cur_client->GetConnectIP()== cur_client->GetIP()   ) ; // official uses getip is this a bug? 
 			return cur_client;
+		}
 	}
 	return 0;
 }

@@ -336,6 +336,7 @@ public:
 	afx_msg void OnDrawClipboard( );
 	afx_msg void OnChangeCbChain(HWND hWndRemove, HWND hWndAfter);
 	// MORPH END leuk_he clipboard chain instead of timer
+	LRESULT OnPowerBroadcast(WPARAM wParam, LPARAM lParam)	;   // leuk_he reconnect on wakeup
 	
 
 };

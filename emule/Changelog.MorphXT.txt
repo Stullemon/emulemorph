@@ -10,6 +10,7 @@ CHANGE: Clipboard ed2k link file watch  now queues into morph category selection
 FIX: rare heap corruption when safeconnnect is disabled. (netfinity)
 CHANGE: update Safekad to warpf 0.3a.9 beta  (netfinity)
 ADD: USS: initial  TTL (stulle/MonKi)
+ADD: experimental Reconnect kad & server after resume from hibernation.
 
 --------------------------------------
 Changelog for eMule 0.48a MorphXT v10.4

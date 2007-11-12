@@ -290,7 +290,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 				ASSERT( false );
 		}
 		else
-			ASSERT(0);
+			ASSERT(0);// tokenized pastrParams contains some garbage that is not supported ( e.g. |torrenthash=xxx|\ ) 
 	}
 
 	if (bError)

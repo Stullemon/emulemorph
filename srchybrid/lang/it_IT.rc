@@ -274,7 +274,7 @@ BEGIN
     IDS_LOADURL             "Carica"
     IDS_DELETEAFTERALLOC    "Il File ""%s"" sta allocando spazio su disco e sarà cancellato successivamente"
     IDS_QL_RATING           "Valutazione"
-    IDS_CONNECTINGTO        "Connessione in corso a %s (%s : %u)..."
+    IDS_CONNECTINGTO        "Connessione in corso a %s (%s:%u)..."
     IDS_CLIENTS             "Client"
     IDS_SEARCH_ANY          "- Qualsiasi -"
     IDS_SEARCH_AUDIO        "Audio" //!
@@ -970,7 +970,7 @@ BEGIN
     IDS_PW_UNLIMITED        "Illimitata"
     IDS_PW_MINREC           "Minima Raccomandata\t%u "
     IDS_PW_UA               "Massimizza le velocità di Up e Down"
-    IDS_PW_PA               "Riduci le velocità di Up e Down"
+    IDS_PW_PA               "Minimizza le velocità di Up e Down"
     IDS_IRC_IGNOREINFOMESSAGE "Ignora messaggi di Informazioni"
     IDS_CONNECTIONLOST      "Connessione persa"
     IDS_WIZ_OS_FRAME        "Sistema Operativo"
@@ -1072,7 +1072,7 @@ BEGIN
     IDS_SHOWOVERHEAD        "Mostra OverHead"
     IDS_UPDOWNSMALL         "Up: %.1f | Down: %.1f" //!
     IDS_EDITLIST            "Lista..."
-    IDS_SP_ICONBAR          "Barra della Velocità nell'icona del System Tray"
+    IDS_SP_ICONBAR          "Barra della Velocità nella Trayicon"
     IDS_RATINGRECV          "Dai un voto al File ricevuto ""%s"": %u"
     IDS_DESCRIPTIONRECV     "Descrizione per il File ricevuto ""%s"": %s"
     IDS_WEBSERVICES         "Risorse Web"
@@ -1744,14 +1744,14 @@ BEGIN
     IDS_INCOMPLETE_FILES    "File incompleti"
     IDS_SHARED_DIRECTORIES  "Cartelle condivise"
     IDS_COLLECTIONLIST      "Lista Collezione"
-    IDS_SHAREDIR            "Condividi una cartella"
+    IDS_SHAREDIR            "Condividi questa cartella"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SHAREDIRSUB         "Condividi anche le sottocartelle"
-    IDS_UNSHAREDIR          "Togli dalla condivisione la cartella"
-    IDS_UNSHAREDIRSUB       "Togli dalla condivisione anche le sottocartelle"
+    IDS_SHAREDIRSUB         "Condividi questa cartella comprese le sottocartelle"
+    IDS_UNSHAREDIR          "Togli dalla condivisione questa cartella"
+    IDS_UNSHAREDIRSUB       "Togli dalla condivisione questa cartella comprese le sottocartelle"
     IDS_ALLSHAREDFILES      "Tutti i File condivisi"
     IDS_ALLDIRECTORIES      "Tutte le cartelle"
     IDS_SEARCHRELATED       "Cerca File correlati"
@@ -1967,7 +1967,7 @@ BEGIN
     IDS_ECFEF               "Stesse possibilità per ogni File"
     IDS_ALL_TIME            "Sempre"
     IDS_COPYFEEDBACK        "Copia le informazioni negli appunti"
-    IDS_FOLLOW_THE_MAJORITY "Segui la Maggioranza"
+    IDS_FOLLOW_THE_MAJORITY "Rinomina secondo la maggioranza"
     IDS_ANTILEECHERLOG      "[Anti-LeecherMod] Il Client %s è stato temporaneamente bannato perché sospettato di azioni di Leech"
     IDS_FAIR_PLAY           "FairPlay"
 END
@@ -2936,7 +2936,7 @@ BEGIN
     ENABLE_TIP              "Apre automaticamente le porte nel Firewall delle conessioni Internet\n<b>ATTENZIONE</b>: Può assorbire molte risorse dalla CPU in alcule configurazioni\nNon è richiesto se non utilizzi il Firewall di Internet o usi un Firewall di terze parti,\no se apri le porte nel tuo Firewall manualmente"
     CLEARMAPTIP             "Apre le porte del Firewall di WinXP quando esegui\neMule e le chiude in uscita"
     ADDMPATIP               "eMule ascolta una porta UDP di un Server (casuale) per conoscere lo\nstato del Server. Apri anche questa porta nel Firewall?"
-    UPNP_GROUP_TIP          "Rileva Router compatibili con lo standard uPnP"
+    UPNP_GROUP_TIP          "Rileva Router compatibili con lo standard UPnP"
 END
 
 STRINGTABLE 
@@ -2957,7 +2957,7 @@ BEGIN
     IDS_WIZARD_TIP          "Mostra il Wizard di avvio utilizzato per impostare la tua connessione ad Internet.\nEseguendo il Wizard verranno aggiornati alcuni valori in questa finestra con valori\ncorretti. Il Wizard di avvio completo può essere avviato dal menu 'Strumenti'"
     IDS_UDPDISABLED_TIP     "Disabilita il traffico sulla porta UDP.\nSe la tua connessione ad Internet (Router) diventa instabile in seguito al\ntraffico UDP c'è un'opzione per disabilitare l'UDP. Verrà generato\nmolto OverHead ma eMule funzionerà ugualmente"
     IDS_STARTTEST_TIP       "Avvia un Browser che si connetterà ad emule-project.net per verificare se le\nporte di eMule sono raggiungibili da un Server Web. eMule potrebbe funzionare\nugualmente se le porte non sono raggiungibili ma sarà più lento. Se il test\ndella connessione fallisce controlla se qualcosa stia bloccando il traffico\nin entrata da Internet"
-    IDS_RANDOMPORTS_TIP     "Invece di impostare le porte manualmente usa porte casuali comprese tra un\nminimo e un massimo. Assicurati che queste porte siano raggiungibili da Internet\ntramite connessione diretta o usando l'uPnP (controlla le impostazioni\n'emulEespana') per aprire le porte nel tuo Router"
+    IDS_RANDOMPORTS_TIP     "Invece di impostare le porte manualmente usa porte casuali comprese tra un\nminimo e un massimo. Assicurati che queste porte siano raggiungibili da Internet\ntramite connessione diretta o usando l'UPnP (controlla le impostazioni\n'emulEespana') per aprire le porte nel tuo Router"
     IDS_MINPORT_TIP         "Numero minimo di porta usato per selezionare una porta casuale.\nAlcuni Provider bloccano le porte inferiori a 1024"
     IDS_MAXPORT_TIP         "Numero massimo di porta usato per selezionare una porta casuale."
     IDC_DOWNLOAD_CAP_TIP    "La velocità massima teorica in Download della tua connessione ad\nInternet in kilobyte per secondo. Verrà utilizzata per calcolare la\nscala del grafico nella finestra delle statistiche e non verrà\ninviata agli altri Client"
@@ -3065,7 +3065,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP_ENABLE_TIP     "Apre le porte nel Router del tuo pc.\nDevi abilitare l'uPnP nel tuo Router. Non hai bisogno di abilitare questa\nimpostazione se le hai già aperte manualmente o non hai un Router. Raccomandato\nse usi le 'Porte casuali' (Default: autorileva)"
+    IDS_UPNP_ENABLE_TIP     "Apre le porte nel Router del tuo pc.\nDevi abilitare l'UPnP nel tuo Router. Non hai bisogno di abilitare questa\nimpostazione se le hai già aperte manualmente o non hai un Router. Raccomandato\nse usi le 'Porte casuali' (Default: autorileva)"
     IDS_UPNP_ENABLEWEB_TIP  "Apre le porte nel Router utilizzate dal WebServer in modo che\nsia raggiungibile da Internet"
     WAP_TIP                 "Il Wireless Application Protocol (WAP) è uno standard internazionale per\nle applicazioni che usano le comunicazioni senza filo (per esempio,\nl'accesso ad Internet dai telefoni cellulari)"
     ENABLEWAP_TIP           "Attiva l'interfaccia Wap"
@@ -3367,7 +3367,7 @@ BEGIN
     IDS_RESTORELASTLOGPANE_TIP 
                             "Ricorda quale pannello del registro (Registro, Approfondito)\nè stato usato l'ultima sessione"
     IDS_PREVIEWCOPIEDARCHIVES_TIP 
-                            "Quando questa opzione è disattivata (=0), eMule userà un nuovo metodo per anteprima,\npiù veloce e che usa meno spazio su disco nella cartella temporanea. Eventuali riscontri\nsu questa nuova versione saranno benvenuti"
+                            "Quando questa opzione è disattivata, eMule userà un nuovo metodo per l'anteprima,\npiù veloce, e che usa meno spazio su disco nella cartella temporanea. Eventuali riscontri\nsu questa nuova versione saranno benvenuti"
     IDS_STRAIGHTWINDOWSTYLES_TIP 
                             "Cambia l'aspetto della finestra dei grafici delle statistiche ed altre piccole \nvariazioni stilistiche. (potrebbe essere necessario il riavvio)"
     IDS_LOGFILEFORMAT_TIP   "Cambia il formato dati del File registro da Unicode a UTF8 se impostato a 1"
@@ -3425,7 +3425,7 @@ BEGIN
                             "Quantità di MB che è consentito scaricare tramite http da un WebServer (Default=5)"
     IDS_ALLOWEDIPS          "IP WebServer consentiti (separati da ;)"
     IDS_ALLOWEDIPS_TIP      "Indirizzi IP dei WebServer ai quali è possibile connettersi, separati da ';'"
-    IDS_STATIC_ICON         "Mostra sempre la TrayIcon"
+    IDS_STATIC_ICON         "Mostra sempre la Trayicon"
     IDS_COMPRESSLEVEL       "Livello Compressione (1-9)"
     IDS_COMPRESSLEVEL_TIP   "Riduce il livello di compressione dei dati comprimibili. L'utilizzo di CPU è leggermente\nridotto, ma saranno richiesti più dati da inviare. Utile per reti ad altissima velocità.\n1 = usa meno CPU, compressione minore\n9 = usa più CPU, migliore compressione.\n(Default=9 - raccomandato!)"
 END
@@ -3449,7 +3449,7 @@ BEGIN
     IDS_MEDIAINFO_ID3LIB_TIP 
                             "Indica ad eMule di controllare i File mpeg (mp1,mp2,mp3,mpa) analizzando l'header\n. I meta dati vengono visualizzati nella finestra di dettaglio File.\n'id3lib' o 'mediainfo.dll' verranno usati per questo.\n(Default=selezionato)"
     IDS_MAXLOGBUFF_TIP      "Specifica l'ammontare di memoria di sistema che eMule utilizzerà per mostrare i dati\nnel registro. Per Windows 98 | ME è riservato un valore predefinito di 64 kB, per\nWindows 2k | XP è di 128 kB. In Win98 | ME il Buffer non può essere maggiore di 64 kB.\nI dati nel registro sono rotativi, cioè, se il Buffer è raggiunge il suo limite, il\nmessaggio più vecchio sarà cancellato ogni nuovo messaggio che arriva\n(FIFO - First In First Out)"
-    IDS_MAXCHATHISTORY_TIP  "Specifica il numero massimo di linee salvate nella cronologia dei messaggi IRC. Quando questo valore verrà raggiunto, il messaggio più vecchio sarà cancellato ogni nuovo messaggio che arriva (FIFO - First In First Out).\n(Default=100)"
+    IDS_MAXCHATHISTORY_TIP  "Specifica il numero massimo di linee salvate nella cronologia dei messaggi IRC.\nQuando questo valore verrà raggiunto, il messaggio più vecchio sarà cancellato\nogni nuovo messaggio che arriva (FIFO - First In First Out).\n(Default=100)"
     IDS_PREVIEWSMALLBLOCKS_TIP 
                             "Questa funzione dovrebbe essere attivata soltanto se usi VLC - VideoLAN per\neffettuare l'anteprima dei File. Abilità la possibilità di effettuare un'anteprima\ndi File multimediali quando vengono scaricati almeno 16 kB di dati per i File .mpeg\no 256 kB di dati per tutti gli altri (.avi, Immagini-CD con contenuti multimediali).\nUsando questa opzione, l'impostazione 'Crea una copia per l'anteprima' deve essere\ndisattivata tramite 'Opzioni -> File'. Nota che VLC versione 8.5 e superiori sembrano\navere alcuni problemi con gli indici danneggiati"
     IDS_RESTORELASTMAINWNDDLG_TIP 
@@ -3563,7 +3563,7 @@ BEGIN
   IDS_BACKUPERROR         "È stato riscontrato un errore durante il Backup."
   IDS_BACKUP_PART         "A causa della loro dimensione, il Backup dei File *.part potrebbe richiedere alcuni minuti.\nSei sicuro di volerlo fare?"
   IDS_BACKUP_PART_W       "Sei sicuro?"
-  IDS_BACKUP_COMPLETE     "File Copiato/i con Successo."
+  IDS_BACKUP_COMPLETE     "File Copiato/i con Successo!"
 
   IDS_X_ADJUSTNTFSDAYLIGHTFILETIME "Aggiusta l'ora legale nei File su NTFS"
   IDS_X_PEERCACHESHOW     "Mostra informazioni sulla PeerCache"
@@ -3577,7 +3577,7 @@ BEGIN
   IDS_X_SHOWCOPYED2KLINK  "Mostra il comando 'Copia Link eD2K negli appunti (HTML)'"
   IDS_X_ICON_FLASH_ON_NEW_MESSAGE "Trayicon lampeggiante su nuovo messaggio"
   IDS_X_SHOWVERTICALHOURMARKERS "Statistiche - Mostra i marcatori verticali per l'orario"
-  IDS_X_REBARTOOLBAR      "disabilita alcune opzioni della Barra degli Strumenti"
+  IDS_X_REBARTOOLBAR      "Disabilita alcune opzioni della Barra degli Strumenti"
 END
 
 STRINGTABLE 
@@ -3598,14 +3598,20 @@ END
 STRINGTABLE 
 BEGIN
   IDS_UPNPDETECTSTATUS "Wizard autorilevamento stato"
-  IDS_DETECTUPNP_TIP  "Stato attuale del rilevamento automatico dell'uPnP nel Wizard di avvio:\n2: Rileva nuovamente l'uPnP al prossimo avvio (il solo valore utile da impostare a 2).\n0: Rilevato il gateway dell'uPnP.\n-1: Non rilevato.\n-2: Rilevamento disabilitato sugli indirizzi LAN non locali.\n-10: Non necessario. (Altri valori vengono ignorati)"
-  IDS_UPNPPORT_TIP  "Utilizzo della porta uPnP. NON APRIRE QUESTA PORTA (Default=0,automatico)"
+  IDS_DETECTUPNP_TIP  "Stato attuale del rilevamento automatico dell'UPnP nel Wizard di avvio:\n2: Rileva nuovamente l'UPnP al prossimo avvio (il solo valore utile da impostare a 2).\n0: Rilevato il gateway dell'uPnP.\n-1: Non rilevato.\n-2: Rilevamento disabilitato sugli indirizzi LAN non locali.\n-10: Non necessario. (Altri valori vengono ignorati)"
+  IDS_UPNPPORT_TIP  "Utilizzo della porta UPnP. NON APRIRE QUESTA PORTA (Default=0, automatico)"
   IDS_UPNPCLEARONCLOSE_TIP "Abilitato=crea una mappatura statica della porta e la chiude in uscita.\nDisabilitato=crea una mappatura dinamica della porta e non la chiude in uscita"
   IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "Apre le porte soltanto sulla prima periferica trovata. Nota che alcune installazioni\ndi Windows restituiscono una periferica che non è quella per la connessione ad\nInternet. (Defaut=disabilitato)"
   IDS_UPNPCLOSEONEXIT "Chiudi le porte in uscita"
   IDS_UPNPLIMITTOFIRSTCONNECTION "Apri le porte solo alla prima connessione"
   IDS_UPNFORCEUPDATE "Forza l'aggiornamento periodico"
   IDS_UPNFORCEUPDATE_TIP "Invece di verificare sulla periferica per Internet se esiste una regola per la\nmappatura della porta, effettua una mappatura ogni 10 minuti (Default=disabilitato)"
+END
+
+STRINGTABLE 
+BEGIN
+   IDS_DONOTWATCHCLIP "Non analizzare gli appunti"
+   IDS_DONOTWATCHCLIP_TIP "Uno o più Link che vengono copiati dagli appunti.\nSeleziona questa opzione per disabilitare l'analisi degli appunti.\nPremi il tasto 'Annulla' per non incollare i Link.\nInserisci o seleziona una categoria e premi 'Ok' per inserire i Link"
 END
 
 #endif    // Italian (Italy) resources

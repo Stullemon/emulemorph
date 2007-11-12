@@ -341,7 +341,7 @@ float CStatistics::GetAvgUploadRate(int averageType)
 			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;
 			if (running < 5)
 				return 0.0F;
-			return (float)(theStats.sessionSentBytes / 1024.0f) / running;
+			return (float)(theStats.sessionSentBytes / 1024.0) / running;
 
 		case AVG_TOTAL:
 			if (theStats.transferStarttime == 0)

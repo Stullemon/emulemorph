@@ -9,7 +9,7 @@ class CSelCategoryDlg : public CPPgtooltippedDialog
 	DECLARE_DYNAMIC(CSelCategoryDlg)
 
 public:
-	CSelCategoryDlg(CWnd* pWnd = NULL);
+	CSelCategoryDlg(CWnd* pWnd = NULL,bool bFromClipboard=false);
 	virtual	~CSelCategoryDlg();
 
 	virtual BOOL	OnInitDialog();
@@ -27,6 +27,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 private:
 	int	m_Return;
+	bool    m_bFromClipboard; // Morph - Added by leuk_he
 	bool	m_cancel; //MORPH - Added by SiRoB
 	bool	m_bCreatedNew;
 };

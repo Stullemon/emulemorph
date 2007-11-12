@@ -8,15 +8,8 @@ read conti
 ./ufind zlib/contrib/masmx86 -type f -print |grep -v CVS >>srclist.txt
 mkdir "$DESTDIR"
 mkdir "$DESTDIR/srchybrid"
-for i in `sort dirlist.txt`
-do
-if [ ! -d "$DESTDIR/$i" ] 
-then
-   echo mkdir "$DESTDIR/$i"
-   mkdir "$DESTDIR/$i"
-fi 
-done
 set -x
+sort dirlist.txt|xargs -i mkdir "$DESTDIR/{}"
 #for i in `cat srclist.txt`
 #do
 #cp -p $i "$DESTDIR/$i"

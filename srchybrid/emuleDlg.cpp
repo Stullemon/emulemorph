@@ -171,8 +171,9 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_WM_SHOWWINDOW()
 	ON_WM_DESTROY()
 	ON_WM_SETTINGCHANGE()
-	ON_WM_DRAWCLIPBOARD() // clipboard chain
-	ON_WM_CHANGECBCHAIN()  // clipboard chain
+	ON_WM_DRAWCLIPBOARD() // MORPH clipboard chain
+	ON_WM_CHANGECBCHAIN()  // MORPH clipboard chain
+	ON_MESSAGE(WM_POWERBROADCAST,OnPowerBroadcast) //MORPH leuk_he reconnect kad on wake from hibernate
 
 	ON_MESSAGE(WM_HOTKEY, OnHotKey)	//Commander - Added: Invisible Mode [TPT]
 
@@ -4333,4 +4334,25 @@ void CemuleDlg::SetClipboardWatch(bool enable)
         
 	// MORPH END leuk_he clipboard chain instead of timer
 
+	LRESULT  CemuleDlg::OnPowerBroadcast(WPARAM wParam, LPARAM lParam)
+{
+	AddLogLine(false,_T("DEBUG:Power state change. wParam=%d lPararm=%ld"),wParam,lParam);
+	switch (wParam) {
+			    case PBT_APMRESUMEAUTOMATIC:
+                case PBT_APMRESUMECRITICAL:
+               // case PBT_APMRESUMESUSPEND: double
+                case PBT_APMRESUMESTANDBY:
+				if (theApp.IsConnected()&& thePrefs.Reconnect() )
+				  {// During wakeup broadcast we did not yet have time to find out that wer are disconnected (?)
+				   CloseConnection();
+				   AddLogLine(false,_T("Reconnect after Power state change. wParam=%d lPararm=%ld"),wParam,lParam);
+				   // TODO: do we need to reinitiate UPNP?
+				   PostMessage(WM_SYSCOMMAND , MP_CONNECT, 0); // tell to connect.. a sec later... 
+				  }
+				return TRUE; // message processed. 
+				break;
+			default:
+				return FALSE; // we do not process this message
+	}
 
+}

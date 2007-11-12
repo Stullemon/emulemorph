@@ -470,7 +470,12 @@ UINT LastCommonRouteFinder::RunInternal() {
                     bool failed = false;
 
                     uint32 curHost = 0;
+                    // ==> [MoNKi: -USS initial TTL-] - Stulle
+                    /*
                     for(uint32 ttl = 1; doRun && enabled && (curHost != 0 && ttl <= 64 || curHost == 0 && ttl < 5) && foundLastCommonHost == false && failed == false; ttl++) {
+                    */
+                    for(uint32 ttl = (uint32)thePrefs.GetUSSInitialTTL(); doRun && enabled && (curHost != 0 && ttl <= 64 || curHost == 0 && ttl < ((uint32)thePrefs.GetUSSInitialTTL()+4)) && foundLastCommonHost == false && failed == false; ttl++) {
+                    // <== [MoNKi: -USS initial TTL-] - Stulle
                         if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 							theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Pinging for TTL %i..."), ttl);
 
@@ -610,7 +615,12 @@ UINT LastCommonRouteFinder::RunInternal() {
 	                                }
                                 }
                             } else {
+                                // ==> [MoNKi: -USS initial TTL-] - Stulle
+                                /*
                                 if(ttl < 4) {
+                                */
+                                if(ttl < (uint32)thePrefs.GetUSSInitialTTL()+3) {
+                                // <== [MoNKi: -USS initial TTL-] - Stulle
 									if(bIsUSSLog) //MORPH - Added by SiRoB, Log Flag to trace or not the USS activities
 										theApp.QueueDebugLogLine(false,_T("UploadSpeedSense: Could perform no ping at all at TTL %i. Trying next ttl."), ttl);
                                 } else {

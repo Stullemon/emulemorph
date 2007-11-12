@@ -47,6 +47,7 @@ void CServerConnect::TryAnotherConnectionRequest()
 {
 	if (connectionattemps.GetCount() < (thePrefs.IsSafeServerConnectEnabled() ? 1 : 2))
 	{
+
 		CServer* next_server = theApp.serverlist->GetNextServer(m_bTryObfuscated);
 		if (next_server == NULL)
 		{
@@ -582,6 +583,31 @@ void CServerConnect::DestroySocket(CServerSocket* pSck){
 		pSck->AsyncSelect(0);
 		pSck->Close();
 	}
+
+	 // netfinity START : Remove from connection attempt list if not already done
+    DWORD tmpkey;
+	CServerSocket* tmpsock;
+	POSITION pos2 = connectionattemps.GetStartPosition();
+	while (pos2) {
+
+    connectionattemps.GetNextAssoc(pos2, tmpkey, tmpsock);
+    if (tmpsock == pSck) {
+		//ASSERT(0); // TEST THAT THE CODE IS WORKING. 
+        connectionattemps.RemoveKey(tmpkey);
+        break;
+
+	}
+
+	}
+	// netfinity END : Make sure socket isn't used after deletion if it's the connected one
+if (connectedsocket == pSck)
+{
+
+    connectedsocket = NULL;
+    connected = false;
+
+}
+
 
 	delete pSck;
 }

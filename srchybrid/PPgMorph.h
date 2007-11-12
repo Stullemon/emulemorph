@@ -33,6 +33,9 @@ protected:
     int m_iUSSGoingUpDivider;
     int m_iUSSGoingDownDivider;
     int m_iUSSNumberOfPings;
+	// ==> [MoNKi: -USS initial TTL-] - Stulle
+	int			m_iUSSTTL;
+	// <== [MoNKi: -USS initial TTL-] - Stulle
 	int m_iMinUpload;
 	bool m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	bool m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
@@ -116,6 +119,9 @@ protected:
     HTREEITEM m_htiUSSGoingUpDivider;
     HTREEITEM m_htiUSSGoingDownDivider;
     HTREEITEM m_htiUSSNumberOfPings;
+	// ==> [MoNKi: -USS initial TTL-] - Stulle
+	HTREEITEM	m_htiUSSTTL;
+	// <== [MoNKi: -USS initial TTL-] - Stulle
 	HTREEITEM m_htiMinUpload;
 	HTREEITEM m_htiEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	HTREEITEM m_htiEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold
