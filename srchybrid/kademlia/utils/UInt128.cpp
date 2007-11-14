@@ -186,12 +186,20 @@ void CUInt128::ToHexString(CString *pstr) const
 		// netfinity: Reduced CPU usage
 		//element.Format(_T("%08X"), m_data[i]);
 		for (int j=0; j<8; ++j)
-	{
+	{   
+      /* netf
 			ULONG	digit = (m_uData[i] >> (j*4)) & 0xF;
+       */
+			TCHAR	digit = (TCHAR) (m_uData[i] >> (j*4)) & 0xF;
+      // end netf
 			if (digit < 10)
 				element[7-j] = _T('0') + digit;
 			else
+        /* netf
 				element[7-j] = _T('A') + (digit - 10);
+        */
+				element[7-j] = _T('A') + (digit - TCHAR(10));
+        // end netf
 		}
 		element[8] = _T('\0');
 		pstr->Append(element);

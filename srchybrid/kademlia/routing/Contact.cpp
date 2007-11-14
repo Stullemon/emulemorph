@@ -205,6 +205,7 @@ void CContact::CheckingType()
 
 void CContact::UpdateType()
 {
+  // netf: uint32 --> time_t 
 	uint32 uHours = (time(NULL)-m_tCreated)/HR2S(1);
 	switch(uHours)
 	{
@@ -214,7 +215,7 @@ void CContact::UpdateType()
 			break;
 		case 1:
 			m_byType = 1;
-			m_tExpires = (time_t)(time(NULL) + MIN2MS(90) );
+			m_tExpires = (time_t)(time(NULL) + MIN2MS(90) ); // morph prevent float overflow
 			break;
 		default:
 			m_byType = 0;

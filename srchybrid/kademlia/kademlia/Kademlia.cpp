@@ -381,7 +381,7 @@ CPrefs *CKademlia::GetPrefs()
 {
 	if (m_pInstance == NULL || m_pInstance->m_pPrefs == NULL)
 	{
-		ASSERT(0);
+		//ASSERT(0); // netfinity: Don't like these asserts as they trigger on every obfuscated UDP packet if Kad is not running
 		return NULL;
 	}
 	return m_pInstance->m_pPrefs;

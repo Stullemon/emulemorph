@@ -175,7 +175,8 @@ UINT CRoutingBin::GetSize() const
 
 UINT CRoutingBin::GetRemaining() const
 {
-	return (UINT)K - m_listEntries.size();
+  // NETF: cast
+	return (UINT)K - (UINT)m_listEntries.size();
 }
 
 void CRoutingBin::GetEntries(ContactList *plistResult, bool bEmptyFirst)

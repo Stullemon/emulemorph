@@ -53,6 +53,7 @@ there client on the eMule forum..
 #include "../../ipfilter.h"
 
 #include "NetF/SafeKad.h" // netfinity: Enable tracking of bad nodes
+#include "NetF/Fakealyzer.h" // netfinity: Detect fake nodes
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -424,6 +425,13 @@ void CKademliaUDPListener::AddContact(const byte *pbyData, uint32 uLenData, uint
 			AddDebugLogLine(false, _T("KADEMLIA_REQ/RES: Ignored kad contact(IP=%s) - Identified as bad node") , ipstr(ntohl(uIP)));
 		return;
 	}
+	// netfinity: Fakealyzer - Check for fake node
+	if (CFakealyzer::IsFakeKadNode(uID.GetDataPtr(), uIP, uUDPPort))
+	{
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("KADEMLIA_REQ/RES: Ignored kad contact(IP=%s) - Identified as fake node") , ipstr(ntohl(uIP)));
+		return;
+	}
 	// netfinity: Safe KAD - Check against manufactured Kad ID's
 	CUInt128 uDistance;
 	CKademlia::GetPrefs()->GetKadID(&uDistance);
@@ -461,6 +469,13 @@ void CKademliaUDPListener::AddContact_KADEMLIA2 (const byte* pbyData, uint32 uLe
 		AddDebugLogLine(false, _T("KADEMLIA2_REQ/RES: Ignored kad contact(IP=%s) - Identified as bad node") , ipstr(ntohl(uIP)));
 		return;
 	}
+	// netfinity: Fakealyzer - Check for fake node
+	if (CFakealyzer::IsFakeKadNode(uID.GetDataPtr(), uIP, uUDPPort))
+	{
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("KADEMLIA2_REQ/RES: Ignored kad contact(IP=%s) - Identified as fake node") , ipstr(ntohl(uIP)));
+		return;
+	}
 	// netfinity: Safe KAD - Check against manufactured Kad ID's
 	CUInt128 uDistance;
 	CKademlia::GetPrefs()->GetKadID(&uDistance);
@@ -484,6 +499,13 @@ void CKademliaUDPListener::AddContacts( const byte *pbyData, uint32 uLenData, ui
 		uint16 uUDPPort = fileIO.ReadUInt16();
 		uint16 uTCPPort = fileIO.ReadUInt16();
 		fileIO.ReadUInt8();
+		// netfinity: Fakealyzer - Check for fake node
+		if (CFakealyzer::IsFakeKadNode(uID.GetDataPtr(), uIP, uUDPPort))
+		{
+			if (::thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("KADEMLIA_BOOTSTRAP_RES: Ignored kad contact(IP=%s) - Identified as fake node") , ipstr(ntohl(uIP)));
+			return;
+		}
 		// netfinity: Safe KAD - Check against manufactured Kad ID's
 		CUInt128 uDistance;
 		CKademlia::GetPrefs()->GetKadID(&uDistance);
@@ -648,6 +670,14 @@ void CKademliaUDPListener::Process_KADEMLIA2_BOOTSTRAP_RES (const byte *pbyPacke
 		uint16 uUDPPort = fileIO.ReadUInt16();
 		uint16 uTCPPort = fileIO.ReadUInt16();
 		uint8 uVersion = fileIO.ReadUInt8();
+		// netfinity: Fakealyzer - Check for fake node
+		if (CFakealyzer::IsFakeKadNode(uContactID.GetDataPtr(), uIP, uUDPPort))
+		{
+			if (::thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("KADEMLIA2_BOOTSTRAP_RES: Ignored kad contact(IP=%s) - Identified as fake node") , ipstr(ntohl(uIP)));
+			return;
+		}
+		else
 		pRoutingZone->Add(uContactID, uIP, uUDPPort, uTCPPort, uVersion, false);
 		uNumContacts--;
 	}
@@ -965,6 +995,14 @@ void CKademliaUDPListener::Process_KADEMLIA_RES (const byte *pbyPacketData, uint
 			uint16 uTCPPortResult = fileIO.ReadUInt16();
 			fileIO.ReadUInt8();
 			uint32 uhostIPResult = ntohl(uIPResult);
+			// BEGIN netfinity: Fakealyzer - Check for fake node
+			if (CFakealyzer::IsFakeKadNode(uIDResult.GetDataPtr(), uIPResult, uUDPPortResult))
+			{
+				if (::thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("KADEMLIA_RES: Ignored kad contact(IP=%s) - Identified as fake node") , ipstr(ntohl(uIP)));
+				continue;
+			}
+			// END netfinity: Fakealyzer - Check for fake node
 			// BEGIN netfinity: Safe KAD
 			// Check against node track list
 			if (safeKad.IsBadNode(uIPResult, uUDPPortResult, uIDResult))
@@ -1123,6 +1161,14 @@ void CKademliaUDPListener::Process_KADEMLIA2_RES (const byte *pbyPacketData, uin
 			uint16 uTCPPortResult = fileIO.ReadUInt16();
 			uint8 uVersion = fileIO.ReadUInt8();
 			uint32 uhostIPResult = ntohl(uIPResult);
+			// BEGIN netfinity: Fakealyzer - Check for fake node
+			if (CFakealyzer::IsFakeKadNode(uIDResult.GetDataPtr(), uIPResult, uUDPPortResult))
+			{
+				if (::thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("KADEMLIA2_RES: Ignored kad contact(IP=%s) - Identified as fake node") , ipstr(ntohl(uIP)));
+				continue;
+			}
+			// END netfinity: Fakealyzer - Check for fake node
 			// BEGIN netfinity: Safe KAD
 			// Check against node track list
 			if (safeKad.IsBadNode(uIPResult, uUDPPortResult, uIDResult))
@@ -1974,6 +2020,15 @@ void CKademliaUDPListener::Process_KADEMLIA2_PUBLISH_KEY_REQ (const byte *pbyPac
 					{
 						if( pEntry->m_uSize == 0 )
 						{
+							// netfinity START: eMule currently send BSOBs where it should use UINT64
+							if(pTag->IsBsob() && pTag->GetBsobSize() == 8)
+							{
+								pEntry->m_uSize = *((uint64*)pTag->GetBsob());
+								delete pTag;
+								pTag = new CKadTagUInt(TAG_FILESIZE, pEntry->m_uSize);
+							}
+             // netfinity END: eMule currently send BSOBs where it should use UINT64
+							else
 							pEntry->m_uSize = pTag->GetInt();
 							if (bDbgInfo)
 								sInfo.AppendFormat(_T("  Size=%u"), pEntry->m_uSize);
@@ -2093,6 +2148,14 @@ void CKademliaUDPListener::Process_KADEMLIA2_PUBLISH_SOURCE_REQ (const byte *pby
 				{
 					if( pEntry->m_uSize == 0 )
 					{
+						// netfinity: eMule currently send BSOBs where it should use UINT64
+						if(pTag->IsBsob() && pTag->GetBsobSize() == 8)
+						{
+							pEntry->m_uSize = *((uint64*)pTag->GetBsob());
+							delete pTag;
+							pTag = new CKadTagUInt(TAG_FILESIZE, pEntry->m_uSize);
+						}
+						else
 						pEntry->m_uSize = pTag->GetInt();
 						if (bDbgInfo)
 							sInfo.AppendFormat(_T("  Size=%u"), pEntry->m_uSize);

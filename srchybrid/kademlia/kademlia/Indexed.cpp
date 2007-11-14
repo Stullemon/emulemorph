@@ -802,7 +802,7 @@ bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* pI
 				int iExt = pItem->m_fileName.ReverseFind(_T('.'));
 				if (iExt != -1)
 				{
-					if (wcsicmp((LPCWSTR)pItem->m_fileName + iExt + 1, pSearchTerm->m_pTag->GetStr()) == 0)
+					if (_wcsicmp((LPCWSTR)pItem->m_fileName + iExt + 1, pSearchTerm->m_pTag->GetStr()) == 0)
 						return true;
 				}
 			}

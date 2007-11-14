@@ -1432,7 +1432,7 @@ static int GetMetaDataWords(CStringArray& rastrWords, const CString& rstrData)
 		rastrWords.Add(strWord);
 		strWord = rstrData.Tokenize(_aszInvKadKeywordChars, iPos);
 	}
-	return rastrWords.GetSize();
+	return (int) rastrWords.GetSize();
 }
 
 static bool IsRedundantMetaData(const CStringArray& rastrFileNameWords, const CString& rstrMetaData)
@@ -1617,7 +1617,7 @@ uint32 CSearch::GetAnswers() const
 	if(m_listFileIDs.size() == 0)
 		return m_uAnswers;
 	// If we sent more then one packet per node, we have to average the answers for the real count.
-	return m_uAnswers/((m_listFileIDs.size()+49)/50);
+	return (uint32) m_uAnswers/((m_listFileIDs.size()+49)/50);
 }
 /*uint32 CSearch::GetKadPacketSent() const
 {
