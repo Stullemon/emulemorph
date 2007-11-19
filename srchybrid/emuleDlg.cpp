@@ -171,8 +171,9 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_WM_SHOWWINDOW()
 	ON_WM_DESTROY()
 	ON_WM_SETTINGCHANGE()
-	ON_WM_DRAWCLIPBOARD() // MORPH clipboard chain
 	ON_WM_CHANGECBCHAIN()  // MORPH clipboard chain
+	ON_WM_DRAWCLIPBOARD() // MORPH clipboard chain
+    //	ON_MESSAGE(WM_DRAWCLIPBOARD,   OnDrawClipboard)	// MORPH clipboard chain
 	ON_MESSAGE(WM_POWERBROADCAST,OnPowerBroadcast) //MORPH leuk_he reconnect kad on wake from hibernate
 
 	ON_MESSAGE(WM_HOTKEY, OnHotKey)	//Commander - Added: Invisible Mode [TPT]
@@ -304,6 +305,8 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 #endif
 	b_HideApp = false; //MORPH - Added by SiRoB, Toggle Show Hide window
 	m_hwndClipChainNext=NULL; // MORPH leuk_he clipboard chain instead of timer
+	m_bChained=false; // MORPH leuk_he clipboard chain instead of timer
+	m_bClipboardChainIsOk=false; // MORPH leuk_he clipboard chain instead of timer
 }
 
 CemuleDlg::~CemuleDlg()
@@ -4291,6 +4294,7 @@ void CemuleDlg::ShowLessControls (bool enable) {
 // MORPH START leuk_he clipboard chain instead of timer
 void CemuleDlg::SetClipboardWatch(bool enable)
 	{
+		AddLogLine(false,_T("SetClipboardWatch"));
 		if (enable) {
 			// add me to chain.
 			/*   Some apps,  WinXP's remote desktop for one, don't play nice with
@@ -4303,32 +4307,39 @@ void CemuleDlg::SetClipboardWatch(bool enable)
             That, however, might be more expensive than just removing and re-adding 
             ourselves back into the chain.
          */
-			if (m_hwndClipChainNext)
+			if (m_bChained|| m_hwndClipChainNext)
                   ChangeClipboardChain(m_hwndClipChainNext); // remove (!)
+			m_bClipboardChainIsOk==false; // fallback to timer if WM OnDrawClipboard mesages are not received. 
 			m_hwndClipChainNext=SetClipboardViewer(); // (re) add
+			m_bChained=true;   // we might be last in queue, prevent circular referece. 
+			
 		}
 		else{
 			// Remove from clipboard chain
-			if (m_hwndClipChainNext) {
+			if (m_bChained||m_hwndClipChainNext) {
 				ChangeClipboardChain(m_hwndClipChainNext);
 				m_hwndClipChainNext=NULL;
+				m_bChained=false;
 			}
 		}
 	}
 
-	afx_msg void CemuleDlg::OnDrawClipboard( )
+ afx_msg void CemuleDlg::OnDrawClipboard()
 	{
+		AddLogLine(false,_T("OnDrawclipboard"));
+        m_bClipboardChainIsOk=true; // we can disable the timer. 
 		if (thePrefs.WatchClipboard4ED2KLinks()) { // always true if we are here
 				theApp.SearchClipboard();		//scan the clipboard txt for ed2k file links/
 			}
     	if (NULL != m_hwndClipChainNext)
-	    	::SendMessage(m_hwndClipChainNext, WM_DRAWCLIPBOARD, 0, 0); //pass message on to next application. 
-
+	    	 ::SendMessage(m_hwndClipChainNext, WM_DRAWCLIPBOARD, 0, 0); //pass message on to next application. 
+		
 	}
 
 	afx_msg void CemuleDlg::OnChangeCbChain(HWND hWndRemove, HWND hWndAfter){
         CDialog::OnChangeCbChain(hWndRemove, hWndAfter);
     	// Update next_in_chain window handle
+		AddLogLine(false,_T("OnChangeCbChain"));
 	    m_hwndClipChainNext = hWndAfter;
 	}
         

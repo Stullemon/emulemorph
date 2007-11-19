@@ -8,6 +8,8 @@
 #include "OtherFunctions.h"
 #include "emuleDlg.h"
 #include "TransferWnd.h"
+#include "DownloadQueue.h"
+#include "ED2KLink.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -24,7 +26,7 @@ CSelCategoryDlg::CSelCategoryDlg(CWnd* /*pWnd*/,bool bFromClipboard)
 {
 	// If they have selected to use the active category as the default
 	// when adding links, then set m_Return to it.  Otherwise, use 'All' (0).
-	if (thePrefs.UseActiveCatForLinks())
+	if (!bFromClipboard && thePrefs.UseActiveCatForLinks())
 		m_Return =	theApp.emuledlg->transferwnd->GetActiveCategory();
 	else
 		m_Return = 0;
@@ -58,6 +60,17 @@ BOOL CSelCategoryDlg::OnInitDialog()
 	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
 	SetWindowText(GetResString(IDS_CAT_SELDLGCAP));
      // localize & tooltip added by leuk_he
+
+	CString ListFilesNames;
+	for (POSITION pos = theApp.downloadqueue->m_ED2KLinkQueue.GetHeadPosition(); pos != 0; theApp.downloadqueue->m_ED2KLinkQueue.GetNext(pos))
+	{
+		ListFilesNames +=  theApp.downloadqueue->m_ED2KLinkQueue.GetAt(pos)->GetName();
+		ListFilesNames +=   _T("\n");
+	}
+	GetDlgItem(IDC_SELFILES)->SetWindowText(ListFilesNames);
+	SetTool(IDC_SELFILES,IDS_SELFILES_TIP);
+
+
 	if (m_bFromClipboard) {
 		GetDlgItem(IDC_DONTASKMEAGAINCB)->SetWindowText(GetResString(IDS_DONOTWATCHCLIP    ));
         SetTool(IDC_DONTASKMEAGAINCB,IDS_DONOTWATCHCLIP_TIP );
@@ -73,6 +86,8 @@ BOOL CSelCategoryDlg::OnInitDialog()
 	SetTool(IDCANCEL,IDS_OKCANCELSEL_TIP);
 	SetTool(IDOK,IDS_OKCANCELSEL_TIP);
 	
+
+
 
 	// 'All' is always an option.
 	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(GetResString(IDS_ALL) + _T("/") + GetResString(IDS_CAT_UNASSIGN));

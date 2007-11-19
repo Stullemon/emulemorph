@@ -291,6 +291,9 @@
 				RelativePath="EncryptedStreamSocket.cpp">
 			</File>
 			<File
+				RelativePath=".\NetF\Fakealyzer.cpp">
+			</File>
+			<File
 				RelativePath="fakecheck.cpp">
 			</File>
 			<File
@@ -2762,10 +2765,10 @@
 				RelativePath="res\Proxy.ico">
 			</File>
 			<File
-				RelativePath="res\queue.ico">
+				RelativePath=".\res\Mod\queue.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\queue.ico">
+				RelativePath="res\queue.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\Rating-Excellent.ico">
@@ -2999,16 +3002,16 @@
 				RelativePath="res\TrayBtnMetallic.bmp">
 			</File>
 			<File
-				RelativePath="res\TrayConnected.ico">
-			</File>
-			<File
 				RelativePath=".\res\MOD\TrayConnected.ico">
 			</File>
 			<File
-				RelativePath="res\TrayDisconnected.ico">
+				RelativePath="res\TrayConnected.ico">
 			</File>
 			<File
 				RelativePath=".\res\MOD\Traydisconnected.ico">
+			</File>
+			<File
+				RelativePath="res\TrayDisconnected.ico">
 			</File>
 			<File
 				RelativePath=".\res\MOD\traylowid.ico">

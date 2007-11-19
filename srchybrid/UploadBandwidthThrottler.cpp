@@ -727,10 +727,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				}
 
 				if (socket != NULL) {
-					/*
+					
 					SocketSentBytes socketSentBytes = socket->SendControlData(allowedDataRateClass[LAST_CLASS] > 0?(UINT)(BytesToSpend - ControlspentBytes):1, minFragSize);
-					*/
+					/*
 					SocketSentBytes socketSentBytes = socket->SendControlData(1, minFragSize);
+					*/
 					uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 					if (lastSpentBytes) {
 						Socket_stat* stat = NULL;

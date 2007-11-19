@@ -750,27 +750,27 @@ void CHttpDownloadDlg::OnStatusCallBack(HINTERNET /*hInternet*/, DWORD dwInterne
 	{
 		case INTERNET_STATUS_RESOLVING_NAME:
 		{
-			SetStatus(GetResString(IDS_HTTPDOWNLOAD_RESOLVING_NAME), (LPCTSTR) lpvStatusInformation);
+			SetStatus(GetResString(IDS_HTTPDOWNLOAD_RESOLVING_NAME), CString ( (LPCSTR) lpvStatusInformation));
 			break;
 		}
 		case INTERNET_STATUS_NAME_RESOLVED:
 		{
-			SetStatus(GetResString(IDS_HTTPDOWNLOAD_RESOLVED_NAME), (LPCTSTR) lpvStatusInformation);
+			SetStatus(GetResString(IDS_HTTPDOWNLOAD_RESOLVED_NAME), CString ( (LPCSTR)lpvStatusInformation));
 			break;
 		}
 		case INTERNET_STATUS_CONNECTING_TO_SERVER:
 		{
-			SetStatus(GetResString(IDS_HTTPDOWNLOAD_CONNECTING), (LPCTSTR) lpvStatusInformation);
+			SetStatus(GetResString(IDS_HTTPDOWNLOAD_CONNECTING), CString ( (LPCSTR)lpvStatusInformation));
 			break;
 		}
 		case INTERNET_STATUS_CONNECTED_TO_SERVER:
 		{
-			SetStatus(GetResString(IDS_HTTPDOWNLOAD_CONNECTED), (LPCTSTR) lpvStatusInformation);
+			SetStatus(GetResString(IDS_HTTPDOWNLOAD_CONNECTED), CString ( (LPCSTR)lpvStatusInformation));
 			break;
 		}
 		case INTERNET_STATUS_REDIRECT:
 		{
-			SetStatus(GetResString(IDS_HTTPDOWNLOAD_REDIRECTING), (LPCTSTR) lpvStatusInformation);
+			SetStatus(GetResString(IDS_HTTPDOWNLOAD_REDIRECTING), CString ( (LPCSTR)lpvStatusInformation));
 			break;
 		}
 		default:

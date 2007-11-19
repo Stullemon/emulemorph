@@ -1062,20 +1062,22 @@ BEGIN
                     WS_VISIBLE
 END
 
-IDD_SELCATEGORY DIALOGEX 0, 0, 186, 76
+IDD_SELCATEGORY DIALOGEX 0, 0, 186, 118
 STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | 
     WS_SYSMENU
 CAPTION "Select Category"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,70,55,50,14,BS_FLAT
-    PUSHBUTTON      "Cancel",IDCANCEL,130,55,50,14,BS_FLAT
+    DEFPUSHBUTTON   "OK",IDOK,70,92,50,14,BS_FLAT
+    PUSHBUTTON      "Cancel",IDCANCEL,130,92,50,14,BS_FLAT
     COMBOBOX        IDC_CATCOMBO,7,23,172,42,CBS_DROPDOWN | CBS_AUTOHSCROLL | 
                     WS_VSCROLL | WS_TABSTOP
+    LTEXT           "",8,39,167,35,128
     LTEXT           "Select a category or type in a title for a new category for this link.",
                     IDC_STATIC_INS,6,3,174,16
     CONTROL         "Do not ask me again",IDC_DONTASKMEAGAINCB,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,11,41,111,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,79,111,10
+    LTEXT           "files...",IDC_SELFILES,6,38,172,35,0,WS_EX_CLIENTEDGE
 END
 
 IDD_PPG_WEBSRV DIALOGEX 0, 0, 230, 241
@@ -6230,6 +6232,7 @@ BEGIN
    IDS_DONOTWATCHCLIP_TIP "One or more of the links that is copied from the clipboard.\nCheck this option to disable watching of the clipboard.\npress cancel to not paste the link. \nEnter or select a catagory and press ok to insert the links"
    IDS_USS_INITIAL_TTL     "Initial TTL" // [MoNKi: -USS initial TTL-] - Stulle
    IDS_USS_INITIAL_TTL_TIP	"In finding the last common router Skip the first n routers\nThis might be usefule if the providers blocks pings at the\ninternel routers. Test this with the 'tracert' command. Default =0, \nIf you go higher than 8 you have a strange ISP network. max = 20\n20 is not recommended. Setting a too high value will cause\n'Network topology has changed.' verbose messages. Loosing the \neffectiveness  of the USS"
+   IDS_SELFILES_TIP "Filesname that were in the link queue at the first display \nof this category selection. More may be added during \n the category selection but are not displayed here"
 END
 
 

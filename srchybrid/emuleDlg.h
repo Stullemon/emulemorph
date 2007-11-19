@@ -331,9 +331,11 @@ public:
 	void ShowLessControls(bool enable);
 	// MORPH END less controls
 	// MORPH START leuk_he clipboard chain instead of timer
-	void SetClipboardWatch(bool enable);
 	HWND m_hwndClipChainNext;
-	afx_msg void OnDrawClipboard( );
+	bool m_bChained; 
+	bool m_bClipboardChainIsOk;
+	void SetClipboardWatch(bool enable);
+	afx_msg void OnDrawClipboard();
 	afx_msg void OnChangeCbChain(HWND hWndRemove, HWND hWndAfter);
 	// MORPH END leuk_he clipboard chain instead of timer
 	LRESULT OnPowerBroadcast(WPARAM wParam, LPARAM lParam)	;   // leuk_he reconnect on wakeup

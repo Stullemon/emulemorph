@@ -1798,14 +1798,13 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 				theApp.serverconnect->TryAnotherConnectionRequest();
 
 			theApp.listensocket->UpdateConnectionsStatus();
-			/*	MORPH START removed leuk_he clipboard chain instead of timer
-			if (thePrefs.WatchClipboard4ED2KLinks()) {
+			//	MORPH START changed leuk_he clipboard chain instead of timer
+			if ((theApp.emuledlg->m_bClipboardChainIsOk==false)&& thePrefs.WatchClipboard4ED2KLinks()) {
 				// TODO: Remove this from here. This has to be done with a clipboard chain
 				// and *not* with a timer!!
 				theApp.SearchClipboard();		
 
 			}
-			 end commented out */
 			{ static uint32 m_nLastChained=::GetTickCount();
 			  if (::GetTickCount() - m_nLastChained > MIN2MS(5)) {
          		theApp.emuledlg->SetClipboardWatch(thePrefs.WatchClipboard4ED2KLinks()); //	reinsert ourself in the clipboard chain see, note in SetClipboardWatch

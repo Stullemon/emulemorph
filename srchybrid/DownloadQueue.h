@@ -228,7 +228,7 @@ private:
 	bool		PurgeED2KLinkQueue();
 	uint32		m_iLastLinkQueuedTick;
 	bool        m_bClipboardLinkInQueue;
-
+       public: // public for category selection box:
 	CTypedPtrList<CPtrList, CED2KFileLink*> m_ED2KLinkQueue;
 	// khaos::categorymod-
 

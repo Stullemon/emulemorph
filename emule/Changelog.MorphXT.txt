@@ -8,7 +8,8 @@ FIX: USC: fix extreme slot explosion bug for ps 100%.
 CHANGE: Clipboard watch uses clipboard chain, save a bit of cpu. [leuk_he]
 CHANGE: Clipboard ed2k link file watch  now queues into morph category selection.
 FIX: rare heap corruption when safeconnnect is disabled. (netfinity)
-CHANGE: update Safekad to warpf 0.3a.9 beta  (netfinity)
+CHANGE: update Safekad to warpf 0.3a.11 beta  (netfinity)
+FIX: kad fix for file > 4GB (netfinity)
 ADD: USS: initial  TTL (stulle/MonKi)
 ADD: experimental Reconnect kad & server after resume from hibernation.
 
