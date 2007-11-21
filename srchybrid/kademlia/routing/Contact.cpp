@@ -215,7 +215,7 @@ void CContact::UpdateType()
 			break;
 		case 1:
 			m_byType = 1;
-			m_tExpires = (time_t)(time(NULL) + MIN2MS(90) ); // morph prevent float overflow
+			m_tExpires = (time_t)(time(NULL) + MIN2S(90) ); // morph prevent float overflow
 			break;
 		default:
 			m_byType = 0;
