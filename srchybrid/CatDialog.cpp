@@ -16,7 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
 #include "emule.h"
-//#include "CustomAutoComplete.h"
+//#include "CustomAutoComplete.h" // morph
 #include "Preferences.h"
 #include "otherfunctions.h"
 #include "SharedFileList.h"
@@ -30,18 +30,45 @@
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #endif
+/* Morph delete: no regexp
+#define	REGULAREXPRESSIONS_STRINGS_PROFILE	_T("AC_VF_RegExpr.dat")
+emd ,ooprm*/
 
 // CCatDialog dialog
 
 IMPLEMENT_DYNAMIC(CCatDialog, CDialog)
+
+BEGIN_MESSAGE_MAP(CCatDialog, CDialog)
+	ON_BN_CLICKED(IDC_BROWSE, OnBnClickedBrowse)
+	ON_BN_CLICKED(IDOK, OnBnClickedOk)
+	ON_MESSAGE(UM_CPN_SELENDOK, OnSelChange) //UM_CPN_SELCHANGE
+END_MESSAGE_MAP()
+
 CCatDialog::CCatDialog(int index)
 	: CDialog(CCatDialog::IDD, 0)
 {
 	m_myCat=thePrefs.GetCategory(index);
 	if (m_myCat==NULL) return;
+/* morph delete: no regexp
+	if (m_myCat == NULL)
+		return;
+	m_pacRegExp=NULL;
+  end morph */
 }
 
-BOOL CCatDialog::OnInitDialog(){
+CCatDialog::~CCatDialog()
+{
+/* morph no regexp
+	if (m_pacRegExp){
+		m_pacRegExp->SaveList(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + REGULAREXPRESSIONS_STRINGS_PROFILE);
+		m_pacRegExp->Unbind();
+		m_pacRegExp->Release();
+	}
+*/ //end morph
+}
+
+BOOL CCatDialog::OnInitDialog()
+{
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
 	SetIcon(theApp.LoadIcon(_T("CATEGORY"),16,16),FALSE);
@@ -49,6 +76,24 @@ BOOL CCatDialog::OnInitDialog(){
 	m_ctlColor.SetDefaultColor(GetSysColor(COLOR_BTNTEXT));
 	UpdateData();
 
+/* morph no regexp
+	if (!thePrefs.IsExtControlsEnabled()) {
+		GetDlgItem(IDC_REGEXPR)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_STATIC_REGEXP)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_REGEXP)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_REB)->ShowWindow(SW_HIDE);
+	}
+
+	m_pacRegExp = new CCustomAutoComplete();
+	m_pacRegExp->AddRef();
+	if (m_pacRegExp->Bind(::GetDlgItem(m_hWnd, IDC_REGEXP), ACO_UPDOWNKEYDROPSLIST | ACO_AUTOSUGGEST)) {
+		m_pacRegExp->LoadList(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + REGULAREXPRESSIONS_STRINGS_PROFILE);
+	}
+	if (theApp.m_fontSymbol.m_hObject){
+		GetDlgItem(IDC_REB)->SetFont(&theApp.m_fontSymbol);
+		GetDlgItem(IDC_REB)->SetWindowText(_T("6")); // show a down-arrow
+	}
+ */ end morph
 	return true;
 }
 
@@ -57,6 +102,12 @@ void CCatDialog::UpdateData()
 	GetDlgItem(IDC_TITLE)->SetWindowText(m_myCat->strTitle);
 	GetDlgItem(IDC_INCOMING)->SetWindowText(m_myCat->strIncomingPath);
 	GetDlgItem(IDC_COMMENT)->SetWindowText(m_myCat->strComment);
+  /* morph: no regexp
+	if (m_myCat->filter==18)
+		SetDlgItemText(IDC_REGEXP,m_myCat->regexp);
+
+	CheckDlgButton(IDC_REGEXPR,m_myCat->ac_regexpeval);
+ end morph */
 
 	COLORREF selcolor=m_myCat->color;
 	newcolor=m_myCat->color;
@@ -103,9 +154,6 @@ void CCatDialog::UpdateData()
 	// khaos::categorymod-
 }
 
-CCatDialog::~CCatDialog()
-{
-}
 
 void CCatDialog::DoDataExchange(CDataExchange* pDX)
 {
@@ -117,23 +165,18 @@ void CCatDialog::DoDataExchange(CDataExchange* pDX)
 	// khaos::kmod-
 }
 
-
-BEGIN_MESSAGE_MAP(CCatDialog, CDialog)
-	ON_BN_CLICKED(IDC_BROWSE, OnBnClickedBrowse)
-	ON_BN_CLICKED(IDOK, OnBnClickedOk)
-	ON_MESSAGE(UM_CPN_SELENDOK, OnSelChange) //CPN_SELCHANGE
-END_MESSAGE_MAP()
-
-
-// CCatDialog message handlers
-
-void CCatDialog::Localize(){
+void CCatDialog::Localize()
+{
 	GetDlgItem(IDC_STATIC_TITLE)->SetWindowText(GetResString(IDS_TITLE));
 	GetDlgItem(IDC_STATIC_INCOMING)->SetWindowText(GetResString(IDS_PW_INCOMING) + _T("  ") + GetResString(IDS_SHAREWARNING) );
 	GetDlgItem(IDC_STATIC_COMMENT)->SetWindowText(GetResString(IDS_COMMENT));
 	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
 	GetDlgItem(IDC_STATIC_COLOR)->SetWindowText(GetResString(IDS_COLOR));
 	GetDlgItem(IDC_STATIC_PRIO)->SetWindowText(GetResString(IDS_STARTPRIO));
+/* MOrph remove
+	GetDlgItem(IDC_STATIC_AUTOCAT)->SetWindowText(GetResString(IDS_AUTOCAT_LABEL));
+	GetDlgItem(IDC_REGEXPR)->SetWindowText(GetResString(IDS_ASREGEXPR));
+   end morph remove*/
 
 	// khaos::kmod+ Category Advanced A4AF Mode and Auto Cat
 	GetDlgItem(IDC_STATIC_A4AF)->SetWindowText(GetResString(IDS_A4AF_ADVMODE));
@@ -184,6 +227,12 @@ void CCatDialog::Localize(){
 
 	SetWindowText(GetResString(IDS_EDITCAT));
 
+/* morph delete
+SetDlgItemText(IDC_STATIC_REGEXP,GetResString(IDS_STATIC_REGEXP));	
+
+	m_prio.ResetContent();
+	end morph delete*/
+
 	while (m_prio.GetCount()>0) m_prio.DeleteString(0);
 	//m_prio.AddString(GetResString(IDS_DONTCHANGE)); //ZZ:DownloadManager
 	m_prio.AddString(GetResString(IDS_PRIOLOW));
@@ -211,6 +260,10 @@ void CCatDialog::OnBnClickedOk()
 		GetDlgItem(IDC_INCOMING)->GetWindowText(m_myCat->strIncomingPath);
 	
 	GetDlgItem(IDC_COMMENT)->GetWindowText(m_myCat->strComment);
+
+/* Morph delete
+	m_myCat->ac_regexpeval= IsDlgButtonChecked(IDC_REGEXPR)>0;
+  end morph delete */
 
 	MakeFoldername(m_myCat->strIncomingPath);
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
@@ -273,6 +326,18 @@ void CCatDialog::OnBnClickedOk()
 	m_myCat->selectioncriteria.bAdvancedFilterMask = IsDlgButtonChecked(IDC_CHECK_MASK)?true:false;	
 	m_myCat->bResumeFileOnlyInSameCat = IsDlgButtonChecked(IDC_CHECK_RESUMEFILEONLYINSAMECAT)?true:false;	//MORPH - Added by SiRoB, Resume file only in the same category
 	// khaos::categorymod-
+/* morph delete
+	GetDlgItemText(IDC_REGEXP,m_myCat->regexp);
+	if (m_myCat->regexp.GetLength()>0) {
+		if (m_pacRegExp && m_pacRegExp->IsBound()){
+			m_pacRegExp->AddItem(m_myCat->regexp,0);
+			m_myCat->filter=18;
+		}
+	} else if (m_myCat->filter==18) {
+		// deactivate regexp
+		m_myCat->filter=0;
+	}
+   end morph delete */
 	
 	theApp.emuledlg->transferwnd->downloadlistctrl.Invalidate();
 
@@ -287,3 +352,13 @@ LONG CCatDialog::OnSelChange(UINT lParam, LONG /*wParam*/)
 		newcolor = m_ctlColor.GetColor();
 	return TRUE;
 }
+
+/* morph delete
+void CCatDialog::OnDDBnClicked()
+{
+	CWnd* box = GetDlgItem(IDC_REGEXP);
+	box->SetFocus();
+	box->SetWindowText(_T(""));
+	box->SendMessage(WM_KEYDOWN, VK_DOWN, 0x00510001);
+}
+end morph delete */

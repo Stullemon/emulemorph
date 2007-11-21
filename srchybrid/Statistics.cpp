@@ -307,18 +307,18 @@ float CStatistics::GetAvgDownloadRate(int averageType)
 		case AVG_SESSION:
 			if (theStats.transferStarttime == 0)
 				return 0.0F;
-			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;
+			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;// Morph: leuk_he: DWORD to  float cast
 			if (running < 5)
 				return 0.0F;
-			return (float)(theStats.sessionReceivedBytes / 1024.0f ) / running; 
+			return (float)(theStats.sessionReceivedBytes / 1024.0f ) / running; // Morph: leuk_he: DWORD to  float cast
 
 		case AVG_TOTAL:
 			if (theStats.transferStarttime == 0)
 				return thePrefs.GetConnAvgDownRate();
-			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;
+			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;// Morph: leuk_he: DWORD to  float cast
 			if (running < 5)
 				return thePrefs.GetConnAvgDownRate();
-			return (((float)(theStats.sessionReceivedBytes / 1024.0f) / running) + thePrefs.GetConnAvgDownRate()) / 2.0F;
+			return (((float)(theStats.sessionReceivedBytes / 1024.0f) / running) + thePrefs.GetConnAvgDownRate()) / 2.0F;// Morph: leuk_he: DWORD to  float cast
 
 		default:
 			if (downrateHistory.size() == 0)
@@ -338,18 +338,18 @@ float CStatistics::GetAvgUploadRate(int averageType)
 		case AVG_SESSION:
 			if (theStats.transferStarttime == 0)
 				return 0.0F;
-			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;
+			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;// Morph: leuk_he: DWORD to  float cast
 			if (running < 5)
 				return 0.0F;
-			return (float)(theStats.sessionSentBytes / 1024.0) / running;
+			return (float)((theStats.sessionSentBytes / 1024.0) / running);// Morph: leuk_he: DWORD to  float cast
 
 		case AVG_TOTAL:
 			if (theStats.transferStarttime == 0)
 				return thePrefs.GetConnAvgUpRate();
-			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;
+			running = (GetTickCount() - theStats.transferStarttime) / 1000.0f;// Morph: leuk_he: DWORD to  float cast
 			if (running < 5)
 				return thePrefs.GetConnAvgUpRate();
-			return (((float)(theStats.sessionSentBytes / 1024) / running) + thePrefs.GetConnAvgUpRate()) / 2.0F;
+			return (float)(((theStats.sessionSentBytes / 1024) / running) + thePrefs.GetConnAvgUpRate()) / 2.0F; // Morph: leuk_he: DWORD to  float cast
 
 		default:
 			if (uprateHistory.size() == 0)
@@ -363,7 +363,7 @@ float CStatistics::GetAvgUploadRate(int averageType)
 
 void CStatistics::CompDownDatarateOverhead()
 {
-	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
+	//MORPH START - Changed by SiRoB, Better datarate measurement for low and high speed
 	DWORD curTick = GetTickCount();
 	if (m_nDownDataRateMSOverhead > 0) {
 		TransferredData newitem = {m_nDownDataRateMSOverhead, curTick};

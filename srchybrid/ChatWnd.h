@@ -47,7 +47,6 @@ public:
 	// MORPH (CB) Friendnote START
 	CEdit m_FriendNote;
 	// MORPH (CB) Friendnote END
-
 protected:
 	friend class CChatSelector;
 	HICON icon_friend;
@@ -81,7 +80,6 @@ protected:
 	afx_msg void OnBnClickedSmiley();
 	afx_msg void OnBnClickedClose();
 	afx_msg void OnBnClickedSend();
-
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 public:
 	bool	UpdateEmfriendsMetFromURL(const CString& strURL);

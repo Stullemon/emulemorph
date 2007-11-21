@@ -309,7 +309,6 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 	m_provider.InsertItem(0, GetResString(IDS_WIZARD_CUSTOM));m_provider.SetItemText(1,1,GetResString(IDS_WIZARD_ENTERBELOW));m_provider.SetItemText(1,2,GetResString(IDS_WIZARD_ENTERBELOW));
 	m_provider.InsertItem(1, GetResString(IDS_UNKNOWN));m_provider.SetItemText(0,1,_T(""));m_provider.SetItemText(0,2,_T(""));
 	// MORPH END : leuk_he: swith 1 and 0 since morph works much better with limits set correct
-
 	m_provider.InsertItem(2,_T("56-k Modem"));m_provider.SetItemText(2,1,_T("56"));m_provider.SetItemText(2,2,_T("56"));
 	m_provider.InsertItem(3,_T("ISDN"));m_provider.SetItemText(3,1,_T("64"));m_provider.SetItemText(3,2,_T("64"));
 	m_provider.InsertItem(4,_T("ISDN 2x"));m_provider.SetItemText(4,1,_T("128"));m_provider.SetItemText(4,2,_T("128"));
@@ -340,7 +339,7 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 	return TRUE;
 }
 
-void CConnectionWizardDlg::OnNMClickProviders(NMHDR* /*pNMHDR*/, LRESULT* /* pResult */ )
+void CConnectionWizardDlg::OnNMClickProviders(NMHDR* /*pNMHDR*/, LRESULT* /* pResult */ ) // morph prevent compile warning
 {
 	SetCustomItemsActivation();
 

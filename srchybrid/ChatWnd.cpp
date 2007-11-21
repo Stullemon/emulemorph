@@ -58,7 +58,6 @@ static char THIS_FILE[] = __FILE__;
 // Used to acess latest selected entry data, even when the list has changed (add/remove actions)
 CFriend *pFriend = NULL;
 // MORPH (CB) Friendnote END
-
 IMPLEMENT_DYNAMIC(CChatWnd, CDialog)
 
 BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
@@ -108,7 +107,6 @@ void CChatWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CMESSAGE, m_wndMessage);
 	DDX_Control(pDX, IDC_CSEND, m_wndSend);
 	DDX_Control(pDX, IDC_CCLOSE, m_wndClose);
-
 	// MORPH (CB) Friendnote START
 	DDX_Control(pDX, IDC_FRIENDNOTE_EDIT, m_FriendNote);
 	// MORPH (CB) Friendnote END
@@ -119,8 +117,7 @@ void CChatWnd::OnLvnItemActivateFriendList(NMHDR* /*pNMHDR*/, LRESULT* /*pResult
 	int iSel = m_FriendListCtrl.GetSelectionMark();
 
 	if (iSel != -1) {
-/* official:
-
+/* official: friendnote replaced
 		CFriend* pFriend = (CFriend*)m_FriendListCtrl.GetItemData(iSel);
 		ShowFriendMsgDetails(pFriend);
 	}
@@ -236,7 +233,7 @@ void CChatWnd::ShowFriendMsgDetails(CFriend* pFriend)
 		GetDlgItem(IDC_FRIENDS_IDENTIFICACION_EDIT)->SetWindowText(_T("-"));
 		GetDlgItem(IDC_FRIENDS_DESCARGADO_EDIT)->SetWindowText(_T("-"));
 		GetDlgItem(IDC_FRIENDS_SUBIDO_EDIT)->SetWindowText(_T("-"));
-		GetDlgItem(IDC_FRIENDNOTE_EDIT)->SetWindowText(_T("")); //Friendnote
+		GetDlgItem(IDC_FRIENDNOTE_EDIT)->SetWindowText(_T("")); // Morph Friendnote
 	}
 }
 

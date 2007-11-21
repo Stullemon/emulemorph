@@ -18,36 +18,45 @@
 #include "ColorButton.h"
 
 struct Category_Struct;
+/* morph delete: no regexp
+class CCustomAutoComplete;
+*/
 
 class CCatDialog : public CDialog
 {
 	DECLARE_DYNAMIC(CCatDialog)
-
 public:
 	CCatDialog(int catindex);   // standard constructor
 	virtual ~CCatDialog();
-	virtual BOOL OnInitDialog();
 
-// Dialog Data
 	enum { IDD = IDD_CAT };
 
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-//	afx_msg void OnCbnSelchangeColorselector();
-	afx_msg LONG OnSelChange(UINT lParam, LONG wParam);
-	DECLARE_MESSAGE_MAP()
-	CColorButton m_ctlColor;
-private:
-	void UpdateData();
 	Category_Struct* m_myCat;
-	void Localize();
 	DWORD newcolor;
+  CColorButton m_ctlColor;
+  
 
 	// khaos::kmod+ Category Advanced A4AF Mode
 	CComboBox m_prio, m_comboA4AF;
 	// khaos::kmod-
 
-public:
+
+//	afx_msg void OnCbnSelchangeColorselector();
+/* morph  No regex delete:
+	CComboBox m_prio;
+	CCustomAutoComplete* m_pacRegExp;
+*/
+	
+	void Localize();
+	void UpdateData();
+
+	virtual BOOL OnInitDialog();
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+
+DECLARE_MESSAGE_MAP()
+	afx_msg LONG OnSelChange(UINT lParam, LONG wParam);
+
 	afx_msg void OnBnClickedBrowse();
 	afx_msg void OnBnClickedOk();
 };

@@ -161,7 +161,7 @@ public:
 	BOOL IOCtl( long lCommand, DWORD* lpArgument );
 
 	//Establishes a socket to listen for incoming connection requests.
-	BOOL Listen( int nConnectionBacklog = SOMAXCONN );
+	BOOL Listen( int nConnectionBacklog = SOMAXCONN ); //morph
 
 	//Receives data from the socket.
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);

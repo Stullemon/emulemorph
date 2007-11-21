@@ -46,9 +46,10 @@ CRBMap<uint32, WebServDef>	CWebServer::AdvLogins; //unlimited logs
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
+// morph start  obfuscated server string if obfuscation is enable
 #define HTTPInit thePrefs.IsClientCryptLayerRequested()?_T("Server: embedded\r\nConnection: close\r\nContent-Type: text/html\r\n"):_T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\n")
 #define HTTPInitGZ thePrefs.IsClientCryptLayerRequested()?_T("Server: embedded\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Encoding: gzip\r\n"):_T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Encoding: gzip\r\n")
+// morph end obfuscated server string if obfuscation is enable
 #define HTTPENCODING _T("utf-8")
 
 #define WEB_SERVER_TEMPLATES_VERSION	7
@@ -116,7 +117,6 @@ CWebServer::CWebServer(void)
 	m_Params.QueueSort =	(QueueSort)ini.GetInt(_T("QueueSort"),QU_SORT_FILENAME);
 	m_Params.ServerSort =	(ServerSort)ini.GetInt(_T("ServerSort"),SERVER_SORT_NAME);
 	m_Params.SharedSort =	(SharedSort)ini.GetInt(_T("SharedSort"),SHARED_SORT_NAME);
-
 	LoadWebServConf(); //MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
 }
 
