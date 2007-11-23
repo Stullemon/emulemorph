@@ -4309,7 +4309,7 @@ void CemuleDlg::SetClipboardWatch(bool enable)
          */
 			if (m_bChained|| m_hwndClipChainNext)
                   ChangeClipboardChain(m_hwndClipChainNext); // remove (!)
-			m_bClipboardChainIsOk==false; // fallback to timer if WM OnDrawClipboard mesages are not received. 
+			m_bClipboardChainIsOk=false; // fallback to timer if WM OnDrawClipboard mesages are not received. 
 			m_hwndClipChainNext=SetClipboardViewer(); // (re) add
 			m_bChained=true;   // we might be last in queue, prevent circular referece. 
 			

@@ -93,7 +93,7 @@ BOOL CCatDialog::OnInitDialog()
 		GetDlgItem(IDC_REB)->SetFont(&theApp.m_fontSymbol);
 		GetDlgItem(IDC_REB)->SetWindowText(_T("6")); // show a down-arrow
 	}
- */ end morph
+ */ //end morph
 	return true;
 }
 
