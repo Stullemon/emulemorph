@@ -727,8 +727,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				}
 
 				if (socket != NULL) {
-					
-					SocketSentBytes socketSentBytes = socket->SendControlData(allowedDataRateClass[LAST_CLASS] > 0?(UINT)(BytesToSpend - ControlspentBytes):1, minFragSize);
+					// try to keep half of data for upload, or sockets will starve and sessions will timeout. 
+					SocketSentBytes socketSentBytes = socket->SendControlData(allowedDataRateClass[LAST_CLASS] > 0?(UINT)(BytesToSpend - ControlspentBytes)/2:1, minFragSize);
 					/*
 					SocketSentBytes socketSentBytes = socket->SendControlData(1, minFragSize);
 					*/
@@ -819,7 +819,8 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			//loop 4
 			numberofclientinhigherclass = 0;
 			//if (realBytesToSpendClass[LAST_CLASS]/1000 >= allowedDataRateClass[LAST_CLASS] || allowedDataRateClass[LAST_CLASS] == _UI32_MAX || bUploadUnlimited) {
-			//if ((thisLoopTick - dwLastFullBandwidthSpent[LAST_CLASS]) >= 1000/max(1,m_highestNumberOfFullyActivatedSlotsClass[0]+m_highestNumberOfFullyActivatedSlotsClass[1]+m_highestNumberOfFullyActivatedSlotsClass[LAST_CLASS])) {
+			//if (  (thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled()) ||
+//				(thisLoopTick - dwLastFullBandwidthSpent[LAST_CLASS]) >= 1000/max(1,m_highestNumberOfFullyActivatedSlotsClass[0]+m_highestNumberOfFullyActivatedSlotsClass[1]+m_highestNumberOfFullyActivatedSlotsClass[LAST_CLASS])) {
 				for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 					BytesToSpend = realBytesToSpendClass[classID] / 1000;
 					if (realBytesToSpendClass[classID] > realBytesToSpendClass[LAST_CLASS])
@@ -927,7 +928,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					}
 					numberofclientinhigherclass += slotCounterClass[classID];
 				}
-			//}
+	//		} // if suc or uss
 			sendLocker.Unlock();
 			lastLoopTickTryTosend = thisLoopTick;
 		}

@@ -1746,7 +1746,7 @@ int CReadBlockFromFileThread::Run() {
 		catch(CString error)
 		{
 			if (thePrefs.GetVerbose())
-				DebugLogWarning(GetResString(IDS_ERR_CLIENTERRORED), m_client->GetUserName(),(LPCTSTR) error);	// type cast. suspicious chash log	Agiz 10.3
+				theApp.QueueDebugLogLine(false,GetResString(IDS_ERR_CLIENTERRORED), m_client->GetUserName(),(LPCTSTR) error);	// type cast. suspicious chash log	Agiz 10.3
 			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
 			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
@@ -1758,7 +1758,7 @@ int CReadBlockFromFileThread::Run() {
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
 			e->GetErrorMessage(szError, ARRSIZE(szError));
 			if (thePrefs.GetVerbose())
-				DebugLogWarning(_T("Failed to create upload package for %s - %s"), m_client->GetUserName(), szError);
+				theApp.QueueDebugLogLine(_T("Failed to create upload package for %s - %s"), m_client->GetUserName(), szError);
 			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
 			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)

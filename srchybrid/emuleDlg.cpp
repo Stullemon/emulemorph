@@ -4294,22 +4294,15 @@ void CemuleDlg::ShowLessControls (bool enable) {
 // MORPH START leuk_he clipboard chain instead of timer
 void CemuleDlg::SetClipboardWatch(bool enable)
 	{
-		AddLogLine(false,_T("SetClipboardWatch"));
+		DebugLog(LOG_SUCCESS,_T("SetClipboardWatch"));
 		if (enable) {
 			// add me to chain.
-			/*   Some apps,  WinXP's remote desktop for one, don't play nice with
-            the chain.  
-
-            It might be possible to detect if we're still in the
-            chain by calling
-               SendMessage (GetClipboardViewer(), WM_DRAWCLIPBOARD, 0, 0);
-            and then seeing if we get the WM_DRAWCLIPBOARD message.
-            That, however, might be more expensive than just removing and re-adding 
-            ourselves back into the chain.
-         */
+			// m_b_chained to preven tloop to self if we are last in chain. 
 			if (m_bChained|| m_hwndClipChainNext)
                   ChangeClipboardChain(m_hwndClipChainNext); // remove (!)
 			m_bClipboardChainIsOk=false; // fallback to timer if WM OnDrawClipboard mesages are not received. 
+			                               // SetClipboardViewer triggers the OnDrawClipboard if the cahin is still intact. 
+			                               // else fall back to polling the clipboard every sec. 
 			m_hwndClipChainNext=SetClipboardViewer(); // (re) add
 			m_bChained=true;   // we might be last in queue, prevent circular referece. 
 			
@@ -4326,7 +4319,7 @@ void CemuleDlg::SetClipboardWatch(bool enable)
 
  afx_msg void CemuleDlg::OnDrawClipboard()
 	{
-		AddLogLine(false,_T("OnDrawclipboard"));
+		DebugLog(LOG_SUCCESS,_T("OnDrawclipboard"));
         m_bClipboardChainIsOk=true; // we can disable the timer. 
 		if (thePrefs.WatchClipboard4ED2KLinks()) { // always true if we are here
 				theApp.SearchClipboard();		//scan the clipboard txt for ed2k file links/
@@ -4339,7 +4332,7 @@ void CemuleDlg::SetClipboardWatch(bool enable)
 	afx_msg void CemuleDlg::OnChangeCbChain(HWND hWndRemove, HWND hWndAfter){
         CDialog::OnChangeCbChain(hWndRemove, hWndAfter);
     	// Update next_in_chain window handle
-		AddLogLine(false,_T("OnChangeCbChain"));
+		DebugLog(LOG_SUCCESS,_T("OnChangeCbChain"));
 	    m_hwndClipChainNext = hWndAfter;
 	}
         
@@ -4347,7 +4340,7 @@ void CemuleDlg::SetClipboardWatch(bool enable)
 
 	LRESULT  CemuleDlg::OnPowerBroadcast(WPARAM wParam, LPARAM lParam)
 {
-	AddLogLine(false,_T("DEBUG:Power state change. wParam=%d lPararm=%ld"),wParam,lParam);
+	DebugLog(LOG_SUCCESS,_T("DEBUG:Power state change. wParam=%d lPararm=%ld"),wParam,lParam);
 	switch (wParam) {
 			    case PBT_APMRESUMEAUTOMATIC:
                 case PBT_APMRESUMECRITICAL:
