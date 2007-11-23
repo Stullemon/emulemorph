@@ -3449,8 +3449,9 @@ STRINGTABLE
 BEGIN
     IDS_DONOTWATCHCLIP 		"Parar de monitorizar el portapapeles"
     IDS_DONOTWATCHCLIP_TIP 	"Uno o más elinks son copiados del portapapeles.\nActiva esta opción para que eMule deje de monitorizar el portapapeles.\nPulsa Cancelar para no pegar el elink.\nIntroduce o selecciona una categoría y pulsa OK para añadir los elinks"
-    IDS_USS_INITIAL_TTL     "TTL Inicial" // [MoNKi: -USS initial TTL-] - Stulle
+    IDS_USS_INITIAL_TTL     "TTL Inicial"
     IDS_USS_INITIAL_TTL_TIP      "En busca del último router en común, ignora los primeros n routers\nEsto puede ser muy útil si el proveedor bloquea pings a los routers de Internet.\nHaz un test con el comando 'tracert'. Por defecto: 0\nSi configuras el TTL por encima de 8, tienes una topología de red muy atípica. Máximo = 20\nNo es recomendable configurarlo a 20. Configurándolo con un valor demasiado\nalto, puede causar los siguientes mensajes en el registro del MorphXT: 'Network topology has changed.' (La topología de red ha cambiado)\nperdiendo la efectividad del USS"
+    IDS_SELFILES_TIP "Los nombres de los archivos que están en la cola de elinks en el portapapeles,\nse muestran en la primera selección de la categoría.\nSe pueden añadir más de uno durante la selección de categoría,\npero no son mostrados."
 END
 
 #endif    // Spanish (Castilian) resources

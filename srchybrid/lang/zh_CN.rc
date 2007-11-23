@@ -508,14 +508,14 @@ BEGIN
     IDS_FR                  "星期五"
     IDS_SA                  "星期六"
     IDS_SO                  "星期日"
-    IDS_WEB_ADMINLOGIN      "远程网络界面-管理员-登陆"
-    IDS_WEB_GUESTLOGIN      "远程网络界面-客人-登陆"
-    IDS_WEB_SESSIONEND      "远程网络界面:注销"
+    IDS_WEB_ADMINLOGIN      "远程网络服务-管理员-登陆"
+    IDS_WEB_GUESTLOGIN      "远程网络服务-客人-登陆"
+    IDS_WEB_SESSIONEND      "远程网络服务:注销"
     IDS_DETAILS             "详细资料"
     IDS_ACTION              "动作"
     IDS_REMOVE              "删除"
     IDS_NEW                 "新建"
-    IDS_WEB_BADLOGINATTEMPT "远程网络界面:登陆尝试失败"
+    IDS_WEB_BADLOGINATTEMPT "远程网络服务:登陆尝试失败"
 END
 
 STRINGTABLE 
@@ -1123,7 +1123,7 @@ BEGIN
     IDS_KAD_SEARCH_KEYWORD_INVALID 
                             "无效的Kad关键字.\r\n\r\nKad搜索表达式必须符合以下格式:\r\n\r\n\t<Kad关键字> [ <ed2k搜索表达式> ]\r\n\r\n<Kad关键字>不能包含以下任何字符:\r\n\r\n\t%s"
     IDS_EDITCAT             "编辑分类属性"
-    IDS_PW_WS               "远程网络界面"
+    IDS_PW_WS               "远程网络服务"
 END
 
 STRINGTABLE 
@@ -1170,7 +1170,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_ACTSESSIONS         "活动会话数"
-    IDS_WEBSRV              "远程网络界面:"
+    IDS_WEBSRV              "远程网络服务:"
     IDS_SW_REFETCHRES       "重新得到结果"
     IDS_FILEHASH            "文件Hash"
     IDS_PW_PROXY            "代理服务器"
@@ -1459,7 +1459,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_FD_DOWNLOADSTARTED  "下载已添加:"
+    IDS_FD_DOWNLOADSTARTED  "下载添加于:"
     IDS_FAILEDREOPEN        "致命错误:重新打开Partfile失败‘%s’(%s)!"
     IDS_ERR_PREVIEWALREADY  "此客户的预览请求正在等待"
     IDS_ERR_PREVIEWFAILED   "来自用户'%s'的预览失败"
@@ -1518,10 +1518,10 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_DYNUP_PINGTOLERANCE "Ping 容限 (%最低Ping)"
-    IDS_DYNUP_GOINGUPDIVIDER "向上缓慢"
-    IDS_DYNUP_GOINGDOWNDIVIDER "向下缓慢"
-    IDS_DYNUP_NUMBEROFPINGS "平均最大Ping次数"
+    IDS_DYNUP_PINGTOLERANCE "Ping 容限 (与最低Ping的百分比)"
+    IDS_DYNUP_GOINGUPDIVIDER "上行迟延"
+    IDS_DYNUP_GOINGDOWNDIVIDER "下行迟延"
+    IDS_DYNUP_NUMBEROFPINGS "平均Ping值取样数"
     IDS_DYNUP_MINUPLOAD     "最低允许的上传速度"
     IDS_ESTTIMELEFT         "估计剩余时间:"
     IDS_TRANSFER_RATE_LABEL "传输速率:"
@@ -2132,7 +2132,6 @@ BEGIN
     IDS_DELAYEDBYUPNP       "由于UPnP正在配置端口映射,网络连接已被延迟."  //"Connecting to the network is delayed, because UPnP is still busy configuring the port forwardings."
     IDS_DELAYEDBYUPNP2      "请等候数秒,eMule将在UPnP设置完毕时开始连接."  //"Please wait some seconds, eMule will connect as soon as UPnP finished."
     IDS_UPNP                "UPnP"
-    IDS_UPNPCLOSEONEXIT     "退出时移除UPnP端口映射"  //"Remove UPnP port forwardings on exit"
     IDS_UPNPSKIPWANIP       "跳过广域网(WAN) IP设置步骤"  //"Skip WAN IP setup"
     IDS_UPNPSKIPWANPPP      "跳过广域网(WAN) PPP设置步骤"  //"Skip WAN PPP setup"
     IDS_SHAREEMULELABEL     "和本机其他用户分享eMule"  //"Sharing eMule with other computer users"
@@ -2190,10 +2189,10 @@ BEGIN
     IDS_USS                 "上传速度检测 (USS)"
     IDS_USS_ENABLED         "启用"
     IDS_USS_LOG             "在debug日志中显示记录"
-    IDS_USS_PINGTOLERANCE   "Ping值容限 (in %%) (Default %i)"
-    IDS_USS_GOINGUPDIVIDER  "上行延迟 (Default %i)"
-    IDS_USS_GOINGDOWNDIVIDER "下行延迟 (Default %i)"
-    IDS_USS_NUMBEROFPINGS   "最大平均ping值 (Default %i)"
+    IDS_USS_PINGTOLERANCE   "Ping值容限 (in %%) (默认 %i)"
+    IDS_USS_GOINGUPDIVIDER  "上行延迟 (默认 %i)"
+    IDS_USS_GOINGDOWNDIVIDER "下行延迟 (默认 %i)"
+    IDS_USS_NUMBEROFPINGS   "平均Ping值取样数 (默认 %i)"
     IDS_USSFINDLASTCOMMON   "USS: 开始路由追踪以寻找上一个通用主机."
     IDS_USSFOUNDLASTCOMMON  "USS: 找到上一个通用主机. LastCommonHost: %s @ TTL: %i HostToPing: %s"
     IDS_USSSTARTLOWPING     "USS: 寻找最低ping值的起始值..."
@@ -2490,7 +2489,7 @@ BEGIN
     IDS_UPNP_PORTDELETED    "UPnP: 端口映射已删除 ""%s"". [%s]"
     IDS_UPNP_LOGEVENTS      "记录 UPnP 事件"
     IDS_UPNP_ENABLE         "启用UPnP"
-    IDS_UPNP_ENABLEWEB      "为远程网络界面端口启用UPnP"
+    IDS_UPNP_ENABLEWEB      "为远程网络服务端口启用UPnP"
     IDS_RANDOMPORTS         "随机端口"
     IDS_MINPORT             "最小端口"
 END
@@ -3083,7 +3082,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPNP_ENABLE_TIP     "设置你的电脑所面临的路由器端口.\n可能必须先启用路由器的uPnP功能\n如果你已经手动设定好了端口则无需此项设置\n如果你没有使用路由器也不需设置\n如果使用了'随机端口'则推荐使用此项设置\n(默认设置: 自动检测)"
-    IDS_UPNP_ENABLEWEB_TIP  "设置远程网络界面所使用的端口, \n这样才能通过internet执行远程网络服务管理"
+    IDS_UPNP_ENABLEWEB_TIP  "设置远程网络服务所使用的端口, \n这样才能通过internet执行远程网络服务管理"
     WAP_TIP                 "无线通讯协议(WAP)是一个开放的国际标准\n适用于通过无线连接(如手机上网)使用的程序"
     ENABLEWAP_TIP           "启用wap界面"
     TEMPLATE_TIP            "选择Morph将使用的wap模板,\n默认位于emule的wapserver目录下(未设定!)"
@@ -3100,17 +3099,17 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDC_WSPASS_TIP          "设置用于访问远程网络服务界面的密码. \n设置恰当的密码非常重要,\n否则任何人都可能通过web服务界面控制你的eMule.\n输入的密码将显示为 ***. 无预设密码."
+    IDC_WSPASS_TIP          "设置用于访问远程网络服务界面的密码. \n设置恰当的密码非常重要,\n否则任何人都可能通过远程网络服务控制你的eMule.\n输入的密码将显示为 ***. 无预设密码."
     IDC_WSPASSLOW_TIP       "启用游客帐号\n游客只能浏览, 不能更改任何设置"
     IDC_MMPASSWORDFIELD_TIP "允许java客户访问的密码"
-    IDC_WSPORT_TIP          "web服务界面的端口. 默认为4711. \n改变此端口会导致web服务界面更加难以访问.\n但如果改成80端口, 有时会更容易访问.\n如果使用了路由器, 需要打开这个端口或者启用uPnp"
+    IDC_WSPORT_TIP          "远程网络服务所使用的端口. 默认为4711. \n改变此端口会导致远程网络服务更加难以访问.\n但如果改成80端口, 有时会更容易访问.\n如果使用了路由器, 需要打开这个端口或者启用uPnp"
     IDC_MMPORT_FIELD_TIP    "Emule的手机用户界面的监听端口.\n大多数java手机适用80端口 (默认设置)"
-    IDC_TMPLPATH_TIP        "web服务界面所采用的模板.\n这个模板也包含html代码."
+    IDC_TMPLPATH_TIP        "远程网络服务界面所采用的模板.\n这个模板也包含html代码."
     IDC_WSTIMEOUT_TIP       "在自动注销前所等待的时间.\n设为0则将禁用自动注销."
-    IDC_WSENABLED_TIP       "启用eMule的web服务界面.\n你将能够通过浏览器远程控制eMule"
+    IDC_WSENABLED_TIP       "启用eMule的远程网络服务界面.\n你将能够通过浏览器远程控制eMule"
     IDC_WSENABLEDLOW_TIP    "启用只读游客帐号.\n默认设置: 禁用."
     IDC_MMENABLED_TIP       "启用emule手机界面.\n可以通过支持java的手机远程控制eMule.\n大多数jave手机有40 KB的可用固定内存,\n大约150-200KB的可用流量."
-    IDC_WS_GZIP_TIP         "压缩传送到web服务界面的数据.\n所有主流浏览器都支持这项功能,\n但如果你希望通过脚本控制eMule,\n可能需要禁用此项功能"
+    IDC_WS_GZIP_TIP         "压缩传送到网络远程服务界面的数据.\n所有主流浏览器都支持这项功能,\n但如果你希望通过脚本控制eMule,\n可能需要禁用此项功能"
     IDC_WS_ALLOWHILEVFUNC_TIP 
                             "允许管理员帐号控制关闭eMule\n以及关闭或重启计算机. \n需要 选项->常规中设为在Windows启动运行eMule"
 END
@@ -3118,7 +3117,7 @@ END
 STRINGTABLE 
 BEGIN
     IDC_WSRELOADTMPL_TIP    "重新加载模板."
-    IDC_TMPLBROWSE_TIP      "浏览文件系统,\n选择包含有web服务界面所需html代码的模板文件"
+    IDC_TMPLBROWSE_TIP      "浏览文件系统,\n选择包含有网络远程服务界面所需html代码的模板文件"
     IDC_GUIDELINK_TIP       "通过浏览器访问http://mobil.emule-project.net/\n启动手机eMule向导"
     IDS_PREFER_SHARE_ALL_TIP 
                             "优先连接到那些有能力处理你的全部共享文件\n(即软性限制符合要求)的服务器."
@@ -3489,7 +3488,7 @@ BEGIN
     IDS_WIZARDREQUIREOBFUSCATED "仅连接到支持加密连接的服务器.\n启用此选项将不会连接到恶意的/虚假的服务器"
     IDS_MORPHWIZ_IMPORT     "运行导入工具来导入\neDonkey/shareaza/eMule中的未完成下载"
     IDS_UPNP_NETSTATUS      "Upnp"
-    IDS_UPNP_ENABLE_WEB     "为远程网络界面端口启用UPnP"
+    IDS_UPNP_ENABLE_WEB     "为远程网络服务端口启用UPnP"
     IDS_UPNP_INFOUNINIT     ",尚未初始化\r\n"
     IDS_UPNP_INFOENABLED    ",已启用\r\n"
     IDS_UPNP_INFODISABLED   ",已禁用\r\n"
@@ -3600,12 +3599,20 @@ BEGIN
     IDS_UPNPPORT_TIP  "upnp使用的端口. 注意不要被其它程序占用!\n(默认设置: 0, 自动分配端口)"
     IDS_UPNPCLEARONCLOSE_TIP "启用: 开放固定端口并在退出程序时关闭\n禁用：创建动态端口, 退出时不关闭"
     IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "仅对检测到的第一个设备开放端口\n注意: 某些windows安装程序会误报本地网关设备\n默认设置: 关闭"
+    IDS_UPNPCLOSEONEXIT "退出eMule时关闭端口"
     IDS_UPNPLIMITTOFIRSTCONNECTION "仅为首个连接开放端口"
     IDS_UPNFORCEUPDATE "强制按时刷新端口"
     IDS_UPNFORCEUPDATE_TIP "每隔10分钟强制分配upnp端口,\n而不首先检测是否已存在端口开放规则\n (默认设置 = 禁用!)"
  END
 
-
+ STRINGTABLE
+ BEGIN
+   IDS_DONOTWATCHCLIP "停止监视剪贴板"
+   IDS_DONOTWATCHCLIP_TIP "发现来自剪贴板的ED2K链接.\n勾选此项可停止对剪贴板的监控.\n如果不想下载该链接, 可点击'取消' \n输入或选择一个分类之后点击'OK'开始下载该链接." 
+   IDS_USS_INITIAL_TTL     "TTL初始化" // [MoNKi: -USS initial TTL-] - Stulle
+   IDS_USS_INITIAL_TTL_TIP      "在搜索路由的过程中忽略找到的第一个路由设备.\n如果网络提供者禁止了来自网内的ping则很有效.\n可使用'tracert'命令测试效果, 默认设置: 关闭.\n如果设置的值大于8, 你的ISP网络就很奇怪了. 最大值=20\n不推荐使用最大值20. 设得太高会导致详细日志中出现'网络拓扑变化'的信息,\n并且会失去USS的效果."
+   IDS_SELFILES_TIP "第一次出现在选择类别对话框中的名称. \n在选择类别时还可以添加新的名称, 但不会在这里显示." 
+END
 
 
 #endif    // Chinese (P.R.C.) resources

@@ -2075,7 +2075,7 @@ BEGIN
     IDS_CAT_SETORDER        "Imposta la Priorità Lineare"
     IDS_CAT_ORDER           "Inserisci un numero intero maggiore o uguale a zero. Il numero minore viene avviato per primo."
     IDS_CAT_PAUSEDSHOWN     " | Mostra quelli in Pausa"
-    IDS_CAT_PAUSEDHIDDEN    " | Mostra quelli Nascosti"
+    IDS_CAT_PAUSEDHIDDEN    " | Nascondi quelli in Pausa"
     IDS_CAT_COLCATEGORY     "Categoria"
     IDS_CAT_COLORDER        "PL"
     IDS_CAT_MNUAUTOINC      "Incremento Automatico Selezionato"
@@ -2094,10 +2094,10 @@ BEGIN
     IDS_SUC                 "Smart Upload Control (SUC)"
     IDS_SUC_ENABLED         "Abilitato"
     IDS_MINUPLOAD           "Limite minimo per l'Upload"
-    IDS_SUC_HIGH            "High Pass (Default %i)"
-    IDS_SUC_LOW             "Low Pass (Default %i)"
-    IDS_SUC_PITCH           "Pitch (Default %i)"
-    IDS_SUC_DRIFT           "Drift (Default %i)"
+    IDS_SUC_HIGH            "High Pass (in Bit/sec, Default %i)"
+    IDS_SUC_LOW             "Low Pass (in Bit/sec, Default %i)"
+    IDS_SUC_PITCH           "Pitch (in Millisecondi, Default %i)"
+    IDS_SUC_DRIFT           "Drift (in Byte, Default %i)"
     IDS_SHOWSECUREDCONNECTION "Mostra le connessioni con i Client Sicuri"
     IDS_SUC_LOG             "Mostra le attività nel Registro Approfondito"
     IDS_A4AF_SHOWDEBUG      "Mostra le attività nel Registro Approfondito"
@@ -3612,6 +3612,9 @@ STRINGTABLE
 BEGIN
    IDS_DONOTWATCHCLIP "Non analizzare gli appunti"
    IDS_DONOTWATCHCLIP_TIP "Uno o più Link che vengono copiati dagli appunti.\nSeleziona questa opzione per disabilitare l'analisi degli appunti.\nPremi il tasto 'Annulla' per non incollare i Link.\nInserisci o seleziona una categoria e premi 'Ok' per inserire i Link"
+   IDS_USS_INITIAL_TTL     "TTL Iniziale" // [MoNKi: -USS initial TTL-] - Stulle
+   IDS_USS_INITIAL_TTL_TIP	"Salta i primi n Router nel trovare l'ultimo Common Router. Potrebbe essere utile se i\nprovider bloccano i Ping ai Router internet. Da testare col comando 'tracert' del\nPrompt dei comandi (Default=0).\nSe superi un valore di 8 allora hai una insolita rete ISP (max=20, 20 non è consigliato).\nL'impostazione di un valore troppo alto causerà un 'Network topology has changed.' come\nmessaggio nel registro avanzato, perdendo l'efficacia dell'USS"
+   IDS_SELFILES_TIP "I nomi dei File che erano in coda durante la prima visualizzazione nella selezione\ndi questa categoria. Ne potrebbero essere aggiunti degli altri durante la selezione\ndella categoria ma non saranno mostrati qui"
 END
 
 #endif    // Italian (Italy) resources
