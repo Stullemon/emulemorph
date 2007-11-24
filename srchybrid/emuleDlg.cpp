@@ -4319,13 +4319,24 @@ void CemuleDlg::SetClipboardWatch(bool enable)
 
  afx_msg void CemuleDlg::OnDrawClipboard()
 	{
+		static bool  in_OnDrawClipboard=false; // TODO. this is a temporary fix agianst stack overflow????? somehow ther ecan be a loop in the clipboard chain. 
 		DebugLog(LOG_SUCCESS,_T("OnDrawclipboard"));
         m_bClipboardChainIsOk=true; // we can disable the timer. 
 		if (thePrefs.WatchClipboard4ED2KLinks()) { // always true if we are here
 				theApp.SearchClipboard();		//scan the clipboard txt for ed2k file links/
 			}
-    	if (NULL != m_hwndClipChainNext)
+		// start temp fix
+		if (in_OnDrawClipboard==true) {
+			DebugLog(LOG_WARNING,_T("OnDrawclipboard: clipboard chain has loop to self. If you can tell the steps to reproduce please open a topic in the morph support forum"));
+			ASSERT(in_OnDrawClipboard==false)   ;
+			return;
+		}
+		;   // end temp fix
+		if (NULL != m_hwndClipChainNext){
+             in_OnDrawClipboard=true;   // temp fix
 	    	 ::SendMessage(m_hwndClipChainNext, WM_DRAWCLIPBOARD, 0, 0); //pass message on to next application. 
+			 in_OnDrawClipboard=false; // temp fix
+		}
 		
 	}
 
