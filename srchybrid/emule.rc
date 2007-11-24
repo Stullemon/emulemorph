@@ -1076,7 +1076,7 @@ BEGIN
     LTEXT           "Select a category or type in a title for a new category for this link.",
                     IDC_STATIC_INS,6,3,174,16
     CONTROL         "Do not ask me again",IDC_DONTASKMEAGAINCB,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,11,79,111,10
+                    BS_AUTOCHECKBOX | WS_TABSTOP,11,79,164,10
     LTEXT           "files...",IDC_SELFILES,6,38,172,35,0,WS_EX_CLIENTEDGE
 END
 
@@ -3966,7 +3966,7 @@ BEGIN
     IDS_STATS_TIMESTATS     "Time Statistics"
     IDS_STATS_AVGANDPROJ    "Projected Averages"
     IDS_STATS_TIMESINCERESET "Time Since Last Reset: %s"
-    IDS_CRYPT_INITFAILED    "Failed to initialize cryptokeys - secure ident disabled"
+    IDS_CRYPT_INITFAILED    "Failed to initialize cryptokeys - secure ident disabled\nCheck directory permission on config dir."
     IDS_CD_IDENT            "Identification:"
     IDS_IDENTOK             "Successful"
     IDS_IDENTFAILED         "Invalid"
