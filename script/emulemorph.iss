@@ -25,6 +25,8 @@ OutputDir=.
 OutputBaseFilename=morphemuleversion-installer
 SetupIconFile=..\srchybrid\res\mod\installerico.ico
 Compression=lzma
+;fast for debug:
+;Compression=zip
 SolidCompression=yes
 ;emule does not work on win98 due to high "rc" resource usage.
 minversion=0,4.0
@@ -43,10 +45,11 @@ Name: "polish"; MessagesFile: "compiler:Languages\Polish.isl"
 Name: "french";  MessagesFile: "compiler:Languages\French.isl";InfoBeforeFile: "..\staging\license-FR.txt"
 Name: "BrazilianPortuguese" ;MessagesFile: "compiler:Languages\BrazilianPortuguese.isl";InfoBeforeFile: "..\staging\license-PT_BR.txt"
 Name: "ChineseSimpl" ;MessagesFile: "ChineseSimp-11-5.1.0.isl"              ;InfoBeforeFile: "..\staging\lincesne-cn.txt"
+Name: "ChineseTrad" ;MessagesFile: "ChineseTrad-2-5.1.11.isl"
 
 [Dirs]
 ;make dir writeable for other users than administrator
-Name: "{app}\config"        ; Permissions:users-modify    ;components:  configfiles ;tasks:progsdir
+Name: "{app}\config"        ; Permissions:users-modify    ;tasks:progsdir
 Name: "{app}\temp"          ; Permissions:users-modify    ;tasks:progsdir
 Name: "{app}\incoming"      ; Permissions:users-modify    ;tasks:progsdir
 
@@ -251,8 +254,7 @@ Root: HKCU; Subkey: "SOFTWARE\eMule"; ValueType: dword; ValueName:  "UsePublicUs
 Root: HKCU; Subkey: "SOFTWARE\eMule"; ValueType: dword; ValueName:  "UsePublicUserDirectories"; ValueData: 000 ; Flags: uninsdeletekey;  Tasks: userdata
 
 [Run]
-;Not in vista because install runs as admin.
-Filename: "{app}\emule.exe"; Description: "{cm:LaunchProgram,eMule}"; Flags: nowait postinstall skipifsilent ;OnlyBelowVersion: 0,6;
+Filename: "{app}\emule.exe"; Description: "{cm:LaunchProgram,eMule}"; Flags: nowait postinstall skipifsilent;OnlyBelowVersion: 0,6;
 Filename: "netsh"; PArameters:"firewall add allowedprogram ""{app}\emule.exe"" eMuleMorphXT enable all" ; flags: runminimized; Tasks: firewall
 
 [uninstallrun]
@@ -276,13 +278,17 @@ Type: files; Name: "{app}\emulemorphhome.url"
 
 ;translations in sepeate file now 10.1
 
-#include "emulemorphchinese.iss"
-#include "morphpolish.isl"
 #include "morphitalian.isl"
 #include "morphspanish.isl"
 #include "morphgerman.isl"
 #include "morphportugesebr.isl"
 #include "morphfrench.isl"
+;codepage:
+#include "morphpolish.isl"
+;codepage:
+#include "emulemorphchinese.iss"
+;codepage 950:
+#include "morphcn_tw.isl"
 
 ; Code sections need to be the last section in a script or the compiler will get confused
 [Code]
