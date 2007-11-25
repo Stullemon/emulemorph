@@ -305,6 +305,8 @@ BOOL CHttpDownloadDlg::OnInitDialog()
 		sError.Format(_T("%d"), ::GetLastError());
 		CString sMsg;
 		sMsg.Format(GetResString(IDS_HTTPDOWNLOAD_FAIL_FILE_OPEN), sError);
+		sMsg += "\n"; // morph  better error reportn when config dir is readonly
+		sMsg += m_sFileToDownloadInto; // morph better error reportn when config dir is readonly
 		AfxMessageBox(sMsg);
 		EndDialog(IDCANCEL);
 		return TRUE;

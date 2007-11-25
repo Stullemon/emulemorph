@@ -917,7 +917,7 @@ bool CClientCreditsList::CreateKeyPair()
 		AutoSeededRandomPool rng;
 		InvertibleRSAFunction privkey;
 		privkey.Initialize(rng,RSAKEYSIZE);
-
+ 
 		Base64Encoder privkeysink(new FileSink(CStringA(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("cryptkey.dat"))));
 		privkey.DEREncode(privkeysink);
 		privkeysink.MessageEnd();
@@ -927,6 +927,9 @@ bool CClientCreditsList::CreateKeyPair()
 	}
 	catch(...)
 	{
+		// morphend: more logging if config dir is redonly (vista!)
+		theApp.QueueLogLineEx(LOG_ERROR, _T("rsa create failed, fialed to create 'cryptkey.dat' in directory %s. Make sure 'Users' has write permmissions." ),thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)); 
+		// morphend: more logging if config dir is redonly (vista!)
 		if (thePrefs.GetVerbose())
 			AddDebugLogLine(false, _T("Failed to create new RSA keypair"));
 		ASSERT ( false );

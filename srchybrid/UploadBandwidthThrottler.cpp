@@ -727,11 +727,11 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				}
 
 				if (socket != NULL) {
+					/*
 					// try to keep half of data for upload, or sockets will starve and sessions will timeout. 
 					SocketSentBytes socketSentBytes = socket->SendControlData(allowedDataRateClass[LAST_CLASS] > 0?(UINT)(BytesToSpend - ControlspentBytes)/2:1, minFragSize);
-					/*
-					SocketSentBytes socketSentBytes = socket->SendControlData(1, minFragSize);
 					*/
+					SocketSentBytes socketSentBytes = socket->SendControlData(1, minFragSize);
 					uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
 					if (lastSpentBytes) {
 						Socket_stat* stat = NULL;

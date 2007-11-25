@@ -1,7 +1,16 @@
 --------------------------------------
+Changelog for eMule 0.48a MorphXT v10.5 installer
+--------------------------------------
+25-11-2007
+
+CHANGE: innosetup 5.2.2 allows to "run" on vista when installed
+ADD: Chinese traditional to installer. 
+
+
+--------------------------------------
 Changelog for eMule 0.48a MorphXT v10.5
 --------------------------------------
-xx-11-2007
+25-11-2007
 
 CHANGE: USC: tuned upload.
 FIX: USC: fix extreme slot explosion bug for ps 100%.
@@ -9,9 +18,9 @@ CHANGE: Clipboard watch uses clipboard chain, save a bit of cpu. [leuk_he]
 CHANGE: Clipboard ed2k link file watch  now queues into morph category selection.
 FIX: rare heap corruption when safeconnnect is disabled. (netfinity)
 CHANGE: update Safekad to warpf 0.3a.11 beta  (netfinity)
-FIX: kad fix for file > 4GB (netfinity)
+FIX: KAD for filesize > 4GB (netfinity)
 ADD: USS: initial  TTL (stulle/MonKi)
-ADD: experimental Reconnect kad & server after resume from hibernation.
+ADD: Reconnect kad & server after resume from hibernation.
 
 --------------------------------------
 Changelog for eMule 0.48a MorphXT v10.4

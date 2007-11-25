@@ -62,13 +62,20 @@ BOOL CSelCategoryDlg::OnInitDialog()
      // localize & tooltip added by leuk_he
 
 	CString ListFilesNames;
-	for (POSITION pos = theApp.downloadqueue->m_ED2KLinkQueue.GetHeadPosition(); pos != 0; theApp.downloadqueue->m_ED2KLinkQueue.GetNext(pos))
-	{
-		ListFilesNames +=  theApp.downloadqueue->m_ED2KLinkQueue.GetAt(pos)->GetName();
-		ListFilesNames +=   _T("\n");
+
+	if (theApp.downloadqueue->m_ED2KLinkQueue.GetCount())
+	{   // show the list how it is when the dialog is constructed. 
+		for (POSITION pos = theApp.downloadqueue->m_ED2KLinkQueue.GetHeadPosition(); pos != 0; theApp.downloadqueue->m_ED2KLinkQueue.GetNext(pos))
+		{
+			ListFilesNames +=  theApp.downloadqueue->m_ED2KLinkQueue.GetAt(pos)->GetName();
+			ListFilesNames +=   _T("\n");
+		}
+		GetDlgItem(IDC_SELFILES)->SetWindowText(ListFilesNames);
+		SetTool(IDC_SELFILES,IDS_SELFILES_TIP);
 	}
-	GetDlgItem(IDC_SELFILES)->SetWindowText(ListFilesNames);
-	SetTool(IDC_SELFILES,IDS_SELFILES_TIP);
+	else // no need to display empty box
+		GetDlgItem(IDC_SELFILES)->ShowWindow(SW_HIDE);
+
 
 
 	if (m_bFromClipboard) {
