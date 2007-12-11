@@ -79,7 +79,7 @@ CSearch::CSearch()
 	m_uTotalLoad = 0;
 	m_uTotalLoadResponses = 0;
 	theApp.emuledlg->kademliawnd->searchList->SearchAdd(this);
-	m_uLastResponse = time(NULL);
+	m_uLastResponse = (uint32)time(NULL); //vs2005
 	m_pucSearchTermsData = NULL;
 	m_uSearchTermsDataSize = 0;
 }
@@ -273,7 +273,7 @@ void CSearch::JumpStart()
 
 	// If we had a response within the last 3 seconds, no need to jumpstart the search.
 	// netfinity: If we already have all responses then go on with the storing unless we already begun storing
-	if (m_uLastResponse + SEC(3) > (uint32)time(NULL) && (m_mapResponded.size() < m_mapTried.size() || m_uTotalRequestAnswers > 0 || m_uAnswers > 0))
+	if (m_uLastResponse + SEC(3) > time(NULL) && (m_mapResponded.size() < m_mapTried.size() || m_uTotalRequestAnswers > 0 || m_uAnswers > 0))
 		return;
 
 	// Search for contacts that can be used to jumpstart a stalled search.
@@ -353,7 +353,7 @@ void CSearch::JumpStart()
 void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *plistResults)
 {
 	if (plistResults)
-		m_uLastResponse = time(NULL);
+		m_uLastResponse = (uint32)time(NULL); //vs2005
 
 	// Remember the contacts to be deleted when finished
 	for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)

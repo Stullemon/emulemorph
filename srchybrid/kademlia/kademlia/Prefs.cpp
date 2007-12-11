@@ -339,7 +339,7 @@ void CPrefs::SetLastContact()
 
 uint32 CPrefs::GetLastContact() const
 {
-	return m_tLastContact;
+	return (uint32)m_tLastContact;  //vs2005
 }
 
 uint8 CPrefs::GetTotalFile() const
