@@ -14,10 +14,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zlibstat", "..\zlib\contrib
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cryptlib", "..\crypto51\cryptlib.vcproj", "{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}"
-	ProjectSection(ProjectDependencies) = postProject
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ResizableLib", "..\ResizableLib\ResizableLib.vcproj", "{A5743026-DE7A-4C3D-86EA-46D6B6847F14}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
@@ -43,6 +39,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "pthread", "pthreads\pthread
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cryptlib", "..\cryptopp\cryptlib.vcproj", "{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Beta = Beta
@@ -64,12 +64,6 @@ Global
 		{76047B4C-9603-4706-8342-80B1365ED9D5}.Debug.Build.0 = Debug|Win32
 		{76047B4C-9603-4706-8342-80B1365ED9D5}.Release.ActiveCfg = Release|Win32
 		{76047B4C-9603-4706-8342-80B1365ED9D5}.Release.Build.0 = Release|Win32
-		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Beta.ActiveCfg = Release|Win32
-		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Beta.Build.0 = Release|Win32
-		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Debug.ActiveCfg = Debug|Win32
-		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Debug.Build.0 = Debug|Win32
-		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Release.ActiveCfg = Release|Win32
-		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Release.Build.0 = Release|Win32
 		{A5743026-DE7A-4C3D-86EA-46D6B6847F14}.Beta.ActiveCfg = Release Static|Win32
 		{A5743026-DE7A-4C3D-86EA-46D6B6847F14}.Beta.Build.0 = Release Static|Win32
 		{A5743026-DE7A-4C3D-86EA-46D6B6847F14}.Debug.ActiveCfg = Unicode Debug|Win32
@@ -106,6 +100,12 @@ Global
 		{98A1AD27-110A-4C3E-AF0C-4F967E536517}.Debug.Build.0 = Debug|Win32
 		{98A1AD27-110A-4C3E-AF0C-4F967E536517}.Release.ActiveCfg = Release|Win32
 		{98A1AD27-110A-4C3E-AF0C-4F967E536517}.Release.Build.0 = Release|Win32
+		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Beta.ActiveCfg = Debug|Win32
+		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Beta.Build.0 = Debug|Win32
+		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Debug.ActiveCfg = Debug|Win32
+		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Debug.Build.0 = Debug|Win32
+		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Release.ActiveCfg = Release|Win32
+		{722AD808-9ECA-459A-8AF5-C0E1AB3D5B87}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
