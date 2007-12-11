@@ -1482,7 +1482,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			catch(CException* ex){
 				ex->Delete();
 			}
-			time_t fdate = (UINT)filestatus.m_mtime.GetTime(); vs2005
+			time_t fdate = (UINT)filestatus.m_mtime.GetTime(); //vs2005
 			if (fdate == 0)
 				fdate = (UINT)-1;
 			if (fdate == -1){
