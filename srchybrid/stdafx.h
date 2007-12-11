@@ -5,10 +5,6 @@
 
 #pragma once
 
-// stdafx.h contains 2 version. top one is for visla studio 2003 sp1, bottom one for vs2005 s1
-
-#if _MSCVER <1400
-
 #ifndef VC_EXTRALEAN
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif
@@ -138,14 +134,14 @@
 #endif
 
 
+#if _MSC_VER<=1400
 
 // Enable warnings which were disabled for Windows/MFC/ATL headers
 #pragma warning(default:4127) // conditional expression is constant
-#if _MSC_VER<=1310
 #pragma warning(default:4548) // expression before comma has no effect; expected expression with side-effect
-#endif
 #if _MSC_VER==1310
 #pragma warning(default:4555) // expression has no effect; expected expression with side-effect
+#endif
 #endif
 
 // when using warning level 4
@@ -160,6 +156,7 @@
 
 #define ARRSIZE(x)	(sizeof(x)/sizeof(x[0]))
 
+#if _MSC_VER>=1400
 #ifdef _DEBUG
 #define malloc(s)		  _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__)
 #define calloc(c, s)	  _calloc_dbg(c, s, _NORMAL_BLOCK, __FILE__, __LINE__)
@@ -168,155 +165,8 @@
 #define free(p)			  _free_dbg(p, _NORMAL_BLOCK)
 #define _msize(p)		  _msize_dbg(p, _NORMAL_BLOCK)
 #endif
+#endif _MSC_VER>=1400
 
-typedef CArray<CStringA> CStringAArray;
-typedef CStringArray CStringWArray;
-
-#define _TWINAPI(fname)	fname "W"
-
-extern "C" int __cdecl __ascii_stricmp(const char * dst, const char * src);
-
-// from here Visaul studio 2005. Note that some are duplicated!
-#else
-
-//vs2005 start
-#ifndef _SECURE_ATL
-#define _SECURE_ATL 1
-#endif
-//vs2005 end
-
-#ifndef VC_EXTRALEAN
-#define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
-#endif
-
-// Modify the following defines if you have to target a platform prior to the ones specified below.
-// Refer to MSDN for the latest info on corresponding values for different platforms.
-#ifndef WINVER			// Allow use of features specific to Windows NN or later.
-#ifdef _WIN64
-#define WINVER 0x0502		// netfinity: Windows 2003 is the first release with 64 bit support
-#else
-//#define WINVER 0x0410		// netfinity: Windows 98 is the oldest platform we intend to support
-#define WINVER 0x0501		// netfinity: Windows XP is the oldest platform we can support
-#endif
-#endif
-
-#ifndef _WIN32_WINNT		// Allow use of features specific to Windows NN or later.                   
-//#if (WINVER < 0x501)
-//#define _WIN32_WINNT 0x0501	// netfinity: Some parts of the Vista SDK requires this as the minimum version
-//#else
-#define _WIN32_WINNT WINVER	// Change this to the appropriate value.
-//#endif
-#endif
-
-#ifndef _WIN32_WINDOWS		// Allow use of features specific to Windows NN or later.
-#define _WIN32_WINDOWS WINVER   // Change this to the appropriate value.
-#endif
-
-#ifndef _WIN32_IE			// Allow use of features specific to IE 6.0 or later.
-#define _WIN32_IE 0x0600	// Change this to the appropriate value to target other versions of IE.
-#endif
-
-// netfinity: Backward compability of new VC++ 2005 features
-#if _MSC_VER < 1400
-#define nullptr reinterpret_cast<void*>(0)
-#endif
-
-#define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
-
-// turns off MFC's hiding of some common and often safely ignored warning messages
-#define _AFX_ALL_WARNINGS
-
-#include <afxwin.h>         // MFC core and standard components
-#include <afxext.h>         // MFC extensions
-#include <afxtempl.h>		// MFC collection classes
-#include <afxcview.h>
-#include <afxole.h>         // MFC OLE classes
-#include <afxodlgs.h>       // MFC OLE dialog classes
-#include <afxdisp.h>        // MFC Automation classes
-
-
-#ifndef _AFX_NO_OLE_SUPPORT
-#include <afxdtctl.h>		// MFC support for Internet Explorer 4 Common Controls
-#endif
-#ifndef _AFX_NO_AFXCMN_SUPPORT
-#include <afxcmn.h>			// MFC support for Windows Common Controls
-#endif // _AFX_NO_AFXCMN_SUPPORT
-
-
-#include <afxsock.h>		// MFC socket extensions
-
-#include <afxrich.h>		// MFC rich edit classes
-
-#include <atlbase.h>
-extern CComModule _Module;
-
-#include <afxdhtml.h>
-
-#include <afxmt.h>			// MFC Multithreaded Extensions (Syncronization Objects)
-#include <afxdlgs.h>		// MFC Standard dialogs
-#include <..\src\mfc\afximpl.h>
-#include <atlcoll.h>
-#include <afxcoll.h>
-#include <afxtempl.h>
-#include <math.h>
-
-#ifndef EWX_FORCEIFHUNG
-#define EWX_FORCEIFHUNG			0x00000010
-#endif
-
-#ifndef WS_EX_LAYOUTRTL
-#define WS_EX_LAYOUTRTL			0x00400000L // Right to left mirroring
-#endif
-
-#ifndef LAYOUT_RTL
-#define LAYOUT_RTL				0x00000001 // Right to left
-#endif
-
-#ifndef COLOR_HOTLIGHT
-#define COLOR_HOTLIGHT			26
-#endif
-
-#ifndef WS_EX_LAYERED
-#define WS_EX_LAYERED			0x00080000
-#endif
-
-#ifndef LWA_COLORKEY
-#define LWA_COLORKEY			0x00000001
-#endif
-
-#ifndef LWA_ALPHA
-#define LWA_ALPHA				0x00000002
-#endif
-
-#ifndef HDF_SORTUP
-#define HDF_SORTUP				0x0400
-#endif
-
-#ifndef HDF_SORTDOWN
-#define HDF_SORTDOWN			0x0200
-#endif
-
-#ifndef COLOR_GRADIENTACTIVECAPTION
-#define COLOR_GRADIENTACTIVECAPTION 27
-#endif
-
-#include "types.h"
-
-#define ARRSIZE(x)	(sizeof(x)/sizeof(x[0]))
-
-//RM => OMG
-#pragma warning (disable:4996)
-#pragma warning (disable:4238)
-//RM <= OMG
-
-/*#ifdef _DEBUG
-#define malloc(s)		  _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__)
-#define calloc(c, s)	  _calloc_dbg(c, s, _NORMAL_BLOCK, __FILE__, __LINE__)
-#define realloc(p, s)	  _realloc_dbg(p, s, _NORMAL_BLOCK, __FILE__, __LINE__)
-#define _expand(p, s)	  _expand_dbg(p, s, _NORMAL_BLOCK, __FILE__, __LINE__)
-#define free(p)			  _free_dbg(p, _NORMAL_BLOCK)
-#define _msize(p)		  _msize_dbg(p, _NORMAL_BLOCK)
-#endif*/
 
 typedef CArray<CStringA> CStringAArray;
 typedef CStringArray CStringWArray;
@@ -335,20 +185,5 @@ extern "C" int __cdecl __ascii_stricmp(const char * dst, const char * src);
 #else
 #pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 #endif
-#endif // vs2005
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#endif
 
