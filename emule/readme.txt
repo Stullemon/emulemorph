@@ -132,7 +132,9 @@ yet. Sorry :) Maybe later..
 
 -"Maximum Sources per File": decide for yourself how many you want :) when you 
  set this too high, your computer might slow down drastically or even crash. 
- 500-1000 are good values for people with DSL/cable connection. In morph you can set a   global limit for all files. A value or 4000 is working for most dsl users. 
+ 500-1000 are good values for people with DSL/cable connection. In morph you can 
+ set a   global limit for all files. A value or 4000 is working for most dsl users. 
+ you need to set this in the morph option
 
 -Choose the directories you want to share with other users. DO NOT SHARE YOUR 
  COMPLETE HARDDISK! Put the stuff you want to share in a seperate Folder. If 
@@ -255,8 +257,6 @@ http://corpo.free.fr/server.met Note that those sites are not related to the eMu
  Learning how the progress bar works will greatly help your understanding of 
  the eDonkey2000 network.
 
-
-
 --"What do the "QR: xxxx" numbers mean that I see when I look at my sources?"
 
  QR stands for "Queue Rank" and it is your current position in this source's 
@@ -268,26 +268,25 @@ http://corpo.free.fr/server.met Note that those sites are not related to the eMu
 
 
 
-
 COMPILING THE SOURCECODE:
 -------------------------
 
-The sourcecode of eMule is availible as seperate download at:
+The sourcecode of eMule morph is availible as seperate download at:
  http://sourceforge.net/projects/emulemorph
-You need Microsoft(C) Visual Studio .NET 2003 + sp1 of this compiler to compile eMule morph
-vs2002 might work, vc2005 will surely not work without modifications to the source
-You need to have MFC/ATL installed!
+ 
+You need Microsoft(C) Visual Studio .NET 2003 + sp1 of this compiler to 
+compile eMule morph.
+vs2002 might work, 
+vs2005 sp1 is experimentally supported by opening emule80.vcproj.
+vs2008 (orca) is unknown 
+You need to have MFC/ATL installed! Express version will not work for this reason. 
 
--Unzip the sources (with subdirs) into a new folder
-
-Since eMule v0.29b the separate download and compilation of additional 
-libraries is required. These libs are 3rd party and therefore - as usual - not 
-within the official distribution. Morph provides them as a special download (scr and libs) 
+Morph provides external libraries as a special download (scr and libs) 
+Note that for official you need to download and configure them seperatly
 You need the following libs:
 
-
 ----- Libs (active):
-040721 crypto521 cryptopp521.zip    5.2.1 http://www.eskimo.com/~weidai/cryptlib.html
+040721 crypto522 cryptopp.zip    5.2.2 http://www.eskimo.com/~weidai/cryptlib.html
 030301 id3lib  id3lib-3.8.3.zip   3.8.3 http://sourceforge.net/projects/id3lib
 060423 png  lpng1210.zip    1.2.10 http://www.libpng.org/pub/png/libpng.html
 021018 ResizableLib ResizableLib_1_3.zip   1.3 http://sourceforge.net/projects/resizablelib
@@ -303,11 +302,10 @@ You need the following libs:
 
 
 (for MobileMule only!)
-	DirectX SDK
-Micorsoft speech api (5.1?)(or just remove "HAVE_SAPI_H" from the preprocessor definitions)
+DirectX SDK
+Microsoft speech api (5.1?)(or just remove "HAVE_SAPI_H" from the preprocessor definitions)
 
-
-Or download all libs and run emule,vcpproj using your favrout p2p application:
+Or download all libs and run emule,vcpproj using your favourite p2p application:
 ed2k://|file|eMule047aMorphXT85_complete_compilable_Package.rar|18128572|4BD14E6F69E3B1046423932F638BEAA8|h=5NX573HANXXHWOGAD2JWUXC57GD55B6X|/
 
 read 
@@ -333,7 +331,7 @@ required foldernames, or adapt them to your needs!).
 
  If you make modifications to eMule and you distribute the compiled version of 
  your build, be sure to obey the GPL license. You have to include the 
- sourcecode, or make it availible for download together with the binary 
+ sourcecode, or make it available for download together with the binary 
  version. READ THE GPL!
 
 MISC. STUFF:
@@ -390,6 +388,5 @@ eDonkey2000 (C)Jed McCaleb, MetaMachine (www.eDonkey2000.com)
 Windows(TM), Windows 95(TM), Windows 98(TM), Windows ME(TM), Windows NT(TM), 
 Windows 2000(TM) and Windows XP(TM) are Copyright (C)Microsoft Corporation. 
 All rights reserved.
-
 
 Goodbye and happy sharing ;)

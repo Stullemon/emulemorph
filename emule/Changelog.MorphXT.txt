@@ -1,4 +1,14 @@
 --------------------------------------
+Changelog for eMule 0.48a MorphXT v10.x
+--------------------------------------
+11-12-2007
+Compiled with visual stusio 2003 sp1. 
+
+CHANGE: update cryptolib Version 5.5.2 (9/24/2007)
+ADD: experimental support for visual studio 2005 sp1. See readme. 
+CHANGE: reduce some cpu under wine [leuk_he]
+
+--------------------------------------
 Changelog for eMule 0.48a MorphXT v10.5 installer
 --------------------------------------
 25-11-2007
