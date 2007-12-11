@@ -78,7 +78,7 @@ public:
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue();
 	CString	GetEqualChanceValueString(bool detail = true);
-	DWORD	GetSessionShareTime()		{ return time(NULL) - m_dwSessionShareTime; }
+	time_t	GetSessionShareTime()		{ return time(NULL) - m_dwSessionShareTime; }
 	void	SetSessionShareTime()		{ m_dwSessionShareTime = time(NULL); }
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 	//EastShare	Start - FairPlay by AndCycle
@@ -109,9 +109,9 @@ private:
 	uint32 alltimeaccepted;
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	bool	m_bInChangedEqualChanceValue;
-	uint32	lastCheckEqualChanceSemiValue;
+	time_t	lastCheckEqualChanceSemiValue; //vs2005
 	double	m_dLastEqualChanceBiasValue;
 	double	m_dLastEqualChanceSemiValue;
-	DWORD m_dwSessionShareTime;
+	time_t  m_dwSessionShareTime; //vs2005
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 };

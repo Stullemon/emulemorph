@@ -525,7 +525,7 @@ public:
 	static	int		m_iCommitFiles;
 
 	static	UINT	maxmsgsessions;
-	static	uint32	versioncheckLastAutomatic;
+	static	time_t	versioncheckLastAutomatic; //vs2005
 	//MORPH START - Added by SiRoB, New Version check
 	static	uint32	mversioncheckLastAutomatic;
 	//MORPH START - Added by SiRoB, New Version check
@@ -1506,7 +1506,7 @@ public:
 
 	static	bool	GetAutoConnectToStaticServersOnly() {return m_bAutoConnectToStaticServersOnly;}
 	static	UINT	GetUpdateDays()						{return versioncheckdays;}
-	static	uint32	GetLastVC()				{return versioncheckLastAutomatic;}
+	static	time_t	GetLastVC()				{return versioncheckLastAutomatic;} //vs2005
 	static	void	UpdateLastVC();
 	//MORPH START - Added by SiRoB, New Version check
 	static	uint32	GetLastMVC()				{return mversioncheckLastAutomatic;}

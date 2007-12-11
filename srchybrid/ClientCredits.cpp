@@ -27,10 +27,10 @@
 #pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(disable:4100) // unreferenced formal parameter
 #pragma warning(disable:4702) // unreachable code
-#include <crypto51/base64.h>
-#include <crypto51/osrng.h>
-#include <crypto51/files.h>
-#include <crypto51/sha.h>
+#include <cryptopp/base64.h>
+#include <cryptopp/osrng.h>
+#include <cryptopp/files.h>
+#include <cryptopp/sha.h>
 #pragma warning(default:4702) // unreachable code
 #pragma warning(default:4100) // unreferenced formal parameter
 #pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
@@ -375,7 +375,7 @@ float CClientCredits::GetMyScoreRatio(uint32 dwForIP) const
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 // Moonlight: SUQWT - Conditions to determine an active record.
 // Returns true if the client has been seen recently
-bool CClientCredits::IsActive(uint32 dwExpired) {
+bool CClientCredits::IsActive(time_t dwExpired) { //vs2005
 	return (GetUploadedTotal() || GetDownloadedTotal() || m_pCredits->nSecuredWaitTime || m_pCredits->nUnSecuredWaitTime) &&
 			(m_pCredits->nLastSeen >= dwExpired);
 }
@@ -580,7 +580,7 @@ void CClientCreditsList::LoadList()
 			m_mapClients.InitHashTable((int)(count*1.5) > 5003?getPrime((int)(count*1.5)):5003);
 			//Morph End - added by AndCycle, minor tweak - prime
 
-			const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
+			const time_t dwExpired = time(NULL) - 12960000; // today - 150 day vs2005
 			uint32 cDeleted = 0;
 			
 			//MORPH START - Changed by SiRoB, Optimization
@@ -701,7 +701,7 @@ void CClientCreditsList::SaveList()
 	BYTE* pBufferSUQWT=NULL;
 	if (m_bSaveUploadQueueWaitTime)
 		pBufferSUQWT = new BYTE[count*sizeof(CreditStruct)];
-	const uint32 dwExpired = time(NULL) - 12960000; // today - 150 day
+	const time_t dwExpired = time(NULL) - 12960000; // today - 150 day vs2005
 	//Morph End   - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	CClientCredits* cur_credit;
 	CCKey tempkey(0);

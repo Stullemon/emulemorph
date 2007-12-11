@@ -5,6 +5,8 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
+// vs2005: this is in wininfo:
+#if _MSC_VER < 1400 
 typedef struct tagMENUINFO
 {
     DWORD   cbSize;
@@ -16,6 +18,7 @@ typedef struct tagMENUINFO
     ULONG_PTR dwMenuData;
 }   MENUINFO, FAR *LPMENUINFO;
 typedef MENUINFO CONST FAR *LPCMENUINFO;
+#endif
 
 typedef BOOL (WINAPI* TSetMenuInfo)(
   HMENU hmenu,       // handle to menu

@@ -268,7 +268,7 @@ bool CLogFile::SetFilePath(LPCTSTR pszFilePath)
 	m_strOriginFileName = szNam;
 
 	//to calibrate milliseconds, would wate out one second
-	for(int start = time(NULL); thePrefs.DateFileNameLog();){
+	for(time_t start = time(NULL); thePrefs.DateFileNameLog();){
 		//the step to next second
 		if(time(NULL) > start){
 			//now the tick shoud really close to the second start

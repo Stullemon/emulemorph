@@ -1926,7 +1926,7 @@ bool CemuleApp::IsEd2kServerLinkInClipboard()
 // Elandal:ThreadSafeLogging -->
 void CemuleApp::QueueDebugLogLine(bool bAddToStatusbar, LPCTSTR line, ...)
 {
-	if (!thePrefs.GetVerbose())
+	if (!thePrefs.GetVerbose()||(line == NULL)) // morph leuk_he add line is null for some rare chrashes. 
 		return;
 
 	m_queueLock.Lock();

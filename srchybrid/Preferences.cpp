@@ -370,7 +370,7 @@ UINT	CPreferences::m_iFileBufferSize;
 UINT	CPreferences::m_iQueueSize;
 int		CPreferences::m_iCommitFiles;
 UINT	CPreferences::maxmsgsessions;
-uint32	CPreferences::versioncheckLastAutomatic;
+time_t	CPreferences::versioncheckLastAutomatic; //vs2005
 //MORPH START - Added by SiRoB, New Version check
 uint32	CPreferences::mversioncheckLastAutomatic;
 //MORPH START - Added by SiRoB, New Version check
@@ -3501,7 +3501,7 @@ void CPreferences::LoadPreferences()
 	m_bDynUpLog = ini.GetBool(_T("USSLog"), true);
 	//MORPH END   - Added by SiRoB,  USS log flag
 	m_bUSSUDP = ini.GetBool(_T("USSUDP_FORCE"), false); //MORPH - Added by SiRoB, USS UDP preferency
-    m_sPingDataSize = ini.GetInt(L"USSPingDataSize", 0); //MORPH leuk_he ICMP ping datasize <> 0 setting
+    m_sPingDataSize = (short)ini.GetInt(L"USSPingDataSize", 0); //MORPH leuk_he ICMP ping datasize <> 0 setting
 	m_bA4AFSaveCpu = ini.GetBool(L"A4AFSaveCpu", false); // ZZ:DownloadManager
     m_bHighresTimer = ini.GetBool(L"HighresTimer", false);
 	m_bRunAsUser = ini.GetBool(L"RunAsUnprivilegedUser", false);

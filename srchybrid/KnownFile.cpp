@@ -648,7 +648,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 	// set lastwrite date
 	struct _stat fileinfo;
 	if (_fstat(file->_file, &fileinfo) == 0){
-		m_tUtcLastModified = fileinfo.st_mtime;
+		m_tUtcLastModified = (uint32)fileinfo.st_mtime; //vs2005
 		AdjustNTFSDaylightFileTime(m_tUtcLastModified, strFilePath);
 	}
 	//Morph Start - Added by Stulle, Equal Chance For Each File

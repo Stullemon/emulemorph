@@ -88,7 +88,7 @@ Basic Obfuscated Handshake Protocol Client <-> Server:
 // cryptoPP used for DH integer calculations
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #pragma warning(disable:4100) // unreferenced formal parameter
-#include <crypto51/osrng.h>
+#include <cryptopp/osrng.h>
 #pragma warning(default:4100) // unreferenced formal parameter
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 

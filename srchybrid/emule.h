@@ -147,6 +147,7 @@ public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
 	virtual BOOL IsIdleMessage(MSG *pMsg);
+	virtual BOOL OnIdle(LONG lCount);
 
 	// ed2k link functions
 	void		AddEd2kLinksToDownload(CString strLinks, int cat, bool fromclipboard=false);

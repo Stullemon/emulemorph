@@ -398,7 +398,7 @@ __inline CStringA ipstrA(in_addr nIP){
 // Date/Time
 //
 time_t safe_mktime(struct tm* ptm);
-bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath);
+bool AdjustNTFSDaylightFileTime(time_t& ruFileDate, LPCTSTR pszFilePath); // vs2005
 
 
 ///////////////////////////////////////////////////////////////////////////////

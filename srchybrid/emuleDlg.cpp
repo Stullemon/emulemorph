@@ -729,8 +729,9 @@ void CemuleDlg::DoVersioncheck(bool manual) {
 void CemuleDlg::DoMVersioncheck(bool manual) {
 	if (!manual && thePrefs.GetLastMVC()!=0) {
 		CTime last(thePrefs.GetLastMVC());
-		time_t tLast=safe_mktime(last.GetLocalTm());
-		time_t tNow=safe_mktime(CTime::GetCurrentTime().GetLocalTm());
+		struct tm tmTemp; //vs2005
+		time_t tLast=safe_mktime(last.GetLocalTm(&tmTemp)); //vs2005
+		time_t tNow=safe_mktime(CTime::GetCurrentTime().GetLocalTm(&tmTemp)); //vs2005
 		if ( (difftime(tNow,tLast) / 86400)<thePrefs.GetUpdateDays() )
 			return;
 	}
@@ -3537,6 +3538,26 @@ LRESULT CemuleDlg::OnKickIdle(UINT /*nWhy*/, long lIdleCount)
 
 	return lResult;
 }
+
+// morph  wine: and save some cpu
+BOOL CemuleApp::OnIdle(LONG lCount)
+{
+	static DWORD dwLastCheck[2];
+	int index=(lCount<=0)?0:1;
+	DWORD dwNow = GetTickCount();
+	if (dwNow - dwLastCheck[index] >= SEC2MS(5))
+		{
+			AddDebugLogLine(false, _T("theApp.OnIdle(%d))"),lCount);
+			dwLastCheck[index]= dwNow;
+			return CWinApp::OnIdle(lCount);
+		}
+		return FALSE ;
+
+}
+// morph  wine: and save some cpu 
+ 
+
+
 
 int CemuleDlg::MapWindowToToolbarButton(CWnd* pWnd) const
 {

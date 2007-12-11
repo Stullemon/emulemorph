@@ -24,7 +24,7 @@
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(disable:4100) // unreferenced formal parameter
-#include <crypto51/crc.h>
+#include <cryptopp/crc.h>
 #pragma warning(default:4100) // unreferenced formal parameter
 #pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative

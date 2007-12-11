@@ -242,7 +242,7 @@ void CPartFile::Init(){
 	insufficient = false;
 	m_bCompletionError = false;
 	m_uTransferred = 0;
-	m_iLastPausePurge = time(NULL);
+	m_iLastPausePurge = (uint32)time(NULL); // vs2005
 	m_AllocateThread=NULL;
 	m_iAllocinfo = 0;
 	if(thePrefs.GetNewAutoDown()){
@@ -501,8 +501,8 @@ void CPartFile::CreatePartFile(UINT cat)
 
 		struct _stat fileinfo;
 		if (_tstat(partfull, &fileinfo) == 0){
-			m_tLastModified = fileinfo.st_mtime;
-			m_tCreated = fileinfo.st_ctime;
+			m_tLastModified = (uint32)fileinfo.st_mtime; //vs2005
+			m_tCreated = (uint32)fileinfo.st_ctime; //vs2005
 		}
 		else
 			AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %s"), partfull, _tcserror(errno));
@@ -1034,7 +1034,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 						if (newtag->IsInt())
 						{
 						    SetLastPublishTimeKadSrc(newtag->GetInt(), 0);
-							if(GetLastPublishTimeKadSrc() > (uint32)time(NULL)+KADEMLIAREPUBLISHTIMES)
+							if(GetLastPublishTimeKadSrc() > time(NULL)+KADEMLIAREPUBLISHTIMES)
 							{
 								//There may be a posibility of an older client that saved a random number here.. This will check for that..
 								SetLastPublishTimeKadSrc(0,0);
@@ -1398,8 +1398,8 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 	// read part file creation time
 	struct _stat fileinfo;
 	if (_tstat(searchpath, &fileinfo) == 0){
-		m_tLastModified = fileinfo.st_mtime;
-		m_tCreated = fileinfo.st_ctime;
+		m_tLastModified = (uint32)fileinfo.st_mtime;
+		m_tCreated = (uint32)fileinfo.st_ctime;
 	}
 	else
 		AddDebugLogLine(false, _T("Failed to get file date for \"%s\" - %s"), searchpath, _tcserror(errno));
@@ -1482,7 +1482,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 			catch(CException* ex){
 				ex->Delete();
 			}
-			uint32 fdate = (UINT)filestatus.m_mtime.GetTime();
+			time_t fdate = (UINT)filestatus.m_mtime.GetTime(); vs2005
 			if (fdate == 0)
 				fdate = (UINT)-1;
 			if (fdate == -1){
@@ -4350,7 +4350,7 @@ BOOL CPartFile::PerformFileComplete()
 	struct _stat st;
 	if (_tstat(strNewname, &st) == 0)
 	{
-		m_tLastModified = st.st_mtime;
+		m_tLastModified = (uint32)st.st_mtime;
 		m_tUtcLastModified = m_tLastModified;
 		AdjustNTFSDaylightFileTime(m_tUtcLastModified, strNewname);
 	}
@@ -4757,7 +4757,7 @@ void CPartFile::PauseFile(bool bInsufficient, bool resort)
 
 	// if file is already in 'paused' or 'insufficient' state, do not refresh the purge time
 	if (!paused && !insufficient)
-		m_iLastPausePurge = time(NULL);
+		m_iLastPausePurge = (uint32)time(NULL);
 	theApp.downloadqueue->RemoveLocalServerRequest(this);
 
 	if(GetKadFileSearchID())
@@ -6242,7 +6242,7 @@ void CPartFile::FlushBuffersExceptionHandler(CFileException* error)
 			SetStatus(PS_ERROR);
 		}
 		paused = true;
-		m_iLastPausePurge = time(NULL);
+		m_iLastPausePurge = (uint32)time(NULL);
 		theApp.downloadqueue->RemoveLocalServerRequest(this);
 		datarate = 0;
 		m_anStates[DS_DOWNLOADING] = 0;
@@ -6260,7 +6260,7 @@ void CPartFile::FlushBuffersExceptionHandler()
 	LogError(LOG_STATUSBAR, GetResString(IDS_ERR_WRITEERROR), GetFileName(), GetResString(IDS_UNKNOWN));
 		SetStatus(PS_ERROR);
 		paused = true;
-		m_iLastPausePurge = time(NULL);
+		m_iLastPausePurge = (uint32)time(NULL);
 		theApp.downloadqueue->RemoveLocalServerRequest(this);
 		datarate = 0;
 		m_anStates[DS_DOWNLOADING] = 0;
@@ -7267,7 +7267,7 @@ bool CPartFile::CheckShowItemInGivenCat(int inCategory)
 		return false;
 	if (curCat->viewfilters.nTimeRemainingMin > 0 || curCat->viewfilters.nTimeRemainingMax > 0)
 	{
-		sint32 nTemp2 = getTimeRemaining();
+		sint32 nTemp2 = (sint32)getTimeRemaining();
 		if (nTemp2 < (sint32)curCat->viewfilters.nTimeRemainingMin || (curCat->viewfilters.nTimeRemainingMax != 0 && nTemp2 > (sint32)curCat->viewfilters.nTimeRemainingMax))
 			return false;
 	}
@@ -7316,9 +7316,9 @@ void CPartFile::SetActive(bool bActive)
 	}
 }
 
-uint32 CPartFile::GetDlActiveTime() const
+time_t CPartFile::GetDlActiveTime() const  //vs2005
 {
-	uint32 nDlActiveTime = m_nDlActiveTime;
+	time_t nDlActiveTime = m_nDlActiveTime; //vs2005
 	if (m_tActivated != 0)
 		nDlActiveTime += time(NULL) - m_tActivated;
 	return nDlActiveTime;

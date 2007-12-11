@@ -20,7 +20,7 @@
 #pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(disable:4100) // unreferenced formal parameter
 #pragma warning(disable:4702) // unreachable code
-#include <crypto51/rsa.h>
+#include <cryptopp/rsa.h>
 #pragma warning(default:4702) // unreachable code
 #pragma warning(default:4100) // unreferenced formal parameter
 #pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
@@ -78,7 +78,7 @@ struct CreditStruct_30c_SUQWTv2{
 	uchar		abyKey[16];
 	uint32		nUploadedLo;	// uploaded TO him
 	uint32		nDownloadedLo;	// downloaded from him
-	uint32		nLastSeen;
+	time_t		nLastSeen;  // vs2005
 	uint32		nUploadedHi;	// upload high 32
 	uint32		nDownloadedHi;	// download high 32
 	uint16		nReserved3;
@@ -156,7 +156,7 @@ public:
 	void	SetLastSeen()					{m_pCredits->nLastSeen = time(NULL);}
 	bool	SetSecureIdent(const uchar* pachIdent, uint8 nIdentLen); // Public key cannot change, use only if there is not public key yet
 	//Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-	bool	IsActive(uint32 dwExpire);	// Moonlight: SUQWT, new function to determine if the record has expired.
+	bool	IsActive(time_t dwExpire);	// Moonlight: SUQWT, new function to determine if the record has expired.
 	//Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	uint32	m_dwCryptRndChallengeFor;
 	uint32	m_dwCryptRndChallengeFrom;

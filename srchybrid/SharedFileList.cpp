@@ -622,7 +622,7 @@ void CSharedFileList::AddFilesFromDirectory(const CString& rstrDirectory, bool b
 		catch(CException* ex){
 			ex->Delete();
 		}
-		uint32 fdate = (UINT)lwtime.GetTime();
+		time_t fdate = lwtime.GetTime(); //vs2005
 		if (fdate == 0)
 			fdate = (UINT)-1;
 		if (fdate == -1){
@@ -1567,7 +1567,7 @@ void CSharedFileList::Process()
 void CSharedFileList::Publish()
 {
 	// Variables to save cpu.
-	UINT tNow = time(NULL);
+	time_t tNow = time(NULL); //vs2005
 	bool isFirewalled = theApp.IsFirewalled();
 
 	if( Kademlia::CKademlia::IsConnected() && ( !isFirewalled || ( isFirewalled && theApp.clientlist->GetBuddyStatus() == Connected)) && GetCount() && Kademlia::CKademlia::GetPublish())

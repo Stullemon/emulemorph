@@ -50,7 +50,7 @@ public:
 
 	// SLUGFILLER: mergeKnown, for TAHO, .met file control
 	void	SetLastSeen()	{ m_dwLastSeen = time(NULL); }
-	uint32	GetLastSeen()	{ return m_dwLastSeen; }
+	time_t	GetLastSeen()	{ return m_dwLastSeen; }
 	// SLUGFILLER: mergeKnown, for TAHO, .met file control
 
 	bool CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam); // create date, hashset and tags from a file
@@ -67,7 +67,7 @@ public:
 	// last file modification time in (DST corrected, if NTFS) real UTC format
 	// NOTE: this value can *not* be compared with NT's version of the UTC time
 	CTime	GetUtcCFileDate() const { return CTime(m_tUtcLastModified); }
-	uint32	GetUtcFileDate() const { return m_tUtcLastModified; }
+	time_t	GetUtcFileDate() const { return m_tUtcLastModified; }
 
 	virtual void SetFileSize(EMFileSize nFileSize);
 
@@ -156,7 +156,7 @@ public:
 
 	// last file modification time in (DST corrected, if NTFS) real UTC format
 	// NOTE: this value can *not* be compared with NT's version of the UTC time
-	uint32	m_tUtcLastModified;
+	time_t	m_tUtcLastModified; // vs2005 ?
 
 	CStatisticFile statistic;
 	time_t m_nCompleteSourcesTime;

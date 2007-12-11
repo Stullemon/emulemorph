@@ -2795,7 +2795,7 @@ bool IsAutoDaylightTimeSetActive()
 	return true; // default to 'Automatically adjust clock for daylight saving changes'
 }
 
-bool AdjustNTFSDaylightFileTime(uint32& ruFileDate, LPCTSTR pszFilePath)
+bool AdjustNTFSDaylightFileTime(time_t& ruFileDate, LPCTSTR pszFilePath) //vs2005
 {
 	if (!thePrefs.GetAdjustNTFSDaylightFileTime())
 		return false;

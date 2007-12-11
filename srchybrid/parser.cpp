@@ -253,17 +253,21 @@ extern "C" {
 #  endif
 #  ifndef YYMALLOC
 #   define YYMALLOC malloc
+#if _MSC_VER < 1400
 #   if (! defined (malloc) && ! defined (YYINCLUDED_STDLIB_H) \
 	&& (defined (__STDC__) || defined (__cplusplus)))
 void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
+#  endif
 #  ifndef YYFREE
 #   define YYFREE free
+#if _MSC_VER < 1400
 #   if (! defined (free) && ! defined (YYINCLUDED_STDLIB_H) \
 	&& (defined (__STDC__) || defined (__cplusplus)))
 void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
+#  endif
 #  endif
 #  ifdef __cplusplus
 }

@@ -253,7 +253,7 @@ public:
     bool    IsPreviewableFileType() const;
 	time_t	getTimeRemaining() const;
 	time_t	getTimeRemainingSimple() const;
-	uint32	GetDlActiveTime() const;
+	time_t	GetDlActiveTime() const; //vs2005
 
 	// Barry - Added as replacement for BlockReceived to buffer data before writing to disk
 	uint32	WriteToBuffer(uint64 transize, const BYTE *data, uint64 start, uint64 end, Requested_Block_Struct *block, const CUpDownClient* client);
@@ -421,7 +421,7 @@ private:
 	CCorruptionBlackBox	m_CorruptionBlackBox;
 	static CBarShader s_LoadBar;
 	static CBarShader s_ChunkBar;
-	uint32	m_iLastPausePurge;
+	time_t	m_iLastPausePurge;
 	uint16	count;
 	UINT	m_anStates[STATES_COUNT];
 	//MORPH START - Added by SiRoB, Cached stat
@@ -478,7 +478,7 @@ private:  //morph
 	UINT	m_category;
 	DWORD	m_dwFileAttributes;
 	time_t	m_tActivated;
-	uint32	m_nDlActiveTime;
+	time_t	m_nDlActiveTime; //vs2005
 	uint32	m_tLastModified;	// last file modification time (NT's version of UTC), to be used for stats only!
 	uint32	m_tCreated;			// file creation time (NT's version of UTC), to be used for stats only!
     uint32	m_random_update_wait;	

@@ -336,7 +336,7 @@ CUpDownClient::~CUpDownClient(){
 	uint8*				curPS;
 	while (pos)
 	{
-		m_PartStatus_list.GetNextAssoc(pos, curFile, curPS);
+		m_PartStatus_list.GetNextAssoc(pos, (const CPartFile *&)curFile, curPS); //RM vs2005
 		if (curPS != m_abyPartStatus)
 			delete[] curPS;
 	}

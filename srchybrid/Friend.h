@@ -37,7 +37,7 @@ public:
 	~CFriend();
 
 	uchar	m_abyUserhash[16];
-	uint32	m_dwLastSeen;
+	time_t	m_dwLastSeen;
 	uint32	m_dwLastUsedIP;
 	uint16	m_nLastUsedPort;
 	uint32	m_dwLastChatted;

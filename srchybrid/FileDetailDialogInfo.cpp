@@ -161,7 +161,7 @@ void CFileDetailDialogInfo::RefreshData()
 		SetDlgItemText(IDC_FILECREATED, str);
 
 		// active download time
-		uint32 nDlActiveTime = file->GetDlActiveTime();
+		time_t nDlActiveTime = file->GetDlActiveTime(); //vs2005
 		if (nDlActiveTime)
 			str = CastSecondsToLngHM(nDlActiveTime);
 		else
@@ -187,7 +187,7 @@ void CFileDetailDialogInfo::RefreshData()
 			// If it's related to the FAT32 seconds time resolution the max. failure should still be only 1 sec.
 			// Happens at least on FAT32 with very high download speed.
 			uint32 tLastModified = file->GetFileDate();
-			uint32 tNow = time(NULL);
+			time_t tNow = time(NULL); //vs2005
 			uint32 tAgo;
 			if (tNow >= tLastModified)
 				tAgo = tNow - tLastModified;

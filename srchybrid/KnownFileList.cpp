@@ -249,7 +249,7 @@ void CKnownFileList::Save()
 			file.WriteUInt32(nRecordsNumber);
 			POSITION pos = m_Files_map.GetStartPosition();
 			// SLUGFILLER: mergeKnown, for TAHO, .met file control
-			const uint32 dwExpired = time(NULL) - (thePrefs.GetKnownMetDays() == 0 ? 12960000 : thePrefs.GetKnownMetDays()*86400);	// Morph - modified by AndCycle, .met file control
+			const time_t  dwExpired = time(NULL) - (thePrefs.GetKnownMetDays() == 0 ? 12960000 : thePrefs.GetKnownMetDays()*86400);	// Morph - modified by AndCycle, .met file control + vs2005
 			while( pos != NULL )
 			{
 				CKnownFile* pFile;
