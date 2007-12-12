@@ -48,6 +48,7 @@ public:
 	void	ShowComments(CKnownFile* file);
 	void	SetAICHHashing(uint32 nVal)				{ nAICHHashing = nVal; } 
 	void	SetDirectoryFilter(CDirectoryItem* pNewFilter, bool bRefresh = true);
+	void	EndFileProcessingThread(); //SDT: vs05 - 1206
 
 protected:
 	CTitleMenu	m_SharedFilesMenu;

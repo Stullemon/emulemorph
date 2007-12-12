@@ -316,6 +316,12 @@ void CUpDownClient::Init()
 }
 
 CUpDownClient::~CUpDownClient(){
+	//MORPH START - ReadBlockFromFileThread //SDT: for safety (got mem leaks) - 1127
+	if (m_readblockthread) {
+		m_readblockthread->StopReadBlock();
+		m_readblockthread = NULL;
+	}
+	//MORPH END   - ReadBlockFromFileThread
 	if (IsAICHReqPending()){
 		m_fAICHRequested = FALSE;
 		CAICHHashSet::ClientAICHRequestFailed(this);

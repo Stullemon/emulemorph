@@ -22,6 +22,7 @@
 #include "SharedFileList.h"
 #include "FileProcessing.h"
 #include "OtherFunctions.h"
+#include "emuleDlg.h" //SDT: vs05 - 1206
 
 IMPLEMENT_DYNCREATE(CFileProcessingWorker, CObject)
 
@@ -52,6 +53,7 @@ IMPLEMENT_DYNCREATE(CFileProcessingThread, CWinThread)
 int	CFileProcessingThread::Run () {
 	m_IsRunning = true;
 	// Process Run()-method of every stored worker object
+	while (m_IsRunning) { //SDT: vs05 - 1206
 	while (!fileWorkers.IsEmpty ()) {
 		// Block the list so we can access it
 		CSingleLock lck (&m_FilelistLocked,true);
@@ -65,11 +67,17 @@ int	CFileProcessingThread::Run () {
 			worker->Run();
 		}
 		delete worker;
+			if (!theApp.emuledlg->IsRunning()) {
+				// Abort and get back immediately
+				fileWorkers.RemoveAll();
+				return 0;
+			}
 	}
-	bool b = IsTerminating();
 	m_IsTerminating = false;
+		this->SuspendThread();
+	}
 	m_IsRunning = false;
-	return !b;
+	return 1;
 }
 
 void    CFileProcessingThread::AddFileProcessingWorker (CFileProcessingWorker* _worker) {

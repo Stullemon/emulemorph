@@ -188,7 +188,7 @@ bool CIP2Country::LoadFromFile(){
 				*szbuffer= '\0';
 				szbuffer=szIPStart-1;
 				++iCount;
-				AddIPRange(_tstoi(szIPStart),_tstoi(szIPEnd), sz2L, sz3L, szCountry);
+				AddIPRange(_tcstoul(szIPStart, NULL, 10), _tcstoul(szIPEnd, NULL, 10), sz2L, sz3L, szCountry); //SDT: vs05 - 1130
 			}
 			fclose(readFile);
 

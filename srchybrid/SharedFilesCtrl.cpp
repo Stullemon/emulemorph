@@ -1939,12 +1939,16 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 						// that the thread does not run at this moment...
 						m_FileProcessingThread.CreateThread ();
 					}
+					else //SDT: vs05 - 1206
+						m_FileProcessingThread.ResumeThread(); // SDT
 				}
 				break;
 			case MP_CRC32_ABORT:
 				// Message the File processing thread to stop any pending calculations
-				if (m_FileProcessingThread.IsRunning ())
+				if (m_FileProcessingThread.IsRunning ()) { //SDT: vs05 - 1206
 					m_FileProcessingThread.Terminate ();
+					m_FileProcessingThread.ResumeThread();
+				}
 				break;
 			case MP_CRC32_TAG:
 				if (!selectedList.IsEmpty()){
@@ -1994,6 +1998,8 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 							// that the thread does not run at this moment...
 							m_FileProcessingThread.CreateThread ();
 						}
+						else //SDT: vs05 - 1206
+							m_FileProcessingThread.ResumeThread();
 					}
 				}
 				break;
@@ -2860,4 +2866,10 @@ void CSharedFilesCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 		}
 	}
 	*pResult = 0;
+}
+
+void CSharedFilesCtrl::EndFileProcessingThread() //SDT: vs05 - 1206
+{
+	if (m_FileProcessingThread.IsRunning ())
+		m_FileProcessingThread.StopIt();
 }

@@ -113,7 +113,7 @@ void CBarShader::SetHeight(int height) {
 	}
 }
 
-void CBarShader::FillRange(uint64 start, uint64 end, COLORREF color) {
+void CBarShader::FillRange(uint64 start, uint64 end, COLORREF color, bool bChunk) { //SDT: fix vs05 chunk detail - 0423
 	if(end > m_uFileSize)
 		end = m_uFileSize;
 
@@ -133,7 +133,11 @@ void CBarShader::FillRange(uint64 start, uint64 end, COLORREF color) {
 	COLORREF endcolor = m_Spans.GetValueAt(endpos);
 	endpos = m_Spans.SetAt(end, endcolor);
 
-	for (POSITION pos = m_Spans.FindFirstKeyAfter(start+1); pos != endpos; ) {
+#if _MSC_VER < 1400
+	for (POSITION pos = m_Spans.FindFirstKeyAfter(start+1); pos != endpos && pos != NULL; ) { //SDT: fix vs05 freeze - 0113
+#else //SDT: fix vs05 chunk detail - 0423
+	for (POSITION pos = m_Spans.FindFirstKeyAfter(start+(bChunk?0:1)); pos != endpos && pos != NULL; ) { //SDT: fix vs05 freeze - 0113
+#endif
 		POSITION pos1 = pos;
 		m_Spans.GetNext(pos);
 		m_Spans.RemoveAt(pos1);

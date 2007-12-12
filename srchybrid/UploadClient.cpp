@@ -247,7 +247,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 					if (end > filesize) {
 						end = filesize;
 						s_UpStatusBar.Reset();
-						s_UpStatusBar.FillRange(0, end%PARTSIZE, crNeither);
+						s_UpStatusBar.FillRange(0, end%PARTSIZE, crNeither, true); //SDT: fix vs05 chunk detail - 0423
 					} else
 						s_UpStatusBar.Fill(crNeither);
 				}
@@ -265,12 +265,12 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 				if (end > filesize) {
 					end = filesize;
 					s_UpStatusBar.Reset();
-					s_UpStatusBar.FillRange(0, end%PARTSIZE, crNeither);
+					s_UpStatusBar.FillRange(0, end%PARTSIZE, crNeither, true); //SDT: fix vs05 chunk detail - 0423
 				} else
 					s_UpStatusBar.Fill(crNeither);
 			}
 				if (block->StartOffset <= end && block->EndOffset >= start) {
-					s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crNextSending);
+					s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crNextSending, true); //SDT: fix vs05 chunk detail - 0423
 				}
 			}
 		}
@@ -284,7 +284,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 				if (block->StartOffset <= end && block->EndOffset >= start) {
 					if(total + (block->EndOffset-block->StartOffset) <= GetSessionPayloadUp()) {
 						// block is sent
-						s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crProgress);
+						s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crProgress, true); //SDT: fix vs05 chunk detail - 0423
 						total += block->EndOffset-block->StartOffset;
 					}
 					else if (total < GetSessionPayloadUp()){
@@ -295,20 +295,20 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 						if (newEnd>=start) {
 							if (newEnd<=end) {
 								uint64 uNewEnd = newEnd%PARTSIZE;
-								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, uNewEnd, crSending);
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, uNewEnd, crSending, true); //SDT: fix vs05 chunk detail - 0423
 								if (block->EndOffset <= end)
-									s_UpStatusBar.FillRange(uNewEnd, block->EndOffset%PARTSIZE, crBuffer);
+									s_UpStatusBar.FillRange(uNewEnd, block->EndOffset%PARTSIZE, crBuffer, true); //SDT: fix vs05 chunk detail - 0423
 								else
-									s_UpStatusBar.FillRange(uNewEnd, end%PARTSIZE, crBuffer);
+									s_UpStatusBar.FillRange(uNewEnd, end%PARTSIZE, crBuffer, true); //SDT: fix vs05 chunk detail - 0423
 							} else 
-								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crSending);
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crSending, true); //SDT: fix vs05 chunk detail - 0423
 						} else if (block->EndOffset <= end)
-							s_UpStatusBar.FillRange((uint64)0, block->EndOffset%PARTSIZE, crBuffer);
+							s_UpStatusBar.FillRange((uint64)0, block->EndOffset%PARTSIZE, crBuffer, true); //SDT: fix vs05 chunk detail - 0423
 					}
 					else{
 						// entire block is still in buffer
 						total += block->EndOffset-block->StartOffset;
-						s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
+						s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer, true); //SDT: fix vs05 chunk detail - 0423
 					}
 				} else
 					total += block->EndOffset-block->StartOffset;

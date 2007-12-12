@@ -2710,7 +2710,7 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 					}
 					else
 						color = crMissing;
-					s_ChunkBar.FillRange(gapstart, gapend + 1,  color);
+					s_ChunkBar.FillRange(gapstart, gapend + 1,  color); //SDT: vs05 freeze? (called from here) - 0113
 
 					if (gapdone) // finished?
 						break;
