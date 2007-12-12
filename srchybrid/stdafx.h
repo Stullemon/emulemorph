@@ -13,12 +13,12 @@
 #define WINVER 0x0400			// 0x0400 == Windows 98 and Windows NT 4.0 (because of '_WIN32_WINDOWS=0x0410')
 #endif
 
-#ifndef _WIN32_WINNT
-#define _WIN32_WINNT 0x0400		// 0x0400 == Windows NT 4.0
+#ifndef _WIN32_WINNT		// Allow use of features specific to Windows NN or later.                   
+#define _WIN32_WINNT WINVER	// Change this to the appropriate value.
 #endif
 
-#ifndef _WIN32_WINDOWS
-#define _WIN32_WINDOWS 0x0410	// 0x0410 == Windows 98
+#ifndef _WIN32_WINDOWS		// Allow use of features specific to Windows NN or later.
+#define _WIN32_WINDOWS WINVER   // Change this to the appropriate value.
 #endif
 
 #ifndef _WIN32_IE
@@ -26,11 +26,20 @@
 #define _WIN32_IE 0x0560		// 0x0560 == Internet Explorer 5.6 -> Comctl32.dll v5.8 (same as MFC internally used)
 #endif
 
+// netfinity: Backward compability of new VC++ 2005 features
+#if _MSC_VER < 1400
+#define nullptr reinterpret_cast<void*>(0)
+#endif
+
+
 #define _ATL_CSTRING_EXPLICIT_CONSTRUCTORS	// some CString constructors will be explicit
 #define _ATL_ALL_WARNINGS
 #define _AFX_ALL_WARNINGS
 // Disable some warnings which get fired with /W4 for Windows/MFC/ATL headers
 #pragma warning(disable:4127) // conditional expression is constant
+
+
+
 
 // Disable some warnings which are only generated when using "/Wall"
 #pragma warning(disable:4061) // enumerate in switch of enum is not explicitly handled by a case label
@@ -73,16 +82,28 @@
 #include <afxwin.h>			// MFC core and standard components
 #include <afxext.h>			// MFC extensions
 #include <afxdisp.h>		// MFC IDispatch & ClassFactory support
+
+#ifndef _AFX_NO_OLE_SUPPORT
 #include <afxdtctl.h>		// MFC support for Internet Explorer 4 Common Controls
+#endif
 #ifndef _AFX_NO_AFXCMN_SUPPORT
 #include <afxcmn.h>			// MFC support for Windows Common Controls
 #endif // _AFX_NO_AFXCMN_SUPPORT
+
 #include <afxole.h>			// MFC OLE support
 
 #include <winsock2.h>
 #define _WINSOCKAPI_
 #include <afxsock.h>		// MFC support for Windows Sockets
+#include <afxsock.h>		// MFC socket extensions
+
+#include <afxrich.h>		// MFC rich edit classes
+
+#include <atlbase.h>
+extern CComModule _Module;
+
 #include <afxdhtml.h>
+
 
 #include <afxmt.h>			// MFC Multithreaded Extensions (Syncronization Objects)
 #include <afxdlgs.h>		// MFC Standard dialogs
@@ -134,8 +155,11 @@
 #endif
 
 
-#if _MSC_VER<=1400
 
+#include "types.h"
+
+/*
+#if _MSC_VER<=1400
 // Enable warnings which were disabled for Windows/MFC/ATL headers
 #pragma warning(default:4127) // conditional expression is constant
 #pragma warning(default:4548) // expression before comma has no effect; expected expression with side-effect
@@ -143,6 +167,7 @@
 #pragma warning(default:4555) // expression has no effect; expected expression with side-effect
 #endif
 #endif
+*/
 
 // when using warning level 4
 #pragma warning(disable:4201) // nonstandard extension used : nameless struct/union (not worth to mess with, it's due to MIDL created code)
@@ -152,12 +177,15 @@
 #pragma warning(disable:4127) // conditional expression is constant
 #endif
 
-#include "types.h"
 
 #define ARRSIZE(x)	(sizeof(x)/sizeof(x[0]))
 
-#if _MSC_VER>=1400
-#ifdef _DEBUG
+//RM => OMG
+#pragma warning (disable:4996)
+#pragma warning (disable:4238)
+//RM <= OMG
+
+#if _MSC_VER<1400
 #define malloc(s)		  _malloc_dbg(s, _NORMAL_BLOCK, __FILE__, __LINE__)
 #define calloc(c, s)	  _calloc_dbg(c, s, _NORMAL_BLOCK, __FILE__, __LINE__)
 #define realloc(p, s)	  _realloc_dbg(p, s, _NORMAL_BLOCK, __FILE__, __LINE__)
@@ -165,8 +193,6 @@
 #define free(p)			  _free_dbg(p, _NORMAL_BLOCK)
 #define _msize(p)		  _msize_dbg(p, _NORMAL_BLOCK)
 #endif
-#endif _MSC_VER>=1400
-
 
 typedef CArray<CStringA> CStringAArray;
 typedef CStringArray CStringWArray;
@@ -174,7 +200,6 @@ typedef CStringArray CStringWArray;
 #define _TWINAPI(fname)	fname "W"
 
 extern "C" int __cdecl __ascii_stricmp(const char * dst, const char * src);
-
 
 #if _MSC_VER>=1400
 #ifdef _UNICODE
