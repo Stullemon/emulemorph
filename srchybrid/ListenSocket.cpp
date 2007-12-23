@@ -261,7 +261,12 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 				throw GetResString(IDS_ERR_NOHELLO);
 			}
 			else if (client && opcode != OP_HELLO && opcode != OP_HELLOANSWER)
+/*
+				client->CheckHandshakeFinished();
+  MORPH START: */
 				client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode);
+ // MORPH END
+
 			switch(opcode)
 			{
 				case OP_HELLOANSWER:
@@ -369,10 +374,10 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 
 					if (size >= 16)
 					{
-						// EastShare START - Marked by TAHO, modified SUQWT
-						//if (!client->GetWaitStartTime())
-						//	client->SetWaitStartTime();
-						// EastShare END - Marked by TAHO, modified SUQWT
+						/* EastShare START - Marked by TAHO, modified SUQWT
+						if (!client->GetWaitStartTime())
+							client->SetWaitStartTime();
+						 EastShare END - Marked by TAHO, modified SUQWT */
 						CSafeMemFile data_in(packet, size);
 						uchar reqfilehash[16];
 						data_in.ReadHash16(reqfilehash);
@@ -504,10 +509,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					    {
 						    CSafeMemFile data(16+16);
 						    data.WriteHash16(reqfile->GetFileHash());
-						    if (reqfile->IsPartFile())
-							    ((CPartFile*)reqfile)->WriteIncPartStatus(&data);
-						    else
-							    data.WriteUInt16(0);
+							  ((CPartFile*)reqfile)->WriteIncPartStatus(&data);
 						    Packet* packet = new Packet(&data, OP_EMULEPROT);
 						    packet->opcode = OP_FILEINCSTATUS;
 						    theStats.AddUpDataOverheadFileRequest(packet->size);
@@ -596,7 +598,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						DebugRecv("OP_StartUpLoadReq", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadFileRequest(size);
 				
-					if (!client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode))
+					if (!client->CheckHandshakeFinished(OP_EDONKEYPROT, opcode))  //morph
 						break;
 					if (size == 16)
 					{
@@ -963,7 +965,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 									|| ((Perm == PERM_FRIENDS) && client->IsFriend())
 									|| ((Perm == PERM_COMMUNITY) && (client->IsCommunity()) || client->IsFriend()) )
 									list.AddTail((void*&)cur_file);
-							}
+							}  //morph
 							// [end] Mighty Knife
 							// xMule_MOD: showSharePermissions
 						}
@@ -1011,7 +1013,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					{
 						AddLogLine(true,GetResString(IDS_SHAREDREQ1),client->GetUserName(),client->GetUserIDHybrid(),GetResString(IDS_ACCEPTED) );
  
-						/*
+						/* sharusubdir
 						//TODO: Don't send shared directories which do not contain any files
 						// add shared directories
 						CString strDir;
@@ -1348,7 +1350,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						DebugRecv("OP_MultiPacket", client, (size >= 16) ? packet : NULL);
 					}
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
-					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode); //morph
 
 					if( client->GetKadPort() )
 						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
@@ -1564,7 +1566,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_MultiPacketAns", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
-					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode); //moprh
 
 					if( client->GetKadPort() )
 						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
@@ -1711,7 +1713,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_QueueRanking", client);
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
-					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);//MOrph
 
 					client->ProcessEmuleQueueRank(packet, size);
 					break;
@@ -1724,7 +1726,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						DebugRecv(opcode == OP_REQUESTSOURCES2 ? "OP_MPReqSources2" : "OP_MPReqSources", client, (size >= 16) ? packet : NULL);
 					
 					theStats.AddDownDataOverheadSourceExchange(uRawSize);
-					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);//MOrph
 
 					uint8 byRequestedVersion = 0;
 					uint16 byRequestedOptions = 0;
@@ -1789,7 +1791,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_AnswerSources", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadSourceExchange(uRawSize);
-					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);//MOrph
 
 					CSafeMemFile data(packet, size);
 					uchar hash[16];
@@ -1838,7 +1840,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_FileDesc", client);
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
-					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);//MOrph
 
 					client->ProcessMuleCommentPacket(packet,size);
 					break;
@@ -1848,7 +1850,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_RequestPreView", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadOther(uRawSize);
-					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);//MOrph
 
 					if (thePrefs.CanSeeShares()==vsfaEverybody || (thePrefs.CanSeeShares()==vsfaFriends && client->IsFriend()))	
 					{
@@ -1869,7 +1871,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_PreviewAnswer", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadOther(uRawSize);
-					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);//MOrph
 
 					client->ProcessPreviewAnswer(packet, size);
 					break;
@@ -2246,7 +2248,6 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					else if(md4cmp(reqfilehash, client->GetUploadFileID()) != 0 && md4cmp(reqfilehash, tempfileid) != 0 && client->GetSessionUp() == 0){
 						// client requested another file than it queued up for. Try to decide if the swith should be allowed.
 						bool allowSwitch = false;
-
 	                    CKnownFile* currequpfile = theApp.sharedfiles->GetFileByID(reqfilehash);
                         if(currequpfile != NULL) {
                             // save original file id asked for, to be able to log it
@@ -2285,7 +2286,6 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 								theApp.uploadqueue->AddClientToQueue(client, true, true);
 
 								AddDebugLogLine(false, GetResString(IDS_CLIENTPUTBACK));
-						
 								client->SetUploadFileID(currequpfile);
 							}
 						}
@@ -2332,7 +2332,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					}
 					
 					theStats.AddDownDataOverheadFileRequest(24);
-					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);
+					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);//MOrph
 
 					if (client->GetRequestFile() && !client->GetRequestFile()->IsStopped() && (client->GetRequestFile()->GetStatus()==PS_READY || client->GetRequestFile()->GetStatus()==PS_EMPTY))
 					{
@@ -2489,7 +2489,8 @@ void CClientReqSocket::OnSend(int nErrorCode)
 void CClientReqSocket::OnError(int nErrorCode)
 {
 	CString strTCPError;
-	///MORPH START - Changed by SiRoB
+	if (thePrefs.GetVerbose())
+	{
 	if (nErrorCode == ERR_WRONGHEADER)
 		strTCPError = _T("Error: Wrong header");
 	else if (nErrorCode == ERR_TOOBIG)
@@ -2500,9 +2501,9 @@ void CClientReqSocket::OnError(int nErrorCode)
 		strTCPError = _T("Error: Unencrypted Connection when Encryption was required");
 	else
 		strTCPError = GetErrorMessage(nErrorCode);
-	if (thePrefs.GetVerbose())
 		DebugLogWarning(_T("Client TCP socket: %s; %s"), strTCPError, DbgGetClientInfo());
-	///MORPH END  - Changed by SiRoB
+	}
+
 	Disconnect(strTCPError);
 }
 
