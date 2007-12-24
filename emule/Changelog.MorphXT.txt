@@ -4,8 +4,9 @@ Changelog for eMule 0.48a MorphXT v10.x
 11-12-2007
 Compiled with visual stusio 2003 sp1. 
 
+FIX: use part.met.bak files instead of hardly ever seen valid part.met.backup files. [leuk_he]
 CHANGE: update cryptolib Version 5.5.2 (9/24/2007)
-ADD: experimental support for visual studio 2005 sp1. See readme. 
+ADD: experimental support for visual studio 2005 sp1. See readme. [fafner/rapid mule/leuk_he]
 CHANGE: reduce some cpu under wine [leuk_he]
 
 --------------------------------------

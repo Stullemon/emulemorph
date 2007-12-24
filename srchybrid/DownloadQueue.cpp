@@ -135,8 +135,8 @@ void CDownloadQueue::Init(){
 		}
 		ff.Close();
 
-		//try recovering any part.met files
-		searchPath += _T(".backup"); //MORPH - TODO, shouldn't it be .bak file restore?
+		//try recovering any part.met.bak files
+		searchPath += PARTMET_BAK_EXT; //MORPH - .bak files should be restore, not backup
 		end = !ff.FindFile(searchPath, 0);
 		while (!end){
 			end = !ff.FindNextFile();

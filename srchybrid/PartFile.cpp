@@ -1374,7 +1374,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 
 	//check if this is a backup
 	// SLUGFILLER: SafeHash - also update the partial name
-	if(_tcsicmp(_tcsrchr(m_fullname, _T('.')), PARTMET_TMP_EXT) == 0) {
+	if(_tcsicmp(_tcsrchr(m_fullname, _T('.')), PARTMET_BAK_EXT) == 0) {
 		m_fullname = RemoveFileExtension(m_fullname);
 		m_partmetfilename = RemoveFileExtension(m_partmetfilename);
 	}
