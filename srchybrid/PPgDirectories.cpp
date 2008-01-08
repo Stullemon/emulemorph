@@ -44,6 +44,7 @@ BEGIN_MESSAGE_MAP(CPPgDirectories, CPropertyPage)
 	ON_BN_CLICKED(IDC_UNCADD,	OnBnClickedAddUNC)
 	ON_BN_CLICKED(IDC_UNCREM,	OnBnClickedRemUNC)
 	ON_WM_HELPINFO()
+	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_SELTEMPDIRADD, OnBnClickedSeltempdiradd)
 END_MESSAGE_MAP()
 
@@ -53,8 +54,18 @@ CPPgDirectories::CPPgDirectories()
 {
 }
 
+void CPPgDirectories::OnDestroy(){
+	   // => Start	  rapid mule gdi leak 
+    HIMAGELIST handle = TreeView_GetImageList(m_ShareSelector.GetSafeHwnd(), TVSIL_STATE);
+    if (handle != NULL)
+        ImageList_Destroy(handle);
+    // <= End
+}
+
+
 CPPgDirectories::~CPPgDirectories()
 {
+
 }
 
 void CPPgDirectories::DoDataExchange(CDataExchange* pDX)
@@ -282,6 +293,7 @@ BOOL CPPgDirectories::OnApply()
    end sharesubdir old code*/
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 	/*
+
 	// check shared directories for reserved folder names
 	POSITION pos = thePrefs.shareddir_list.GetHeadPosition();
 	while (pos){
@@ -342,7 +354,6 @@ void CPPgDirectories::Localize(void)
 		GetDlgItem(IDC_SELINCDIR)->SetWindowText(GetResString(IDS_PW_BROWSE));
 		GetDlgItem(IDC_SELTEMPDIR)->SetWindowText(GetResString(IDS_PW_BROWSE));
 		GetDlgItem(IDC_SHARED_FRM)->SetWindowText(GetResString(IDS_PW_SHARED));
-
 		// leuk_he tooltipped start
 		SetTool(  IDC_INCFILES,  IDS_INCFILES_TIP);
 		SetTool(  IDC_SELINCDIR,IDS_INCFILES_TIP );
@@ -354,9 +365,6 @@ void CPPgDirectories::Localize(void)
 		SetTool(  IDC_UNCADD ,IDS_UNCADD_TIP );
 		SetTool(  IDC_UNCREM ,IDS_UNCREM_TIP );
 		// leuk_he tooltipped end
-
-
-
 	}
 }
 
@@ -446,6 +454,7 @@ void CPPgDirectories::OnBnClickedAddUNC()
 	}
 	 end old code */
   // MORPH START SHARESUBDIR 
+
 	CAddSharedDirDialog AddSharedDirDialog(_T("\\\\Server\\Share"),false);
 	int result = AddSharedDirDialog.DoModal();
 		if (result != IDOK) 
