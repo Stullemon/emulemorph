@@ -27,12 +27,12 @@
 #include "uploadqueue.h"
 #include "preferences.h"
 
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[]=__FILE__;
 #endif
-
 
 /**
  * The constructor starts the thread.
@@ -48,6 +48,7 @@ UploadBandwidthThrottler::UploadBandwidthThrottler(void) {
 	memset(m_SentBytesSinceLastCallOverheadClass,0,sizeof(m_SentBytesSinceLastCallOverheadClass));
 	memset(m_highestNumberOfFullyActivatedSlotsClass,0,sizeof(m_highestNumberOfFullyActivatedSlotsClass));
 	memset(slotCounterClass,0,sizeof(slotCounterClass));
+	m_nUpDataOverheadFromDownload=0;
 		
 	threadEndedEvent = new CEvent(0, 1);
     pauseEvent = new CEvent(TRUE, TRUE);
@@ -381,6 +382,24 @@ void UploadBandwidthThrottler::Pause(bool paused) {
         pauseEvent->SetEvent();
     }
 }
+
+// morph start
+void UploadBandwidthThrottler::SetDownDataOverheadOtherPackets(long bytes)	{
+	sendLocker.Lock();
+	m_nUpDataOverheadFromDownload+=bytes;
+	sendLocker.Unlock();
+}
+
+
+uint64	UploadBandwidthThrottler::GetDownDataOverheadOtherPackets_andreset()	{
+	sendLocker.Lock();
+	uint64	 ret=m_nUpDataOverheadFromDownload;
+    m_nUpDataOverheadFromDownload=0;
+	sendLocker.Unlock();
+
+	return ret;
+}
+
 
 uint32 UploadBandwidthThrottler::GetSlotLimit(uint32 currentUpSpeed) {
     uint32 upPerClient = UPLOAD_CLIENT_DATARATE;
@@ -805,6 +824,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					numberofclientinhigherclass += slotCounterClass[classID];
 				}
 			}
+			// add in any tcp overhead we got from ack download frames
+			ControlspentBytes+=	GetDownDataOverheadOtherPackets_andreset()	;
+			//
 			if (ControlspentBytes) {
 				// Comsume overhead byte in higher class too
 				for (uint32 i = 0; i < LAST_CLASS; i++) {
@@ -816,6 +838,9 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				m_SentBytesSinceLastCallOverheadClass[LAST_CLASS] += ControlspentOverhead;
 				sendBytesLocker.Unlock();
 			}
+
+
+
 			//loop 4
 			numberofclientinhigherclass = 0;
 			//if (realBytesToSpendClass[LAST_CLASS]/1000 >= allowedDataRateClass[LAST_CLASS] || allowedDataRateClass[LAST_CLASS] == _UI32_MAX || bUploadUnlimited) {

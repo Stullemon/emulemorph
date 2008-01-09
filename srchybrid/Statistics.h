@@ -74,13 +74,14 @@ public:
 	uint64	GetDownDataOverheadServerPackets()			{return m_nDownDataOverheadServerPackets;}
 	uint64	GetDownDataOverheadKadPackets()				{return m_nDownDataOverheadKadPackets;}
 	uint64	GetDownDataOverheadOtherPackets()			{return m_nDownDataOverheadOtherPackets;}
-
-
+	
 	///////////////////////////////////////////////////////////////////////////
 	// Up Overhead
 	//
 	void	CompUpDatarateOverhead();
 	void	ResetUpDatarateOverhead();
+
+
 	void	AddUpDataOverheadSourceExchange(uint32 data)	{ m_nUpDataRateMSOverhead += data;
 															  m_nUpDataOverheadSourceExchange += data;
 															  m_nUpDataOverheadSourceExchangePackets++;}
@@ -200,6 +201,8 @@ private:
 	static DWORD	m_AvarageDDRO_listLastRemovedTimestamp;
 	static DWORD	m_AvarageUDRO_listLastRemovedTimestamp;
 	//MORPH END   - Added by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
+
+
 	/*ZZ*/uint64  m_nTotalCompletedBytes;
 };
 

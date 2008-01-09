@@ -5,8 +5,7 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-// vs2005: this is in wininfo:
-#if _MSC_VER < 1400 
+#ifndef MIM_APPLYTOSUBMENUS 
 typedef struct tagMENUINFO
 {
     DWORD   cbSize;

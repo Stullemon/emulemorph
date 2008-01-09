@@ -393,7 +393,7 @@ CUpDownClient* CClientList::FindClientByIP_KadPort(uint32 ip, uint16 port) const
 		CUpDownClient* cur_client = list.GetNext(pos);
 		if (cur_client->GetConnectIP() == ip && cur_client->GetKadPort() == port)
 		{   
-			ASSERT(cur_client->GetConnectIP()== cur_client->GetIP()   ) ; // official uses getip is this a bug? 
+			//ASSERT(cur_client->GetConnectIP()== cur_client->GetIP()   ) ; // official uses getip is this a bug? 
 			return cur_client;
 		}
 	}

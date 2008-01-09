@@ -999,9 +999,11 @@ int FirstTimeWizard() //lh ftw
 	page2.m_iAutoConnectAtStart = 0;
 	page3.m_sTCP.Format(_T("%u"), thePrefs.GetPort());
 	page3.m_sUDP.Format(_T("%u"), thePrefs.GetUDPPort());
-//	page4.m_iDAP = 1; // MORPH less is more
-//	page4.m_iUAP = 1; // MORPH less is more
-//	page5.m_iULFullChunks = 1;	  // MORPH not needed full chunk due to zz upload
+/*	
+  page4.m_iDAP = 1; // MORPH less is more
+  page4.m_iUAP = 1; // MORPH less is more
+  page5.m_iULFullChunks = 1;	  // MORPH not needed full chunk due to zz upload
+*/
 	page6.m_iSafeServerConnect = 0;
 	page6.m_iKademlia = 1;
 	page6.m_iED2K = 1;
@@ -1011,12 +1013,12 @@ int FirstTimeWizard() //lh ftw
 	page6.m_pbUDPDisabled = &bUDPDisabled;
 
 	page6b.m_iShowLessControls = thePrefs.IsLessControls(); // MORPH START show less controls
-    page6b.m_iShowMoreControls = thePrefs.IsExtControlsEnabled(); // MORPH startup wizard
+  page6b.m_iShowMoreControls = thePrefs.IsExtControlsEnabled(); // MORPH startup wizard
 
 	/* MORPH only when changed. (RANDOMIZE PORTS) */
 	uint16 oldtcpport=thePrefs.GetPort(false,true);
 	uint16 oldudpport=thePrefs.GetUDPPort(false,true);
-	/* MORPH only when changed.  */
+	/* MORPH only when changed. or the sockets are rest when the first time wiz is stated again */
 
 	int iResult = sheet.DoModal();
 	if (iResult == IDCANCEL) {
@@ -1045,14 +1047,16 @@ int FirstTimeWizard() //lh ftw
 		AddAutoStart();
 	else
 		RemAutoStart();
-//	thePrefs.SetNewAutoDown(page4.m_iDAP!=0); // MORPH Less is more
-//	thePrefs.SetNewAutoUp(page4.m_iUAP!=0); // MORPH less is more
-//	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks!=0); // MORPH less is more
+/* MORPH STAR Less is more removed:
+ 	thePrefs.SetNewAutoDown(page4.m_iDAP!=0); 
+  thePrefs.SetNewAutoUp(page4.m_iUAP!=0);
+	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks!=0);
+   MORPH END Less is more 
 	thePrefs.SetSafeServerConnectEnabled(page6.m_iSafeServerConnect!=0);
 	thePrefs.SetNetworkKademlia(page6.m_iKademlia!=0);
 	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);
 	thePrefs.m_bCryptLayerRequiredStrictServer = (page6.m_iReqObfus!=0); // // MORPH lh require obfuscated server connection
-	thePrefs.SetExtControls(page6b.m_iShowMoreControls!=0 );
+	thePrefs.SetExtControls(page6b.m_iShowMoreControls!=0 ); //morph show more controls in wizard
 	thePrefs.SetLessControls(page6b.m_iShowLessControls!=0); // MORPH START show less controls
 
 	theApp.m_UPnP_IGDControlPoint->SetUPnPNat(page3.uPnPNAT!=0); // leuk_he add upnp to startup wizard

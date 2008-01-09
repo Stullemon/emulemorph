@@ -82,7 +82,7 @@ void CStatisticFile::AddTransferred(uint64 start, uint64 bytes){	//MORPH - Added
 
 //MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
 void CStatisticFile::AddBlockTransferred(uint64 start, uint64 end, uint64 count){
-	if (start >= end || !count)
+	if (start+1 >= end || !count)
 		return;
 
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
@@ -99,7 +99,7 @@ void CStatisticFile::AddBlockTransferred(uint64 start, uint64 end, uint64 count)
 	if (spreadlist.IsEmpty())
 		spreadlist.SetAt(0, 0);
 
-	POSITION endpos = spreadlist.FindFirstKeyAfter(end+1);
+	POSITION endpos = spreadlist.FindFirstKeyAfter(end);
 
 	if (endpos)
 		spreadlist.GetPrev(endpos);
@@ -111,9 +111,9 @@ void CStatisticFile::AddBlockTransferred(uint64 start, uint64 end, uint64 count)
 	uint64 endcount = spreadlist.GetValueAt(endpos);
 	endpos = spreadlist.SetAt(end, endcount);
 
-	POSITION startpos = spreadlist.FindFirstKeyAfter(start+1);
+	POSITION startpos = spreadlist.FindFirstKeyAfter(start);
 
-	for (POSITION pos = startpos; pos != endpos; spreadlist.GetNext(pos)) {
+	for (POSITION pos = startpos; pos != 0 && pos != endpos; spreadlist.GetNext(pos)) { 
 		spreadlist.SetValueAt(pos, spreadlist.GetValueAt(pos)+count);
 	}
 
@@ -121,6 +121,7 @@ void CStatisticFile::AddBlockTransferred(uint64 start, uint64 end, uint64 count)
 
 	ASSERT(startpos != NULL);
 
+	if (startpos == NULL ) return;
 	uint64 startcount = spreadlist.GetValueAt(startpos)+count;
 	startpos = spreadlist.SetAt(start, startcount);
 

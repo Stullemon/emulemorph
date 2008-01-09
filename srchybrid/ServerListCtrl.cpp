@@ -1326,9 +1326,23 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				// Obfuscation
 				case 14:{
 					if (server->SupportsObfuscationTCP() && server->GetObfuscationPortTCP() != 0)
+					{ //morph start	 obfuscation server required
 						Sbuffer = GetResString(IDS_YES); 
+						if (server->GetServerKeyUDP()) {	// MORPH and has a valid obfuscation key
+												Sbuffer+="(";
+							                    Sbuffer+=GetResString(IDS_KEY );  // obfuscation key available
+												Sbuffer+=")";	  
+						}
+						else {
+												Sbuffer+="(";
+							                    Sbuffer+=GetResString(IDS_BUDDYNONE ); // no key available.
+												Sbuffer+=")";
+						     }
+					} // morph end obfuscation server required
 					else
 						Sbuffer = GetResString(IDS_NO);
+
+
 					break;
 				}
 				case 15:{

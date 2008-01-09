@@ -41,6 +41,7 @@ protected:
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnBnClickedSeltempdiradd();
+	afx_msg void OnDestroy();
 };
 // MOROPH START sharesubdir
 class CAddSharedDirDialog : public CDialog

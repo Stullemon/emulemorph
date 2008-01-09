@@ -28,6 +28,7 @@
 #include "emuleDlg.h"
 #include "Log.h"
 
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -341,6 +342,7 @@ void CEMSocket::OnReceive(int nErrorCode){
 		readMax = downloadLimit;
 	}
 
+	
 	// We attempt to read up to 2 megs at a time (minus whatever is in our internal read buffer)
 	uint32 ret = Receive(GlobalReadBuffer + pendingHeaderSize, readMax);
 	if(ret == SOCKET_ERROR || byConnected == ES_DISCONNECTED){
@@ -367,6 +369,9 @@ void CEMSocket::OnReceive(int nErrorCode){
 		// Update limit
 		downloadLimit -= GetRealReceivedBytes();
 	}
+	// Morph START take download ack overhead into account
+	theApp.uploadBandwidthThrottler->SetDownDataOverheadOtherPackets((GetRealReceivedBytes()/1460+ (GetRealReceivedBytes()%1460)?1:0)*40); // 40 bytes tcp overhead per frame.
+	// Morph END take download ack overhead into account
 
 	// CPU load improvement
 	// Detect if the socket's buffer is empty (or the size did match...)

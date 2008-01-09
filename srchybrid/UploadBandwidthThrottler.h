@@ -41,6 +41,13 @@ public:
     ~UploadBandwidthThrottler(void);
 
     void GetStats(uint64* SentBytes, uint64* SentBytesOverhead, uint32* HighestNumberOfFullyActivatedSlotsSinceLastCallClass);
+
+	// MORPH count tcp overhead from download
+	void SetDownDataOverheadOtherPackets(long bytes)	;
+	uint64	GetDownDataOverheadOtherPackets_andreset()	;
+	// END count
+
+
     //MORPH - Removed by SiRoB, See above (avoid lock delay by splitting call)
 	/*
 	uint64 GetNumberOfSentBytesOverheadSinceLastCallAndReset(uint64* sentBytesOverhead);
@@ -100,6 +107,10 @@ private:
     uint32 m_highestNumberOfFullyActivatedSlotsClass[NB_SPLITTING_CLASS];
 	uint32 slotCounterClass[NB_SPLITTING_CLASS];
 	bool doRun;
+	// MORPH START
+	uint64	m_nUpDataOverheadFromDownload;
+	// MOPRH END
+
 
     CEvent busyEvent;
 };

@@ -1802,12 +1802,14 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 			if ((theApp.emuledlg->m_bClipboardChainIsOk==false)&& thePrefs.WatchClipboard4ED2KLinks()) {
 				theApp.SearchClipboard();		
 			}
+			/* How bad is this needed? seems to cause a loop in clipboard chain anyway... remove now
 			{ static uint32 m_nLastChained=::GetTickCount();
 			  if (thePrefs.WatchClipboard4ED2KLinks() && ::GetTickCount() - m_nLastChained > MIN2MS(5)) {
          		theApp.emuledlg->SetClipboardWatch(thePrefs.WatchClipboard4ED2KLinks()); //	reinsert ourself in the clipboard chain see, note in SetClipboardWatch
 				m_nLastChained=::GetTickCount();
 			  }
 			}
+			*/
 			//	MORPH END leuk_he clipboard chain instead of timer
 
 

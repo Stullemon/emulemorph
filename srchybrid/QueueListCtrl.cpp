@@ -548,16 +548,23 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					case 3:
 						Sbuffer.Format(_T("%i"),client->GetScore(false,false,true));
 						break;
-					case 4:{
+					case 4:{ // add {
 							if (client->HasLowID()){
-								if (client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
+            /* replaced by zz coide
+						if (client->m_bAddNextConnect)
+							Sbuffer.Format(_T("%i ****"),client->GetScore(false));
+						else
+							Sbuffer.Format(_T("%i (%s)"),client->GetScore(false), GetResString(IDS_IDLOW));
+              end replace by zz code*/
+             //ZZ
+						 if (client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
 									Sbuffer.Format(GetResString(IDS_UP_LOWID_AWAITED),client->GetScore(false), CastSecondsToHM((::GetTickCount()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
 								else
 									Sbuffer.Format(GetResString(IDS_UP_LOWID2),client->GetScore(false));
+              // END
 								}
 							else
 								Sbuffer.Format(_T("%i"),client->GetScore(false));
-
 							//EastShare START - Added by TAHO, Pay Back First
 							if(file && client->IsMoreUpThanDown(file)) {
 								CString tempStr;
@@ -571,7 +578,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								Sbuffer.Append(_T(" F"));
 							}
 							//Morph End - added by AndCycle, show out keep full chunk transfer
-						}
+						} //MOrph
 						break;
 					case 5:
 						Sbuffer.Format(_T("%i"),client->GetAskedCount());
@@ -855,7 +862,31 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 		}
 		
-		//MORPH START - Changed by SiRoB, ZZ Upload System
+/*:replace case 102 & 2
+		case 2: {
+			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
+			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+			if( (file1 != NULL) && (file2 != NULL))
+				iResult=((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority()) - ((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority());
+			else if( file1 == NULL )
+				iResult=1;
+			else
+				iResult=-1;
+			break;
+		}
+		case 102:{
+			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
+			CKnownFile* file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+			if( (file1 != NULL) && (file2 != NULL))
+				iResult=((file2->GetUpPriority()==PR_VERYLOW) ? -1 : file2->GetUpPriority()) - ((file1->GetUpPriority()==PR_VERYLOW) ? -1 : file1->GetUpPriority());
+			else if( file1 == NULL )
+				iResult=1;
+			else
+				iResult=-1;
+			break;
+		}
+   end replace*/
+	//MORPH START - Changed by SiRoB, ZZ Upload System
 		case 2: 
 		case 102: {
 			//MORPH START - Adde by SiRoB, Optimization requpfile
@@ -885,7 +916,6 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				iResult = 1;
 			else
 				iResult = -1;
-
 			if(lParamSort != 2)
 				iResult = -iResult;
 			break;
@@ -901,8 +931,10 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		//MORPH START - Changed by SiRoB, ZZ Upload System
 		case 4: 
 			//iResult=CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
+      // break;
 		case 104: { 
 			//iResult=CompareUnsigned(item2->GetScore(false), item1->GetScore(false));
+      //break;
 			//MORPH START - Adde by SiRoB, Optimization requpfile
 			/*
 			CKnownFile* file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
@@ -947,9 +979,12 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			iResult=item2->GetLastUpRequest() - item1->GetLastUpRequest();
 			break;
 		
-		case 7: 
+		case 7:
+         /* replace:
+        iResult=item1->GetWaitStartTime() - item2->GetWaitStartTime(); 
+        break;
+         */
 			//EastShare START - Modified by TAHO, modified SUQWT
-			//return item1->GetWaitStartTime() - item2->GetWaitStartTime();
 			{
 				sint64 time1 = item1->GetWaitStartTime();
 				sint64 time2 = item2->GetWaitStartTime();
@@ -964,6 +999,10 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			}
 			//EastShare END - Modified by TAHO, modified SUQWT
 		case 107: 
+       /* replace:
+			iResult=item2->GetWaitStartTime() - item1->GetWaitStartTime();
+			break;
+      */ 
 			//EastShare START - Modified by TAHO, modified SUQWT
 			//return item2->GetWaitStartTime() - item1->GetWaitStartTime();
 			{
@@ -1056,6 +1095,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		iResult= SortProc(lParam1, lParam2, dwNextSort);
 	}
 	*/
+
 	return iResult;
 
 }
