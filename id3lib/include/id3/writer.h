@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Id: writer.h,v 1.2 2007-06-02 20:17:23 pindakaasmod Exp $
+// $Id: writer.h,v 1.3 2008-01-09 22:56:41 stulleamgym Exp $
 
 // id3lib: a software library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -33,9 +33,11 @@
 class ID3_CPP_EXPORT ID3_Writer
 {
  public:
-  typedef uint32 size_type;
+//  typedef uint32 size_type;
+  typedef size_t size_type; // netfinity: 64bit safe!
   typedef uint8  char_type;
-  typedef uint32 pos_type;
+//  typedef uint32 pos_type;
+  typedef size_t pos_type; // netfinity: 64bit safe!
   typedef  int32 off_type;
   typedef  int16 int_type;
   static const int_type END_OF_WRITER;

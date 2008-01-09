@@ -1,4 +1,4 @@
-// $Id: io_helpers.cpp,v 1.2 2007-06-02 20:17:33 pindakaasmod Exp $
+// $Id: io_helpers.cpp,v 1.3 2008-01-09 22:57:29 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -24,6 +24,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 #if defined HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -37,7 +38,7 @@ String io::readString(ID3_Reader& reader)
   String str;
   while (!reader.atEnd())
   {
-    ID3_Reader::char_type ch = reader.readChar();
+    ID3_Reader::char_type ch = static_cast<ID3_Reader::char_type>(reader.readChar());
     if (ch == '\0')
     {
       break;
@@ -111,13 +112,13 @@ namespace
       return false;
     }
     io::ExitTrigger et(reader);
-    ch1 = reader.readChar();
+    ch1 = static_cast<ID3_Reader::char_type>(reader.readChar());
     if (reader.atEnd())
     {
       return false;
     }
     et.release();
-    ch2 = reader.readChar();
+    ch2 = static_cast<ID3_Reader::char_type>(reader.readChar());
     return true;
   }
 }
@@ -249,7 +250,7 @@ String io::readTrailingSpaces(ID3_Reader& reader, size_t len)
   spaces.reserve(len);
   while (!wr.atEnd())
   {
-    ID3_Reader::char_type ch = wr.readChar();
+    ID3_Reader::char_type ch = static_cast<ID3_Reader::char_type>(wr.readChar());
     if (ch == '\0' || ch == ' ')
     {
       spaces += ch;

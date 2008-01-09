@@ -1,4 +1,4 @@
-// $Id: tag_parse_v1.cpp,v 1.2 2007-06-02 20:17:35 pindakaasmod Exp $
+// $Id: tag_parse_v1.cpp,v 1.3 2008-01-09 22:57:30 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -25,6 +25,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 #include "tag_impl.h" //has <stdio.h> "tag.h" "header_tag.h" "frame.h" "field.h" "spec.h" "id3lib_strings.h" "utils.h"
 #include "helpers.h"
 #include "id3/io_decorators.h" //has "readers.h" "io_helpers.h" "utils.h"
@@ -115,7 +116,7 @@ bool id3::v1::parse(ID3_TagImpl& tag, ID3_Reader& reader)
   {
     if (trackno[1] != '\0')
     { //we've got a tracknumber
-      size_t track = trackno[1];
+      uchar track = trackno[1];
       field = id3::v2::getTrack(tag);
       if (field.size() == 0 || field == "00")
       {
@@ -128,7 +129,7 @@ bool id3::v1::parse(ID3_TagImpl& tag, ID3_Reader& reader)
   else
   {
     // trackno[0] != '\0'
-    const int paddingsize = (ID3_V1_LEN_COMMENT-2) - comment.size();
+    const size_t paddingsize = (ID3_V1_LEN_COMMENT-2) - comment.size();
     const char * padding = "                            "; //28 spaces
 
     if (trackno[1] == '\0' || trackno[1] == 0x20 && trackno[0] != 0x20)
@@ -152,7 +153,7 @@ bool id3::v1::parse(ID3_TagImpl& tag, ID3_Reader& reader)
   
   ID3D_NOTICE("id3::v1::parse: read bytes: " << reader.getCur() - beg);
   // the GENRE field/frame
-  uchar genre = reader.readChar();
+  uchar genre = static_cast<uchar>(reader.readChar());
   field = id3::v2::getGenre(tag);
   if (genre != 0xFF && (field.size() == 0 || field == ""))
   {

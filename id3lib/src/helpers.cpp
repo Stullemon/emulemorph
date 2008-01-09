@@ -1,4 +1,4 @@
-// $Id: helpers.cpp,v 1.2 2007-06-02 20:17:33 pindakaasmod Exp $
+// $Id: helpers.cpp,v 1.3 2008-01-09 22:57:29 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -27,6 +27,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 #if defined HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -356,11 +357,11 @@ size_t id3::v2::getTrackNum(const ID3_TagImpl& tag)
 ID3_Frame* id3::v2::setTrack(ID3_TagImpl& tag, uchar trk, uchar ttl)
 {
   ID3_Frame* frame = NULL;
-  String track = toString((size_t)trk);
+  String track = toString((uint32)trk);
   if (ttl > 0)
   {
     track += "/";
-    track += toString((size_t)ttl);
+    track += toString((uint32)ttl);
   }
   setFrameText(tag, ID3FID_TRACKNUM, track);
 

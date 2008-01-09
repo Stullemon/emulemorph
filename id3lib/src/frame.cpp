@@ -1,4 +1,4 @@
-// $Id: frame.cpp,v 1.3 2007-06-02 20:17:31 pindakaasmod Exp $
+// $Id: frame.cpp,v 1.4 2008-01-09 22:57:27 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -25,6 +25,8 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
+
 #if defined HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -43,7 +45,7 @@
  ** text frame.
  ** 
  ** @author Dirk Mahoney
- ** @version $Id: frame.cpp,v 1.3 2007-06-02 20:17:31 pindakaasmod Exp $
+ ** @version $Id: frame.cpp,v 1.4 2008-01-09 22:57:27 stulleamgym Exp $
  ** @see ID3_Tag
  ** @see ID3_Field
  ** @see ID3_Err
@@ -198,7 +200,15 @@ const char* ID3_Frame::GetTextID() const
 
 bool ID3_Frame::Parse(ID3_Reader& reader) 
 {
-  return _impl->Parse(reader);
+  try // Klenotic: Catch errors and return false instead of crashing.
+  { 
+    return _impl->Parse(reader);
+  }
+  catch(...)
+  {
+    ID3D_WARNING( "ID3_Frame::Parse: call to _impl->Parse() failed");
+    return false;
+  }
 }
 
 void ID3_Frame::Render(ID3_Writer& writer) const

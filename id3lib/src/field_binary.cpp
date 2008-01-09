@@ -1,4 +1,4 @@
-// $Id: field_binary.cpp,v 1.2 2007-06-02 20:17:31 pindakaasmod Exp $
+// $Id: field_binary.cpp,v 1.3 2008-01-09 22:57:27 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -24,6 +24,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 #include <stdio.h>
 //#include <string.h>
 #include <memory.h>
@@ -33,6 +34,10 @@
 #include "writer.h"
 #include "io_helpers.h"
 #include "id3/utils.h" // has <config.h> "id3/id3lib_streams.h" "id3/globals.h" "id3/id3lib_strings.h"
+
+#ifdef min
+#undef min
+#endif
 
 using namespace dami;
 

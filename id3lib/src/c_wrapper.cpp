@@ -1,4 +1,4 @@
-// $Id: c_wrapper.cpp,v 1.2 2007-06-02 20:17:30 pindakaasmod Exp $
+// $Id: c_wrapper.cpp,v 1.3 2008-01-09 22:57:27 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -26,6 +26,7 @@
 // http://download.sourceforge.net/id3lib/
 
 //#include <string.h>
+#include "pch.h"
 #include "id3.h"
 #include "tag.h"
 #include "field.h"

@@ -1,4 +1,4 @@
-// $Id: tag.cpp,v 1.3 2007-06-02 20:17:34 pindakaasmod Exp $
+// $Id: tag.cpp,v 1.4 2008-01-09 22:57:29 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -25,6 +25,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 //#include "readers.h"
 #include "writers.h"
 #include "tag_impl.h" //has <stdio.h> "tag.h" "header_tag.h" "frame.h" "field.h" "spec.h" "id3lib_strings.h" "utils.h"
@@ -271,7 +272,7 @@ using namespace dami;
  ** formatted 'CDM' frames from the unreleased ID3v2 2.01 draft specification.
  **
  ** \author Dirk Mahoney
- ** \version $Id: tag.cpp,v 1.3 2007-06-02 20:17:34 pindakaasmod Exp $
+ ** \version $Id: tag.cpp,v 1.4 2008-01-09 22:57:29 stulleamgym Exp $
  ** \sa ID3_Frame
  ** \sa ID3_Field
  ** \sa ID3_Err
@@ -987,9 +988,9 @@ void ID3_Tag::AddNewFrame(ID3_Frame* f)
  **/
 void ID3_Tag::AddFrames(const ID3_Frame *frames, size_t numFrames)
 {
-  for (int i = numFrames - 1; i >= 0; i--)
+  for (size_t i = numFrames; i > 0; i--)
   {
-    this->AddFrame(frames[i]);
+    this->AddFrame(frames[i-1]);
   }
 }
 
@@ -1051,7 +1052,7 @@ ID3_Tag& ID3_Tag::operator<<(const ID3_Frame* frame)
   return *this;
 }
 
-int32 ID3_IsTagHeader(const uchar data[ID3_TAGHEADERSIZE])
+off_t ID3_IsTagHeader(const uchar data[ID3_TAGHEADERSIZE])
 {
   size_t size = ID3_Tag::IsV2Tag(data);
 

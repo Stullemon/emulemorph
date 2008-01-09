@@ -474,33 +474,6 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Resource Files"
-			Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe"
-			>
-			<File
-				RelativePath="win32\zlib1.rc"
-				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCResourceCompilerTool"
-						PreprocessorDefinitions=""
-						AdditionalIncludeDirectories="\Archive\Work\eMule\eMule.v0.47c.Magic.Angel.v2.1.src\zlib\win32"
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCResourceCompilerTool"
-						PreprocessorDefinitions=""
-						AdditionalIncludeDirectories="\Archive\Work\eMule\eMule.v0.47c.Magic.Angel.v2.1.src\zlib\win32"
-					/>
-				</FileConfiguration>
-			</File>
-		</Filter>
-		<Filter
 			Name="Assembler Files (Unsupported)"
 			Filter="asm;obj;c;cpp;cxx;h;hpp;hxx"
 			>

@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Id: mp3_parse.cpp,v 1.3 2007-06-02 20:17:33 pindakaasmod Exp $
+// $Id: mp3_parse.cpp,v 1.4 2008-01-09 22:57:29 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 2002, Thijmen Klok (thijmen@id3lib.org)
@@ -25,6 +25,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 #include "mp3_header.h"
 
 #define FRAMES_FLAG     0x0001
@@ -425,7 +426,7 @@ bool Mp3Info::Parse(ID3_Reader& reader, size_t mp3size)
   else                /* MPEG 2 */
     sideinfo_len = (_mp3_header_output->channelmode == MP3CHANNELMODE_SINGLE_CHANNEL) ? 4 + 9 : 4 + 17;
 
-  int vbr_header_offest = beg + sideinfo_len;
+  off_t vbr_header_offest = beg + sideinfo_len;
   int vbr_frames = 0;
 
   sideinfo_len += 2; // add two for the crc itself
@@ -500,7 +501,7 @@ bool Mp3Info::Parse(ID3_Reader& reader, size_t mp3size)
                            + ((vbr_flags & TOC_FLAG)? 100:0)
                            + ((vbr_flags & SCALE_FLAG)? 4:0);
 
-      if (mp3size >= vbr_header_offest + vbr_header_size) 
+      if ((int)mp3size >= vbr_header_offest + vbr_header_size)
       {
         reader.readChars(&vbrheaderdata[VBR_HEADER_MIN_SIZE], vbr_header_size - VBR_HEADER_MIN_SIZE); 
         vbrheaderdata[vbr_header_size] = '\0';

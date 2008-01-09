@@ -1,4 +1,4 @@
-// $Id: tag_render.cpp,v 1.2 2007-06-02 20:17:35 pindakaasmod Exp $
+// $Id: tag_render.cpp,v 1.3 2008-01-09 22:57:30 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -25,6 +25,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 #include <memory.h>
 #include "tag_impl.h" //has <stdio.h> "tag.h" "header_tag.h" "frame.h" "field.h" "spec.h" "id3lib_strings.h" "utils.h"
 #include "helpers.h"
@@ -119,7 +120,7 @@ void id3::v2::render(ID3_Writer& writer, const ID3_TagImpl& tag)
   }
   
   // zero the remainder of the buffer so that our padding bytes are zero
-  luint nPadding = tag.PaddingSize(frmSize);
+  size_t nPadding = tag.PaddingSize(frmSize);
   ID3D_NOTICE( "id3::v2::render(): padding size = " << nPadding );
   
   hdr.SetDataSize(frmSize + tag.GetExtendedBytes() + nPadding);
@@ -191,7 +192,7 @@ void ID3_TagImpl::RenderExtHeader(uchar *buffer)
 
 size_t ID3_TagImpl::PaddingSize(size_t curSize) const
 {
-  luint newSize = 0;
+  size_t newSize = 0;
   
   // if padding is switched off
   if (! _is_padded)
@@ -210,7 +211,7 @@ size_t ID3_TagImpl::PaddingSize(size_t curSize) const
   }
   else
   {
-    luint tempSize = curSize + ID3_GetDataSize(*this) +
+    size_t tempSize = curSize + ID3_GetDataSize(*this) +
                      this->GetAppendedBytes() + ID3_TagHeader::SIZE;
     
     // this method of automatic padding rounds the COMPLETE FILE up to the

@@ -1,4 +1,4 @@
-// $Id: field.cpp,v 1.3 2007-06-02 20:17:31 pindakaasmod Exp $
+// $Id: field.cpp,v 1.4 2008-01-09 22:57:27 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -26,6 +26,7 @@
 // http://download.sourceforge.net/id3lib/
 
 
+#include "pch.h"
 #include "field_impl.h"
 #include "id3/utils.h" // has <config.h> "id3/id3lib_streams.h" "id3/globals.h" "id3/id3lib_strings.h"
 #include "field_def.h"
@@ -877,7 +878,7 @@ static  ID3_FrameDef ID3_FrameDefs[] =
  ** if you only plan to generate 3.0 tags.
  **
  ** @author Dirk Mahoney
- ** @version $Id: field.cpp,v 1.3 2007-06-02 20:17:31 pindakaasmod Exp $
+ ** @version $Id: field.cpp,v 1.4 2008-01-09 22:57:27 stulleamgym Exp $
  ** \sa ID3_Tag
  ** \sa ID3_Frame
  ** \sa ID3_Err
@@ -952,6 +953,8 @@ void ID3_FieldImpl::Clear()
           _text.assign(_fixed_size, '\0');
         }
       }
+	  else
+		_num_items = 0 ;
       break;
     }
     default:
@@ -1031,6 +1034,9 @@ size_t ID3_FieldImpl::Size() const
   else if (_type == ID3FTY_TEXTSTRING)
   {
     size = _text.size();
+    if (ID3TE_IS_DOUBLE_BYTE_ENC(_enc)) {
+      size /= 2;
+    }
   }
   else
   {
@@ -1092,7 +1098,7 @@ ID3_FrameID
 ID3_FindFrameID(const char *id)
 {
   ID3_FrameID fid = ID3FID_NOFRAME;
-  const int slen = strlen(id);
+  const size_t slen = strlen(id);
 
   for (size_t cur = 0; ID3_FrameDefs[cur].eID != ID3FID_NOFRAME; ++cur)
   {
@@ -1235,7 +1241,7 @@ bool ID3_FieldImpl::SetEncoding(ID3_TextEnc enc)
  ** \endcode
  **
  ** @author Cedric Tefft
- ** @version $Id: field.cpp,v 1.3 2007-06-02 20:17:31 pindakaasmod Exp $
+ ** @version $Id: field.cpp,v 1.4 2008-01-09 22:57:27 stulleamgym Exp $
  **/
 
 

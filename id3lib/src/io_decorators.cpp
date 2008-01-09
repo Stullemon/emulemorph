@@ -1,4 +1,4 @@
-// $Id: io_decorators.cpp,v 1.3 2007-06-02 20:17:33 pindakaasmod Exp $
+// $Id: io_decorators.cpp,v 1.4 2008-01-09 22:57:29 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -24,6 +24,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 #if defined HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -154,7 +155,7 @@ ID3_Reader::size_type io::CharReader::readChars(char_type buf[], size_type len)
     {
       break;
     }
-    char_type ch = this->readChar();
+    char_type ch = static_cast<char_type>(this->readChar());
     if (buf != NULL)
     {
       buf[numChars] = ch;
@@ -170,12 +171,12 @@ ID3_Reader::int_type io::LineFeedReader::readChar()
   {
     return END_OF_READER;
   }
-  char_type ch = _reader.readChar();
+  char_type ch = static_cast<char_type>(_reader.readChar());
   if (ch == 0x0D && this->peekChar() == 0x0A)
   {
     ID3D_NOTICE( "LineFeedReader::readChar(): found CRLF at pos " << 
                  this->getCur() );
-    ch = _reader.readChar();
+    ch = static_cast<char_type>(_reader.readChar());
   }
   return ch;
 };
@@ -186,7 +187,7 @@ ID3_Reader::int_type io::UnsyncedReader::readChar()
   {
     return END_OF_READER;
   }
-  char_type ch = _reader.readChar();
+  char_type ch = static_cast<char_type>(_reader.readChar());
   if (ch == 0xFF && this->peekChar() == 0x00)
   {
     ID3D_NOTICE( "UnsyncedReader::readChar(): found sync at pos " << 
@@ -268,7 +269,7 @@ void io::CompressedWriter::flush()
   // The zlib documentation specifies that the destination size needs to
   // be an unsigned long at least 0.1% larger than the source buffer,
   // plus 12 bytes
-  unsigned long newDataSize = dataSize + (dataSize / 10) + 12;
+  uLongf newDataSize = static_cast<uLongf>(dataSize + (dataSize / 10) + 12);
   char_type* newData = new char_type[newDataSize];
   if (::compress(newData, &newDataSize, data, dataSize) != Z_OK)
   {

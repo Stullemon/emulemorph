@@ -1,5 +1,5 @@
 // -*- C++ -*-
-/* $Id: globals.h,v 1.2 2007-06-02 20:17:22 pindakaasmod Exp $
+/* $Id: globals.h,v 1.3 2008-01-09 22:56:40 stulleamgym Exp $
 
  * id3lib: a C++ library for creating and manipulating id3v1/v2 tags
  * Copyright 1999, 2000 Scott Thomas Haug
@@ -166,7 +166,7 @@ ID3_ENUM(ID3_V2Spec)
   ID3V2_3_0,
   ID3V2_4_0,
   ID3V2_EARLIEST = ID3V2_2_0,
-  ID3V2_LATEST = ID3V2_3_0
+  ID3V2_LATEST = ID3V2_4_0 // Lex: changed for last version
 };
 
 /** The various types of tags that id3lib can handle

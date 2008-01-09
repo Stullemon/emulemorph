@@ -1,4 +1,4 @@
-// $Id: globals.cpp,v 1.2 2007-06-02 20:17:32 pindakaasmod Exp $
+// $Id: globals.cpp,v 1.3 2008-01-09 22:57:28 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -24,6 +24,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 #include "id3/globals.h" //has <stdlib.h> "id3/sized_types.h"
 
 #if defined HAVE_CONFIG_H

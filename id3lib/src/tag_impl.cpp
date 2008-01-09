@@ -1,4 +1,4 @@
-// $Id: tag_impl.cpp,v 1.2 2007-06-02 20:17:34 pindakaasmod Exp $
+// $Id: tag_impl.cpp,v 1.3 2008-01-09 22:57:30 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -25,6 +25,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 #if defined HAVE_SYS_PARAM_H
 #include <sys/param.h>
 #endif
@@ -41,7 +42,7 @@ size_t ID3_TagImpl::IsV2Tag(ID3_Reader& reader)
   size_t tagSize = 0;
   String id = io::readText(reader, ID3_TagHeader::ID_SIZE);
   String ver = io::readText(reader, 2);
-  char flags = reader.readChar();
+  char flags = static_cast<char>(reader.readChar());
   String size = io::readText(reader, 4);
 
   if (id == ID3_TagHeader::ID &&

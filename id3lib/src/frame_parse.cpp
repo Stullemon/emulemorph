@@ -1,4 +1,4 @@
-// $Id: frame_parse.cpp,v 1.3 2007-06-02 20:17:32 pindakaasmod Exp $
+// $Id: frame_parse.cpp,v 1.4 2008-01-09 22:57:28 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -24,6 +24,7 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
+#include "pch.h"
 #if defined HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -130,6 +131,14 @@ bool ID3_FrameImpl::Parse(ID3_Reader& reader)
     ID3D_WARNING( "ID3_FrameImpl::Parse(): not enough data to parse frame" );
     return false;
   }
+
+  if (dataSize > 16777216) //Klenotic: The max frame size is 16MB according to http://www.id3.org/easy.html.  A corrupted tag that reports a frame size of (-1) will crash the program.
+  {
+    ID3D_WARNING( "ID3_FrameImpl::Parse(): frame size too large" );
+    return false;
+  }
+
+
   io::WindowedReader wr(reader, dataSize);
   ID3D_NOTICE( "ID3_FrameImpl::Parse(): window getBeg() = " << wr.getBeg() );
   ID3D_NOTICE( "ID3_FrameImpl::Parse(): window getCur() = " << wr.getCur() );
@@ -149,14 +158,14 @@ bool ID3_FrameImpl::Parse(ID3_Reader& reader)
 
   if (_hdr.GetEncryption())
   {
-    char ch = wr.readChar();
+    char ch = static_cast<char>(wr.readChar());
     this->SetEncryptionID(ch);
     ID3D_NOTICE( "ID3_FrameImpl::Parse(): frame is encrypted, encryption_id = " << (int) ch );
   }
 
   if (_hdr.GetGrouping())
   {
-    char ch = wr.readChar();
+    char ch = static_cast<char>(wr.readChar());
     this->SetGroupingID(ch);
     ID3D_NOTICE( "ID3_FrameImpl::Parse(): frame is encrypted, grouping_id = " << (int) ch );
   }
