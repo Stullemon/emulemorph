@@ -1,5 +1,5 @@
 // -*- C++ -*-
-// $Id: mp3_parse.cpp,v 1.4 2008-01-09 22:57:29 stulleamgym Exp $
+// $Id: mp3_parse.cpp,v 1.5 2008-01-15 11:20:39 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 2002, Thijmen Klok (thijmen@id3lib.org)
@@ -25,7 +25,6 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
-#include "pch.h"
 #include "mp3_header.h"
 
 #define FRAMES_FLAG     0x0001

@@ -1,4 +1,4 @@
-// $Id: misc_support.cpp,v 1.3 2008-01-09 22:57:29 stulleamgym Exp $
+// $Id: misc_support.cpp,v 1.4 2008-01-15 11:20:39 stulleamgym Exp $
 
 // id3lib: a C++ library for creating and manipulating id3v1/v2 tags
 // Copyright 1999, 2000  Scott Thomas Haug
@@ -25,7 +25,6 @@
 // id3lib.  These files are distributed with id3lib at
 // http://download.sourceforge.net/id3lib/
 
-#include "pch.h"
 //#include <ctype.h>
 #include <stdio.h>
 
