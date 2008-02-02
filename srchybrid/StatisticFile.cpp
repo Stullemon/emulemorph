@@ -82,6 +82,7 @@ void CStatisticFile::AddTransferred(uint64 start, uint64 bytes){	//MORPH - Added
 
 //MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
 void CStatisticFile::AddBlockTransferred(uint64 start, uint64 end, uint64 count){
+	if (start == 0 ) start=1;   // byte 0? 
 	if (start+1 >= end || !count)
 		return;
 
@@ -99,7 +100,7 @@ void CStatisticFile::AddBlockTransferred(uint64 start, uint64 end, uint64 count)
 	if (spreadlist.IsEmpty())
 		spreadlist.SetAt(0, 0);
 
-	POSITION endpos = spreadlist.FindFirstKeyAfter(end);
+	POSITION endpos = spreadlist.FindFirstKeyAfter(end);  // returns null if no more. 
 
 	if (endpos)
 		spreadlist.GetPrev(endpos);
