@@ -1181,16 +1181,11 @@ BOOL CAskExit::OnInitDialog()
 	int  i_startupmode;
 	int rights;
 
-	if (afxData.bWin95) {
-		GetDlgItem( IDYESSERVICE)->EnableWindow(false);
-	} 
-	else {
 		NTServiceGet(b_installed,i_startupmode,	rights);
 		if (b_installed == 1) 
 			GetDlgItem( IDYESSERVICE)->EnableWindow(true);
 		else
 			GetDlgItem( IDYESSERVICE)->EnableWindow(false);
-	}   
    return TRUE;  
 
 }

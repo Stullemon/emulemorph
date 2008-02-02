@@ -1158,8 +1158,11 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 						strInfo += _T("\n");
 					strInfo += strSource;
 				}
-
+/* vs2008  start
 				const CSimpleArray<CSearchFile::SClient>& aClients = file->GetClients();
+*/
+				const CSimpleArray<CSearchFile::SClient,CSearchFile::CSClientEqualHelper>& aClients = file->GetClients();
+// vs2008 end
 				for (int i = 0; i < aClients.GetSize(); i++){
 					uint32 uClientIP = aClients[i].m_nIP;
 					uint32 uServerIP = aClients[i].m_nServerIP;
@@ -1180,7 +1183,11 @@ void CSearchListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 			}
 
 			if (file->GetServers().GetSize()){
+/* vs2008 start
 				const CSimpleArray<CSearchFile::SServer>& aServers = file->GetServers();
+*/ 
+				const CSimpleArray<CSearchFile::SServer,CSearchFile::CSServerEqualHelper>& aServers = file->GetServers();
+// vs2008 end
 				for (int i = 0; i < aServers.GetSize(); i++){
 					uint32 uServerIP = aServers[i].m_nIP;
 						CString strServer;

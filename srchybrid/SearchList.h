@@ -50,7 +50,6 @@ typedef struct {
 class CFileDataIO;
 class CAbstractFile;
 
-
 __inline bool __stdcall operator==(const CSearchFile::SServer& s1, const CSearchFile::SServer& s2)
 {
 	return s1.m_nIP==s2.m_nIP && s1.m_nPort==s2.m_nPort;

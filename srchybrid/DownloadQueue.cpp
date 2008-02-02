@@ -225,7 +225,11 @@ void CDownloadQueue::AddSearchToDownload(CSearchFile* toadd, uint8 paused, int c
 	}
 
 	// Add more sources which were found via global UDP search
+/* morph vs2008
 	const CSimpleArray<CSearchFile::SClient>& aClients = toadd->GetClients();
+*/
+	const CSimpleArray<CSearchFile::SClient,CSearchFile::CSClientEqualHelper>& aClients = toadd->GetClients();
+ // end morph vs2008
 	for (int i = 0; i < aClients.GetSize(); i++){
 		CSafeMemFile sources(1+4+2);
 		try{
@@ -296,7 +300,7 @@ bool CDownloadQueue::StartNextFile(int cat, bool force){
 			}
 		}
 		if (pfile == NULL && !force)
-			return false;
+			return false; //morph
 	}
 
     if(cat == -1 || pfile == NULL && force) {

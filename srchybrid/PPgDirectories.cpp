@@ -44,7 +44,7 @@ BEGIN_MESSAGE_MAP(CPPgDirectories, CPropertyPage)
 	ON_BN_CLICKED(IDC_UNCADD,	OnBnClickedAddUNC)
 	ON_BN_CLICKED(IDC_UNCREM,	OnBnClickedRemUNC)
 	ON_WM_HELPINFO()
-	ON_WM_DESTROY()
+	ON_WM_DESTROY() // morph gdi leak
 	ON_BN_CLICKED(IDC_SELTEMPDIRADD, OnBnClickedSeltempdiradd)
 END_MESSAGE_MAP()
 
@@ -62,10 +62,8 @@ void CPPgDirectories::OnDestroy(){
     // <= End
 }
 
-
 CPPgDirectories::~CPPgDirectories()
 {
-
 }
 
 void CPPgDirectories::DoDataExchange(CDataExchange* pDX)
@@ -85,7 +83,6 @@ BOOL CPPgDirectories::OnInitDialog()
 	m_ShareSelector.Init();	
    SLUGFILLER END: shareSubdir  */
 
-
 	((CEdit*)GetDlgItem(IDC_INCFILES))->SetLimitText(509);
 	((CEdit*)GetDlgItem(IDC_TEMPFILES))->SetLimitText(509);
 /* old version: on column
@@ -93,7 +90,6 @@ BOOL CPPgDirectories::OnInitDialog()
 */
 	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCLIST_INACTIVE  ), LVCFMT_LEFT, 270, -1);  // sharesubdir ==> this can be better
 	m_ctlUncPaths.InsertColumn(1,GetResString(IDS_SUBDIRS), LVCFMT_LEFT); // sharesubdir + column for inactive shares
-
 	m_ctlUncPaths.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
 	GetDlgItem(IDC_SELTEMPDIRADD)->ShowWindow(thePrefs.IsExtControlsEnabled()?SW_SHOW:SW_HIDE);
@@ -174,7 +170,7 @@ BOOL CPPgDirectories::OnApply()
 		AfxMessageBox(GetResString(IDS_WRN_INCFILE_RESERVED));
 		return FALSE;
 	}
-	*/
+	*/ //end safehash remove
 	// checking specified tempdir(s)
 	CString strTempDir;
 	GetDlgItemText(IDC_TEMPFILES, strTempDir);
@@ -200,7 +196,7 @@ BOOL CPPgDirectories::OnApply()
 				AfxMessageBox(GetResString(IDS_WRN_TEMPFILES_RESERVED));
 				return FALSE;
 			}
-			*/
+			*/ // end safehash remove
 			bool doubled=false;
 			for (int i=0;i<temptempfolders.GetCount();i++)	// avoid double tempdirs
 				if (temptempfolders.GetAt(i).CompareNoCase(atmp)==0) {
@@ -248,8 +244,7 @@ BOOL CPPgDirectories::OnApply()
 		theApp.RemoveTempFolderIcon();
 	}
 	// Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
-	
-	thePrefs.m_strIncomingDir = strIncomingDir;
+		thePrefs.m_strIncomingDir = strIncomingDir;
 	MakeFoldername(thePrefs.m_strIncomingDir);
 	thePrefs.GetCategory(0)->strIncomingPath = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 
@@ -302,7 +297,7 @@ BOOL CPPgDirectories::OnApply()
 		if (!thePrefs.IsShareableDirectory(rstrDir))
 			thePrefs.shareddir_list.RemoveAt(posLast);
 	}
-	*/
+	*/ // end safehash remove
 
 	if (testtempdirchanged)
 		AfxMessageBox(GetResString(IDS_SETTINGCHANGED_RESTART));
@@ -454,7 +449,6 @@ void CPPgDirectories::OnBnClickedAddUNC()
 	}
 	 end old code */
   // MORPH START SHARESUBDIR 
-
 	CAddSharedDirDialog AddSharedDirDialog(_T("\\\\Server\\Share"),false);
 	int result = AddSharedDirDialog.DoModal();
 		if (result != IDOK) 

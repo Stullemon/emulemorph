@@ -243,7 +243,7 @@ switch (thePrefs.GetTransferWnd1()) {
 void CTransferWnd::ShowQueueCount(uint32 number)
 {
 	TCHAR buffer[100];
-
+ // MORPH START
 	if(thePrefs.IsInfiniteQueueEnabled()){
 		#ifdef _UNICODE
 			TCHAR symbol[2] = _T("\x221E");
@@ -255,6 +255,10 @@ void CTransferWnd::ShowQueueCount(uint32 number)
 	else {
 		_sntprintf(buffer, _countof(buffer), _T("%u / %u (%u ") + GetResString(IDS_BANNED).MakeLower() + _T(")"), number, (thePrefs.GetQueueSize() + max(thePrefs.GetQueueSize()/4, 200)),theApp.clientlist->GetBannedCount()); //Commander - Modified: ClientQueueProgressBar
 	}
+/*
+_sntprintf(buffer, _countof(buffer), _T("%u (%u ") + GetResString(IDS_BANNED).MakeLower() + _T(")"), number, theApp.clientlist->GetBannedCount());
+*/
+  // MORPH END
 	buffer[_countof(buffer) - 1] = _T('\0');
 	GetDlgItem(IDC_QUEUECOUNT)->SetWindowText(buffer);
 
@@ -1524,7 +1528,7 @@ int CTransferWnd::AddCategory(CString newtitle,CString newincoming,CString newco
 	newcat->care4all=false;
 	*/
 	newcat->color= (DWORD)-1;
-    newcat->downloadInAlphabeticalOrder = FALSE; // ZZ:DownloadManager
+  newcat->downloadInAlphabeticalOrder = FALSE; 
 
 	// khaos::categorymod+ Initialize View Filter Variables
 	newcat->viewfilters.bArchives = true;

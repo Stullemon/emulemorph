@@ -93,7 +93,7 @@ void CDirectDownloadDlg::OnOK()
 			strTok += _T("/");
 		try
 		{
-			CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(strTok.Trim());
+			CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(strTok.Trim());// Morph trim
 			if (pLink)
 			{
 				if (pLink->GetKind() == CED2KLink::kFile)

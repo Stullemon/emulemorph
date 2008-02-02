@@ -76,6 +76,7 @@ public:
 	void		 SetListExpanded(bool val)	{ m_list_bExpanded = val; }
 
 	struct SClient {
+	public:
 		SClient() {
 			m_nIP = 0;
 			m_nPort = 0;
@@ -93,8 +94,20 @@ public:
 		uint16 m_nPort;
 		uint16 m_nServerPort;
 	};
+// vs2008 start
+class CSClientEqualHelper
+{
+public:
+	static bool IsEqual(const SClient & t1, const SClient & t2)
+	{
+		return ((t1.m_nIP == t2.m_nIP) &&
+		t1.m_nServerIP == t2.m_nServerIP );
+	}
+	};
+// vs2008 end
 	void AddClient(const SClient& client) { m_aClients.Add(client); }
-	const CSimpleArray<SClient>& GetClients() const { return m_aClients; }
+
+	const CSimpleArray<SClient,CSClientEqualHelper>& GetClients() const { return m_aClients; }
 
 	struct SServer {
 		SServer() {
@@ -114,8 +127,26 @@ public:
 		UINT   m_uAvail;
 		bool   m_bUDPAnswer;
 	};
+// vs2008 start
+	class CSServerEqualHelper
+	{
+	public:
+		static bool IsEqual(const SServer & t1, const SServer & t2)
+		{
+			return (t1.m_nIP == t2.m_nIP) &&
+			t1.m_nPort == t2.m_nPort &&
+			t1.m_uAvail ==  t2.m_uAvail &&
+			t1.m_bUDPAnswer == t2.m_bUDPAnswer ;
+		}
+	};
+// vs2008 end
+
 	void AddServer(const SServer& server) { m_aServers.Add(server); }
+/* vs2008
 	const CSimpleArray<SServer>& GetServers() const { return m_aServers; }
+*/
+	const CSimpleArray<SServer,CSServerEqualHelper>& GetServers() const { return m_aServers; }
+// end vs2008
 	SServer& GetServerAt(int iServer) { return m_aServers[iServer]; }
 	
 	void	AddPreviewImg(CxImage* img)	{	m_listImages.Add(img); }
@@ -144,8 +175,13 @@ private:
 	uint32	m_nSearchID;
 	uint32	m_nClientServerIP;
 	uint16	m_nClientServerPort;
+/* vs2008 start 
 	CSimpleArray<SClient> m_aClients;
 	CSimpleArray<SServer> m_aServers;
+*/
+	CSimpleArray<SClient,CSClientEqualHelper> m_aClients;
+	CSimpleArray<SServer,CSServerEqualHelper> m_aServers;
+// vs200 end
 	CSimpleArray<CxImage*> m_listImages;
 	LPTSTR m_pszDirectory;
 	// spamfilter

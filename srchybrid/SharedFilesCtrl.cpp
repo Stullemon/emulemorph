@@ -790,7 +790,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						buffer.ReleaseBuffer();
 						break;
 					case 10:
-                	    //MORPH START - Changed by SiRoB, Avoid misusing of powersharing
+             	    //MORPH START - Changed by SiRoB, Avoid misusing of powersharing
   						if (file->m_nCompleteSourcesCountLo == file->m_nCompleteSourcesCountHi)
 							buffer.Format(_T("%u (%u)"), file->m_nCompleteSourcesCountLo, file->m_nVirtualCompleteSourcesCount);
                 	    else if (file->m_nCompleteSourcesCountLo == 0)
@@ -863,7 +863,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						else {
 							powersharemode = thePrefs.GetPowerShareMode();
 							buffer.Append(_T(" ") + ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". "));
-						}
+						} //
 						if(powersharemode == 2)
 							buffer.Append(GetResString(IDS_POWERSHARE_AUTO_LABEL));
 						else if (powersharemode == 1)
@@ -941,7 +941,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								buffer.Append(_T(" + ") + ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". S"));
 						break;
 						//MORPH START - Changed by SiRoB, Avoid misusing of HideOS
-					}
+					} //
 					//MORPH END   - Added by SiRoB, HIDEOS
 					//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 					case 19:
@@ -952,7 +952,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								buffer = GetResString(IDS_DISABLED);
 						} else {
 							buffer = ((CString)GetResString(IDS_DEFAULT)).Left(1) + _T(". ") + GetResString((thePrefs.GetShareOnlyTheNeed()>0)?IDS_ENABLED:IDS_DISABLED);
-						}
+						} //
 						break;
 					//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
@@ -976,7 +976,7 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					// [end] Mighty Knife
 				}
-				if(iColumn != 8 && iColumn!=14)
+				if(iColumn != 8 && iColumn!=14) //morph
 					dc.DrawText(buffer, buffer.GetLength(),&cur_rec,uDTFlags);
 				if ( iColumn == 0 )
 					cur_rec.left -= iIconDrawWidth;

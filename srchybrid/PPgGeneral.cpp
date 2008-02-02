@@ -104,7 +104,6 @@ void CPPgGeneral::LoadSettings(void)
 	} else 
 		CheckDlgButton(IDC_INVISIBLE_MODE, 1);
 	//Commander - Added: Invisible Mode [TPT] - End
-
 	GetDlgItem(IDC_NICK)->SetWindowText(thePrefs.GetUserNick());
 
 	for(int i = 0; i < m_language.GetCount(); i++)
@@ -147,7 +146,6 @@ void CPPgGeneral::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_STARTUPSOUNDON,0);
     //Commander - Added: Enable/Disable Startupsound - End
-
 	if(thePrefs.bringtoforeground)
 		CheckDlgButton(IDC_BRINGTOFOREGROUND,1);
 	else
@@ -354,7 +352,6 @@ void CPPgGeneral::Localize(void)
 		GetDlgItem(IDC_STARTUP)->SetWindowText(GetResString(IDS_STARTUP));
 		GetDlgItem(IDC_STARTWIN)->SetWindowText(GetResString(IDS_STARTWITHWINDOWS));
 		GetDlgItem(IDC_MINIMULE)->SetWindowText(GetResString(IDS_ENABLEMINIMULE));
-
 		GetDlgItem(IDC_STARTUPSOUNDON)->SetWindowText(GetResString(IDS_PW_STARTUPSOUND));//Commander - Added: Enable/Disable Startupsound
 		//Commander - Added: Invisible Mode [TPT] - Start
 		// Add key modifiers to ComboBox

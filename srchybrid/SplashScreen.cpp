@@ -112,7 +112,11 @@ void CSplashScreen::OnPaint()
 			LOGFONT lf = {0};
 			lf.lfHeight = 14;
 			lf.lfWeight = FW_BOLD;
+			/* morph no win98
 			lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
+			*/
+			lf.lfQuality = ANTIALIASED_QUALITY;
+			// end
 			_tcscpy(lf.lfFaceName, _T("Arial"));
 			COLORREF oldclr = dc.SetTextColor(RGB(128,128,255));//Commander: Set white text color
 			int iOMode = dc.SetBkMode(TRANSPARENT);//Commander: Make bg transparent

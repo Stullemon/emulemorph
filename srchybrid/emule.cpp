@@ -297,8 +297,9 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 CemuleApp theApp(_T("eMule"));
 
 
-// Workaround for buggy 'AfxSocketTerm' (needed at least for MFC 7.0)
-#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800
+// Workaround for buggy 'AfxSocketTerm' (needed at least for MFC 7.0) 
+//morph, alslo for vs2008now ???
+#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900
 void __cdecl __AfxSocketTerm()
 {
 #if defined(_AFXDLL) && (_MFC_VER==0x0700 || _MFC_VER==0x0710)
@@ -474,7 +475,8 @@ BOOL CemuleApp::InitInstance()
 	}
 		}
 	//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
-#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800
+// mfc90 for vs2008
+#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900
 	atexit(__AfxSocketTerm);
 #else
 #error "You are using an MFC version which may require a special version of the above function!"
@@ -2162,7 +2164,7 @@ void CemuleApp::UpdateDesktopColorDepth()
 			// loosing any colors.
 			m_iDfltImageListColorFlags = ILC_COLOR16;
 		}
-
+/* MORPH win95 is not supported, vs2008 does not support .win95
 		// Don't use >8-bit image lists with OSs with restricted memory for GDI resources
 		if (afxData.bWin95) {
 			// NOTE: ILC_COLOR8 leads to converting all icons to the standard windows system
@@ -2170,6 +2172,7 @@ void CemuleApp::UpdateDesktopColorDepth()
 			// Though there is no other chance with Win98 because of the 64K GDI limit.
 			m_iDfltImageListColorFlags = ILC_COLOR8;
 		}
+MORPH END */
 	}
 
 	// Doesn't help..

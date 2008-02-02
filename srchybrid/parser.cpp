@@ -32,6 +32,9 @@
    There are some unavoidable exceptions within include files to
    define necessary library symbols; they are noted "INFRINGES ON
    USER NAME SPACE" below.  */
+// vs2008: moved.
+#include "stdafx.h"
+
 
 /* Identify Bison output.  */
 #define YYBISON 1
@@ -117,8 +120,9 @@
 
 /* Copy the first part of user declarations.  */
 
-
+/* moved up
 #include "stdafx.h"
+*/
 #include "resource.h"
 #include "OtherFunctions.h"
 #include "SearchExpr.h"

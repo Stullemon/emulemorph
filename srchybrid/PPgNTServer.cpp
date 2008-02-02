@@ -211,13 +211,14 @@ int  CPPgNTService::FillStatus(){
 	int b_installed;
 	int  i_startupmode;
 	int rights;
-
+    /* no win98
 	if (afxData.bWin95) {
 		GetDlgItem( IDC_SVC_CURRENT_STATUS)->SetWindowText(GetResString(IDS_SVC_OSTOOOLD));
 		GetDlgItem( IDC_SVC_INSTALLSERVICE)->EnableWindow(false); 
 		GetDlgItem( IDC_SVC_SERVERUNINSTALL)->EnableWindow(false); 
         return -1;
 	} 
+	end no win98 vs2008*/
 		NTServiceGet(b_installed,i_startupmode,	rights);
 
 		if (RunningAsService())		{ 

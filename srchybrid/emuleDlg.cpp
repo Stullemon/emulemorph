@@ -1373,6 +1373,7 @@ void CemuleDlg::ShowTransferRate(bool bForceAll)
 		}
 		//MORPH END   - Added by IceCream, Correct the bug of the download speed shown in the systray
 
+		/* MORPH vs2008
 		// Win98: '\r\n' is not displayed correctly in tooltip
 		if (afxData.bWin95) {
 			LPTSTR psz = buffer2;
@@ -1382,6 +1383,7 @@ void CemuleDlg::ShowTransferRate(bool bForceAll)
 				psz++;
 			}
 		}
+		*/  //end comment out vs2008
 		TraySetToolTip(buffer2);
 	}
 

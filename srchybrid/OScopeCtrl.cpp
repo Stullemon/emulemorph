@@ -451,14 +451,16 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 			}
 		}
 	}
-
+/* no win98 vs2008 
 	if (afxData.bWin95) {
 		// Win98: To get a rotated font it has to be specified as "Arial" ("MS Shell Dlg" 
 		// and "MS Sans Serif" are not created with rotation)
 		yUnitFont.CreateFont(FontPointSizeToLogUnits(8*10), 0, 900, 900, FW_NORMAL, FALSE, FALSE, 0, DEFAULT_CHARSET,
 							 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, _T("Arial"));
 	}
-	else {
+	else 
+	*/ // end no win98 vs2008
+	{
 		yUnitFont.CreateFont(FontPointSizeToLogUnits(8*10), 0, 900, 900, FW_NORMAL, FALSE, FALSE, 0, DEFAULT_CHARSET,
 							 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, _T("MS Shell Dlg"));
 	}

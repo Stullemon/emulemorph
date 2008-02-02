@@ -195,7 +195,6 @@ BOOL CPPgFiles::OnApply()
 		thePrefs.m_btransferfullchunks = false;
 
 
-
 	if(IsDlgButtonChecked(IDC_WATCHCB))
 		thePrefs.watchclipboard = true;
 	else
@@ -247,7 +246,6 @@ void CPPgFiles::Localize(void)
 		GetDlgItem(IDC_FNC)->SetWindowText(GetResString(IDS_EDIT));
 		GetDlgItem(IDC_ONND)->SetWindowText(GetResString(IDS_ONNEWDOWNLOAD));
 		GetDlgItem(IDC_FNCLEANUP)->SetWindowText(GetResString(IDS_AUTOCLEANUPFN));
-
 		GetDlgItem(IDC_STATICVIDEOPLAYER)->SetWindowText(GetResString(IDS_PW_VIDEOPLAYER));
 		GetDlgItem(IDC_VIDEOPLAYER_CMD_LBL)->SetWindowText(GetResString(IDS_COMMAND));
 		GetDlgItem(IDC_VIDEOPLAYER_ARGS_LBL)->SetWindowText(GetResString(IDS_ARGUMENTS));

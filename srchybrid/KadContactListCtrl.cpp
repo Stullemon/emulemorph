@@ -165,7 +165,11 @@ bool CKadContactListCtrl::ContactAdd(const Kademlia::CContact* contact)
 	//		Trying to update all the columns causes one of the connection freezes in win98
 	//		ContactRef(contact);
 			// If it still doesn't work under Win98, uncomment the '!afxData.bWin95' term
+			/* no win95 vs2008
 			if (!afxData.bWin95 && iItem >= 0)
+			*/
+			if (iItem >= 0)
+            //end no win98
 				UpdateContact(iItem, contact);
 			UpdateKadContactCount();
 		}

@@ -9,8 +9,16 @@
 #define VC_EXTRALEAN		// Exclude rarely-used stuff from Windows headers
 #endif
 
+#if _MSC_VER >= 1500   //vs2008?
+#ifndef WINVER
+#define WINVER 0x0501		// at least xp ... for vs2008. not good but.... compil
+#endif
+#else
+
 #ifndef WINVER
 #define WINVER 0x0400			// 0x0400 == Windows 98 and Windows NT 4.0 (because of '_WIN32_WINDOWS=0x0410')
+#endif
+
 #endif
 
 #ifndef _WIN32_WINNT		// Allow use of features specific to Windows NN or later.                   

@@ -19,7 +19,6 @@
 #include "stdafx.h"
 #include <winsvc.h>
 #include <afxwin.h>
-#include <atlrx.h>
 #include <afxinet.h> 
 
 #include "userMsgs.h"

@@ -371,7 +371,11 @@ void CCreditsThread::InitFonts()
 	lf.lfHeight = 16;
 	lf.lfWeight = 700;
 	//lf.lfItalic = TRUE;
+	/* MORPH win95 is not supported, vs2008 does not support .win95
 	lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
+	*/
+	lf.lfQuality = ANTIALIASED_QUALITY;
+	// MORPH END
 	_tcscpy(lf.lfFaceName, _T("Arial"));
 	font2->CreateFontIndirect(&lf);
 	m_arFonts.Add(font2);
@@ -385,7 +389,11 @@ void CCreditsThread::InitFonts()
 	memset((void*)&lf, 0, sizeof(lf));
 	lf.lfHeight = 25;
 	lf.lfWeight = 900;
+	/* MORPH
 	lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
+	 */
+	lf.lfQuality = ANTIALIASED_QUALITY;
+	// MORPH END
 	_tcscpy(lf.lfFaceName, _T("Arial"));
 	font3->CreateFontIndirect(&lf);
 	m_arFonts.Add(font3);

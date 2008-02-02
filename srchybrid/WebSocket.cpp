@@ -419,7 +419,7 @@ UINT AFX_CDECL WebSocketListeningFunc(LPVOID pThis)
 		else
 			stAddr.sin_addr.S_un.S_addr = INADDR_ANY;
 
-		if (!bind(hSocket, (sockaddr*)&stAddr, sizeof(stAddr)) && !listen(hSocket, 5)) //SOMAXCONN is too much with winsock2
+		if (!bind(hSocket, (sockaddr*)&stAddr, sizeof(stAddr)) && !listen(hSocket, 5)) //SOMAXCONN is too much with winsock2 MORPH
 		{
 			HANDLE hEvent = CreateEvent(NULL, FALSE, TRUE, NULL);
 			if (hEvent)
