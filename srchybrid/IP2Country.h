@@ -52,7 +52,7 @@ class CIP2Country
 		void	RemoveAllIPs();
 		void	RemoveAllFlags();
 
-		void	AddIPRange(uint32 IPfrom,uint32 IPto, TCHAR* shortCountryName, TCHAR* midCountryName, TCHAR* longCountryName);
+		void	AddIPRange(uint32 IPfrom,uint32 IPto, const TCHAR* shortCountryName, const TCHAR* midCountryName,  const TCHAR* longCountryName);
 
 		IPRange_Struct2*	GetCountryFromIP(uint32 IP);
 		CString	GetCountryNameFromRef(IPRange_Struct2* m_structServerCountry, bool longname=false);

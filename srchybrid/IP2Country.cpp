@@ -140,17 +140,16 @@ bool CIP2Country::LoadFromFile(){
 			int iDuplicate = 0;
 			int iMerged = 0;
 			bool error = false;
-			TCHAR *szIPStart,*szIPEnd,*sz2L,*sz3L,*szCountry;
 			while (!feof(readFile)) {
 				error = false;
-				if (_fgetts(szbuffer, 512+8,readFile)==0) break;
+				if (_fgetts(szbuffer,512,readFile)==0) break;
 				++iLine;
 				/*
 				http://ip-to-country.webhosting.info/node/view/54
 
 				This is a sample of how the CSV file is structured:
 
-				"0033996344","0033996351","GB","GBR","UNITED KINGDOM"
+				0033996344,0033996351,GB,GBR,"UNITED KINGDOM"
 				"0050331648","0083886079","US","USA","UNITED STATES"
 				"0094585424","0094585439","SE","SWE","SWEDEN"
 
@@ -162,33 +161,39 @@ bool CIP2Country::LoadFromFile(){
 				COUNTRY_NAME 	VARCHAR(50) 		Country name based on ISO 3166
 				*/
 				// we assume that the ip-to-country.csv is valid and doesn't cause any troubles
+				// Since dec 2007 the file is provided without " so we tokenize on ,
 				// get & process IP range
+				CString sbuffer = szbuffer;
+				sbuffer.Remove(L'"'); // get rid of the " signs
 				
-				if (*szbuffer != _T('"'))
+				CString tempStr[5];
+				int curPos = 0;
+				for(int forCount = 0; forCount < 5; ++forCount)
+				{
+					tempStr[forCount] = sbuffer.Tokenize(_T(","), curPos);
+					if(tempStr[forCount].IsEmpty()) 
+					{
+						if(forCount == 0 || forCount == 1) 
+						{
+							error = true; //no empty ip field
+							break;
+						}
+						//no need to throw an exception, keep reading in next line
+						//throw CString(_T("error line in"));
+					}
+				}
+				if(error)
+				{
+					theApp.QueueDebugLogLineEx(LOG_ERROR,_T( "error line number : %i"),  iCount+1);
+					theApp.QueueDebugLogLineEx(LOG_ERROR, _T("possible error line in %s"), ip2countryCSVfile);
 					continue;
-				szIPStart=++szbuffer;
-				for (  ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
-				*szbuffer = '\0';
-				szIPEnd=szbuffer+=3;
-				for (  ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
-				*szbuffer = '\0';
-				sz2L = szbuffer+=3;
-				for (  ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
-				*szbuffer = '\0';
-				sz3L = szbuffer+=3;
-				for (  ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ );
-				*szbuffer = '\0';
-				szCountry = szbuffer+=3;
-				++szbuffer;
-				for (  ; *szbuffer != 0 && *szbuffer != '"'; szbuffer++ )
-					if ( (*szbuffer >= (TCHAR)L'A') && (*szbuffer <= (TCHAR)L'Z') )
-						*szbuffer -= (TCHAR)(L'A' - L'a');
-					else if (*szbuffer == (TCHAR)L' ')
-						++szbuffer;
-				*szbuffer= '\0';
-				szbuffer=szIPStart-1;
+				}
+				//tempStr[4] is full country name, capitalize country name from rayita
+				FirstCharCap(&tempStr[4]);
+
 				++iCount;
-				AddIPRange(_tcstoul(szIPStart, NULL, 10), _tcstoul(szIPEnd, NULL, 10), sz2L, sz3L, szCountry); //SDT: vs05 - 1130
+     			AddIPRange((UINT)_tstol(tempStr[0]), (UINT)_tstol(tempStr[1]), tempStr[2].GetString(), tempStr[3], tempStr[4]);
+
 			}
 			fclose(readFile);
 
@@ -421,7 +426,7 @@ void CIP2Country::RemoveAllFlags(){
 	AddLogLine(false, GetResString(IDS_IP2COUNTRY_FLAGUNLD));
 }
 
-void CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, TCHAR* shortCountryName, TCHAR* midCountryName, TCHAR* longCountryName){
+void CIP2Country::AddIPRange(uint32 IPfrom,uint32 IPto, const TCHAR* shortCountryName, const TCHAR* midCountryName, const TCHAR* longCountryName){
 	IPRange_Struct2* newRange = new IPRange_Struct2();
 	newRange->IPstart = IPfrom;
 	newRange->IPend = IPto;
