@@ -137,6 +137,7 @@ public:
 		m_pfnMediaInfo_Close = NULL;
 		m_pfnMediaInfo_Get = NULL;
 		m_pfnMediaInfo_Count_Get = NULL;
+		m_pfnMediaInfo_inform =NULL ; //morph
 	}
 	~CMediaInfoDLL()
 	{
@@ -150,8 +151,8 @@ public:
 		{
 			m_bInitialized = TRUE;
 
-			CString strPath = theApp.GetProfileString(_T("eMule"), _T("MediaInfo_MediaInfoDllPath"), _T("MEDIAINFO.DLL"));
-			m_hLib = LoadLibrary(strPath);
+			// morph use prefs  strPath = theApp.GetProfileString(_T("eMule"), _T("MediaInfo_MediaInfoDllPath"), _T("MEDIAINFO.DLL"));
+			m_hLib = LoadLibrary(CPreferences::sMediaInfo_MediaInfoDllPath); // morph, use advanced prefs. 
 			if (m_hLib != NULL)
 			{
 				ULONGLONG ullVersion = GetModuleVersion(m_hLib);
@@ -212,6 +213,7 @@ public:
 					(FARPROC &)m_pfnMediaInfo_Open = GetProcAddress(m_hLib, "MediaInfo_Open");
 					(FARPROC &)m_pfnMediaInfo_Close = GetProcAddress(m_hLib, "MediaInfo_Close");
 					(FARPROC &)m_pfnMediaInfo_Get = GetProcAddress(m_hLib, "MediaInfo_Get");
+					(FARPROC &)m_pfnMediaInfo_inform = GetProcAddress(m_hLib, "MediaInfo_Inform"); // morph. 
 					(FARPROC &)m_pfnMediaInfo_Count_Get = GetProcAddress(m_hLib, "MediaInfo_Count_Get");
 					if (m_pfnMediaInfo_New && m_pfnMediaInfo_Delete && m_pfnMediaInfo_Open && m_pfnMediaInfo_Close && m_pfnMediaInfo_Get) {
 						m_ullVersion = ullVersion;
@@ -284,6 +286,20 @@ public:
 		return _T("");
 	}
 
+
+// morph  start
+CString Inform(void* Handle,size_t format)
+	{
+		if (m_pfnMediaInfo_inform) 
+			if (m_ullVersion >= MAKEDLLVERULL(0, 7, 0, 0)) {
+			return (*m_pfnMediaInfo_inform)(Handle,format);
+		}
+		return _T("");
+	}
+		//morph end
+
+
+
 	int Count_Get(void* Handle, stream_t_C StreamKind, int StreamNumber)
 	{
 		if (m_pfnMediaInfo4_Get)
@@ -314,6 +330,9 @@ protected:
 	int				(__stdcall *m_pfnMediaInfo_Open)(void* Handle, const wchar_t* File) throw(...);
 	void*			(__stdcall *m_pfnMediaInfo_New)() throw(...);
 	void			(__stdcall *m_pfnMediaInfo_Delete)(void* Handle) throw(...);
+	// morph:
+	const wchar_t*  (__stdcall *m_pfnMediaInfo_inform)(void* Handle,size_t reserved) throw(...);
+	// morph end
 };
 
 CMediaInfoDLL theMediaInfoDLL;
@@ -904,7 +923,11 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 	// Check for AVI file
 	//
 	bool bIsAVI = false;
+	/* morph use advanced pref
 	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RIFF"), 1)) 
+	*/
+	if (CPreferences::bMediaInfo_RIFF) 
+    // end morph advanced pref
 	{
 		try
 		{
@@ -1482,6 +1505,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 							}
 						}
 
+						CString strInform = theMediaInfoDLL.Inform(Handle,0); // morph
 						CString strTitle = theMediaInfoDLL.Get(Handle, Stream_General, 0, _T("Title"), Info_Text, Info_Name);
 						CString strTitleMore = theMediaInfoDLL.Get(Handle, Stream_General, 0, _T("Title_More"), Info_Text, Info_Name);
 						if (!strTitleMore.IsEmpty() && !strTitle.IsEmpty() && strTitleMore != strTitle)
@@ -1816,7 +1840,16 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 							if (!str.IsEmpty())
 								mi->strInfo << _T("   ") << GetResString(IDS_PW_LANG) << _T(":\t") << str << _T("\n");
 						}
-
+						// morph start verbose mediainfo
+						if (!strInform.IsEmpty()) {
+								if (!mi->strInfo.IsEmpty()) 
+									 mi->strInfo << _T("\n");
+								mi->strInfo.SetSelectionCharFormat(mi->strInfo.m_cfBold);
+								mi->strInfo<< _T("Verbose   \n");
+             					mi->strInfo << strInform ; //morph
+						}
+						// morph en verbose mediainfo
+ 
 						theMediaInfoDLL.Close(Handle);
 
 						// MediaInfoLib does not handle MPEG files correctly in regards of
