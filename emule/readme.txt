@@ -1,5 +1,5 @@
 eMule Copyright (C)2002-2005 Merkur (merkur-@users.sourceforge.net)
-eMule morph Copyright (C)2002-2007 morph team
+eMule morph Copyright (C)2002-2008 morph team
 Note: --- Additions made for emule morph
 
 
@@ -278,7 +278,7 @@ You need Microsoft(C) Visual Studio .NET 2003 + sp1 of this compiler to
 compile eMule morph.
 vs2002 might work, 
 vs2005 sp1 is experimentally supported by opening emule80.vcproj.
-vs2008 (orca) is unknown 
+vs2008 is highly experimentylly supported by upgrading emule80.vcproj. But keep reading. 
 You need to have MFC/ATL installed! Express version will not work for this reason. 
 
 Morph provides external libraries as a special download (scr and libs) 
@@ -295,6 +295,9 @@ You need the following libs:
 050604 Pthreads pthreads-w32-2-7-0-release.tar.gz 2.7.0 http://sources.redhat.com/pthreads-win32/index.html
        upnplib  libupnp 1.4.1 (pre) http://www.libupnp.org/
 
+All the above libs are ready configured in the _src_and_lib download of morph. Just extract them and open the emule.sln file
+
+
 ----- Libs (old):
 050803 CrashRpt CrashRpt.v3.0.2.5.zip   3.0.2.5 http://www3.sympatico.ca/grant.mcdorman
 060407 ZipArchive ziparchive.v2.4.10.zip   2.4.10 http://www.artpol-software.com/index_zip.html
@@ -305,12 +308,33 @@ You need the following libs:
 DirectX SDK
 Microsoft speech api (5.1?)(or just remove "HAVE_SAPI_H" from the preprocessor definitions)
 
-Or download all libs and run emule,vcpproj using your favourite p2p application:
-ed2k://|file|eMule047aMorphXT85_complete_compilable_Package.rar|18128572|4BD14E6F69E3B1046423932F638BEAA8|h=5NX573HANXXHWOGAD2JWUXC57GD55B6X|/
-
 read 
 http://forum.emule-project.net/index.php?showtopic=87109
 for more details
+
+
+[VS2008 only]
+vs2008 requires a seperate download from micosoft for the atlrx.h file
+http://www.codeplex.com/Project/Download/FileDownload.aspx?ProjectName=AtlServer&DownloadId=11220
+
+unzip the file in the (new) atlserv directory.
+
+emulesrc --> atlserv --> include
+         |           +-> source
+         +------------->cryptopp
+         +------------->srchybrid
+
+and add  the includepath in emule80 -> c++ -> general -> addition include directories
+
+NOTE THAT VS2008 is currently only tested to compile. so this is bleeding edge
+ Note that binaries from vs2008 have winver set to 501, requireing windows XP. 
+ (a requirement not for previous compilers)
+ 
+find a topic in the morph forum (http://forum.emule-project.net/index.php?showforum=28) if you have 
+any issues with vs2008 
+[/vs2008 only]     
+         
+
 
 
 Download and save their sourcecode one level above the eMule source code 
@@ -376,6 +400,14 @@ Morpheus (founder, retired)
 And all the other team members listed at:
 http://sourceforge.net/project/memberlist.php?group_id=72158
      
+morph supporters:
+-andu
+-fafner
+-rapid mule
+-morph translators
+-and everyone i forgot to thank.
+
+
 
 LEGAL:
 ------
