@@ -4,13 +4,13 @@ Changelog for eMule 0.48a MorphXT v10.x
 xx-01-2008
 Compiled with visual stusio 2003 sp1. 
 
-Add: Show too much verbose info on content-> mediafinfo.
+Add: Show  much verbose info on content-> mediafinfo.dll (if you disable advanedoptions mediainfo_RIFF for avi files...)
 Add: (BETA!) download ack overhead used in in upload calculation
 Add: show if server obfuscation key is available
 FIX: use part.met.bak files instead of hardly ever seen valid part.met.backup files. [leuk_he]
 CHANGE: update cryptolib Version 5.5.2 (9/24/2007)
 ADD: experimental support for visual studio 2005 sp1. See readme. [fafner/rapid mule/leuk_he]
-ADD: alpha support for vs2008, make sure to read the readme
+ADD: alpha support for vs2008, make very sure to read the readme.
 CHANGE: reduce some cpu under wine [leuk_he]
 
 --------------------------------------
