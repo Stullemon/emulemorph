@@ -1364,6 +1364,12 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 				uint32 start = (uint32)statistic.spreadlist.GetKeyAt(pos);
 				statistic.spreadlist.GetNext(pos);
 				ASSERT(pos != NULL);	// Last value should always be 0
+				if (pos==NULL) {
+						// this should no happen, but abort might prevent a chrash?
+						LogError(LOG_STATUSBAR, _T("Error in spreadbarinfo knownfile. unexpected end of pos __FILE__ __LINE__"));
+						return false;
+					}
+
 				uint32 end = (uint32)statistic.spreadlist.GetKeyAt(pos);
 				//MORPH - Smooth sample
 				if (end - start < EMBLOCKSIZE && count > hideOS)
