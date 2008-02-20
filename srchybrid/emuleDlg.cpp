@@ -3550,9 +3550,6 @@ BOOL CemuleApp::OnIdle(LONG lCount)
 	DWORD dwNow = GetTickCount();
 	if (dwNow - dwLastCheck[index] >= SEC2MS(5))
 		{
-#ifdef  DEBUG
-			AddDebugLogLine(false, _T("theApp.OnIdle(%d))"),lCount); // we would flood the log with 2 messages every 5 seconds... 
-#endif
 			dwLastCheck[index]= dwNow;
 			return CWinApp::OnIdle(lCount);
 		}
