@@ -261,6 +261,85 @@
 				Name="VCPostBuildEventTool"
 			/>
 		</Configuration>
+		<Configuration
+			Name="debug80|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
+			UseOfMFC="0"
+			ATLMinimizesCRunTimeLibraryUsage="false"
+			CharacterSet="2"
+			>
+			<Tool
+				Name="VCPreBuildEventTool"
+			/>
+			<Tool
+				Name="VCCustomBuildTool"
+			/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"
+			/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"
+			/>
+			<Tool
+				Name="VCMIDLTool"
+				PreprocessorDefinitions="_DEBUG"
+				MkTypLibCompatible="true"
+				SuppressStartupBanner="true"
+				TargetEnvironment="1"
+				TypeLibraryName=".\Debug/upnpLib.tlb"
+				HeaderFileName=""
+			/>
+			<Tool
+				Name="VCCLCompilerTool"
+				Optimization="0"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)\..\ixml\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\src\inc&quot;;&quot;$(ProjectDir)\..\upnp\inc&quot;;&quot;$(ProjectDir)\..\threadutil\inc&quot;;&quot;$(ProjectDir)\..\ixml\inc&quot;;&quot;$(ProjectDir)\..\..\pthreads\pthreads\inc&quot;"
+				PreprocessorDefinitions="UPNP_STATIC_LIB;INCLUDE_CLIENT_APIS;_WIN32;WIN32;_DEBUG;PTW32_STATIC_LIB;_CRT_SECURE_NO_WARNINGS"
+				BasicRuntimeChecks="3"
+				RuntimeLibrary="1"
+				PrecompiledHeaderFile=".\Debug/upnpLib.pch"
+				AssemblerListingLocation=".\Debug/"
+				ObjectFile=".\Debug/"
+				ProgramDataBaseFileName=".\Debug/"
+				BrowseInformation="1"
+				WarningLevel="3"
+				SuppressStartupBanner="true"
+				DebugInformationFormat="4"
+				CompileAs="0"
+			/>
+			<Tool
+				Name="VCManagedResourceCompilerTool"
+			/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				PreprocessorDefinitions="_DEBUG"
+				Culture="1033"
+			/>
+			<Tool
+				Name="VCPreLinkEventTool"
+			/>
+			<Tool
+				Name="VCLibrarianTool"
+				IgnoreAllDefaultLibraries="true"
+			/>
+			<Tool
+				Name="VCALinkTool"
+			/>
+			<Tool
+				Name="VCXDCMakeTool"
+			/>
+			<Tool
+				Name="VCBscMakeTool"
+			/>
+			<Tool
+				Name="VCFxCopTool"
+			/>
+			<Tool
+				Name="VCPostBuildEventTool"
+			/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -301,6 +380,17 @@
 						AdditionalIncludeDirectories="$(ProjectDir)\..\ixml\src\inc"
 					/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="debug80|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="0"
+						AdditionalIncludeDirectories=""
+						BasicRuntimeChecks="3"
+						BrowseInformation="1"
+					/>
+				</FileConfiguration>
 			</File>
 			<Filter
 				Name="ixml"
@@ -338,6 +428,17 @@
 							AdditionalIncludeDirectories=""
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\ixml\src\document.c"
@@ -369,6 +470,17 @@
 							Name="VCCLCompilerTool"
 							Optimization="2"
 							AdditionalIncludeDirectories=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
 						/>
 					</FileConfiguration>
 				</File>
@@ -404,6 +516,17 @@
 							AdditionalIncludeDirectories=""
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\ixml\src\ixml.c"
@@ -435,6 +558,17 @@
 							Name="VCCLCompilerTool"
 							Optimization="2"
 							AdditionalIncludeDirectories=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
 						/>
 					</FileConfiguration>
 				</File>
@@ -470,6 +604,17 @@
 							AdditionalIncludeDirectories=""
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\ixml\src\ixmlparser.c"
@@ -501,6 +646,17 @@
 							Name="VCCLCompilerTool"
 							Optimization="2"
 							AdditionalIncludeDirectories=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
 						/>
 					</FileConfiguration>
 				</File>
@@ -536,6 +692,17 @@
 							AdditionalIncludeDirectories=""
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\ixml\src\node.c"
@@ -569,6 +736,17 @@
 							AdditionalIncludeDirectories=""
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\ixml\src\nodeList.c"
@@ -600,6 +778,17 @@
 							Name="VCCLCompilerTool"
 							Optimization="2"
 							AdditionalIncludeDirectories=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
 						/>
 					</FileConfiguration>
 				</File>
@@ -640,6 +829,17 @@
 							AdditionalIncludeDirectories=""
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\threadutil\src\iasnprintf.c"
@@ -671,6 +871,17 @@
 							Name="VCCLCompilerTool"
 							Optimization="2"
 							AdditionalIncludeDirectories=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
 						/>
 					</FileConfiguration>
 				</File>
@@ -706,6 +917,17 @@
 							AdditionalIncludeDirectories=""
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\threadutil\src\ThreadPool.c"
@@ -739,6 +961,17 @@
 							AdditionalIncludeDirectories=""
 						/>
 					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
+						/>
+					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\threadutil\src\TimerThread.c"
@@ -770,6 +1003,17 @@
 							Name="VCCLCompilerTool"
 							Optimization="2"
 							AdditionalIncludeDirectories=""
+						/>
+					</FileConfiguration>
+					<FileConfiguration
+						Name="debug80|Win32"
+						>
+						<Tool
+							Name="VCCLCompilerTool"
+							Optimization="0"
+							AdditionalIncludeDirectories=""
+							BasicRuntimeChecks="3"
+							BrowseInformation="1"
 						/>
 					</FileConfiguration>
 				</File>
@@ -814,6 +1058,17 @@
 								AdditionalIncludeDirectories=""
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\upnp\src\api\upnpapi.c"
@@ -847,6 +1102,17 @@
 								AdditionalIncludeDirectories=""
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\upnp\src\api\upnptools.c"
@@ -878,6 +1144,17 @@
 								Name="VCCLCompilerTool"
 								Optimization="2"
 								AdditionalIncludeDirectories=""
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
 							/>
 						</FileConfiguration>
 					</File>
@@ -918,6 +1195,17 @@
 								AdditionalIncludeDirectories=""
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\upnp\src\gena\gena_ctrlpt.c"
@@ -951,6 +1239,17 @@
 								AdditionalIncludeDirectories=""
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\upnp\src\gena\gena_device.c"
@@ -982,6 +1281,17 @@
 								Name="VCCLCompilerTool"
 								Optimization="2"
 								AdditionalIncludeDirectories=""
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
 							/>
 						</FileConfiguration>
 					</File>
@@ -1026,6 +1336,17 @@
 									AdditionalIncludeDirectories=""
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="debug80|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									Optimization="0"
+									AdditionalIncludeDirectories=""
+									BasicRuntimeChecks="3"
+									BrowseInformation="1"
+								/>
+							</FileConfiguration>
 						</File>
 					</Filter>
 					<Filter
@@ -1062,6 +1383,17 @@
 									Name="VCCLCompilerTool"
 									Optimization="2"
 									AdditionalIncludeDirectories=""
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="debug80|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									Optimization="0"
+									AdditionalIncludeDirectories=""
+									BasicRuntimeChecks="3"
+									BrowseInformation="1"
 								/>
 							</FileConfiguration>
 						</File>
@@ -1102,6 +1434,17 @@
 									AdditionalIncludeDirectories=""
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="debug80|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									Optimization="0"
+									AdditionalIncludeDirectories=""
+									BasicRuntimeChecks="3"
+									BrowseInformation="1"
+								/>
+							</FileConfiguration>
 						</File>
 						<Filter
 							Name="http"
@@ -1139,6 +1482,17 @@
 										AdditionalIncludeDirectories=""
 									/>
 								</FileConfiguration>
+								<FileConfiguration
+									Name="debug80|Win32"
+									>
+									<Tool
+										Name="VCCLCompilerTool"
+										Optimization="0"
+										AdditionalIncludeDirectories=""
+										BasicRuntimeChecks="3"
+										BrowseInformation="1"
+									/>
+								</FileConfiguration>
 							</File>
 							<File
 								RelativePath="..\upnp\src\genlib\net\http\httpreadwrite.c"
@@ -1170,6 +1524,17 @@
 										Name="VCCLCompilerTool"
 										Optimization="2"
 										AdditionalIncludeDirectories=""
+									/>
+								</FileConfiguration>
+								<FileConfiguration
+									Name="debug80|Win32"
+									>
+									<Tool
+										Name="VCCLCompilerTool"
+										Optimization="0"
+										AdditionalIncludeDirectories=""
+										BasicRuntimeChecks="3"
+										BrowseInformation="1"
 									/>
 								</FileConfiguration>
 							</File>
@@ -1205,6 +1570,17 @@
 										AdditionalIncludeDirectories=""
 									/>
 								</FileConfiguration>
+								<FileConfiguration
+									Name="debug80|Win32"
+									>
+									<Tool
+										Name="VCCLCompilerTool"
+										Optimization="0"
+										AdditionalIncludeDirectories=""
+										BasicRuntimeChecks="3"
+										BrowseInformation="1"
+									/>
+								</FileConfiguration>
 							</File>
 							<File
 								RelativePath="..\upnp\src\genlib\net\http\statcodes.c"
@@ -1238,6 +1614,17 @@
 										AdditionalIncludeDirectories=""
 									/>
 								</FileConfiguration>
+								<FileConfiguration
+									Name="debug80|Win32"
+									>
+									<Tool
+										Name="VCCLCompilerTool"
+										Optimization="0"
+										AdditionalIncludeDirectories=""
+										BasicRuntimeChecks="3"
+										BrowseInformation="1"
+									/>
+								</FileConfiguration>
 							</File>
 							<File
 								RelativePath="..\upnp\src\genlib\net\http\webserver.c"
@@ -1269,6 +1656,17 @@
 										Name="VCCLCompilerTool"
 										Optimization="2"
 										AdditionalIncludeDirectories=""
+									/>
+								</FileConfiguration>
+								<FileConfiguration
+									Name="debug80|Win32"
+									>
+									<Tool
+										Name="VCCLCompilerTool"
+										Optimization="0"
+										AdditionalIncludeDirectories=""
+										BasicRuntimeChecks="3"
+										BrowseInformation="1"
 									/>
 								</FileConfiguration>
 							</File>
@@ -1307,6 +1705,17 @@
 										Name="VCCLCompilerTool"
 										Optimization="2"
 										AdditionalIncludeDirectories=""
+									/>
+								</FileConfiguration>
+								<FileConfiguration
+									Name="debug80|Win32"
+									>
+									<Tool
+										Name="VCCLCompilerTool"
+										Optimization="0"
+										AdditionalIncludeDirectories=""
+										BasicRuntimeChecks="3"
+										BrowseInformation="1"
 									/>
 								</FileConfiguration>
 							</File>
@@ -1348,6 +1757,17 @@
 									AdditionalIncludeDirectories=""
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="debug80|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									Optimization="0"
+									AdditionalIncludeDirectories=""
+									BasicRuntimeChecks="3"
+									BrowseInformation="1"
+								/>
+							</FileConfiguration>
 						</File>
 					</Filter>
 					<Filter
@@ -1386,6 +1806,17 @@
 									AdditionalIncludeDirectories=""
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="debug80|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									Optimization="0"
+									AdditionalIncludeDirectories=""
+									BasicRuntimeChecks="3"
+									BrowseInformation="1"
+								/>
+							</FileConfiguration>
 						</File>
 						<File
 							RelativePath="..\upnp\src\genlib\util\strintmap.c"
@@ -1417,6 +1848,17 @@
 									Name="VCCLCompilerTool"
 									Optimization="2"
 									AdditionalIncludeDirectories=""
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="debug80|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									Optimization="0"
+									AdditionalIncludeDirectories=""
+									BasicRuntimeChecks="3"
+									BrowseInformation="1"
 								/>
 							</FileConfiguration>
 						</File>
@@ -1452,6 +1894,17 @@
 									AdditionalIncludeDirectories=""
 								/>
 							</FileConfiguration>
+							<FileConfiguration
+								Name="debug80|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									Optimization="0"
+									AdditionalIncludeDirectories=""
+									BasicRuntimeChecks="3"
+									BrowseInformation="1"
+								/>
+							</FileConfiguration>
 						</File>
 						<File
 							RelativePath="..\upnp\src\genlib\util\util.c"
@@ -1483,6 +1936,17 @@
 									Name="VCCLCompilerTool"
 									Optimization="2"
 									AdditionalIncludeDirectories=""
+								/>
+							</FileConfiguration>
+							<FileConfiguration
+								Name="debug80|Win32"
+								>
+								<Tool
+									Name="VCCLCompilerTool"
+									Optimization="0"
+									AdditionalIncludeDirectories=""
+									BasicRuntimeChecks="3"
+									BrowseInformation="1"
 								/>
 							</FileConfiguration>
 						</File>
@@ -1524,6 +1988,17 @@
 								AdditionalIncludeDirectories=""
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\upnp\src\soap\soap_device.c"
@@ -1555,6 +2030,17 @@
 								Name="VCCLCompilerTool"
 								Optimization="2"
 								AdditionalIncludeDirectories=""
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
 							/>
 						</FileConfiguration>
 					</File>
@@ -1599,6 +2085,17 @@
 								AdditionalIncludeDirectories=""
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\upnp\src\ssdp\ssdp_device.c"
@@ -1632,6 +2129,17 @@
 								AdditionalIncludeDirectories=""
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\upnp\src\ssdp\ssdp_server.c"
@@ -1663,6 +2171,17 @@
 								Name="VCCLCompilerTool"
 								Optimization="2"
 								AdditionalIncludeDirectories=""
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
 							/>
 						</FileConfiguration>
 					</File>
@@ -1703,6 +2222,17 @@
 								AdditionalIncludeDirectories=""
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
+							/>
+						</FileConfiguration>
 					</File>
 				</Filter>
 				<Filter
@@ -1741,6 +2271,17 @@
 								AdditionalIncludeDirectories=""
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\upnp\src\uuid\sysdep.c"
@@ -1774,6 +2315,17 @@
 								AdditionalIncludeDirectories=""
 							/>
 						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
+							/>
+						</FileConfiguration>
 					</File>
 					<File
 						RelativePath="..\upnp\src\uuid\uuid.c"
@@ -1805,6 +2357,17 @@
 								Name="VCCLCompilerTool"
 								Optimization="2"
 								AdditionalIncludeDirectories=""
+							/>
+						</FileConfiguration>
+						<FileConfiguration
+							Name="debug80|Win32"
+							>
+							<Tool
+								Name="VCCLCompilerTool"
+								Optimization="0"
+								AdditionalIncludeDirectories=""
+								BasicRuntimeChecks="3"
+								BrowseInformation="1"
 							/>
 						</FileConfiguration>
 					</File>
