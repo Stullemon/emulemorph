@@ -333,6 +333,7 @@ void CServer::SetServerKeyUDP(uint32 dwServerKeyUDP){
    */
    // we need a server key for the first connect BEFORE we gat a valid ip
    // optimization: determine ip in a different way (upnp or adapter)
+// NOTE: this assert fires on disconnect from hibernation????? 
 	ASSERT( ((theApp.GetPublicIP() != 0) &&(!theApp.IsWaitingForCryptPingConnect())) || dwServerKeyUDP == 0 );	 // MORPH lh require obfuscated server connection  modified
 	m_dwServerKeyUDP = dwServerKeyUDP;
 	m_dwIPServerKeyUDP = theApp.GetPublicIP();
