@@ -1715,11 +1715,7 @@ int CReadBlockFromFileThread::Run() {
 				m_lockhandle->Lock();
 			}
 			
-			//MORPH - Optimization
-			/*
 			if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone))
-			*/
-			if (!file.Open(fullname,CFile::modeRead|CFile::osRandomAccess|CFile::shareDenyNone))
 				throw GetResString(IDS_ERR_OPEN);
 
 			file.Seek(StartOffset,0);

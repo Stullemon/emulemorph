@@ -478,11 +478,9 @@ void CPartFile::CreatePartFile(UINT cat)
 
 	CString partfull(RemoveFileExtension(m_fullname));
 	SetFilePath(partfull);
-	//MORPH - Optimization
-	/*
+	
+	//SDT: note: CFile::osRandomAccess inflates XP's file cache beyond all limits and renders systems tight on mem virtually unusable - 080229
 	if (!m_hpartfile.Open(partfull,CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osSequentialScan)){
-	*/
-	if (!m_hpartfile.Open(partfull,CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osRandomAccess)){
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_CREATEPARTFILE));
 		SetStatus(PS_ERROR);
 	}
@@ -1383,7 +1381,7 @@ uint8 CPartFile::LoadPartFile(LPCTSTR in_directory,LPCTSTR in_filename, bool get
 	// open permanent handle
 	CString searchpath(RemoveFileExtension(m_fullname));
 	CFileException fexpPart;
-	if (!m_hpartfile.Open(searchpath, CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osRandomAccess, &fexpPart)){
+	if (!m_hpartfile.Open(searchpath, CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osSequentialScan, &fexpPart)){
 		CString strError;
 		strError.Format(GetResString(IDS_ERR_FILEOPEN), searchpath, GetFileName());
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -4339,7 +4337,7 @@ BOOL CPartFile::PerformFileComplete()
 		paused = true;
 		stopped = true;
 		//MORPH START - Added by SiRoB, Make the permanent handle open again
-		if (!m_hpartfile.Open(strPartfilename, CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osRandomAccess))
+		if (!m_hpartfile.Open(strPartfilename, CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osSequentialScan))
 			LogError(LOG_STATUSBAR, _T("Failed to reopen partfile: %s"),strPartfilename);
 		//MORPH END   - Added by SiRoB, Make the permanent handle open again
 		SetStatus(PS_ERROR);
@@ -7955,11 +7953,8 @@ int CPartHashThread::Run()
 	CSingleLock sLock(&(m_pOwner->ICH_mut)); // ICH locks the file
 	if (m_ICHused)
 		sLock.Lock();
-	//MORPH - Optimization
-	/*
+	
 	if (file.Open(directory+_T("\\")+filename,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone)){
-	*/
-	if (file.Open(directory+_T("\\")+filename,CFile::modeRead|CFile::osRandomAccess|CFile::shareDenyNone)){
 		for (UINT i = 0; i < (UINT)m_PartsToHash.GetSize(); i++){
 			uint16 partnumber = m_PartsToHash[i];
 			uchar hashresult[16];
