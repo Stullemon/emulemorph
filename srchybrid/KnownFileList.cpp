@@ -59,6 +59,7 @@ CKnownFileList::CKnownFileList()
 	m_dwCancelledFilesSeed = 0;
 	m_nLastSaved = ::GetTickCount();
 	Init();
+	bReloadHistory = false; //Fafner: possible exception in history - 070626
 }
 
 CKnownFileList::~CKnownFileList()
@@ -367,6 +368,10 @@ void CKnownFileList::Process()
 {
 	if (::GetTickCount() - m_nLastSaved > MIN2MS(11))
 		Save();
+	if (bReloadHistory) { //Fafner: possible exception in history - 070626
+		bReloadHistory = false;
+		theApp.emuledlg->sharedfileswnd->historylistctrl.Reload();
+	}
 }
 
 bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)

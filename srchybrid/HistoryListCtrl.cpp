@@ -242,6 +242,12 @@ void CHistoryListCtrl::Init(void)
 	InsertColumn(8,GetResString(IDS_SF_REQUESTS),LVCFMT_RIGHT,100);
 	InsertColumn(9,GetResString(IDS_SF_ACCEPTS),LVCFMT_RIGHT,100);
 	//EastShare END
+	//MORPH START - SLUGFILLER: Spreadbars //Fafner: added to history - 080318
+	InsertColumn(10,GetResString(IDS_SF_UPLOADED_PARTS),LVCFMT_LEFT,170,14); // SF
+	InsertColumn(11,GetResString(IDS_SF_TURN_PART),LVCFMT_LEFT,100,15); // SF
+	InsertColumn(12,GetResString(IDS_SF_TURN_SIMPLE),LVCFMT_LEFT,100,16); // VQB
+	InsertColumn(13,GetResString(IDS_SF_FULLUPLOAD),LVCFMT_LEFT,100,17); // SF
+	//MORPH END   - SLUGFILLER: Spreadbars
 
 	LoadSettings();
 
@@ -341,190 +347,228 @@ void CHistoryListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	CMemDC pDC(oDC, &rcItem);	
 	CFont *pOldFont = pDC.SelectObject(GetFont());
 	COLORREF crOldTextColor;
-	CKnownFile* file = (CKnownFile*)lpDrawItemStruct->itemData;
-	
-	if(m_bCustomDraw)
-		crOldTextColor = pDC.SetTextColor(m_lvcd.clrText);
-	else
-		crOldTextColor = pDC.SetTextColor(m_crWindowText);
 
-	int iOffset = pDC.GetTextExtent(_T(" "), 1 ).cx*2;
-	int iItem = lpDrawItemStruct->itemID;
-	CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
+	//Fafner: possible exception in history - 070626
+	//Fafner: note: I got this when replacing known.met (e.g., with backup) and some of
+	//Fafner: note: the files are still shared. After return and reload it is fine.
+	CString sText;
+	try {
+		CKnownFile* file = (CKnownFile*)lpDrawItemStruct->itemData;
+		
+		if(m_bCustomDraw)
+			crOldTextColor = pDC.SetTextColor(m_lvcd.clrText);
+		else
+			crOldTextColor = pDC.SetTextColor(m_crWindowText);
 
-	//gets the item image and state info
-	LV_ITEM lvi;
-	lvi.mask = LVIF_IMAGE | LVIF_STATE;
-	lvi.iItem = iItem;
-	lvi.iSubItem = 0;
-	lvi.stateMask = LVIS_DROPHILITED | LVIS_FOCUSED | LVIS_SELECTED;
-	GetItem(&lvi);
+		int iOffset = pDC.GetTextExtent(_T(" "), 1 ).cx*2;
+		int iItem = lpDrawItemStruct->itemID;
+		CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
 
-	//see if the item be highlighted
-	BOOL bHighlight = ((lvi.state & LVIS_DROPHILITED) || (lvi.state & LVIS_SELECTED));
-	BOOL bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
+		//gets the item image and state info
+		LV_ITEM lvi;
+		lvi.mask = LVIF_IMAGE | LVIF_STATE;
+		lvi.iItem = iItem;
+		lvi.iSubItem = 0;
+		lvi.stateMask = LVIS_DROPHILITED | LVIS_FOCUSED | LVIS_SELECTED;
+		GetItem(&lvi);
 
-	//get rectangles for drawing
-	CRect rcBounds, rcLabel, rcIcon;
-	GetItemRect(iItem, rcBounds, LVIR_BOUNDS);
-	GetItemRect(iItem, rcLabel, LVIR_LABEL);
-	GetItemRect(iItem, rcIcon, LVIR_ICON);
-	CRect rcCol(rcBounds);
+		//see if the item be highlighted
+		BOOL bHighlight = ((lvi.state & LVIS_DROPHILITED) || (lvi.state & LVIS_SELECTED));
+		BOOL bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
 
-	//the label!
-	CString sLabel = GetItemText(iItem, 0);
-	//labels are offset by a certain amount
-	//this offset is related to the width of a space character
-	CRect rcHighlight;
-	CRect rcWnd;
+		//get rectangles for drawing
+		CRect rcBounds, rcLabel, rcIcon;
+		GetItemRect(iItem, rcBounds, LVIR_BOUNDS);
+		GetItemRect(iItem, rcLabel, LVIR_LABEL);
+		GetItemRect(iItem, rcIcon, LVIR_ICON);
+		CRect rcCol(rcBounds);
 
-	//should I check (GetExtendedStyle() & LVS_EX_FULLROWSELECT) ?
-	rcHighlight.top    = rcBounds.top;
-	rcHighlight.bottom = rcBounds.bottom;
-	rcHighlight.left   = rcBounds.left  + 1;
-	rcHighlight.right  = rcBounds.right - 1;
+		//the label!
+		CString sLabel = GetItemText(iItem, 0);
+		sText = sLabel;
+		//labels are offset by a certain amount
+		//this offset is related to the width of a space character
+		CRect rcHighlight;
+		CRect rcWnd;
 
-	COLORREF crOldBckColor;
-	//draw the background color
-	if(bHighlight) 
-	{
-		if(bCtrlFocused) 
+		//should I check (GetExtendedStyle() & LVS_EX_FULLROWSELECT) ?
+		rcHighlight.top    = rcBounds.top;
+		rcHighlight.bottom = rcBounds.bottom;
+		rcHighlight.left   = rcBounds.left  + 1;
+		rcHighlight.right  = rcBounds.right - 1;
+
+		COLORREF crOldBckColor;
+		//draw the background color
+		if(bHighlight) 
 		{
-			pDC.FillRect(rcHighlight, &CBrush(m_crHighlight));
-			crOldBckColor = pDC.SetBkColor(m_crHighlight);
+			if(bCtrlFocused) 
+			{
+				pDC.FillRect(rcHighlight, &CBrush(m_crHighlight));
+				crOldBckColor = pDC.SetBkColor(m_crHighlight);
+			} 
+			else 
+			{
+				pDC.FillRect(rcHighlight, &CBrush(m_crNoHighlight));
+				crOldBckColor = pDC.SetBkColor(m_crNoHighlight);
+			}
 		} 
 		else 
 		{
-			pDC.FillRect(rcHighlight, &CBrush(m_crNoHighlight));
-			crOldBckColor = pDC.SetBkColor(m_crNoHighlight);
-		}
-	} 
-	else 
-	{
-		pDC.FillRect(rcHighlight, &CBrush(m_crWindow));
-		crOldBckColor = pDC.SetBkColor(GetBkColor());
-	}
-
-	//update column
-	rcCol.right = rcCol.left + GetColumnWidth(0);
-
-	//draw the item's icon
-	int iImage = theApp.GetFileTypeSystemImageIdx( file->GetFileName() );
-	if (theApp.GetSystemImageList() != NULL)
-		::ImageList_Draw(theApp.GetSystemImageList(), iImage, pDC, rcCol.left + 4, rcCol.top, ILD_NORMAL|ILD_TRANSPARENT);
-
-	//draw item label (column 0)
-	sLabel = file->GetFileName();
-	rcLabel.left += 16;
-	rcLabel.left += iOffset / 2;
-	rcLabel.right -= iOffset;
-	pDC.DrawText(sLabel, -1, rcLabel, MLC_DT_TEXT | DT_LEFT | DT_NOCLIP);
-
-	//draw labels for remaining columns
-	LV_COLUMN lvc;
-	lvc.mask = LVCF_FMT | LVCF_WIDTH;
-	rcBounds.right = rcHighlight.right > rcBounds.right ? rcHighlight.right : rcBounds.right;
-
-	int iCount = pHeaderCtrl->GetItemCount();
-	for(int iCurrent = 0; iCurrent < iCount; iCurrent++) 
-	{
-		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
-
-		if(iColumn == 0)
-			continue;
-
-		GetColumn(iColumn, &lvc);
-		//don't draw anything with 0 width
-		if(lvc.cx == 0)
-			continue;
-
-		rcCol.left = rcCol.right;
-		rcCol.right += lvc.cx;
-
-		//EastShare START - Added by Pretender
-		CString buffer;
-		//EastShare END
-		switch(iColumn){
-			case 1:
-				sLabel = CastItoXBytes(file->GetFileSize());
-				break;
-			case 2:
-				sLabel = file->GetFileTypeDisplayStr();
-				break;
-			case 3:
-				sLabel = EncodeBase16(file->GetFileHash(),16);
-				break;
-			case 4:
-				sLabel = file->GetUtcCFileDate().Format("%x %X");
-				break;
-			case 5:
-				if (theApp.sharedfiles->IsFilePtrInList(file))
-					sLabel=GetResString(IDS_YES);
-				else
-					sLabel=GetResString(IDS_NO);
-				break;
-			case 6:
-				sLabel = file->GetFileComment();
-				break;
-			
-			//EastShare START - Added by Pretender
-			case 7:
-				sLabel = CastItoXBytes(file->statistic.GetAllTimeTransferred());
-				break;
-			case 8:
-				buffer.Format(_T("%u"), file->statistic.GetAllTimeRequests());
-				sLabel = buffer;
-				break;
-			case 9:
-				buffer.Format(_T("%u"), file->statistic.GetAllTimeAccepts());
-				sLabel = buffer;
-				break;
-			//EastShare
-
-		}
-		if (sLabel.GetLength() == 0)
-			continue;
-
-		//get the text justification
-		UINT nJustify = DT_LEFT;
-		switch(lvc.fmt & LVCFMT_JUSTIFYMASK) 
-		{
-			case LVCFMT_RIGHT:
-				nJustify = DT_RIGHT;
-				break;
-			case LVCFMT_CENTER:
-				nJustify = DT_CENTER;
-				break;
-			default:
-				break;
+			pDC.FillRect(rcHighlight, &CBrush(m_crWindow));
+			crOldBckColor = pDC.SetBkColor(GetBkColor());
 		}
 
-		rcLabel = rcCol;
-		rcLabel.left += iOffset;
+		//update column
+		rcCol.right = rcCol.left + GetColumnWidth(0);
+
+		//draw the item's icon
+		int iImage = theApp.GetFileTypeSystemImageIdx( file->GetFileName() );
+		if (theApp.GetSystemImageList() != NULL)
+			::ImageList_Draw(theApp.GetSystemImageList(), iImage, pDC, rcCol.left + 4, rcCol.top, ILD_NORMAL|ILD_TRANSPARENT);
+
+		//draw item label (column 0)
+		sLabel = file->GetFileName();
+		rcLabel.left += 16;
+		rcLabel.left += iOffset / 2;
 		rcLabel.right -= iOffset;
+		pDC.DrawText(sLabel, -1, rcLabel, MLC_DT_TEXT | DT_LEFT | DT_NOCLIP);
 
-		pDC.DrawText(sLabel, -1, rcLabel, MLC_DT_TEXT | nJustify);
+		//draw labels for remaining columns
+		LV_COLUMN lvc;
+		lvc.mask = LVCF_FMT | LVCF_WIDTH;
+		rcBounds.right = rcHighlight.right > rcBounds.right ? rcHighlight.right : rcBounds.right;
+
+		int iCount = pHeaderCtrl->GetItemCount();
+		for(int iCurrent = 0; iCurrent < iCount; iCurrent++) 
+		{
+			int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
+
+			if(iColumn == 0)
+				continue;
+
+			GetColumn(iColumn, &lvc);
+			//don't draw anything with 0 width
+			if(lvc.cx == 0)
+				continue;
+
+			rcCol.left = rcCol.right;
+			rcCol.right += lvc.cx;
+
+			//EastShare START - Added by Pretender
+			CString buffer;
+			//EastShare END
+			switch(iColumn){
+				case 1:
+					sLabel = CastItoXBytes(file->GetFileSize());
+					break;
+				case 2:
+					sLabel = file->GetFileTypeDisplayStr();
+					break;
+				case 3:
+					sLabel = EncodeBase16(file->GetFileHash(),16);
+					break;
+				case 4:
+					sLabel = file->GetUtcCFileDate().Format("%x %X");
+					break;
+				case 5:
+					if (theApp.sharedfiles->IsFilePtrInList(file))
+						sLabel=GetResString(IDS_YES);
+					else
+						sLabel=GetResString(IDS_NO);
+					break;
+				case 6:
+					sLabel = file->GetFileComment();
+					break;
+				
+				//EastShare START - Added by Pretender
+				case 7:
+					sLabel = CastItoXBytes(file->statistic.GetAllTimeTransferred());
+					break;
+				case 8:
+					buffer.Format(_T("%u"), file->statistic.GetAllTimeRequests());
+					sLabel = buffer;
+					break;
+				case 9:
+					buffer.Format(_T("%u"), file->statistic.GetAllTimeAccepts());
+					sLabel = buffer;
+					break;
+				//EastShare
+
+				// SLUGFILLER: Spreadbars //Fafner: added to history - 080318
+				case 10:
+					rcCol.bottom--;
+					rcCol.top++;
+					file->statistic.DrawSpreadBar(pDC,&rcCol,thePrefs.UseFlatBar());
+					rcCol.bottom++;
+					rcCol.top--;
+					break;
+				case 11:
+					buffer.Format(_T("%.2f"),file->statistic.GetSpreadSortValue());
+					sLabel = buffer;
+					break;
+				case 12:
+					if (file->GetFileSize()>(uint64)0)
+						buffer.Format(_T("%.2f"),((double)file->statistic.GetAllTimeTransferred())/((double)file->GetFileSize()));
+					else
+						buffer.Format(_T("%.2f"),0.0f);
+					sLabel = buffer;
+					break;
+				case 13:
+					buffer.Format(_T("%.2f"),file->statistic.GetFullSpreadCount());
+					sLabel = buffer;
+					break;
+				// SLUGFILLER: Spreadbars
+			}
+			if (sLabel.GetLength() == 0)
+				continue;
+
+			//get the text justification
+			UINT nJustify = DT_LEFT;
+			switch(lvc.fmt & LVCFMT_JUSTIFYMASK) 
+			{
+				case LVCFMT_RIGHT:
+					nJustify = DT_RIGHT;
+					break;
+				case LVCFMT_CENTER:
+					nJustify = DT_CENTER;
+					break;
+				default:
+					break;
+			}
+
+			rcLabel = rcCol;
+			rcLabel.left += iOffset;
+			rcLabel.right -= iOffset;
+
+			if (iColumn != 10) //Fafner: added to history - 080318
+				pDC.DrawText(sLabel, -1, rcLabel, MLC_DT_TEXT | nJustify);
+		}
+
+		//draw focus rectangle if item has focus
+		if((lvi.state & LVIS_FOCUSED) && (bCtrlFocused || (lvi.state & LVIS_SELECTED))) 
+		{
+			if(!bCtrlFocused || !(lvi.state & LVIS_SELECTED))
+				pDC.FrameRect(rcHighlight, &CBrush(m_crNoFocusLine));
+			else
+				pDC.FrameRect(rcHighlight, &CBrush(m_crFocusLine));
+		}
+
+		//Xman Code Improvement
+		//not needed
+		//pDC.Flush();
+		//restore old font
+		pDC.SelectObject(pOldFont);
+		pDC.SetTextColor(crOldTextColor);
+		pDC.SetBkColor(crOldBckColor);
+		oDC->SetBkColor(crOldDCBkColor);
+		if (!theApp.IsRunningAsService(SVC_LIST_OPT)) // MORPH leuk_he:run as ntservice v1..
+			m_updatethread->AddItemUpdated((LPARAM)file); //MORPH - UpdateItemThread
 	}
-
-	//draw focus rectangle if item has focus
-	if((lvi.state & LVIS_FOCUSED) && (bCtrlFocused || (lvi.state & LVIS_SELECTED))) 
-	{
-		if(!bCtrlFocused || !(lvi.state & LVIS_SELECTED))
-			pDC.FrameRect(rcHighlight, &CBrush(m_crNoFocusLine));
-		else
-			pDC.FrameRect(rcHighlight, &CBrush(m_crFocusLine));
+	catch (...) {
+		if (!theApp.knownfiles->bReloadHistory)
+			LogError(LOG_STATUSBAR, _T("CHistoryListCtrl::DrawItem: exception - %s."), sText); //just once
+		theApp.knownfiles->bReloadHistory = true;
 	}
-
-	//Xman Code Improvement
-	//not needed
-	//pDC.Flush();
-	//restore old font
-	pDC.SelectObject(pOldFont);
-	pDC.SetTextColor(crOldTextColor);
-	pDC.SetBkColor(crOldBckColor);
-	oDC->SetBkColor(crOldDCBkColor);
-	if (!theApp.IsRunningAsService(SVC_LIST_OPT)) // MORPH leuk_he:run as ntservice v1..
-		m_updatethread->AddItemUpdated((LPARAM)file); //MORPH - UpdateItemThread
 }
 
 void CHistoryListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
@@ -548,83 +592,116 @@ int CHistoryListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 
 	int iResult=0;
 
-	switch(lParamSort){
-		case 0: //filename asc
-			iResult= _tcsicmp(item1->GetFileName(),item2->GetFileName());
-			break;
-		case 20: //filename desc
-			iResult= _tcsicmp(item2->GetFileName(),item1->GetFileName());
-			break;
-		case 1: //filesize asc
-			iResult= item1->GetFileSize()==item2->GetFileSize()?0:(item1->GetFileSize()>item2->GetFileSize()?1:-1);
-			break;
-		case 21: //filesize desc
-			iResult= item1->GetFileSize()==item2->GetFileSize()?0:(item2->GetFileSize()>item1->GetFileSize()?1:-1);
-			break;
-		case 2: //filetype asc
-			iResult= item1->GetFileType().CompareNoCase(item2->GetFileType());
-			break;
-		case 22: //filetype desc
-			iResult= item2->GetFileType().CompareNoCase(item1->GetFileType());
-			break;
-		case 3: //file ID
-			iResult= memcmp(item1->GetFileHash(),item2->GetFileHash(),16);
-			break;
-		case 23:
-			iResult= memcmp(item2->GetFileHash(),item1->GetFileHash(),16);
-			break;
-		case 4: //date
-			iResult= CompareUnsigned(item1->GetUtcFileDate(),item2->GetUtcFileDate());
-			break;
-		case 24:
-			iResult= CompareUnsigned(item2->GetUtcFileDate(),item1->GetUtcFileDate());
-			break;
-		case 5: //Shared?
-			{
-				bool shared1, shared2;
-				shared1 = theApp.sharedfiles->IsFilePtrInList(item1);
-				shared2 = theApp.sharedfiles->IsFilePtrInList(item2);
-				iResult= shared1==shared2 ? 0 : (shared1 && !shared2 ? 1 : -1);
-			}
-			break;
-		case 25:
-			{
-				bool shared1, shared2;
-				shared1 = theApp.sharedfiles->IsFilePtrInList(item1);
-				shared2 = theApp.sharedfiles->IsFilePtrInList(item2);
-				iResult= shared1==shared2 ? 0 : (shared2 && !shared1 ? 1 : -1);
-			}
-			break;
-		case 6: //comment
-			iResult= _tcsicmp(item1->GetFileComment(),item2->GetFileComment());
-			break;
-		case 26:
-			iResult= _tcsicmp(item2->GetFileComment(),item1->GetFileComment());
-			break;
-		//EastShare START - Added by Pretender
-		case 7: //all transferred asc
-			iResult=item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item1->statistic.GetAllTimeTransferred()>item2->statistic.GetAllTimeTransferred()?1:-1);
-			break;
-		case 27: //all transferred desc
-			iResult=item2->statistic.GetAllTimeTransferred()==item1->statistic.GetAllTimeTransferred()?0:(item2->statistic.GetAllTimeTransferred()>item1->statistic.GetAllTimeTransferred()?1:-1);
-			break;
+	try { //Fafner: possible exception in history - 070626
+		switch(lParamSort){
+			case 0: //filename asc
+				iResult= _tcsicmp(item1->GetFileName(),item2->GetFileName());
+				break;
+			case 20: //filename desc
+				iResult= _tcsicmp(item2->GetFileName(),item1->GetFileName());
+				break;
+			case 1: //filesize asc
+				iResult= item1->GetFileSize()==item2->GetFileSize()?0:(item1->GetFileSize()>item2->GetFileSize()?1:-1);
+				break;
+			case 21: //filesize desc
+				iResult= item1->GetFileSize()==item2->GetFileSize()?0:(item2->GetFileSize()>item1->GetFileSize()?1:-1);
+				break;
+			case 2: //filetype asc
+				iResult= item1->GetFileType().CompareNoCase(item2->GetFileType());
+				break;
+			case 22: //filetype desc
+				iResult= item2->GetFileType().CompareNoCase(item1->GetFileType());
+				break;
+			case 3: //file ID
+				iResult= memcmp(item1->GetFileHash(),item2->GetFileHash(),16);
+				break;
+			case 23:
+				iResult= memcmp(item2->GetFileHash(),item1->GetFileHash(),16);
+				break;
+			case 4: //date
+				iResult= CompareUnsigned(item1->GetUtcFileDate(),item2->GetUtcFileDate());
+				break;
+			case 24:
+				iResult= CompareUnsigned(item2->GetUtcFileDate(),item1->GetUtcFileDate());
+				break;
+			case 5: //Shared?
+				{
+					bool shared1, shared2;
+					shared1 = theApp.sharedfiles->IsFilePtrInList(item1);
+					shared2 = theApp.sharedfiles->IsFilePtrInList(item2);
+					iResult= shared1==shared2 ? 0 : (shared1 && !shared2 ? 1 : -1);
+				}
+				break;
+			case 25:
+				{
+					bool shared1, shared2;
+					shared1 = theApp.sharedfiles->IsFilePtrInList(item1);
+					shared2 = theApp.sharedfiles->IsFilePtrInList(item2);
+					iResult= shared1==shared2 ? 0 : (shared2 && !shared1 ? 1 : -1);
+				}
+				break;
+			case 6: //comment
+				iResult= _tcsicmp(item1->GetFileComment(),item2->GetFileComment());
+				break;
+			case 26:
+				iResult= _tcsicmp(item2->GetFileComment(),item1->GetFileComment());
+				break;
+			//EastShare START - Added by Pretender
+			case 7: //all transferred asc
+				iResult=item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item1->statistic.GetAllTimeTransferred()>item2->statistic.GetAllTimeTransferred()?1:-1);
+				break;
+			case 27: //all transferred desc
+				iResult=item2->statistic.GetAllTimeTransferred()==item1->statistic.GetAllTimeTransferred()?0:(item2->statistic.GetAllTimeTransferred()>item1->statistic.GetAllTimeTransferred()?1:-1);
+				break;
 
-		case 8: //acc requests asc
-			iResult=item1->statistic.GetAllTimeAccepts() - item2->statistic.GetAllTimeAccepts();
-			break;
-		case 28: //acc requests desc
-			iResult=item2->statistic.GetAllTimeAccepts() - item1->statistic.GetAllTimeAccepts();
-			break;
-		
-		case 9: //acc accepts asc
-			iResult=item1->statistic.GetAllTimeAccepts() - item2->statistic.GetAllTimeAccepts();
-			break;
-		case 29: //acc accepts desc
-			iResult=item2->statistic.GetAllTimeAccepts() - item1->statistic.GetAllTimeAccepts();
-			break;
-		//EastShare END
-		default: 
-			iResult= 0;
+			case 8: //acc requests asc
+				iResult=item1->statistic.GetAllTimeAccepts() - item2->statistic.GetAllTimeAccepts();
+				break;
+			case 28: //acc requests desc
+				iResult=item2->statistic.GetAllTimeAccepts() - item1->statistic.GetAllTimeAccepts();
+				break;
+			
+			case 9: //acc accepts asc
+				iResult=item1->statistic.GetAllTimeAccepts() - item2->statistic.GetAllTimeAccepts();
+				break;
+			case 29: //acc accepts desc
+				iResult=item2->statistic.GetAllTimeAccepts() - item1->statistic.GetAllTimeAccepts();
+				break;
+			//EastShare END
+			//MORPH START - SLUGFILLER: Spreadbars //Fafner: added to history - 080318
+			case 10: //spread asc
+			case 11:
+				iResult=CompareFloat(item1->statistic.GetSpreadSortValue(),item2->statistic.GetSpreadSortValue());
+				break;
+			case 30: //spread desc
+			case 31:
+				iResult=CompareFloat(item2->statistic.GetSpreadSortValue(),item1->statistic.GetSpreadSortValue());
+				break;
+
+			case 12: // VQB:  Simple UL asc
+			case 32: //VQB:  Simple UL desc
+				{
+					float x1 = ((float)item1->statistic.GetAllTimeTransferred())/((float)item1->GetFileSize());
+					float x2 = ((float)item2->statistic.GetAllTimeTransferred())/((float)item2->GetFileSize());
+					if (lParamSort == 12) iResult=CompareFloat(x1,x2); else iResult=CompareFloat(x2,x1);
+				break;
+				}
+			case 13: // SF:  Full Upload Count asc
+				iResult=CompareFloat(item1->statistic.GetFullSpreadCount(),item2->statistic.GetFullSpreadCount());
+				break;
+			case 33: // SF:  Full Upload Count desc
+				iResult=CompareFloat(item2->statistic.GetFullSpreadCount(),item1->statistic.GetFullSpreadCount());
+				break;
+			//MORPH END   - SLUGFILLER: Spreadbars
+			default: 
+				iResult= 0;
+		}
+	}
+	catch (...) {
+		if (!theApp.knownfiles->bReloadHistory)
+			LogError(LOG_STATUSBAR, _T("CHistoryListCtrl::SortProc: exception.")); //just once
+		theApp.knownfiles->bReloadHistory = true;
+		iResult = 0;
 	}
 	// SLUGFILLER: multiSort remove - handled in parent class
 	/*
@@ -680,6 +757,20 @@ void CHistoryListCtrl::Localize() {
 				break;
 			//EastShare
 
+			//MORPH START - SLUGFILLER: Spreadbars //Fafner: added to history - 080318
+			case 10:
+				strRes = GetResString(IDS_SF_UPLOADED_PARTS);
+				break;
+			case 11:
+				strRes = GetResString(IDS_SF_TURN_PART);
+				break;
+			case 12:
+				strRes = GetResString(IDS_SF_TURN_SIMPLE);
+				break;
+			case 13:
+				strRes = GetResString(IDS_SF_FULLUPLOAD);
+			//MORPH END - SLUGFILLER: Spreadbars
+				break;
 
 			default:
 				strRes = "No Text!!";

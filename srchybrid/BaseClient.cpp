@@ -316,7 +316,7 @@ void CUpDownClient::Init()
 }
 
 CUpDownClient::~CUpDownClient(){
-	//MORPH START - ReadBlockFromFileThread //SDT: for safety (got mem leaks) - 1127
+	//MORPH START - ReadBlockFromFileThread //Fafner: for safety (got mem leaks) - 071127
 	if (m_readblockthread) {
 		m_readblockthread->StopReadBlock();
 		m_readblockthread = NULL;

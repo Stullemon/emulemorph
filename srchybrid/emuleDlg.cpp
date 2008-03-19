@@ -2210,7 +2210,7 @@ void CemuleDlg::OnClose()
 	theApp.clientlist->DeleteAll();
 	searchwnd->DeleteAllSearchListCtrlItems();
 	sharedfileswnd->sharedfilesctrl.DeleteAllItems();
-	sharedfileswnd->sharedfilesctrl.EndFileProcessingThread(); //SDT: vs05 - 1206
+	sharedfileswnd->sharedfilesctrl.EndFileProcessingThread(); //Fafner: vs2005 - 071206
     transferwnd->queuelistctrl.DeleteAllItems();
 	transferwnd->clientlistctrl.DeleteAllItems();
 	transferwnd->uploadlistctrl.DeleteAllItems();

@@ -19,6 +19,7 @@
 #include "emule.h"
 #include "barshader.h"
 #include "Preferences.h"
+#include "Log.h" //Fafner: corrupted barshaderinfo? - 080317
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -113,7 +114,7 @@ void CBarShader::SetHeight(int height) {
 	}
 }
 
-void CBarShader::FillRange(uint64 start, uint64 end, COLORREF color, bool bChunk) { //SDT: fix vs05 chunk detail - 0423
+void CBarShader::FillRange(uint64 start, uint64 end, COLORREF color) {
 	if(end > m_uFileSize)
 		end = m_uFileSize;
 
@@ -129,14 +130,25 @@ void CBarShader::FillRange(uint64 start, uint64 end, COLORREF color, bool bChunk
 		endpos = m_Spans.GetTailPosition();
 
 	ASSERT(endpos != NULL);
+	if (endpos == NULL) { //Fafner: corrupted barshaderinfo? - 080317
+		DebugLog(LOG_MORPH|LOG_ERROR, _T("FillRange: No endpos in barshaderinfo - %I64u, %I64u"), start, end);
+		return;
+	}
 
 	COLORREF endcolor = m_Spans.GetValueAt(endpos);
 	endpos = m_Spans.SetAt(end, endcolor);
 
+	//Fafner: fix vs2005 chunk detail - 080317
+	//Fafner: fix vs2005 freeze - 080317
+	//Fafner: note: FindFirstKeyAfter seems to work differently under vs2005 than under vs2003
+	//Fafner: note: the original code 'start+1' lead to not working chunk details
+	//Fafner: note: for some reason pos can evaluate to NULL and then the loop continues forever
+	//Fafner: note: see also similar code in CStatisticFile::AddBlockTransferred
+	//Fafner: note: also look for the keywords 'spreadbarinfo', 'barshaderinfo'
 #if _MSC_VER < 1400
-	for (POSITION pos = m_Spans.FindFirstKeyAfter(start+1); pos != endpos && pos != NULL; ) { //SDT: fix vs05 freeze - 0113
-#else //SDT: fix vs05 chunk detail - 0423
-	for (POSITION pos = m_Spans.FindFirstKeyAfter(start+(bChunk?0:1)); pos != endpos && pos != NULL; ) { //SDT: fix vs05 freeze - 0113
+	for (POSITION pos = m_Spans.FindFirstKeyAfter(start+1); pos != endpos && pos != NULL; ) {
+#else
+	for (POSITION pos = m_Spans.FindFirstKeyAfter(start); pos != endpos && pos != NULL; ) {
 #endif
 		POSITION pos1 = pos;
 		m_Spans.GetNext(pos);

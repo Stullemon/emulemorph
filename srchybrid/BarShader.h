@@ -29,8 +29,7 @@ public:
 	void SetFileSize(EMFileSize fileSize);
 
 	//fills in a range with a certain color, new ranges overwrite old
-	void FillRange(uint64 start, uint64 end, COLORREF color, bool bChunk = false); //SDT: fix vs05 chunk detail - 0423
-
+	void FillRange(uint64 start, uint64 end, COLORREF color);
 	//fills in entire range with a certain color
 	void Fill(COLORREF color);
 

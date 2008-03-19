@@ -22,7 +22,7 @@
 #include "SharedFileList.h"
 #include "FileProcessing.h"
 #include "OtherFunctions.h"
-#include "emuleDlg.h" //SDT: vs05 - 1206
+#include "emuleDlg.h" //Fafner: CFileProcessingThread: vs2005 - 071206
 
 IMPLEMENT_DYNCREATE(CFileProcessingWorker, CObject)
 
@@ -53,27 +53,27 @@ IMPLEMENT_DYNCREATE(CFileProcessingThread, CWinThread)
 int	CFileProcessingThread::Run () {
 	m_IsRunning = true;
 	// Process Run()-method of every stored worker object
-	while (m_IsRunning) { //SDT: vs05 - 1206
-	while (!fileWorkers.IsEmpty ()) {
-		// Block the list so we can access it
-		CSingleLock lck (&m_FilelistLocked,true);
-		CFileProcessingWorker* worker = fileWorkers.RemoveHead ();
-		// Release the lock
-		lck.Unlock ();
-		// If the thread should terminate we don't run the job
-		if (!IsTerminating()) {
-			// Set the owner and run the worker
-			worker->SetOwner (this);
-			worker->Run();
-		}
-		delete worker;
+	while (m_IsRunning) { //Fafner: vs2005 - 071206
+		while (!fileWorkers.IsEmpty ()) {
+			// Block the list so we can access it
+			CSingleLock lck (&m_FilelistLocked,true);
+			CFileProcessingWorker* worker = fileWorkers.RemoveHead ();
+			// Release the lock
+			lck.Unlock ();
+			// If the thread should terminate we don't run the job
+			if (!IsTerminating()) {
+				// Set the owner and run the worker
+				worker->SetOwner (this);
+				worker->Run();
+			}
+			delete worker;
 			if (!theApp.emuledlg->IsRunning()) {
 				// Abort and get back immediately
 				fileWorkers.RemoveAll();
 				return 0;
 			}
-	}
-	m_IsTerminating = false;
+		}
+		m_IsTerminating = false;
 		this->SuspendThread();
 	}
 	m_IsRunning = false;

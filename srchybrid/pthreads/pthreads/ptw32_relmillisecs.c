@@ -94,7 +94,11 @@ ptw32_relmillisecs (const struct timespec * abstime)
 
 #else /* ! NEED_FTIME */
 
+#if _MSC_VER < 1400
   _ftime(&currSysTime);
+#else //Fafner: vs2005 - 080317
+  _ftime_s(&currSysTime);
+#endif
 
   tmpCurrMilliseconds = (int64_t) currSysTime.time * MILLISEC_PER_SEC;
   tmpCurrMilliseconds += (int64_t) currSysTime.millitm;

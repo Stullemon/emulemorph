@@ -479,7 +479,7 @@ void CPartFile::CreatePartFile(UINT cat)
 	CString partfull(RemoveFileExtension(m_fullname));
 	SetFilePath(partfull);
 	
-	//SDT: note: CFile::osRandomAccess inflates XP's file cache beyond all limits and renders systems tight on mem virtually unusable - 080229
+	//Fafner: note: CFile::osRandomAccess inflates XP's file cache beyond all limits and renders systems tight on mem virtually unusable - 080229
 	if (!m_hpartfile.Open(partfull,CFile::modeCreate|CFile::modeReadWrite|CFile::shareDenyWrite|CFile::osSequentialScan)){
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_CREATEPARTFILE));
 		SetStatus(PS_ERROR);
@@ -1741,10 +1741,10 @@ bool CPartFile::SavePartFile()
 					uint64 start = statistic.spreadlist.GetKeyAt(pos);
 					statistic.spreadlist.GetNext(pos);
 					ASSERT(pos != NULL);	// Last value should always be 0
-					if (pos) {
-						// this should no happen, but abort might prevent a chash?
-						LogError(LOG_STATUSBAR, _T("Error in spreadbarinfo. unexpected end of pos __FILE__ __LINE__"));
-						return false;
+					if (pos == NULL) {
+						// this should no happen, but abort might prevent a crash?
+						DebugLog(LOG_MORPH|LOG_ERROR, _T("Error in spreadbarinfo for partfile (%s). No matching end to start = %lu"), GetFileName(), start);
+						break;
 					}
 					uint64 end = statistic.spreadlist.GetKeyAt(pos);
 					//MORPH - Smooth sample
@@ -1774,10 +1774,10 @@ bool CPartFile::SavePartFile()
 					uint32 start = (uint32)statistic.spreadlist.GetKeyAt(pos);
 					statistic.spreadlist.GetNext(pos);
 					ASSERT(pos != NULL);	// Last value should always be 0
-										if (pos) {
-						// this should no happen, but abort might prevent a chrash?
-						LogError(LOG_STATUSBAR, _T("Error in spreadbarinfo hideos. unexpected end of pos __FILE__ __LINE__"));
-						return false;
+					if (pos == NULL) {
+						// this should no happen, but abort might prevent a crash?
+						DebugLog(LOG_MORPH|LOG_ERROR, _T("Error in spreadbarinfo for partfile (%s). No matching end to start = %lu"), GetFileName(), start);
+						break;
 					}
 					uint32 end = (uint32)statistic.spreadlist.GetKeyAt(pos);
 					//MORPH - Smooth sample
@@ -2718,7 +2718,7 @@ void CPartFile::DrawStatusBar(CDC* dc, LPCRECT rect, bool bFlat) /*const*/
 					}
 					else
 						color = crMissing;
-					s_ChunkBar.FillRange(gapstart, gapend + 1,  color); //SDT: vs05 freeze? (called from here) - 0113
+					s_ChunkBar.FillRange(gapstart, gapend + 1,  color); //Fafner: vs2005 freeze? (called from here) - 080317
 
 					if (gapdone) // finished?
 						break;

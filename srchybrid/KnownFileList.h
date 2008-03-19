@@ -56,6 +56,8 @@ public:
 #endif
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
 
+	bool	bReloadHistory; //Fafner: possible exception in history - 070626
+
 private:
 	bool	LoadKnownFiles();
 	bool	LoadCancelledFiles();

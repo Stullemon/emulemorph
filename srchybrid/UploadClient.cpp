@@ -247,7 +247,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 					if (end > filesize) {
 						end = filesize;
 						s_UpStatusBar.Reset();
-						s_UpStatusBar.FillRange(0, end%PARTSIZE, crNeither, true); //SDT: fix vs05 chunk detail - 0423
+					s_UpStatusBar.FillRange(0, end%PARTSIZE, crNeither);
 					} else
 						s_UpStatusBar.Fill(crNeither);
 				}
@@ -265,12 +265,12 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 				if (end > filesize) {
 					end = filesize;
 					s_UpStatusBar.Reset();
-					s_UpStatusBar.FillRange(0, end%PARTSIZE, crNeither, true); //SDT: fix vs05 chunk detail - 0423
+						s_UpStatusBar.FillRange(0, end%PARTSIZE, crNeither);
 				} else
 					s_UpStatusBar.Fill(crNeither);
 			}
 				if (block->StartOffset <= end && block->EndOffset >= start) {
-					s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crNextSending, true); //SDT: fix vs05 chunk detail - 0423
+					s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crNextSending);
 				}
 			}
 		}
@@ -284,7 +284,7 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 				if (block->StartOffset <= end && block->EndOffset >= start) {
 					if(total + (block->EndOffset-block->StartOffset) <= GetSessionPayloadUp()) {
 						// block is sent
-						s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crProgress, true); //SDT: fix vs05 chunk detail - 0423
+						s_UpStatusBar.FillRange((block->StartOffset > start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset+1:end)%PARTSIZE, crProgress);
 						total += block->EndOffset-block->StartOffset;
 					}
 					else if (total < GetSessionPayloadUp()){
@@ -295,20 +295,20 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 						if (newEnd>=start) {
 							if (newEnd<=end) {
 								uint64 uNewEnd = newEnd%PARTSIZE;
-								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, uNewEnd, crSending, true); //SDT: fix vs05 chunk detail - 0423
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, uNewEnd, crSending);
 								if (block->EndOffset <= end)
-									s_UpStatusBar.FillRange(uNewEnd, block->EndOffset%PARTSIZE, crBuffer, true); //SDT: fix vs05 chunk detail - 0423
+									s_UpStatusBar.FillRange(uNewEnd, block->EndOffset%PARTSIZE, crBuffer);
 								else
-									s_UpStatusBar.FillRange(uNewEnd, end%PARTSIZE, crBuffer, true); //SDT: fix vs05 chunk detail - 0423
+									s_UpStatusBar.FillRange(uNewEnd, end%PARTSIZE, crBuffer);
 							} else 
-								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crSending, true); //SDT: fix vs05 chunk detail - 0423
+								s_UpStatusBar.FillRange(block->StartOffset%PARTSIZE, end%PARTSIZE, crSending);
 						} else if (block->EndOffset <= end)
-							s_UpStatusBar.FillRange((uint64)0, block->EndOffset%PARTSIZE, crBuffer, true); //SDT: fix vs05 chunk detail - 0423
+							s_UpStatusBar.FillRange((uint64)0, block->EndOffset%PARTSIZE, crBuffer);
 					}
 					else{
 						// entire block is still in buffer
 						total += block->EndOffset-block->StartOffset;
-						s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer, true); //SDT: fix vs05 chunk detail - 0423
+						s_UpStatusBar.FillRange((block->StartOffset>start)?block->StartOffset%PARTSIZE:(uint64)0, ((block->EndOffset < end)?block->EndOffset:end)%PARTSIZE, crBuffer);
 					}
 				} else
 					total += block->EndOffset-block->StartOffset;
@@ -356,6 +356,121 @@ void CUpDownClient::DrawUpStatusBarChunk(CDC* dc, RECT* rect, bool /*onlygreyrec
 	}
 }
 //MORPH END   - Display current uploading chunk
+
+void CUpDownClient::DrawUpStatusBarChunkText(CDC* dc, RECT* cur_rec) const //Fafner: part number - 080317
+{
+	if (!thePrefs.GetUseClientPercentage())
+		return;
+	CString Sbuffer;
+	CRect rcDraw = cur_rec;
+	rcDraw.top--;rcDraw.bottom--;
+	COLORREF oldclr = dc->SetTextColor(RGB(0,0,0));
+	int iOMode = dc->SetBkMode(TRANSPARENT);
+	if (!m_DoneBlocks_list.IsEmpty()){
+		const Requested_Block_Struct* block;
+		block = m_DoneBlocks_list.GetHead();
+		Sbuffer.Format(_T("%u"), (UINT)(block->StartOffset/PARTSIZE));
+	}
+	else if (!m_BlockRequests_queue.IsEmpty()){
+		const Requested_Block_Struct* block;
+		block = m_BlockRequests_queue.GetHead();
+		Sbuffer.Format(_T("%u"), (UINT)(block->StartOffset/PARTSIZE));
+	}
+	else
+		Sbuffer.Format(_T("?"));
+	
+	#define	DrawChunkText	dc->DrawText(Sbuffer, Sbuffer.GetLength(), &rcDraw, DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
+	DrawChunkText;
+	rcDraw.left+=1;rcDraw.right+=1;
+	DrawChunkText;
+	rcDraw.left+=1;rcDraw.right+=1;
+	DrawChunkText;
+	
+	rcDraw.top+=1;rcDraw.bottom+=1;
+	DrawChunkText;
+	rcDraw.top+=1;rcDraw.bottom+=1;
+	DrawChunkText;
+	
+	rcDraw.left-=1;rcDraw.right-=1;
+	DrawChunkText;
+	rcDraw.left-=1;rcDraw.right-=1;
+	DrawChunkText;
+	
+	rcDraw.top-=1;rcDraw.bottom-=1;
+	DrawChunkText;
+	
+	rcDraw.left++;rcDraw.right++;
+	dc->SetTextColor(RGB(255,255,255));
+	DrawChunkText;
+	dc->SetBkMode(iOMode);
+	dc->SetTextColor(oldclr);
+}
+
+void CUpDownClient::DrawCompletedPercent(CDC* dc, RECT* cur_rec) const //Fafner: client percentage - 061022
+{
+	if (!thePrefs.GetUseClientPercentage())
+		return;
+	float percent = GetCompletedPercent();
+	if (percent <= 0.05f)
+		return;
+	CString Sbuffer;
+	CRect rcDraw = cur_rec;
+	rcDraw.top--;rcDraw.bottom--;
+	COLORREF oldclr = dc->SetTextColor(RGB(0,0,0));
+	int iOMode = dc->SetBkMode(TRANSPARENT);
+	Sbuffer.Format(_T("%.1f%%"), percent);
+	
+	#define	DrawPercentText	dc->DrawText(Sbuffer, Sbuffer.GetLength(), &rcDraw, DT_CENTER|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
+	DrawPercentText;
+	rcDraw.left+=1;rcDraw.right+=1;
+	DrawPercentText;
+	rcDraw.left+=1;rcDraw.right+=1;
+	DrawPercentText;
+	
+	rcDraw.top+=1;rcDraw.bottom+=1;
+	DrawPercentText;
+	rcDraw.top+=1;rcDraw.bottom+=1;
+	DrawPercentText;
+	
+	rcDraw.left-=1;rcDraw.right-=1;
+	DrawPercentText;
+	rcDraw.left-=1;rcDraw.right-=1;
+	DrawPercentText;
+	
+	rcDraw.top-=1;rcDraw.bottom-=1;
+	DrawPercentText;
+	
+	rcDraw.left++;rcDraw.right++;
+	dc->SetTextColor(RGB(255,255,255));
+	DrawPercentText;
+	dc->SetBkMode(iOMode);
+	dc->SetTextColor(oldclr);
+}
+
+UINT CUpDownClient::GetCompletedPartCount() const //Fafner: client percentage - 061022
+{
+	CKnownFile* currequpfile = CheckAndGetReqUpFile();
+	if (m_abyUpPartStatus && currequpfile && (::GetTickCount() - m_dwLastUpParts > MIN2MS(5))) { //every 5 min
+		UINT result = 0;
+		for (UINT i = 0; i < currequpfile->GetPartCount(); i++) {
+			if (m_abyUpPartStatus[i] & SC_AVAILABLE)
+				result++;
+		}
+		((CUpDownClient*)this)->m_dwLastUpParts = ::GetTickCount();
+		((CUpDownClient*)this)->m_uiLastUpParts = result;
+	}
+	return m_uiLastUpParts;
+}
+
+float CUpDownClient::GetCompletedPercent() const //Fafner: client percentage - 061022
+{
+	try { //Fafner: try to avoid crash on removed file - 070516
+		return (float)GetCompletedPartCount() / (float)CheckAndGetReqUpFile()->GetPartCount() * 100.0f;
+}
+	catch (...) {
+		return 0.0f;
+	}
+}
 
 void CUpDownClient::SetUploadState(EUploadState eNewState)
 {

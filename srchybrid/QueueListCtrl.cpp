@@ -557,7 +557,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							Sbuffer.Format(_T("%i (%s)"),client->GetScore(false), GetResString(IDS_IDLOW));
               end replace by zz code*/
              //ZZ
-						 if (client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
+								if (client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)
 									Sbuffer.Format(GetResString(IDS_UP_LOWID_AWAITED),client->GetScore(false), CastSecondsToHM((::GetTickCount()-client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick)/1000));
 								else
 									Sbuffer.Format(GetResString(IDS_UP_LOWID2),client->GetScore(false));
@@ -604,6 +604,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							cur_rec.bottom--;
 							cur_rec.top++;
 							client->DrawUpStatusBar(dc,&cur_rec,false,thePrefs.UseFlatBar());
+							client->DrawCompletedPercent(dc,&cur_rec); //Fafner: client percentage - 061022
 							cur_rec.bottom++;
 							cur_rec.top--;
 						}
@@ -886,7 +887,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 		}
    end replace*/
-	//MORPH START - Changed by SiRoB, ZZ Upload System
+		//MORPH START - Changed by SiRoB, ZZ Upload System
 		case 2: 
 		case 102: {
 			//MORPH START - Adde by SiRoB, Optimization requpfile
@@ -979,7 +980,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			iResult=item2->GetLastUpRequest() - item1->GetLastUpRequest();
 			break;
 		
-		case 7:
+		case 7: 
          /* replace:
         iResult=item1->GetWaitStartTime() - item2->GetWaitStartTime(); 
         break;
@@ -1033,10 +1034,16 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			iResult=(item2->GetUploadState() == US_BANNED) - (item1->GetUploadState() == US_BANNED);
 			break;
 		case 9: 
-			iResult=item1->GetUpPartCount()- item2->GetUpPartCount();
+			if (thePrefs.GetUseClientPercentage())
+				iResult=(int)(item1->GetCompletedPercent()*10.f) - (int)(item2->GetCompletedPercent()*10.f); //Fafner: client percentage - 061022
+			else
+				iResult=item1->GetUpPartCount()- item2->GetUpPartCount();
 			break;
 		case 109: 
-			iResult=item2->GetUpPartCount() - item1->GetUpPartCount();
+			if (thePrefs.GetUseClientPercentage())
+				iResult=(int)(item2->GetCompletedPercent()*10.f) - (int)(item1->GetCompletedPercent()*10.f); //Fafner: client percentage - 061022
+			else
+				iResult=item2->GetUpPartCount() - item1->GetUpPartCount();
 			break;
 		//MORPH START - Modified by SiRoB, Client Software
 		case 10:

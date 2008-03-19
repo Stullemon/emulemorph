@@ -1939,13 +1939,13 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 						// that the thread does not run at this moment...
 						m_FileProcessingThread.CreateThread ();
 					}
-					else //SDT: vs05 - 1206
-						m_FileProcessingThread.ResumeThread(); // SDT
+					else //Fafner: vs2005 - 071206
+						m_FileProcessingThread.ResumeThread(); // Fafner
 				}
 				break;
 			case MP_CRC32_ABORT:
 				// Message the File processing thread to stop any pending calculations
-				if (m_FileProcessingThread.IsRunning ()) { //SDT: vs05 - 1206
+				if (m_FileProcessingThread.IsRunning ()) { //Fafner: vs2005 - 071206
 					m_FileProcessingThread.Terminate ();
 					m_FileProcessingThread.ResumeThread();
 				}
@@ -1998,7 +1998,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 							// that the thread does not run at this moment...
 							m_FileProcessingThread.CreateThread ();
 						}
-						else //SDT: vs05 - 1206
+						else //Fafner: vs2005 - 071206
 							m_FileProcessingThread.ResumeThread();
 					}
 				}
@@ -2868,7 +2868,7 @@ void CSharedFilesCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 
-void CSharedFilesCtrl::EndFileProcessingThread() //SDT: vs05 - 1206
+void CSharedFilesCtrl::EndFileProcessingThread() //Fafner: vs2005 - 071206
 {
 	if (m_FileProcessingThread.IsRunning ())
 		m_FileProcessingThread.StopIt();

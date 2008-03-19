@@ -193,7 +193,7 @@ bool CIP2Country::LoadFromFile(){
 
 				++iCount;
      			//AddIPRange((UINT)_tstol(tempStr[0]), (UINT)_tstol(tempStr[1]), tempStr[2].GetString(), tempStr[3], tempStr[4]);
-				AddIPRange(_tcstoul(tempStr[0], NULL, 10), _tcstoul(tempStr[1], NULL, 10), tempStr[2].GetString(), tempStr[3], tempStr[4]); //SDT: vs05 - 1130
+				AddIPRange(_tcstoul(tempStr[0], NULL, 10), _tcstoul(tempStr[1], NULL, 10), tempStr[2].GetString(), tempStr[3], tempStr[4]); //Fafner: vs2005 - 061130
 
 			}
 			fclose(readFile);

@@ -388,6 +388,11 @@ public:
 	float			GetCompression() const	{return (float)compressiongain/notcompressed*100.0f;} // Add rod show compression
 	void			ResetCompressionGain() {compressiongain = 0; notcompressed=1;} // Add show compression
 	uint32			GetAskTime()	{return AskTime;} //MORPH - Added by SiRoB - Smart Upload Control v2 (SUC) [lovelace]
+	UINT			GetCompletedPartCount() const;							//Fafner: client percentage - 061022
+	void			DrawCompletedPercent(CDC* dc, RECT* cur_rec) const;
+	void			DrawUpStatusBarChunkText(CDC* dc, RECT* cur_rec) const;	//Fafner: part number - 080317
+	void			DrawBlankBar(CDC* dc, RECT* rect, COLORREF crColor) const;
+	float			GetCompletedPercent() const;
 
 	// secure ident
 	void			SendPublicKeyPacket();
@@ -924,6 +929,8 @@ protected:
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	bool	m_bLeecher; //MORPH - Added by IceCream, anti-leecher feature
 	CString m_strNotOfficial; //MORPH - Added by SiRoB, Control Mod Tag
+	DWORD	m_dwLastUpParts; //Fafner: client percentage - 061022
+	UINT	m_uiLastUpParts; //Fafner: client percentage - 061022
 	////////////////////////////////////////////////////////////////////////
 	// Upload
 	//

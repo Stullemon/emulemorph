@@ -100,9 +100,6 @@ public:
 							  // the thread object must not be destroyed because it should
 							  // be able to be restarted
 							  m_bAutoDelete = false; 	}
-	~CFileProcessingThread() { //SDT: vs05 - 1206
-		;
-	}
 
 	virtual	BOOL	InitInstance() { return true; }
 	virtual int		Run();
@@ -119,7 +116,7 @@ public:
 	// A way for the application to check if the thread is currently running.
 	// This is not totally save, but save enough...
 	virtual bool    IsRunning() const { return m_IsRunning; }
-	virtual void    StopIt() { m_IsRunning = false; ResumeThread(); } //SDT: vs05 - 1206
+	virtual void    StopIt() { m_IsRunning = false; ResumeThread(); } //Fafner: vs2005 - 071206
 
 	virtual void    AddFileProcessingWorker (CFileProcessingWorker* _worker);
 };
