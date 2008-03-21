@@ -1305,7 +1305,12 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 	DWORD dwFileAttributes;
 	LPCTSTR pszCacheExt = NULL;
 	if (iLength == -1)
-		iLength = _tcslen(pszFilePath);
+	    {// morph, JUst woraaround a reported chrashdump 
+			if (pszFilePath== NULL) 
+               iLength ==0;
+			else  //original:
+				iLength = _tcslen(pszFilePath); 
+	} // morph
 	if (iLength > 0 && (pszFilePath[iLength - 1] == _T('\\') || pszFilePath[iLength - 1] == _T('/'))){
 		// it's a directory
 		pszCacheExt = _T("\\");
