@@ -1150,13 +1150,13 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 			else{
 				if(thePrefs.GetUPnPVerboseLog()) {
 					theApp.QueueDebugLogLine(false, _T( "UPnP: Added port mapping \"%s\" (%s). [%s]"), desc, _T("Static"), srv->ServiceType);
-				};
+				}
 			}
 		}
 		else{
 			if(bIsUpdating){
 				if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: Failed to add port mapping \"%s\" [%s] [%s]"), desc, srv->ServiceType, GetErrDescription(RespNode, rc));
+					theApp.QueueDebugLogLine(false, _T("UPnP: Failed to update port mapping \"%s\" [%s] [%s]"), desc, srv->ServiceType, GetErrDescription(RespNode, rc));
 			}
 			else {
 				if(thePrefs.GetUPnPVerboseLog()) 
