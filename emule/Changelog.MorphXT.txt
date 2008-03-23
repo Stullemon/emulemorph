@@ -4,6 +4,9 @@ Changelog for eMule 0.48a MorphXT v10.x
 xx-01-2008
 Compiled with visual stusio 2003 sp1. 
 
+Add: spreadbars to history [fafner]
+Add: percentage client already got in QueueList and UploadList [fafner]
+Add: chunk number to chunk details in UploadList [fafner]
 Add: Show  much verbose info on content-> mediafinfo.dll (if you disable advanedoptions mediainfo_RIFF for avi files...)
 Add: (BETA!) download ack overhead used in in upload calculation
 Add: show if server obfuscation key is available
