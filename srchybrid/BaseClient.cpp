@@ -190,6 +190,9 @@ void CUpDownClient::Init()
 	m_bIsHybrid = false;
 	m_bIsML=false;
 	m_uModClient = MOD_NONE; //MOPPH - Added by Stulle, Mod Icons
+	m_uiCompletedParts = 0; //Fafner: client percentage - 080325
+	m_uiLastChunk = (UINT)-1; //Fafner: client percentage - 080325
+	m_uiCurrentChunks = 0; //Fafner: client percentage - 080325
 	m_Friend = NULL;
 	m_uFileRating=0;
 	(void)m_strFileComment;

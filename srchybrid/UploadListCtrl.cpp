@@ -571,7 +571,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							cur_rec.bottom--;
 							cur_rec.top++;
 							client->DrawUpStatusBar(dc,&cur_rec,false,thePrefs.UseFlatBar());
-							client->DrawCompletedPercent(dc,&cur_rec); //Fafner: client percentage - 061022
+							client->DrawCompletedPercent(dc,&cur_rec); //Fafner: client percentage - 080325
 							cur_rec.bottom++;
 							cur_rec.top--;
 						break;
@@ -977,13 +977,13 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 
 		case 7:
 			if (thePrefs.GetUseClientPercentage())
-				iResult=(int)(item1->GetCompletedPercent()*10.f) - (int)(item2->GetCompletedPercent()*10.f); //Fafner: client percentage - 061022
+				iResult=(int)(item1->GetCompletedPercent()*10.f) - (int)(item2->GetCompletedPercent()*10.f); //Fafner: client percentage - 080325
 			else
 				iResult=item1->GetUpPartCount() - item2->GetUpPartCount();
 			break;
 		case 107: 
 			if (thePrefs.GetUseClientPercentage())
-				iResult=(int)(item2->GetCompletedPercent()*10.f) - (int)(item1->GetCompletedPercent()*10.f); //Fafner: client percentage - 061022
+				iResult=(int)(item2->GetCompletedPercent()*10.f) - (int)(item1->GetCompletedPercent()*10.f); //Fafner: client percentage - 080325
 			else
 				iResult=item2->GetUpPartCount() - item1->GetUpPartCount();
 			break;

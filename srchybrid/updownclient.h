@@ -179,7 +179,8 @@ enum EChunkStatus{
 	SC_AVAILABLE		= 1,
 	SC_HIDDENBYSOTN		= 2,
 	SC_HIDDENBYHIDEOS	= 4,
-	SC_PARTIAL			= 8 //MORPH - Added By SiRoB, ICS merged into partstatus
+	SC_PARTIAL			= 8, //MORPH - Added By SiRoB, ICS merged into partstatus
+	SC_XFER				= 16 //Fafner: mark transferred parts - 080325
 };
 //MORPH END   - Added by SiRoB, See chunk that we hide
 
@@ -388,11 +389,9 @@ public:
 	float			GetCompression() const	{return (float)compressiongain/notcompressed*100.0f;} // Add rod show compression
 	void			ResetCompressionGain() {compressiongain = 0; notcompressed=1;} // Add show compression
 	uint32			GetAskTime()	{return AskTime;} //MORPH - Added by SiRoB - Smart Upload Control v2 (SUC) [lovelace]
-	UINT			GetCompletedPartCount() const;							//Fafner: client percentage - 061022
-	void			DrawCompletedPercent(CDC* dc, RECT* cur_rec) const;
-	void			DrawUpStatusBarChunkText(CDC* dc, RECT* cur_rec) const;	//Fafner: part number - 080317
-	void			DrawBlankBar(CDC* dc, RECT* rect, COLORREF crColor) const;
+	void			DrawCompletedPercent(CDC* dc, RECT* cur_rec) const;		//Fafner: client percentage - 080325
 	float			GetCompletedPercent() const;
+	void			DrawUpStatusBarChunkText(CDC* dc, RECT* cur_rec) const;	//Fafner: part number - 080317
 
 	// secure ident
 	void			SendPublicKeyPacket();
@@ -929,8 +928,9 @@ protected:
 	uint32  AskTime; //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 	bool	m_bLeecher; //MORPH - Added by IceCream, anti-leecher feature
 	CString m_strNotOfficial; //MORPH - Added by SiRoB, Control Mod Tag
-	DWORD	m_dwLastUpParts; //Fafner: client percentage - 061022
-	UINT	m_uiLastUpParts; //Fafner: client percentage - 061022
+	UINT	m_uiCompletedParts; //Fafner: client percentage - 080325
+	UINT	m_uiLastChunk; //Fafner: client percentage - 080325
+	UINT	m_uiCurrentChunks; //Fafner: client percentage - 080325
 	////////////////////////////////////////////////////////////////////////
 	// Upload
 	//

@@ -1448,6 +1448,7 @@ void CUploadQueue::ScheduleRemovalFromUploadQueue(CUpDownClient* client, LPCTSTR
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason, bool updatewindow, bool earlyabort){
     POSITION foundPos = uploadinglist.Find(client);
 	if(foundPos != NULL) {
+		client->m_uiLastChunk = (UINT)-1; //Fafner: client percentage - 080325
 		POSITION renumberPosition = uploadinglist.GetTailPosition();
 		uint32 classID = client->GetClassID(); //MORPH - Upload Splitting Class
 		while(renumberPosition != foundPos) {

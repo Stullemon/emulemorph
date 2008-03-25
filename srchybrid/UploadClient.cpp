@@ -126,6 +126,8 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 					crChunk = crHiddenPartBySOTN;
 				else if (m_abyUpPartStatus[i]&SC_HIDDENBYHIDEOS)
 					crChunk = crHiddenPartByHideOS;
+				else if (m_abyUpPartStatus[i]&SC_XFER) //Fafner: mark transferred parts - 080325
+					crChunk = crProgress;
 				else 
 					crChunk = crBoth;
 				s_UpStatusBar.FillRange(PARTSIZE*(uint64)(i), PARTSIZE*(uint64)(i+1), crChunk);
@@ -146,6 +148,12 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			if(block){
 			    uint32 start = (uint32)(block->StartOffset/PARTSIZE);
 			    s_UpStatusBar.FillRange((uint64)start*PARTSIZE, (uint64)(start+1)*PARTSIZE, crNextSending);
+				if (m_uiLastChunk != (UINT)-1 && start != m_uiLastChunk) { //Fafner: client percentage - 080325
+					if (!(m_abyUpPartStatus[m_uiLastChunk] & SC_XFER))
+						((CUpDownClient*)this)->m_uiCurrentChunks++; //because client switched to new chunk we guess the former completed
+					((CUpDownClient*)this)->m_abyUpPartStatus[m_uiLastChunk] |= SC_XFER;
+				}
+				((CUpDownClient*)this)->m_uiLastChunk = start;
 			}
 		}
 		if (!m_DoneBlocks_list.IsEmpty()){
@@ -366,16 +374,10 @@ void CUpDownClient::DrawUpStatusBarChunkText(CDC* dc, RECT* cur_rec) const //Faf
 	rcDraw.top--;rcDraw.bottom--;
 	COLORREF oldclr = dc->SetTextColor(RGB(0,0,0));
 	int iOMode = dc->SetBkMode(TRANSPARENT);
-	if (!m_DoneBlocks_list.IsEmpty()){
-		const Requested_Block_Struct* block;
-		block = m_DoneBlocks_list.GetHead();
-		Sbuffer.Format(_T("%u"), (UINT)(block->StartOffset/PARTSIZE));
-	}
-	else if (!m_BlockRequests_queue.IsEmpty()){
-		const Requested_Block_Struct* block;
-		block = m_BlockRequests_queue.GetHead();
-		Sbuffer.Format(_T("%u"), (UINT)(block->StartOffset/PARTSIZE));
-	}
+	if (!m_DoneBlocks_list.IsEmpty())
+		Sbuffer.Format(_T("%u"), (UINT)(m_DoneBlocks_list.GetHead()->StartOffset/PARTSIZE));
+	else if (!m_BlockRequests_queue.IsEmpty())
+		Sbuffer.Format(_T("%u"), (UINT)(m_BlockRequests_queue.GetHead()->StartOffset/PARTSIZE));
 	else
 		Sbuffer.Format(_T("?"));
 	
@@ -406,7 +408,7 @@ void CUpDownClient::DrawUpStatusBarChunkText(CDC* dc, RECT* cur_rec) const //Faf
 	dc->SetTextColor(oldclr);
 }
 
-void CUpDownClient::DrawCompletedPercent(CDC* dc, RECT* cur_rec) const //Fafner: client percentage - 061022
+void CUpDownClient::DrawCompletedPercent(CDC* dc, RECT* cur_rec) const //Fafner: client percentage - 080325
 {
 	if (!thePrefs.GetUseClientPercentage())
 		return;
@@ -447,26 +449,11 @@ void CUpDownClient::DrawCompletedPercent(CDC* dc, RECT* cur_rec) const //Fafner:
 	dc->SetTextColor(oldclr);
 }
 
-UINT CUpDownClient::GetCompletedPartCount() const //Fafner: client percentage - 061022
-{
-	CKnownFile* currequpfile = CheckAndGetReqUpFile();
-	if (m_abyUpPartStatus && currequpfile && (::GetTickCount() - m_dwLastUpParts > MIN2MS(5))) { //every 5 min
-		UINT result = 0;
-		for (UINT i = 0; i < currequpfile->GetPartCount(); i++) {
-			if (m_abyUpPartStatus[i] & SC_AVAILABLE)
-				result++;
-		}
-		((CUpDownClient*)this)->m_dwLastUpParts = ::GetTickCount();
-		((CUpDownClient*)this)->m_uiLastUpParts = result;
-	}
-	return m_uiLastUpParts;
-}
-
-float CUpDownClient::GetCompletedPercent() const //Fafner: client percentage - 061022
+float CUpDownClient::GetCompletedPercent() const //Fafner: client percentage - 080325
 {
 	try { //Fafner: try to avoid crash on removed file - 070516
-		return (float)GetCompletedPartCount() / (float)CheckAndGetReqUpFile()->GetPartCount() * 100.0f;
-}
+		return (float)(m_uiCompletedParts + m_uiCurrentChunks) / (float)CheckAndGetReqUpFile()->GetPartCount() * 100.0f;
+}		//m_uiCompletedParts is what we got reported from client and m_uiCurrentChunks is what we guess during upload
 	catch (...) {
 		return 0.0f;
 	}
@@ -796,7 +783,8 @@ void CUpDownClient::CreateNextBlockPackage(){
 					//MORPH START - Added by SiRoB, Anti Anti HideOS & SOTN :p 
 					if (m_abyUpPartStatus) {
 						for (UINT i = (UINT)(currentBlock->StartOffset/PARTSIZE); i < (UINT)((currentBlock->EndOffset-1)/PARTSIZE+1); i++)
-						if (m_abyUpPartStatus[i]>SC_AVAILABLE)
+						//if (m_abyUpPartStatus[i]>SC_AVAILABLE)
+						if (m_abyUpPartStatus[i]&SC_HIDDENBYSOTN || m_abyUpPartStatus[i]&SC_HIDDENBYHIDEOS) //Fafner: mark transferred parts (here: take care of) - 080325
 							{
 								CString error;
 									error.Format(_T("%s: Part %u, %I64u = %I64u - %I64u "), GetResString(IDS_ERR_HIDDENBLOCK), i, i64uTogo, currentBlock->EndOffset, currentBlock->StartOffset);
@@ -928,6 +916,9 @@ bool CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 	m_abyUpPartStatus = NULL;
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
+	m_uiCompletedParts = 0; //Fafner: client percentage - 080325
+	m_uiLastChunk = (UINT)-1; //Fafner: client percentage - 080325
+	m_uiCurrentChunks = 0; //Fafner: client percentage - 080325
 	if( GetExtendedRequestsVersion() == 0 )
 		return true;
 
@@ -973,6 +964,14 @@ bool CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 		{
 					tempreqfile->UpdatePartsInfo();
 			}
+	}
+	if (m_abyUpPartStatus) { //Fafner: client percentage - 080325
+		UINT result = 0;
+		for (UINT i = 0; i < tempreqfile->GetPartCount(); i++) {
+			if (m_abyUpPartStatus[i] & SC_AVAILABLE)
+				result++;
+		}
+		m_uiCompletedParts = result;
 	}
 	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
 	return true;
