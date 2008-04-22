@@ -467,6 +467,9 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 		if (m_readblockthread) {
 			m_readblockthread->StopReadBlock();
 			m_readblockthread = NULL;
+			if (m_abyfiledata != (byte*)-2 && m_abyfiledata != (byte*)-1 && m_abyfiledata != NULL)
+				delete[] m_abyfiledata;
+			m_abyfiledata = NULL; //Fafner: missing? (clients don't restart CReadBlockFromFileThread) - 080421
 		}
 		//MORPH END   - ReadBlockFromFileThread
 		if (m_nUploadState == US_UPLOADING)
@@ -738,7 +741,8 @@ void CUpDownClient::CreateNextBlockPackage(){
 	// Buffer new data if current buffer is less than 100 KBytes
         while (!m_BlockRequests_queue.IsEmpty() && m_abyfiledata != (byte*)-2) {
 			if (m_abyfiledata == (byte*)-1) {
-				//An error occured
+				//An error occured //Fafner: note: this error is common during file copying - 080421
+				if (!CheckAndGetReqUpFile()->IsPartFile() || ((CPartFile*)CheckAndGetReqUpFile())->GetFileOp() != PFOP_COPYING)
 				theApp.sharedfiles->Reload();
 				throw GetResString(IDS_ERR_OPEN);
 			}
@@ -1798,6 +1802,7 @@ void CReadBlockFromFileThread::SetReadBlockFromFile(LPCTSTR filepath, uint64 sta
 	StartOffset = startOffset;
 	togo = toread;
 	m_client = client;
+	m_clientname = m_client->GetUserName(); //Fafner: avoid possible crash - 080421
 	m_lockhandle = lockhandle;
 	pauseEvent.SetEvent();
 } 
@@ -1826,7 +1831,11 @@ int CReadBlockFromFileThread::Run() {
 		try{
 			if (m_lockhandle) {
 				lockFile.m_pObject = m_lockhandle;
-				m_lockhandle->Lock();
+				if (m_lockhandle->Lock(1000) == 0) { //Fafner: Lock() == Lock(INFINITE): waits forever - 080421
+					CString str;
+					str.Format(_T("file is locked: %s"), fullname);
+					throw str;
+				}
 			}
 			
 			if (!file.Open(fullname,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone))
@@ -1855,34 +1864,46 @@ int CReadBlockFromFileThread::Run() {
 		}
 		catch(CString error)
 		{
+			if (lockFile.m_pObject) { //Fafner: missing? - 080421
+				lockFile.m_pObject->Unlock(); // Unlock the (part) file as soon as we are done with accessing it.
+				lockFile.m_pObject = NULL;
+			}
 			if (thePrefs.GetVerbose())
-				theApp.QueueDebugLogLine(false,GetResString(IDS_ERR_CLIENTERRORED), m_client->GetUserName(),(LPCTSTR) error);	// type cast. suspicious chash log	Agiz 10.3
+				theApp.QueueDebugLogLine(false,GetResString(IDS_ERR_CLIENTERRORED), m_clientname, error); //Fafner: avoid possible crash - 080421
 			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
 			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
 				delete[] filedata;
-			return 1;
+			//return 1; //Fafner: note: exit here gives corrupted heap; so let the thread end by StopReadBlock() - 080421
 		}
 		catch(CFileException* e)
 		{
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
 			e->GetErrorMessage(szError, ARRSIZE(szError));
+			if (lockFile.m_pObject) { //Fafner: missing? - 080421
+				lockFile.m_pObject->Unlock(); // Unlock the (part) file as soon as we are done with accessing it.
+				lockFile.m_pObject = NULL;
+			}
 			if (thePrefs.GetVerbose())
-				theApp.QueueDebugLogLine(_T("Failed to create upload package for %s - %s"), m_client->GetUserName(), szError);
+				theApp.QueueDebugLogLine(false,_T("Failed to create upload package for %s - %s"), m_clientname, szError); //Fafner: avoid possible crash - 080421
 			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
 			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
 				delete[] filedata;
 			e->Delete();
-			return 2;
+			//return 2; //Fafner: note: exit here gives corrupted heap; so let the thread end by StopReadBlock() - 080421
 		}
 		catch(...)
 		{
+			if (lockFile.m_pObject) { //Fafner: missing? - 080421
+				lockFile.m_pObject->Unlock(); // Unlock the (part) file as soon as we are done with accessing it.
+				lockFile.m_pObject = NULL;
+			}
 			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
 			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
 				delete[] filedata;
-			return 3;
+			//return 3; //Fafner: note: exit here gives corrupted heap; so let the thread end by StopReadBlock() - 080421
 		}
 		
 		pauseEvent.Lock();

@@ -246,6 +246,7 @@ private:
 	uint64			StartOffset;
 	uint32			togo;
 	CUpDownClient*	m_client;
+	CString			m_clientname; //Fafner: avoid possible crash - 080421
 	CString			fullname;
 	CSyncObject*	m_lockhandle;
 	CEvent			pauseEvent;

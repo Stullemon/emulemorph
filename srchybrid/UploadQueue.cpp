@@ -48,6 +48,7 @@
 #include "Kademlia/Kademlia/Prefs.h"
 #include "Log.h"
 #include "collection.h"
+#include "PartFile.h" //Fafner: look for PFOP_COPYING below - 080421
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -738,6 +739,10 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	if(newclient == NULL)
 		return false;
 
+	//Fafner: copying lets clients stuck in CReadBlockFromFileThread::Run because file is locked - 080421
+	if (newclient->CheckAndGetReqUpFile()->IsPartFile()
+		&& ((CPartFile*)(newclient->CheckAndGetReqUpFile()))->GetFileOp() == PFOP_COPYING)
+		return false;
 	//Removed by SiRoB, Not used due to zz Upload system
 	/*
 	if (!thePrefs.TransferFullChunks())
