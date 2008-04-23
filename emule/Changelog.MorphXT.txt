@@ -2,7 +2,7 @@
 Changelog for eMule 0.48a MorphXT v10.x
 --------------------------------------
 xx-01-2008
-Compiled with visual stusio 2003 sp1. 
+Compiled with visual stusio 2003 sp1. & 2005
 
 FIX: clients downloading during large file completion stuck with 'stalled, reading from disk' [fafner]
 ADD: spreadbars to history [fafner]
