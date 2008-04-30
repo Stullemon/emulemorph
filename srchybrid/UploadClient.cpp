@@ -148,12 +148,6 @@ void CUpDownClient::DrawUpStatusBar(CDC* dc, RECT* rect, bool onlygreyrect, bool
 			if(block){
 			    uint32 start = (uint32)(block->StartOffset/PARTSIZE);
 			    s_UpStatusBar.FillRange((uint64)start*PARTSIZE, (uint64)(start+1)*PARTSIZE, crNextSending);
-				if (m_uiLastChunk != (UINT)-1 && start != m_uiLastChunk) { //Fafner: client percentage - 080325
-					if (!(m_abyUpPartStatus[m_uiLastChunk] & SC_XFER))
-						((CUpDownClient*)this)->m_uiCurrentChunks++; //because client switched to new chunk we guess the former completed
-					((CUpDownClient*)this)->m_abyUpPartStatus[m_uiLastChunk] |= SC_XFER;
-				}
-				((CUpDownClient*)this)->m_uiLastChunk = start;
 			}
 		}
 		if (!m_DoneBlocks_list.IsEmpty()){
@@ -881,6 +875,15 @@ void CUpDownClient::CreateNextBlockPackage(){
 
 				m_DoneBlocks_list.AddHead(m_BlockRequests_queue.RemoveHead());
 				delete[] filedata_ReadFromDisk;
+				//Fafner: start: client percentage - 080429
+			    uint32 start = (uint32)(m_DoneBlocks_list.GetHead()->StartOffset/PARTSIZE);
+				if (m_uiLastChunk != (UINT)-1 && start != m_uiLastChunk) {
+					if (!(m_abyUpPartStatus[m_uiLastChunk] & SC_XFER))
+						m_uiCurrentChunks++; //because client switched to new chunk we guess the former completed
+					m_abyUpPartStatus[m_uiLastChunk] |= SC_XFER;
+				}
+				m_uiLastChunk = start;
+				//Fafner: end: client percentage - 080429
 			}
 			//now process error from nextblock to read
 
