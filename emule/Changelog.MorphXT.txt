@@ -18,6 +18,7 @@ ADD: experimental support for visual studio 2005 sp1. See readme. [fafner/rapid 
 ADD: alpha support for vs2008, make very sure to read the readme.
 CHANGE: reduce some cpu under wine [leuk_he]
 CHANGE: Using a different method to create captcha due to new version of CxImage lib [Stulle]
+CHANGE: FriendSlots now saved in 0x66 (0x2 occupied by official) [Stulle]
 REMOVED: SafeKAD (the Officials did a big step in that direction) [Stulle]
 REMOVED: KAD optimizations (what ever :P) [Stulle]
 
