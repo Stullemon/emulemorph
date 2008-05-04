@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -394,7 +394,7 @@ HRESULT CMainFrameDropTarget::PasteText(CLIPFORMAT cfData, COleDataObject& data)
 				pszUrlA++;
 			
 			hrPasteResult = S_FALSE; // default: nothing was pasted
-			if (strncmp(pszUrlA, "ed2k://|", 8) == 0)
+			if (strnicmp(pszUrlA, "ed2k://|", 8) == 0)
 			{
 				CString strData(pszUrlA);
 				int iPos = 0;

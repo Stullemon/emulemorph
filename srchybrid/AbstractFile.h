@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -98,9 +98,10 @@ public:
 	const CString& GetFileComment() /*const*/;
 	UINT	GetFileRating() /*const*/;
 	void	LoadComment();
-	virtual void	UpdateFileRatingCommentAvail(bool bForceUpdate = false) = 0;
+	virtual void	UpdateFileRatingCommentAvail(bool bForceUpdate = true) = 0;
 
 	bool	AddNote(Kademlia::CEntry* pEntry);
+	void	RefilterKadNotes(bool bUpdate = true);
 	const	CKadEntryPtrList& getNotes() const { return m_kadNotes; }
 
 	bool			IsKadCommentSearchRunning() const						{ return m_bKadCommentSearchRunning; }

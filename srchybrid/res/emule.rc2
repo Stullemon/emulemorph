@@ -41,7 +41,7 @@ BEGIN
             VALUE "FileVersion", SZ_VERSION_NAME
 #endif
             VALUE "InternalName", "emule.exe"
-            VALUE "LegalCopyright", "Copyright © 2002-2007 Merkur - read license.txt for more infos"
+            VALUE "LegalCopyright", "Copyright © 2002-2008 Merkur - read license.txt for more infos"
             VALUE "OriginalFilename", "emule.exe"
             VALUE "ProductName", "eMule"
 #ifdef _UNICODE

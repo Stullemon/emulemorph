@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -24,6 +24,8 @@
 #include "kademlia/kademlia/SearchManager.h"
 #include "kademlia/kademlia/Search.h"
 #include "searchlist.h"
+#include "InputBox.h"
+#include "DownloadQueue.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -37,6 +39,7 @@ IMPLEMENT_DYNAMIC(CCommentDialogLst, CResizablePage)
 BEGIN_MESSAGE_MAP(CCommentDialogLst, CResizablePage) 
    	ON_BN_CLICKED(IDOK, OnBnClickedApply) 
    	ON_BN_CLICKED(IDC_SEARCHKAD, OnBnClickedSearchKad) 
+	ON_BN_CLICKED(IDC_EDITCOMMENTFILTER, OnBnClickedFilter) 
 	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
 	ON_WM_TIMER()
 	ON_WM_DESTROY()
@@ -81,6 +84,7 @@ BOOL CCommentDialogLst::OnInitDialog()
 
 	AddAnchor(IDC_LST,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_SEARCHKAD,BOTTOM_RIGHT);
+	AddAnchor(IDC_EDITCOMMENTFILTER,BOTTOM_LEFT);
 
 	m_lstComments.Init();
 	Localize(); 
@@ -120,6 +124,7 @@ void CCommentDialogLst::OnDestroy()
 void CCommentDialogLst::Localize(void)
 { 
 	GetDlgItem(IDC_SEARCHKAD)->SetWindowText(GetResString(IDS_SEARCHKAD));
+	GetDlgItem(IDC_EDITCOMMENTFILTER)->SetWindowText(GetResString(IDS_EDITSPAMFILTER));
 } 
 
 void CCommentDialogLst::RefreshData(bool deleteOld)
@@ -192,3 +197,32 @@ void CCommentDialogLst::OnBnClickedSearchKad()
 	}
 	RefreshData();
 }
+
+void CCommentDialogLst::OnBnClickedFilter()
+{
+	InputBox inputbox;
+	inputbox.SetLabels(GetResString(IDS_EDITSPAMFILTERCOMMENTS), GetResString(IDS_FILTERCOMMENTSLABEL), thePrefs.GetCommentFilter());
+	inputbox.DoModal();
+	if (!inputbox.WasCancelled()){
+		CString strCommentFilters = inputbox.GetInput();
+		strCommentFilters.MakeLower();
+		CString strNewCommentFilters;
+		int curPos = 0;
+		CString strFilter(strCommentFilters.Tokenize(_T("|"), curPos));
+		while (!strFilter.IsEmpty())
+		{
+			strFilter.Trim();
+			if (!strNewCommentFilters.IsEmpty())
+				strNewCommentFilters += _T('|');
+			strNewCommentFilters += strFilter;
+			strFilter = strCommentFilters.Tokenize(_T("|"), curPos);
+		}
+		if (thePrefs.GetCommentFilter() != strNewCommentFilters){
+			thePrefs.SetCommentFilter(strNewCommentFilters);
+			theApp.downloadqueue->RefilterAllComments();
+			RefreshData();
+		}
+	}
+}
+
+

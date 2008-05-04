@@ -1,6 +1,6 @@
 // parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -403,4 +403,36 @@ void CAbstractFile::SetKadCommentSearchRunning(bool bVal){
 		m_bKadCommentSearchRunning = bVal;
 		UpdateFileRatingCommentAvail(true);
 	}
+}
+
+void CAbstractFile::RefilterKadNotes(bool bUpdate){
+	// check all availabe comments against our filter again
+	if (thePrefs.GetCommentFilter().IsEmpty())
+		return;
+	POSITION pos1, pos2;
+	for (pos1 = m_kadNotes.GetHeadPosition();( pos2 = pos1 ) != NULL;)
+	{
+		m_kadNotes.GetNext(pos1);
+		Kademlia::CEntry* entry = m_kadNotes.GetAt(pos2);
+		if (!entry->GetStrTagValue(TAG_DESCRIPTION).IsEmpty()){
+			CString strCommentLower(entry->GetStrTagValue(TAG_DESCRIPTION));
+			strCommentLower.MakeLower();
+
+			int iPos = 0;
+			CString strFilter(thePrefs.GetCommentFilter().Tokenize(_T("|"), iPos));
+			while (!strFilter.IsEmpty())
+			{
+				// comment filters are already in lowercase, compare with temp. lowercased received comment
+				if (strCommentLower.Find(strFilter) >= 0)
+				{
+					m_kadNotes.RemoveAt(pos2);
+					delete entry;
+					break;
+				}
+				strFilter = thePrefs.GetCommentFilter().Tokenize(_T("|"), iPos);
+			}		
+		}
+	}
+	if (bUpdate) // untill updated rating and m_bHasComment might be wrong
+		UpdateFileRatingCommentAvail();
 }

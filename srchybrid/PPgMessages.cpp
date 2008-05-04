@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -41,9 +41,10 @@ BEGIN_MESSAGE_MAP(CPPgMessages, CPropertyPage)
 	ON_EN_CHANGE(IDC_COMMENTFILTER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_MSGONLYFRIENDS , OnSettingsChange) 
 	ON_BN_CLICKED(IDC_MSGONLYSEC, OnSettingsChange)
-	ON_BN_CLICKED(IDC_ADVSPAMFILTER , OnSettingsChange)
+	ON_BN_CLICKED(IDC_ADVSPAMFILTER , OnSpamFilterChange)
 	ON_BN_CLICKED(IDC_INDICATERATINGS , OnSettingsChange)
 	ON_BN_CLICKED(IDC_MSHOWSMILEYS, OnSettingsChange)
+	ON_BN_CLICKED(IDC_USECAPTCHAS, OnSettingsChange)
 	ON_WM_HELPINFO()
 	ON_WM_DESTROY()
 END_MESSAGE_MAP()
@@ -96,8 +97,14 @@ void CPPgMessages::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_MSHOWSMILEYS,0);
 
+	if(thePrefs.IsChatCaptchaEnabled())
+		CheckDlgButton(IDC_USECAPTCHAS,1);
+	else
+		CheckDlgButton(IDC_USECAPTCHAS,0);
+
 	GetDlgItem(IDC_FILTER)->SetWindowText(thePrefs.messageFilter);
 	GetDlgItem(IDC_COMMENTFILTER)->SetWindowText(thePrefs.commentFilter);
+	OnSpamFilterChange();
 }
 
 BOOL CPPgMessages::OnInitDialog()
@@ -120,6 +127,7 @@ BOOL CPPgMessages::OnApply()
 	thePrefs.msgsecure = IsDlgButtonChecked(IDC_MSGONLYSEC)!=0;
 	thePrefs.m_bAdvancedSpamfilter = IsDlgButtonChecked(IDC_ADVSPAMFILTER)!=0;
 	thePrefs.indicateratings = IsDlgButtonChecked(IDC_INDICATERATINGS)!=0;
+	thePrefs.m_bUseChatCaptchas = IsDlgButtonChecked(IDC_USECAPTCHAS) != 0;
 
 	bool bOldSmileys = thePrefs.GetMessageEnableSmileys();
 	thePrefs.m_bMessageEnableSmileys = IsDlgButtonChecked(IDC_MSHOWSMILEYS) != 0;
@@ -166,6 +174,7 @@ void CPPgMessages::Localize(void)
 
 		GetDlgItem(IDC_MSGONLYFRIENDS)->SetWindowText(GetResString(IDS_MSGONLYFRIENDS));
 		GetDlgItem(IDC_MSGONLYSEC)->SetWindowText(GetResString(IDS_MSGONLYSEC));
+		GetDlgItem(IDC_USECAPTCHAS)->SetWindowText(GetResString(IDS_USECAPTCHAS));	
 
 		GetDlgItem(IDC_ADVSPAMFILTER)->SetWindowText(GetResString(IDS_ADVSPAMFILTER));
 	
@@ -188,7 +197,6 @@ void CPPgMessages::Localize(void)
 	
 		// MORPH END leuk_he tooltipped
 	}
-
 }
 
 
@@ -224,4 +232,15 @@ BOOL CPPgMessages::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
+}
+void CPPgMessages::OnSpamFilterChange()
+{
+	if (IsDlgButtonChecked(IDC_ADVSPAMFILTER) == 0){
+		GetDlgItem(IDC_USECAPTCHAS)->EnableWindow(FALSE);
+		CheckDlgButton(IDC_USECAPTCHAS, 0);
+	}
+	else{
+		GetDlgItem(IDC_USECAPTCHAS)->EnableWindow(TRUE);
+	}
+	OnSettingsChange();
 }

@@ -1,6 +1,6 @@
 ﻿// parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -40,6 +40,7 @@
 #include "Packets.h"
 #include "Kademlia/Kademlia/SearchManager.h"
 #include "Kademlia/Kademlia/Entry.h"
+#include "kademlia/kademlia/UDPFirewallTester.h"
 #include "SafeFile.h"
 #include "shahashset.h"
 #include "Log.h"
@@ -1673,15 +1674,17 @@ Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient, uint8 by
 			if (byUsedVersion >= 2)
 			    data.WriteHash16(cur_src->GetUserHash());
 			if (byUsedVersion >= 4){
-				// CryptSettings - SourceExchange V4
-				// 5 Reserved (!)
+				// ConnectSettings - SourceExchange V4
+				// 4 Reserved (!)
+				// 1 DirectCallback Supported/Available 
 				// 1 CryptLayer Required
 				// 1 CryptLayer Requested
 				// 1 CryptLayer Supported
 				const uint8 uSupportsCryptLayer	= cur_src->SupportsCryptLayer() ? 1 : 0;
 				const uint8 uRequestsCryptLayer	= cur_src->RequestsCryptLayer() ? 1 : 0;
 				const uint8 uRequiresCryptLayer	= cur_src->RequiresCryptLayer() ? 1 : 0;
-				const uint8 byCryptOptions = (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
+				//const uint8 uDirectUDPCallback	= cur_src->SupportsDirectUDPCallback() ? 1 : 0;
+				const uint8 byCryptOptions = /*(uDirectUDPCallback << 3) |*/ (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
 				data.WriteUInt8(byCryptOptions);
 			}
 			if (nCount > 500)
@@ -2301,8 +2304,8 @@ bool CKnownFile::PublishNotes()
 bool CKnownFile::PublishSrc()
 {
 	uint32 lastBuddyIP = 0;
-
-	if( theApp.IsFirewalled() )
+	if( theApp.IsFirewalled() && 
+		(Kademlia::CUDPFirewallTester::IsFirewalledUDP(true) || !Kademlia::CUDPFirewallTester::IsVerified()))
 	{
 		CUpDownClient* buddy = theApp.clientlist->GetBuddy();
 		if( buddy )

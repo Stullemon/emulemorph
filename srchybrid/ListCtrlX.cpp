@@ -4,6 +4,7 @@
 #include "ListViewSearchDlg.h"
 #include "OtherFunctions.h"
 #include "MenuCmds.h"
+#include "Preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -145,6 +146,9 @@ void CListCtrlX::PreSubclassWindow()
 		m_hAccel = ::LoadAccelerators(AfxGetResourceHandle(), MAKEINTRESOURCE(m_uIDAccel));
 		ASSERT(m_hAccel);
 	}
+
+	if (thePrefs.GetUseSystemFontForMainControls())
+		SendMessage(WM_SETFONT, NULL, FALSE);
 }
 
 BOOL CListCtrlX::PreTranslateMessage(MSG *pMsg)
@@ -463,6 +467,16 @@ void CListCtrlX::OnMenuSelect(UINT nItemID, UINT nFlags, HMENU hSysMenu)
 
 void CListCtrlX::OnContextMenu(CWnd * /*pWnd*/, CPoint point)
 {
+	if (point.x != -1 || point.y != -1) {
+		CRect rcClient;
+		GetClientRect(&rcClient);
+		ClientToScreen(&rcClient);
+		if (!rcClient.PtInRect(point)) {
+			Default();
+			return;
+		}
+	}
+
 	if (m_uIDMenu == (UINT)-1 && m_pMenu == NULL){
 		Default();
 		return;

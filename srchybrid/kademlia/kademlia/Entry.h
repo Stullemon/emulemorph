@@ -27,26 +27,81 @@ there client on the eMule forum..
 #pragma once
 #include "./Tag.h"
 
+struct SSearchTerm;
 namespace Kademlia
 {
+	class CDataIO;
 	class CEntry
 	{
+		protected:
+			struct structFileNameEntry{
+				CKadTagValueString	m_fileName;
+				uint32				m_uPopularityIndex;
+			};
 		public:
-			CEntry();
-			~CEntry();
+						CEntry();
+			virtual		~CEntry();
 
-			CEntry* Copy();
-			uint64 GetIntTagValue(LPCSTR szTagName) const;
-			CStringW GetStrTagValue(LPCSTR szTagName) const;
+			virtual		CEntry* Copy();
+			virtual bool IsKeyEntry()					{ return false; }
+
+			uint64		GetIntTagValue(CKadTagNameString strTagName, bool bIncludeVirtualTags = true) const;
+			bool		GetIntTagValue(CKadTagNameString strTagName, uint64& rValue, bool bIncludeVirtualTags = true) const;
+			CStringW	GetStrTagValue(CKadTagNameString strTagName) const;
+			void		AddTag(CKadTag* pTag)			{ m_listTag.push_back(pTag); }
+			uint32		GetTagCount() const; // Adds filename and size to the count if not empty, even if they are not stored as tags
+			void		WriteTagList(CDataIO* pData)	{ WriteTagListInc(pData, 0); }
+
+			CKadTagValueString	GetCommonFileNameLowerCase() const;
+			CKadTagValueString	GetCommonFileName() const;
+			void		SetFileName(CKadTagValueString strName);
+
 			uint32 m_uIP;
 			uint16 m_uTCPPort;
 			uint16 m_uUDPPort;
 			CUInt128 m_uKeyID;
 			CUInt128 m_uSourceID;
-			CKadTagValueString m_fileName; // NOTE: this always holds the string in LOWERCASE!!!
-			uint64 m_uSize;
+			uint64	m_uSize;
+			time_t	m_tLifetime;
+			bool	m_bSource;
+
+		protected:
+			void		WriteTagListInc(CDataIO* pData, uint32 nIncreaseTagNumber = 0);
+			CList<structFileNameEntry, structFileNameEntry&>		m_listFileNames;	
 			TagList m_listTag;
-			time_t m_tLifetime;
-			bool m_bSource;
+	};
+
+	class CKeyEntry : public CEntry
+	{
+		protected:
+			struct structPublishingIP{
+				uint32				m_uIP;
+				time_t				m_tLastPublish;
+			};
+		public:
+			CKeyEntry();
+			virtual ~CKeyEntry();
+
+			virtual	CEntry*		Copy();
+			virtual bool IsKeyEntry()					{ return true; }
+
+			bool				SearchTermsMatch(const SSearchTerm* pSearchTerm) const;
+			void				MergeIPsAndFilenames(CKeyEntry* pFromEntry);
+			void				CleanUpTrackedPublishers();
+			float				GetTrustValue();
+			void				WritePublishTrackingDataToFile(CDataIO* pData);
+			void				ReadPublishTrackingDataFromFile(CDataIO* pData);
+			void				DirtyDeletePublishData();
+			void				WriteTagListWithPublishInfo(CDataIO* pData);
+			static void			ResetGlobalTrackingMap()						{ s_mapGlobalPublishIPs.RemoveAll(); }
+
+		protected:
+			void				RecalcualteTrustValue();
+			static void			AdjustGlobalPublishTracking(uint32 uIP, bool bIncrease, CString strDbgReason);
+			
+			uint32	dwLastTrustValueCalc;			
+			float	m_fTrustValue;
+			CList<structPublishingIP, structPublishingIP&>*			 m_pliPublishingIPs;
+			static CMap<uint32, uint32, uint32, uint32> s_mapGlobalPublishIPs; // tracks count of publishings for each 255.255.255.0/28 subnet
 	};
 }

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -112,9 +112,15 @@ void CIrcNickListCtrl::OnContextMenu(CWnd*, CPoint point)
 	//Ban currently uses chanserv to ban which seems to kick also.. May change this later..
 	//	menuNick.AppendMenu(MF_STRING, Irc_KB, _T("Kick/Ban"));
 	menuNick.AppendMenu(MF_STRING, Irc_Slap, GetResString(IDS_IRC_SLAP));
+	menuNick.SetDefaultItem(Irc_Priv);
 	GetPopupMenuPos(*this, point);
 	menuNick.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 	VERIFY( menuNick.DestroyMenu() );
+}
+
+void CIrcNickListCtrl::OpenPrivateChannel(const Nick *pNick)
+{
+	m_pParent->AddInfoMessage(pNick->m_sNick, GetResString(IDS_IRC_PRIVATECHANSTART), true);
 }
 
 void CIrcNickListCtrl::OnNMDblClk(NMHDR*, LRESULT* pResult)
@@ -125,10 +131,7 @@ void CIrcNickListCtrl::OnNMDblClk(NMHDR*, LRESULT* pResult)
 	{
 		const Nick* pNick = (Nick*)GetItemData(iNickItem);
 		if (pNick)
-		{
-			//Valid nick, send a info message to force open a new channel..
-			m_pParent->AddInfoMessage(pNick->m_sNick, GetResString(IDS_IRC_PRIVATECHANSTART));
-		}
+			OpenPrivateChannel(pNick);
 	}
 	*pResult = 0;
 }
@@ -428,7 +431,7 @@ void CIrcNickListCtrl::UpdateNickCount()
 	CString sResource;
 	int iItemCount = GetItemCount();
 	if (iItemCount)
-		sResource.Format(_T("%s[%i]"), GetResString(IDS_IRC_NICK), iItemCount);
+		sResource.Format(_T("%s (%u)"), GetResString(IDS_IRC_NICK), iItemCount);
 	else
 		sResource.Format(_T("%s"), GetResString(IDS_IRC_NICK));
 	HDITEM hdi;
@@ -463,7 +466,7 @@ BOOL CIrcNickListCtrl::OnCommand(WPARAM wParam, LPARAM)
 	{
 		case Irc_Priv:
 			if (pNick)
-				m_pParent->AddInfoMessage(pNick->m_sNick, GetResString(IDS_IRC_PRIVATECHANSTART));
+				OpenPrivateChannel(pNick);
 			return TRUE;
 
 		case Irc_Kick:

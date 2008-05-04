@@ -139,3 +139,11 @@
 #define eMule_FAQ_WebServer	139
 #define eMule_part_file_access_module_for_VideoLAN_README	140
 #define eMule_FAQ_Preferences_Messages	141
+#define eMule_FAQ_GUI_Kad			200
+#define eMule_FAQ_GUI_Server		201
+#define eMule_FAQ_GUI_Transfers		202
+#define eMule_FAQ_GUI_Search		203
+#define eMule_FAQ_GUI_SharedFiles	204
+#define eMule_FAQ_GUI_Messages		205
+#define eMule_FAQ_GUI_IRC			206
+#define eMule_FAQ_GUI_Statistics	207

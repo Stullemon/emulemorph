@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -49,6 +49,7 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSettingsChange()					{ SetModified(); }
+	afx_msg void OnSpamFilterChange();
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnDestroy();

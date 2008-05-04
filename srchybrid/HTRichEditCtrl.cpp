@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -580,6 +580,16 @@ void CHTRichEditCtrl::Reset()
 
 void CHTRichEditCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
+	if (point.x != -1 || point.y != -1) {
+		CRect rcClient;
+		GetClientRect(&rcClient);
+		ClientToScreen(&rcClient);
+		if (!rcClient.PtInRect(point)) {
+			Default();
+			return;
+		}
+	}
+
 	long lSelStart, lSelEnd;
 	GetSel(lSelStart, lSelEnd);
 
@@ -1447,6 +1457,74 @@ bool CHTRichEditCtrl::InsertSmiley(LPCTSTR pszSmileyID)
 
 	if ((hr = pIRichEditOle->InsertObject(&reobject)) != S_OK)
 		return false;
+
+	return true;
+}
+
+bool CHTRichEditCtrl::AddCaptcha(HBITMAP hbmp)
+{
+	HRESULT hr;
+	if (hbmp == NULL)
+		return false;
+	
+	SetSel(GetWindowTextLength(), GetWindowTextLength());
+	CBitmapDataObject *pbdo = new CBitmapDataObject(hbmp);
+	CComPtr<IDataObject> pIDataObject; 
+	pIDataObject.Attach((IDataObject *)pbdo->GetInterface(&IID_IDataObject));
+
+	CComPtr<IRichEditOle> pIRichEditOle;
+	pIRichEditOle.Attach(GetIRichEditOle());
+	if (!pIRichEditOle)
+		return false;
+
+	CComPtr<IOleClientSite> pIOleClientSite;
+	pIRichEditOle->GetClientSite(&pIOleClientSite);
+	if (!pIOleClientSite)
+		return false;
+
+	if (m_pIStorageCaptchas == NULL)
+	{
+		CComPtr<ILockBytes> pILockBytes;
+		if ((hr = CreateILockBytesOnHGlobal(NULL, TRUE, &pILockBytes)) != S_OK)
+			return false;
+		if ((hr = StgCreateDocfileOnILockBytes(pILockBytes, STGM_SHARE_EXCLUSIVE | STGM_CREATE | STGM_READWRITE, 0, &m_pIStorageCaptchas)) != S_OK)
+			return false;
+	}
+
+	FORMATETC FormatEtc;
+#ifdef USE_METAFILE
+	FormatEtc.cfFormat = CF_ENHMETAFILE;
+#else
+	FormatEtc.cfFormat = CF_BITMAP;
+#endif
+	FormatEtc.ptd = NULL;
+	FormatEtc.dwAspect = DVASPECT_CONTENT;
+	FormatEtc.lindex = -1;
+#ifdef USE_METAFILE
+	FormatEtc.tymed = TYMED_ENHMF;
+#else
+	FormatEtc.tymed = TYMED_GDI;
+#endif
+
+	CComPtr<IOleObject> pIOleObject;
+	if ((hr = OleCreateStaticFromData(pIDataObject, __uuidof(pIOleObject), OLERENDER_FORMAT, &FormatEtc, pIOleClientSite, m_pIStorageCaptchas, (void **)&pIOleObject)) != S_OK)
+		return false;
+	OleSetContainedObject(pIOleObject, TRUE);
+
+	REOBJECT reobject = {0};
+	reobject.cbStruct = sizeof(reobject);
+	if ((hr = pIOleObject->GetUserClassID(&reobject.clsid)) != S_OK)
+		return false;
+	reobject.cp = REO_CP_SELECTION;
+	reobject.dvaspect = DVASPECT_CONTENT;
+	reobject.poleobj = pIOleObject;
+	reobject.polesite = pIOleClientSite;
+	reobject.pstg = m_pIStorageCaptchas;
+	reobject.dwFlags = REO_BELOWBASELINE;
+
+	if ((hr = pIRichEditOle->InsertObject(&reobject)) != S_OK)
+		return false;
+	ReplaceSel(_T(""));
 
 	return true;
 }

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -171,10 +171,10 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_WM_SHOWWINDOW()
 	ON_WM_DESTROY()
 	ON_WM_SETTINGCHANGE()
+	ON_MESSAGE(WM_POWERBROADCAST, OnPowerBroadcast)
 	ON_WM_CHANGECBCHAIN()  // MORPH clipboard chain
 	ON_WM_DRAWCLIPBOARD() // MORPH clipboard chain
     //	ON_MESSAGE(WM_DRAWCLIPBOARD,   OnDrawClipboard)	// MORPH clipboard chain
-	ON_MESSAGE(WM_POWERBROADCAST,OnPowerBroadcast) //MORPH leuk_he reconnect kad on wake from hibernate
 
 	ON_MESSAGE(WM_HOTKEY, OnHotKey)	//Commander - Added: Invisible Mode [TPT]
 
@@ -303,6 +303,8 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 	m_hUPnPTimeOutTimer = 0;
 	m_bConnectRequestDelayedForUPnP = false;
 #endif
+	m_bEd2kSuspendDisconnect = false;
+	m_bKadSuspendDisconnect = false;
 	b_HideApp = false; //MORPH - Added by SiRoB, Toggle Show Hide window
 	m_hwndClipChainNext=NULL; // MORPH leuk_he clipboard chain instead of timer
 	m_bChained=false; // MORPH leuk_he clipboard chain instead of timer
@@ -359,6 +361,23 @@ LRESULT CemuleDlg::OnAreYouEmule(WPARAM, LPARAM)
 	return UWM_ARE_YOU_EMULE;
 } 
 
+void DialogCreateIndirect(CDialog *pWnd, UINT uID)
+{
+#if 0
+	// This could be a nice way to change the font size of the main windows without needing
+	// to re-design the dialog resources. However, that technique does not work for the
+	// SearchWnd and it also introduces new glitches (which would need to get resolved)
+	// in almost all of the main windows.
+	CDialogTemplate dlgTempl;
+	dlgTempl.Load(MAKEINTRESOURCE(uID));
+	dlgTempl.SetFont(_T("MS Shell Dlg"), 8);
+	pWnd->CreateIndirect(dlgTempl.m_hTemplate);
+	FreeResource(dlgTempl.Detach());
+#else
+	pWnd->Create(uID);
+#endif
+}
+
 BOOL CemuleDlg::OnInitDialog()
 {
 	m_bStartMinimized = thePrefs.GetStartMinimized();
@@ -389,7 +408,7 @@ BOOL CemuleDlg::OnInitDialog()
 	// Create global GUI objects
 	theApp.CreateAllFonts();
 	theApp.CreateBackwardDiagonalBrush();
-
+	m_wndTaskbarNotifier->SetTextDefaultFont();
 	CTrayDialog::OnInitDialog();
 	InitWindowStyles(this);
 	CreateToolbarCmdIconMap();
@@ -468,14 +487,14 @@ BOOL CemuleDlg::OnInitDialog()
 	SetStatusBarPartsSize();
 
 	// create main window dialog pages
-	VERIFY(serverwnd->Create(IDD_SERVER));
-	sharedfileswnd->Create(IDD_FILES);
-	searchwnd->Create(this);
-	chatwnd->Create(IDD_CHAT);
-	transferwnd->Create(IDD_TRANSFER);
-	statisticswnd->Create(IDD_STATISTICS);
-	kademliawnd->Create(IDD_KADEMLIAWND);
-	ircwnd->Create(IDD_IRC);
+	DialogCreateIndirect(serverwnd, IDD_SERVER);
+	DialogCreateIndirect(sharedfileswnd, IDD_FILES);
+	searchwnd->Create(this); // can not use 'DialogCreateIndirect' for the SearchWnd, grrr..
+	DialogCreateIndirect(chatwnd, IDD_CHAT);
+	DialogCreateIndirect(transferwnd, IDD_TRANSFER);
+	DialogCreateIndirect(statisticswnd, IDD_STATISTICS);
+	DialogCreateIndirect(kademliawnd, IDD_KADEMLIAWND);
+	DialogCreateIndirect(ircwnd, IDD_IRC);
 
 	// with the top rebar control, some XP themes look better with some additional lite borders.. some not..
 	//serverwnd->ModifyStyleEx(0, WS_EX_STATICEDGE);
@@ -826,10 +845,12 @@ void CALLBACK CemuleDlg::StartupTimer(HWND /*hwnd*/, UINT /*uiMsg*/, UINT /*idEv
 				if(thePrefs.DoAutoConnect())
 					theApp.emuledlg->OnBnClickedButton2();
 				*/
-				theApp.emuledlg->status++;
 				break;
 			}
 			case 5:
+				if (thePrefs.IsStoringSearchesEnabled())
+					theApp.searchlist->LoadSearches();
+				theApp.emuledlg->status++;
 				break;
 			// SLUGFILLER: SafeHash - delay load shared files
 			case 6:
@@ -1576,6 +1597,20 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 					serverwnd->UpdateServerMetFromURL(strAddress);
 			}
 			break;
+		case CED2KLink::kNodesList:
+			{
+				CED2KNodesListLink* pListLink = pLink->GetNodesListLink(); 
+				_ASSERT( pListLink !=0 ); 
+				CString strAddress = pListLink->GetAddress();
+				// Becasue the nodes.dat is vital for kad and its routing and doesn't needs to be updated in general
+				// we request a confirm to avoid accidental / malicious updating of this file. This is a bit inconsitent
+				// as the same kinda applies to the server.met, but those require more updates and are easier to understand
+				CString strConfirm;
+				strConfirm.Format(GetResString(IDS_CONFIRMNODESDOWNLOAD), strAddress);
+				if(strAddress.GetLength() != 0 && AfxMessageBox(strConfirm, MB_YESNO | MB_ICONQUESTION, 0) == IDYES)
+					kademliawnd->UpdateNodesDatFromURL(strAddress);
+			}
+			break;
 		case CED2KLink::kServer:
 			{
 				CString defName;
@@ -2172,6 +2207,8 @@ void CemuleDlg::OnClose()
 	theApp.m_pPeerCache->Save();
 	theApp.scheduler->RestoreOriginals();
 	theApp.searchlist->SaveSpamFilter();
+	if (thePrefs.IsStoringSearchesEnabled())
+		theApp.searchlist->StoreSearches();
 	
 #ifdef USE_OFFICIAL_UPNP
 	// close uPnP Ports
@@ -2493,12 +2530,12 @@ void CemuleDlg::StartConnection()
 			AddLogLine(true, GetResString(IDS_CONNECTING));
 
 			// ed2k
-			if (thePrefs.GetNetworkED2K() && !theApp.serverconnect->IsConnecting() && !theApp.serverconnect->IsConnected()) {
+			if ((thePrefs.GetNetworkED2K() || m_bEd2kSuspendDisconnect) && !theApp.serverconnect->IsConnecting() && !theApp.serverconnect->IsConnected()) {
 					theApp.serverconnect->ConnectToAnyServer();
 			}
 
 			// kad
-			if (thePrefs.GetNetworkKademlia() && !Kademlia::CKademlia::IsRunning()) {
+			if ((thePrefs.GetNetworkKademlia() || m_bKadSuspendDisconnect) && !Kademlia::CKademlia::IsRunning()) {
 				Kademlia::CKademlia::Start();
 			}
 #ifdef USE_OFFICIAL_UPNP
@@ -2507,6 +2544,8 @@ void CemuleDlg::StartConnection()
 
 		ShowConnectionState();
 	}
+	m_bEd2kSuspendDisconnect = false;
+	m_bKadSuspendDisconnect = false;
 }
 
 void CemuleDlg::CloseConnection()
@@ -2788,6 +2827,9 @@ LRESULT CemuleDlg::OnTaskbarNotifierClicked(WPARAM /*wParam*/, LPARAM lParam)
 
 void CemuleDlg::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
 {
+	// Do not update the Shell's large icon size, because we still have an image list
+	// from the shell which contains the old large icon size.
+	//theApp.UpdateLargeIconSize();
 	theApp.UpdateDesktopColorDepth();
 	CTrayDialog::OnSettingChange(uFlags, lpszSection);
 }
@@ -3038,6 +3080,13 @@ BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			break;
 		case MP_HM_HELP:
 		case TBBTN_HELP:
+			if (activewnd != NULL) {
+				HELPINFO hi;
+				ZeroMemory(&hi, sizeof(HELPINFO));
+				hi.cbSize = sizeof(HELPINFO);
+				activewnd->SendMessage(WM_HELP, 0, (LPARAM)&hi);
+			}
+			else
 			wParam = ID_HELP;
 			break;
 		case MP_HM_CON:
@@ -3278,6 +3327,26 @@ void StraightWindowStyles(CWnd* pWnd)
 	}
 }
 
+void ApplySystemFont(CWnd* pWnd)
+{
+	CWnd* pWndChild = pWnd->GetWindow(GW_CHILD);
+	while (pWndChild)
+	{
+		ApplySystemFont(pWndChild);
+		pWndChild = pWndChild->GetNextWindow();
+	}
+
+	CHAR szClassName[MAX_PATH];
+	if (::GetClassNameA(*pWnd, szClassName, _countof(szClassName)))
+	{
+		if (   __ascii_stricmp(szClassName, "SysListView32") == 0
+			|| __ascii_stricmp(szClassName, "SysTreeView32") == 0)
+		{
+			pWnd->SendMessage(WM_SETFONT, NULL, FALSE);
+		}
+	}
+}
+
 static bool s_bIsXPStyle;
 
 void FlatWindowStyles(CWnd* pWnd)
@@ -3310,6 +3379,7 @@ void FlatWindowStyles(CWnd* pWnd)
 
 void InitWindowStyles(CWnd* pWnd)
 {
+	//ApplySystemFont(pWnd);
 	if (thePrefs.GetStraightWindowStyles() < 0)
 		return;
 	else if (thePrefs.GetStraightWindowStyles() > 0)
@@ -3448,6 +3518,10 @@ void CemuleDlg::DestroySplash()
 		delete m_pSplashWnd;
 		m_pSplashWnd = NULL;
 	}
+#ifdef _BETA
+	if (!thePrefs.IsFirstStart())
+		AfxMessageBox(GetResString(IDS_BETANAG), MB_ICONINFORMATION | MB_OK, 0);
+#endif
 }
 
 BOOL CemuleApp::IsIdleMessage(MSG *pMsg)
@@ -4119,6 +4193,36 @@ LRESULT CemuleDlg::OnUPnPResult(WPARAM /*wParam*/, LPARAM /*lParam*/){
 }
 #endif
 
+LRESULT  CemuleDlg::OnPowerBroadcast(WPARAM wParam, LPARAM lParam)
+{
+	//DebugLog(_T("DEBUG:Power state change. wParam=%d lPararm=%ld"),wParam,lParam);
+	switch (wParam) {
+		case PBT_APMRESUMEAUTOMATIC:
+		{
+			if (m_bEd2kSuspendDisconnect || m_bKadSuspendDisconnect)
+			{
+				DebugLog(_T("Reconnect after Power state change. wParam=%d lPararm=%ld"),wParam,lParam);
+				// TODO: do we need to reinitiate UPNP?
+				PostMessage(WM_SYSCOMMAND , MP_CONNECT, 0); // tell to connect.. a sec later...
+			}
+			return TRUE; // message processed.
+			break;
+		}
+		case PBT_APMSUSPEND:
+		{		
+			DebugLog(_T("System is going is suspending operation, disconnecting. wParam=%d lPararm=%ld"),wParam,lParam);
+			m_bEd2kSuspendDisconnect = theApp.serverconnect->IsConnected();
+			m_bKadSuspendDisconnect = Kademlia::CKademlia::IsConnected();
+			CloseConnection();
+			return TRUE; // message processed.
+			break;
+		}
+		default:
+			return FALSE; // we do not process this message
+	}
+
+}
+
 //Commander - Added: Invisible Mode [TPT] - Start
 LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM /*lParam*/)
 {
@@ -4370,27 +4474,4 @@ void CemuleDlg::SetClipboardWatch(bool enable)
 	    m_hwndClipChainNext = hWndAfter;
 	}
         
-	// MORPH END leuk_he clipboard chain instead of timer
-
-	LRESULT  CemuleDlg::OnPowerBroadcast(WPARAM wParam, LPARAM lParam)
-{
-	DebugLog(LOG_SUCCESS,_T("DEBUG:Power state change. wParam=%d lPararm=%ld"),wParam,lParam);
-	switch (wParam) {
-			    case PBT_APMRESUMEAUTOMATIC:
-                case PBT_APMRESUMECRITICAL:
-               // case PBT_APMRESUMESUSPEND: double
-                case PBT_APMRESUMESTANDBY:
-				if (theApp.IsConnected()&& thePrefs.Reconnect() )
-				  {// During wakeup broadcast we did not yet have time to find out that wer are disconnected (?)
-				   CloseConnection();
-				   AddLogLine(false,_T("Reconnect after Power state change. wParam=%d lPararm=%ld"),wParam,lParam);
-				   // TODO: do we need to reinitiate UPNP?
-				   PostMessage(WM_SYSCOMMAND , MP_CONNECT, 0); // tell to connect.. a sec later... 
-				  }
-				return TRUE; // message processed. 
-				break;
-			default:
-				return FALSE; // we do not process this message
-	}
-
-}
+// MORPH END leuk_he clipboard chain instead of timer

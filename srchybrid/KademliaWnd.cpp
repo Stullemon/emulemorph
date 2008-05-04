@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -28,6 +28,10 @@
 #include "OtherFunctions.h"
 #include "emuledlg.h"
 #include "clientlist.h"
+#include "log.h"
+#include "HttpDownloadDlg.h"
+#include "Kademlia/routing/RoutingZone.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -48,10 +52,14 @@ BEGIN_MESSAGE_MAP(CKademliaWnd, CResizableDialog)
 	ON_BN_CLICKED(IDC_KADCONNECT, OnBnConnect)
 	ON_WM_SYSCOLORCHANGE()
 	ON_EN_SETFOCUS(IDC_BOOTSTRAPIP, OnEnSetfocusBootstrapip)
+	ON_EN_SETFOCUS(IDC_BOOTSTRAPURL, OnEnSetfocusBootstrapNodesdat)
 	ON_EN_CHANGE(IDC_BOOTSTRAPIP, UpdateControlsState)
 	ON_EN_CHANGE(IDC_BOOTSTRAPPORT, UpdateControlsState)
+	ON_EN_CHANGE(IDC_BOOTSTRAPURL, UpdateControlsState)
 	ON_BN_CLICKED(IDC_RADCLIENTS, UpdateControlsState)
 	ON_BN_CLICKED(IDC_RADIP, UpdateControlsState)
+	ON_BN_CLICKED(IDC_RADNODESURL, UpdateControlsState)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CKademliaWnd::CKademliaWnd(CWnd* pParent /*=NULL*/)
@@ -112,10 +120,13 @@ BOOL CKademliaWnd::OnInitDialog()
 	AddAnchor(IDC_BOOTSTRAPBUTTON, TOP_RIGHT);
 	AddAnchor(IDC_BOOTSTRAPPORT, TOP_RIGHT);
 	AddAnchor(IDC_BOOTSTRAPIP, TOP_RIGHT);
+	AddAnchor(IDC_BOOTSTRAPURL, TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC4, TOP_RIGHT);
 	AddAnchor(IDC_SSTATIC7, TOP_RIGHT);
+	AddAnchor(IDC_NODESDATLABEL, TOP_RIGHT);
 	AddAnchor(IDC_RADCLIENTS, TOP_RIGHT);
 	AddAnchor(IDC_RADIP, TOP_RIGHT);
+	AddAnchor(IDC_RADNODESURL, TOP_RIGHT);
 
 	searchList->UpdateKadSearchCount();
 	m_contactListCtrl->UpdateKadContactCount();
@@ -157,7 +168,14 @@ BOOL CKademliaWnd::PreTranslateMessage(MSG* pMsg)
 
 void CKademliaWnd::OnEnSetfocusBootstrapip()
 {
-	CheckRadioButton(IDC_RADIP, IDC_RADCLIENTS, IDC_RADIP);
+	CheckRadioButton(IDC_RADIP, IDC_RADNODESURL, IDC_RADIP);
+	UpdateControlsState();
+}
+
+void CKademliaWnd::OnEnSetfocusBootstrapNodesdat()
+{
+	CheckRadioButton(IDC_RADIP, IDC_RADNODESURL, IDC_RADNODESURL);
+	UpdateControlsState();
 }
 
 void CKademliaWnd::OnBnClickedBootstrapbutton()
@@ -165,7 +183,7 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 	CString strIP;
 	uint16 nPort = 0;
 
-	if (!IsDlgButtonChecked(IDC_RADCLIENTS))
+	if (IsDlgButtonChecked(IDC_RADIP) != 0)
 	{
 		GetDlgItem(IDC_BOOTSTRAPIP)->GetWindowText(strIP);
 		strIP.Trim();
@@ -190,17 +208,32 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 
 		if (m_pacONBSIPs && m_pacONBSIPs->IsBound())
 			m_pacONBSIPs->AddItem(strIP + _T(":") + strPort, 0);
-	}
-
-	if( !Kademlia::CKademlia::IsRunning() )
-	{
-		Kademlia::CKademlia::Start();
-		theApp.emuledlg->ShowConnectionState();
-	}
-	if (!strIP.IsEmpty() && nPort)
-	{
+		if( !Kademlia::CKademlia::IsRunning() )
+		{
+			Kademlia::CKademlia::Start();
+			theApp.emuledlg->ShowConnectionState();
+		}
 		// JOHNTODO - Switch between Kad1 and Kad2
 		Kademlia::CKademlia::Bootstrap(strIP, nPort, true);
+	}
+	else if (IsDlgButtonChecked(IDC_RADNODESURL) != 0)
+	{
+		CString strURL;
+		GetDlgItemText(IDC_BOOTSTRAPURL, strURL);
+		if (strURL.IsEmpty() || (strURL.Find(_T("://")) == -1)) {
+			// not a valid URL
+			LogError(LOG_STATUSBAR, GetResString(IDS_INVALIDURL) );
+			return;
+		}
+		UpdateNodesDatFromURL(strURL);
+	}
+	else
+	{
+		if( !Kademlia::CKademlia::IsRunning() )
+		{
+			Kademlia::CKademlia::Start();
+			theApp.emuledlg->ShowConnectionState();
+		}
 	}
 }
 
@@ -248,6 +281,7 @@ void CKademliaWnd::Localize()
 	GetDlgItem(IDC_BOOTSTRAPBUTTON)->SetWindowText(GetResString(IDS_BOOTSTRAP));
 	GetDlgItem(IDC_SSTATIC4)->SetWindowText(GetResString(IDS_SV_ADDRESS) + _T(":"));
 	GetDlgItem(IDC_SSTATIC7)->SetWindowText(GetResString(IDS_SV_PORT) + _T(":"));
+	GetDlgItem(IDC_NODESDATLABEL)->SetWindowText(GetResString(IDS_BOOTSRAPNODESDAT));
 	GetDlgItem(IDC_FIREWALLCHECKBUTTON)->SetWindowText(GetResString(IDS_KAD_RECHECKFW));
 	
 	SetDlgItemText(IDC_KADCONTACTLAB,GetResString(IDS_KADCONTACTLAB));
@@ -277,13 +311,16 @@ void CKademliaWnd::UpdateControlsState()
 	GetDlgItemText(IDC_BOOTSTRAPIP, strBootstrapIP);
 	CString strBootstrapPort;
 	GetDlgItemText(IDC_BOOTSTRAPPORT, strBootstrapPort);
+	CString strBootstrapUrl;
+	GetDlgItemText(IDC_BOOTSTRAPURL, strBootstrapUrl);
+
 	GetDlgItem(IDC_BOOTSTRAPBUTTON)->EnableWindow(
 		!Kademlia::CKademlia::IsConnected()
-		&& (  (   IsDlgButtonChecked(IDC_RADIP)>0
-		       && !strBootstrapIP.IsEmpty()
-			   && (strBootstrapIP.Find(_T(':')) != -1 || !strBootstrapPort.IsEmpty())
-			  )
-		    || IsDlgButtonChecked(IDC_RADCLIENTS)>0));
+		&& (  (IsDlgButtonChecked(IDC_RADIP)>0 && !strBootstrapIP.IsEmpty()
+				&& (strBootstrapIP.Find(_T(':')) != -1 || !strBootstrapPort.IsEmpty()))
+		    || IsDlgButtonChecked(IDC_RADCLIENTS) != 0
+			|| (IsDlgButtonChecked(IDC_RADNODESURL) != 0 && !strBootstrapUrl.IsEmpty() ))
+			);
 }
 
 UINT CKademliaWnd::GetContactCount() const
@@ -323,4 +360,33 @@ void CKademliaWnd::ContactRem(const Kademlia::CContact* contact)
 void CKademliaWnd::ContactRef(const Kademlia::CContact* contact)
 {
 	m_contactListCtrl->ContactRef(contact);
+}
+
+void CKademliaWnd::UpdateNodesDatFromURL(CString strURL){
+	CString strTempFilename;
+	strTempFilename.Format(_T("%stemp-%d-nodes.dat"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), ::GetTickCount());
+
+	// try to download nodes.dat
+	Log(GetResString(IDS_DOWNLOADING_NODESDAT_FROM), strURL);
+	CHttpDownloadDlg dlgDownload;
+	dlgDownload.m_strTitle = GetResString(IDS_DOWNLOADING_NODESDAT);
+	dlgDownload.m_sURLToDownload = strURL;
+	dlgDownload.m_sFileToDownloadInto = strTempFilename;
+	if (dlgDownload.DoModal() != IDOK) {
+		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_FAILEDDOWNLOADNODES), strURL);
+		return;
+	}
+
+	if (!Kademlia::CKademlia::IsRunning()){
+		Kademlia::CKademlia::Start();
+		theApp.emuledlg->ShowConnectionState();
+	}
+	Kademlia::CKademlia::GetRoutingZone()->ReadFile(strTempFilename);
+	(void)_tremove(strTempFilename);		
+}
+
+BOOL CKademliaWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
+{
+	theApp.ShowHelp(eMule_FAQ_GUI_Kad);
+	return TRUE;
 }

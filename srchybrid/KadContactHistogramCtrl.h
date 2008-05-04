@@ -19,7 +19,6 @@ protected:
 	CPen m_penAxis;
 	CPen m_penAux;
 	CPen m_penHist;
-	CFont m_fontLabel;
 	int m_iMaxLabelHeight;
 	int m_iMaxNumLabelWidth;
 	bool m_bInitializedFontMetrics;

@@ -35,6 +35,7 @@ there client on the eMule forum..
 #include "./Defines.h"
 #include "./Prefs.h"
 #include "./Indexed.h"
+#include "./UDPFirewallTester.h"
 #include "./SearchManager.h"
 #include "../io/IOException.h"
 #include "../io/ByteIO.h"
@@ -53,8 +54,7 @@ there client on the eMule forum..
 #include "../../UpDownClient.h"
 #include "../../Log.h"
 #include "../../KnownFileList.h"
-
-#include "NetF/SafeKad.h" // netfinity: Enable tracking of bad nodes
+#include "../utils/KadClientSearcher.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -82,10 +82,17 @@ CSearch::CSearch()
 	m_uLastResponse = (uint32)time(NULL); //vs2005
 	m_pucSearchTermsData = NULL;
 	m_uSearchTermsDataSize = 0;
+	pNodeSpecialSearchRequester = NULL;
 }
 
 CSearch::~CSearch()
 {
+	if (pNodeSpecialSearchRequester != NULL){
+		// inform requester that our search failed
+		pNodeSpecialSearchRequester->KadSearchIPByNodeIDResult(KCSR_NOTFOUND, 0, 0);
+		pNodeSpecialSearchRequester = NULL;
+	}
+
 	// Remove search from GUI
 	theApp.emuledlg->kademliawnd->searchList->SearchRem(this);
 
@@ -110,13 +117,7 @@ CSearch::~CSearch()
 
 	// Decrease the use count for any contacts that are in your contact list.
 	for (ContactMap::iterator itContactMap = m_mapInUse.begin(); itContactMap != m_mapInUse.end(); ++itContactMap)
-	{
-		// BEGIN netfinity: Safe KAD - Increase type counter for contacts that didn't respond (or was useful, if candidate) during the search
-		if (m_mapTried.count(itContactMap->first) > 0 && (itContactMap->second->GetCandidate() == true ? m_mapUseful.count(itContactMap->first) > 0 : m_mapResponded.count(itContactMap->first) > 0))
-			itContactMap->second->CheckingType();
-		// END netfinity: Safe KAD - Increase type counter for contacts that didn't respond during the search
-		itContactMap->second->DecUse();
-	}
+		((CContact*)itContactMap->second)->DecUse();
 
 	// Delete any temp contacts..
 	for (ContactList::const_iterator itContactList = m_listDelete.begin(); itContactList != m_listDelete.end(); ++itContactList)
@@ -143,43 +144,16 @@ void CSearch::Go()
 	{
 		CUInt128 uDistance(CKademlia::GetPrefs()->GetKadID());
 		uDistance.Xor(m_uTarget);
-// BEGIN netfinity: Safe KAD - 
-		// Choose only validated (type <= 2) nodes closest to the distance point unless NODE search
-		if(m_uType != NODE)
-			CKademlia::GetRoutingZone()->GetClosestTo(2, m_uTarget, uDistance, 50, &m_mapPossible, true, true);
-		// If less than 50 nodes was returned then choose any (type <= 3) nodes closest to the distance point
-		if (m_mapPossible.size() < 50)
-		{
-			for (ContactMap::iterator itContactMap = m_mapPossible.begin(); itContactMap != m_mapPossible.end(); ++itContactMap)
-				itContactMap->second->DecUse();
-			CKademlia::GetRoutingZone()->GetClosestTo(3, m_uTarget, uDistance, 50, &m_mapPossible, true, true);
-		}
-
+		CKademlia::GetRoutingZone()->GetClosestTo(3, m_uTarget, uDistance, 50, &m_mapPossible, true, true);
+	}
+	if (!m_mapPossible.empty())
+	{
 		//Lets keep our contact list entries in mind to dec the inUse flag.
 		for (ContactMap::iterator itContactMap = m_mapPossible.begin(); itContactMap != m_mapPossible.end(); ++itContactMap)
 			m_mapInUse[itContactMap->first] = itContactMap->second;
 
 		ASSERT(m_mapPossible.size() == m_mapInUse.size());
 
-		// Skip the first N nodes for NODE searches unless this is node validation
-		// This should help against holes gettin created in the network, as the nodes closest to another node are often bogus
-		// This could be used for NODECOMPLETE too, but one have to be careful here so we don't miss any nodes close to ourselves
-		if(m_uType == NODE && m_mapPossible.size() > 0 && m_mapPossible.begin()->first != m_uTarget)
-		{
-			int skipNodes = min((int) m_mapPossible.size() - 1, rand() % 5);
-			for (ContactMap::iterator itContacts = m_mapPossible.begin(); itContacts != m_mapPossible.end();)
-			{
-				if (skipNodes > 0)
-					m_mapPossible.erase(itContacts++);
-				else
-					 break;
-				--skipNodes;
-			}
-		}
-// END netfinity: Safe KAD
-	}
-	if (!m_mapPossible.empty())
-	{
 		// Take top ALPHA_QUERY to start search with.
 		int iCount;
 		
@@ -201,7 +175,6 @@ void CSearch::Go()
 			++itContactMap2;
 		}
 	}
-
 	// Update search for the GUI
 	theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 }
@@ -219,6 +192,8 @@ void CSearch::PrepareToStop()
 	{
 		case NODE:
 		case NODECOMPLETE:
+		case NODESPECIAL:
+		case NODEFWCHECKUDP:
 			uBaseTime = SEARCHNODE_LIFETIME;
 			break;
 		case FILE:
@@ -267,176 +242,58 @@ void CSearch::JumpStart()
 		return;
 	}
 
-	// netfinity: Safe KAD - We never jump start NODE searches as they are supposed to just test one contact
-	if (m_uType == NODE)
-		return;
-
 	// If we had a response within the last 3 seconds, no need to jumpstart the search.
-	// netfinity: If we already have all responses then go on with the storing unless we already begun storing
-	if (m_uLastResponse + SEC(3) > time(NULL) && (m_mapResponded.size() < m_mapTried.size() || m_uTotalRequestAnswers > 0 || m_uAnswers > 0))
+	if (m_uLastResponse + SEC(3) > (uint32)time(NULL))
 		return;
 
 	// Search for contacts that can be used to jumpstart a stalled search.
-	// netfinity: Safe KAD - Avoid wasting resources on unnecessary store operations
-	int iCanStore = 5; // Limit to max 5 store operations per call
-	bool bHasTried = false;
-
-	for (ContactMap::iterator itPossibleMap = m_mapPossible.begin(); itPossibleMap != m_mapPossible.end();)
+	while(!m_mapPossible.empty())
 	{
-		CUInt128 uDistance = itPossibleMap->first;
-		CContact* pContact = itPossibleMap->second;
-		++itPossibleMap;
+		// Get a contact closest to our target.
+		CContact* pContact = m_mapPossible.begin()->second;
 
-		// BEGIN netfinity: Safe KAD - Calculate the search distance (we want to know all contacts among the 3 closest)
-		CUInt128 uSearchDistance = GetSearchDistance();
-
-		// netfinity: Safe KAD - Iterate until the minimum search distance has been covered
-		if (bHasTried && uDistance > uSearchDistance)
-			break;
-		// netfinity: Safe KAD - We can have gotten new knowledge about bad nodes since we added these on the list
-		else if (safeKad.IsBadNode(pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetClientID()))
-		{
-			// Erase all references to this one (will allow the Kad ID to be tried again against another node)
-			m_mapPossible.erase(uDistance);
-			m_mapTried.erase(uDistance);
-			m_mapRetried.erase(uDistance);
-			m_mapResponded.erase(uDistance);
-			m_mapUseful.erase(uDistance);
-			if (::thePrefs.GetLogFilteredIPs())
-				AddDebugLogLine(false, _T("Search Manager: Removing contact(IP=%s) - Identified as bad node") , ipstr(ntohl(pContact->GetIPAddress())));
-		}
 		// Have we already tried to contact this node.
-		else if (m_mapTried.count(uDistance) > 0)
+		if (m_mapTried.count(m_mapPossible.begin()->first) > 0)
 		{
 			// Did we get a response from this node, if so, try to store or get info.
-			if (m_mapResponded.count(uDistance) > 0)
-			{
-				if (iCanStore > 0) // netfinity: Safe KAD - Avoid unnecessary storing if not among the best
-				{
-					StorePacket(pContact);
-					// Remove from possible list.
-					m_mapPossible.erase(uDistance);
-					--iCanStore; // netfinity: Safe KAD - Reduce the allowed storing count
-				}
-			}
-			// BEGIN netfinity: Sometimes it's good to try twice
-			else if (m_mapRetried.count(uDistance) == 0 && uDistance <= uSearchDistance)
-			{
-				// Add to tried list.
-				m_mapRetried[uDistance] = pContact;
-				// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
-				// Send request
-				SendFindValue(pContact);
-				// netfinity: We don't bother changing the bCanStore and bHasTried here, as this node is probably dead
-			}
-			else
-			{
-				// Remove from possible list.
-				m_mapPossible.erase(uDistance);
-			}
-			// END netfinity: Sometimes it's good to try twice
+			if(m_mapResponded.count(m_mapPossible.begin()->first) > 0)
+				StorePacket();
+			// Remove from possible list.
+			m_mapPossible.erase(m_mapPossible.begin());
 		}
 		else
 		{
 			// Add to tried list.
-			m_mapTried[uDistance] = pContact;
+			m_mapTried[m_mapPossible.begin()->first] = pContact;
 			// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
 			// Send request
 			SendFindValue(pContact);
-			// netfinity: Safe KAD - There appears to still be some nodes that are closer than those responded, so stop storing for now to save resources
-			iCanStore = 0;
-			bHasTried = true;
+			break;
 		}
 	}
 }
 
 void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *plistResults)
 {
-	if (plistResults)
-		m_uLastResponse = (uint32)time(NULL); //vs2005
+	if(plistResults)
+		m_uLastResponse = time(NULL);
 
 	// Remember the contacts to be deleted when finished
 	for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
 		m_listDelete.push_back(*itContactList);
 
-	// netfinity: Safe KAD - We need this to add responding nodes to the routing table
-	CRoutingZone *pRoutingZone = CKademlia::GetRoutingZone();
-
-	//Find contact that is responding.
-	CUInt128 uFromDistance;
-	CContact* pFromContact = NULL;
-	for (ContactMap::const_iterator itContactMap = m_mapTried.begin(); itContactMap != m_mapTried.end(); ++itContactMap)
-	{
-		if ((itContactMap->second->GetIPAddress() == uFromIP) && (itContactMap->second->GetUDPPort() == uFromPort))
-		{
-			uFromDistance = itContactMap->first;
-			pFromContact = itContactMap->second;
-		}
-	}
-	// netfinity: Safe KAD - Since we retry contacts we might get double responses
-	if (pFromContact == NULL || m_mapResponded.count(uFromDistance) > 0)
-	{
+	if (m_uType == NODEFWCHECKUDP){
+		m_uAnswers++;
 		delete plistResults;
+		// Update search on the GUI.
+		theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 		return;
 	}
-
-
-	// netfinity: Safe KAD - Remember as useful and clear candidate flag if node answers with something of value
-	if (plistResults->size() > 0)
-	{
-		m_mapUseful[uFromDistance] = pFromContact;
-		pFromContact->SetCandidate(false);
-	}
-
-// BEGIN netfinity: Safe KAD - Trim the response list to the amount requested
-	int maxNodes = 2;
-	switch(m_uType)
-	{
-		case NODE:
-		case NODECOMPLETE:
-			maxNodes = KADEMLIA_FIND_NODE;
-			break;
-		case FILE:
-		case KEYWORD:
-		case FINDSOURCE:
-		case NOTES:
-			maxNodes = KADEMLIA_FIND_VALUE;
-			break;
-		case FINDBUDDY:
-		case STOREFILE:
-		case STOREKEYWORD:
-		case STORENOTES:
-			maxNodes = KADEMLIA_STORE;
-			break;
-	}
-
-	for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end();)
-	{
-		if (maxNodes > 0)
-			 ++itContactList;
-		else
-			plistResults->erase(itContactList++);
-		--maxNodes;
-	}
-// END netfinity: Safe KAD - Trim the response list to the amount requested
-
 	// Not interested in responses for FIND_NODE.
 	// Once we get a results we stop the search.
 	// These contacts are added to contacts by UDPListener.
 	if (m_uType == NODE)
 	{
-// BEGIN netfinity: Safe KAD - Add the responses to the routing table unless this was an usefulness check
-		if (m_uTarget != pFromContact->GetClientID())
-		{
-			for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
-			{
-				// Get next result
-				CContact* pContact = *itContactList;
-				pRoutingZone->AddUnfiltered(pContact->GetClientID(), pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetTCPPort(), pContact->GetVersion(), false, true);
-			}
-		}
-// END netfinity: Safe KAD - Add the responses to the routing table
-
 		// Note we got an answer
 		m_uAnswers++;
 		// We clear the possible list to force the search to stop.
@@ -450,99 +307,78 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 
 	try
 	{
-		// Add to list of people who responded
-		m_mapResponded[uFromDistance] = pFromContact;
-		// netfinity: Safe KAD - This seems to be a good node so add it if possible to the routing table
-		if (plistResults->size() > 0) // Contacts that did't have any valid contacts to give aren't very useful to keep
+		//Find contact that is responding.
+		for (ContactMap::const_iterator itContactMap = m_mapTried.begin(); itContactMap != m_mapTried.end(); ++itContactMap)
 		{
-			pRoutingZone->AddUnfiltered(pFromContact->GetClientID(), pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), pFromContact->GetTCPPort(), pFromContact->GetVersion(), false, true);
-			CContact* pStoredContact = pRoutingZone->GetContact(pFromContact->GetClientID());
-			if (pStoredContact != NULL)
-				pStoredContact->SetCandidate(false); // We already know this contact is useful
-		}
+			CUInt128 uFromDistance(itContactMap->first);
+			CContact* pFromContact = itContactMap->second;
 
-		ContactMap mapBest; // netfinity: Safe KAD - Take only the best contacts from this response
-
-		// Loop through their responses
-		for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
-		{
-			// Get next result
-			CContact* pContact = *itContactList;
-
-			// Calc distance this result is to the target.
-			CUInt128 uDistance(pContact->GetClientID());
-			uDistance.Xor(m_uTarget);
-
-			// Ignore this contact if already know or tried it.
-// BEGIN netfinity: Safe KAD - There may be a contact on the list with the same ID, but that turned out as bad which allow us to replace it
-			CContact* pExistingContact = NULL;
-			if (m_mapPossible.count(uDistance) > 0)
-				pExistingContact = m_mapPossible[uDistance];
-			if (pExistingContact == NULL && m_mapTried.count(uDistance) > 0)
-				pExistingContact = m_mapTried[uDistance];
-
-			if (pExistingContact != NULL)
+			if ((pFromContact->GetIPAddress() == uFromIP) && (pFromContact->GetUDPPort() == uFromPort))
 			{
-				if (safeKad.IsBadNode(pExistingContact->GetIPAddress(), pExistingContact->GetUDPPort(), pExistingContact->GetClientID()) && pExistingContact != pFromContact)
-				{
-					// Erase all references to the old one
-					m_mapPossible.erase(uDistance);
-					m_mapTried.erase(uDistance);
-					m_mapRetried.erase(uDistance); // netfinity: Sometimes it's good to try twice
-					m_mapResponded.erase(uDistance);
-					m_mapUseful.erase(uDistance);
-					if (::thePrefs.GetLogFilteredIPs())
-						AddDebugLogLine(false, _T("Search Manager: Replacing contact(IP=%s) - Identified as bad node") , ipstr(ntohl(pExistingContact->GetIPAddress())));
-				}
-				else
-					continue;
-			}
-// END netfinity: Safe KAD - There may be a contact on the list with the same ID, but that turned out as bad which allow us to replace it
+				// Add to list of people who responded
+				m_mapResponded[uFromDistance] = pFromContact;
 
-			// Add to possible
-			m_mapPossible[uDistance] = pContact;
-
-			// netfinity: Safe KAD - Calculate the search distance (we want to know all contacts among the 3 closest)
-			CUInt128 uSearchDistance = GetSearchDistance();
-
-			// Verify if the result is closer to the target then the one we just checked.
-			// netfinity: The wider search criteria is in case we hit right on the spot with the first try
-			if (uDistance < uSearchDistance) 
-			{
-				// The top APLPHA_QUERY of results are used to determine if we send a request.
-				if (mapBest.size() < ALPHA_QUERY)
+				// Loop through their responses
+				for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
 				{
-					mapBest[uDistance] = pContact;
-				}
-				else
-				{
-					ContactMap::iterator itContactMapBest = mapBest.end();
-					itContactMapBest--;
-					if (uDistance < itContactMapBest->first)
+					// Get next result
+					CContact* pContact = *itContactList;
+
+					// Calc distance this result is to the target.
+					CUInt128 uDistance(pContact->GetClientID());
+					uDistance.Xor(m_uTarget);
+
+					// Ignore this contact if already know or tried it.
+					if (m_mapPossible.count(uDistance) > 0)
+						continue;
+					if (m_mapTried.count(uDistance) > 0)
+						continue;
+
+					// Add to possible
+					m_mapPossible[uDistance] = pContact;
+
+					// Verify if the result is closer to the target then the one we just checked.
+					if (uDistance < uFromDistance)
 					{
-						// Prevent having more then ALPHA_QUERY within the Best list.
-						mapBest.erase(itContactMapBest);
-						mapBest[uDistance] = pContact;
+						// The top APLPHA_QUERY of results are used to determine if we send a request.
+						bool bTop = false;
+						if (m_mapBest.size() < ALPHA_QUERY)
+						{
+							bTop = true;
+							m_mapBest[uDistance] = pContact;
+						}
+						else
+						{
+							ContactMap::iterator itContactMapBest = m_mapBest.end();
+							itContactMapBest--;
+							if (uDistance < itContactMapBest->first)
+							{
+								// Prevent having more then ALPHA_QUERY within the Best list.
+								m_mapBest.erase(itContactMapBest);
+								m_mapBest[uDistance] = pContact;
+								bTop = true;
+							}
+						}
+
+						if(bTop)
+						{
+							// We determined this contact is a canditate for a request.
+							// Add to the tried list.
+							m_mapTried[uDistance] = pContact;
+							// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
+							// Send request
+							SendFindValue(pContact);
+						}
 					}
 				}
+				// Complete node search, just increase the answers and update the GUI
+				if( m_uType == NODECOMPLETE || m_uType == NODESPECIAL)
+				{
+					m_uAnswers++;
+					theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
+				}
+				break;
 			}
-		}
-		// BEGIN netfinity: Safe KAD - Process the best contacts
-		for (ContactMap::iterator itContactMapBest = mapBest.begin(); itContactMapBest != mapBest.end(); ++itContactMapBest)
-		{
-			// We determined this contact is a canditate for a request.
-			// Add to the tried list.
-			m_mapTried[itContactMapBest->first] = itContactMapBest->second;
-			// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
-			// Send request
-			SendFindValue(itContactMapBest->second);
-		}
-		// END netfinity: Safe KAD - Process the best contacts
-		// Complete node search, just increase the answers and update the GUI
-		if( m_uType == NODECOMPLETE )
-		{
-			m_uAnswers++;
-			theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 		}
 	}
 	catch (...)
@@ -550,22 +386,16 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 		AddDebugLogLine(false, _T("Exception in CSearch::ProcessResponse"));
 	}
 	delete plistResults;
-
-	// netfinity: Do we have all responses, if so start processing them (rarely happens, but who knows)
-	if (m_mapResponded.size() == m_mapTried.size())
-		JumpStart();
 }
 
-// netfinity: Allow storing for any contact, not just the one on top of the list (simplifies coding)
-void CSearch::StorePacket(CContact* pContact)
+void CSearch::StorePacket()
 {
 	ASSERT(!m_mapPossible.empty());
 
 	// This method is currently only called by jumpstart so only use best possible.
-	//ContactMap::const_iterator itContactMap = m_mapPossible.begin();
-	CUInt128 uFromDistance(pContact->GetClientID() /*itContactMap->first*/);
-	uFromDistance.Xor(m_uTarget);
-	CContact* pFromContact = pContact; //itContactMap->second;
+	ContactMap::const_iterator itContactMap = m_mapPossible.begin();
+	CUInt128 uFromDistance(itContactMap->first);
+	CContact* pFromContact = itContactMap->second;
 
 	// Make sure this is a valid Node to store too.
 	// Shouldn't LAN IPs already be filtered?
@@ -593,7 +423,14 @@ void CSearch::StorePacket(CContact* pContact)
 						m_pfileSearchTerms.WriteUInt64(pFile->GetFileSize());
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA2_SEARCH_SOURCE_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_SOURCE_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+						if (pFromContact->GetVersion() >= 6){ /*48b*/
+							CUInt128 uClientID = pFromContact->GetClientID();
+							CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_SOURCE_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), pFromContact->GetUDPKey(), &uClientID);
+						}
+						else {
+							CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_SOURCE_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
+							ASSERT( CKadUDPKey(0) == pFromContact->GetUDPKey() );
+						}
 					}
 					else
 					{
@@ -606,7 +443,7 @@ void CSearch::StorePacket(CContact* pContact)
 					m_pfileSearchTerms.WriteUInt8(1);
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_REQ(File)", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -651,18 +488,26 @@ void CSearch::StorePacket(CContact* pContact)
 						m_pfileSearchTerms.Write(m_pucSearchTermsData, m_uSearchTermsDataSize);
 					}
 				}
+				
+				if (pFromContact->GetVersion() >= 6){ /*48b*/
+					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+						DebugSend("KADEMLIA2_SEARCH_KEY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+					CUInt128 uClientID = pFromContact->GetClientID();
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_KEY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), pFromContact->GetUDPKey(), &uClientID);
 
-				if (pFromContact->GetVersion() >= 3/*47b*/)
+				}
+				else if (pFromContact->GetVersion() >= 3/*47b*/)
 				{
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA2_SEARCH_KEY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_KEY_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_KEY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
+					ASSERT( CKadUDPKey(0) == pFromContact->GetUDPKey() );
 				}
 				else
 				{
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_REQ(KEYWORD)", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -687,7 +532,14 @@ void CSearch::StorePacket(CContact* pContact)
 						m_pfileSearchTerms.WriteUInt64(pFile->GetFileSize());
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA2_SEARCH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_NOTES_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+						if (pFromContact->GetVersion() >= 6){ /*48b*/
+							CUInt128 uClientID = pFromContact->GetClientID();
+							CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), pFromContact->GetUDPKey(), &uClientID);
+						}
+						else {
+							CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA2_SEARCH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
+							ASSERT( CKadUDPKey(0) == pFromContact->GetUDPKey() );
+						}
 					}
 					else
 					{
@@ -700,7 +552,7 @@ void CSearch::StorePacket(CContact* pContact)
 					m_pfileSearchTerms.WriteUInt128(&CKademlia::GetPrefs()->GetKadID());
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_NOTES_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_SEARCH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -737,12 +589,26 @@ void CSearch::StorePacket(CContact* pContact)
 					//3 Firewalled Kad Source.
 					//4 >4GB file HighID Source.
 					//5 >4GB file Firewalled Kad source.
-
+					//6 Firewalled Source with Direct Callback (supports >4GB)
+					
+					bool bDirectCallback = false;
 					TagList listTag;
 					if( theApp.IsFirewalled() )
 					{
-						// We are firewalled, make sure we have a buddy.
-						if( theApp.clientlist->GetBuddy() )
+						bDirectCallback = (Kademlia::CKademlia::IsRunning() && !Kademlia::CUDPFirewallTester::IsFirewalledUDP(true) && Kademlia::CUDPFirewallTester::IsVerified());
+						if (bDirectCallback){
+							// firewalled, but direct udp callback is possible so no need for buddies
+							// We are not firewalled..
+							listTag.push_back(new CKadTagUInt(TAG_SOURCETYPE, 6));
+							listTag.push_back(new CKadTagUInt(TAG_SOURCEPORT, thePrefs.GetPort()));
+							if (!CKademlia::GetPrefs()->GetUseExternKadPort())
+								listTag.push_back(new CKadTagUInt16(TAG_SOURCEUPORT, CKademlia::GetPrefs()->GetInternKadPort()));
+							if (pFromContact->GetVersion() >= 2/*47a*/)
+							{
+								listTag.push_back(new CKadTagUInt(TAG_FILESIZE, pFile->GetFileSize()));
+							}							
+						}
+						else if( theApp.clientlist->GetBuddy() ) // We are firewalled, make sure we have a buddy.
 						{
 							// We send the ID to our buddy so they can do a callback.
 							CUInt128 uBuddyID(true);
@@ -755,6 +621,9 @@ void CSearch::StorePacket(CContact* pContact)
 							listTag.push_back(new CKadTagUInt(TAG_SERVERPORT, theApp.clientlist->GetBuddy()->GetUDPPort()));
 							listTag.push_back(new CKadTagStr(TAG_BUDDYHASH, CStringW(md4str(uBuddyID.GetData()))));
 							listTag.push_back(new CKadTagUInt(TAG_SOURCEPORT, thePrefs.GetPort()));
+							if (!CKademlia::GetPrefs()->GetUseExternKadPort())
+								listTag.push_back(new CKadTagUInt16(TAG_SOURCEUPORT, CKademlia::GetPrefs()->GetInternKadPort()));
+
 							if (pFromContact->GetVersion() >= 2/*47a*/)
 							{
 								listTag.push_back(new CKadTagUInt(TAG_FILESIZE, pFile->GetFileSize()));
@@ -775,22 +644,16 @@ void CSearch::StorePacket(CContact* pContact)
 						else
 							listTag.push_back(new CKadTagUInt(TAG_SOURCETYPE, 1));
 						listTag.push_back(new CKadTagUInt(TAG_SOURCEPORT, thePrefs.GetPort()));
+						if (!CKademlia::GetPrefs()->GetUseExternKadPort())
+							listTag.push_back(new CKadTagUInt16(TAG_SOURCEUPORT, CKademlia::GetPrefs()->GetInternKadPort()));
+
 						if (pFromContact->GetVersion() >= 2/*47a*/)
 						{
 							listTag.push_back(new CKadTagUInt(TAG_FILESIZE, pFile->GetFileSize()));
 						}
 					}
 
-					// Encryption options Tag
-					// 5 Reserved (!)
-					// 1 CryptLayer Required
-					// 1 CryptLayer Requested
-					// 1 CryptLayer Supported
-					const uint8 uSupportsCryptLayer	= thePrefs.IsClientCryptLayerSupported() ? 1 : 0;
-					const uint8 uRequestsCryptLayer	= thePrefs.IsClientCryptLayerRequested() ? 1 : 0;
-					const uint8 uRequiresCryptLayer	= thePrefs.IsClientCryptLayerRequired() ? 1 : 0;
-					const uint8 byCryptOptions = (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
-					listTag.push_back(new CKadTagUInt8(TAG_ENCRYPTION, byCryptOptions));
+					listTag.push_back(new CKadTagUInt8(TAG_ENCRYPTION, CKademlia::GetPrefs()->GetMyConnectOptions(true, true)));
 					
 
 					// Send packet
@@ -859,17 +722,25 @@ void CSearch::StorePacket(CContact* pContact)
 					byIO.Seek(current_pos);
 					
 					// Send packet
-					if (pFromContact->GetVersion() >= 2/*47a*/)
+					if (pFromContact->GetVersion() >= 6){ /*48b*/
+						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+							DebugSend("KADEMLIA2_PUBLISH_KEY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CUInt128 uClientID = pFromContact->GetClientID();
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_KEY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), pFromContact->GetUDPKey(), &uClientID);
+
+					}	
+					else if (pFromContact->GetVersion() >= 2/*47a*/)
 					{
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA2_PUBLISH_KEY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_KEY_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_KEY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
+						ASSERT( CKadUDPKey(0) == pFromContact->GetUDPKey() );
 					}
 					else
 					{
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA_PUBLISH_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
 					}
 				}
 				// Inc total request answers
@@ -907,17 +778,24 @@ void CSearch::StorePacket(CContact* pContact)
 					byIO.WriteTagList(listTag);
 
 					// Send packet
-					if (pFromContact->GetVersion() >= 2/*47a*/)
+					if (pFromContact->GetVersion() >= 6){ /*48b*/
+						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+							DebugSend("KADEMLIA2_PUBLISH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
+						CUInt128 uClientID = pFromContact->GetClientID();
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), pFromContact->GetUDPKey(), &uClientID);
+					}
+					else if (pFromContact->GetVersion() >= 2/*47a*/)
 					{
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA2_PUBLISH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_NOTES_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA2_PUBLISH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
+						ASSERT( CKadUDPKey(0) == pFromContact->GetUDPKey() );
 					}
 					else
 					{
 						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 							DebugSend("KADEMLIA_PUBLISH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_NOTES_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
 					}
 					// Inc total request answers
 					m_uTotalRequestAnswers++;
@@ -953,7 +831,14 @@ void CSearch::StorePacket(CContact* pContact)
 				// Send packet
 				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 					DebugSend("KADEMLIA_FINDBUDDY_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-				CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_FINDBUDDY_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+				if (pFromContact->GetVersion() >= 6){ /*48b*/
+					CUInt128 uClientID = pFromContact->GetClientID();
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_FINDBUDDY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), pFromContact->GetUDPKey(), &uClientID);
+				}
+				else {
+					CKademlia::GetUDPListener()->SendPacket(&m_pfileSearchTerms, KADEMLIA_FINDBUDDY_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
+					ASSERT( CKadUDPKey(0) == pFromContact->GetUDPKey() );
+				}
 				// Inc total request answers
 				m_uAnswers++;
 				// Update search in the GUI
@@ -982,11 +867,29 @@ void CSearch::StorePacket(CContact* pContact)
 				// Send packet
 				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 					DebugSend("KADEMLIA_CALLBACK_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-				CKademlia::GetUDPListener()->SendPacket( &fileIO, KADEMLIA_CALLBACK_REQ, *pFromContact); //->GetIPAddress(), pFromContact->GetUDPPort());
+				if (pFromContact->GetVersion() >= 6){ /*48b*/
+					CUInt128 uClientID = pFromContact->GetClientID();
+					CKademlia::GetUDPListener()->SendPacket( &fileIO, KADEMLIA_CALLBACK_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), pFromContact->GetUDPKey(), &uClientID);
+				}
+				else {
+					CKademlia::GetUDPListener()->SendPacket( &fileIO, KADEMLIA_CALLBACK_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
+					ASSERT( CKadUDPKey(0) == pFromContact->GetUDPKey() );
+				}
 				// Inc total request answers
 				m_uAnswers++;
 				// Update search in the GUI
 				theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
+				break;
+			}
+		case NODESPECIAL:
+			{
+				// we are looking for the IP of a given nodeid, so we just check if we 0 distance and if so, report the
+				// tip to the requester
+				if (uFromDistance == CUInt128((ULONG)0)){
+					pNodeSpecialSearchRequester->KadSearchIPByNodeIDResult(KCSR_SUCCEEDED, ntohl(pFromContact->GetIPAddress()), pFromContact->GetTCPPort());
+					pNodeSpecialSearchRequester = NULL;
+					PrepareToStop();
+				}
 				break;
 			}
 	}
@@ -1023,6 +926,7 @@ void CSearch::ProcessResultFile(const CUInt128 &uAnswer, TagList *plistInfo)
 	uint16 uServerPort = 0;
 	//    uint32 uClientID = 0;
 	uchar ucharBuddyHash[16];
+	md4clr(ucharBuddyHash);
 	CUInt128 uBuddy;
 	uint8 byCryptOptions = 0; // 0 = not supported
 
@@ -1062,6 +966,7 @@ void CSearch::ProcessResultFile(const CUInt128 &uAnswer, TagList *plistInfo)
 		case 3:
 		case 4:
 		case 5:
+		case 6:
 			m_uAnswers++;
 			theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 			theApp.downloadqueue->KademliaSearchFile(m_uSearchID, &uAnswer, &uBuddy, uType, uIP, uTCPPort, uUDPPort, uServerIP, uServerPort, byCryptOptions);
@@ -1095,12 +1000,12 @@ void CSearch::ProcessResultNotes(const CUInt128 &uAnswer, TagList *plistInfo)
 		}
 		else if (!pTag->m_name.Compare(TAG_FILENAME))
 		{
-			pEntry->m_fileName = pTag->GetStr();
+			pEntry->SetFileName(pTag->GetStr());
 			delete pTag;
 		}
 		else if (!pTag->m_name.Compare(TAG_DESCRIPTION))
 		{
-			pEntry->m_listTag.push_front(pTag);
+			pEntry->AddTag(pTag);
 
 			// Test if comment sould be filtered
 			if (!thePrefs.GetCommentFilter().IsEmpty())
@@ -1123,7 +1028,7 @@ void CSearch::ProcessResultNotes(const CUInt128 &uAnswer, TagList *plistInfo)
 			}
 		}
 		else if (!pTag->m_name.Compare(TAG_FILERATING))
-			pEntry->m_listTag.push_front(pTag);
+			pEntry->AddTag(pTag);
 		else
 			delete pTag;
 	}
@@ -1191,6 +1096,7 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 	CString sCodec;
 	uint32 uBitrate = 0;
 	uint32 uAvailability = 0;
+	uint32 uPublishInfo = 0;
 	// Flag that is set if we want this keyword.
 	bool bFileName = false;
 	bool bFileSize = false;
@@ -1244,6 +1150,16 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 			if( uAvailability > 65500 )
 				uAvailability = 0;
 		}
+		else if (!pTag->m_name.Compare(TAG_PUBLISHINFO))
+		{
+			uPublishInfo = (uint32)pTag->GetInt();
+#ifdef _DEBUG
+			uint32 byDifferentNames = uPublishInfo && 0xFF000000;
+			uint32 byPublishersKnown = uPublishInfo && 0x00FF0000;
+			uint32 wTrustValue = uPublishInfo && 0x0000FFFF;
+			DebugLog(_T("Received PublishInfoTag: %u different names, %u Publishers, %.2f Trustvalue"), byDifferentNames, byPublishersKnown, (float)wTrustValue / 100.0f);  
+#endif
+		}
 		delete pTag;
 	}
 	delete plistInfo;
@@ -1278,7 +1194,7 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 	theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 	// Send we keyword to searchlist to be processed.
 	// This method is still legacy from the multithreaded Kad, maybe this can be changed for better handling.
-	theApp.searchlist->KademliaSearchKeyword(m_uSearchID, &uAnswer, sName, uSize, sType, 8,
+	theApp.searchlist->KademliaSearchKeyword(m_uSearchID, &uAnswer, sName, uSize, sType, 9,
 		    2, TAG_FILEFORMAT, (LPCTSTR)sFormat,
 		    2, TAG_MEDIA_ARTIST, (LPCTSTR)sArtist,
 		    2, TAG_MEDIA_ALBUM, (LPCTSTR)sAlbum,
@@ -1286,7 +1202,8 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 		    3, TAG_MEDIA_LENGTH, uLength,
 		    3, TAG_MEDIA_BITRATE, uBitrate,
 		    2, TAG_MEDIA_CODEC, (LPCTSTR)sCodec,
-		    3, TAG_SOURCES, uAvailability);
+		    3, TAG_SOURCES, uAvailability,
+			3, TAG_PUBLISHINFO, uPublishInfo);
 }
 
 void CSearch::SendFindValue(CContact* pContact)
@@ -1303,6 +1220,8 @@ void CSearch::SendFindValue(CContact* pContact)
 		{
 			case NODE:
 			case NODECOMPLETE:
+			case NODESPECIAL:
+			case NODEFWCHECKUDP:
 				fileIO.WriteUInt8(KADEMLIA_FIND_NODE);
 				break;
 			case FILE:
@@ -1332,7 +1251,14 @@ void CSearch::SendFindValue(CContact* pContact)
 
 		if (pContact->GetVersion() >= 2/*47a*/)
 		{
-			CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA2_REQ, *pContact); //->GetIPAddress(), pContact->GetUDPPort());
+			if (pContact->GetVersion() >= 6){ /*48b*/
+				CUInt128 uClientID = pContact->GetClientID();
+				CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA2_REQ, pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetUDPKey(), &uClientID);
+			}
+			else {
+				CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA2_REQ, pContact->GetIPAddress(), pContact->GetUDPPort(), 0, NULL);
+				ASSERT( CKadUDPKey(0) == pContact->GetUDPKey() );
+			}
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 			{
 				switch(m_uType)
@@ -1342,6 +1268,12 @@ void CSearch::SendFindValue(CContact* pContact)
 						break;
 					case NODECOMPLETE:
 						DebugSend("KADEMLIA2_REQ(NODECOMPLETE)", pContact->GetIPAddress(), pContact->GetUDPPort());
+						break;
+					case NODESPECIAL:
+						DebugSend("KADEMLIA2_REQ(NODESPECIAL)", pContact->GetIPAddress(), pContact->GetUDPPort());
+						break;
+					case NODEFWCHECKUDP:
+						DebugSend("KADEMLIA2_REQ(NODEFWCHECKUDP)", pContact->GetIPAddress(), pContact->GetUDPPort());
 						break;
 					case FILE:
 						DebugSend("KADEMLIA2_REQ(FILE)", pContact->GetIPAddress(), pContact->GetUDPPort());
@@ -1368,7 +1300,7 @@ void CSearch::SendFindValue(CContact* pContact)
 		}
 		else
 		{
-			CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA_REQ, *pContact); //->GetIPAddress(), pContact->GetUDPPort());
+			CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA_REQ, pContact->GetIPAddress(), pContact->GetUDPPort(), 0, NULL);
 			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 			{
 				switch(m_uType)
@@ -1378,6 +1310,12 @@ void CSearch::SendFindValue(CContact* pContact)
 						break;
 					case NODECOMPLETE:
 						DebugSend("KADEMLIA_REQ(NODECOMPLETE)", pContact->GetIPAddress(), pContact->GetUDPPort());
+						break;
+					case NODESPECIAL:
+						DebugSend("KADEMLIA_REQ(NODECOMPLETE)", pContact->GetIPAddress(), pContact->GetUDPPort());
+						break;
+					case NODEFWCHECKUDP:
+						DebugSend("KADEMLIA_REQ(NODEFWCHECKUDP)", pContact->GetIPAddress(), pContact->GetUDPPort());
 						break;
 					case FILE:
 						DebugSend("KADEMLIA_REQ(FILE)", pContact->GetIPAddress(), pContact->GetUDPPort());
@@ -1432,7 +1370,7 @@ static int GetMetaDataWords(CStringArray& rastrWords, const CString& rstrData)
 		rastrWords.Add(strWord);
 		strWord = rstrData.Tokenize(_aszInvKadKeywordChars, iPos);
 	}
-	return (int) rastrWords.GetSize();
+	return (int) rastrWords.GetSize(); // MOPRH
 }
 
 static bool IsRedundantMetaData(const CStringArray& rastrFileNameWords, const CString& rstrMetaData)
@@ -1480,6 +1418,7 @@ void CSearch::PreparePacketForTags(CByteIO *byIO, CKnownFile *pFile)
 			listTag.push_back(new CKadTagStr(TAG_FILENAME, pFile->GetFileName()));
 			if (pFile->GetFileSize() > OLD_MAX_EMULE_FILE_SIZE)
 			{
+				// TODO: As soon as we drop Kad1 support, we should switch to Int64 tags (we could do now already for kad2 nodes only but no advantage in that)
 				byte byValue[8];
 				*((uint64*)byValue) = pFile->GetFileSize();
 				listTag.push_back(new CKadTagBsob(TAG_FILESIZE, byValue, sizeof(byValue)));
@@ -1595,8 +1534,7 @@ uint32 CSearch::GetNodeLoad() const
 	return m_uTotalLoad/m_uTotalLoadResponses;
 }
 
-// netfinity: Moved inline for performance reasons
-/*uint32 CSearch::GetSearchID() const
+uint32 CSearch::GetSearchID() const
 {
 	return m_uSearchID;
 }
@@ -1611,15 +1549,15 @@ void CSearch::SetSearchTypes( uint32 uVal )
 void CSearch::SetTargetID( CUInt128 uVal )
 {
 	m_uTarget = uVal;
-}*/
+}
 uint32 CSearch::GetAnswers() const
 {
 	if(m_listFileIDs.size() == 0)
 		return m_uAnswers;
 	// If we sent more then one packet per node, we have to average the answers for the real count.
-	return (uint32) m_uAnswers/((m_listFileIDs.size()+49)/50);
+	return (uint32) m_uAnswers/((m_listFileIDs.size()+49)/50); // MOPRH
 }
-/*uint32 CSearch::GetKadPacketSent() const
+uint32 CSearch::GetKadPacketSent() const
 {
 	return m_uKadPacketSent;
 }
@@ -1651,7 +1589,7 @@ uint32 CSearch::GetNodeLoadResonse() const
 uint32 CSearch::GetNodeLoadTotal() const
 {
 	return m_uTotalLoad;
-}*/
+}
 void CSearch::UpdateNodeLoad( uint8 uLoad )
 {
 	// Since all nodes do not return a load value, keep track of total responses and total load.
@@ -1665,54 +1603,3 @@ void CSearch::SetSearchTermData( uint32 uSearchTermDataSize, LPBYTE pucSearchTer
 	m_pucSearchTermsData = new BYTE[uSearchTermDataSize];
 	memcpy(m_pucSearchTermsData, pucSearchTermsData, uSearchTermDataSize);
 }
-
-// BEGIN netfinity: Calculate the search distance (we want to know all contacts among the 3 closest)
-CUInt128 CSearch::GetSearchDistance()
-{
-	CUInt128 uSearchDistance;
-	int iCheckCount = 0;
-	if (time(NULL) - m_tCreated < 3)
-	{
-		// During initial phase we have to look for the closest possible ones
-		for (ContactMap::const_iterator itPossibleMap = m_mapPossible.begin(); itPossibleMap != m_mapPossible.end(); ++itPossibleMap)
-		{
-			if (itPossibleMap->first > uSearchDistance)
-				uSearchDistance = itPossibleMap->first;
-			++iCheckCount;
-			if (iCheckCount >= ALPHA_QUERY)
-				break;
-		}
-	}
-	else
-	{
-		iCheckCount = 0;
-		for (ContactMap::const_iterator itUsefulMap = m_mapUseful.begin(); itUsefulMap != m_mapUseful.end(); ++itUsefulMap)
-		{
-			// Search among the best useful nodes
-			if (itUsefulMap->first > uSearchDistance )
-				uSearchDistance = itUsefulMap->first;
-			++iCheckCount;
-			// Stop if limit is reached or the search tolerance is exceeded
-			if (iCheckCount >= ALPHA_QUERY || uSearchDistance.Get32BitChunk(0) > SEARCHTOLERANCE)
-				break;
-		}
-		if (iCheckCount < ALPHA_QUERY)
-		{
-			iCheckCount = 0;
-			for (ContactMap::const_iterator itTriedMap = m_mapTried.begin(); itTriedMap != m_mapTried.end(); ++itTriedMap)
-			{
-				// Search among the best tried
-				if (itTriedMap->first > uSearchDistance)
-					uSearchDistance = itTriedMap->first;
-				++iCheckCount;
-				// Stop if limit is reached or the search tolerance is exceeded
-				if (iCheckCount >= (ALPHA_QUERY + 2) || uSearchDistance.Get32BitChunk(0) > SEARCHTOLERANCE)
-					break;
-			}
-		}
-	}
-	return uSearchDistance;
-}
-// END netfinity: Calculate the search distance (we want to know all contacts among the 3 closest)
-
-

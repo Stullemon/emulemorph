@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -158,6 +158,8 @@ protected:
 #ifdef USE_OFFICIAL_UPNP
 	bool			m_bConnectRequestDelayedForUPnP;
 #endif
+	bool			m_bKadSuspendDisconnect;
+	bool			m_bEd2kSuspendDisconnect;
 	//MORPH START - Added by SiRoB, Version check
 	char			m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
 	//MORPH END   - Added by SiRoB, Version check
@@ -236,6 +238,7 @@ protected:
 	afx_msg LRESULT OnKickIdle(UINT nWhy, long lIdleCount);
 	afx_msg void OnShowWindow( BOOL bShow, UINT nStatus );
 	afx_msg BOOL OnChevronPushed(UINT id, NMHDR *pnm, LRESULT *pResult);
+	afx_msg LRESULT OnPowerBroadcast(WPARAM wParam, LPARAM lParam);
 
 	// quick-speed changer -- based on xrmb
 	afx_msg void QuickSpeedUpload(UINT nID);
@@ -338,9 +341,6 @@ public:
 	afx_msg void OnDrawClipboard();
 	afx_msg void OnChangeCbChain(HWND hWndRemove, HWND hWndAfter);
 	// MORPH END leuk_he clipboard chain instead of timer
-	LRESULT OnPowerBroadcast(WPARAM wParam, LPARAM lParam)	;   // leuk_he reconnect on wakeup
-	
-
 };
 
 

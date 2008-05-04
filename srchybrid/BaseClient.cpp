@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -45,6 +45,8 @@
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "Kademlia/Kademlia/Search.h"
 #include "Kademlia/Kademlia/SearchManager.h"
+#include "Kademlia/Kademlia/UDPFirewallTester.h"
+#include "Kademlia/routing/RoutingZone.h"
 #include "Kademlia/Utils/UInt128.h"
 #include "Kademlia/Net/KademliaUDPListener.h"
 #include "Kademlia/Kademlia/Prefs.h"
@@ -59,6 +61,7 @@
 #include "ClientUDPSocket.h"
 #include "shahashset.h"
 #include "Log.h"
+#include "CaptchaGenerator.h"
 #include "libald.h" //MORPH - Added by Stulle, AppleJuice Detection [Xman]
 
 #ifdef _DEBUG
@@ -67,6 +70,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+#define URLINDICATOR	_T("http:|www.|.de |.net |.com |.org |.to |.tk |.cc |.fr |ftp:|ed2k:|https:|ftp.|.info|.biz|.uk|.eu|.es|.tv|.cn|.tw|.ws|.nu|.jp")
 
 IMPLEMENT_DYNAMIC(CClientException, CException)
 IMPLEMENT_DYNAMIC(CUpDownClient, CObject)
@@ -295,6 +299,11 @@ void CUpDownClient::Init()
 	m_fSupportsCryptLayer = 0;
 	m_fRequiresCryptLayer = 0;
 	m_fSupportsSourceEx2 = 0;
+	m_fSupportsCaptcha = 0;
+	m_fDirectUDPCallback = 0;
+	m_cCaptchasSent = 0;
+	m_nChatCaptchaState = CA_NONE;
+	m_dwDirectCallbackTimeout = 0;
 
 	m_fFailedDownload = 0; //MORPH - Added by SiRoB, Fix Connection Collision
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
@@ -329,8 +338,13 @@ CUpDownClient::~CUpDownClient(){
 		m_fAICHRequested = FALSE;
 		CAICHHashSet::ClientAICHRequestFailed(this);
 	}
-	if (m_Friend)
+
+	if (GetFriend() != NULL)
+	{
+		if (GetFriend()->IsTryingToConnect())
+			GetFriend()->UpdateFriendConnectionState(FCR_DELETED);
         m_Friend->SetLinkedClient(NULL);
+	}
 
 	theApp.clientlist->RemoveClient(this, _T("Destructing client object"));
 
@@ -547,6 +561,8 @@ void CUpDownClient::ClearHelloProperties()
 	m_fSupportsCryptLayer = 0;
 	m_fRequiresCryptLayer = 0;
 	m_fSupportsSourceEx2 = 0;
+	m_fSupportsCaptcha = 0;
+	m_fDirectUDPCallback = 0;
 }
 
 bool CUpDownClient::ProcessHelloPacket(const uchar* pachPacket, uint32 nSize)
@@ -828,7 +844,9 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 
 			case CT_EMULE_MISCOPTIONS2:
-				//	21 Reserved
+				//	19 Reserved
+				//   1 Direct UDP Callback supported and available
+				//	 1 Supports ChatCaptchas
 				//	 1 Supports SourceExachnge2 Packets, ignores SX1 Packet Version
 				//	 1 Requires CryptLayer
 				//	 1 Requests CryptLayer
@@ -836,8 +854,10 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				//	 1 Reserved (ModBit)
 				//   1 Ext Multipacket (Hash+Size instead of Hash)
 				//   1 Large Files (includes support for 64bit tags)
-				//   4 Kad Version
+				//   4 Kad Version - will go up to version 15 only (may need to add another field at some point in the future)
 				if (temptag.IsInt()) {
+					m_fDirectUDPCallback	= (temptag.GetInt() >>  12) & 0x01;
+					m_fSupportsCaptcha	    = (temptag.GetInt() >>  11) & 0x01;
 					m_fSupportsSourceEx2	= (temptag.GetInt() >>  10) & 0x01;
 					m_fRequiresCryptLayer	= (temptag.GetInt() >>  9) & 0x01;
 					m_fRequestsCryptLayer	= (temptag.GetInt() >>  8) & 0x01;
@@ -848,7 +868,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_byKadVersion			= (uint8)((temptag.GetInt() >>  0) & 0x0f);
 					dwEmuleTags |= 8;
 					if (bDbgInfo)
-						m_strHelloInfo.AppendFormat(_T("\n  KadVersion=%u, LargeFiles=%u ExtMultiPacket=%u CryptLayerSupport=%u CryptLayerRequest=%u CryptLayerRequires=%u m_fSupportsSourceEx2=%u"), m_byKadVersion, m_fSupportsLargeFiles, m_fExtMultiPacket, m_fSupportsCryptLayer, m_fRequestsCryptLayer, m_fRequiresCryptLayer, m_fSupportsSourceEx2);
+						m_strHelloInfo.AppendFormat(_T("\n  KadVersion=%u, LargeFiles=%u ExtMultiPacket=%u CryptLayerSupport=%u CryptLayerRequest=%u CryptLayerRequires=%u SupportsSourceEx2=%u SupportsCaptcha=%u DirectUDPCallback=%u"), m_byKadVersion, m_fSupportsLargeFiles, m_fExtMultiPacket, m_fSupportsCryptLayer, m_fRequestsCryptLayer, m_fRequiresCryptLayer, m_fSupportsSourceEx2, m_fSupportsCaptcha, m_fDirectUDPCallback);
 					m_fRequestsCryptLayer &= m_fSupportsCryptLayer;
 					m_fRequiresCryptLayer &= m_fRequestsCryptLayer;
 
@@ -1005,7 +1025,33 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		Ban();
 	}
 
+
+	if (GetFriend() != NULL && GetFriend()->HasUserhash() && md4cmp(GetFriend()->m_abyUserhash, m_achUserHash) != 0)
+	{
+		// this isnt our friend anymore and it will be removed/replaced, tell our friendobject about it
+		if (GetFriend()->IsTryingToConnect())
+			GetFriend()->UpdateFriendConnectionState(FCR_USERHASHFAILED); // this will remove our linked friend
+		else
+			GetFriend()->SetLinkedClient(NULL);
+	}
+	// do not replace friendobjects which have no userhash, but the fitting ip with another friend object with the 
+	// fitting userhash (both objects would fit to this instance), as this could lead to unwanted results
+	if (GetFriend() == NULL || GetFriend()->HasUserhash() || GetFriend()->m_dwLastUsedIP != GetConnectIP()
+		|| GetFriend()->m_nLastUsedPort != GetUserPort())
+	{
 	// MORPH START  always call setLinked_client
+//	/*  original officila code:always call setLinke_client
+	if ((m_Friend = theApp.friendlist->SearchFriend(m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){
+		// Link the friend to that client
+		m_Friend->SetLinkedClient(this);
+	}
+	else{
+		// avoid that an unwanted client instance keeps a friend slot
+		SetFriendSlot(false);
+	}
+//	*/
+	// TODO: Is this fix/ change still right?
+	/*
 	CFriend*	new_friend ;
     if ((new_friend = theApp.friendlist->SearchFriend(m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){
 		// Link the friend to that client
@@ -1018,17 +1064,14 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 		if (m_Friend) m_Friend->SetLinkedClient(NULL); // morph, does this help agianst chrashing due to friend slots?
 		m_Friend=NULL;//is newfriend
 	}
-/*  original officila code:always call setLinke_client
-	if ((m_Friend = theApp.friendlist->SearchFriend(m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){
-		// Link the friend to that client
-		m_Friend->SetLinkedClient(this);
+	*/
+	// MORPH END  always call setLinke_client
 	}
 	else{
-		// avoid that an unwanted client instance keeps a friend slot
-		SetFriendSlot(false);
+		// however, copy over our userhash in this case
+		md4cpy(GetFriend()->m_abyUserhash, m_achUserHash);
 	}
-*/
-	// MORPH END  always call setLinke_client
+
 
 	// check for known major gpl breaker
 	CString strBuffer = m_pszUsername;
@@ -1534,7 +1577,14 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	uint32 kadUDPPort = 0;
 	if(Kademlia::CKademlia::IsConnected())
 	{
-		kadUDPPort = thePrefs.GetUDPPort();
+		if (Kademlia::CKademlia::GetPrefs()->GetExternalKadPort() != 0 
+			&& Kademlia::CKademlia::GetPrefs()->GetUseExternKadPort()
+			&& Kademlia::CUDPFirewallTester::IsVerified())
+		{
+			kadUDPPort = Kademlia::CKademlia::GetPrefs()->GetExternalKadPort();
+		}
+		else
+			kadUDPPort = Kademlia::CKademlia::GetPrefs()->GetInternKadPort();
 	}
 	CTag tagUdpPorts(CT_EMULE_UDPPORTS, 
 				((uint32)kadUDPPort			   << 16) |
@@ -1596,9 +1646,15 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	const UINT uRequestsCryptLayer	= thePrefs.IsClientCryptLayerRequested() ? 1 : 0;
 	const UINT uRequiresCryptLayer	= thePrefs.IsClientCryptLayerRequired() ? 1 : 0;
 	const UINT uSupportsSourceEx2	= 1;
+	const UINT uSupportsCaptcha		= 1;
+	// direct callback is only possible if connected to kad, tcp firewalled and verified UDP open (for example on a full cone NAT)
+	const UINT uDirectUDPCallback	= (Kademlia::CKademlia::IsRunning() && Kademlia::CKademlia::IsFirewalled()
+		&& !Kademlia::CUDPFirewallTester::IsFirewalledUDP(true) && Kademlia::CUDPFirewallTester::IsVerified()) ? 1 : 0;
 
 	CTag tagMisOptions2(CT_EMULE_MISCOPTIONS2, 
 //				(RESERVED				     ) 
+				(uDirectUDPCallback		<< 12) |
+				(uSupportsCaptcha		<< 11) |
 				(uSupportsSourceEx2		<< 10) |
 				(uRequiresCryptLayer	<<  9) |
 				(uRequestsCryptLayer	<<  8) |
@@ -1698,6 +1754,7 @@ void CUpDownClient::ProcessMuleCommentPacket(const uchar* pachPacket, uint32 nSi
 					{
 						strComment.Empty();
 						uRating = 0;
+						SetSpammer(true);
 						break;
 					}
 					strFilter = thePrefs.GetCommentFilter().Tokenize(_T("|"), iPos);
@@ -1717,10 +1774,27 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 {
 	ASSERT( theApp.clientlist->IsValidClient(this) );
 
+	// was this a direct callback?
+	if (m_dwDirectCallbackTimeout != 0){
+		theApp.clientlist->RemoveDirectCallback(this);
+		m_dwDirectCallbackTimeout = 0;
+		// TODO LOGREMOVE
+		DebugLog(_T("Direct Callback failed - %s"), DbgGetClientInfo());
+	}
+	
+	if (GetKadState() == KS_QUEUED_FWCHECK_UDP)
+		Kademlia::CUDPFirewallTester::SetUDPFWCheckResult(false, true, ntohl(GetConnectIP()), 0); // inform the tester that this test was cancelled
+	else if (GetKadState() == KS_FWCHECK_UDP)
+		Kademlia::CUDPFirewallTester::SetUDPFWCheckResult(false, false, ntohl(GetConnectIP()), 0); // inform the tester that this test has failed
 	//If this is a KAD client object, just delete it!
 	SetKadState(KS_NONE);
 	
-	if (GetUploadState() == US_UPLOADING || GetUploadState() == US_CONNECTING || GetUploadState() == US_BANNED) //MORPH - Changed by SiRoB
+	//MORPH START - Changed by SiRoB
+	/*
+    if (GetUploadState() == US_UPLOADING || GetUploadState() == US_CONNECTING)
+	*/
+	if (GetUploadState() == US_UPLOADING || GetUploadState() == US_CONNECTING || GetUploadState() == US_BANNED)
+	//MORPH END   - Changed by SiRoB
 	{
 		//if (thePrefs.GetLogUlDlEvents() && GetUploadState()==US_UPLOADING && m_fSentOutOfPartReqs==0 && !theApp.uploadqueue->IsOnUploadQueue(this))
 		//	DebugLog(_T("Disconnected client removed from upload queue and waiting list: %s"), DbgGetClientInfo());
@@ -1840,7 +1914,10 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 
 	if (GetChatState() != MS_NONE){
 		bDelete = false;
-		theApp.emuledlg->chatwnd->chatselector.ConnectingResult(this,false);
+		if (GetFriend() != NULL && GetFriend()->IsTryingToConnect())
+			GetFriend()->UpdateFriendConnectionState(FCR_DISCONNECTED); // for friends any connectionupdate is handled in the friend class
+		else
+			theApp.emuledlg->chatwnd->chatselector.ConnectingResult(this,false); // other clients update directly
 	}
 	
 	if (!bFromSocket && socket){
@@ -1904,7 +1981,8 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 	if (socketnotinitiated) {
 		//MORPH - Changed by SiRoB, Fix connection collision 
 		/*
-		if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected())
+		//TODO: sanitize check if we are currently trying to connect already
+		if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon && !(socket && socket->IsConnected()))
 		*/
 		if (theApp.listensocket->TooManySockets() && !bIgnoreMaxCon)
 		{
@@ -1970,10 +2048,12 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 
 		if( GetKadState() == KS_QUEUED_FWCHECK )
 			SetKadState(KS_CONNECTING_FWCHECK);
+	else if (GetKadState() == KS_QUEUED_FWCHECK_UDP)
+		SetKadState(KS_FWCHECK_UDP);
 
 		if ( HasLowID() )
 		{
-			if(!theApp.DoCallback(this))
+		if(!theApp.DoCallback(this)) // lowid2lowid check used for the whole function, don't remove
 			{
 				//We cannot do a callback!
 				if (GetDownloadState() == DS_CONNECTING)
@@ -1999,7 +2079,8 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 			//If ANYTHING changes with the "if(!theApp.DoCallback(this))" above that will let you fall through 
 			//with the condition that the source is firewalled and we are firewalled, we must
 			//recheck it before the this check..
-			if( HasValidBuddyID() && !GetBuddyIP() && !GetBuddyPort() && !theApp.serverconnect->IsLocalServer(GetServerIP(), GetServerPort()))
+		if( HasValidBuddyID() && !GetBuddyIP() && !GetBuddyPort() && !theApp.serverconnect->IsLocalServer(GetServerIP(), GetServerPort())
+			&& !(SupportsDirectUDPCallback() && thePrefs.GetUDPPort() != 0))
 			{
 				//This is a Kad firewalled source that we want to do a special callback because it has no buddyIP or buddyPort.
 				if( Kademlia::CKademlia::IsConnected() )
@@ -2014,6 +2095,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 				}
 			}
 		}
+
 		//MORPH - Fix connection collision 
 		/*
 		if (!socket || !socket->IsConnected())
@@ -2034,16 +2116,46 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 		}
 		//MORPH - Fix connection collision 
 		/*
-		else {
+		else
+		{
 			if (CheckHandshakeFinished())
 				ConnectionEstablished();
 			else
 				DEBUG_ONLY( DebugLogWarning( _T("TryToConnect found connected socket, but without Handshake finished - %s"), DbgGetClientInfo()) );
 		
 			return true;
+		}
 		*/
-		// MOD Note: Do not change this part - Merkur
-		if (HasLowID())
+	
+		if (HasLowID() && SupportsDirectUDPCallback() && thePrefs.GetUDPPort() != 0 && GetConnectIP() != 0) // LOWID with DirectCallback
+		{
+			// a direct callback is possible - since no other parties are involved and only one additional packet overhead 
+			// is used we basically handle it like a normal connectiontry, no restrictions apply
+			// we already check above with !theApp.DoCallback(this) if any callback is possible at all
+			m_dwDirectCallbackTimeout = ::GetTickCount() + SEC2MS(45);
+			theApp.clientlist->AddDirectCallbackClient(this);
+			// TODO LOGREMOVE
+			DebugLog(_T("Direct Callback on port %u to client %s (%s) "), GetKadPort(), DbgGetClientInfo(), md4str(GetUserHash()));
+		
+			CSafeMemFile data;
+			data.WriteUInt16(thePrefs.GetPort()); // needs to know our port
+			data.WriteHash16(thePrefs.GetUserHash()); // and userhash
+			// our connection settings
+			const uint8 uSupportsCryptLayer	= thePrefs.IsClientCryptLayerSupported() ? 1 : 0;
+			const uint8 uRequestsCryptLayer	= thePrefs.IsClientCryptLayerRequested() ? 1 : 0;
+			const uint8 uRequiresCryptLayer	= thePrefs.IsClientCryptLayerRequired() ? 1 : 0;
+			const uint8 uDirectUDPCallback	= 0;
+			const uint8 byCryptOptions = (uDirectUDPCallback << 3) | (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
+			data.WriteUInt8(byCryptOptions);
+			if (thePrefs.GetDebugClientUDPLevel() > 0)
+				DebugSend("OP_DIRECTCALLBACKREQ", this);
+			Packet* packet = new Packet(&data, OP_EMULEPROT);
+			packet->opcode = OP_DIRECTCALLBACKREQ;
+			theStats.AddUpDataOverheadOther(packet->size);
+			theApp.clientudp->SendPacket(packet, GetConnectIP(), GetKadPort(), ShouldReceiveCryptUDPPackets(), GetUserHash(), false, 0);
+
+		} // MOD Note: Do not change this part - Merkur
+		else if (HasLowID()) // LOWID
 		{
 			if (GetDownloadState() == DS_CONNECTING)
 				SetDownloadState(DS_WAITCALLBACK);
@@ -2143,7 +2255,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 			}
 		}
 		// MOD Note - end
-		else
+	else // HIGHID
 		{
 			if (!Connect())
 				return false; // client was deleted!
@@ -2190,6 +2302,14 @@ void CUpDownClient::ConnectionEstablished()
 	if (theApp.GetPublicIP() == 0 && theApp.IsConnected() && m_fPeerCache)
 		SendPublicIPRequest();
 
+	// was this a direct callback?
+	if (m_dwDirectCallbackTimeout != 0){
+		theApp.clientlist->RemoveDirectCallback(this);
+		m_dwDirectCallbackTimeout = 0;
+		// TODO LOGREMOVE
+		DebugLog(_T("Direct Callback succeeded, connection established - %s"), DbgGetClientInfo());
+	}
+
 	switch(GetKadState())
 	{
 		case KS_CONNECTING_FWCHECK:
@@ -2199,10 +2319,21 @@ void CUpDownClient::ConnectionEstablished()
 		case KS_INCOMING_BUDDY:
 			SetKadState(KS_CONNECTED_BUDDY);
 			break;
+		case KS_FWCHECK_UDP:
+			SendFirewallCheckUDPRequest();
+			break;
 	}
 
 	if (GetChatState() == MS_CONNECTING || GetChatState() == MS_CHATTING)
-		theApp.emuledlg->chatwnd->chatselector.ConnectingResult(this,true);
+	{
+		if (GetFriend() != NULL && GetFriend()->IsTryingToConnect()){
+			GetFriend()->UpdateFriendConnectionState(FCR_ESTABLISHED); // for friends any connectionupdate is handled in the friend class
+			if (credits != NULL && credits->GetCurrentIdentState(GetConnectIP()) == IS_IDFAILED)
+				GetFriend()->UpdateFriendConnectionState(FCR_SECUREIDENTFAILED);
+		}
+		else
+			theApp.emuledlg->chatwnd->chatselector.ConnectingResult(this, true); // other clients update directly
+	}
 
 	switch(GetDownloadState())
 	{
@@ -2709,9 +2840,15 @@ void CUpDownClient::ProcessSignaturePacket(const uchar* pachPacket, uint32 nSize
 		// result is saved in function abouve
 		//if (thePrefs.GetLogSecureIdent())
 		//	AddDebugLogLine(false, _T("'%s' has passed the secure identification, V2 State: %i"), GetUserName(), byChaIPKind);
+
+		// inform our friendobject if needed
+		if (GetFriend() != NULL && GetFriend()->IsTryingToConnect())
+			GetFriend()->UpdateFriendConnectionState(FCR_USERHASHVERIFIED);
 	}
 	else
 	{
+		if (GetFriend() != NULL && GetFriend()->IsTryingToConnect())
+			GetFriend()->UpdateFriendConnectionState(FCR_SECUREIDENTFAILED);
 		if (thePrefs.GetLogSecureIdent())
 			AddDebugLogLine(false, _T("'%s' has failed the secure identification, V2 State: %i"), GetUserName(), byChaIPKind);
 	}
@@ -2937,7 +3074,7 @@ void CUpDownClient::ProcessPreviewAnswer(const uchar* pachPacket, uint32 nSize)
 // !if the functions returns false that client object was deleted because the connection try failed and the object wasn't needed anymore.
 bool CUpDownClient::SafeSendPacket(Packet* packet){
 	if (socket && socket->IsConnected()){
-		socket->SendPacket(packet);
+		socket->SendPacket(packet, true);
 		return true;
 	}
 	else{
@@ -3477,6 +3614,336 @@ bool  CUpDownClient::IsObfuscatedConnectionEstablished() const {
 bool CUpDownClient::ShouldReceiveCryptUDPPackets() const {
 	return (thePrefs.IsClientCryptLayerSupported() && SupportsCryptLayer() && theApp.GetPublicIP() != 0
 		&& HasValidHash() && (thePrefs.IsClientCryptLayerRequested() || RequestsCryptLayer()) );
+}
+
+void CUpDownClient::ProcessChatMessage(CSafeMemFile* data, uint32 nLength)
+{
+	//filter me?
+	//MORPH START - Changed by SiRoB, originaly in ChatSelector::IsSpam(), Added by IceCream, third fixed criteria: leechers who try to afraid other morph/lovelave/blackrat users (NOS, Darkmule ...)
+	/*
+	if ( (thePrefs.MsgOnlyFriends() && !IsFriend()) || (thePrefs.MsgOnlySecure() && GetUserName()==NULL) )
+	*/
+	if ( (thePrefs.MsgOnlyFriends() && !IsFriend()) || (thePrefs.MsgOnlySecure() && GetUserName()==NULL) || (thePrefs.GetEnableAntiLeecher() && (IsLeecher() || TestLeecher())))
+	//MORPH END - Changed by SiRoB, originaly in ChatSelector::IsSpam(), Added by IceCream, third fixed criteria: leechers who try to afraid other morph/lovelave/blackrat users (NOS, Darkmule ...)
+	{
+		if (!GetMessageFiltered()){
+			if (thePrefs.GetVerbose())
+				//MORPH START - Changed by SiRoB, Just Add client soft version
+				/*
+				AddDebugLogLine(false,_T("Filtered Message from '%s' (IP:%s)"), GetUserName(), ipstr(GetConnectIP()));
+				*/
+				AddDebugLogLine(false,_T("Filtered Message from '%s' (IP:%s) (%s)"), GetUserName(), ipstr(GetConnectIP()),GetClientSoftVer());
+				//MORPH END   - Changed by SiRoB, Just Add client soft version
+				AddDebugLogLine(false,_T("Filtered Message from '%s' (IP:%s)"), GetUserName(), ipstr(GetConnectIP()));
+		}
+		SetMessageFiltered(true);
+		return;
+	}
+
+	CString strMessage(data->ReadString(GetUnicodeSupport()!=utf8strNone, nLength));
+	if (thePrefs.GetDebugClientTCPLevel() > 0)
+		Debug(_T("  %s\n"), strMessage);
+	
+	// default filtering
+	CString strMessageCheck(strMessage);
+	strMessageCheck.MakeLower();
+	CString resToken;
+	int curPos = 0;
+	resToken = thePrefs.GetMessageFilter().Tokenize(_T("|"), curPos);
+	while (!resToken.IsEmpty())
+	{
+		resToken.Trim();
+		if (strMessageCheck.Find(resToken.MakeLower()) > -1){
+			if ( thePrefs.IsAdvSpamfilterEnabled() && !IsFriend() && GetMessagesSent() == 0 ){
+				SetSpammer(true);
+				theApp.emuledlg->chatwnd->chatselector.EndSession(this);
+			}
+			return;
+		}
+		resToken = thePrefs.GetMessageFilter().Tokenize(_T("|"), curPos);
+	}
+
+	// advanced spamfilter check
+	if (thePrefs.IsChatCaptchaEnabled() && !IsFriend()) {
+		// captcha checks outrank any further checks - if the captcha has been solved, we assume its no spam
+		// first check if we need to sent a captcha request to this client
+		if (GetMessagesSent() == 0 && GetMessagesReceived() == 0 && GetChatCaptchaState() != CA_CAPTCHASOLVED)
+		{
+			// we have never sent a message to this client, and no message from him has ever passed our filters
+			if (GetChatCaptchaState() != CA_CHALLENGESENT)
+			{
+				// we also aren't currently expecting a cpatcha response
+				if (m_fSupportsCaptcha != NULL)
+				{
+					// and he supports captcha, so send him on and store the message (without showing for now)
+					if (m_cCaptchasSent < 3) // no more than 3 tries
+					{
+						m_strCaptchaPendingMsg = strMessage;
+						CSafeMemFile fileAnswer(1024);
+						fileAnswer.WriteUInt8(0); // no tags, for future use
+						CCaptchaGenerator captcha(4);
+						if (captcha.WriteCaptchaImage(fileAnswer)){
+							m_strCaptchaChallenge = captcha.GetCaptchaText();
+							m_nChatCaptchaState = CA_CHALLENGESENT;
+							m_cCaptchasSent++;
+							Packet* packet = new Packet(&fileAnswer, OP_EMULEPROT, OP_CHATCAPTCHAREQ);
+							theStats.AddUpDataOverheadOther(packet->size);
+							SafeSendPacket(packet);
+						}
+						else{
+							ASSERT( false );
+							DebugLogError(_T("Failed to create Captcha for client %s"), DbgGetClientInfo());
+						}
+					}
+				}
+				else
+				{
+					// client doesn't supports captchas, but we require them, tell him that its not going to work out
+					// with an answer message (will not be shown and doesn't counts as sent message)
+					if (m_cCaptchasSent < 1) // dont sent this notifier more than once
+					{
+						m_cCaptchasSent++;
+						// always sent in english
+						CString rstrMessage = _T("In order to avoid spam messages, this user requires you to solve a captcha before you can send a message to him. However your client does not supports captchas, so you will not be able to chat with this user.");
+						SendChatMessage(rstrMessage);
+						DebugLog(_T("Received message from client not supporting captchs, filtered and sent notifier (%s)"), DbgGetClientInfo());
+					}
+					else
+						DebugLog(_T("Received message from client not supporting captchs, filtered, didn't sent notifier (%s)"), DbgGetClientInfo());
+				}
+				return;
+			}
+			else //(GetChatCaptchaState() == CA_CHALLENGESENT)
+			{
+				// this message must be the answer to the captcha request we send him, lets verify
+				ASSERT( !m_strCaptchaChallenge.IsEmpty() );
+				if (m_strCaptchaChallenge.CompareNoCase(strMessage.Trim().Right(min(strMessage.GetLength(), m_strCaptchaChallenge.GetLength()))) == 0){
+					// allright
+					DebugLog(_T("Captcha solved, showing withheld message (%s)"), DbgGetClientInfo());
+					m_nChatCaptchaState = CA_CAPTCHASOLVED; // this state isn't persitent, but the messagecounter will be used to determine later if the captcha has been solved
+					// replace captchaanswer with withheld message and show it
+					strMessage = m_strCaptchaPendingMsg;
+					m_cCaptchasSent = 0;
+					m_strCaptchaChallenge = _T("");
+					Packet* packet = new Packet(OP_CHATCAPTCHARES, 1, OP_EMULEPROT, false);
+					packet->pBuffer[0] = 0; // status response
+					theStats.AddUpDataOverheadOther(packet->size);
+					SafeSendPacket(packet);
+				}
+				else{ // wrong, cleanup and ignore
+					DebugLogWarning(_T("Captcha answer failed (%s)"), DbgGetClientInfo());
+					m_nChatCaptchaState = CA_NONE;
+					m_strCaptchaChallenge = _T("");
+					m_strCaptchaPendingMsg = _T("");
+					Packet* packet = new Packet(OP_CHATCAPTCHARES, 1, OP_EMULEPROT, false);
+					packet->pBuffer[0] = (m_cCaptchasSent < 3)? 1 : 2; // status response
+					theStats.AddUpDataOverheadOther(packet->size);
+					SafeSendPacket(packet);
+					return; // nothing more todo
+				}
+			}	
+		}
+		else
+			DEBUG_ONLY( DebugLog(_T("Message passed CaptchaFilter - already solved or not needed (%s)"), DbgGetClientInfo()) );
+
+	}
+	if (thePrefs.IsAdvSpamfilterEnabled() && !IsFriend()) // friends are never spammer... (but what if two spammers are friends :P )
+	{	
+		bool bIsSpam = false;
+		if (IsSpammer())
+			bIsSpam = true;
+		else
+		{
+
+			// first fixed criteria: If a client  sends me an URL in his first message before I response to him
+			// there is a 99,9% chance that it is some poor guy advising his leech mod, or selling you .. well you know :P
+			if (GetMessagesSent() == 0){
+				int curPos=0;
+				CString resToken = CString(URLINDICATOR).Tokenize(_T("|"), curPos);
+				while (resToken != _T("")){
+					if (strMessage.Find(resToken) > (-1) )
+						bIsSpam = true;
+					resToken= CString(URLINDICATOR).Tokenize(_T("|"),curPos);
+				}
+				// second fixed criteria: he sent me 4  or more messages and I didn't answered him once
+				if (GetMessagesReceived() > 3)
+					bIsSpam = true;
+			}
+		}
+		if (bIsSpam)
+		{
+			if (IsSpammer()){
+				if (thePrefs.GetVerbose())
+					AddDebugLogLine(false, _T("'%s' has been marked as spammer"), GetUserName());
+			}
+			SetSpammer(true);
+			theApp.emuledlg->chatwnd->chatselector.EndSession(this);
+			return;
+
+		}
+	}
+
+	theApp.emuledlg->chatwnd->chatselector.ProcessMessage(this, strMessage);
+}
+
+void CUpDownClient::ProcessCaptchaRequest(CSafeMemFile* data){
+	// received a captcha request, check if we actually accept it (only after sending a message ourself to this client)
+	if (GetChatCaptchaState() == CA_ACCEPTING && GetChatState() != MS_NONE
+		&& theApp.emuledlg->chatwnd->chatselector.GetItemByClient(this) != NULL)
+	{
+		// read tags (for future use)
+		uint8 nTagCount = data->ReadUInt8();
+		for (uint32 i = 0; i < nTagCount; i++)
+			CTag tag(data, true);
+		// sanitize checks - we want a small captcha not a wallpaper
+		uint32 nSize = (uint32)(data->GetLength() - data->GetPosition());
+		if ( nSize > 128 && nSize < 2048)
+		{
+			ULONGLONG pos = data->GetPosition();
+			BYTE* byBuffer = data->Detach();
+			CxImage imgCaptcha(&byBuffer[pos], nSize, CXIMAGE_FORMAT_BMP);
+			//free(byBuffer);
+			if (imgCaptcha.IsValid() && imgCaptcha.GetHeight() > 10 && imgCaptcha.GetHeight() < 50
+				&& imgCaptcha.GetWidth() > 10 && imgCaptcha.GetWidth() < 150 )
+			{
+				HBITMAP hbmp = imgCaptcha.MakeBitmap();
+				if (hbmp != NULL){
+					m_nChatCaptchaState = CA_CAPTCHARECV;
+					theApp.emuledlg->chatwnd->chatselector.ShowCaptchaRequest(this, hbmp);
+					DeleteObject(hbmp);
+				}
+				else
+					DebugLogWarning(_T("Received captcha request from client, Creating bitmap failed (%s)"), DbgGetClientInfo());
+			}
+			else
+				DebugLogWarning(_T("Received captcha request from client, processing image failed or invalid pixel size (%s)"), DbgGetClientInfo());
+		}
+		else
+			DebugLogWarning(_T("Received captcha request from client, size sanitize check failed (%u) (%s)"), nSize, DbgGetClientInfo());
+	}
+	else
+		DebugLogWarning(_T("Received captcha request from client, but don't accepting it at this time (%s)"), DbgGetClientInfo());
+}
+
+void CUpDownClient::ProcessCaptchaReqRes(uint8 nStatus)
+{
+	if (GetChatCaptchaState() == CA_SOLUTIONSENT && GetChatState() != MS_NONE
+		&& theApp.emuledlg->chatwnd->chatselector.GetItemByClient(this) != NULL)
+	{
+		ASSERT( nStatus < 3 );
+		m_nChatCaptchaState = CA_NONE;
+		theApp.emuledlg->chatwnd->chatselector.ShowCaptchaResult(this, GetResString((nStatus == 0) ? IDS_CAPTCHASOLVED : IDS_CAPTCHAFAILED));
+	}
+	else {
+		m_nChatCaptchaState = CA_NONE;
+		DebugLogWarning(_T("Received captcha result from client, but don't accepting it at this time (%s)"), DbgGetClientInfo());
+	}
+}
+
+CFriend* CUpDownClient::GetFriend() const
+{
+	if (m_Friend != NULL && theApp.friendlist->IsValid(m_Friend))
+		return m_Friend;
+	else if (m_Friend != NULL)
+		ASSERT( FALSE );
+	return NULL;
+}
+
+void CUpDownClient::SendChatMessage(CString strMessage)
+{
+	CSafeMemFile data;
+	data.WriteString(strMessage, GetUnicodeSupport());
+	Packet* packet = new Packet(&data, OP_EDONKEYPROT, OP_MESSAGE);
+	theStats.AddUpDataOverheadOther(packet->size);
+	SafeSendPacket(packet);
+}
+
+bool CUpDownClient::HasPassedSecureIdent(bool bPassIfUnavailable) const
+{
+	if (credits != NULL)
+	{
+		if (credits->GetCurrentIdentState(GetConnectIP()) == IS_IDENTIFIED 
+			|| (credits->GetCurrentIdentState(GetConnectIP()) == IS_NOTAVAILABLE && bPassIfUnavailable))
+		{
+			return true;
+		}
+	}
+	return false;
+}
+
+void CUpDownClient::SendFirewallCheckUDPRequest()
+{
+	ASSERT( GetKadState() == KS_FWCHECK_UDP );
+	if (!Kademlia::CKademlia::IsRunning()){
+		SetKadState(KS_NONE);
+		return;
+	}
+	else if (GetUploadState() != US_NONE || GetDownloadState() != DS_NONE || GetChatState() != MS_NONE
+		|| GetKadVersion() <= KADEMLIA_VERSION5_48a || GetKadPort() == 0)
+	{
+		Kademlia::CUDPFirewallTester::SetUDPFWCheckResult(false, true, ntohl(GetIP()), 0); // inform the tester that this test was cancelled
+		SetKadState(KS_NONE);
+		return;
+	}
+	ASSERT( Kademlia::CKademlia::GetPrefs()->GetExternalKadPort() != 0 );
+	CSafeMemFile data;
+	data.WriteUInt16(Kademlia::CKademlia::GetPrefs()->GetInternKadPort());
+	data.WriteUInt16(Kademlia::CKademlia::GetPrefs()->GetExternalKadPort());
+	data.WriteUInt32(Kademlia::CKademlia::GetPrefs()->GetUDPVerifyKey(GetConnectIP()));
+	Packet* packet = new Packet(&data, OP_EMULEPROT, OP_FWCHECKUDPREQ);
+	theStats.AddUpDataOverheadKad(packet->size);
+	SafeSendPacket(packet);
+}
+
+void CUpDownClient::ProcessFirewallCheckUDPRequest(CSafeMemFile* data){
+	if (!Kademlia::CKademlia::IsRunning() || Kademlia::CKademlia::GetUDPListener() == NULL){
+		DebugLogWarning(_T("Ignored Kad Firewallrequest UDP because Kad is not running (%s)"), DbgGetClientInfo());
+		return;
+	}
+	// first search if we know this IP already, if so the result might be biased and we need tell the requester 
+	bool bErrorAlreadyKnown = false;
+	if (GetUploadState() != US_NONE || GetDownloadState() != DS_NONE || GetChatState() != MS_NONE)
+		bErrorAlreadyKnown = true;
+	else if (Kademlia::CKademlia::GetRoutingZone()->GetContact(ntohl(GetConnectIP()), 0, false) != NULL)
+		bErrorAlreadyKnown = true;
+
+	uint16 nRemoteInternPort = data->ReadUInt16();
+	uint16 nRemoteExternPort = data->ReadUInt16();
+	uint32 dwSenderKey = data->ReadUInt32();
+	if (nRemoteInternPort == 0){
+		DebugLogError(_T("UDP Firewallcheck requested with Intern Port == 0 (%s)"), DbgGetClientInfo());
+		return;
+	}
+	if (dwSenderKey == 0)
+		DebugLogWarning(_T("UDP Firewallcheck requested with SenderKey == 0 (%s)"), DbgGetClientInfo());
+	
+	CSafeMemFile fileTestPacket1;
+	fileTestPacket1.WriteUInt8(bErrorAlreadyKnown ? 1 : 0);
+	fileTestPacket1.WriteUInt16(nRemoteInternPort);
+	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+		DebugSend("KADEMLIA2_FIREWALLUDP", ntohl(GetConnectIP()), nRemoteInternPort);
+	Kademlia::CKademlia::GetUDPListener()->SendPacket(&fileTestPacket1, KADEMLIA2_FIREWALLUDP, ntohl(GetConnectIP())
+		, nRemoteInternPort, Kademlia::CKadUDPKey(dwSenderKey, theApp.GetPublicIP(false)), NULL);
+	
+	// if the client has a router with PAT (and therefore a different extern port than intern), test this port too
+	if (nRemoteExternPort != 0 && nRemoteExternPort != nRemoteInternPort){
+		CSafeMemFile fileTestPacket2;
+		fileTestPacket2.WriteUInt8(bErrorAlreadyKnown ? 1 : 0);
+		fileTestPacket2.WriteUInt16(nRemoteExternPort);
+		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+			DebugSend("KADEMLIA2_FIREWALLUDP", ntohl(GetConnectIP()), nRemoteExternPort);
+		Kademlia::CKademlia::GetUDPListener()->SendPacket(&fileTestPacket1, KADEMLIA2_FIREWALLUDP, ntohl(GetConnectIP())
+			, nRemoteExternPort, Kademlia::CKadUDPKey(dwSenderKey, theApp.GetPublicIP(false)), NULL);
+	}
+	DebugLog(_T("Answered UDP Firewallcheck request (%s)"), DbgGetClientInfo());
+}
+
+void CUpDownClient::SetConnectOptions(uint8 byOptions, bool bEncryption, bool bCallback)
+{
+	SetCryptLayerSupport((byOptions & 0x01) != 0 && bEncryption);
+	SetCryptLayerRequest((byOptions & 0x02) != 0 && bEncryption);
+	SetCryptLayerRequires((byOptions & 0x04) != 0 && bEncryption);
+	SetDirectUDPCallbackSupport((byOptions & 0x08) != 0 && bCallback);
 }
 
 //MORPH START - Added by SiRoB, ZZUL_20040904

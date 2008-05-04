@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -1597,7 +1597,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 
 			if (cur_block->fZStreamError){
 				if (thePrefs.GetVerbose())
-					AddDebugLogLine(false, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %u because of errornous zstream state for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
+					AddDebugLogLine(false, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %I64u because of errornous zstream state for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
 				//MORPH - Optimization
 				/*
 				reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);

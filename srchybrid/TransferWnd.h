@@ -132,6 +132,7 @@ protected:
 	void	SetWnd1Icon(EWnd1Icon iIcon);
 	void	SetWnd2Icon(EWnd2Icon iIcon);
 	void	ShowSplitWindow(bool bReDraw = false);
+	void	LocalizeToolbars();
 
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -158,6 +159,7 @@ protected:
 	afx_msg void OnWnd2BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSplitterMoved(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnWindowPosChanged(WINDOWPOS* lpwndpos);
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 
 	// khaos::categorymod+
 	void		CreateCategoryMenus();

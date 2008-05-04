@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -76,6 +76,8 @@ BOOL CListViewSearchDlg::OnInitDialog()
 	SetDlgItemText(IDC_LISTVIEW_SEARCH_TEXT_LBL, GetResString(IDS_SEARCH_TEXT) + _T(':'));
 	SetDlgItemText(IDC_LISTVIEW_SEARCH_COLUMN_LBL, GetResString(IDS_SEARCH_COLUMN) + _T(':'));
 	SetDlgItemText(IDCANCEL, GetResString(IDS_CANCEL));
+	GetDlgItem(IDOK)->SetWindowText(GetResString(IDS_TREEOPTIONS_OK));
+
 
 	if (!m_bCanSearchInAllColumns)
 		m_iSearchColumn = 0;

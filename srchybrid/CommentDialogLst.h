@@ -38,6 +38,7 @@ protected:
 	DECLARE_MESSAGE_MAP() 
 	afx_msg void OnBnClickedApply(); 
 	afx_msg void OnBnClickedSearchKad(); 
+	afx_msg void OnBnClickedFilter();
 	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
 	afx_msg void OnDestroy();
 	afx_msg void OnTimer(UINT nIDEvent);

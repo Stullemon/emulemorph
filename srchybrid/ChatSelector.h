@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "ClosableTabCtrl.h"
+#include "Friend.h"
 
 class CChatWnd;
 class CHTRichEditCtrl;
@@ -43,7 +44,7 @@ public:
 ///////////////////////////////////////////////////////////////////////////////
 // CChatSelector
 
-class CChatSelector : public CClosableTabCtrl
+class CChatSelector : public CClosableTabCtrl, CFriendConnectionListener
 {
 	DECLARE_DYNAMIC(CChatSelector)
 
@@ -58,6 +59,8 @@ public:
 	CChatItem*	GetItemByClient(CUpDownClient* client);
 	CChatItem*	GetItemByIndex(int index);
 	void		ProcessMessage(CUpDownClient* sender, const CString& message);
+	void		ShowCaptchaRequest(CUpDownClient* sender, HBITMAP bmpCaptcha);
+	void		ShowCaptchaResult(CUpDownClient* sender, CString strResult);
 	bool		SendMessage(const CString& rstrMessage);
 	void		DeleteAllItems();
 	void		ShowChat();
@@ -67,6 +70,8 @@ public:
 	CChatItem*	GetCurrentChatItem();
 	BOOL		RemoveItem(int nItem) { return DeleteItem(nItem); }
 	void		EnableSmileys(bool bEnable);
+	void		ReportConnectionProgress(CUpDownClient* pClient, CString strProgressDesc, bool bNoTimeStamp);
+	void		ClientObjectChanged(CUpDownClient* pOldClient, CUpDownClient* pNewClient);
 
 protected:
 	CChatWnd	*m_pParent;
@@ -77,7 +82,6 @@ protected:
 	int			m_iContextIndex;
 
 	void AddTimeStamp(CChatItem*);
-	bool IsSpam(CString strMessage, CUpDownClient* client);
 	void SetAllIcons();
 	void GetChatSize(CRect& rcChat);
 

@@ -112,8 +112,6 @@ CTaskbarNotifier::CTaskbarNotifier()
 			m_hMsImg32Dll = NULL;
 		}
 	}
-
-	SetTextDefaultFont(); // We use default GUI Font
 }
 
 CTaskbarNotifier::~CTaskbarNotifier()
@@ -218,7 +216,7 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR pszFilePath)
 	iBmpTransparentBlue = ini.GetInt(_T("BmpTrasparentBlue"), 255);
 	iBmpTransparentBlue = ini.GetInt(_T("BmpTransparentBlue"), iBmpTransparentBlue);
 
-	strFontType = ini.GetString(_T("FontType"), _T("MS Shell Dlg"));
+	strFontType = ini.GetString(_T("FontType"), theApp.GetDefaultFontFaceName());
 	iFontSize = ini.GetInt(_T("FontSize"), 8) * 10;
 
 	m_dwTimeToStay = ini.GetInt(_T("TimeToStay"), 4000);
@@ -300,7 +298,7 @@ void CTaskbarNotifier::SetTextFont(LPCTSTR pszFont, int nSize, int nNormalStyle,
 {
 	LOGFONT lf;
 	m_fontNormal.DeleteObject();
-	m_fontNormal.CreatePointFont(nSize, pszFont);
+	CreatePointFont(m_fontNormal, nSize, pszFont);
 	m_fontNormal.GetLogFont(&lf);
 
 	// We  set the Font of the unselected ITEM
@@ -345,8 +343,7 @@ void CTaskbarNotifier::SetTextFont(LPCTSTR pszFont, int nSize, int nNormalStyle,
 void CTaskbarNotifier::SetTextDefaultFont()
 {
 	LOGFONT lf;
-	CFont *pFont = CFont::FromHandle((HFONT)GetStockObject(DEFAULT_GUI_FONT));
-	pFont->GetLogFont(&lf);
+	AfxGetMainWnd()->GetFont()->GetLogFont(&lf);
 	m_fontNormal.DeleteObject();
 	m_fontSelected.DeleteObject();
 	m_fontNormal.CreateFontIndirect(&lf);

@@ -37,6 +37,7 @@ there client on the eMule forum..
 #include "../io/ByteIO.h"
 #include "../../Preferences.h"
 #include "../../Log.h"
+#include "../utils/KadUDPKey.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -58,379 +59,251 @@ CIndexed::CIndexed()
 	m_mapNotes.InitHashTable(1031);
 	m_mapLoad.InitHashTable(1031);
 	m_mapSources.InitHashTable(1031);
-	/* MORPH START dir vista officla fix (godlaugh2007)
-	m_sSourceFileName = CMiscUtils::GetAppDir();
-	m_sSourceFileName.Append(CONFIGFOLDER);
-	m_sSourceFileName.Append(_T("src_index.dat"));
-	m_sKeyFileName = CMiscUtils::GetAppDir();
-	m_sKeyFileName.Append(CONFIGFOLDER);
-	m_sKeyFileName.Append(_T("key_index.dat"));
-	m_sLoadFileName = CMiscUtils::GetAppDir();
-	m_sLoadFileName.Append(CONFIGFOLDER);
-	m_sLoadFileName.Append(_T("load_index.dat"));
-	*/
-	m_sSourceFileName =thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)  + _T("src_index.dat");
-	m_sKeyFileName =thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)  + _T("key_index.dat");
-    m_sLoadFileName =thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)  + _T("load_index.dat");
-    // MORPH END dir vista officla fix (godlaugh2007)
-    m_tLastClean = time(NULL) + (60*30);
+	m_sSourceFileName = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("src_index.dat");
+	m_sKeyFileName = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("key_index.dat");
+	m_sLoadFileName = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("load_index.dat");
+	m_tLastClean = time(NULL) + (60*30);
 	m_uTotalIndexSource = 0;
 	m_uTotalIndexKeyword = 0;
 	m_uTotalIndexNotes = 0;
 	m_uTotalIndexLoad = 0;
+	m_bAbortLoading = false;
+	m_bDataLoaded = false;
 	ReadFile();
 }
 
 void CIndexed::ReadFile(void)
 {
-	try
-	{
-		uint32 uTotalLoad = 0;
-		uint32 uTotalSource = 0;
-		uint32 uTotalKeyword = 0;
-		CUInt128 uKeyID, uID, uSourceID;
-
-		CBufferedFileIO fileLoad;
-		if(fileLoad.Open(m_sLoadFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
-		{
-			setvbuf(fileLoad.m_pStream, NULL, _IOFBF, 32768);
-			uint32 uVersion = fileLoad.ReadUInt32();
-			if(uVersion<2)
-			{
-				/*time_t tSaveTime = */fileLoad.ReadUInt32();
-				uint32 uNumLoad = fileLoad.ReadUInt32();
-				while(uNumLoad)
-				{
-					fileLoad.ReadUInt128(&uKeyID);
-					if(AddLoad(uKeyID, fileLoad.ReadUInt32()))
-						uTotalLoad++;
-					uNumLoad--;
-				}
-			}
-			fileLoad.Close();
-		}
-
-		CBufferedFileIO fileKey;
-		if (fileKey.Open(m_sKeyFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
-		{
-			setvbuf(fileKey.m_pStream, NULL, _IOFBF, 32768);
-
-			uint32 uVersion = fileKey.ReadUInt32();
-			if( uVersion < 3 )
-			{
-				time_t tSaveTime = fileKey.ReadUInt32();
-				if( tSaveTime > time(NULL) )
-				{
-					fileKey.ReadUInt128(&uID);
-					if( Kademlia::CKademlia::GetPrefs()->GetKadID() == uID )
-					{
-						uint32 uNumKeys = fileKey.ReadUInt32();
-						while( uNumKeys )
-						{
-							fileKey.ReadUInt128(&uKeyID);
-							uint32 uNumSource = fileKey.ReadUInt32();
-							while( uNumSource )
-							{
-								fileKey.ReadUInt128(&uSourceID);
-								uint32 uNumName = fileKey.ReadUInt32();
-								while( uNumName )
-								{
-									CEntry* pToAdd = new Kademlia::CEntry();
-									pToAdd->m_bSource = false;
-									pToAdd->m_tLifetime = fileKey.ReadUInt32();
-									uint32 uTotalTags = fileKey.ReadByte();
-									while( uTotalTags )
-									{
-										CKadTag* pTag = fileKey.ReadTag();
-										if(pTag)
-										{
-											if (!pTag->m_name.Compare(TAG_FILENAME))
-											{
-												pToAdd->m_fileName = pTag->GetStr();
-												KadTagStrMakeLower(pToAdd->m_fileName); // make lowercase, the search code expects lower case strings!
-												// NOTE: always add the 'name' tag, even if it's stored separately in 'fileName'. the tag is still needed for answering search request
-												pToAdd->m_listTag.push_back(pTag);
-											}
-											else if (!pTag->m_name.Compare(TAG_FILESIZE))
-											{
-												pToAdd->m_uSize = pTag->GetInt();
-												// NOTE: always add the 'size' tag, even if it's stored separately in 'size'. the tag is still needed for answering search request
-												pToAdd->m_listTag.push_back(pTag);
-											}
-											else if (!pTag->m_name.Compare(TAG_SOURCEIP))
-											{
-												pToAdd->m_uIP = (uint32)pTag->GetInt();
-												pToAdd->m_listTag.push_back(pTag);
-											}
-											else if (!pTag->m_name.Compare(TAG_SOURCEPORT))
-											{
-												pToAdd->m_uTCPPort = (uint16)pTag->GetInt();
-												pToAdd->m_listTag.push_back(pTag);
-											}
-											else if (!pTag->m_name.Compare(TAG_SOURCEUPORT))
-											{
-												pToAdd->m_uUDPPort = (uint16)pTag->GetInt();
-												pToAdd->m_listTag.push_back(pTag);
-											}
-											else
-											{
-												pToAdd->m_listTag.push_back(pTag);
-											}
-										}
-										uTotalTags--;
-									}
-									pToAdd->m_uKeyID.SetValue(uKeyID);
-									pToAdd->m_uSourceID.SetValue(uSourceID);
-									uint8 uLoad;
-									if(AddKeyword(uKeyID, uSourceID, pToAdd, uLoad))
-										uTotalKeyword++;
-									else
-										delete pToAdd;
-									uNumName--;
-								}
-								uNumSource--;
-							}
-							uNumKeys--;
-						}
-					}
-				}
-			}
-			fileKey.Close();
-		}
-
-		CBufferedFileIO fileSource;
-		if (fileSource.Open(m_sSourceFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
-		{
-			setvbuf(fileSource.m_pStream, NULL, _IOFBF, 32768);
-
-			uint32 uVersion = fileSource.ReadUInt32();
-			if( uVersion < 3 )
-			{
-				time_t tSaveTime = fileSource.ReadUInt32();
-				if( tSaveTime > time(NULL) )
-				{
-					uint32 uNumKeys = fileSource.ReadUInt32();
-					while( uNumKeys )
-					{
-						fileSource.ReadUInt128(&uKeyID);
-						uint32 uNumSource = fileSource.ReadUInt32();
-						while( uNumSource )
-						{
-							fileSource.ReadUInt128(&uSourceID);
-							uint32 uNumName = fileSource.ReadUInt32();
-							while( uNumName )
-							{
-								CEntry* pToAdd = new Kademlia::CEntry();
-								pToAdd->m_bSource = true;
-								pToAdd->m_tLifetime = fileSource.ReadUInt32();
-								uint32 uTotalTags = fileSource.ReadByte();
-								while( uTotalTags )
-								{
-									CKadTag* pTag = fileSource.ReadTag();
-									if(pTag)
-									{
-										if (!pTag->m_name.Compare(TAG_SOURCEIP))
-										{
-											pToAdd->m_uIP = (uint32)pTag->GetInt();
-											pToAdd->m_listTag.push_back(pTag);
-										}
-										else if (!pTag->m_name.Compare(TAG_SOURCEPORT))
-										{
-											pToAdd->m_uTCPPort = (uint16)pTag->GetInt();
-											pToAdd->m_listTag.push_back(pTag);
-										}
-										else if (!pTag->m_name.Compare(TAG_SOURCEUPORT))
-										{
-											pToAdd->m_uUDPPort = (uint16)pTag->GetInt();
-											pToAdd->m_listTag.push_back(pTag);
-										}
-										else
-										{
-											pToAdd->m_listTag.push_back(pTag);
-										}
-									}
-									uTotalTags--;
-								}
-								pToAdd->m_uKeyID.SetValue(uKeyID);
-								pToAdd->m_uSourceID.SetValue(uSourceID);
-								uint8 uLoad;
-								if(AddSources(uKeyID, uSourceID, pToAdd, uLoad))
-									uTotalSource++;
-								else
-									delete pToAdd;
-								uNumName--;
-							}
-							uNumSource--;
-						}
-						uNumKeys--;
-					}
-				}
-			}
-			fileSource.Close();
-
-			m_uTotalIndexSource = uTotalSource;
-			m_uTotalIndexKeyword = uTotalKeyword;
-			m_uTotalIndexLoad = uTotalLoad;
-			AddDebugLogLine( false, _T("Read %u source, %u keyword, and %u load entries"), uTotalSource, uTotalKeyword, uTotalLoad);
-		}
-	}
-	catch ( CIOException *ioe )
-	{
-		AddDebugLogLine( false, _T("Exception in CIndexed::readFile (IO error(%i))"), ioe->m_iCause);
-		ioe->Delete();
-	}
-	catch (...)
-	{
-		AddDebugLogLine(false, _T("Exception in CIndexed::readFile"));
-	}
+	m_bAbortLoading = false;
+	CLoadDataThread* pLoadDataThread = (CLoadDataThread*) AfxBeginThread(RUNTIME_CLASS(CLoadDataThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
+	pLoadDataThread->SetValues(this);
+	pLoadDataThread->ResumeThread();
 }
 
 CIndexed::~CIndexed()
-{
-	try
-	{
-		uint32 uTotalSource = 0;
-		uint32 uTotalKey = 0;
-		uint32 uTotalLoad = 0;
+{ 
+	if (!m_bDataLoaded){
+		// the user clicked on disconnect/close just after he started kad (on probably just before posting in the forum the emule doenst works :P )
+		// while the loading thread is still busy. First tell the thread to abort its loading, afterwards wait for it to terminate
+		// and then delete all loaded items without writing them to the files (as they are incomplete and unchanged)
+		DebugLogWarning(_T("Kad stopping while still loading CIndexed data, waiting for abort"));
+		m_bAbortLoading = true;
+		CSingleLock sLock(&m_mutSync);
+		sLock.Lock(); // wait
+		ASSERT( m_bDataLoaded );
 
-		CBufferedFileIO fileLoad;
-		if(fileLoad.Open(m_sLoadFileName, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
-		{
-			setvbuf(fileLoad.m_pStream, NULL, _IOFBF, 32768);
-			uint32 uVersion = 1;
-			fileLoad.WriteUInt32(uVersion);
-			fileLoad.WriteUInt32((uint32) time(NULL));
-			fileLoad.WriteUInt32((uint32) m_mapLoad.GetCount());
-			POSITION pos1 = m_mapLoad.GetStartPosition();
-			while( pos1 != NULL )
-			{
-				Load* pLoad;
-				CCKey key1;
-				m_mapLoad.GetNextAssoc( pos1, key1, pLoad );
-				fileLoad.WriteUInt128(pLoad->uKeyID);
-				fileLoad.WriteUInt32(pLoad->uTime);
-				uTotalLoad++;
-				delete pLoad;
-			}
-			fileLoad.Close();
-		}
-
-		CBufferedFileIO fileSource;
-		if (fileSource.Open(m_sSourceFileName, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
-		{
-			setvbuf(fileSource.m_pStream, NULL, _IOFBF, 32768);
-			uint32 uVersion = 2;
-			fileSource.WriteUInt32(uVersion);
-			fileSource.WriteUInt32((uint32) time(NULL)+KADEMLIAREPUBLISHTIMES);
-			fileSource.WriteUInt32((uint32) m_mapSources.GetCount());
-			POSITION pos1 = m_mapSources.GetStartPosition();
-			while( pos1 != NULL )
-			{
-				CCKey key1;
-				SrcHash* pCurrSrcHash;
-				m_mapSources.GetNextAssoc( pos1, key1, pCurrSrcHash );
-				fileSource.WriteUInt128(pCurrSrcHash->uKeyID);
-				CKadSourcePtrList* keyHashSrcMap = &pCurrSrcHash->ptrlistSource;
-				fileSource.WriteUInt32((uint32) keyHashSrcMap->GetCount());
-				POSITION pos2 = keyHashSrcMap->GetHeadPosition();
-				while( pos2 != NULL )
-				{
-					Source* pCurrSource = keyHashSrcMap->GetNext(pos2);
-					fileSource.WriteUInt128(pCurrSource->uSourceID);
-					CKadEntryPtrList* srcEntryList = &pCurrSource->ptrlEntryList;
-					fileSource.WriteUInt32((uint32) srcEntryList->GetCount());
-					for(POSITION pos3 = srcEntryList->GetHeadPosition(); pos3 != NULL; )
-					{
-						CEntry* pCurrName = srcEntryList->GetNext(pos3);
-						fileSource.WriteUInt32((uint32) pCurrName->m_tLifetime);
-						fileSource.WriteTagList(pCurrName->m_listTag);
-						delete pCurrName;
-						uTotalSource++;
-					}
-					delete pCurrSource;
-				}
-				delete pCurrSrcHash;
-			}
-			fileSource.Close();
-		}
-
-		CBufferedFileIO fileKey;
-		if (fileKey.Open(m_sKeyFileName, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
-		{
-			setvbuf(fileKey.m_pStream, NULL, _IOFBF, 32768);
-			uint32 uVersion = 2;
-			fileKey.WriteUInt32(uVersion);
-			fileKey.WriteUInt32((uint32) time(NULL)+KADEMLIAREPUBLISHTIMEK);
-			fileKey.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
-			fileKey.WriteUInt32((uint32) m_mapKeyword.GetCount());
-			POSITION pos1 = m_mapKeyword.GetStartPosition();
-			while( pos1 != NULL )
-			{
-				CCKey key1;
-				KeyHash* pCurrKeyHash;
-				m_mapKeyword.GetNextAssoc( pos1, key1, pCurrKeyHash );
-				fileKey.WriteUInt128(pCurrKeyHash->uKeyID);
-				CSourceKeyMap* keySrcKeyMap = &pCurrKeyHash->mapSource;
-				fileKey.WriteUInt32((uint32) keySrcKeyMap->GetCount());
-				POSITION pos2 = keySrcKeyMap->GetStartPosition();
-				while( pos2 != NULL )
-				{
-					Source* pCurrSource;
-					CCKey key2;
-					keySrcKeyMap->GetNextAssoc( pos2, key2, pCurrSource );
-					fileKey.WriteUInt128(pCurrSource->uSourceID);
-					CKadEntryPtrList* srcEntryList = &pCurrSource->ptrlEntryList;
-					fileKey.WriteUInt32((uint32) srcEntryList->GetCount());
-					for(POSITION pos3 = srcEntryList->GetHeadPosition(); pos3 != NULL; )
-					{
-						CEntry* pCurrName = srcEntryList->GetNext(pos3);
-						fileKey.WriteUInt32((uint32) pCurrName->m_tLifetime);
-						fileKey.WriteTagList(pCurrName->m_listTag);
-						delete pCurrName;
-						uTotalKey++;
-					}
-					delete pCurrSource;
-				}
-				delete pCurrKeyHash;
-			}
-			fileKey.Close();
-		}
-		AddDebugLogLine( false, _T("Wrote %u source, %u keyword, and %u load entries"), uTotalSource, uTotalKey, uTotalLoad);
-
-		POSITION pos1 = m_mapNotes.GetStartPosition();
+		// cleanup without storing
+		POSITION pos1 = m_mapSources.GetStartPosition();
 		while( pos1 != NULL )
 		{
 			CCKey key1;
-			SrcHash* pCurrNoteHash;
-			m_mapNotes.GetNextAssoc( pos1, key1, pCurrNoteHash );
-			CKadSourcePtrList* keyHashNoteMap = &pCurrNoteHash->ptrlistSource;
-			POSITION pos2 = keyHashNoteMap->GetHeadPosition();
+			SrcHash* pCurrSrcHash;
+			m_mapSources.GetNextAssoc( pos1, key1, pCurrSrcHash );
+			CKadSourcePtrList* keyHashSrcMap = &pCurrSrcHash->ptrlistSource;
+			POSITION pos2 = keyHashSrcMap->GetHeadPosition();
 			while( pos2 != NULL )
 			{
-				Source* pCurrNote = keyHashNoteMap->GetNext(pos2);
-				CKadEntryPtrList* noteEntryList = &pCurrNote->ptrlEntryList;
-				for(POSITION pos3 = noteEntryList->GetHeadPosition(); pos3 != NULL; )
+				Source* pCurrSource = keyHashSrcMap->GetNext(pos2);
+				CKadEntryPtrList* srcEntryList = &pCurrSource->ptrlEntryList;
+				for(POSITION pos3 = srcEntryList->GetHeadPosition(); pos3 != NULL; )
 				{
-					delete noteEntryList->GetNext(pos3);
+					CEntry* pCurrName = srcEntryList->GetNext(pos3);
+					delete pCurrName;
 				}
-				delete pCurrNote;
+				delete pCurrSource;
 			}
-			delete pCurrNoteHash;
+			delete pCurrSrcHash;
+		}
+
+		pos1 = m_mapKeyword.GetStartPosition();
+		while( pos1 != NULL )
+		{
+			CCKey key1;
+			KeyHash* pCurrKeyHash;
+			m_mapKeyword.GetNextAssoc( pos1, key1, pCurrKeyHash );
+			CSourceKeyMap* keySrcKeyMap = &pCurrKeyHash->mapSource;
+			POSITION pos2 = keySrcKeyMap->GetStartPosition();
+			while( pos2 != NULL )
+			{
+				Source* pCurrSource;
+				CCKey key2;
+				keySrcKeyMap->GetNextAssoc( pos2, key2, pCurrSource );
+				CKadEntryPtrList* srcEntryList = &pCurrSource->ptrlEntryList;
+				for(POSITION pos3 = srcEntryList->GetHeadPosition(); pos3 != NULL; )
+				{
+					CKeyEntry* pCurrName = (CKeyEntry*)srcEntryList->GetNext(pos3);
+					ASSERT( pCurrName->IsKeyEntry() );
+					pCurrName->DirtyDeletePublishData();
+					delete pCurrName;
+				}
+				delete pCurrSource;
+			}
+			delete pCurrKeyHash;
+		}
+		CKeyEntry::ResetGlobalTrackingMap();
+	}
+	else {
+		// standart cleanup with sotring
+		try
+		{
+			uint32 uTotalSource = 0;
+			uint32 uTotalKey = 0;
+			uint32 uTotalLoad = 0;
+
+			CBufferedFileIO fileLoad;
+			if(fileLoad.Open(m_sLoadFileName, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
+			{
+				setvbuf(fileLoad.m_pStream, NULL, _IOFBF, 32768);
+				uint32 uVersion = 1;
+				fileLoad.WriteUInt32(uVersion);
+				fileLoad.WriteUInt32((uint32) time(NULL)); // MOPRH
+				fileLoad.WriteUInt32((uint32) m_mapLoad.GetCount()); // MORPH
+				POSITION pos1 = m_mapLoad.GetStartPosition();
+				while( pos1 != NULL )
+				{
+					Load* pLoad;
+					CCKey key1;
+					m_mapLoad.GetNextAssoc( pos1, key1, pLoad );
+					fileLoad.WriteUInt128(pLoad->uKeyID);
+					fileLoad.WriteUInt32(pLoad->uTime);
+					uTotalLoad++;
+					delete pLoad;
+				}
+				fileLoad.Close();
+			}
+			else
+				DebugLogError(_T("Unable to store Kad file: %s"), m_sLoadFileName);
+
+			CBufferedFileIO fileSource;
+			if (fileSource.Open(m_sSourceFileName, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
+			{
+				setvbuf(fileSource.m_pStream, NULL, _IOFBF, 32768);
+				uint32 uVersion = 2;
+				fileSource.WriteUInt32(uVersion);
+				fileSource.WriteUInt32((uint32) time(NULL)+KADEMLIAREPUBLISHTIMES); // MOPRH
+				fileSource.WriteUInt32((uint32) m_mapSources.GetCount()); // MOPRH
+				POSITION pos1 = m_mapSources.GetStartPosition();
+				while( pos1 != NULL )
+				{
+					CCKey key1;
+					SrcHash* pCurrSrcHash;
+					m_mapSources.GetNextAssoc( pos1, key1, pCurrSrcHash );
+					fileSource.WriteUInt128(pCurrSrcHash->uKeyID);
+					CKadSourcePtrList* keyHashSrcMap = &pCurrSrcHash->ptrlistSource;
+					fileSource.WriteUInt32((uint32) keyHashSrcMap->GetCount()); // MOPRH
+					POSITION pos2 = keyHashSrcMap->GetHeadPosition();
+					while( pos2 != NULL )
+					{
+						Source* pCurrSource = keyHashSrcMap->GetNext(pos2);
+						fileSource.WriteUInt128(pCurrSource->uSourceID);
+						CKadEntryPtrList* srcEntryList = &pCurrSource->ptrlEntryList;
+						fileSource.WriteUInt32((uint32) srcEntryList->GetCount()); // MOPRH
+						for(POSITION pos3 = srcEntryList->GetHeadPosition(); pos3 != NULL; )
+						{
+							CEntry* pCurrName = srcEntryList->GetNext(pos3);
+							fileSource.WriteUInt32((uint32) pCurrName->m_tLifetime); // MOPRH
+							pCurrName->WriteTagList(&fileSource);
+							delete pCurrName;
+							uTotalSource++;
+						}
+						delete pCurrSource;
+					}
+					delete pCurrSrcHash;
+				}
+				fileSource.Close();
+			}
+			else
+				DebugLogError(_T("Unable to store Kad file: %s"), m_sSourceFileName);
+
+			CBufferedFileIO fileKey;
+			if (fileKey.Open(m_sKeyFileName, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
+			{
+				setvbuf(fileKey.m_pStream, NULL, _IOFBF, 32768);
+				uint32 uVersion = 3;
+				fileKey.WriteUInt32(uVersion);
+				fileKey.WriteUInt32((uint32) time(NULL)+KADEMLIAREPUBLISHTIMEK); // MOPRH
+				fileKey.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
+				fileKey.WriteUInt32((uint32) m_mapKeyword.GetCount()); // MOPRH
+				POSITION pos1 = m_mapKeyword.GetStartPosition();
+				while( pos1 != NULL )
+				{
+					CCKey key1;
+					KeyHash* pCurrKeyHash;
+					m_mapKeyword.GetNextAssoc( pos1, key1, pCurrKeyHash );
+					fileKey.WriteUInt128(pCurrKeyHash->uKeyID);
+					CSourceKeyMap* keySrcKeyMap = &pCurrKeyHash->mapSource;
+					fileKey.WriteUInt32((uint32) keySrcKeyMap->GetCount()); // MOPRH
+					POSITION pos2 = keySrcKeyMap->GetStartPosition();
+					while( pos2 != NULL )
+					{
+						Source* pCurrSource;
+						CCKey key2;
+						keySrcKeyMap->GetNextAssoc( pos2, key2, pCurrSource );
+						fileKey.WriteUInt128(pCurrSource->uSourceID);
+						CKadEntryPtrList* srcEntryList = &pCurrSource->ptrlEntryList;
+						fileKey.WriteUInt32((uint32) srcEntryList->GetCount()); // MOPRH
+						for(POSITION pos3 = srcEntryList->GetHeadPosition(); pos3 != NULL; )
+						{
+							CKeyEntry* pCurrName = (CKeyEntry*)srcEntryList->GetNext(pos3);
+							ASSERT( pCurrName->IsKeyEntry() );
+							fileKey.WriteUInt32((uint32) pCurrName->m_tLifetime); // MOPRH
+							pCurrName->WritePublishTrackingDataToFile(&fileKey);
+							pCurrName->WriteTagList(&fileKey);
+							pCurrName->DirtyDeletePublishData();
+							delete pCurrName;
+							uTotalKey++;
+						}
+						delete pCurrSource;
+					}
+					delete pCurrKeyHash;
+				}
+				CKeyEntry::ResetGlobalTrackingMap();
+				fileKey.Close();
+			}
+			else
+				DebugLogError(_T("Unable to store Kad file: %s"), m_sKeyFileName);
+
+			AddDebugLogLine( false, _T("Wrote %u source, %u keyword, and %u load entries"), uTotalSource, uTotalKey, uTotalLoad);
+
+
+		}
+		catch ( CIOException *ioe )
+		{
+			AddDebugLogLine( false, _T("Exception in CIndexed::~CIndexed (IO error(%i))"), ioe->m_iCause);
+			ioe->Delete();
+		}
+		catch (...)
+		{
+			AddDebugLogLine(false, _T("Exception in CIndexed::~CIndexed"));
 		}
 	}
-	catch ( CIOException *ioe )
+
+	// leftover cleanup (same for both variants)
+	POSITION pos1 = m_mapNotes.GetStartPosition();
+	while( pos1 != NULL )
 	{
-		AddDebugLogLine( false, _T("Exception in CIndexed::~CIndexed (IO error(%i))"), ioe->m_iCause);
-		ioe->Delete();
-	}
-	catch (...)
-	{
-		AddDebugLogLine(false, _T("Exception in CIndexed::~CIndexed"));
+		CCKey key1;
+		SrcHash* pCurrNoteHash;
+		m_mapNotes.GetNextAssoc( pos1, key1, pCurrNoteHash );
+		CKadSourcePtrList* keyHashNoteMap = &pCurrNoteHash->ptrlistSource;
+		POSITION pos2 = keyHashNoteMap->GetHeadPosition();
+		while( pos2 != NULL )
+		{
+			Source* pCurrNote = keyHashNoteMap->GetNext(pos2);
+			CKadEntryPtrList* noteEntryList = &pCurrNote->ptrlEntryList;
+			for(POSITION pos3 = noteEntryList->GetHeadPosition(); pos3 != NULL; )
+			{
+				delete noteEntryList->GetNext(pos3);
+			}
+			delete pCurrNote;
+		}
+		delete pCurrNoteHash;
 	}
 }
 
 void CIndexed::Clean(void)
 {
+
 	try
 	{
 		if( m_tLastClean > time(NULL) )
@@ -458,7 +331,8 @@ void CIndexed::Clean(void)
 					for(POSITION pos3 = pCurrSource->ptrlEntryList.GetHeadPosition(); pos3 != NULL; )
 					{
 						POSITION pos4 = pos3;
-						CEntry* pCurrName = pCurrSource->ptrlEntryList.GetNext(pos3);
+						CKeyEntry* pCurrName = (CKeyEntry*)pCurrSource->ptrlEntryList.GetNext(pos3);
+						ASSERT( pCurrName->IsKeyEntry() );
 						uTotalKey++;
 						if( !pCurrName->m_bSource && pCurrName->m_tLifetime < tNow)
 						{
@@ -466,6 +340,10 @@ void CIndexed::Clean(void)
 							pCurrSource->ptrlEntryList.RemoveAt(pos4);
 							delete pCurrName;
 						}
+						else if (pCurrName->m_bSource)
+							ASSERT( false );
+						else
+							pCurrName->CleanUpTrackedPublishers(); // intern cleanup
 					}
 					if( pCurrSource->ptrlEntryList.IsEmpty())
 					{
@@ -529,10 +407,22 @@ void CIndexed::Clean(void)
 	}
 }
 
-bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad)
+bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CKeyEntry* pEntry, uint8& uLoad, bool bIgnoreThreadLock)
 {
+	// do not access any data while the loading thread is busy;
+	// bIgnoreThreadLock should be only used by CLoadDataThread itself
+	if (!bIgnoreThreadLock && !m_bDataLoaded) {
+		DEBUG_ONLY( DebugLogWarning(_T("CIndexed Memberfunction call failed because the dataloading still in progress")) );
+		return false;
+	}
+
 	if( !pEntry )
 		return false;
+
+	if (!pEntry->IsKeyEntry()){
+		ASSERT( false );
+		return false;
+	}
 
 	if( m_uTotalIndexKeyword > KADEMLIAMAXENTRIES )
 	{
@@ -540,7 +430,7 @@ bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kad
 		return false;
 	}
 
-	if( pEntry->m_uSize == 0 || pEntry->m_fileName.IsEmpty() || pEntry->m_listTag.size() == 0 || pEntry->m_tLifetime < time(NULL))
+	if( pEntry->m_uSize == 0 || pEntry->GetCommonFileName().IsEmpty() || pEntry->GetTagCount() == 0 || pEntry->m_tLifetime < time(NULL))
 		return false;
 
 	KeyHash* pCurrKeyHash;
@@ -548,6 +438,7 @@ bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kad
 	{
 		Source* pCurrSource = new Source;
 		pCurrSource->uSourceID.SetValue(uSourceID);
+		pEntry->MergeIPsAndFilenames(NULL); //IpTracking init
 		pCurrSource->ptrlEntryList.AddHead(pEntry);
 		pCurrKeyHash = new KeyHash;
 		pCurrKeyHash->uKeyID.SetValue(uKeyID);
@@ -559,7 +450,7 @@ bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kad
 	}
 	else
 	{
-		uint32 uIndexTotal = (uint32) pCurrKeyHash->mapSource.GetCount();
+		uint32 uIndexTotal = (uint32) pCurrKeyHash->mapSource.GetCount(); // MOPRH
 		if ( uIndexTotal > KADEMLIAMAXINDEX )
 		{
 			uLoad = 100;
@@ -578,11 +469,29 @@ bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kad
 					//while this index is full, popular files will be the only thing you index.
 					return false;
 				}
-				delete pCurrSource->ptrlEntryList.GetHead();
-				pCurrSource->ptrlEntryList.RemoveHead();
+				// also check for size match
+				CKeyEntry* pOldEntry = NULL;
+				for (POSITION pos = pCurrSource->ptrlEntryList.GetHeadPosition(); pos != NULL; pCurrSource->ptrlEntryList.GetNext(pos)){
+					CKeyEntry* pCurEntry = (CKeyEntry*)pCurrSource->ptrlEntryList.GetAt(pos);
+					ASSERT( pCurEntry->IsKeyEntry() );
+					if (pCurEntry->m_uSize == pEntry->m_uSize){
+						pOldEntry = pCurEntry;
+						pCurrSource->ptrlEntryList.RemoveAt(pos);
+						break;
+					}
+				}
+				pEntry->MergeIPsAndFilenames(pOldEntry); // pOldEntry can be NULL, thats ok and we still need todo this call in this case
+				if (pOldEntry == NULL){
+					m_uTotalIndexKeyword++;
+					DebugLogWarning(_T("Kad: Indexing: Keywords: Multiple sizes published for file %s"), pEntry->m_uSourceID.ToHexString());
+				}
+				delete pOldEntry;
+				pOldEntry = NULL;
 			}
-			else
+			else{
 				m_uTotalIndexKeyword++;
+				pEntry->MergeIPsAndFilenames(NULL); //IpTracking init
+			}
 			uLoad = (uint8)((uIndexTotal*100)/KADEMLIAMAXINDEX);
 			pCurrSource->ptrlEntryList.AddHead(pEntry);
 			return true;
@@ -591,6 +500,7 @@ bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kad
 		{
 			pCurrSource = new Source;
 			pCurrSource->uSourceID.SetValue(uSourceID);
+			pEntry->MergeIPsAndFilenames(NULL); //IpTracking init
 			pCurrSource->ptrlEntryList.AddHead(pEntry);
 			pCurrKeyHash->mapSource.SetAt(CCKey(pCurrSource->uSourceID.GetData()), pCurrSource);
 			m_uTotalIndexKeyword++;
@@ -600,11 +510,18 @@ bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kad
 	}
 }
 
-bool CIndexed::AddSources(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad)
+bool CIndexed::AddSources(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad, bool bIgnoreThreadLock)
 {
+	// do not access any data while the loading thread is busy;
+	// bIgnoreThreadLock should be only used by CLoadDataThread itself
+	if (!bIgnoreThreadLock && !m_bDataLoaded) {
+		DEBUG_ONLY( DebugLogWarning(_T("CIndexed Memberfunction call failed because the dataloading still in progress")) );
+		return false;
+	}
+
 	if( !pEntry )
 		return false;
-	if( pEntry->m_uIP == 0 || pEntry->m_uTCPPort == 0 || pEntry->m_uUDPPort == 0 || pEntry->m_listTag.size() == 0 || pEntry->m_tLifetime < time(NULL))
+	if( pEntry->m_uIP == 0 || pEntry->m_uTCPPort == 0 || pEntry->m_uUDPPort == 0 || pEntry->GetTagCount() == 0 || pEntry->m_tLifetime < time(NULL))
 		return false;
 
 	SrcHash* pCurrSrcHash;
@@ -623,7 +540,7 @@ bool CIndexed::AddSources(const CUInt128& uKeyID, const CUInt128& uSourceID, Kad
 	}
 	else
 	{
-		uint32 uSize = (uint32) pCurrSrcHash->ptrlistSource.GetSize();
+		uint32 uSize = (uint32) pCurrSrcHash->ptrlistSource.GetSize(); // MOPRH
 		for(POSITION pos1 = pCurrSrcHash->ptrlistSource.GetHeadPosition(); pos1 != NULL; )
 		{
 			Source* pCurrSource = pCurrSrcHash->ptrlistSource.GetNext(pos1);
@@ -672,11 +589,18 @@ bool CIndexed::AddSources(const CUInt128& uKeyID, const CUInt128& uSourceID, Kad
 	}
 }
 
-bool CIndexed::AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad)
+bool CIndexed::AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad, bool bIgnoreThreadLock)
 {
+	// do not access any data while the loading thread is busy;
+	// bIgnoreThreadLock should be only used by CLoadDataThread itself
+	if (!bIgnoreThreadLock && !m_bDataLoaded) {
+		DEBUG_ONLY( DebugLogWarning(_T("CIndexed Memberfunction call failed because the dataloading still in progress")) );
+		return false;
+	}
+
 	if( !pEntry )
 		return false;
-	if( pEntry->m_uIP == 0 || pEntry->m_listTag.size() == 0 )
+	if( pEntry->m_uIP == 0 || pEntry->GetTagCount() == 0 )
 		return false;
 
 	SrcHash* pCurrNoteHash;
@@ -695,7 +619,7 @@ bool CIndexed::AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kadem
 	}
 	else
 	{
-		uint32 uSize = (uint32) pCurrNoteHash->ptrlistSource.GetSize();
+		uint32 uSize = (uint32) pCurrNoteHash->ptrlistSource.GetSize(); // MOPRH
 		for(POSITION pos1 = pCurrNoteHash->ptrlistSource.GetHeadPosition(); pos1 != NULL; )
 		{
 			Source* pCurrNote = pCurrNoteHash->ptrlistSource.GetNext(pos1);
@@ -743,8 +667,15 @@ bool CIndexed::AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kadem
 	}
 }
 
-bool CIndexed::AddLoad(const CUInt128& uKeyID, uint32 uTime)
+bool CIndexed::AddLoad(const CUInt128& uKeyID, uint32 uTime, bool bIgnoreThreadLock)
 {
+	// do not access any data while the loading thread is busy;
+	// bIgnoreThreadLock should be only used by CLoadDataThread itself
+	if (!bIgnoreThreadLock && !m_bDataLoaded) {
+		DEBUG_ONLY( DebugLogWarning(_T("CIndexed Memberfunction call failed because the dataloading still in progress")) );
+		return false;
+	}
+
 	//This is needed for when you restart the client.
 	if((uint32)time(NULL)>uTime)
 		return false;
@@ -761,194 +692,14 @@ bool CIndexed::AddLoad(const CUInt128& uKeyID, uint32 uTime)
 	return true;
 }
 
-bool SearchTermsMatch(const SSearchTerm* pSearchTerm, const Kademlia::CEntry* pItem)
+void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm* pSearchTerms, uint32 uIP, uint16 uPort, bool bOldClient, bool bKad2, uint16 uStartPosition, CKadUDPKey senderUDPKey)
 {
-	// boolean operators
-	if (pSearchTerm->m_type == SSearchTerm::AND)
-		return SearchTermsMatch(pSearchTerm->m_pLeft, pItem) && SearchTermsMatch(pSearchTerm->m_pRight, pItem);
-
-	if (pSearchTerm->m_type == SSearchTerm::OR)
-		return SearchTermsMatch(pSearchTerm->m_pLeft, pItem) || SearchTermsMatch(pSearchTerm->m_pRight, pItem);
-
-	if (pSearchTerm->m_type == SSearchTerm::NOT)
-		return SearchTermsMatch(pSearchTerm->m_pLeft, pItem) && !SearchTermsMatch(pSearchTerm->m_pRight, pItem);
-
-	// word which is to be searched in the file name (and in additional meta data as done by some ed2k servers???)
-	if (pSearchTerm->m_type == SSearchTerm::String)
-	{
-		int iStrSearchTerms = (int) pSearchTerm->m_pastr->GetCount();
-		if (iStrSearchTerms == 0)
-			return false;
-		// if there are more than one search strings specified (e.g. "aaa bbb ccc") the entire string is handled
-		// like "aaa AND bbb AND ccc". search all strings from the string search term in the tokenized list of
-		// the file name. all strings of string search term have to be found (AND)
-		for (int iSearchTerm = 0; iSearchTerm < iStrSearchTerms; iSearchTerm++)
-		{
-			// this will not give the same results as when tokenizing the filename string, but it is 20 times faster.
-			if (wcsstr(pItem->m_fileName, pSearchTerm->m_pastr->GetAt(iSearchTerm)) == NULL)
-				return false;
-		}
-		return true;
+	// do not access any data while the loading thread is busy;
+	if (!m_bDataLoaded) {
+		DEBUG_ONLY( DebugLogWarning(_T("CIndexed Memberfunction call failed because the dataloading still in progress")) );
+		return;
 	}
 
-	if (pSearchTerm->m_type == SSearchTerm::MetaTag)
-	{
-		if (pSearchTerm->m_pTag->m_type == 2) // meta tags with string values
-		{
-			if (pSearchTerm->m_pTag->m_name.Compare(TAG_FILEFORMAT) == 0)
-			{
-				// 21-Sep-2006 []: Special handling for TAG_FILEFORMAT which is already part
-				// of the filename and thus does not need to get published nor stored explicitly,
-				int iExt = pItem->m_fileName.ReverseFind(_T('.'));
-				if (iExt != -1)
-				{
-					if (_wcsicmp((LPCWSTR)pItem->m_fileName + iExt + 1, pSearchTerm->m_pTag->GetStr()) == 0)
-						return true;
-				}
-			}
-			else
-			{
-				for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-				{
-					const CKadTag* pTag = *itTagList;
-					if (pTag->IsStr() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-						return pTag->GetStr().CompareNoCase(pSearchTerm->m_pTag->GetStr()) == 0;
-				}
-			}
-		}
-	}
-	else if (pSearchTerm->m_type == SSearchTerm::OpGreaterEqual)
-	{
-		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const CKadTag* pTag = *itTagList;
-				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetInt() >= pSearchTerm->m_pTag->GetInt();
-			}
-		}
-		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetFloat() >= pSearchTerm->m_pTag->GetFloat();
-			}
-		}
-	}
-	else if (pSearchTerm->m_type == SSearchTerm::OpLessEqual)
-	{
-		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetInt() <= pSearchTerm->m_pTag->GetInt();
-			}
-		}
-		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetFloat() <= pSearchTerm->m_pTag->GetFloat();
-			}
-		}
-	}
-	else if (pSearchTerm->m_type == SSearchTerm::OpGreater)
-	{
-		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetInt() > pSearchTerm->m_pTag->GetInt();
-			}
-		}
-		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetFloat() > pSearchTerm->m_pTag->GetFloat();
-			}
-		}
-	}
-	else if (pSearchTerm->m_type == SSearchTerm::OpLess)
-	{
-		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetInt() < pSearchTerm->m_pTag->GetInt();
-			}
-		}
-		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetFloat() < pSearchTerm->m_pTag->GetFloat();
-			}
-		}
-	}
-	else if (pSearchTerm->m_type == SSearchTerm::OpEqual)
-	{
-		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetInt() == pSearchTerm->m_pTag->GetInt();
-			}
-		}
-		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetFloat() == pSearchTerm->m_pTag->GetFloat();
-			}
-		}
-	}
-	else if (pSearchTerm->m_type == SSearchTerm::OpNotEqual)
-	{
-		if (pSearchTerm->m_pTag->IsInt()) // meta tags with integer values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsInt() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetInt() != pSearchTerm->m_pTag->GetInt();
-			}
-		}
-		else if (pSearchTerm->m_pTag->IsFloat()) // meta tags with float values
-		{
-			for (TagList::const_iterator itTagList = pItem->m_listTag.begin(); itTagList != pItem->m_listTag.end(); ++itTagList)
-			{
-				const Kademlia::CKadTag* pTag = *itTagList;
-				if (pTag->IsFloat() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-					return pTag->GetFloat() != pSearchTerm->m_pTag->GetFloat();
-			}
-		}
-	}
-
-	return false;
-}
-
-void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm* pSearchTerms, uint32 uIP, uint16 uPort, bool bOldClient, bool bKad2, uint16 uStartPosition)
-{
 	KeyHash* pCurrKeyHash;
 	if(m_mapKeyword.Lookup(CCKey(uKeyID.GetData()), pCurrKeyHash))
 	{
@@ -964,94 +715,118 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 			byIO.WriteByte(KADEMLIA_SEARCH_RES);
 		byIO.WriteUInt128(uKeyID);
 		byIO.WriteUInt16(50);
-		uint16 uMaxResults = 300;
+		const uint16 uMaxResults = 300;
 		int iCount = 0-uStartPosition;
-		int iSrcCount = 0; // netfinity: Anti fragmenting
-		POSITION pos1 = pCurrKeyHash->mapSource.GetStartPosition();
-		while( pos1 != NULL )
-		{
-			CCKey key1;
-			Source* pCurrSource;
-			pCurrKeyHash->mapSource.GetNextAssoc( pos1, key1, pCurrSource );
-			for(POSITION pos2 = pCurrSource->ptrlEntryList.GetHeadPosition(); pos2 != NULL; )
+		// we do 2 loops: In the first one we ignore all results which have a trustvalue below 1
+		// in the second one we then also consider those. That way we make sure our 300 max results are not full
+		// of spam entries. We could also sort by trustvalue, but we would risk to only send popular files this way
+		// on very hot keywords
+		bool bOnlyTrusted = true;
+		uint32 dbgResultsTrusted = 0;
+		uint32 dbgResultsUntrusted = 0;
+		do{
+			POSITION pos1 = pCurrKeyHash->mapSource.GetStartPosition();
+			while( pos1 != NULL )
 			{
-				CEntry* pCurrName = pCurrSource->ptrlEntryList.GetNext(pos2);
-				if ( !pSearchTerms || SearchTermsMatch(pSearchTerms, pCurrName) )
+				CCKey key1;
+				Source* pCurrSource;
+				pCurrKeyHash->mapSource.GetNextAssoc( pos1, key1, pCurrSource );
+				for(POSITION pos2 = pCurrSource->ptrlEntryList.GetHeadPosition(); pos2 != NULL; )
 				{
-					if( iCount < 0 )
-						iCount++;
-					else if( (uint16)iCount < uMaxResults )
+					CKeyEntry* pCurrName = (CKeyEntry*)pCurrSource->ptrlEntryList.GetNext(pos2);
+					ASSERT( pCurrName->IsKeyEntry() );
+					if ( (bOnlyTrusted ^ (pCurrName->GetTrustValue() < 1.0f)) && (!pSearchTerms || pCurrName->SearchTermsMatch(pSearchTerms)) )
 					{
-						if((!bOldClient || pCurrName->m_uSize <= OLD_MAX_EMULE_FILE_SIZE))
-						{
+						if( iCount < 0 )
 							iCount++;
-							byIO.WriteUInt128(pCurrName->m_uSourceID);
-							byIO.WriteTagList(pCurrName->m_listTag);
-							// BEGIN netfinity: Anti fragmenting
-							iSrcCount++;
-							uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
-							if( /*iCount % 50 == 0*/ uLen + 100 > 2000 )
+						else if( (uint16)iCount < uMaxResults )
+						{
+							if((!bOldClient || pCurrName->m_uSize <= OLD_MAX_EMULE_FILE_SIZE))
 							{
-								byIO.Seek((bKad2 ? (18 + 16) : 18));
-								byIO.WriteByte((byte) iSrcCount);
-							// END netfinity: Anti fragmenting
-								CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
-								byIO.Reset();
-								byIO.WriteByte(OP_KADEMLIAHEADER);
-								if(bKad2)
-								{
-									if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-										DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
-									byIO.WriteByte(KADEMLIA2_SEARCH_RES);
-									byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
-								}
+								iCount++;
+								if (bOnlyTrusted)
+									dbgResultsTrusted++;
 								else
+									dbgResultsUntrusted++;
+								byIO.WriteUInt128(pCurrName->m_uSourceID);
+								if (bKad2)
+									pCurrName->WriteTagListWithPublishInfo(&byIO);
+								else
+									pCurrName->WriteTagList(&byIO);
+								if( iCount % 50 == 0 )
 								{
-									if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-										DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
-									byIO.WriteByte(KADEMLIA_SEARCH_RES);
+									uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+									CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
+									byIO.Reset();
+									byIO.WriteByte(OP_KADEMLIAHEADER);
+									if(bKad2)
+									{
+										if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+											DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+										byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+										byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
+									}
+									else
+									{
+										if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+											DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
+										byIO.WriteByte(KADEMLIA_SEARCH_RES);
+									}
+									byIO.WriteUInt128(uKeyID);
+									byIO.WriteUInt16(50);
 								}
-								byIO.WriteUInt128(uKeyID);
-								byIO.WriteUInt16(50);
-								iSrcCount = 0; // netfinity: Anti fragmenting
 							}
 						}
-					}
-					else
-					{
-						pos1 = NULL;
-						break;
+						else
+						{
+							pos1 = NULL;
+							break;
+						}
 					}
 				}
 			}
-		}
+			if (bOnlyTrusted && iCount < (int)uMaxResults)
+				bOnlyTrusted = false;
+			else
+				break;
+		} while (!bOnlyTrusted);
+
+		// LOGTODO: Remove Log
+		DebugLog(_T("Kad Keyword search Result Request: Send %u trusted and %u untrusted results"), dbgResultsTrusted, dbgResultsUntrusted);
+
 		if(iCount > 0)
 		{
-			int iCountLeft = iSrcCount; // netfinity: Anti fragmenting /*(uint16)iCount % 50;*/
-			if( iCountLeft )
+			uint16 uCountLeft = (uint16)iCount % 50;
+			if( uCountLeft )
 			{
 				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
 				if(bKad2)
 				{
-					memcpy(byPacket+18+16, &iCountLeft, 2); // netf
+					memcpy(byPacket+18+16, &uCountLeft, 2);
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
 				}
 				else
 				{
-					memcpy(byPacket+18, &iCountLeft, 2); // netf
+					memcpy(byPacket+18, &uCountLeft, 2);
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
 				}
-				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 			}
 		}
 	}
 	Clean();
 }
 
-void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint16 uStartPosition, uint64 uFileSize)
+void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint16 uStartPosition, uint64 uFileSize, CKadUDPKey senderUDPKey)
 {
+	// do not access any data while the loading thread is busy;
+	if (!m_bDataLoaded) {
+		DEBUG_ONLY( DebugLogWarning(_T("CIndexed Memberfunction call failed because the dataloading still in progress")) );
+		return;
+	}
+
 	SrcHash* pCurrSrcHash;
 	if(m_mapSources.Lookup(CCKey(uKeyID.GetData()), pCurrSrcHash))
 	{
@@ -1069,7 +844,6 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 		byIO.WriteUInt16(50);
 		uint16 uMaxResults = 300;
 		int iCount = 0-uStartPosition;
-		int iSrcCount = 0; // netfinity: Anti fragmenting
 		for(POSITION pos1 = pCurrSrcHash->ptrlistSource.GetHeadPosition(); pos1 != NULL; )
 		{
 			Source* pCurrSource = pCurrSrcHash->ptrlistSource.GetNext(pos1);
@@ -1083,17 +857,12 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 					if( !uFileSize || !pCurrName->m_uSize || pCurrName->m_uSize == uFileSize )
 					{
 						byIO.WriteUInt128(pCurrName->m_uSourceID);
-						byIO.WriteTagList(pCurrName->m_listTag);
+						pCurrName->WriteTagList(&byIO);
 						iCount++;
-						// BEGIN netfinity: Anti fragmenting
-						iSrcCount++;
-						uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
-						if( /*iCount % 50 == 0*/ uLen + 100 > 2000 )
+						if( iCount % 50 == 0 )
 						{
-							byIO.Seek((bKad2 ? (18 + 16) : 18));
-							byIO.WriteByte((byte) iSrcCount);
-						// END netfinity: Anti fragmenting
-							CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+							uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+							CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 							byIO.Reset();
 							byIO.WriteByte(OP_KADEMLIAHEADER);
 							if(bKad2)
@@ -1111,7 +880,6 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 							}
 							byIO.WriteUInt128(uKeyID);
 							byIO.WriteUInt16(50);
-							iSrcCount = 0; // netfinity: Anti fragmenting
 						}
 					}
 				}
@@ -1123,31 +891,37 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 		}
 		if( iCount > 0 )
 		{
-			int iCountLeft = iSrcCount; // netfinity: Anti fragmenting /*(uint16)iCount % 50;*/
-			if( iCountLeft )
+			uint16 uCountLeft = (uint16)iCount % 50;
+			if( uCountLeft )
 			{
 				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
 				if(bKad2)
 				{
-					memcpy(byPacket+18+16, &iCountLeft, 2);
+					memcpy(byPacket+18+16, &uCountLeft, 2);
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
 				}
 				else
 				{
-					memcpy(byPacket+18, &iCountLeft, 2);
+					memcpy(byPacket+18, &uCountLeft, 2);
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
 				}
-				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 			}
 		}
 	}
 	Clean();
 }
 
-void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint64 uFileSize)
+void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint64 uFileSize, CKadUDPKey senderUDPKey)
 {
+	// do not access any data while the loading thread is busy;
+	if (!m_bDataLoaded) {
+		DEBUG_ONLY( DebugLogWarning(_T("CIndexed Memberfunction call failed because the dataloading still in progress")) );
+		return;
+	}
+
 	try
 	{
 		SrcHash* pCurrNoteHash;
@@ -1166,8 +940,7 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 			byIO.WriteUInt128(uKeyID);
 			byIO.WriteUInt16(50);
 			uint16 uMaxResults = 150;
-			int uCount = 0;
-			int iSrcCount = 0; // netfinity: Anti fragmenting
+			uint16 uCount = 0;
 			for(POSITION pos1 = pCurrNoteHash->ptrlistSource.GetHeadPosition(); pos1 != NULL; )
 			{
 				Source* pCurrNote = pCurrNoteHash->ptrlistSource.GetNext(pos1);
@@ -1179,17 +952,12 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 						if( !uFileSize || !pCurrName->m_uSize || uFileSize == pCurrName->m_uSize )
 						{
 							byIO.WriteUInt128(pCurrName->m_uSourceID);
-							byIO.WriteTagList(pCurrName->m_listTag);
+							pCurrName->WriteTagList(&byIO);
 							uCount++;
-							// BEGIN netfinity: Anti fragmenting
-							iSrcCount++;
-							uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
-							if( /*iCount % 50 == 0*/ uLen + 100 > 2000 )
+							if( uCount % 50 == 0 )
 							{
-								byIO.Seek((bKad2 ? (18 + 16) : 18));
-								byIO.WriteByte((byte) iSrcCount);
-							// END netfinity: Anti fragmentingif( uCount % 50 == 0 )
-								CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+								uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+								CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 								byIO.Reset();
 								byIO.WriteByte(OP_KADEMLIAHEADER);
 								if(bKad2)
@@ -1207,7 +975,6 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 								}
 								byIO.WriteUInt128(uKeyID);
 								byIO.WriteUInt16(50);
-								iSrcCount = 0; // netfinity: Anti fragmenting
 							}
 						}
 					}
@@ -1217,23 +984,23 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 					}
 				}
 			}
-			int iCountLeft = iSrcCount; // netfinity: Anti fragmenting /*uCount % 50;*/
-			if( iCountLeft )
+			uint16 uCountLeft = uCount % 50;
+			if( uCountLeft )
 			{
 				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
 				if(bKad2)
 				{
-					memcpy(byPacket+18+16, &iCountLeft, 2);
+					memcpy(byPacket+18+16, &uCountLeft, 2);
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
 				}
 				else
 				{
-					memcpy(byPacket+18, &iCountLeft, 2);
+					memcpy(byPacket+18, &uCountLeft, 2);
 					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 						DebugSend("KADEMLIA_SEARCH_NOTES_RES", uIP, uPort);
 				}
-				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort);
+				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 			}
 		}
 	}
@@ -1245,6 +1012,12 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 
 bool CIndexed::SendStoreRequest(const CUInt128& uKeyID)
 {
+	// do not access any data while the loading thread is busy;
+	if (!m_bDataLoaded) {
+		DEBUG_ONLY( DebugLogWarning(_T("CIndexed Memberfunction call failed because the dataloading still in progress")) );
+		return true; // don't report overloaded with a false
+	}
+
 	Load* pLoad;
 	if(m_mapLoad.Lookup(CCKey(uKeyID.GetData()), pLoad))
 	{
@@ -1262,7 +1035,13 @@ bool CIndexed::SendStoreRequest(const CUInt128& uKeyID)
 
 uint32 CIndexed::GetFileKeyCount()
 {
-	return (uint32) m_mapKeyword.GetCount();
+	// do not access any data while the loading thread is busy;
+	if (!m_bDataLoaded) {
+		DEBUG_ONLY( DebugLogWarning(_T("CIndexed Memberfunction call failed because the dataloading still in progress")) );
+		return 0;
+	}
+
+	return (uint32) m_mapKeyword.GetCount(); // MOPRH
 }
 
 SSearchTerm::SSearchTerm()
@@ -1278,4 +1057,254 @@ SSearchTerm::~SSearchTerm()
 	if (m_type == String)
 		delete m_pastr;
 	delete m_pTag;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////
+/// CIndexed::CLoadDataThread Implementation
+typedef CIndexed::CLoadDataThread CLoadDataThread;
+IMPLEMENT_DYNCREATE(CLoadDataThread, CWinThread)
+
+CIndexed::CLoadDataThread::CLoadDataThread()
+{
+	m_pOwner = NULL;
+}
+
+BOOL CIndexed::CLoadDataThread::InitInstance()
+{
+	InitThreadLocale();
+	return TRUE;
+}
+
+int CIndexed::CLoadDataThread::Run()
+{
+	DbgSetThreadName("Kademlia Indexed Load Data");
+	if ( !m_pOwner )
+		return 0;
+
+	ASSERT( m_pOwner->m_bDataLoaded == false );
+	CSingleLock sLock(&m_pOwner->m_mutSync);
+	sLock.Lock();
+
+	try
+	{
+		uint32 uTotalLoad = 0;
+		uint32 uTotalSource = 0;
+		uint32 uTotalKeyword = 0;
+		CUInt128 uKeyID, uID, uSourceID;
+		
+		if (!m_pOwner->m_bAbortLoading)
+		{
+			CBufferedFileIO fileLoad;
+			if(fileLoad.Open(m_sLoadFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
+			{
+				setvbuf(fileLoad.m_pStream, NULL, _IOFBF, 32768);
+				uint32 uVersion = fileLoad.ReadUInt32();
+				if(uVersion<2)
+				{
+					/*time_t tSaveTime = */fileLoad.ReadUInt32();
+					uint32 uNumLoad = fileLoad.ReadUInt32();
+					while(uNumLoad && !m_pOwner->m_bAbortLoading)
+					{
+						fileLoad.ReadUInt128(&uKeyID);
+						if(m_pOwner->AddLoad(uKeyID, fileLoad.ReadUInt32(), true))
+							uTotalLoad++;
+						uNumLoad--;
+					}
+				}
+				fileLoad.Close();
+			}
+			else
+				DebugLogWarning(_T("Unable to load Kad file: %s"), m_sLoadFileName);
+		}
+
+		if (!m_pOwner->m_bAbortLoading)
+		{
+			CBufferedFileIO fileKey;
+			if (fileKey.Open(m_sKeyFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
+			{
+				setvbuf(fileKey.m_pStream, NULL, _IOFBF, 32768);
+
+				uint32 uVersion = fileKey.ReadUInt32();
+				if( uVersion < 4)
+				{
+					time_t tSaveTime = fileKey.ReadUInt32();
+					if( tSaveTime > time(NULL) )
+					{
+						fileKey.ReadUInt128(&uID);
+						if( Kademlia::CKademlia::GetPrefs()->GetKadID() == uID )
+						{
+							uint32 uNumKeys = fileKey.ReadUInt32();
+							while( uNumKeys && !m_pOwner->m_bAbortLoading )
+							{
+								fileKey.ReadUInt128(&uKeyID);
+								uint32 uNumSource = fileKey.ReadUInt32();
+								while( uNumSource && !m_pOwner->m_bAbortLoading )
+								{
+									fileKey.ReadUInt128(&uSourceID);
+									uint32 uNumName = fileKey.ReadUInt32();
+									while( uNumName && !m_pOwner->m_bAbortLoading)
+									{
+										CKeyEntry* pToAdd = new Kademlia::CKeyEntry();
+										pToAdd->m_uKeyID.SetValue(uKeyID);
+										pToAdd->m_uSourceID.SetValue(uSourceID);									
+										pToAdd->m_bSource = false;
+										pToAdd->m_tLifetime = fileKey.ReadUInt32();
+										if (uVersion >= 3)
+											pToAdd->ReadPublishTrackingDataFromFile(&fileKey);
+										uint32 uTotalTags = fileKey.ReadByte();
+										while( uTotalTags )
+										{
+											CKadTag* pTag = fileKey.ReadTag();
+											if(pTag)
+											{
+												if (!pTag->m_name.Compare(TAG_FILENAME))
+												{
+													if (pToAdd->GetCommonFileName().IsEmpty())
+														pToAdd->SetFileName(pTag->GetStr());
+													delete pTag;
+												}
+												else if (!pTag->m_name.Compare(TAG_FILESIZE))
+												{
+													pToAdd->m_uSize = pTag->GetInt();
+													delete pTag;
+												}
+												else if (!pTag->m_name.Compare(TAG_SOURCEIP))
+												{
+													pToAdd->m_uIP = (uint32)pTag->GetInt();
+													pToAdd->AddTag(pTag);
+												}
+												else if (!pTag->m_name.Compare(TAG_SOURCEPORT))
+												{
+													pToAdd->m_uTCPPort = (uint16)pTag->GetInt();
+													pToAdd->AddTag(pTag);
+												}
+												else if (!pTag->m_name.Compare(TAG_SOURCEUPORT))
+												{
+													pToAdd->m_uUDPPort = (uint16)pTag->GetInt();
+													pToAdd->AddTag(pTag);
+												}
+												else
+												{
+													pToAdd->AddTag(pTag);
+												}
+											}
+											uTotalTags--;
+										}
+										uint8 uLoad;
+										if(m_pOwner->AddKeyword(uKeyID, uSourceID, pToAdd, uLoad, true))
+											uTotalKeyword++;
+										else
+											delete pToAdd;
+										uNumName--;
+									}
+									uNumSource--;
+								}
+								uNumKeys--;
+							}
+						}
+					}
+				}
+				fileKey.Close();
+			}
+			else
+				DebugLogWarning(_T("Unable to load Kad file: %s"), m_sKeyFileName);
+		}
+
+		if (!m_pOwner->m_bAbortLoading)
+		{
+			CBufferedFileIO fileSource;
+			if (fileSource.Open(m_sSourceFileName, CFile::modeRead | CFile::typeBinary | CFile::shareDenyWrite))
+			{
+				setvbuf(fileSource.m_pStream, NULL, _IOFBF, 32768);
+
+				uint32 uVersion = fileSource.ReadUInt32();
+				if( uVersion < 3 )
+				{
+					time_t tSaveTime = fileSource.ReadUInt32();
+					if( tSaveTime > time(NULL) )
+					{
+						uint32 uNumKeys = fileSource.ReadUInt32();
+						while( uNumKeys && !m_pOwner->m_bAbortLoading )
+						{
+							fileSource.ReadUInt128(&uKeyID);
+							uint32 uNumSource = fileSource.ReadUInt32();
+							while( uNumSource && !m_pOwner->m_bAbortLoading )
+							{
+								fileSource.ReadUInt128(&uSourceID);
+								uint32 uNumName = fileSource.ReadUInt32();
+								while( uNumName && !m_pOwner->m_bAbortLoading )
+								{
+									CEntry* pToAdd = new Kademlia::CEntry();
+									pToAdd->m_bSource = true;
+									pToAdd->m_tLifetime = fileSource.ReadUInt32();
+									uint32 uTotalTags = fileSource.ReadByte();
+									while( uTotalTags )
+									{
+										CKadTag* pTag = fileSource.ReadTag();
+										if(pTag)
+										{
+											if (!pTag->m_name.Compare(TAG_SOURCEIP))
+											{
+												pToAdd->m_uIP = (uint32)pTag->GetInt();
+												pToAdd->AddTag(pTag);
+											}
+											else if (!pTag->m_name.Compare(TAG_SOURCEPORT))
+											{
+												pToAdd->m_uTCPPort = (uint16)pTag->GetInt();
+												pToAdd->AddTag(pTag);
+											}
+											else if (!pTag->m_name.Compare(TAG_SOURCEUPORT))
+											{
+												pToAdd->m_uUDPPort = (uint16)pTag->GetInt();
+												pToAdd->AddTag(pTag);
+											}
+											else
+											{
+												pToAdd->AddTag(pTag);
+											}
+										}
+										uTotalTags--;
+									}
+									pToAdd->m_uKeyID.SetValue(uKeyID);
+									pToAdd->m_uSourceID.SetValue(uSourceID);
+									uint8 uLoad;
+									if(m_pOwner->AddSources(uKeyID, uSourceID, pToAdd, uLoad, true))
+										uTotalSource++;
+									else
+										delete pToAdd;
+									uNumName--;
+								}
+								uNumSource--;
+							}
+							uNumKeys--;
+						}
+					}
+				}
+				fileSource.Close();
+
+				m_pOwner->m_uTotalIndexSource = uTotalSource;
+				m_pOwner->m_uTotalIndexKeyword = uTotalKeyword;
+				m_pOwner->m_uTotalIndexLoad = uTotalLoad;
+				AddDebugLogLine( false, _T("Read %u source, %u keyword, and %u load entries"), uTotalSource, uTotalKeyword, uTotalLoad);
+			}
+			else
+				DebugLogWarning(_T("Unable to load Kad file: %s"), m_sSourceFileName);
+		}
+	}
+	catch ( CIOException *ioe )
+	{
+		AddDebugLogLine( false, _T("CIndexed::CLoadDataThread::Run (IO error(%i))"), ioe->m_iCause);
+		ioe->Delete();
+	}
+	catch (...)
+	{
+		AddDebugLogLine(false, _T("Exception in CIndexed::CLoadDataThread::Run"));
+		ASSERT( false );
+	}
+	if (m_pOwner->m_bAbortLoading)
+		AddDebugLogLine(false, _T("Terminating CIndexed::CLoadDataThread - early abort requested"));
+	else
+		AddDebugLogLine(false, _T("Terminating CIndexed::CLoadDataThread - finished loading data"));
+
+	m_pOwner->m_bDataLoaded = true;
+	return 0;
 }

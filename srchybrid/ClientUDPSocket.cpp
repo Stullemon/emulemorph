@@ -1,5 +1,5 @@
 ﻿//this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -31,12 +31,14 @@
 #include "Listensocket.h"
 #include <zlib/zlib.h>
 #include "kademlia/kademlia/Kademlia.h"
+#include "kademlia/kademlia/UDPFirewallTester.h"
 #include "kademlia/net/KademliaUDPListener.h"
 #include "kademlia/io/IOException.h"
 #include "IPFilter.h"
 #include "Log.h"
 #include "EncryptedDatagramSocket.h"
 #include "./kademlia/kademlia/prefs.h"
+#include "./kademlia/utils/KadUDPKey.h"
 
 #include "FirewallOpener.h" // emulEspaa: Added by MoNKi [MoNKi: -Random Ports-]
 
@@ -82,8 +84,8 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 	if (!(theApp.ipfilter->IsFiltered(sockAddr.sin_addr.S_un.S_addr) || theApp.clientlist->IsBannedClient(sockAddr.sin_addr.S_un.S_addr)))
 	{
 		BYTE* pBuffer;
-		uint16 nReceiverVerifyKey;
-		uint16 nSenderVerifyKey;
+		uint32 nReceiverVerifyKey;
+		uint32 nSenderVerifyKey;
 		int nPacketLen = DecryptReceivedClient(buffer, nRealLen, &pBuffer, sockAddr.sin_addr.S_un.S_addr, &nReceiverVerifyKey, &nSenderVerifyKey);
 		if (nPacketLen >= 1)
 		{
@@ -123,7 +125,9 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 								unpack[1] = pBuffer[1];
 								try
 								{
-									Kademlia::CKademlia::ProcessPacket(unpack, unpackedsize+2, ntohl(sockAddr.sin_addr.S_un.S_addr), ntohs(sockAddr.sin_port));
+									Kademlia::CKademlia::ProcessPacket(unpack, unpackedsize+2, ntohl(sockAddr.sin_addr.S_un.S_addr), ntohs(sockAddr.sin_port)
+										, (Kademlia::CPrefs::GetUDPVerifyKey(sockAddr.sin_addr.S_un.S_addr) == nReceiverVerifyKey)
+										, Kademlia::CKadUDPKey(nSenderVerifyKey, theApp.GetPublicIP(false)) );
 								}
 								catch(...)
 								{
@@ -148,7 +152,9 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 					{
 						theStats.AddDownDataOverheadKad(nPacketLen);
 						if (nPacketLen >= 2)
-							Kademlia::CKademlia::ProcessPacket(pBuffer, nPacketLen, ntohl(sockAddr.sin_addr.S_un.S_addr), ntohs(sockAddr.sin_port));
+							Kademlia::CKademlia::ProcessPacket(pBuffer, nPacketLen, ntohl(sockAddr.sin_addr.S_un.S_addr), ntohs(sockAddr.sin_port)
+							, (Kademlia::CPrefs::GetUDPVerifyKey(sockAddr.sin_addr.S_un.S_addr) == nReceiverVerifyKey)
+							, Kademlia::CKadUDPKey(nSenderVerifyKey, theApp.GetPublicIP(false)) );
 						else
 							throw CString(_T("Kad packet too short"));
 						break;
@@ -437,6 +443,41 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 			}
 			break;
 		}
+		case OP_DIRECTCALLBACKREQ:
+		{
+			if (thePrefs.GetDebugClientUDPLevel() > 0)
+				DebugRecv("OP_DIRECTCALLBACKREQ", NULL, NULL, ip);
+			if (!theApp.clientlist->AllowCalbackRequest(ip)){
+				DebugLogWarning(_T("Ignored DirectCallback Request because this IP (%s) has sent too many request within a short time"), ipstr(ip));
+				break;
+			}
+			// do we accept callbackrequests at all?
+			if (Kademlia::CKademlia::IsRunning() && Kademlia::CKademlia::IsFirewalled())
+			{
+				CSafeMemFile data(packet, size);
+				uint16 nRemoteTCPPort = data.ReadUInt16();
+				uchar uchUserHash[16];
+				data.ReadHash16(uchUserHash);
+				uint8 byConnectOptions = data.ReadUInt8();
+				CUpDownClient* pRequester = theApp.clientlist->FindClientByUserHash(uchUserHash, ip, nRemoteTCPPort);
+				if (pRequester == NULL) {
+					pRequester = new CUpDownClient(NULL, nRemoteTCPPort, ip, 0, 0, true);
+					pRequester->SetUserHash(uchUserHash);
+					theApp.clientlist->AddClient(pRequester);
+				}
+				pRequester->SetConnectOptions(byConnectOptions, true, false);
+				pRequester->SetDirectUDPCallbackSupport(false);
+				pRequester->SetIP(ip);
+				pRequester->SetUserPort(nRemoteTCPPort);
+				//TODO LOGREMOVE
+				DebugLog(_T("Accepting incoming DirectCallbackRequest from %s"), pRequester->DbgGetClientInfo());
+				pRequester->TryToConnect();
+			}
+			else
+				DebugLogWarning(_T("Ignored DirectCallback Request because we do not accept DirectCall backs at all (%s)"), ipstr(ip));
+
+			break;
+		}
 		default:
 			theStats.AddDownDataOverheadOther(size);
 			if (thePrefs.GetDebugClientUDPLevel() > 0)
@@ -467,7 +508,6 @@ void CClientUDPSocket::OnSend(int nErrorCode){
 // <-- ZZ:UploadBandWithThrottler (UDP)
 }
 
-
 SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint32 /*minFragSize */){ // ZZ:UploadBandWithThrottler (UDP)
 // ZZ:UploadBandWithThrottler (UDP) -->
 	// NOTE: *** This function is invoked from a *different* thread!
@@ -486,7 +526,7 @@ SocketSentBytes CClientUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend,
 			memcpy(sendbuffer+2,cur_packet->packet->pBuffer,cur_packet->packet->size);
 
 			if (cur_packet->bEncrypt && (theApp.GetPublicIP() > 0 || cur_packet->bKad)){
-				nLen = EncryptSendClient(&sendbuffer, nLen, cur_packet->pachTargetClientHashORKadID, cur_packet->bKad,  cur_packet->nReceiverVerifyKey, (cur_packet->bKad ? Kademlia::CKademlia::GetPrefs()->GetUDPVerifyKey(cur_packet->dwIP) : (uint16)0));
+				nLen = EncryptSendClient(&sendbuffer, nLen, cur_packet->pachTargetClientHashORKadID, cur_packet->bKad,  cur_packet->nReceiverVerifyKey, (cur_packet->bKad ? Kademlia::CPrefs::GetUDPVerifyKey(cur_packet->dwIP) : (uint16)0));
 				DEBUG_ONLY(  DebugLog(_T("Sent obfuscated UDP packet to clientIP: %s, Kad: %s, ReceiverKey: %u"), ipstr(cur_packet->dwIP), cur_packet->bKad ? _T("Yes") : _T("No"), cur_packet->nReceiverVerifyKey) );
 			}
 
@@ -537,17 +577,17 @@ int CClientUDPSocket::SendTo(char* lpBuf,int nBufLen,uint32 dwIP, uint16 nPort){
 	return 0;
 }
 
-bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort, bool bEncrypt, const uchar* pachTargetClientHashORKadID, bool bKad, uint16 nReceiverVerifyKey){
+bool CClientUDPSocket::SendPacket(Packet* packet, uint32 dwIP, uint16 nPort, bool bEncrypt, const uchar* pachTargetClientHashORKadID, bool bKad, uint32 nReceiverVerifyKey){
 	UDPPack* newpending = new UDPPack;
 	newpending->dwIP = dwIP;
 	newpending->nPort = nPort;
 	newpending->packet = packet;
 	newpending->dwTime = GetTickCount();
-	newpending->bEncrypt = bEncrypt && pachTargetClientHashORKadID != NULL;
+	newpending->bEncrypt = bEncrypt && (pachTargetClientHashORKadID != NULL || (bKad && nReceiverVerifyKey != 0));
 	newpending->bKad = bKad;
 	newpending->nReceiverVerifyKey = nReceiverVerifyKey;
 
-	if (newpending->bEncrypt)
+	if (newpending->bEncrypt && pachTargetClientHashORKadID != NULL)
 		md4cpy(newpending->pachTargetClientHashORKadID, pachTargetClientHashORKadID);
 	else
 		md4clr(newpending->pachTargetClientHashORKadID);

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -149,7 +149,6 @@ int		GetPathDriveNumber(CString path);
 EFileType	GetFileTypeEx(CKnownFile* kfile, bool checkextention=true, bool checkfileheader=true, bool nocached=false);
 CString		GetFiletypeName(EFileType ftype);
 int			IsExtentionTypeof(EFileType type, CString ext);
-LPCTSTR		_tcsistr(LPCTSTR pszString, LPCTSTR pszPattern);
 uint32		LevenshteinDistance(const CString& str1, const CString& str2);
 bool		_tmakepathlimit(TCHAR *path, const TCHAR *drive, const TCHAR *dir, const TCHAR *fname, const TCHAR *ext);
 
@@ -168,6 +167,8 @@ CString GetRateString(UINT rate);
 HWND GetComboBoxEditCtrl(CComboBox& cb);
 HWND ReplaceRichEditCtrl(CWnd* pwndRE, CWnd* pwndParent, CFont* pFont);
 int  FontPointSizeToLogUnits(int nPointSize);
+bool CreatePointFont(CFont &rFont, int nPointSize, LPCTSTR lpszFaceName);
+bool CreatePointFontIndirect(CFont &rFont, const LOGFONT *lpLogFont);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -377,6 +378,8 @@ bool gotostring(CFile &file, uchar *find, LONGLONG plen);
 void TriggerPortTest(uint16 tcp, uint16 udp);
 bool IsGoodIP(uint32 nIP, bool forceCheck = false);
 bool IsGoodIPPort(uint32 nIP, uint16 nPort);
+bool IsLANIP(uint32 nIP);
+uint8 GetMyConnectOptions(bool bEncryption = true, bool bCallback = true);
 //No longer need seperate lowID checks as we now know the servers just give *.*.*.0 users a lowID
 __inline bool IsLowID(uint32 id){
 	return (id < 16777216);

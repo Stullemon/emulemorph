@@ -60,7 +60,7 @@ public:
 	//void LoadSettings(CPreferences::Table tID);
 	void LoadSettings();
 
-	DWORD SetExtendedStyle(DWORD dwNewStyle) { return CListCtrl::SetExtendedStyle(dwNewStyle | LVS_EX_HEADERDRAGDROP); }
+	DWORD SetExtendedStyle(DWORD dwNewStyle);
 
 	// Hide the column
 	void HideColumn(int iColumn);
@@ -158,6 +158,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
 	afx_msg void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+	afx_msg void MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct);
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
 	afx_msg void OnSysColorChange();
 	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);

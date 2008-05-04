@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -162,7 +162,7 @@ void CEditDelayed::DoDelayedEvalute(bool bForce)
 	GetParent()->SendMessage(UM_DELAYED_EVALUATE, (WPARAM)m_nCurrentColumnIdx, (LPARAM)(LPCTSTR)m_strLastEvaluatedContent);
 }
 
-void CEditDelayed::OnInit(CHeaderCtrl* pColumnHeader)
+void CEditDelayed::OnInit(CHeaderCtrl* pColumnHeader, CArray<int, int>* paIgnoredColums)
 {
 	SetEditRect(false);
 	CRect rectWindow;
@@ -190,6 +190,8 @@ void CEditDelayed::OnInit(CHeaderCtrl* pColumnHeader)
 	m_iwReset.SetImageList(pImageList);
 	m_iwReset.Create(_T(""), WS_CHILD , CRect(0, 0, ICON_LEFTSPACE, rectWindow.bottom), this, 1);
 
+	if (paIgnoredColums != NULL)
+		m_aIgnoredColums.Copy(*paIgnoredColums);
 	ShowColumnText(true);
 }
 
@@ -232,7 +234,14 @@ void CEditDelayed::OnLButtonDown(UINT nFlags, CPoint point)
 			for (int i = 0; i < nCount ;i++) {
 				nIdx = m_pctrlColumnHeader->OrderToIndex(i);
 				m_pctrlColumnHeader->GetItem(nIdx, &hdi);
-				if (hdi.cxy > 0) // ignore hidden columns
+				bool bIgnored = false;
+				for (int i = 0; i < m_aIgnoredColums.GetCount(); i++){
+					if (m_aIgnoredColums[i] == nIdx){
+						bIgnored = true;
+						break;
+					}
+				}
+				if (hdi.cxy > 0 && !bIgnored) // ignore hidden columns
 					menu.AppendMenu(MF_STRING | ((m_nCurrentColumnIdx == nIdx) ? MF_CHECKED : MF_UNCHECKED), MP_FILTERCOLUMNS + nIdx, hdi.pszText);
 			}
 

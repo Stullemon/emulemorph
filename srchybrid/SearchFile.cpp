@@ -1,6 +1,6 @@
 // parts of this file are based on work from pan One (http://home-3.tiscali.nl/~meost/pms/)
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -300,6 +300,25 @@ CSearchFile::~CSearchFile()
 	//MORPH END   - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	for (int i = 0; i < m_listImages.GetSize(); i++)
 		delete m_listImages[i];
+}
+
+void CSearchFile::StoreToFile(CFileDataIO& rFile) const
+{
+	rFile.WriteHash16(m_abyFileHash);
+	rFile.WriteUInt32(m_nClientID);
+	rFile.WriteUInt16(m_nClientPort);
+	rFile.WriteUInt32(taglist.GetCount());
+	INT_PTR pos;
+	for (pos = 0; pos < taglist.GetCount(); pos++){
+		CTag* tag = taglist.GetAt(pos);
+		if (tag->GetNameID() == FT_FILERATING && tag->IsInt())
+		{
+			CTag temp(FT_FILERATING, (tag->GetInt() * (255/5)) & 0xFF);
+			temp.WriteNewEd2kTag(&rFile);
+			continue;
+		}
+		tag->WriteNewEd2kTag(&rFile);
+	}
 }
 
 void CSearchFile::UpdateFileRatingCommentAvail(bool bForceUpdate)

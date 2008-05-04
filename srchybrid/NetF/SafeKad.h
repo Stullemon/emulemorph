@@ -7,6 +7,7 @@
 #include "Kademlia/routing/Contact.h"
 #include "Kademlia/routing/Maps.h"
 
+#ifdef USE_SAFEKAD
 namespace Kademlia
 {
 	class CSafeKad
@@ -60,3 +61,4 @@ namespace Kademlia
 	extern CSafeKad safeKad;
 }
 #endif	//SAFEKAD_H
+#endif //USE_SAFEKAD

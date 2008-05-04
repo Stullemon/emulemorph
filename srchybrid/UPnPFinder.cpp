@@ -571,8 +571,8 @@ HRESULT CUPnPFinder::MapPort(const ServicePointer& service)
 				  !( strServiceId.Find( L"urn:upnp-org:serviceId:WANDSLLinkC" ) == -1 );
 	}
 
-	bool bPPP = !( strServiceId.Find( L"urn:upnp-org:serviceId:WANPPPConn" ) == -1 );
-	bool bIP  = !( strServiceId.Find( L"urn:upnp-org:serviceId:WANIPConn" ) == -1 );
+	bool bPPP = stristr(strServiceId, L"urn:upnp-org:serviceId:WANPPPC") != NULL;
+	bool bIP  = stristr(strServiceId, L"urn:upnp-org:serviceId:WANIPC")  != NULL;
 
 	if ( ((thePrefs.GetSkipWANPPPSetup() || m_bDisableWANPPPSetup) && bPPP) ||
 		 ((thePrefs.GetSkipWANIPSetup() || m_bDisableWANIPSetup) && bIP) ||
@@ -592,7 +592,7 @@ HRESULT CUPnPFinder::MapPort(const ServicePointer& service)
 
 	DebugLog(_T("Got status info from the service %s: %s"), strServiceId, strResult );
 
-	if ( _tcsistr( strResult, L"|VT_BSTR=Connected|" ) != NULL )
+	if ( stristr( strResult, L"|VT_BSTR=Connected|" ) != NULL )
 	{
 		// Add a callback to detect device status changes
 		// ??? How it will work if two devices are active ???
@@ -611,14 +611,14 @@ HRESULT CUPnPFinder::MapPort(const ServicePointer& service)
 			m_bUPnPDeviceConnected = TRIS_TRUE;
 		}
 	}
-	else if ( _tcsistr( strResult, L"|VT_BSTR=Disconnected|" ) != NULL && m_bADSL && bPPP )
+	else if ( stristr( strResult, L"|VT_BSTR=Disconnected|" ) != NULL && m_bADSL && bPPP )
 	{
 		DebugLog(_T("Disconnected PPP service in ADSL device..."));
 		m_bDisableWANIPSetup = false;
 		m_bDisableWANPPPSetup = true;
 		m_ADSLFailed = true;
 	}
-	else if ( _tcsistr( strResult, L"|VT_BSTR=Disconnected|" ) != NULL && m_bADSL && bIP )
+	else if ( stristr( strResult, L"|VT_BSTR=Disconnected|" ) != NULL && m_bADSL && bIP )
 	{
 		DebugLog(_T("Disconnected IP service in ADSL device..."));
 		m_bDisableWANIPSetup = true;
@@ -801,8 +801,8 @@ void CUPnPFinder::DeleteExistingPortMappings(ServicePointer pService)
 				break;
 			}
 
-			if ( _tcsistr( strActionResult, L"|VT_BSTR=eMule TCP|" ) != NULL ||
-				_tcsistr( strActionResult, L"|VT_BSTR=eMule UDP|" ) != NULL )
+			if ( stristr( strActionResult, L"|VT_BSTR=eMule TCP|" ) != NULL ||
+				stristr( strActionResult, L"|VT_BSTR=eMule UDP|" ) != NULL )
 			{
 
 
@@ -811,13 +811,13 @@ void CUPnPFinder::DeleteExistingPortMappings(ServicePointer pService)
 				strProtocol	= '|' + oTokens[ 2 ] + '|';
 
 				// verify types
-				if ( _tcsistr( strHost, L"VT_BSTR" ) == NULL
-						|| _tcsistr( strPort, L"VT_UI2" ) == NULL
-						|| _tcsistr( strProtocol, L"VT_BSTR" ) == NULL )
+				if ( stristr( strHost, L"VT_BSTR" ) == NULL
+						|| stristr( strPort, L"VT_UI2" ) == NULL
+						|| stristr( strProtocol, L"VT_BSTR" ) == NULL )
 					break;
 
 				if ( _tcsstr( oTokens[ 4 ], m_sLocalIP ) != NULL || 
-					 _tcsistr( oTokens[ 4 ], szComputerName ) != NULL )
+					 stristr( oTokens[ 4 ], szComputerName ) != NULL )
 				{
 					CString str;
 					hrDel = InvokeAction( pService, L"DeletePortMapping", 

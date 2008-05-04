@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -163,7 +163,7 @@ void CPPgWiz1Welcome::DoDataExchange(CDataExchange* pDX)
 BOOL CPPgWiz1Welcome::OnInitDialog()
 {
 	CFont fontVerdanaBold;
-	fontVerdanaBold.CreatePointFont(120, _T("Verdana Bold"));
+	CreatePointFont(fontVerdanaBold, 12*10, _T("Verdana Bold"));
 	LOGFONT lf;
 	fontVerdanaBold.GetLogFont(&lf);
 	lf.lfWeight = FW_BOLD;
@@ -602,7 +602,7 @@ public:
 	CPPgWiz1Upload(UINT nIDTemplate, LPCTSTR pszCaption = NULL, LPCTSTR pszHeaderTitle = NULL, LPCTSTR pszHeaderSubTitle = NULL)
 		: CDlgPageWizard(nIDTemplate, pszCaption, pszHeaderTitle, pszHeaderSubTitle)
 	{
-		m_iULFullChunks = 1;
+		m_iObfuscation = 0;
 	}
 	virtual ~CPPgWiz1Upload();
 	virtual BOOL OnInitDialog();
@@ -610,7 +610,7 @@ public:
 // Dialog Data
 	enum { IDD = IDD_WIZ1_UPLOAD };
 
-	int m_iULFullChunks;
+	int m_iObfuscation;
 
 protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
@@ -626,7 +626,7 @@ END_MESSAGE_MAP()
 CPPgWiz1Upload::CPPgWiz1Upload()
 	: CDlgPageWizard(CPPgWiz1Upload::IDD)
 {
-	m_iULFullChunks = 1;
+	m_iObfuscation = 0;
 }
 
 CPPgWiz1Upload::~CPPgWiz1Upload()
@@ -636,14 +636,14 @@ CPPgWiz1Upload::~CPPgWiz1Upload()
 void CPPgWiz1Upload::DoDataExchange(CDataExchange* pDX)
 {
 	CDlgPageWizard::DoDataExchange(pDX);
-	DDX_Check(pDX, IDC_FULLCHUNKTRANS, m_iULFullChunks);
+	DDX_Check(pDX, IDC_WIZZARDOBFUSCATION, m_iObfuscation);
 }
 
 BOOL CPPgWiz1Upload::OnInitDialog()
 {
 	CDlgPageWizard::OnInitDialog();
 	InitWindowStyles(this);
-	GetDlgItem(IDC_FULLCHUNKTRANS)->SetWindowText(GetResString(IDS_FIRSTFULLCHUNK));
+	GetDlgItem(IDC_WIZZARDOBFUSCATION)->SetWindowText(GetResString(IDS_WIZZARDOBFUSCATION));
 	return TRUE;
 }
 
@@ -892,7 +892,7 @@ void CPPgWiz1End::DoDataExchange(CDataExchange* pDX)
 BOOL CPPgWiz1End::OnInitDialog()
 {
 	CFont fontVerdanaBold;
-	fontVerdanaBold.CreatePointFont(120, _T("Verdana Bold"));
+	CreatePointFont(fontVerdanaBold, 12*10, _T("Verdana Bold"));
 	LOGFONT lf;
 	fontVerdanaBold.GetLogFont(&lf);
 	lf.lfWeight = FW_BOLD;
@@ -970,10 +970,9 @@ int FirstTimeWizard() //lh ftw
 	CPPgWiz1UlPrio page4(IDD_WIZ1_ULDL_PRIO, GetResString(IDS_WIZ1), GetResString(IDS_PW_CON_DOWNLBL) + _T(" / ") + GetResString(IDS_PW_CON_UPLBL), GetResString(IDS_PRIORITY));
 	sheet.AddPage(&page4);
 	*/
-	/*MORPH   leuk_he: full chunks is not fucntional in zz upload system
-	CPPgWiz1Upload page5(IDD_WIZ1_UPLOAD, GetResString(IDS_WIZ1), GetResString(IDS_PW_CON_UPLBL), GetResString(IDS_WIZ1_UPLOAD_SUBTITLE));
+
+	CPPgWiz1Upload page5(IDD_WIZ1_UPLOAD, GetResString(IDS_WIZ1), GetResString(IDS_SECURITY), GetResString(IDS_OBFUSCATION));
 	sheet.AddPage(&page5);
-	  MORPH */ 
 	
 	CPPgWiz1Server page6(IDD_WIZ1_SERVER, GetResString(IDS_WIZ1), GetResString(IDS_PW_SERVER), GetResString(IDS_NETWORK));
 	sheet.AddPage(&page6);
@@ -999,11 +998,13 @@ int FirstTimeWizard() //lh ftw
 	page2.m_iAutoConnectAtStart = 0;
 	page3.m_sTCP.Format(_T("%u"), thePrefs.GetPort());
 	page3.m_sUDP.Format(_T("%u"), thePrefs.GetUDPPort());
+// MORPH less is more
 /*	
-  page4.m_iDAP = 1; // MORPH less is more
-  page4.m_iUAP = 1; // MORPH less is more
-  page5.m_iULFullChunks = 1;	  // MORPH not needed full chunk due to zz upload
+  page4.m_iDAP = 1;
+  page4.m_iUAP = 1;
 */
+// MORPH less is more
+	page5.m_iObfuscation = thePrefs.IsClientCryptLayerRequested() ? 1 : 0;
 	page6.m_iSafeServerConnect = 0;
 	page6.m_iKademlia = 1;
 	page6.m_iED2K = 1;
@@ -1047,15 +1048,21 @@ int FirstTimeWizard() //lh ftw
 		AddAutoStart();
 	else
 		RemAutoStart();
-/* MORPH STAR Less is more removed:
+//MORPH START - Removed, Less is more
+/*
  	thePrefs.SetNewAutoDown(page4.m_iDAP!=0); 
   thePrefs.SetNewAutoUp(page4.m_iUAP!=0);
-	thePrefs.SetTransferFullChunks(page5.m_iULFullChunks!=0);
-   MORPH END Less is more 
+*/
+//MORPH END   - Removed, Less is more 
+	thePrefs.m_bCryptLayerRequested = page5.m_iObfuscation != 0;
+	if (page5.m_iObfuscation != 0)
+		thePrefs.m_bCryptLayerSupported = true;
 	thePrefs.SetSafeServerConnectEnabled(page6.m_iSafeServerConnect!=0);
 	thePrefs.SetNetworkKademlia(page6.m_iKademlia!=0);
 	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);
-	thePrefs.m_bCryptLayerRequiredStrictServer = (page6.m_iReqObfus!=0); // // MORPH lh require obfuscated server connection
+	thePrefs.m_bCryptLayerRequested = page5.m_iObfuscation != 0;
+	if (page5.m_iObfuscation != 0)
+		thePrefs.m_bCryptLayerSupported = true;
 	thePrefs.SetExtControls(page6b.m_iShowMoreControls!=0 ); //morph show more controls in wizard
 	thePrefs.SetLessControls(page6b.m_iShowLessControls!=0); // MORPH START show less controls
 
@@ -1078,7 +1085,7 @@ int FirstTimeWizard() //lh ftw
 		}
 	
 	/* MORPH
-    return True
+    return TRUE;
 	*/
 	return page6b.m_iRunNetworkWizard + 2* page6b.m_iRunImportTool ; // MORPH  startup wizard (1= run net, 2= run improt , 3 = both) 
 }

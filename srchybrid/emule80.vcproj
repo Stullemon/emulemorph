@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
+				AdditionalIncludeDirectories="..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
 				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;PNG_DEBUG=1;PNG_USE_PNGVCRD;PNG_LIBPNG_SPECIALBUILD"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -56,7 +56,7 @@
 				ForceConformanceInForLoopScope="false"
 				UsePrecompiledHeader="2"
 				WarningLevel="4"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -146,7 +146,7 @@
 				FavorSizeOrSpeed="2"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
+				AdditionalIncludeDirectories="..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_RELEASE;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -244,7 +244,7 @@
 				FavorSizeOrSpeed="2"
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
-				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
+				AdditionalIncludeDirectories="..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB"
 				StringPooling="true"
 				BasicRuntimeChecks="0"
@@ -435,6 +435,10 @@
 			</File>
 			<File
 				RelativePath="BaseClient.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\CaptchaGenerator.cpp"
 				>
 			</File>
 			<File
@@ -1125,6 +1129,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\kademlia\net\PacketTracking.cpp"
+					>
+				</File>
+				<File
 					RelativePath="kademlia\kademlia\Prefs.cpp"
 					>
 				</File>
@@ -1146,6 +1154,10 @@
 				</File>
 				<File
 					RelativePath="kademlia\utils\ThreadName.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\kademlia\kademlia\UDPFirewallTester.cpp"
 					>
 				</File>
 				<File
@@ -1195,6 +1207,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\CaptchaGenerator.h"
+				>
+			</File>
+			<File
 				RelativePath="CBase64Coding.hpp"
 				>
 			</File>
@@ -1204,6 +1220,10 @@
 			</File>
 			<File
 				RelativePath="ClientList.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ClientStateDefs.h"
 				>
 			</File>
 			<File
@@ -1626,11 +1646,19 @@
 					>
 				</File>
 				<File
+					RelativePath=".\kademlia\net\PacketTracking.h"
+					>
+				</File>
+				<File
 					RelativePath="kademlia\kademlia\Kademlia.h"
 					>
 				</File>
 				<File
 					RelativePath="kademlia\net\KademliaUDPListener.h"
+					>
+				</File>
+				<File
+					RelativePath=".\kademlia\utils\KadUDPKey.h"
 					>
 				</File>
 				<File
@@ -1643,6 +1671,10 @@
 				</File>
 				<File
 					RelativePath="kademlia\utils\MiscUtils.h"
+					>
+				</File>
+				<File
+					RelativePath=".\kademlia\net\PacketTracking.h"
 					>
 				</File>
 				<File
@@ -1671,6 +1703,10 @@
 				</File>
 				<File
 					RelativePath="kademlia\utils\ThreadName.h"
+					>
+				</File>
+				<File
+					RelativePath=".\kademlia\kademlia\UDPFirewallTester.h"
 					>
 				</File>
 				<File
@@ -4326,6 +4362,10 @@
 			</File>
 			<File
 				RelativePath="..\setup\Template.eMuleSkin.ini"
+				>
+			</File>
+			<File
+				RelativePath="..\setup\Template.Notifier.ini"
 				>
 			</File>
 			<File

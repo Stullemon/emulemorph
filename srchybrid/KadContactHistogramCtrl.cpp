@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -46,7 +46,6 @@ CKadContactHistogramCtrl::CKadContactHistogramCtrl()
 	m_penAux.CreatePen(PS_DOT, 1, RGB(192, 192, 192));
 	m_penHist.CreatePen(PS_SOLID, 1, RGB(255, 32, 32));
 
-	m_fontLabel.CreatePointFont(8*10, _T("MS Shell Dlg"));
 	m_iMaxNumLabelWidth = 3*8;
 	m_iMaxLabelHeight = 8;
 	m_bInitializedFontMetrics = false;
@@ -114,7 +113,7 @@ void CKadContactHistogramCtrl::OnPaint()
 	dc.FillSolidRect(rcClnt, GetSysColor(COLOR_WINDOW));
 	COLORREF crOldTextColor = dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
-	CFont* pOldFont = dc.SelectObject(&m_fontLabel);
+	CFont* pOldFont = dc.SelectObject(AfxGetMainWnd()->GetFont());
 	if (!m_bInitializedFontMetrics)
 	{
 		TEXTMETRIC tm;

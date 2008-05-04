@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -1027,7 +1027,7 @@ void CDownloadQueue::Process(){
 	CheckDiskspaceTimed();
 
 // ZZ:DownloadManager -->
-    if((!m_dwLastA4AFtime) || (::GetTickCount() - m_dwLastA4AFtime) > 2*60*1000) {
+    if((!m_dwLastA4AFtime) || (::GetTickCount() - m_dwLastA4AFtime) > MIN2MS(8)) {
         theApp.clientlist->ProcessA4AFClients();
         m_dwLastA4AFtime = ::GetTickCount();
     }
@@ -2372,6 +2372,7 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 	if( (ip == Kademlia::CKademlia::GetIPAddress() || ED2Kip == theApp.serverconnect->GetClientID()) && tcp == thePrefs.GetPort())
 		return;
 	CUpDownClient* ctemp = NULL; 
+	DEBUG_ONLY( DebugLog(_T("Kadsource received, type %u, IP %s"), type, ipstr(ED2Kip)) );
 	switch( type )
 	{
 		case 4:
@@ -2403,6 +2404,10 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 		case 3:
 		{
 			//This will be a firewaled client connected to Kad only.
+			// if we are firewalled ourself, the source is useless to us
+			if (theApp.IsFirewalled())
+				break;
+
 			//We set the clientID to 1 as a Kad user only has 1 buddy.
 			ctemp = new CUpDownClient(temp,tcp,1,0,0,false);
 			//The only reason we set the real IP is for when we get a callback
@@ -2418,14 +2423,31 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 			ctemp->SetBuddyPort(serverport);
 			break;
 		}
+		case 6:
+		{
+			// firewalled source which supports direct udp callback
+			// if we are firewalled ourself, the source is useless to us
+			if (theApp.IsFirewalled())
+				break;
+
+			if ((byCryptOptions & 0x08) == 0){
+				DebugLogWarning(_T("Received Kad source type 6 (direct callback) which has the direct callback flag not set (%s)"), ipstr(ED2Kip));
+				break;
+			}
+			ctemp = new CUpDownClient(temp, tcp, 1, 0, 0, false);
+			ctemp->SetSourceFrom(SF_KADEMLIA);
+			ctemp->SetKadPort(udp);
+			ctemp->SetIP(ED2Kip); // need to set the Ip address, which cannot be used for TCP but for UDP
+			byte cID[16];
+			pcontactID->ToByteArray(cID);
+			ctemp->SetUserHash(cID);
+			pbuddyID->ToByteArray(cID);
+		}
 	}
 
 	if (ctemp != NULL){
 		// add encryption settings
-		ctemp->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
-		ctemp->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
-		ctemp->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
-
+		ctemp->SetConnectOptions(byCryptOptions);
 		CheckAndAddSource(temp, ctemp);
 	}
 }
@@ -2633,6 +2655,13 @@ CString CDownloadQueue::GetOptimalTempDir(UINT nCat, EMFileSize nFileSize){
 	else{ // so was condtion 2 and 3, take 4.. wait there is no 3 - this must be a bug
 		ASSERT( false );
 		return thePrefs.GetTempDir();
+	}
+}
+
+void CDownloadQueue::RefilterAllComments(){
+	for (POSITION pos = filelist.GetHeadPosition();pos != 0;){
+		CPartFile* cur_file = filelist.GetNext(pos);
+		cur_file->RefilterFileComments();
 	}
 }
 

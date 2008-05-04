@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -544,7 +544,7 @@ void CServerWnd::OnBnClickedAddserver()
 	}
 
 	uint16 uPort = 0;
-	if (_tcsncmp(serveraddr, _T("ed2k://"), 7) == 0){
+	if (_tcsnicmp(serveraddr, _T("ed2k://"), 7) == 0){
 		CED2KLink* pLink = NULL;
 		try{
 			pLink = CED2KLink::CreateLinkFromUrl(serveraddr);
@@ -998,7 +998,7 @@ void CServerWnd::ResetHistory()
 
 BOOL CServerWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
-	theApp.ShowHelp(eMule_FAQ_Update_Server);
+	theApp.ShowHelp(eMule_FAQ_GUI_Server);
 	return TRUE;
 }
 

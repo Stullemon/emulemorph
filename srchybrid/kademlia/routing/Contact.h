@@ -35,6 +35,7 @@ there client on the eMule forum..
 */
 #pragma once
 #include "../utils/UInt128.h"
+#include "../utils/KadUDPKey.h"
 
 namespace Kademlia
 {
@@ -42,12 +43,13 @@ namespace Kademlia
 	{
 			friend class CRoutingZone;
 			friend class CRoutingBin;
-			friend class CSafeKad; // netfinity: Track contact IP usage
 		public:
 			~CContact();
 			CContact();
-			CContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, uint8 uVersion);
-			CContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, const CUInt128 &uTarget, uint8 uVersion);
+			CContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, uint8 uVersion, CKadUDPKey cUDPKey, bool bIPVerified);
+			CContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, const CUInt128 &uTarget, uint8 uVersion, CKadUDPKey cUDPKey, bool bIPVerified);	
+
+			CContact& operator=(const CContact& k1)				{ Copy(k1); return *this; }	
 
 			void GetClientID(CUInt128 *puId) const;
 			CUInt128 GetClientID() const;
@@ -73,16 +75,23 @@ namespace Kademlia
 			bool InUse();
 			void IncUse();
 			void DecUse();
-			void SetCandidate(bool bCandidate) {m_bCandidate = bCandidate;} // netfinity: Safe KAD - Does this node need to prove worthiness
-			bool GetCandidate() const {return m_bCandidate;} // netfinity: Safe KAD - Does this node need to prove worthiness
 			uint8 GetVersion() const;
 			void SetVersion(uint8 uVersion);
 			time_t GetCreatedTime() const;
 			time_t GetExpireTime() const;
 			time_t GetLastTypeSet() const;
+			time_t GetLastSeen() const;
 			bool CheckIfKad2();
+			
+			CKadUDPKey	GetUDPKey()	const;
+			void		SetUDPKey(CKadUDPKey cUDPKey);
+			bool		IsIpVerified()	const;
+			void		SetIpVerified(bool bIPVerified);
+			
 		private:
-			void InitContact(); // Common var initialization goes here
+			void	InitContact(); // Common var initialization goes here
+			void	Copy(const CContact& fromContact);
+
 			CUInt128 m_uClientID;
 			CUInt128 m_uDistance;
 			uint32 m_uIp;
@@ -95,8 +104,8 @@ namespace Kademlia
 			byte m_byType;
 			uint8 m_uVersion;
 			bool m_bGuiRefs;
-			bool m_bSafeKadRefs; // netfinity: Safe KAD - Is this contacts IP tracked
-			bool m_bCandidate; // netfinity: Safe KAD - This node need to prove worthiness
 			bool m_bCheckKad2;
+			bool m_bIPVerified;
+			CKadUDPKey	m_cUDPKey;
 	};
 }

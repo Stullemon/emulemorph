@@ -37,9 +37,6 @@ namespace Kademlia
 		public:
 			static void IPAddressToString(uint32 uIP, CString *pString);
 			static void DebugHexDump(const byte *pbyData, uint32 uLenData);
-			/* MORPH REPLACED
-			static LPCTSTR GetAppDir();
-			 END MORPH REPLACED */
 		private:
 			static CString m_sAppDirectory;
 	};

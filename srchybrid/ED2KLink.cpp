@@ -1,5 +1,5 @@
 ﻿//this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -106,6 +106,48 @@ CED2KFileLink* CED2KServerListLink::GetFileLink()
 CED2KLink::LinkType CED2KServerListLink::GetKind() const
 {
 	return kServerList;
+}
+
+/////////////////////////////////////////////
+// CED2KNodesListLink implementation 
+///////////////////////////////////////////// 
+CED2KNodesListLink::CED2KNodesListLink(const TCHAR* address)
+{
+	m_address = address;
+}
+
+CED2KNodesListLink::~CED2KNodesListLink()
+{
+} 
+
+void CED2KNodesListLink::GetLink(CString& lnk) const
+{
+	lnk.Format(_T("ed2k://|nodeslist|%s|/"), m_address);
+}
+
+CED2KServerListLink* CED2KNodesListLink::GetServerListLink()
+{
+	return NULL;
+}
+
+CED2KNodesListLink* CED2KNodesListLink::GetNodesListLink()
+{
+	return this;
+}
+
+CED2KServerLink* CED2KNodesListLink::GetServerLink()
+{
+	return NULL;
+}
+
+CED2KFileLink* CED2KNodesListLink::GetFileLink()
+{
+	return NULL;
+}
+
+CED2KLink::LinkType CED2KNodesListLink::GetKind() const
+{
+	return kNodesList;
 }
 
 /////////////////////////////////////////////
@@ -290,7 +332,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 				ASSERT( false );
 		}
 		else
-			ASSERT(0);// tokenized pastrParams contains some garbage that is not supported ( e.g. |torrenthash=xxx|\ ) 
+			ASSERT(0);
 	}
 
 	if (bError)
@@ -454,7 +496,7 @@ CED2KLink* CED2KLink::CreateLinkFromUrl(const TCHAR* uri)
 	strURI.Trim(); // This function is used for various sources, trim the string again.
 	int iPos = 0;
 	CString strTok = GetNextString(strURI, _T("|"), iPos);
-	if (strTok == _T("ed2k://"))
+	if (strTok.CompareNoCase(_T("ed2k://")) == 0)
 	{
 		strTok = GetNextString(strURI, _T("|"), iPos);
 		if (strTok == _T("file"))
@@ -518,6 +560,12 @@ CED2KLink* CED2KLink::CreateLinkFromUrl(const TCHAR* uri)
 				if (!strPort.IsEmpty() && GetNextString(strURI, _T("|"), iPos) == _T("/"))
 					return new CED2KServerLink(strServer, strPort);
 			}
+		}
+		else if (strTok == _T("nodeslist"))
+		{
+			CString strURL = GetNextString(strURI, _T("|"), iPos);
+			if (!strURL.IsEmpty() && GetNextString(strURI, _T("|"), iPos) == _T("/"))
+				return new CED2KNodesListLink(strURL);
 		}
 		// MORPH START - Added by Commander, Friendlinks [emulEspaa]
 		else if ( strTok == _T("friend") )
@@ -592,6 +640,11 @@ CED2KFileLink* CED2KFriendLink::GetFileLink()
 	return NULL;
 }
 
+CED2KNodesListLink* CED2KFriendLink::GetNodesListLink()
+{
+	return NULL;
+}
+
 CED2KLink::LinkType CED2KFriendLink::GetKind() const
 {
 	return kFriend;
@@ -619,6 +672,11 @@ CED2KServerLink* CED2KFriendListLink::GetServerLink()
 
 CED2KFileLink* CED2KFriendListLink::GetFileLink() 
 { 
+	return NULL;
+}
+
+CED2KNodesListLink* CED2KFriendListLink::GetNodesListLink()
+{
 	return NULL;
 }
 

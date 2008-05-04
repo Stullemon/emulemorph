@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -45,6 +45,7 @@ public:
 	bool ChangeNick(const CString& sChannel, const CString& sOldnick, const CString& sNewnick);
 	bool ChangeNickMode(const CString& sChannel, const CString& sNice, const CString& sMode);
 	bool ChangeAllNick(const CString& sOldnick, const CString& sNewnick);
+	void OpenPrivateChannel(const Nick *pNick);
 	void UpdateNickCount();
 	void Localize();
 	CString m_sUserModeSettings;

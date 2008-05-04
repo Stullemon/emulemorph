@@ -27,6 +27,7 @@ public:
 	bool ContactAdd(const Kademlia::CContact* contact);
 	void ContactRem(const Kademlia::CContact* contact);
 	void ContactRef(const Kademlia::CContact* contact);
+	void UpdateNodesDatFromURL(CString strURL);
 
 	// Searches
 	CKadSearchListCtrl* searchList;
@@ -57,4 +58,6 @@ protected:
 	afx_msg void OnBnClickedFirewallcheckbutton();
 	afx_msg void OnSysColorChange();
 	afx_msg void OnEnSetfocusBootstrapip();
+	afx_msg void OnEnSetfocusBootstrapNodesdat();
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 };

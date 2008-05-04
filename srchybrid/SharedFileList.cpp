@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -41,6 +41,8 @@
 #include "ClientList.h"
 #include "Log.h"
 #include "Collection.h"
+#include "kademlia/kademlia/UDPFirewallTester.h"
+#include "md5sum.h"
 #include "SR13-ImportParts.h" //MORPH - Added by SiRoB, Import Parts [SR13]
 
 #ifdef _DEBUG
@@ -341,6 +343,19 @@ CSharedFileList::~CSharedFileList(){
 	}
 	// SLUGFILLER: SafeHash
 	delete m_keywords;
+
+#ifdef _BETA
+	// On Beta builds we created a testfile, delete it when closing eMule
+	CString tempDir = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
+	if (tempDir.Right(1)!=_T("\\"))
+		tempDir+=_T("\\");
+	CString strBetaFileName;
+	strBetaFileName.Format(_T("eMule%u.%u%c.%u Beta Testfile "), CemuleApp::m_nVersionMjr, 
+		CemuleApp::m_nVersionMin, _T('a') + CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld);
+	MD5Sum md5(strBetaFileName);
+	strBetaFileName += md5.GetHash().Left(6) + _T(".txt");
+	DeleteFile(tempDir + strBetaFileName);
+#endif
 }
 
 void CSharedFileList::CopySharedFileMap(CMap<CCKey,const CCKey&,CKnownFile*,CKnownFile*> &Files_Map)
@@ -421,12 +436,50 @@ void CSharedFileList::FindSharedFiles()
 			theApp.downloadqueue->AddPartFilesToShare(); // read partfiles
 	}
 
+
+
 	// khaos::kmod+ Fix: Shared files loaded multiple times.
 	CStringList l_sAdded;
 	CString tempDir;
 	CString ltempDir;
 	
 	// SLUGFILLER START: shareSubdir
+/* old code:
+	tempDir = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
+	if (tempDir.Right(1)!=_T("\\"))
+		tempDir+=_T("\\");
+
+#ifdef _BETA
+	// In Betaversion we create a testfile which is published in order to make testing easier
+	// by allowing to easily find files which are published and shared by "new" nodes
+	CStdioFile f;
+	CString strBetaFileName;
+	strBetaFileName.Format(_T("eMule%u.%u%c.%u Beta Testfile "), CemuleApp::m_nVersionMjr, 
+		CemuleApp::m_nVersionMin, _T('a') + CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld);
+	MD5Sum md5(strBetaFileName);
+	strBetaFileName += md5.GetHash().Left(6) + _T(".txt");
+	if (!f.Open(tempDir + strBetaFileName, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite))
+		ASSERT( false );
+	else
+	{
+		try	{
+			// do not translate the content!
+			f.WriteString(strBetaFileName + '\n'); // garantuees a different hash on different versions
+			f.WriteString(_T("This file is automatically created by eMule Beta versions to help the developers testing and debugging new the new features. eMule will delete this file when exiting, otherwise you can remove this file at any time.\nThanks for beta testing eMule :)"));
+			f.Close();
+		}
+		catch (CFileException* ex) {
+			ASSERT(0);
+			ex->Delete();
+		}
+	}
+#endif
+
+
+	AddFilesFromDirectory(tempDir);
+	tempDir.MakeLower();
+	l_sAdded.AddHead( tempDir );
+ end old code*/
 	CStringList l_sAddedWithSubdir;	
 
 	// Doing the double list thing.
@@ -449,20 +502,39 @@ void CSharedFileList::FindSharedFiles()
 	tempDir=thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 	if (tempDir.Right(1)!=_T("\\"))
 		tempDir+=_T("\\");
+
+#ifdef _BETA
+	// In Betaversion we create a testfile which is published in order to make testing easier
+	// by allowing to easily find files which are published and shared by "new" nodes
+	CStdioFile f;
+	CString strBetaFileName;
+	strBetaFileName.Format(_T("eMule%u.%u%c.%u Beta Testfile "), CemuleApp::m_nVersionMjr, 
+		CemuleApp::m_nVersionMin, _T('a') + CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld);
+	MD5Sum md5(strBetaFileName);
+	strBetaFileName += md5.GetHash().Left(6) + _T(".txt");
+	if (!f.Open(tempDir + strBetaFileName, CFile::modeCreate | CFile::modeWrite | CFile::shareDenyWrite))
+		ASSERT( false );
+	else
+	{
+		try	{
+			// do not translate the content!
+			f.WriteString(strBetaFileName + '\n'); // garantuees a different hash on different versions
+			f.WriteString(_T("This file is automatically created by eMule Beta versions to help the developers testing and debugging new the new features. eMule will delete this file when exiting, otherwise you can remove this file at any time.\nThanks for beta testing eMule :)"));
+			f.Close();
+		}
+		catch (CFileException* ex) {
+			ASSERT(0);
+			ex->Delete();
+		}
+	}
+#endif
+
 	tempDir.MakeLower();
 	if( !FindStartingWith(&l_sAddedWithSubdir, tempDir) ) {
 		l_sAdded.AddHead( tempDir );
 	  	AddFilesFromDirectory(tempDir);
 	}
 	// SLUGFILLER EMD: shareSubdir
-/* old code:
-	tempDir = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
-	if (tempDir.Right(1)!=_T("\\"))
-		tempDir+=_T("\\");
-	AddFilesFromDirectory(tempDir);
-	tempDir.MakeLower();
-	l_sAdded.AddHead( tempDir );
- end old code*/
 
 	for (int ix=1;ix<thePrefs.GetCatCount();ix++)
 	{
@@ -1569,8 +1641,9 @@ void CSharedFileList::Publish()
 	// Variables to save cpu.
 	time_t tNow = time(NULL); //vs2005
 	bool isFirewalled = theApp.IsFirewalled();
+	bool bDirectCallback = Kademlia::CKademlia::IsRunning() && !Kademlia::CUDPFirewallTester::IsFirewalledUDP(true) && Kademlia::CUDPFirewallTester::IsVerified();
 
-	if( Kademlia::CKademlia::IsConnected() && ( !isFirewalled || ( isFirewalled && theApp.clientlist->GetBuddyStatus() == Connected)) && GetCount() && Kademlia::CKademlia::GetPublish())
+	if( Kademlia::CKademlia::IsConnected() && ( !isFirewalled || ( isFirewalled && theApp.clientlist->GetBuddyStatus() == Connected) || bDirectCallback) && GetCount() && Kademlia::CKademlia::GetPublish())
 	{ 
 		//We are connected to Kad. We are either open or have a buddy. And Kad is ready to start publishing.
 		if( Kademlia::CKademlia::GetTotalStoreKey() < KADEMLIATOTALSTOREKEY)

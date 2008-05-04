@@ -1,4 +1,4 @@
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -197,7 +197,7 @@ public:
 	virtual void	DrawShareStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool	 bFlat) /*const*/;
 	bool	IsComplete(uint64 start, uint64 end, bool bIgnoreBufferedData) const;
 	bool	IsPureGap(uint64 start, uint64 end) const;
-	bool	IsAlreadyRequested(uint64 start, uint64 end) const;
+	bool	IsAlreadyRequested(uint64 start, uint64 end, bool bCheckBuffers = false) const;
     bool    ShrinkToAvoidAlreadyRequested(uint64& start, uint64& end) const;
 	bool	IsCorruptedPart(UINT partnumber) const;
 	//MORPH START - Enhanced DBR
@@ -305,6 +305,7 @@ public:
 	uint32	GetRecoveredPartsByICH() const { return m_uPartsSavedDueICH; }
 
 	virtual void	UpdateFileRatingCommentAvail(bool bForceUpdate = false);
+	virtual void	RefilterFileComments();
 
 	void	AddDownloadingSource(CUpDownClient* client);
 	void	RemoveDownloadingSource(CUpDownClient* client);

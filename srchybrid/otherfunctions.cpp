@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -40,6 +40,8 @@
 #include "collection.h"
 #include "SafeFile.h"
 #include "FileFormat.h"
+#include "Kademlia/Kademlia/kademlia.h"
+#include "kademlia/kademlia/UDPFirewallTester.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1389,6 +1391,7 @@ struct SED2KFileType
     { _T(".divx"),  ED2KFT_VIDEO },
     { _T(".m1v"),   ED2KFT_VIDEO },
     { _T(".m2v"),   ED2KFT_VIDEO },
+    { _T(".m4v"),   ED2KFT_VIDEO },
     { _T(".mkv"),   ED2KFT_VIDEO },
     { _T(".mov"),   ED2KFT_VIDEO },
     { _T(".mp1v"),  ED2KFT_VIDEO },
@@ -2031,8 +2034,12 @@ bool IsGoodIP(uint32 nIP, bool forceCheck)
 
 	if (!thePrefs.FilterLANIPs() && !forceCheck/*ZZ:UploadSpeedSense*/)
 		return true;
+	else
+		return !IsLANIP(nIP);
+}
 
-	// filter LAN IP's
+bool IsLANIP(uint32 nIP){
+	// LAN IP's
 	// -------------------------------------------
 	//	0.*								"This" Network
 	//	10.0.0.0 - 10.255.255.255		Class A
@@ -2043,15 +2050,15 @@ bool IsGoodIP(uint32 nIP, bool forceCheck)
 	uint8 nSecond = (uint8)(nIP >> 8);
 
 	if (nFirst==192 && nSecond==168) // check this 1st, because those LANs IPs are mostly spreaded
-		return false;
+		return true;
 
 	if (nFirst==172 && nSecond>=16 && nSecond<=31)
-		return false;
+		return true;
 
 	if (nFirst==0 || nFirst==10)
-		return false;
+		return true;
 
-	return true; 
+	return false;
 }
 
 bool IsGoodIPPort(uint32 nIP, uint16 nPort)
@@ -2884,7 +2891,7 @@ uint32 GetRandomUInt32()
 	//	random number N+3 is below or greater/equal than 0x8000
 
 	uint32 uRand0 = GetRandomUInt16();
-	srand(GetTickCount());
+	srand(GetTickCount() | uRand0);
 	uint32 uRand1 = GetRandomUInt16();
 	return (uRand0 << 16) | uRand1;
 #else
@@ -3180,18 +3187,50 @@ int FontPointSizeToLogUnits(int nPointSize)
 	HDC hDC = ::GetDC(HWND_DESKTOP);
 	if (hDC)
 	{
-		// convert nPointSize to logical units based on pDC
 		POINT pt;
-		pt.y = ::GetDeviceCaps(hDC, LOGPIXELSY) * nPointSize;
-		pt.y /= 720;    // 72 points/inch, 10 decipoints/point
+#if 0
+		// This is the same math which is performed by "CFont::CreatePointFont",
+		// which is flawed because it does not perform any rounding. But without
+		// performing the correct rounding one can not get the correct LOGFONT-height
+		// for an 8pt font!
+		//
+		// PointSize	Result
+		// -------------------
+		// 8*10			10.666 -> 10 (cut down and thus wrong result)
+		pt.y = GetDeviceCaps(hDC, LOGPIXELSY) * nPointSize;
+		pt.y /= 720;
+#else
+		// This math accounts for proper rounding and thus we will get the correct results.
+		//
+		// PointSize	Result
+		// -------------------
+		// 8*10			10.666 -> 11 (rounded up and thus correct result)
+		pt.y = MulDiv(GetDeviceCaps(hDC, LOGPIXELSY), nPointSize, 720);
+#endif
 		pt.x = 0;
-		::DPtoLP(hDC, &pt, 1);
+		DPtoLP(hDC, &pt, 1);
 		POINT ptOrg = { 0, 0 };
-		::DPtoLP(hDC, &ptOrg, 1);
+		DPtoLP(hDC, &ptOrg, 1);
 		nPointSize = -abs(pt.y - ptOrg.y);
-		::ReleaseDC(NULL, hDC);
+		ReleaseDC(HWND_DESKTOP, hDC);
 	}
 	return nPointSize;
+}
+
+bool CreatePointFontIndirect(CFont &rFont, const LOGFONT *lpLogFont)
+{
+	LOGFONT logFont = *lpLogFont;
+	logFont.lfHeight = FontPointSizeToLogUnits(logFont.lfHeight);
+	return rFont.CreateFontIndirect(&logFont) != FALSE;
+}
+
+bool CreatePointFont(CFont &rFont, int nPointSize, LPCTSTR lpszFaceName)
+{
+	LOGFONT logFont = {0};
+	logFont.lfCharSet = DEFAULT_CHARSET;
+	logFont.lfHeight = nPointSize;
+	lstrcpyn(logFont.lfFaceName, lpszFaceName, _countof(logFont.lfFaceName));
+	return CreatePointFontIndirect(rFont, &logFont);
 }
 
 bool IsUnicodeFile(LPCTSTR pszFilePath)
@@ -3609,20 +3648,6 @@ int IsExtentionTypeof(EFileType ftype, CString fext) {
 	return false;
 }
 
-/////////////////////////////////////////////////////////////////////////////
-// Case independent string search
-
-LPCTSTR _tcsistr(LPCTSTR pszString, LPCTSTR pszPattern)
-{
-	CString strPattern(pszPattern);
-	CString strString(pszString);
-	int nResult = strString.MakeLower().Find(strPattern.MakeLower());
-	if (nResult != (-1))
-		return &pszString[nResult];
-	else
-		return NULL;
-}
-
 uint32 LevenshteinDistance(const CString& str1, const CString& str2)
 {
 	uint32 n1 = str1.GetLength();
@@ -3691,6 +3716,23 @@ bool _tmakepathlimit(TCHAR *path, const TCHAR *drive, const TCHAR *dir, const TC
 		delete[] tchBuffer;
 		return true;
 	}
+}
+
+uint8 GetMyConnectOptions(bool bEncryption, bool bCallback){
+	// Connect options Tag
+	// 4 Reserved (!)
+	// 1 Direct Callback
+	// 1 CryptLayer Required
+	// 1 CryptLayer Requested
+	// 1 CryptLayer Supported
+	const uint8 uSupportsCryptLayer	= (thePrefs.IsClientCryptLayerSupported() && bEncryption) ? 1 : 0;
+	const uint8 uRequestsCryptLayer	= (thePrefs.IsClientCryptLayerRequested() && bEncryption) ? 1 : 0;
+	const uint8 uRequiresCryptLayer	= (thePrefs.IsClientCryptLayerRequired() && bEncryption) ? 1 : 0;
+	// direct callback is only possible if connected to kad, tcp firewalled and verified UDP open (for example on a full cone NAT)
+	const uint8 uDirectUDPCallback	= (bCallback && theApp.IsFirewalled() && Kademlia::CKademlia::IsRunning() && !Kademlia::CUDPFirewallTester::IsFirewalledUDP(true) && Kademlia::CUDPFirewallTester::IsVerified()) ? 1 : 0;
+	
+	const uint8 byCryptOptions = (uDirectUDPCallback << 3) | (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
+	return byCryptOptions;
 }
 
 // khaos::kmod+ Functions to return a random number within a given range.

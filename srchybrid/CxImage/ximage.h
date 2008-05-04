@@ -468,7 +468,8 @@ public:
 /** \addtogroup Transformations */ //@{
 	// image operations
 	bool Rotate(float angle, CxImage* iDst = NULL);
-	bool Rotate2(float angle, CxImage *iDst = NULL, InterpolationMethod inMethod=IM_BILINEAR,
+	bool Rotate2(float angle, CxImage *iDst, bool const optimizeRightAngles, bool const bKeepOriginalSize);
+	bool Rotate3(float angle, CxImage *iDst = NULL, InterpolationMethod inMethod=IM_BILINEAR,
                 OverflowMethod ofMethod=OM_BACKGROUND, RGBQUAD *replColor=0,
                 bool const optimizeRightAngles=true, bool const bKeepOriginalSize=false);
 	bool Rotate180(CxImage* iDst = NULL);
@@ -492,6 +493,7 @@ public:
 //@}
 #endif //CXIMAGE_SUPPORT_TRANSFORMATION
 
+	bool Jitter(long radius);
 #if CXIMAGE_SUPPORT_DSP
 /** \addtogroup DSP */ //@{
 	bool Contour();
@@ -501,7 +503,7 @@ public:
 	bool HistogramRoot();
 	bool HistogramLog();
 	long Histogram(long* red, long* green = 0, long* blue = 0, long* gray = 0, long colorspace = 0);
-	bool Jitter(long radius=2);
+	//bool Jitter(long radius=2);
 	bool Repair(float radius = 0.25f, long niterations = 1, long colorspace = 0);
 	bool Combine(CxImage* r,CxImage* g,CxImage* b,CxImage* a, long colorspace = 0);
 	bool FFT2(CxImage* srcReal, CxImage* srcImag, CxImage* dstReal, CxImage* dstImag, long direction = 1, bool bForceFFT = true, bool bMagnitude = true);

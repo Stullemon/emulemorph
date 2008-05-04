@@ -419,6 +419,12 @@ void CDataIO::WriteTagList(const TagList& tagList)
 		WriteTag(*itTagList);
 }
 
+void CDataIO::WriteString(const CStringW& strVal){
+	CUnicodeToUTF8 utf8(strVal);
+	WriteUInt16((uint16)utf8.GetLength());
+	WriteArray(utf8, utf8.GetLength());
+}
+
 namespace Kademlia
 {
 	void deleteTagListEntries(TagList* pTaglist)

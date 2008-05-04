@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -39,7 +39,8 @@ static char THIS_FILE[] = __FILE__;
 #define NICK_LV_PROFILE_NAME _T("IRCNicksLv")
 #define CHAN_LV_PROFILE_NAME _T("IRCChannelsLv")
 
-#define	STATUS_MSG_COLOR		RGB(255,0,0)		// red
+// Request from IRC-folks: don't use similar colors for Status and Info messages
+#define	STATUS_MSG_COLOR		RGB(0,128,0)		// dark green
 #define	INFO_MSG_COLOR			RGB(192,0,0)		// mid red
 #define	SENT_TARGET_MSG_COLOR	RGB(0,192,0)		// bright green
 #define	RECV_SOURCE_MSG_COLOR	RGB(0,128,255)		// bright cyan/blue
@@ -623,32 +624,46 @@ void CIrcWnd::OnBnClickedCloseChannel(int iItem)
 	}
 }
 
-void CIrcWnd::AddStatus(CString sLine, bool bShowActivity)
+void CIrcWnd::AddStatus(CString sLine, bool bShowActivity, UINT uStatusCode)
 {
-	Channel* pUpdateChannel = m_wndChanSel.m_lstChannels.GetHead();
-	if (!pUpdateChannel)
+	Channel* pStatusChannel = m_wndChanSel.m_lstChannels.GetHead();
+	if (!pStatusChannel)
 		return;
 	sLine += _T("\r\n");
 
 	// This allows for us to add blank lines to the status..
 	if (sLine == _T("\r\n"))
-		pUpdateChannel->m_wndLog.AppendText(sLine);
+		pStatusChannel->m_wndLog.AppendText(sLine);
 	else if (sLine.GetLength() >= 1 && sLine[0] == _T('*'))
 	{
 		if (thePrefs.GetIRCAddTimeStamp())
-			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pUpdateChannel->m_wndLog);
-		AddColorLine(sLine, pUpdateChannel->m_wndLog, STATUS_MSG_COLOR);
+			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pStatusChannel->m_wndLog);
+		AddColorLine(sLine, pStatusChannel->m_wndLog, STATUS_MSG_COLOR);
+	}
+	else if (uStatusCode >= 400)
+	{
+		if (thePrefs.GetIRCAddTimeStamp())
+			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pStatusChannel->m_wndLog);
+		if (!(sLine.GetLength() >= 1 && sLine[0] == _T('-')))
+			sLine = _T("-Error- ") + sLine;
+		AddColorLine(sLine, pStatusChannel->m_wndLog, INFO_MSG_COLOR);
 	}
 	else
 	{
 		if (thePrefs.GetIRCAddTimeStamp())
-			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pUpdateChannel->m_wndLog);
-		AddColorLine(sLine, pUpdateChannel->m_wndLog);
+			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pStatusChannel->m_wndLog);
+		AddColorLine(sLine, pStatusChannel->m_wndLog);
 	}
-	if (m_wndChanSel.m_pCurrentChannel == pUpdateChannel)
+	if (m_wndChanSel.m_pCurrentChannel == pStatusChannel)
 		return;
 	if (bShowActivity)
-		m_wndChanSel.SetActivity(pUpdateChannel, true);
+		m_wndChanSel.SetActivity(pStatusChannel, true);
+	if (uStatusCode >= 400)
+	{
+		if (!(sLine.GetLength() >= 1 && sLine[0] == _T('-')))
+			sLine = _T("-Error- ") + sLine;
+		AddInfoMessage(m_wndChanSel.m_pCurrentChannel, sLine);
+	}
 }
 
 void CIrcWnd::AddStatusF(CString sLine, ...)
@@ -661,7 +676,32 @@ void CIrcWnd::AddStatusF(CString sLine, ...)
 	AddStatus(sTemp);
 }
 
-void CIrcWnd::AddInfoMessage(const CString& sChannelName, CString sLine)
+void CIrcWnd::AddInfoMessage(Channel *pChannel, CString sLine)
+{
+	if (sLine.GetLength() >= 1 && sLine[0] == _T('*'))
+	{
+		if (thePrefs.GetIRCAddTimeStamp())
+			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pChannel->m_wndLog);
+		AddColorLine(sLine, pChannel->m_wndLog, STATUS_MSG_COLOR);
+	}
+	else if (sLine.GetLength() >= 1 && sLine[0] == _T('-') && sLine.Find(_T('-'), 1) != -1)
+	{
+		if (thePrefs.GetIRCAddTimeStamp())
+			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pChannel->m_wndLog);
+		AddColorLine(sLine, pChannel->m_wndLog, INFO_MSG_COLOR);
+	}
+	else
+	{
+		if (thePrefs.GetIRCAddTimeStamp())
+			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pChannel->m_wndLog);
+		AddColorLine(sLine, pChannel->m_wndLog);
+	}
+	if (m_wndChanSel.m_pCurrentChannel == pChannel)
+		return;
+	m_wndChanSel.SetActivity(pChannel, true);
+}
+
+void CIrcWnd::AddInfoMessage(const CString& sChannelName, CString sLine, bool bShowChannel)
 {
 	if (sChannelName.IsEmpty())
 		return;
@@ -682,27 +722,9 @@ void CIrcWnd::AddInfoMessage(const CString& sChannelName, CString sLine)
 		if (!pUpdateChannel)
 			pUpdateChannel = m_wndChanSel.NewChannel(sChannelName, Channel::ctPrivate);
 	}
-	if (sLine.GetLength() >= 1 && sLine[0] == _T('*'))
-	{
-		if (thePrefs.GetIRCAddTimeStamp())
-			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pUpdateChannel->m_wndLog);
-		AddColorLine(sLine, pUpdateChannel->m_wndLog, STATUS_MSG_COLOR);
-	}
-	else if (sLine.GetLength() >= 1 && sLine[0] == _T('-') && sLine.Find(_T('-'), 1) != -1)
-	{
-		if (thePrefs.GetIRCAddTimeStamp())
-			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pUpdateChannel->m_wndLog);
-		AddColorLine(sLine, pUpdateChannel->m_wndLog, INFO_MSG_COLOR);
-	}
-	else
-	{
-		if (thePrefs.GetIRCAddTimeStamp())
-			AddColorLine(s_szTimeStampColorPrefix + CTime::GetCurrentTime().Format(TIME_STAMP_FORMAT), pUpdateChannel->m_wndLog);
-		AddColorLine(sLine, pUpdateChannel->m_wndLog);
-	}
-	if (m_wndChanSel.m_pCurrentChannel == pUpdateChannel)
-		return;
-	m_wndChanSel.SetActivity(pUpdateChannel, true);
+	if (bShowChannel)
+		m_wndChanSel.SelectChannel(pUpdateChannel);
+	AddInfoMessage(pUpdateChannel, sLine);
 }
 
 void CIrcWnd::AddInfoMessageF(const CString& sChannelName, CString sLine, ...)
@@ -1185,7 +1207,7 @@ void CIrcWnd::SendString(const CString& sSend)
 
 BOOL CIrcWnd::OnHelpInfo(HELPINFO*)
 {
-	theApp.ShowHelp(eMule_FAQ_IRC_Chat);
+	theApp.ShowHelp(eMule_FAQ_GUI_IRC);
 	return TRUE;
 }
 

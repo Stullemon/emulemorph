@@ -40,6 +40,7 @@ there client on the eMule forum..
 namespace Kademlia
 {
 	class CRoutingBin;
+	class CKadUDPKey;
 	/**
 	 * The *Zone* is just a node in a binary tree of *Zone*s.
 	 * Each zone is either an internal node or a leaf node.
@@ -60,10 +61,12 @@ namespace Kademlia
 			uint32 Consolidate();
 			bool OnBigTimer();
 			void OnSmallTimer();
-			bool Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate, bool bAdd = true); // netfinity: Safe KAD
-			bool AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, bool bUpdate, bool bAdd = true); // netfinity: Safe KAD
-			bool Add(CContact* pContact, bool bUpdate, bool bAdd = true); // netfinity: Safe KAD
-			CContact *GetContact(const CUInt128 &uID) const;
+			bool Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, CKadUDPKey cUDPKey, bool bIPVerified, bool bUpdate);
+			bool AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, CKadUDPKey cUDPKey, bool bIPVerified, bool bUpdate);
+			bool Add(CContact* pContact, bool bUpdate);
+			void ReadFile(CString strSpecialNodesdate = _T(""));
+			CContact* GetContact(const CUInt128 &uID) const;
+			CContact* GetContact(uint32 uIP, uint16 nPort, bool bTCPPort) const;
 			UINT GetNumContacts() const;
 			// Returns a list of all contacts in all leafs of this zone.
 			void GetAllEntries(ContactList *plistResult, bool bEmptyFirst = true);
@@ -78,7 +81,7 @@ namespace Kademlia
 		private:
 			CRoutingZone(CRoutingZone *pSuper_zone, int iLevel, const CUInt128 &uZone_index);
 			void Init(CRoutingZone *pSuper_zone, int iLevel, const CUInt128 &uZone_index);
-			void ReadFile();
+			
 			void WriteFile();
 			bool IsLeaf() const;
 			bool CanSplit() const;

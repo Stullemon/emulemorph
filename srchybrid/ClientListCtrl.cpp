@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -392,7 +392,8 @@ void CClientListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							nOverlayImage |= 1;
 						if (client->IsObfuscatedConnectionEstablished())
 							nOverlayImage |= 2;
-						POINT point = {cur_rec.left, cur_rec.top+1};
+						int iIconPosY = (cur_rec.Height() > 16) ? ((cur_rec.Height() - 16) / 2) : 1;
+						POINT point = {cur_rec.left, cur_rec.top + iIconPosY};
 						imagelist.Draw(dc,image, point, ILD_NORMAL | INDEXTOOVERLAYMASK(nOverlayImage));
 
 						//MORPH START - Credit Overlay Icon

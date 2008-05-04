@@ -30,6 +30,7 @@ public:
 	bool DoNewKadSearch(SSearchParams* pParams);
 	void CancelEd2kSearch();
 	void CancelKadSearch(UINT uSearchID);
+	void SetNextSearchID(uint32 uNextID);
 
 	bool CanSearchRelatedFiles() const;
 	void SearchRelatedFiles(CPtrList& listFiles);
@@ -45,7 +46,8 @@ public:
 	void LocalEd2kSearchEnd(UINT count, bool bMoreResultsAvailable);
 	void AddGlobalEd2kSearchResults(UINT count);
 
-	bool CreateNewTab(SSearchParams* pParams);
+	bool CreateNewTab(SSearchParams* pParams, bool bActiveIcon = true);
+	SSearchParams* GetSearchParamsBySearchID(uint32 nSearchID);
 	void ShowSearchSelector(bool visible);
 	CClosableTabCtrl& GetSearchSelector();
 

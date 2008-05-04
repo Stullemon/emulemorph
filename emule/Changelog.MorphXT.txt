@@ -1,9 +1,10 @@
 --------------------------------------
-Changelog for eMule 0.48a MorphXT v10.x
+Changelog for eMule 0.49a MorphXT v11.0
 --------------------------------------
-xx-01-2008
+xx-xx-2008
 Compiled with visual stusio 2003 sp1. & 2005
 
+Merged to 0.49a *BETA2* [Stulle]
 FIX: clients downloading during large file completion stuck with 'stalled, reading from disk' [fafner]
 ADD: spreadbars to history [fafner]
 ADD: percentage client already got in QueueList and UploadList [fafner]
@@ -16,6 +17,8 @@ CHANGE: update cryptolib Version 5.5.2 (9/24/2007)
 ADD: experimental support for visual studio 2005 sp1. See readme. [fafner/rapid mule/leuk_he]
 ADD: alpha support for vs2008, make very sure to read the readme.
 CHANGE: reduce some cpu under wine [leuk_he]
+REMOVED: SafeKAD (the Officials did a big step in that direction) [Stulle]
+REMOVED: KAD optimizations (what ever :P) [Stulle]
 
 --------------------------------------
 Changelog for eMule 0.48a MorphXT v10.5 installer

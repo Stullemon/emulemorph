@@ -13,7 +13,7 @@ public:
 	virtual ~CServerListCtrl();
 
 	bool	Init();
-	bool	AddServer(const CServer* pServer, bool bAddToList = true);
+	bool	AddServer(const CServer* pServer, bool bAddToList = true, bool bRandom = false);
 	void	RemoveServer(const CServer* pServer);
 	bool	AddServerMetToList(const CString& strFile);
 	void	RefreshServer(const CServer* pServer);

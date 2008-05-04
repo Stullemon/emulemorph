@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -260,16 +260,7 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		case MP_MESSAGE:
 			if (cur_friend)
 			{
-				if (cur_friend->GetLinkedClient(true))
-					theApp.emuledlg->chatwnd->StartSession(cur_friend->GetLinkedClient());
-				else
-				{
-					CUpDownClient* chatclient = new CUpDownClient(0,cur_friend->m_nLastUsedPort,cur_friend->m_dwLastUsedIP,0,0,true);
-					chatclient->SetUserName(cur_friend->m_strName);
-					chatclient->SetUserHash(cur_friend->m_abyUserhash);
-					theApp.clientlist->AddClient(chatclient);
-					theApp.emuledlg->chatwnd->StartSession(chatclient);
-				}
+				theApp.emuledlg->chatwnd->StartSession(cur_friend->GetClientForChatSession());
 			}
 			break;
 		case MP_REMOVEFRIEND:
@@ -281,6 +272,7 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					SetSelectionMark(iSel);
 					SetItemState(iSel, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 				}
+				theApp.emuledlg->chatwnd->UpdateSelectedFriendMsgDetails();
 			}
 			break;
 		case MP_ADDFRIEND:{

@@ -30,6 +30,7 @@ public:
 
 	//fills in a range with a certain color, new ranges overwrite old
 	void FillRange(uint64 start, uint64 end, COLORREF color);
+
 	//fills in entire range with a certain color
 	void Fill(COLORREF color);
 

@@ -29,9 +29,9 @@
 //	<major>.<minor>			 is used for the protocol(!) version
 //
 #define VERSION_MJR		0
-#define VERSION_MIN		48
+#define VERSION_MIN		49
 #define VERSION_UPDATE	0
-#define VERSION_BUILD	8
+#define VERSION_BUILD	21
 
 // NOTE: This version string is also used by the language DLLs!
 #define	SZ_VERSION_NAME		chSTR(VERSION_MJR) _T(".") chSTR(VERSION_MIN) _T(".") chSTR(VERSION_UPDATE)

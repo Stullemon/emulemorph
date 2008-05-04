@@ -61,6 +61,7 @@ protected:
 										   LPVOID lpvStatusInformation, DWORD dwStatusInformationLength);
 	void OnStatusCallBack(HINTERNET hInternet, DWORD dwInternetStatus,
 						  LPVOID lpvStatusInformation, DWORD dwStatusInformationLength);
+	CString GetStatusInfo(LPVOID lpvStatusInformation);
 	static UINT _DownloadThread(LPVOID pParam);
 	void HandleThreadErrorWithLastError(CString strIDError, DWORD dwLastError = 0);
 	void HandleThreadError(CString strIDError);
@@ -69,7 +70,7 @@ protected:
 	void SetTimeLeft(DWORD dwSecondsLeft, DWORD dwBytesRead, DWORD dwFileSize);
 	void SetProgressRange(DWORD dwFileSize);
 	void SetStatus(const CString& sCaption);
-	void SetStatus(CString nID, const CString& lpsz1);
+	void SetStatus(CString strFmt, LPCTSTR lpsz1);
 	void SetTransferRate(double KbPerSecond);
 	void PlayAnimation();
 	void SetProgress(DWORD dwBytesRead);
@@ -89,6 +90,7 @@ protected:
 	BOOL		m_bSafeToClose;
 	CFile		m_FileToWrite;
 	CWinThread*	m_pThread;
+	static ULONGLONG sm_ullWinInetVer;
+
 	LPSYSTEMTIME	m_pLastModifiedTime;//MORPH - Added by SiRoB,
-	
 };

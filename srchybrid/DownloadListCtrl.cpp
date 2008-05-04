@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -571,13 +571,20 @@ void CDownloadListCtrl::DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlI
 		{
 		case 0:{		// file name
 			CRect rcDraw(lpRect);
+			int iIconPosY = (rcDraw.Height() > theApp.GetSmallSytemIconSize().cy) ? ((rcDraw.Height() - theApp.GetSmallSytemIconSize().cy) / 2) : 0;
 			int iImage = theApp.GetFileTypeSystemImageIdx(lpPartFile->GetFileName());
 			if (theApp.GetSystemImageList() != NULL)
-				::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc->GetSafeHdc(), rcDraw.left, rcDraw.top, ILD_NORMAL|ILD_TRANSPARENT);
+				::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc->GetSafeHdc(), rcDraw.left, rcDraw.top + iIconPosY, ILD_NORMAL | ILD_TRANSPARENT);
 			rcDraw.left += theApp.GetSmallSytemIconSize().cx;
+
+			//MORPH START - Optimization
+			/*
+			if (thePrefs.ShowRatingIndicator() && (lpPartFile->HasComment() || lpPartFile->HasRating() || lpPartFile->IsKadCommentSearchRunning())){
+			*/
 			if ( thePrefs.ShowRatingIndicator() ){
 				if (lpPartFile->HasComment() || lpPartFile->HasRating() || lpPartFile->IsKadCommentSearchRunning())
-					m_ImageList.Draw(dc, lpPartFile->UserRating(true)+14, rcDraw.TopLeft(), ILD_NORMAL);
+			//MORPH END   - Optimization
+				m_ImageList.Draw(dc, lpPartFile->UserRating(true) + 14, CPoint(rcDraw.left, rcDraw.top + iIconPosY), ILD_NORMAL);
 				rcDraw.left += RATING_ICON_WIDTH;
 			}
 
@@ -931,8 +938,9 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 
 		case 0:		// icon, name, status
 			{
-				RECT cur_rec = *lpRect;
-				POINT point = {cur_rec.left, cur_rec.top+1};
+				CRect cur_rec(*lpRect);
+				int iIconPosY = (cur_rec.Height() > 16) ? ((cur_rec.Height() - 16) / 2) : 1;
+				POINT point = {cur_rec.left, cur_rec.top + iIconPosY};
 				if (lpCtrlItem->type == AVAILABLE_SOURCE){
 					switch (lpUpDownClient->GetDownloadState()) {
 					case DS_CONNECTING:
@@ -972,17 +980,17 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, Ctr
 					}
 				}
 				else {
-
 					m_ImageList.Draw(dc, 3, point, ILD_NORMAL);
 				}
 				cur_rec.left += 20;
+
 				UINT uOvlImg = 0;
 				if ((lpUpDownClient->Credits() && lpUpDownClient->Credits()->GetCurrentIdentState(lpUpDownClient->GetIP()) == IS_IDENTIFIED))
 					uOvlImg |= 1;
 				if (lpUpDownClient->IsObfuscatedConnectionEstablished())
 					uOvlImg |= 2;
 
-				POINT point2= {cur_rec.left,cur_rec.top+1};
+				POINT point2 = {cur_rec.left, cur_rec.top + iIconPosY};
 				//MORPH START - Modified by SiRoB, More client & ownCredit overlay icon
 				//MORPH - Removed by SiRoB, Friend Addon
 				/*
@@ -2275,13 +2283,17 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 						CString fileList;
 						bool validdelete = false;
 						bool removecompl = false;
+						int cFiles = 0;
 						for (pos = selectedList.GetHeadPosition(); pos != 0; )
 						{
 							CPartFile* cur_file = selectedList.GetNext(pos);
 							if (cur_file->GetStatus() != PS_COMPLETING && (cur_file->GetStatus() != PS_COMPLETE || wParam == MP_CANCEL) ){
 								validdelete = true;
-								if (selectedCount < 50)
+								cFiles++;
+								if (cFiles < 50)
 									fileList.Append(_T("\n") + CString(cur_file->GetFileName()));
+								else if(cFiles == 50)
+									fileList.Append(_T("\n..."));
 							}
 							else if (cur_file->GetStatus() == PS_COMPLETE)
 								removecompl = true;
@@ -3899,7 +3911,7 @@ void CDownloadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 		::GetCursorPos(&hti.pt);
 		ScreenToClient(&hti.pt);
 		if (SubItemHitTest(&hti) == -1 || hti.iItem != pGetInfoTip->iItem || hti.iSubItem != 0){
-			// don' show the default label tip for the main item, if the mouse is not over the main item
+			// don't show the default label tip for the main item, if the mouse is not over the main item
 			if ((pGetInfoTip->dwFlags & LVGIT_UNFOLDED) == 0 && pGetInfoTip->cchTextMax > 0 && pGetInfoTip->pszText[0] != _T('\0'))
 				pGetInfoTip->pszText[0] = _T('\0');
 			return;
@@ -3991,6 +4003,7 @@ void CDownloadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 				}
 			}
 
+			info += TOOLTIP_AUTOFORMAT_SUFFIX_CH;
 			_tcsncpy(pGetInfoTip->pszText, info, pGetInfoTip->cchTextMax);
 			pGetInfoTip->pszText[pGetInfoTip->cchTextMax-1] = _T('\0');
 		}

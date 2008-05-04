@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -446,7 +446,7 @@ void CCreditsThread::InitText()
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 
 	m_arCredits.Add(sTmp);
-	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2007 Merkur"));
+	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2008 Merkur"));
 	m_arCredits.Add(_T("S:50"));
 
     //Commander - Added: MorphTeam - Start

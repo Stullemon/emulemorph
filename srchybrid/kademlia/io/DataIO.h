@@ -46,6 +46,7 @@ namespace Kademlia
 			BYTE* ReadBsob(uint8* puSize);
 			float ReadFloat();
 			CStringW ReadStringUTF8(bool bOptACP = false);
+			void	 WriteString(const CStringW& strVal);
 			CKadTag* ReadTag(bool bOptACP = false);
 			void ReadTagList(TagList* pTaglist, bool bOptACP = false);
 			void WriteByte(byte byVal);

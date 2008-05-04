@@ -27,6 +27,7 @@
 
 // CHistoryListCtrl
 
+#ifndef NO_HISTORY
 class CHistoryListCtrl : public CMuleListCtrl, public CListCtrlItemWalk
 {
 	DECLARE_DYNAMIC(CHistoryListCtrl)
@@ -66,5 +67,4 @@ private:
 	CTitleMenu	m_HistoryOpsMenu;
 	void		OpenFile(CKnownFile* file);
 };
-
-
+#endif

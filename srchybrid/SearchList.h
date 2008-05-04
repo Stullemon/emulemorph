@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -50,6 +50,7 @@ typedef struct {
 class CFileDataIO;
 class CAbstractFile;
 
+
 __inline bool __stdcall operator==(const CSearchFile::SServer& s1, const CSearchFile::SServer& s2)
 {
 	return s1.m_nIP==s2.m_nIP && s1.m_nPort==s2.m_nPort;
@@ -90,6 +91,9 @@ public:
 	bool	AddNotes(Kademlia::CEntry* entry, const uchar* hash);
 	void	SetNotesSearchStatus(const uchar* pFileHash, bool bSearchRunning);
 	void	SentUDPRequestNotification(uint32 nSearchID, uint32 dwServerIP);	
+	
+	void	StoreSearches();
+	void	LoadSearches();
 	
 	void	DoSpamRating(CSearchFile* pSearchFile, bool bIsClientFile = false, bool bMarkAsNoSpam = false, bool bRecalculateAll = false, bool bUpdateAll = false, uint32 dwFromUDPServerIP = 0);
 	void	MarkFileAsSpam(CSearchFile* pSpamFile, bool bRecalculateAll = false, bool bUpdate = false);

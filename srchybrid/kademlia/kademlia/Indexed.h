@@ -56,26 +56,42 @@ struct SSearchTerm
 
 namespace Kademlia
 {
-
+	class CKadUDPKey;
+	class CKeyEntry;
 	class CIndexed
 	{
 		public:
+			class CLoadDataThread : public CWinThread
+			{
+				DECLARE_DYNCREATE(CLoadDataThread)
+			protected:
+				CLoadDataThread();
+			public:
+				virtual BOOL InitInstance();
+				virtual int	Run();
+				void	SetValues(CIndexed* pOwner)		{ m_pOwner = pOwner; }
+
+			private:
+				CIndexed* m_pOwner;
+			};
+
 			CIndexed();
 			~CIndexed();
 
-			bool AddKeyword(const CUInt128& uKeyWordID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad);
-			bool AddSources(const CUInt128& uKeyWordID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad);
-			bool AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad);
-			bool AddLoad(const CUInt128& uKeyID, uint32 uTime);
+			bool AddKeyword(const CUInt128& uKeyWordID, const CUInt128& uSourceID, Kademlia::CKeyEntry* pEntry, uint8& uLoad, bool bIgnoreThreadLock = false);
+			bool AddSources(const CUInt128& uKeyWordID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad, bool bIgnoreThreadLock = false);
+			bool AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad, bool bIgnoreThreadLock = false);
+			bool AddLoad(const CUInt128& uKeyID, uint32 uTime, bool bIgnoreThreadLock = false);
 			uint32 GetFileKeyCount();
-			void SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm* pSearchTerms, uint32 uIP, uint16 uPort, bool bOldClient, bool bKad2, uint16 uStartPosition);
-			void SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint16 uStartPosition, uint64 uFileSize);
-			void SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint64 uFileSize);
+			void SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm* pSearchTerms, uint32 uIP, uint16 uPort, bool bOldClient, bool bKad2, uint16 uStartPosition, CKadUDPKey senderUDPKey);
+			void SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint16 uStartPosition, uint64 uFileSize, CKadUDPKey senderUDPKey);
+			void SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint64 uFileSize, CKadUDPKey senderUDPKey);
 			bool SendStoreRequest(const CUInt128& uKeyID);
 			uint32 m_uTotalIndexSource;
 			uint32 m_uTotalIndexKeyword;
 			uint32 m_uTotalIndexNotes;
 			uint32 m_uTotalIndexLoad;
+
 		private:
 			void ReadFile(void);
 			void Clean(void);
@@ -83,9 +99,14 @@ namespace Kademlia
 			CKeyHashMap m_mapKeyword;
 			CSrcHashMap m_mapSources;
 			CSrcHashMap m_mapNotes;
-			CLoadMap m_mapLoad;
+			CLoadMap	m_mapLoad;
+			CMutex		m_mutSync;
+			volatile bool	m_bDataLoaded;
+			volatile bool	m_bAbortLoading; // signs the loading thread to abort
 			static CString	m_sSourceFileName;
 			static CString	m_sKeyFileName;
 			static CString	m_sLoadFileName;
 	};
+
+
 }

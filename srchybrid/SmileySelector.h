@@ -1,6 +1,6 @@
 
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -40,4 +40,5 @@ protected:
 	afx_msg void OnActivateApp(BOOL bActive, DWORD dwThreadID);
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	afx_msg void OnTbnSmileyGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnDestroy();
 };

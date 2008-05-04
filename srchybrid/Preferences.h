@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -190,6 +190,7 @@ public:
 	static	UINT	depth3D;			   // Barry
 	static	bool	m_bEnableMiniMule;
 	static	int		m_iStraightWindowStyles;
+	static  bool	m_bUseSystemFontForMainControls;
 	static	bool	m_bRTLWindowsLayout;
 	static	CString	m_strSkinProfile;
 	static	CString	m_strSkinProfileDir;
@@ -518,6 +519,7 @@ public:
 	
 	static	bool	msgonlyfriends;
 	static	bool	msgsecure;
+	static	bool	m_bUseChatCaptchas;
 
 	static	UINT	filterlevel;
 	static	UINT	m_iFileBufferSize;
@@ -902,6 +904,8 @@ public:
 	static bool		m_bEnableSearchResultFilter;
 
 	static BOOL		m_bIsRunningAeroGlass;
+	static bool		m_bPreventStandby;
+	static bool		m_bStoreSearches;
 
 
 	static bool		m_bCryptLayerRequiredStrictServer; // MORPH lh require obfuscated server connection 
@@ -1357,6 +1361,7 @@ public:
 	// <-----khaos-
 	static	bool	UseFlatBar()						{return (depth3D==0);}
 	static	int		GetStraightWindowStyles()			{return m_iStraightWindowStyles;}
+	static  bool	GetUseSystemFontForMainControls()	{return m_bUseSystemFontForMainControls;}
 
 	static	const CString& GetSkinProfile()				{return m_strSkinProfile;}
 	static	void	SetSkinProfile(LPCTSTR pszProfile)	{m_strSkinProfile = pszProfile; }
@@ -1515,6 +1520,7 @@ public:
 	static	int		GetIPFilterLevel()		{ return filterlevel;}
 	static	const CString& GetMessageFilter()			{return messageFilter;}
 	static	const CString& GetCommentFilter(){ return commentFilter; }
+	static	void	SetCommentFilter(const CString& strFilter) {commentFilter = strFilter;}
 	static	const CString& GetFilenameCleanups()		{return filenameCleanups;}
 
 	static	bool	ShowRatesOnTitle()		{ return showRatesInTitle;}
@@ -1589,6 +1595,7 @@ public:
 	static	UINT	GetMsgSessionsMax()					{return maxmsgsessions;}
 	static	bool	IsSecureIdentEnabled()					{ return m_bUseSecureIdent;} // use clientcredits->CryptoAvailable() to check if crypting is really available and not this function
 	static	bool	IsAdvSpamfilterEnabled()				{ return m_bAdvancedSpamfilter;}
+	static	bool	IsChatCaptchaEnabled()				{return IsAdvSpamfilterEnabled() && m_bUseChatCaptchas;}
 	static	const CString& GetTemplate()				{return m_strTemplateFile;}
 	static	void	SetTemplate(CString in)				{m_strTemplateFile = in;}
 	static	bool	GetNetworkKademlia()				{return networkkademlia && udpport > 0;}
@@ -1775,6 +1782,8 @@ public:
 	static bool     IsServerCryptLayerRequiredStrict()  {return IsClientCryptLayerSupported() && m_bCryptLayerRequiredStrictServer && udpport > 0;} // MORPH lh require obfuscated server connection 
 	
 
+	static bool		IsStoringSearchesEnabled()			{return m_bStoreSearches;}
+	static bool		GetPreventStandby()					{return m_bPreventStandby;}
 	static uint16	GetRandomTCPPort();
 	static uint16	GetRandomUDPPort();
 

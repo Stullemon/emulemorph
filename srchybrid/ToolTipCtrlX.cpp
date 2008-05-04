@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -127,41 +127,56 @@ void CToolTipCtrlX::OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult)
 			 pOldDCFont = pdc->SelectObject(&m_fontNormal);
 		}
 		if (m_bCol1Bold && m_fontBold.m_hObject == NULL) {
-			CFont* pFont = pwnd->GetFont();
-			if (pFont) {
 				LOGFONT lf;
-				pFont->GetLogFont(&lf);
+			m_fontNormal.GetLogFont(&lf);
 				lf.lfWeight = FW_BOLD;
 				VERIFY( m_fontBold.CreateFontIndirect(&lf) );
-			}
 		}
 		pdc->SetTextColor(m_crTooltipTextColor);
 
-
+		// Auto-format the text only if explicitly requested. Otherwise we would also format
+		// single line tooltips for regular list items, and if those list items contain ':'
+		// characters they would be shown partially in bold. For performance reasons, the
+		// auto-format is to be requested by appending the TOOLTIP_AUTOFORMAT_SUFFIX_CH 
+		// character. Appending, because we can remove that character efficiently without
+		// re-allocating the entire string.
+		bool bAutoFormatText = strText.GetLength() > 0 && strText[strText.GetLength() - 1] == TOOLTIP_AUTOFORMAT_SUFFIX_CH;
+		if (bAutoFormatText)
+			strText.Truncate(strText.GetLength() - 1); // truncate the TOOLTIP_AUTOFORMAT_SUFFIX_CH char by setting it to NUL
+		bool bShowFileIcon = m_bShowFileIcon && bAutoFormatText;
+		if (bShowFileIcon) {
+			int iPosNL = strText.Find(_T('\n'));
+			if (iPosNL > 0) {
+				int iPosColon = strText.Find(_T(':'));
+				if (iPosColon < iPosNL)
+					bShowFileIcon = false; // 1st line does not contain a filename
+			}
+		}
 		int iTextHeight = 0;
 		int iMaxCol1Width = 0;
 		int iMaxCol2Width = 0;
 		int iMaxSingleLineWidth = 0;
 		CSize sizText(0);
 		int iPos = 0;
-		int iCaptionEnd = m_bShowFileIcon ? max(strText.Find(_T("\n<br_head>\n")), 0) : 0; // special tooltip with file icon
-		int iCaptionHeigth = 0;
-		int iIconMinYBorder = 3;
-		int iIconSize = theApp.GetBigSytemIconSize().cx;
-		int iIconDrawingSpace = iIconSize + 9;
+		int iCaptionEnd = bShowFileIcon ? max(strText.Find(_T("\n<br_head>\n")), 0) : 0; // special tooltip with file icon
+		int iCaptionHeight = 0;
+		int iIconMinYBorder = bShowFileIcon ? 3 : 0;
+		int iIconWidth = bShowFileIcon ? theApp.GetBigSytemIconSize().cx : 0;
+		int iIconHeight = bShowFileIcon ? theApp.GetBigSytemIconSize().cy : 0;
+		int iIconDrawingWidth = bShowFileIcon ? (iIconWidth + 9) : 0;
 		while (iPos != -1)
 		{
 			CString strLine = GetNextString(strText, _T('\n'), iPos);
-			int iColon = strLine.Find(_T(':'));
+			int iColon = bAutoFormatText ? strLine.Find(_T(':')) : -1;
 			if (iColon != -1) {
 				CFont* pOldFont = m_bCol1Bold ? pdc->SelectObject(&m_fontBold) : NULL;
 				CSize siz = pdc->GetTextExtent(strLine, iColon + 1);
 				if (pOldFont)
 					pdc->SelectObject(pOldFont);
-				iMaxCol1Width = max(iMaxCol1Width, siz.cx + ((m_bShowFileIcon && iPos <= iCaptionEnd + strLine.GetLength()) ? iIconDrawingSpace : 0));
+				iMaxCol1Width = max(iMaxCol1Width, siz.cx + ((bShowFileIcon && iPos <= iCaptionEnd + strLine.GetLength()) ? iIconDrawingWidth : 0));
 				iTextHeight = siz.cy + 1; // update height with 'col1' string, because 'col2' string might be empty and therefore has no height
 				if (iPos <= iCaptionEnd)
-					iCaptionHeigth += siz.cy + 1;
+					iCaptionHeight += siz.cy + 1;
 				else
 					sizText.cy += siz.cy + 1;
 
@@ -173,21 +188,20 @@ void CToolTipCtrlX::OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult)
 					iMaxCol2Width = max(iMaxCol2Width, siz.cx);
 				}
 			}
-			else if (m_bShowFileIcon && iPos <= iCaptionEnd && iPos == strLine.GetLength() + 1){
+			else if (bShowFileIcon && iPos <= iCaptionEnd && iPos == strLine.GetLength() + 1){
 				// file name, printed bold on top without any tabbing or desc
 				CFont* pOldFont = m_bCol1Bold ? pdc->SelectObject(&m_fontBold) : NULL;
 				CSize siz = pdc->GetTextExtent(strLine);
 				if (pOldFont)
 					pdc->SelectObject(pOldFont);
-				iMaxSingleLineWidth = max(iMaxSingleLineWidth, siz.cx + iIconDrawingSpace);
-				iCaptionHeigth += siz.cy + 1;
-
+				iMaxSingleLineWidth = max(iMaxSingleLineWidth, siz.cx + iIconDrawingWidth);
+				iCaptionHeight += siz.cy + 1;
 			}
 			else if (!strLine.IsEmpty() && strLine.Compare(_T("<br>")) != 0 && strLine.Compare(_T("<br_head>")) != 0) {
 				CSize siz = pdc->GetTextExtent(strLine);
-				iMaxSingleLineWidth = max(iMaxSingleLineWidth, siz.cx + ((iPos <= iCaptionEnd) ? iIconDrawingSpace : 0));
-				if (m_bShowFileIcon && iPos <= iCaptionEnd + strLine.GetLength())
-					iCaptionHeigth += siz.cy + 1;
+				iMaxSingleLineWidth = max(iMaxSingleLineWidth, siz.cx + ((bShowFileIcon && iPos <= iCaptionEnd) ? iIconDrawingWidth : 0));
+				if (bShowFileIcon && iPos <= iCaptionEnd + strLine.GetLength())
+					iCaptionHeight += siz.cy + 1;
 				else
 					sizText.cy += siz.cy + 1;
 			}
@@ -196,9 +210,9 @@ void CToolTipCtrlX::OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult)
 				sizText.cy += siz.cy;
 			}
 		}
-		if (m_bShowFileIcon && iCaptionEnd > 0)
-			iCaptionHeigth = max(iCaptionHeigth, iIconSize + (2*iIconMinYBorder));
-		sizText.cy += iCaptionHeigth;
+		if (bShowFileIcon && iCaptionEnd > 0)
+			iCaptionHeight = max(iCaptionHeight, theApp.GetBigSytemIconSize().cy + (2*iIconMinYBorder));
+		sizText.cy += iCaptionHeight;
 
 		iMaxCol1Width = min(m_iScreenWidth4, iMaxCol1Width);
 		iMaxCol2Width = min(m_iScreenWidth4*2, iMaxCol2Width);
@@ -211,8 +225,6 @@ void CToolTipCtrlX::OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult)
 		AdjustRect(&rcNewSize);		
 		rcWnd.right = rcWnd.left + rcNewSize.Width();
 		rcWnd.bottom = rcWnd.top + rcNewSize.Height();
-
-
 
 		if (rcWnd.left >= m_rcScreen.left) {
 			if (rcWnd.right > m_rcScreen.right && rcWnd.Width() <= m_rcScreen.Width())
@@ -230,17 +242,16 @@ void CToolTipCtrlX::OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult)
 		pNMCD->nmcd.rc.bottom = rcWnd.bottom;
 		pdc->FillSolidRect(&rcWnd, m_crTooltipBkColor);
 
-		
 		iPos = 0;
 		while (iPos != -1)
 		{
 			CString strLine = GetNextString(strText, _T('\n'), iPos);
-			int iColon = strLine.Find(_T(':'));
+			int iColon = bAutoFormatText ? strLine.Find(_T(':')) : -1;
 			CRect rcDT;
-			if (!m_bShowFileIcon || (unsigned)iPos > (unsigned)iCaptionEnd + strLine.GetLength())
+			if (!bShowFileIcon || (unsigned)iPos > (unsigned)iCaptionEnd + strLine.GetLength())
 				rcDT.SetRect(ptText.x, ptText.y, ptText.x + iMaxCol1Width, ptText.y + iTextHeight);
 			else
-				rcDT.SetRect(ptText.x + iIconDrawingSpace, ptText.y, ptText.x + iMaxCol1Width, ptText.y + iTextHeight);
+				rcDT.SetRect(ptText.x + iIconDrawingWidth, ptText.y, ptText.x + iMaxCol1Width, ptText.y + iTextHeight);
 			if (iColon != -1) {
 				// don't draw empty <col1> strings (they are still handy to use for skipping the <col1> space)
 				if (iColon > 0) {
@@ -261,23 +272,30 @@ void CToolTipCtrlX::OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult)
 
 				ptText.y += iTextHeight;
 			}
-			else if (m_bShowFileIcon && iPos <= iCaptionEnd && iPos == strLine.GetLength() + 1){
+			else if (bShowFileIcon && iPos <= iCaptionEnd && iPos == strLine.GetLength() + 1){
 				// first line on special fileicon tab - draw icon and bold filename
 				CFont* pOldFont = m_bCol1Bold ? pdc->SelectObject(&m_fontBold) : NULL;
-				pdc->DrawText(strLine, CRect(ptText.x  + iIconDrawingSpace, ptText.y, ptText.x + iMaxSingleLineWidth, ptText.y + iTextHeight), m_dwCol1DrawTextFlags);
+				pdc->DrawText(strLine, CRect(ptText.x  + iIconDrawingWidth, ptText.y, ptText.x + iMaxSingleLineWidth, ptText.y + iTextHeight), m_dwCol1DrawTextFlags);
 				if (pOldFont)
 					pdc->SelectObject(pOldFont);
 
 				ptText.y += iTextHeight;
 				int iImage = theApp.GetFileTypeSystemImageIdx(strLine, -1, true);
-				if (theApp.GetBigSystemImageList() != NULL)
-					::ImageList_Draw(theApp.GetBigSystemImageList(), iImage, pdc->GetSafeHdc(), ptText.x, rcDT.top + ((iCaptionHeigth - iIconSize) / 2), ILD_NORMAL|ILD_TRANSPARENT);
+				if (theApp.GetBigSystemImageList() != NULL) {
+					int iPosY = rcDT.top;
+					if (iCaptionHeight > iIconHeight)
+						iPosY += (iCaptionHeight - iIconHeight) / 2;
+					::ImageList_Draw(theApp.GetBigSystemImageList(), iImage, pdc->GetSafeHdc(), ptText.x, iPosY, ILD_NORMAL|ILD_TRANSPARENT);
+				}
 			}
 			else {
-				if (strLine.Compare(_T("<br>")) == 0 || strLine.Compare(_T("<br_head>")) == 0){
+				bool bIsBrHeadLine = false;
+				if (bAutoFormatText && (strLine.Compare(_T("<br>")) == 0 || (bIsBrHeadLine = strLine.Compare(_T("<br_head>")) == 0) == true)){
 					CPen pen;
 					pen.CreatePen(0, 1, m_crTooltipTextColor);
 					CPen *pOP = pdc->SelectObject(&pen);
+					if (bIsBrHeadLine)
+						ptText.y = iCaptionHeight;
 					pdc->MoveTo(ptText.x, ptText.y + ((iTextHeight - 2) / 2)); 
 					pdc->LineTo(ptText.x + iMaxSingleLineWidth, ptText.y + ((iTextHeight - 2) / 2));
 					ptText.y += iTextHeight;

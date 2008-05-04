@@ -1,7 +1,6 @@
 #pragma once
 
-class CSafeMemFile;
-
+#include "SafeFile.h"
 
 ///////////////////////////////////////////////////////////////////////////////
 // ESearchType
@@ -37,6 +36,24 @@ struct SSearchParams
 		bMatchKeywords = false;
 		bUnicode = true;
 	}
+
+	SSearchParams(CFileDataIO& rFile)
+	{
+		dwSearchID = rFile.ReadUInt32();
+		eType = (ESearchType)rFile.ReadUInt8();
+		bClientSharedFiles = rFile.ReadUInt8() > 0;
+		strSpecialTitle = rFile.ReadString(true);
+		strExpression = rFile.ReadString(true);
+		strFileType = rFile.ReadString(true);
+		ullMinSize = 0;
+		ullMaxSize = 0;
+		uAvailability = 0;
+		uComplete = 0;
+		ulMinBitrate = 0;
+		ulMinLength = 0;
+		bMatchKeywords = false;
+		bUnicode = true;
+	}
 	DWORD dwSearchID;
 	bool bClientSharedFiles;
 	CString strSearchTitle;
@@ -61,6 +78,16 @@ struct SSearchParams
 	CString strSpecialTitle;
 	bool bMatchKeywords;
 	bool bUnicode;
+
+	void StorePartially(CFileDataIO& rFile) const
+	{
+		rFile.WriteUInt32(dwSearchID);
+		rFile.WriteUInt8((uint8)eType);
+		rFile.WriteUInt8(bClientSharedFiles ? 1 : 0);
+		rFile.WriteString(strSpecialTitle, utf8strRaw);
+		rFile.WriteString(strExpression, utf8strRaw);
+		rFile.WriteString(CString(strFileType), utf8strRaw);
+	}
 };
 
 bool GetSearchPacket(CSafeMemFile* data, SSearchParams* pParams, bool bTargetSupports64Bit, bool* pbPacketUsing64Bit);

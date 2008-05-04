@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -149,6 +149,16 @@ BOOL CRichEditCtrlX::OnEnLink(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CRichEditCtrlX::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
+	if (point.x != -1 || point.y != -1) {
+		CRect rcClient;
+		GetClientRect(&rcClient);
+		ClientToScreen(&rcClient);
+		if (!rcClient.PtInRect(point)) {
+			Default();
+			return;
+		}
+	}
+
 	long iSelStart, iSelEnd;
 	GetSel(iSelStart, iSelEnd);
 	int iTextLen = GetWindowTextLength();

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -77,6 +77,7 @@ public:
 	bool	IsGlobalEd2kSearchRunning() const { return (global_search_timer != 0); }
 	void	LocalEd2kSearchEnd(UINT count, bool bMoreResultsAvailable);
 	void	AddGlobalEd2kSearchResults(UINT count);
+	void	SetNextSearchID(uint32 uNextID)				{m_nEd2kSearchID = uNextID;}
 
 	bool	DoNewKadSearch(SSearchParams* pParams);
 	void	CancelKadSearch(UINT uSearchID);
@@ -91,12 +92,15 @@ public:
 	bool	CanDeleteAllSearches() const;
 	void	DeleteSearch(uint32 nSearchID);
 	void	DeleteAllSearches();
+	void	DeleteSelectedSearch();
 
-	bool	CreateNewTab(SSearchParams* pParams);
+	bool	CreateNewTab(SSearchParams* pParams, bool bActiveIcon = true);
 	void	ShowSearchSelector(bool visible);
 	int		GetSelectedCat() { return m_cattabs.GetCurSel(); }
 	void	UpdateCatTabs();
 
+	SSearchParams* GetSearchResultsParams(UINT uSearchID) const;
+	
 	uint32	GetFilterColumn() const				{ return m_nFilterColumn; }
 
 protected:
@@ -127,7 +131,7 @@ protected:
 	void SetSearchResultsIcon(UINT uSearchID, int iImage);
 	void SetActiveSearchResultsIcon(UINT uSearchID);
 	void SetInactiveSearchResultsIcon(UINT uSearchID);
-	SSearchParams* GetSearchResultsParams(UINT uSearchID) const;
+	
 
 	virtual void OnInitialUpdate();
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);

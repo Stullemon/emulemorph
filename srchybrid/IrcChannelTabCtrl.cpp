@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -243,18 +243,42 @@ Channel* CIrcChannelTabCtrl::NewChannel(const CString& sName, Channel::EType eTy
 	else
 		newitem.iImage = 2;
 	int iInsertAt = GetItemCount();
-//#ifdef _DEBUG
-	if (eType == Channel::ctNormal)
-		iInsertAt = 2;
-//#endif
 	int iItem = InsertItem(iInsertAt, &newitem);
 	if (eType == Channel::ctNormal)
-	{
-		SetCurSel(iItem);
-		SetCurFocus(iItem);
-		OnTcnSelChange(NULL, NULL);
-	}
+		SelectChannel(iItem);
 	return pChannel;
+}
+
+int CIrcChannelTabCtrl::FindChannel(const Channel *pChannel)
+{
+	TCITEM item;
+	item.mask = TCIF_PARAM;
+	item.lParam = -1;
+	int iItems = GetItemCount();
+	int iIndex;
+	for (iIndex = 0; iIndex < iItems; iIndex++)
+	{
+		GetItem(iIndex, &item);
+		if ((const Channel*)item.lParam == pChannel)
+			return iIndex;
+	}
+	return -1;
+}
+
+void CIrcChannelTabCtrl::SelectChannel(int iItem)
+{
+	ASSERT( iItem >= 0 && iItem < GetItemCount() );
+	SetCurSel(iItem);
+	SetCurFocus(iItem);
+	OnTcnSelChange(NULL, NULL);
+}
+
+void CIrcChannelTabCtrl::SelectChannel(const Channel *pChannel)
+{
+	int iItem = FindChannel(pChannel);
+	if (iItem < 0)
+		return;
+	SelectChannel(iItem);
 }
 
 void CIrcChannelTabCtrl::RemoveChannel(const CString& sChannel)

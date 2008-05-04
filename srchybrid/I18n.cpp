@@ -121,7 +121,7 @@ static SLanguage _aLanguages[] =
 	{LANGID_PL_PL,	_T("polish"),		FALSE,	_T("pl_PL"),	1250,	_T("windows-1250")},	// Polish
 	{LANGID_PT_BR,	_T("ptb"),			FALSE,	_T("pt_BR"),	1252,	_T("windows-1252")},	// Portuguese (Brazil)
 	{LANGID_PT_PT,	_T("ptg"),			FALSE,	_T("pt_PT"),	1252,	_T("windows-1252")},	// Portuguese (Portugal)
-	{LANGID_RO_RO,	_T(""),				FALSE,	_T("ro_RO"),	1250,	_T("windows-1250")},	// Rumänisch
+	{LANGID_RO_RO,	_T(""),				FALSE,	_T("ro_RO"),	1250,	_T("windows-1250")},	// Romanian
 	{LANGID_RU_RU,	_T("russian"),		FALSE,	_T("ru_RU"),	1251,	_T("windows-1251")},	// Russian
 	{LANGID_SL_SI,	_T("slovak"),		FALSE,	_T("sl_SI"),	1250,	_T("windows-1250")},	// Slovenian
 	{LANGID_SQ_AL,	_T(""),				FALSE,	_T("sq_AL"),	1252,	_T("windows-1252")},	// Albanian (Albania)
@@ -131,6 +131,7 @@ static SLanguage _aLanguages[] =
 	{LANGID_ZH_CN,	_T("chs"),			FALSE,	_T("zh_CN"),	 936,	_T("gb2312")},			// Chinese (P.R.C.)
 	{LANGID_ZH_TW,	_T("cht"),			FALSE,	_T("zh_TW"),	 950,	_T("big5")}, 			// Chinese (Taiwan)
 	{LANGID_VI_VN,	_T(""),				FALSE,	_T("vi_VN"),	1258,	_T("windows-1258")},	// Vietnamese
+	{LANGID_UG_CN,	_T(""),				FALSE,	_T("ug_CN"),	1256,	_T("windows-1256")},	// Uighur
 	{0, NULL, 0, 0}
 };
 

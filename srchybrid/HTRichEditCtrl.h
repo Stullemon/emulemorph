@@ -21,6 +21,7 @@ public:
 	void Add(LPCTSTR pszMsg, int iLen = -1);
 	void AddTyped(LPCTSTR pszMsg, int iLen, UINT uFlags);
 	void AddLine(LPCTSTR pszMsg, int iLen = -1, bool bLink = false, COLORREF cr = CLR_DEFAULT, COLORREF bk = CLR_DEFAULT, DWORD mask = 0);
+	bool AddCaptcha(HBITMAP hbmp);
 	void Reset();
 	CString GetLastLogEntry();
 	CString GetAllLogEntries();
@@ -67,6 +68,7 @@ protected:
 	static int sm_iSmileyClients;
 	static CComPtr<IStorage> sm_pIStorageSmileys;
 	static CMapStringToPtr sm_aSmileyBitmaps;
+	CComPtr<IStorage> m_pIStorageCaptchas;
 
 	void SelectAllItems();
 	void CopySelectedItems();

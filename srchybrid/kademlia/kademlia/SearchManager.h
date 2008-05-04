@@ -41,6 +41,7 @@ namespace Kademlia
 	void deleteTagListEntries(TagList* plistTag);
 
 	class CRoutingZone;
+	class CKadClientSearcher;
 	class CSearchManager
 	{
 			friend class CRoutingZone;
@@ -61,8 +62,15 @@ namespace Kademlia
 			static void GetWords(LPCTSTR sz, WordList *plistWords);
 			static void UpdateStats();
 			static bool AlreadySearchingFor(const CUInt128 &uTarget);
+			
+			static void CancelNodeFWCheckUDPSearch();
+			static bool FindNodeFWCheckUDP();
+			static bool IsFWCheckUDPSearch(const CUInt128 &uTarget);
+			static void SetNextSearchID(uint32 uNextID)				{m_uNextID = uNextID;}
 		private:
 			static void FindNode(const CUInt128 &uID, bool bComplete);
+			static bool FindNodeSpecial(const CUInt128 &uID, CKadClientSearcher* pRequester);
+			static void CancelNodeSpecial(CKadClientSearcher* pRequester);
 			static void JumpStart();
 			static uint32 m_uNextID;
 			static SearchMap m_mapSearches;

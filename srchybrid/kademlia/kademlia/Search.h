@@ -38,32 +38,35 @@ namespace Kademlia
 {
 	void deleteTagListEntries(TagList* plistTag);
 	class CByteIO;
+	class CKadClientSearcher;
 	class CSearch
 	{
 			friend class CSearchManager;
 		public:
-			 // netfinity: Made some inline for performance reasons
-			uint32 GetSearchID() const {return m_uSearchID;}
-			uint32 GetSearchTypes() const {return m_uType;}
-			void SetSearchTypes( uint32 uVal ) {m_uType = uVal;}
-			void SetTargetID( CUInt128 uVal ) {m_uTarget = uVal;}
-			uint32 GetAnswers() const;
-			uint32 GetKadPacketSent() const {return m_uKadPacketSent;}
-			uint32 GetRequestAnswer() const {return m_uTotalRequestAnswers;}
-			void StorePacket(CContact* pContact); // netf
-			const CString& GetFileName() const {return m_sFileName;}
-			void SetFileName(const CString& sFileName) {m_sFileName = sFileName;}
-			CUInt128 GetTarget() const {return m_uTarget;}
-			void AddFileID(const CUInt128& uID);
-			void PreparePacketForTags( CByteIO* pbyPacket, CKnownFile* pFile );
-			bool Stoping() const {return m_bStoping;}
-			uint32 GetNodeLoad() const;
-			uint32 GetNodeLoadResonse() const {return m_uTotalLoadResponses;}
-			uint32 GetNodeLoadTotal() const {return m_uTotalLoad;}
-			void UpdateNodeLoad( uint8 uLoad );
-			void SetSearchTermData( uint32 uSearchTermDataSize, LPBYTE pucSearchTermsData );
-			enum
-			{
+			uint32		GetSearchID() const;
+			uint32		GetSearchTypes() const;
+			void		SetSearchTypes( uint32 uVal );
+			void		SetTargetID( CUInt128 uVal );
+			CUInt128	GetTarget() const;
+			uint32		GetAnswers() const;
+			uint32		GetKadPacketSent() const;
+			uint32		GetRequestAnswer() const;
+			uint32		GetNodeLoad() const;
+			uint32		GetNodeLoadResonse() const;
+			uint32		GetNodeLoadTotal() const;
+			const		CString& GetFileName() const;
+			void		SetFileName(const CString& sFileName);
+			void		SetSearchTermData( uint32 uSearchTermDataSize, LPBYTE pucSearchTermsData );
+
+			void		AddFileID(const CUInt128& uID);
+			void		PreparePacketForTags( CByteIO* pbyPacket, CKnownFile* pFile );
+			bool		Stoping() const;
+			void		UpdateNodeLoad( uint8 uLoad );
+			
+			CKadClientSearcher*	GetNodeSpecialSearchRequester() const						{ return pNodeSpecialSearchRequester; }
+			void				SetNodeSpecialSearchRequester(CKadClientSearcher* pNew)		{ pNodeSpecialSearchRequester = pNew; } 
+			
+			enum {
 			    NODE,
 			    NODECOMPLETE,
 			    FILE,
@@ -73,8 +76,10 @@ namespace Kademlia
 			    STOREKEYWORD,
 			    STORENOTES,
 			    FINDBUDDY,
-			    FINDSOURCE
-		};
+			    FINDSOURCE,
+				NODESPECIAL, // nodesearch request from requester "outside" of kad to find the IP of a given nodeid
+				NODEFWCHECKUDP // find new unknown IPs for a UDP firewallcheck
+			};
 
 			CSearch();
 			~CSearch();
@@ -89,8 +94,7 @@ namespace Kademlia
 			void JumpStart();
 			void SendFindValue(CContact* pContact);
 			void PrepareToStop();
-
-			CUInt128 GetSearchDistance(); // netfinity: Safe KAD - Calculate the search coverage to find the 3 "alive" closest nodes
+			void StorePacket();
 
 			bool m_bStoping;
 			time_t m_tCreated;
@@ -104,16 +108,15 @@ namespace Kademlia
 			uint32 m_uSearchID;
 			uint32 m_uSearchTermsDataSize;
 			LPBYTE m_pucSearchTermsData;
+			CKadClientSearcher* pNodeSpecialSearchRequester; // used to callback on result for NODESPECIAL searches
 			CUInt128 m_uTarget;
 			WordList m_listWords;
 			CString m_sFileName;
 			UIntList m_listFileIDs;
 			ContactMap m_mapPossible;
 			ContactMap m_mapTried;
-			ContactMap m_mapRetried; // netfinity: Safe KAD - Sometimes it's good to try twice
 			ContactMap m_mapResponded;
-			ContactMap m_mapUseful; // netfinity: Safe KAD - Track the nodes who gave us some contacts (not filtered)
-			//ContactMap m_mapBest; // netfinity: Safe KAD - Obsoleted
+			ContactMap m_mapBest;
 			ContactList m_listDelete;
 			ContactMap m_mapInUse;
 	};

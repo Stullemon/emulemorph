@@ -15,17 +15,20 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include <emule_site_config.h>
+
 #if _MSC_VER < 1310 && !defined(NO_VS2002_SDK)	// check for 'Visual Studio .NET 2002'
 #define HAVE_SAPI_H
 #endif
-
-
-// if you are missing sapi.h, you either need to install the Microsoft Speech SDK or Microsoft Vista SDK
-// or you can just remove the line below, which will disable speech notifications in eMule
-
-/* we get a warning here... how troublesome
+// if you are missing 'sapi.h', you either need to install the Microsoft Speech SDK or Microsoft Vista SDK
+// or you can use "emule_site_config.h" to define 'VS2003_SDK'
+//MORPH START - Removed, How very troublesome!
+/*
+#ifndef VS2003_SDK
 #define HAVE_SAPI_H
+#endif
 */
+//MORPH END   - Removed, How very troublesome!
 
 #ifdef HAVE_SAPI_H
 #include <sapi.h>

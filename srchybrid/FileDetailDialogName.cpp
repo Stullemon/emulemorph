@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -295,6 +295,7 @@ void CFileDetailDialogName::OnNMRclickList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	popupMenu.AppendMenu(flag,MP_MESSAGE, GetResString(IDS_TAKEOVER));
 	popupMenu.AppendMenu(flag,MP_COPYSELECTED, GetResString(IDS_COPY));
 	popupMenu.AppendMenu(MF_STRING,MP_RESTORE, GetResString(IDS_SV_UPDATE));
+	popupMenu.SetDefaultItem(MP_MESSAGE);
 	popupMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
 	VERIFY( popupMenu.DestroyMenu() );
 

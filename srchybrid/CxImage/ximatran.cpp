@@ -560,7 +560,7 @@ bool CxImage::Rotate(float angle, CxImage* iDst)
  *
  * \author ***bd*** 2.2004
  */
-bool CxImage::Rotate2(float angle, 
+bool CxImage::Rotate3(float angle, 
                        CxImage *iDst, 
                        InterpolationMethod inMethod, 
                        OverflowMethod ofMethod, 
@@ -2433,6 +2433,163 @@ bool CxImage::QIShrink(long newx, long newy, CxImage* const iDst)
 		Transfer(newImage);
     return true;
 
+}
+
+bool CxImage::Rotate2(float angle, 
+                       CxImage *iDst, 
+                       bool const optimizeRightAngles,
+					   bool const bKeepOriginalSize)
+{
+	if (!pDib) return false;					//no dib no go
+	
+	double ang = -angle*acos(0.0f)/90.0f;		//convert angle to radians and invert (positive angle performs clockwise rotation)
+	float cos_angle = (float) cos(ang);			//these two are needed later (to rotate)
+	float sin_angle = (float) sin(ang);
+	
+	//Calculate the size of the new bitmap (rotate corners of image)
+	CxPoint2 p[4];								//original corners of the image
+	p[0]=CxPoint2(-0.5f,-0.5f);
+	p[1]=CxPoint2(GetWidth()-0.5f,-0.5f);
+	p[2]=CxPoint2(-0.5f,GetHeight()-0.5f);
+	p[3]=CxPoint2(GetWidth()-0.5f,GetHeight()-0.5f);
+	CxPoint2 newp[4];								//rotated positions of corners
+	//(rotate corners)
+	if (bKeepOriginalSize){
+		for (int i=0; i<4; i++) {
+			newp[i].x = p[i].x;
+			newp[i].y = p[i].y;
+		}//for
+	} else {
+		for (int i=0; i<4; i++) {
+			newp[i].x = (p[i].x*cos_angle - p[i].y*sin_angle);
+			newp[i].y = (p[i].x*sin_angle + p[i].y*cos_angle);
+		}//for i
+		
+		if (optimizeRightAngles) { 
+			//For rotations of 90, -90 or 180 or 0 degrees, call faster routines
+			if (newp[3].Distance(CxPoint2(GetHeight()-0.5f, 0.5f-GetWidth())) < 0.25) 
+				//rotation right for circa 90 degrees (diagonal pixels less than 0.25 pixel away from 90 degree rotation destination)
+				return RotateRight(iDst);
+			if (newp[3].Distance(CxPoint2(0.5f-GetHeight(), -0.5f+GetWidth())) < 0.25) 
+				//rotation left for ~90 degrees
+				return RotateLeft(iDst);
+			if (newp[3].Distance(CxPoint2(0.5f-GetWidth(), 0.5f-GetHeight())) < 0.25) 
+				//rotation left for ~180 degrees
+				return Rotate180(iDst);
+			if (newp[3].Distance(p[3]) < 0.25) {
+				//rotation not significant
+				if (iDst) iDst->Copy(*this);		//copy image to iDst, if required
+				return true;						//and we're done
+			}//if
+		}//if
+	}//if
+
+	//(read new dimensions from location of corners)
+	float minx = (float) min(min(newp[0].x,newp[1].x),min(newp[2].x,newp[3].x));
+	float miny = (float) min(min(newp[0].y,newp[1].y),min(newp[2].y,newp[3].y));
+	float maxx = (float) max(max(newp[0].x,newp[1].x),max(newp[2].x,newp[3].x));
+	float maxy = (float) max(max(newp[0].y,newp[1].y),max(newp[2].y,newp[3].y));
+	int newWidth = (int) floor(maxx-minx+0.5f);
+	int newHeight= (int) floor(maxy-miny+0.5f);
+	float ssx=((maxx+minx)- ((float) newWidth-1))/2.0f;   //start for x
+	float ssy=((maxy+miny)- ((float) newHeight-1))/2.0f;  //start for y
+
+	float newxcenteroffset = 0.5f * newWidth;
+	float newycenteroffset = 0.5f * newHeight;
+	if (bKeepOriginalSize){
+		ssx -= 0.5f * GetWidth();
+		ssy -= 0.5f * GetHeight();
+	}
+
+	//create destination image
+	CxImage imgDest;
+	imgDest.CopyInfo(*this);
+	imgDest.Create(newWidth,newHeight,GetBpp(),GetType());
+	imgDest.SetPalette(GetPalette());
+#if CXIMAGE_SUPPORT_ALPHA
+	if(AlphaIsValid()) imgDest.AlphaCreate(); //MTA: Fix for rotation problem when the image has an alpha channel
+#endif //CXIMAGE_SUPPORT_ALPHA
+	
+	RGBQUAD rgb;			//pixel colour
+	RGBQUAD rc;
+	rc.rgbRed=255; rc.rgbGreen=255; rc.rgbBlue=255; rc.rgbReserved=0;
+	float x,y;              //destination location (float, with proper offset)
+	float origx, origy;     //origin location
+	int destx, desty;       //destination location
+	
+	y=ssy;                  //initialize y
+	if (!IsIndexed()){ //RGB24
+		//optimized RGB24 implementation (direct write to destination):
+		BYTE *pxptr;
+#if CXIMAGE_SUPPORT_ALPHA
+		BYTE *pxptra=0;
+#endif //CXIMAGE_SUPPORT_ALPHA
+		for (desty=0; desty<newHeight; desty++) {
+			info.nProgress = (long)(100*desty/newHeight);
+			if (info.nEscape) break;
+			//initialize x
+			x=ssx;
+			//calculate pointer to first byte in row
+			pxptr=(BYTE *)imgDest.BlindGetPixelPointer(0, desty);
+#if CXIMAGE_SUPPORT_ALPHA
+			//calculate pointer to first byte in row
+			if (AlphaIsValid()) pxptra=imgDest.AlphaGetPointer(0, desty);
+#endif //CXIMAGE_SUPPORT_ALPHA
+			for (destx=0; destx<newWidth; destx++) {
+				//get source pixel coordinate for current destination point
+				//origx = (cos_angle*(x-head.biWidth/2)+sin_angle*(y-head.biHeight/2))+newWidth/2;
+				//origy = (cos_angle*(y-head.biHeight/2)-sin_angle*(x-head.biWidth/2))+newHeight/2;
+				origx = cos_angle*x+sin_angle*y;
+				origy = cos_angle*y-sin_angle*x;
+				if (bKeepOriginalSize){
+					origx += newxcenteroffset;
+					origy += newycenteroffset;
+				}
+				rgb = GetPixelColor(origx, origy);
+				//copy alpha and colour value to destination
+#if CXIMAGE_SUPPORT_ALPHA
+				if (pxptra) *pxptra++ = rgb.rgbReserved;
+#endif //CXIMAGE_SUPPORT_ALPHA
+				*pxptr++ = rgb.rgbBlue;
+				*pxptr++ = rgb.rgbGreen;
+				*pxptr++ = rgb.rgbRed;
+				x++;
+			}//for destx
+			y++;
+		}//for desty
+	} else { 
+		//non-optimized implementation for paletted images
+		for (desty=0; desty<newHeight; desty++) {
+			info.nProgress = (long)(100*desty/newHeight);
+			if (info.nEscape) break;
+			x=ssx;
+			for (destx=0; destx<newWidth; destx++) {
+				//get source pixel coordinate for current destination point
+				origx=(cos_angle*x+sin_angle*y);
+				origy=(cos_angle*y-sin_angle*x);
+				if (bKeepOriginalSize){
+					origx += newxcenteroffset;
+					origy += newycenteroffset;
+				}
+				rgb = GetPixelColor(origx, origy);
+				//***!*** SetPixelColor is slow for palleted images
+#if CXIMAGE_SUPPORT_ALPHA
+				if (AlphaIsValid()) 
+					imgDest.SetPixelColor(destx,desty,rgb,true);
+				else 
+#endif //CXIMAGE_SUPPORT_ALPHA     
+					imgDest.SetPixelColor(destx,desty,rgb,false);
+				x++;
+			}//for destx
+			y++;
+		}//for desty
+	}
+	//select the destination
+	
+	if (iDst) iDst->Transfer(imgDest);
+	else Transfer(imgDest);
+	
+	return true;
 }
 
 ////////////////////////////////////////////////////////////////////////////////

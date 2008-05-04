@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -1403,7 +1403,7 @@ bool CSearchResultsWnd::DoNewKadSearch(SSearchParams* pParams)
 	return true;
 }
 
-bool CSearchResultsWnd::CreateNewTab(SSearchParams* pParams)
+bool CSearchResultsWnd::CreateNewTab(SSearchParams* pParams, bool bActiveIcon)
 {
     int iTabItems = searchselect.GetItemCount();
     for (int i = 0; i < iTabItems; i++)
@@ -1426,12 +1426,12 @@ bool CSearchResultsWnd::CreateNewTab(SSearchParams* pParams)
 	if (pParams->bClientSharedFiles)
 		newitem.iImage = sriClient;
 	else if (pParams->eType == SearchTypeKademlia)
-		newitem.iImage = sriKadActice;
+		newitem.iImage = bActiveIcon ? sriKadActice : sriKad;
 	else if (pParams->eType == SearchTypeEd2kGlobal)
-		newitem.iImage = sriGlobalActive;
+		newitem.iImage = bActiveIcon ? sriGlobalActive : sriGlobal;
 	else{
 		ASSERT( pParams->eType == SearchTypeEd2kServer );
-		newitem.iImage = sriServerActive;
+		newitem.iImage = bActiveIcon ? sriServerActive : sriServer;
 	}
 	int itemnr = searchselect.InsertItem(INT_MAX, &newitem);
 	if (!searchselect.IsWindowVisible())
@@ -1439,6 +1439,17 @@ bool CSearchResultsWnd::CreateNewTab(SSearchParams* pParams)
 	searchselect.SetCurSel(itemnr);
 	searchlistctrl.ShowResults(pParams->dwSearchID);
 	return true;
+}
+
+void CSearchResultsWnd::DeleteSelectedSearch()
+{
+	TCITEM item;
+	item.mask = TCIF_PARAM;
+	if (searchselect.GetItemCount() > 0 && searchselect.GetCurFocus() != (-1) && searchselect.GetItem(searchselect.GetCurFocus(), &item)
+		&& item.lParam != NULL)
+	{
+		DeleteSearch(((const SSearchParams*)item.lParam)->dwSearchID);
+	}
 }
 
 bool CSearchResultsWnd::CanDeleteSearch(uint32 /*nSearchID*/) const
@@ -1525,7 +1536,7 @@ void CSearchResultsWnd::DeleteAllSearches()
 	searchlistctrl.DeleteAllItems();
 	ShowSearchSelector(false);
 	searchselect.DeleteAllItems();
-	searchlistctrl.NoTabs(); //MORPH bengarchy bugfix: Prevent slow search result not getting a tab  http://forum.emule-project.net/index.php?showtopic=127905. 
+	searchlistctrl.NoTabs();
 
 	CWnd* pWndFocus = GetFocus();
 	m_pwndParams->m_ctlMore.EnableWindow(FALSE);
@@ -1676,7 +1687,7 @@ void CSearchResultsWnd::OnClose()
 
 BOOL CSearchResultsWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
-	theApp.ShowHelp(eMule_FAQ_Search);
+	theApp.ShowHelp(eMule_FAQ_GUI_Search);
 	return TRUE;
 }
 

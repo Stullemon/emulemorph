@@ -37,9 +37,9 @@ public:
 
 	// MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 	/*
-	typedef enum { kServerList, kServer , kFile , kInvalid } LinkType;
+	typedef enum { kServerList, kServer , kFile , kNodesList, kInvalid } LinkType;
 	*/
-	typedef enum { kServerList, kServer , kFile , kFriend, kFriendList, kInvalid } LinkType;
+	typedef enum { kServerList, kServer , kFile , kNodesList, kFriend, kFriendList, kInvalid } LinkType;
 	// MORPH START - Modified by Commander, Friendlinks [emulEspaña]
 
 	virtual LinkType GetKind() const = 0;
@@ -47,6 +47,7 @@ public:
 	virtual class CED2KServerListLink* GetServerListLink() = 0;
 	virtual class CED2KServerLink* GetServerLink() = 0;
 	virtual class CED2KFileLink* GetFileLink() = 0;
+	virtual class CED2KNodesListLink* GetNodesListLink() = 0;
 };
 
 
@@ -61,6 +62,7 @@ public:
 	virtual CED2KServerListLink* GetServerListLink();
 	virtual CED2KServerLink* GetServerLink();
 	virtual CED2KFileLink* GetFileLink();
+	virtual CED2KNodesListLink* GetNodesListLink()		{ return NULL; }
 
 	const CString& GetAddress() const { return m_strAddress; }
 	uint16 GetPort() const { return m_port;}
@@ -88,6 +90,7 @@ public:
 	virtual CED2KServerListLink* GetServerListLink();
 	virtual CED2KServerLink* GetServerLink();
 	virtual CED2KFileLink* GetFileLink();
+	virtual CED2KNodesListLink* GetNodesListLink() 		{ return NULL; }
 	
 	const TCHAR* GetName() const			{ return m_name; }
 	const uchar* GetHashKey() const			{ return m_hash;}
@@ -125,6 +128,7 @@ public:
 	virtual CED2KServerListLink* GetServerListLink();
 	virtual CED2KServerLink* GetServerLink();
 	virtual CED2KFileLink* GetFileLink();
+	virtual CED2KNodesListLink* GetNodesListLink()		{ return NULL; }
 
 	const TCHAR* GetAddress() const { return m_address; }
 
@@ -132,6 +136,30 @@ private:
 	CED2KServerListLink();
 	CED2KServerListLink(const CED2KFileLink&);
 	CED2KServerListLink& operator=(const CED2KFileLink&);
+
+	CString m_address;
+};
+
+
+class CED2KNodesListLink : public CED2KLink
+{
+public:
+	CED2KNodesListLink(const TCHAR* pszAddress);
+	virtual ~CED2KNodesListLink();
+
+	virtual LinkType GetKind() const;
+	virtual void GetLink(CString& lnk) const;
+	virtual CED2KServerListLink* GetServerListLink();
+	virtual CED2KServerLink* GetServerLink();
+	virtual CED2KFileLink* GetFileLink();
+	virtual CED2KNodesListLink* GetNodesListLink();
+
+	const TCHAR* GetAddress() const { return m_address; }
+
+private:
+	CED2KNodesListLink();
+	CED2KNodesListLink(const CED2KFileLink&);
+	CED2KNodesListLink& operator=(const CED2KFileLink&);
 
 	CString m_address;
 };
@@ -149,6 +177,7 @@ public:
 	virtual CED2KServerListLink*	GetServerListLink();
 	virtual CED2KServerLink*		GetServerLink();
 	virtual CED2KFileLink*			GetFileLink();
+	virtual CED2KNodesListLink*		GetNodesListLink();
 
 	CString	GetUserName() const						{ return m_sUserName; }
 	void	GetUserHash(uchar userHash[]) const		{ memcpy(userHash, m_hash, 16*sizeof(uchar)); }
@@ -169,6 +198,7 @@ public:
 	virtual CED2KServerListLink*	GetServerListLink();
 	virtual CED2KServerLink*		GetServerLink();
 	virtual CED2KFileLink*			GetFileLink();
+	virtual CED2KNodesListLink*		GetNodesListLink();
 
 	CString	GetAddress() const		{ return m_address; }
 

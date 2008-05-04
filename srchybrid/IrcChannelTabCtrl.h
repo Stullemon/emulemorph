@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -67,6 +67,7 @@ public:
 	Channel* FindChannelByName(const CString& sName);
 	Channel* NewChannel(const CString& sName, Channel::EType uType);
 	void RemoveChannel(const CString& sChannel);
+	void SelectChannel(const Channel *pChannel);
 	void DeleteAllChannels();
 	bool ChangeChanMode(const CString& sChannel, const CString& sParam, const CString& sDir, const CString& sCommand);
 	void ScrollHistory(bool bDown);
@@ -90,6 +91,8 @@ protected:
 	CImageList m_imlistIRC;
 
 	void SetAllIcons();
+	int FindChannel(const Channel *pChannel);
+	void SelectChannel(int iItem);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnTcnSelChange(NMHDR *pNMHDR, LRESULT *pResult);

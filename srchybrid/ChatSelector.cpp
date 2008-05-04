@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -40,14 +40,11 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define	STATUS_MSG_COLOR		RGB(255,0,0)		// red
+#define	STATUS_MSG_COLOR		RGB(0,128,0)		// dark green
 #define	SENT_TARGET_MSG_COLOR	RGB(0,192,0)		// bright green
 #define	RECV_SOURCE_MSG_COLOR	RGB(0,128,255)		// bright cyan/blue
 
 #define	TIME_STAMP_FORMAT		_T("[%H:%M] ")
-
-#define URLINDICATOR	_T("http:|www.|.de |.net |.com |.org |.to |.tk |.cc |.fr |ftp:|ed2k:|https:|ftp.|.info|.biz|.uk|.eu|.es|.tv|.cn|.tw|.ws|.nu|.jp")
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // CChatItem
@@ -230,38 +227,6 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, const CString& message
 	sender->IncMessagesReceived();
 	CChatItem* ci = GetItemByClient(sender);
 
-	CString strMessage(message);
-	strMessage.MakeLower();
-	CString resToken;
-	int curPos = 0;
-	resToken = thePrefs.GetMessageFilter().Tokenize(_T("|"), curPos);
-	while (!resToken.IsEmpty())
-	{
-		resToken.Trim();
-		if (strMessage.Find(resToken.MakeLower()) > -1){
-			if ( thePrefs.IsAdvSpamfilterEnabled() && !sender->IsFriend() && sender->GetMessagesSent() == 0 ){
-				sender->SetSpammer(true);
-				if (ci)
-					EndSession(sender);
-			}
-			return;
-		}
-		resToken = thePrefs.GetMessageFilter().Tokenize(_T("|"), curPos);
-	}
-
-	// advanced spamfilter check
-	if (IsSpam(strMessage, sender))
-	{
-		if (!sender->IsSpammer()){
-			if (thePrefs.GetVerbose())
-				AddDebugLogLine(false, _T("'%s' has been marked as spammer"), sender->GetUserName());
-		}
-		sender->SetSpammer(true);
-		if (ci)
-			EndSession(sender);
-		return;
-	}
-
     AddLogLine(true, GetResString(IDS_NEWMSG), sender->GetUserName(), ipstr(sender->GetConnectIP()));
 
 	bool isNewChatWindow = false;
@@ -297,6 +262,30 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, const CString& message
 	}
 }
 
+void CChatSelector::ShowCaptchaRequest(CUpDownClient* sender, HBITMAP bmpCaptcha)
+{
+	CChatItem* ci = GetItemByClient(sender);
+	if (ci != NULL)
+	{
+		if (thePrefs.GetIRCAddTimeStamp())
+			AddTimeStamp(ci);
+		ci->log->AppendKeyWord(_T("*** ") + GetResString(IDS_CAPTCHAREQUEST), STATUS_MSG_COLOR);
+		ci->log->AddCaptcha(bmpCaptcha);
+		ci->log->AddLine(_T("\n"));
+	}
+}
+
+void CChatSelector::ShowCaptchaResult(CUpDownClient* sender, CString strResult)
+{
+	CChatItem* ci = GetItemByClient(sender);
+	if (ci != NULL)
+	{
+		if (thePrefs.GetIRCAddTimeStamp())
+			AddTimeStamp(ci);
+		ci->log->AppendKeyWord(_T("*** ") + strResult + _T("\n"), STATUS_MSG_COLOR);
+	}
+}
+
 bool CChatSelector::SendMessage(const CString& rstrMessage)
 {
 	CChatItem* ci = GetCurrentChatItem();
@@ -314,22 +303,41 @@ bool CChatSelector::SendMessage(const CString& rstrMessage)
 	if (ci->client->GetChatState() == MS_CONNECTING)
 		return false;
 
-	if (thePrefs.GetIRCAddTimeStamp())
-		AddTimeStamp(ci);
+	if (ci->client->GetChatCaptchaState() == CA_CAPTCHARECV)
+		ci->client->SetChatCaptchaState(CA_SOLUTIONSENT);
+	else if (ci->client->GetChatCaptchaState() == CA_SOLUTIONSENT)
+		ASSERT( false ); // we responsed to a captcha but didn't heard from the client afterwards - hopefully its just lag and this message will get through
+	else
+		ci->client->SetChatCaptchaState(CA_ACCEPTING);
+
+	
+
+
+	// there are three cases on connectiing/sending the message:
 	if (ci->client->socket && ci->client->socket->IsConnected())
 	{
-		CSafeMemFile data;
-		data.WriteString(rstrMessage, ci->client->GetUnicodeSupport());
-		Packet* packet = new Packet(&data, OP_EDONKEYPROT, OP_MESSAGE);
-		theStats.AddUpDataOverheadOther(packet->size);
-		ci->client->socket->SendPacket(packet, true, true);
-
+		// 1.) the client is connected already - this is simple, jsut send it
+		ci->client->SendChatMessage(rstrMessage);
+	if (thePrefs.GetIRCAddTimeStamp())
+		AddTimeStamp(ci);
 		ci->log->AppendKeyWord(thePrefs.GetUserNick(), SENT_TARGET_MSG_COLOR);
 		ci->log->AppendText(_T(": "));
 		ci->log->AppendText(rstrMessage + _T("\n"));
 	}
+	else if (ci->client->GetFriend() != NULL)
+	{
+		// We are not connected and this client is a friend - friends have additional ways to connect and additional checks
+		// to make sure they are really friends, let the friend class is handling it
+		ci->strMessagePending = rstrMessage;
+		ci->client->SetChatState(MS_CONNECTING);
+		ci->client->GetFriend()->TryToConnect(this);
+	}
 	else
 	{
+		// this is a normal client, who is not connected right now. just try to connect to the given IP, without any
+		// additional checks or searchings.
+		if (thePrefs.GetIRCAddTimeStamp())
+			AddTimeStamp(ci);
 		ci->log->AppendKeyWord(_T("*** ") + GetResString(IDS_CONNECTING), STATUS_MSG_COLOR);
 		ci->strMessagePending = rstrMessage;
 		ci->client->SetChatState(MS_CONNECTING);
@@ -352,7 +360,7 @@ void CChatSelector::ConnectingResult(CUpDownClient* sender, bool success)
 	ci->client->SetChatState(MS_CHATTING);
 	if (!success){
 		if (!ci->strMessagePending.IsEmpty()){
-			ci->log->AppendKeyWord(_T(" ") + GetResString(IDS_FAILED) + _T("\n"), STATUS_MSG_COLOR);
+			ci->log->AppendKeyWord(_T(" ...") + GetResString(IDS_FAILED) + _T("\n"), STATUS_MSG_COLOR);
 			ci->strMessagePending.Empty();
 		}
 		else{
@@ -362,13 +370,8 @@ void CChatSelector::ConnectingResult(CUpDownClient* sender, bool success)
 		}
 	}
 	else if (!ci->strMessagePending.IsEmpty()){
-		ci->log->AppendKeyWord(_T(" ok\n"), STATUS_MSG_COLOR);
-		
-		CSafeMemFile data;
-		data.WriteString(ci->strMessagePending, ci->client->GetUnicodeSupport());
-		Packet* packet = new Packet(&data, OP_EDONKEYPROT, OP_MESSAGE);
-		theStats.AddUpDataOverheadOther(packet->size);
-		ci->client->socket->SendPacket(packet, true, true);
+		ci->log->AppendKeyWord(_T(" ...") + GetResString(IDS_TREEOPTIONS_OK) + _T("\n"), STATUS_MSG_COLOR);
+		ci->client->SendChatMessage(ci->strMessagePending);
 
 		if (thePrefs.GetIRCAddTimeStamp())
 			AddTimeStamp(ci);
@@ -508,6 +511,7 @@ void CChatSelector::EndSession(CUpDownClient* client)
 		return;
 	CChatItem* ci = (CChatItem*)item.lParam;
 	ci->client->SetChatState(MS_NONE);
+	ci->client->SetChatCaptchaState(CA_NONE);
 
 	DeleteItem(iCurSel);
 	delete ci;
@@ -552,34 +556,6 @@ void CChatSelector::OnSize(UINT nType, int cx, int cy)
 		CChatItem* ci = (CChatItem*)item.lParam;
 		ci->log->SetWindowPos(NULL, rcChat.left, rcChat.top, rcChat.Width(), rcChat.Height(), SWP_NOZORDER);
 	}
-}
-
-bool CChatSelector::IsSpam(CString strMessage, CUpDownClient* client)
-{
-	// first step, spam dectection will be further improved in future versions
-	if ( !thePrefs.IsAdvSpamfilterEnabled() || client->IsFriend() ) // friends are never spammer... (but what if two spammers are friends :P )
-		return false;
-
-	if (client->IsSpammer())
-		return true;
-
-	// first fixed criteria: If a client  sends me an URL in his first message before I response to him
-	// there is a 99,9% chance that it is some poor guy advising his leech mod, or selling you .. well you know :P
-	if (client->GetMessagesSent() == 0){
-		int curPos=0;
-		CString resToken = CString(URLINDICATOR).Tokenize(_T("|"), curPos);
-		while (resToken != _T("")){
-			if (strMessage.Find(resToken) > (-1) )
-				return true;
-			resToken= CString(URLINDICATOR).Tokenize(_T("|"),curPos);
-		}
-	}
-	// second fixed criteria: he sent me 4  or more messages and I didn't answered him once
-	if (client->GetMessagesReceived() > 3 && client->GetMessagesSent() == 0)
-		return true;
-
-	// to be continued
-	return false;
 }
 
 void CChatSelector::AddTimeStamp(CChatItem* ci)
@@ -685,3 +661,22 @@ void CChatSelector::EnableSmileys(bool bEnable)
 	}
 }
 
+void CChatSelector::ReportConnectionProgress(CUpDownClient* pClient, CString strProgressDesc, bool bNoTimeStamp)
+{
+	CChatItem* ci = GetItemByClient(pClient);
+	if (!ci)
+		return;
+	if (thePrefs.GetIRCAddTimeStamp() && !bNoTimeStamp)
+		AddTimeStamp(ci);
+	ci->log->AppendKeyWord(strProgressDesc, STATUS_MSG_COLOR);
+}
+
+void CChatSelector::ClientObjectChanged(CUpDownClient* pOldClient, CUpDownClient* pNewClient){
+	// the friend has deceided to change the clients objects (because the old doesnt seems to be our friend) during a connectiontry
+	// in order to not close and reopen a new session and loose the prior chat, switch the objects on a existing tab
+	// nothing else changes since the tab is supposed to be still connected to the same friend
+	CChatItem* ci = GetItemByClient(pOldClient);
+	if (!ci)
+		return;
+	ci->client = pNewClient;
+}

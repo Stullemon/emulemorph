@@ -268,6 +268,16 @@ bool CSearchManager::AlreadySearchingFor(const CUInt128 &uTarget)
 	return (m_mapSearches.count(uTarget) > 0);
 }
 
+bool CSearchManager::IsFWCheckUDPSearch(const CUInt128 &uTarget)
+{
+	// Check if this target is in the search map.
+	SearchMap::const_iterator itSearchMap = m_mapSearches.find(uTarget);
+	if (itSearchMap != m_mapSearches.end())
+		return (itSearchMap->second->GetSearchTypes() == CSearch::NODEFWCHECKUDP);
+	return false;
+}
+
+
 void CSearchManager::GetWords(LPCTSTR sz, WordList *plistWords)
 {
 	LPCTSTR szS = sz;
@@ -393,6 +403,8 @@ void CSearchManager::JumpStart()
 					break;
 				}
 			case CSearch::NODE:
+			case CSearch::NODESPECIAL:
+			case CSearch::NODEFWCHECKUDP:
 				{
 					if (itSearchMap->second->m_tCreated + SEARCHNODE_LIFETIME < tNow)
 					{
@@ -604,4 +616,51 @@ void CSearchManager::ProcessResult(const CUInt128 &uTarget, const CUInt128 &uAns
 	}
 	else
 		pSearch->ProcessResult(uAnswer, plistInfo);
+}
+
+bool CSearchManager::FindNodeSpecial(const CUInt128 &uID, CKadClientSearcher* pRequester){
+	// Do a node lookup.
+	CString strDbgID;
+	uID.ToHexString(&strDbgID);
+	DebugLog(_T("Starting NODESPECIAL Kad Search for %s"), strDbgID);
+	CSearch *pSearch = new CSearch;
+	pSearch->m_uType = CSearch::NODESPECIAL;
+	pSearch->m_uTarget = uID;
+	pSearch->SetNodeSpecialSearchRequester(pRequester);
+	return StartSearch(pSearch);
+}
+
+bool CSearchManager::FindNodeFWCheckUDP(){
+	CancelNodeFWCheckUDPSearch();
+	CUInt128 uID;
+	uID.SetValueRandom();
+	DebugLog(_T("Starting NODEFWCHECKUDP Kad Search"));
+	CSearch *pSearch = new CSearch;
+	pSearch->m_uType = CSearch::NODEFWCHECKUDP;
+	pSearch->m_uTarget = uID;
+	return StartSearch(pSearch);
+}
+
+void CSearchManager::CancelNodeSpecial(CKadClientSearcher* pRequester){
+	// Stop a specific nodespecialsearch
+	for (SearchMap::iterator itSearchMap = m_mapSearches.begin(); itSearchMap != m_mapSearches.end(); ++itSearchMap)
+	{
+		if (itSearchMap->second->GetNodeSpecialSearchRequester() == pRequester)
+		{
+			itSearchMap->second->SetNodeSpecialSearchRequester(NULL);
+			itSearchMap->second->PrepareToStop();
+			return;
+		}
+	}
+}
+
+void CSearchManager::CancelNodeFWCheckUDPSearch(){
+	// Stop node searches done for udp firewallcheck
+	for (SearchMap::iterator itSearchMap = m_mapSearches.begin(); itSearchMap != m_mapSearches.end(); ++itSearchMap)
+	{
+		if (itSearchMap->second->GetSearchTypes() == CSearch::NODEFWCHECKUDP)
+		{
+			itSearchMap->second->PrepareToStop();
+		}
+	}
 }

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -73,7 +73,7 @@ void CPPgNotify::DoDataExchange(CDataExchange* pDX)
 BOOL CPPgNotify::OnInitDialog()
 {
 #if _ATL_VER >= 0x0710
-	m_bEnableEMail = (IsRunningXPSP2() > 0);
+	m_bEnableEMail = (IsRunningXPSP2OrHigher() > 0);
 #endif
 
 	CPropertyPage::OnInitDialog();

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -30,6 +30,7 @@
 #include "SharedFileList.h"
 #include "UpDownClient.h"
 #include "UserMsgs.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -55,6 +56,7 @@ BEGIN_MESSAGE_MAP(CStatisticsDlg, CResizableDialog)
 	ON_STN_DBLCLK(IDC_SCOPE_U, OnStnDblclickScopeU)
 	ON_STN_DBLCLK(IDC_STATSSCOPE, OnStnDblclickStatsscope)
 	ON_MESSAGE(UM_OSCOPEPOSITION, OnOscopePositionMsg)
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CStatisticsDlg::CStatisticsDlg(CWnd* pParent /*=NULL*/)
@@ -152,6 +154,8 @@ BOOL CStatisticsDlg::OnInitDialog()
 
 	// Win98: Explicitly set to Unicode to receive Unicode notifications.
 	stattree.SendMessage(CCM_SETUNICODEFORMAT, TRUE);
+	if (thePrefs.GetUseSystemFontForMainControls())
+		stattree.SendMessage(WM_SETFONT, NULL, FALSE);
 	CreateMyTree();
 
 	// Setup download-scope
@@ -3701,4 +3705,10 @@ BOOL CStatisticsDlg::PreTranslateMessage(MSG* pMsg)
 	}
 
 	return CDialog::PreTranslateMessage(pMsg);
+}
+
+BOOL CStatisticsDlg::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
+{
+	theApp.ShowHelp(eMule_FAQ_GUI_Statistics);
+	return TRUE;
 }

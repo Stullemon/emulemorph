@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -2091,7 +2091,7 @@ bool CPartFile::IsComplete(uint64 start, uint64 end, bool bIgnoreBufferedData) c
 				|| (cur_gap->start >= start          && cur_gap->start <= end)
 				|| (cur_gap->end   <= end            && cur_gap->end   >= start)
 				|| (start          >= cur_gap->start && end            <= cur_gap->end)
-			)
+			)	// should be equal to if (start <= cur_gap->end  && end >= cur_gap->start)
 			{
 				((CPartFile*)this)->m_BufferedData_list_Locker.Unlock();//MORPH - Flush Thread
 				return false;	
@@ -2117,14 +2117,24 @@ bool CPartFile::IsPureGap(uint64 start, uint64 end) const
 	return false;
 }
 
-bool CPartFile::IsAlreadyRequested(uint64 start, uint64 end) const
+bool CPartFile::IsAlreadyRequested(uint64 start, uint64 end, bool bCheckBuffers) const
 {
 	ASSERT( start <= end );
-
+	// check our requestlist
 	for (POSITION pos =  requestedblocks_list.GetHeadPosition();pos != 0; ){
 		const Requested_Block_Struct* cur_block = requestedblocks_list.GetNext(pos);
 		if ((start <= cur_block->EndOffset) && (end >= cur_block->StartOffset))
 			return true;
+	}
+	// check our buffers
+	if (bCheckBuffers){
+		for (POSITION pos =  m_BufferedData_list.GetHeadPosition();pos != 0; ){
+			const PartFileBufferedData* cur_block =  m_BufferedData_list.GetNext(pos);
+			if ((start <= cur_block->end) && (end >= cur_block->start)){
+				DebugLogWarning(_T("CPartFile::IsAlreadyRequested, collision with buffered data found"));
+				return true;
+			}
+		}
 	}
 	return false;
 }
@@ -2141,24 +2151,71 @@ bool CPartFile::ShrinkToAvoidAlreadyRequested(uint64& start, uint64& end) const
         if ((start <= cur_block->EndOffset) && (end >= cur_block->StartOffset)) {
             if(start < cur_block->StartOffset) {
                 end = cur_block->StartOffset - 1;
-
-				// netfinity: Removed as it is actually a one byte request
-                //if(start == end) {
-                //    return false;
-                //}
+// ==> new code
+                if(start == end)
+                    return false;
+            }
+			else if(end > cur_block->EndOffset) {
+                start = cur_block->EndOffset + 1;
+                if(start == end) {
+                    return false;
+                }
+            }
+			else 
+                return false;
+        }
+	}
+// <== new code
+// ==> old code
+/*
+		// netfinity: Removed as it is actually a one byte request
+		// TODO: Is this still valid?
+// comment start
+                if(start == end) {
+                    return false;
+                }
+// comment end
             } else if(end > cur_block->EndOffset) {
                 start = cur_block->EndOffset + 1;
 
-				// netfinity: Removed as it is actually a one byte request
-                //if(start == end) {
-                //    return false;
-                //}
+		// netfinity: Removed as it is actually a one byte request
+		// TODO: Is this still valid?
+// comment start
+                if(start == end) {
+                    return false;
+                }
+// comment end
             } else {
                 return false;
             }
         }
 	}
+*/
+// <== old code
+// ==> new code
 
+	// has been shrunk to fit requested, if needed shrink it further to not collidate with buffered data
+	// check our buffers
+	for (POSITION pos =  m_BufferedData_list.GetHeadPosition();pos != 0; ){
+		const PartFileBufferedData* cur_block =  m_BufferedData_list.GetNext(pos);
+		if ((start <= cur_block->end) && (end >= cur_block->start)) {
+            if(start < cur_block->start) {
+                end = cur_block->end - 1;
+                if(start == end)
+                    return false;
+            }
+			else if(end > cur_block->end) {
+                start = cur_block->end + 1;
+                if(start == end) {
+                    return false;
+                }
+            }
+			else 
+                return false;
+        }
+	}
+
+// <== new code
     ASSERT(start >= startOrig && start <= endOrig);
     ASSERT(end >= startOrig && end <= endOrig);
 
@@ -2344,7 +2401,7 @@ bool CPartFile::GetNextEmptyBlockInPart(UINT partNumber, Requested_Block_Struct 
 			end = start + bytesToRequest - 1;
 #endif
 		// END netfinity: DynamicBlockRequests - Reduce bytes to request
-		if (!IsAlreadyRequested(start, end))
+		if (!IsAlreadyRequested(start, end, true))
 		{
 			// Was this block to be returned
 			if (result != NULL)
@@ -3498,9 +3555,8 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 		{
 			debug_possiblesources++;
 			CUpDownClient* newsource = new CUpDownClient(this,port,userid,serverip,serverport,true);
-			newsource->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
-			newsource->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
-			newsource->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
+			newsource->SetConnectOptions(byCryptOptions, true, false);
+
 			if ((byCryptOptions & 0x80) != 0)
 				newsource->SetUserHash(achUserHash);
 			theApp.downloadqueue->CheckAndAddSource(this,newsource);
@@ -5304,15 +5360,17 @@ Packet* CPartFile::CreateSrcInfoPacket(const CUpDownClient* forClient, uint8 byR
 			if (byUsedVersion >= 2)
 				data.WriteHash16(cur_src->GetUserHash());
 			if (byUsedVersion >= 4){
-				// CryptSettings - SourceExchange V4
-				// 5 Reserved (!)
+				// ConnectSettings - SourceExchange V4
+				// 4 Reserved (!)
+				// 1 DirectCallback Supported/Available 
 				// 1 CryptLayer Required
 				// 1 CryptLayer Requested
 				// 1 CryptLayer Supported
 				const uint8 uSupportsCryptLayer	= cur_src->SupportsCryptLayer() ? 1 : 0;
 				const uint8 uRequestsCryptLayer	= cur_src->RequestsCryptLayer() ? 1 : 0;
 				const uint8 uRequiresCryptLayer	= cur_src->RequiresCryptLayer() ? 1 : 0;
-				const uint8 byCryptOptions = (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
+				//const uint8 uDirectUDPCallback	= cur_src->SupportsDirectUDPCallback() ? 1 : 0;
+				const uint8 byCryptOptions = /*(uDirectUDPCallback << 3) |*/ (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
 				data.WriteUInt8(byCryptOptions);
 			}
 			if (nCount > 500)
@@ -5573,9 +5631,7 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 uClientSXVersion, 
 			if (uPacketSXVersion >= 2)
 				newsource->SetUserHash(achUserHash);
 			if (uPacketSXVersion >= 4) {
-				newsource->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
-				newsource->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
-				newsource->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
+				newsource->SetConnectOptions(byCryptOptions, true, false);
 				//if (thePrefs.GetDebugSourceExchange()) // remove this log later
 				//	AddDebugLogLine(false, _T("Received CryptLayer aware (%u) source from V4 Sourceexchange (%s)"), byCryptOptions, newsource->DbgGetClientInfo());
 			}
@@ -7568,6 +7624,8 @@ void CPartFile::AICHRecoveryDataAvailable(UINT nPart)
 			m_CorruptionBlackBox.CorruptedData(PARTSIZE*(uint64)nPart+pos, PARTSIZE*(uint64)nPart + pos + (nBlockSize-1));
 		}
 	}
+	m_CorruptionBlackBox.EvaluateData((uint16)nPart);
+	
 	if (m_uCorruptionLoss >= nRecovered)
 		m_uCorruptionLoss -= nRecovered;
 	if (thePrefs.sesLostFromCorruption >= nRecovered)
@@ -7648,6 +7706,37 @@ UINT CPartFile::GetMaxSourcePerFileUDP() const
 CString CPartFile::GetTempPath() const
 {
 	return m_fullname.Left(m_fullname.ReverseFind(_T('\\'))+1);
+}
+
+void CPartFile::RefilterFileComments(){
+	// check all availabe comments against our filter again
+	if (thePrefs.GetCommentFilter().IsEmpty())
+		return;
+	for (POSITION pos = srclist.GetHeadPosition(); pos != NULL;)
+	{
+		CUpDownClient* cur_src = srclist.GetNext(pos);
+		if (cur_src->HasFileComment())
+		{
+			CString strCommentLower(cur_src->GetFileComment());
+			strCommentLower.MakeLower();
+
+			int iPos = 0;
+			CString strFilter(thePrefs.GetCommentFilter().Tokenize(_T("|"), iPos));
+			while (!strFilter.IsEmpty())
+			{
+				// comment filters are already in lowercase, compare with temp. lowercased received comment
+				if (strCommentLower.Find(strFilter) >= 0)
+				{
+					cur_src->SetFileComment(_T(""));
+					cur_src->SetFileRating(0);
+					break;
+				}
+				strFilter = thePrefs.GetCommentFilter().Tokenize(_T("|"), iPos);
+			}		
+		}
+	}
+	RefilterKadNotes();
+	UpdateFileRatingCommentAvail();
 }
 
 //MORPH START - Added by SiRoB, SLUGFILLER: SafeHash

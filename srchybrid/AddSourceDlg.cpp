@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -84,7 +84,9 @@ BOOL CAddSourceDlg::OnInitDialog()
 	SetDlgItemText(IDC_SOURCE_TYPE,GetResString(IDS_META_SRCTYPE));
 	SetDlgItemText(IDC_RURL,GetResString(IDS_SV_URL));
 	SetDlgItemText(IDC_UIP,GetResString(IDS_USERSIP));
-	SetDlgItemText(IDC_PORT,GetResString(IDS_PORT));	
+	SetDlgItemText(IDC_PORT,GetResString(IDS_PORT));
+	GetDlgItem(IDOK)->SetWindowText(GetResString(IDS_TREEOPTIONS_OK));
+
 
 	EnableSaveRestore(_T("AddSourceDlg"));
 

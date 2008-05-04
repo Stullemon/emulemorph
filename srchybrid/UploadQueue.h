@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -55,8 +55,8 @@ public:
 	void	SetMaxVUR(uint32 in_MaxVUR){MaxVUR=in_MaxVUR;}
 	//MORPH END   - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 
-	int		GetWaitingUserCount()					{return waitinglist.GetCount();}
-	int		GetUploadQueueLength()					{return uploadinglist.GetCount();}
+	int		GetWaitingUserCount() const				{return waitinglist.GetCount();}
+	int		GetUploadQueueLength() const			{return uploadinglist.GetCount();}
 	//MORPH START - Upload Splitting Class
 	uint32	GetNumberOfSlotInAboveClass(uint32 classID) {uint32 retvalue = 0; for (uint32 i = 0; i < classID; i++) retvalue+=m_aiSlotCounter[i]; return retvalue;}
 	uint32	GetActiveUploadsCount(uint32 classID = LAST_CLASS)					{return GetNumberOfSlotInAboveClass(classID)+m_MaxActiveClientsShortTimeClass[classID];}

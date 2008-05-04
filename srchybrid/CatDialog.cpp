@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -220,6 +220,7 @@ void CCatDialog::Localize()
     GetDlgItem(IDC_FILTERGROUP)->SetWindowText(GetResString(IDS_CAT_FILTERS));
 
 	GetDlgItem(IDC_CHECK_RESUMEFILEONLYINSAMECAT)->SetWindowText(GetResString(IDS_CAT_RESUMEFILEONLYINSAMECAT)); //MORPH - Added by SiRoB, Resume file only in the same category
+	GetDlgItem(IDOK)->SetWindowText(GetResString(IDS_TREEOPTIONS_OK));
 
 	m_ctlColor.CustomText = GetResString(IDS_COL_MORECOLORS);
 	m_ctlColor.DefaultText = GetResString(IDS_DEFAULT);

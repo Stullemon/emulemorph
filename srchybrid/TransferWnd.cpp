@@ -32,6 +32,7 @@
 #include "DropDownButton.h"
 #include "ToolTipCtrlX.h"
 #include "SharedFilesWnd.h"
+#include "HelpIDs.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -64,6 +65,7 @@ BEGIN_MESSAGE_MAP(CTransferWnd, CResizableDialog)
 	ON_WM_SYSCOLORCHANGE()
 	ON_WM_SETTINGCHANGE()
 	ON_WM_WINDOWPOSCHANGED()
+	ON_WM_HELPINFO()
 	ON_NOTIFY(TBN_DROPDOWN, IDC_DOWNLOAD_ICO, OnWnd1BtnDropDown)
 	ON_NOTIFY(TBN_DROPDOWN, IDC_UPLOAD_ICO, OnWnd2BtnDropDown)
 	ON_NOTIFY(UM_SPN_SIZED, IDC_SPLITTER, OnSplitterMoved)
@@ -808,18 +810,7 @@ void CTransferWnd::SetWnd2Icons()
 
 void CTransferWnd::Localize()
 {
-	m_btnWnd1->SetWindowText(GetResString(IDS_TW_DOWNLOADS));
-	m_btnWnd1->SetBtnText(MP_VIEW1_SPLIT_WINDOW, GetResString(IDS_SPLIT_WINDOW));
-	m_btnWnd1->SetBtnText(MP_VIEW1_DOWNLOADS, GetResString(IDS_TW_DOWNLOADS));
-	m_btnWnd1->SetBtnText(MP_VIEW1_UPLOADING, GetResString(IDS_UPLOADING));
-	m_btnWnd1->SetBtnText(MP_VIEW1_DOWNLOADING, GetResString(IDS_DOWNLOADING));
-	m_btnWnd1->SetBtnText(MP_VIEW1_ONQUEUE, GetResString(IDS_ONQUEUE));
-	m_btnWnd1->SetBtnText(MP_VIEW1_CLIENTS, GetResString(IDS_CLIENTLIST));
-	m_btnWnd2->SetWindowText(GetResString(IDS_UPLOADING));
-	m_btnWnd2->SetBtnText(MP_VIEW2_UPLOADING, GetResString(IDS_UPLOADING));
-	m_btnWnd2->SetBtnText(MP_VIEW2_DOWNLOADING, GetResString(IDS_DOWNLOADING));
-	m_btnWnd2->SetBtnText(MP_VIEW2_ONQUEUE, GetResString(IDS_ONQUEUE));
-	m_btnWnd2->SetBtnText(MP_VIEW2_CLIENTS, GetResString(IDS_CLIENTLIST));
+	LocalizeToolbars();
 	GetDlgItem(IDC_QUEUECOUNT_LABEL)->SetWindowText(GetResString(IDS_TW_QUEUE));
 	GetDlgItem(IDC_QUEUE_REFRESH_BUTTON)->SetWindowText(GetResString(IDS_SV_UPDATE));
 
@@ -838,6 +829,22 @@ void CTransferWnd::Localize()
 	else
 		ShowList(m_dwShowListIDC);
 	UpdateListCount(m_uWnd2);
+}
+
+void CTransferWnd::LocalizeToolbars()
+{
+	m_btnWnd1->SetWindowText(GetResString(IDS_TW_DOWNLOADS));
+	m_btnWnd1->SetBtnText(MP_VIEW1_SPLIT_WINDOW, GetResString(IDS_SPLIT_WINDOW));
+	m_btnWnd1->SetBtnText(MP_VIEW1_DOWNLOADS, GetResString(IDS_TW_DOWNLOADS));
+	m_btnWnd1->SetBtnText(MP_VIEW1_UPLOADING, GetResString(IDS_UPLOADING));
+	m_btnWnd1->SetBtnText(MP_VIEW1_DOWNLOADING, GetResString(IDS_DOWNLOADING));
+	m_btnWnd1->SetBtnText(MP_VIEW1_ONQUEUE, GetResString(IDS_ONQUEUE));
+	m_btnWnd1->SetBtnText(MP_VIEW1_CLIENTS, GetResString(IDS_CLIENTLIST));
+	m_btnWnd2->SetWindowText(GetResString(IDS_UPLOADING));
+	m_btnWnd2->SetBtnText(MP_VIEW2_UPLOADING, GetResString(IDS_UPLOADING));
+	m_btnWnd2->SetBtnText(MP_VIEW2_DOWNLOADING, GetResString(IDS_DOWNLOADING));
+	m_btnWnd2->SetBtnText(MP_VIEW2_ONQUEUE, GetResString(IDS_ONQUEUE));
+	m_btnWnd2->SetBtnText(MP_VIEW2_CLIENTS, GetResString(IDS_CLIENTLIST));
 }
 
 void CTransferWnd::OnBnClickedQueueRefreshButton()
@@ -1701,9 +1708,9 @@ CString CTransferWnd::GetTabStatistic(int tab)
 		GetResString(IDS_DL_SPEED) ,speed, GetResString(IDS_KBYTESPERSEC),
 		GetResString(IDS_DL_SIZE),CastItoXBytes(trsize, false, false),CastItoXBytes(size, false, false),
 		GetResString(IDS_ONDISK),CastItoXBytes(disksize, false, false));
+	title += TOOLTIP_AUTOFORMAT_SUFFIX_CH;
 	return title;
 }
-
 
 void CTransferWnd::OnDblclickDltab()
 {
@@ -2053,14 +2060,16 @@ void CTransferWnd::ShowSplitWindow(bool bReDraw)
 void CTransferWnd::OnDisableList()
 {
 	bool bSwitchList = false;
-	if (thePrefs.m_bDisableKnownClientList && m_uWnd2 == wnd2Clients)
+	if (thePrefs.m_bDisableKnownClientList)
 	{
-		// clientlistctrl.DeleteAllItems(); xman disbale queue list fix
+		clientlistctrl.DeleteAllItems();
+		if (m_uWnd2 == wnd2Clients)
 		bSwitchList = true;
 	}
-	if (thePrefs.m_bDisableQueueList && m_uWnd2 == wnd2OnQueue)
+	if (thePrefs.m_bDisableQueueList)
 	{
-		//queuelistctrl.DeleteAllItems(); xman disbale queue list fix
+		queuelistctrl.DeleteAllItems();
+		if (m_uWnd2 == wnd2OnQueue)
 		bSwitchList = true;
 	}
 	if (bSwitchList)
@@ -2285,8 +2294,15 @@ void CTransferWnd::ResetTransToolbar(bool bShowToolbar, bool bResetLists)
 
 	if (bResetLists)
 	{
+		LocalizeToolbars();
 		ShowSplitWindow(true);
 		VerifyCatTabSize();
 		ShowWnd2(m_uWnd2);
 	}
+}
+
+BOOL CTransferWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
+{
+	theApp.ShowHelp(eMule_FAQ_GUI_Transfers);
+	return TRUE;
 }

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -59,7 +59,9 @@ CKnownFileList::CKnownFileList()
 	m_dwCancelledFilesSeed = 0;
 	m_nLastSaved = ::GetTickCount();
 	Init();
+#ifndef NO_HISTORY
 	bReloadHistory = false; //Fafner: possible exception in history - 070626
+#endif
 }
 
 CKnownFileList::~CKnownFileList()
@@ -368,10 +370,12 @@ void CKnownFileList::Process()
 {
 	if (::GetTickCount() - m_nLastSaved > MIN2MS(11))
 		Save();
+#ifndef NO_HISTORY
 	if (bReloadHistory) { //Fafner: possible exception in history - 070626
 		bReloadHistory = false;
 		theApp.emuledlg->sharedfileswnd->historylistctrl.Reload();
 	}
+#endif
 }
 
 bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)

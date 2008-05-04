@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -162,6 +162,8 @@ void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch* search
 			break;
 		case Kademlia::CSearch::NODE:
 		case Kademlia::CSearch::NODECOMPLETE:
+		case Kademlia::CSearch::NODESPECIAL:
+		case Kademlia::CSearch::NODEFWCHECKUDP:
 			id = GetResString(IDS_KAD_NODE);
 			SetItem(iItem,0,LVIF_IMAGE,0,2,0,0,0,0);
 			break;

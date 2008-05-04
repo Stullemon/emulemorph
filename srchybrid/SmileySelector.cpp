@@ -1,6 +1,6 @@
 
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -69,6 +69,7 @@ BEGIN_MESSAGE_MAP(CSmileySelector, CWnd)
 #ifndef SHOW_SMILEY_SHORTCUTS
 	ON_NOTIFY(TBN_GETINFOTIP, IDC_SMILEY_TOOLBAR, OnTbnSmileyGetInfoTip)
 #endif
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 CSmileySelector::CSmileySelector()
@@ -79,6 +80,14 @@ CSmileySelector::CSmileySelector()
 
 CSmileySelector::~CSmileySelector()
 {
+}
+
+void CSmileySelector::OnDestroy()
+{
+	CImageList *piml = m_tb.GetImageList();
+	if (piml)
+		piml->DeleteImageList();
+	CWnd::OnDestroy();
 }
 
 BOOL CSmileySelector::Create(CWnd *pWndParent, const RECT *pRect, CEdit *pwndEdit)
@@ -130,11 +139,8 @@ BOOL CSmileySelector::Create(CWnd *pWndParent, const RECT *pRect, CEdit *pwndEdi
 	iml.Create(sizSmiley.cx, sizSmiley.cy, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
 	for (int i = 0; i < _countof(g_aSmileys); i++)
 	{
-		HICON hIcon = theApp.LoadIcon(g_aSmileys[i].pszResource, sizSmiley.cx, sizSmiley.cy);
-		if (hIcon) {
-			iml.Add(hIcon);
+		iml.Add(CTempIconLoader(g_aSmileys[i].pszResource, sizSmiley.cx, sizSmiley.cy));
 			m_iBitmaps++;
-		}
 	}
 	CImageList *pimlOld = m_tb.SetImageList(&iml);
 	iml.Detach();
@@ -266,3 +272,4 @@ void CSmileySelector::OnTbnSmileyGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 	*pResult = 0;
 }
 #endif
+

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -50,6 +50,8 @@
 #include "SearchDlg.h"
 #include "SearchResultsWnd.h"
 #include "ToolTipCtrlX.h"
+#include "kademlia/kademlia/kademlia.h"
+#include "kademlia/kademlia/UDPFirewallTester.h"
 #include "uploadqueue.h" //MORPH - Added by SiRoB, 
 #include "Log.h" //MORPH
 // Mighty Knife: CRC32-Tag, Mass Rename
@@ -536,6 +538,8 @@ void CSharedFilesCtrl::AddFile(const CKnownFile* file)
 				//MORPH END   - Added, SharedView Ed2kType [Avi3k]
 		}
 	}
+	if (IsFilteredItem(file))
+		return;
 	if (FindFile(file) != -1)
 		return;
 	int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM, GetItemCount(), LPSTR_TEXTCALLBACK, 0, 0, 0, (LPARAM)file);
@@ -640,6 +644,63 @@ void CSharedFilesCtrl::ShowFilesCount()
 #endif
 	//MORPH END   - Changed, Downloaded History [Monki/Xman]
 
+void CSharedFilesCtrl::GetItemDisplayText(const CKnownFile* file, int iSubItem, LPTSTR pszText, int cchTextMax) const
+{
+	if (pszText == NULL || cchTextMax <= 0) {
+		ASSERT(0);
+		return;
+	}
+	pszText[0] = _T('\0');
+	CString buffer;
+	switch(iSubItem){
+		case 0:
+			_tcsncpy(pszText, file->GetFileName(), cchTextMax);
+			break;
+		case 1:
+			_tcsncpy(pszText, CastItoXBytes(file->GetFileSize(), false, false), cchTextMax);
+			break;
+		case 2:
+			_tcsncpy(pszText, file->GetFileTypeDisplayStr(), cchTextMax);
+			break;
+		case 3:{
+			_tcsncpy(pszText, file->GetUpPriorityDisplayString(), cchTextMax);
+			break;
+			   }
+		case 4:
+			_tcsncpy(pszText, md4str(file->GetFileHash()), cchTextMax);
+			break;
+		case 5:
+			buffer.Format(_T("%u (%u)"), file->statistic.GetRequests(), file->statistic.GetAllTimeRequests());
+			_tcsncpy(pszText, buffer, cchTextMax);
+			break;
+		case 6:
+			buffer.Format(_T("%u (%u)"), file->statistic.GetAccepts(), file->statistic.GetAllTimeAccepts());
+			_tcsncpy(pszText, buffer, cchTextMax);
+			break;
+		case 7:
+			buffer.Format(_T("%s (%s)"), CastItoXBytes(file->statistic.GetTransferred(), false, false), CastItoXBytes(file->statistic.GetAllTimeTransferred(), false, false));
+			_tcsncpy(pszText, buffer, cchTextMax);
+			break;
+		case 8:
+			break;
+		case 9:
+			_tcsncpy(pszText, file->GetPath(), cchTextMax);
+			PathRemoveBackslash(pszText);
+			break;
+		case 10:
+			if (file->m_nCompleteSourcesCountLo == file->m_nCompleteSourcesCountHi)
+				buffer.Format(_T("%u"), file->m_nCompleteSourcesCountLo);
+			else if (file->m_nCompleteSourcesCountLo == 0)
+				buffer.Format(_T("< %u"), file->m_nCompleteSourcesCountHi);
+			else
+				buffer.Format(_T("%u - %u"), file->m_nCompleteSourcesCountLo, file->m_nCompleteSourcesCountHi);
+			_tcsncpy(pszText, buffer, cchTextMax);
+			break;
+		case 11:
+			break;
+	}
+	pszText[cchTextMax - 1] = _T('\0');
+}
 #define DLC_DT_TEXT (DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_NOPREFIX|DT_END_ELLIPSIS)
 
 void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
@@ -718,18 +779,19 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 				// xMule_MOD: showSharePermissions
 				switch(iColumn){
 					case 0:{
+						int iIconPosY = (cur_rec.Height() > theApp.GetSmallSytemIconSize().cy) ? ((cur_rec.Height() - theApp.GetSmallSytemIconSize().cy) / 2) : 0;
 						int iImage = theApp.GetFileTypeSystemImageIdx(file->GetFileName());
 						if (theApp.GetSystemImageList() != NULL)
-						::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc.GetSafeHdc(), cur_rec.left, cur_rec.top, ILD_NORMAL|ILD_TRANSPARENT);
+						::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc.GetSafeHdc(), cur_rec.left, cur_rec.top + iIconPosY, ILD_NORMAL|ILD_TRANSPARENT);
 						if (!file->GetFileComment().IsEmpty() || file->GetFileRating())
-							m_ImageList.Draw(dc, 0, CPoint(cur_rec.left, cur_rec.top), ILD_NORMAL | ILD_TRANSPARENT | INDEXTOOVERLAYMASK(1));
+							m_ImageList.Draw(dc, 0, CPoint(cur_rec.left, cur_rec.top + iIconPosY), ILD_NORMAL | ILD_TRANSPARENT | INDEXTOOVERLAYMASK(1));
 						cur_rec.left += (iIconDrawWidth-3);
 
 						if (thePrefs.ShowRatingIndicator())
 						{
 							if (file->HasComment() || file->HasRating() || file->IsKadCommentSearchRunning())
 							{
-								m_ImageList.Draw(dc, file->UserRating(true)+3, CPoint(cur_rec.left, cur_rec.top), ILD_NORMAL);
+								m_ImageList.Draw(dc, file->UserRating(true)+3, CPoint(cur_rec.left, cur_rec.top + iIconPosY), ILD_NORMAL);
 							}
 							cur_rec.left += 16;
 							iIconDrawWidth += 16;
@@ -808,8 +870,11 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						{
 							if (theApp.IsFirewalled() && theApp.IsConnected())
 							{
-								if (theApp.clientlist->GetBuddy() && (file->GetLastPublishBuddy() == theApp.clientlist->GetBuddy()->GetIP()))
+								if ((theApp.clientlist->GetBuddy() && (file->GetLastPublishBuddy() == theApp.clientlist->GetBuddy()->GetIP()))
+									|| (Kademlia::CKademlia::IsRunning() && !Kademlia::CUDPFirewallTester::IsFirewalledUDP(true) && Kademlia::CUDPFirewallTester::IsVerified()))
+								{
 									bSharedInKad = true;
+								}
 								else
 									bSharedInKad = false;
 							}
@@ -997,22 +1062,31 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 		outline_rec.top--;
 		outline_rec.bottom++;
-		dc.FrameRect(&outline_rec, &CBrush(m_crWindow));
+		dc.FrameRect(&outline_rec, &CBrush(GetBkColor()));
 		outline_rec.top++;
 		outline_rec.bottom--;
 		outline_rec.left++;
 		outline_rec.right--;
 
-		if (lpDrawItemStruct->itemID > 0 && GetItemState(lpDrawItemStruct->itemID - 1, LVIS_SELECTED))
+		if (lpDrawItemStruct->itemID != 0 && GetItemState(lpDrawItemStruct->itemID - 1, LVIS_SELECTED))
 			outline_rec.top--;
 
-		if (lpDrawItemStruct->itemID + 1 < (UINT)GetItemCount() && GetItemState(lpDrawItemStruct->itemID + 1, LVIS_SELECTED))
+		if (lpDrawItemStruct->itemID + 1 != (UINT)GetItemCount() && GetItemState(lpDrawItemStruct->itemID + 1, LVIS_SELECTED))
 			outline_rec.bottom++;
 
 		if(bCtrlFocused)
 			dc.FrameRect(&outline_rec, &CBrush(m_crFocusLine));
 		else
 			dc.FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
+	}
+	else if (((lpDrawItemStruct->itemState & ODS_FOCUS) == ODS_FOCUS) && (GetFocus() == this))
+	{
+		RECT focus_rec;
+		focus_rec.top    = lpDrawItemStruct->rcItem.top;
+		focus_rec.bottom = lpDrawItemStruct->rcItem.bottom;
+		focus_rec.left   = lpDrawItemStruct->rcItem.left + 1;
+		focus_rec.right  = lpDrawItemStruct->rcItem.right - 1;
+		dc.FrameRect(&focus_rec, &CBrush(m_crNoFocusLine));
 	}
 	
 	if (m_crWindowTextBk == CLR_NONE)
@@ -2861,11 +2935,44 @@ void CSharedFilesCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 		if (pFile && pGetInfoTip->pszText && pGetInfoTip->cchTextMax > 0)
 		{
 			CString strInfo = pFile->GetInfoSummary();
+			strInfo += TOOLTIP_AUTOFORMAT_SUFFIX_CH;
 			_tcsncpy(pGetInfoTip->pszText, strInfo, pGetInfoTip->cchTextMax);
 			pGetInfoTip->pszText[pGetInfoTip->cchTextMax-1] = _T('\0');
 		}
 	}
 	*pResult = 0;
+}
+
+bool CSharedFilesCtrl::IsFilteredItem(const CKnownFile* pKnownFile) const
+{
+	const CStringArray& rastrFilter = theApp.emuledlg->sharedfileswnd->m_astrFilter;
+	if (rastrFilter.GetSize() == 0)
+		return false;
+
+	// filtering is done by text only for all colums to keep it consistent and simple for the user even if that
+	// doesn't allows complex filters
+	TCHAR szFilterTarget[256];
+	GetItemDisplayText(pKnownFile, theApp.emuledlg->sharedfileswnd->GetFilterColumn(),
+					   szFilterTarget, _countof(szFilterTarget));
+
+	bool bItemFiltered = false;
+	for (int i = 0; i < rastrFilter.GetSize(); i++)
+	{
+		const CString& rstrExpr = rastrFilter.GetAt(i);
+		bool bAnd = true;
+		LPCTSTR pszText = (LPCTSTR)rstrExpr;
+		if (pszText[0] == _T('-')) {
+			pszText += 1;
+			bAnd = false;
+		}
+
+		bool bFound = (stristr(szFilterTarget, pszText) != NULL);
+		if ((bAnd && !bFound) || (!bAnd && bFound)) {
+			bItemFiltered = true;
+			break;
+		}
+	}
+	return bItemFiltered;
 }
 
 void CSharedFilesCtrl::EndFileProcessingThread() //Fafner: vs2005 - 071206

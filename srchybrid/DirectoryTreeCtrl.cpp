@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -54,6 +54,7 @@ BEGIN_MESSAGE_MAP(CDirectoryTreeCtrl, CTreeCtrl)
 	ON_WM_RBUTTONDOWN()
 	ON_WM_KEYDOWN()
 	ON_WM_CHAR()
+	ON_WM_DESTROY()
 	ON_MESSAGE(TM_FOUNDNETWORKDRIVE, OnFoundNetworkDrive)	// SLUGFILLER: shareSubdir - Multi-threading
 END_MESSAGE_MAP()
 
@@ -66,6 +67,17 @@ CDirectoryTreeCtrl::~CDirectoryTreeCtrl()
 {
 	// don't destroy the system's image list
 	m_image.Detach();
+}
+
+void CDirectoryTreeCtrl::OnDestroy()
+{
+	// If a treeview control is created with TVS_CHECKBOXES, the application has to 
+	// delete the image list which was implicitly created by the control.
+	CImageList *piml = GetImageList(TVSIL_STATE);
+	if (piml)
+		piml->DeleteImageList();
+
+	CTreeCtrl::OnDestroy();
 }
 
 void CDirectoryTreeCtrl::OnTvnItemexpanding(NMHDR *pNMHDR, LRESULT *pResult)
@@ -793,6 +805,16 @@ void CDirectoryTreeCtrl::UnshareChildItems(CString strDir)
 
 void CDirectoryTreeCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
+	if (point.x != -1 || point.y != -1) {
+		CRect rcClient;
+		GetClientRect(&rcClient);
+		ClientToScreen(&rcClient);
+		if (!rcClient.PtInRect(point)) {
+			Default();
+			return;
+		}
+	}
+
 	CPoint ptMenu(-1, -1);
 	if (point.x != -1 && point.y != -1)
 	{

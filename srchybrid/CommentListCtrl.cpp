@@ -15,11 +15,11 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
+#include "CommentListCtrl.h"
 #include "OtherFunctions.h"
 #include "MenuCmds.h"
 #include "TitleMenu.h"
 #include "emule.h"
-#include "CommentListCtrl.h"
 #include "UpDownClient.h"
 #include "kademlia/kademlia/Entry.h"
 
@@ -248,7 +248,7 @@ void CCommentListCtrl::AddItem(const Kademlia::CEntry* entry)
 		return;
 	int iRating = (int)entry->GetIntTagValue(TAG_FILERATING);
 	SComment* pComment = new SComment(pClientCookie, iRating, entry->GetStrTagValue(TAG_DESCRIPTION),
-									  entry->m_fileName, _T(""), 1/*Kad*/,
+									  entry->GetCommonFileName(), _T(""), 1/*Kad*/,
 									  _T(""), //Commander - Added: ClientSoftware Column
 									  _T("")); //Commander - Added: ClientCountry Column
 	AddComment(pComment);

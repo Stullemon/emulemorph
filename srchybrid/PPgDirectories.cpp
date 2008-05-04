@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -160,17 +160,64 @@ BOOL CPPgDirectories::OnApply()
 
 	CString strIncomingDir;
 	GetDlgItemText(IDC_INCFILES, strIncomingDir);
+	MakeFoldername(strIncomingDir);
 	if (strIncomingDir.IsEmpty()){
 		strIncomingDir = thePrefs.GetDefaultDirectory(EMULE_INCOMINGDIR, true); // will create the directory here if it doesnt exists
 		SetDlgItemText(IDC_INCFILES, strIncomingDir);
 	}
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 	/*
-	if (thePrefs.IsInstallationDirectory(strIncomingDir)){
+	else if (thePrefs.IsInstallationDirectory(strIncomingDir)){
 		AfxMessageBox(GetResString(IDS_WRN_INCFILE_RESERVED));
 		return FALSE;
 	}
 	*/ //end safehash remove
+	else if (strIncomingDir.CompareNoCase(testincdirchanged) != 0 && strIncomingDir.CompareNoCase(thePrefs.GetDefaultDirectory(EMULE_INCOMINGDIR, false)) != 0){
+		// if the user chooses a non-default directory which already contains files, inform him that all those files
+		// will be shared
+		CFileFind ff;
+		CString strSearchPath;
+		strSearchPath.Format(_T("%s\\*"),strIncomingDir);
+		bool bEnd = !ff.FindFile(strSearchPath, 0);
+		bool bExistingFile = false;
+		while (!bEnd)
+		{
+			bEnd = !ff.FindNextFile();
+			if (ff.IsDirectory() || ff.IsDots() || ff.IsSystem() || ff.IsTemporary() || ff.GetLength()==0)
+				continue;
+
+			// ignore real(!) LNK files
+			TCHAR szExt[_MAX_EXT];
+			_tsplitpath(ff.GetFileName(), NULL, NULL, NULL, szExt);
+			if (_tcsicmp(szExt, _T(".lnk")) == 0){
+				SHFILEINFO info;
+				if (SHGetFileInfo(ff.GetFilePath(), 0, &info, sizeof(info), SHGFI_ATTRIBUTES) && (info.dwAttributes & SFGAO_LINK)){
+					CComPtr<IShellLink> pShellLink;
+					if (SUCCEEDED(pShellLink.CoCreateInstance(CLSID_ShellLink))){
+						CComQIPtr<IPersistFile> pPersistFile = pShellLink;
+						if (pPersistFile){
+							USES_CONVERSION;
+							if (SUCCEEDED(pPersistFile->Load(T2COLE(ff.GetFilePath()), STGM_READ))){
+								TCHAR szResolvedPath[MAX_PATH];
+								if (pShellLink->GetPath(szResolvedPath, ARRSIZE(szResolvedPath), NULL, 0) == NOERROR){
+									TRACE(_T("%hs: Did not share file \"%s\" - not supported file type\n"), __FUNCTION__, ff.GetFilePath());
+									continue;
+								}
+							}
+						}
+					}
+				}
+			}
+			bExistingFile = true;
+			break;
+		}
+		if (bExistingFile
+			&& AfxMessageBox(GetResString(IDS_WRN_INCFILE_EXISTS), MB_OKCANCEL | MB_ICONINFORMATION) == IDCANCEL)
+		{
+			return FALSE;
+		}
+	}
+	
 	// checking specified tempdir(s)
 	CString strTempDir;
 	GetDlgItemText(IDC_TEMPFILES, strTempDir);

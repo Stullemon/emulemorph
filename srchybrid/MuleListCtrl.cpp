@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -70,6 +70,7 @@ BEGIN_MESSAGE_MAP(CMuleListCtrl, CListCtrl)
 	ON_WM_KEYDOWN()
 	ON_WM_ERASEBKGND()
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_MEASUREITEM_REFLECT()
 	ON_NOTIFY_REFLECT(LVN_GETINFOTIP, OnLvnGetInfoTip)
 END_MESSAGE_MAP()
 
@@ -131,6 +132,11 @@ void CMuleListCtrl::SetName(LPCTSTR lpszName) {
 	m_Name = lpszName;
 }
 
+DWORD CMuleListCtrl::SetExtendedStyle(DWORD dwNewStyle)
+{
+	return CListCtrl::SetExtendedStyle(dwNewStyle | LVS_EX_HEADERDRAGDROP);
+}
+
 void CMuleListCtrl::PreSubclassWindow()
 {
 	SetColors();
@@ -144,6 +150,12 @@ void CMuleListCtrl::PreSubclassWindow()
 		m_hAccel = ::LoadAccelerators(AfxGetResourceHandle(), MAKEINTRESOURCE(m_uIDAccel));
 		ASSERT(m_hAccel);
 	}
+
+	// DEFAULT_GUI_FONT: Vista: "MS Shell Dlg" with 8 pts (regardless of system applet settings !!!)
+	// SYSTEM_FONT:		 Vista: Good old Windows 3.11 System Font
+	// NULL				 Vista: Font ('Symbol') with the face and size which is configured in System applet.
+	if (thePrefs.GetUseSystemFontForMainControls())
+		SendMessage(WM_SETFONT, NULL, FALSE);
 }
 
 int CMuleListCtrl::IndexToOrder(CHeaderCtrl* pHeader, int iIndex) {
@@ -1011,6 +1023,24 @@ BOOL CMuleListCtrl::OnWndMsg(UINT message, WPARAM wParam, LPARAM lParam, LRESULT
 			return *pResult = bResult;
 		}
 		return *pResult = TRUE;
+
+	case WM_CONTEXTMENU:
+		// If the context menu is opened with the _mouse_ and if it was opened _outside_ 
+		// the client area of the list view, let Windows handle that message.
+		// Otherwise we would prevent the context menu for e.g. scrollbars to be invoked.
+		if ((HWND)wParam == m_hWnd)
+		{
+			CPoint ptMouse(lParam);
+			if (ptMouse.x != -1 || ptMouse.y != -1)
+			{
+				ScreenToClient(&ptMouse);
+				CRect rcClient;
+				GetClientRect(&rcClient);
+				if (!rcClient.PtInRect(ptMouse))
+					return DefWindowProc(message, wParam, lParam);
+			}
+		}
+		break;
 	}
 
 	return CListCtrl::OnWndMsg(message, wParam, lParam, pResult);
@@ -1222,7 +1252,8 @@ void CMuleListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	if(pImageList) 
 	{
 		COLORREF crOld = pImageList->SetBkColor(CLR_NONE);
-		pImageList->Draw(pDC, lvi.iImage, rcIcon.TopLeft(), ILD_NORMAL);
+		int iIconPosY = (rcItem.Height() > 16) ? ((rcItem.Height() - 16) / 2) : 0;
+		pImageList->Draw(pDC, lvi.iImage, CPoint(rcIcon.left, rcIcon.top + iIconPosY), ILD_NORMAL);
 		pImageList->SetBkColor(crOld);
 	}
 
@@ -1364,6 +1395,49 @@ void CMuleListCtrl::OnSysColorChange()
 	//redraw the up/down sort arrow (if it's there)
 	if(m_iCurrentSortItem >= 0)
 		SetSortArrow(m_iCurrentSortItem, (ArrowType)m_atSortArrow);
+
+	if (thePrefs.GetUseSystemFontForMainControls())
+	{
+		// Send a (useless) WM_WINDOWPOSCHANGED to the listview control to trigger a 
+		// WM_MEASUREITEM message which is needed to set the new item height in case
+		// there was a font changed in the Windows System settings.
+		//
+		// Though it does not work as expected. Although we get the WM_MEASUREITEM and although
+		// we return the correct (new) item height, the listview control does not redraw the
+		// items with the new height until the control really gets resized.
+		CRect rc;
+		GetWindowRect(&rc);
+		WINDOWPOS wp;
+		wp.hwnd = m_hWnd;
+		wp.cx = rc.Width();
+		wp.cy = rc.Height();
+		wp.flags = SWP_NOACTIVATE | SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_FRAMECHANGED;
+		SendMessage(WM_WINDOWPOSCHANGED, 0, (LPARAM)&wp);
+	}
+}
+
+void CMuleListCtrl::MeasureItem(LPMEASUREITEMSTRUCT lpMeasureItemStruct)
+{
+	Default();
+
+	if (thePrefs.GetUseSystemFontForMainControls())
+	{
+		CDC *pDC = GetDC();
+		if (pDC)
+		{
+			CFont *pFont = GetFont();
+			if (pFont)
+			{
+				CFont *pFontOld = pDC->SelectObject(pFont);
+				TEXTMETRIC tm;
+				pDC->GetTextMetrics(&tm);
+				int iNewHeight = tm.tmHeight + tm.tmExternalLeading + 1;
+				lpMeasureItemStruct->itemHeight = max(17, iNewHeight);
+				pDC->SelectObject(pFontOld);
+			}
+			ReleaseDC(pDC);
+		}
+	}
 }
 
 HIMAGELIST CMuleListCtrl::ApplyImageList(HIMAGELIST himl)

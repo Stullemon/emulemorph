@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -208,7 +208,7 @@ bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge)
 			if (newserver->GetListName().IsEmpty())
 				newserver->SetListName(newserver->GetAddress());
 
-			if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(newserver, true))
+			if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(newserver, true, true))
 			{
 				CServer* update = theApp.serverlist->GetServerByAddress(newserver->GetAddress(), newserver->GetPort());
 				if (update)
@@ -245,7 +245,7 @@ bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge)
 	return true;
 }
 
-bool CServerList::AddServer(const CServer* pServer)
+bool CServerList::AddServer(const CServer* pServer, bool bAddTail)
 {
 	if (!IsGoodServerIP(pServer)){ // check for 0-IP, localhost and optionally for LAN addresses
 		if (thePrefs.GetLogFilteredIPs())
@@ -278,7 +278,10 @@ bool CServerList::AddServer(const CServer* pServer)
 		theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(pFoundServer);
 		return false;
 	}
-	list.AddTail(const_cast<CServer*>(pServer));
+	if (bAddTail)
+		list.AddTail(const_cast<CServer*>(pServer));
+	else
+		list.AddHead(const_cast<CServer*>(pServer));
 	return true;
 }
 
@@ -916,94 +919,108 @@ bool CServerList::SaveServermetToFile()
 void CServerList::AddServersFromTextFile(const CString& strFilename)
 {
 	CStdioFile f;
-	if (!f.Open(strFilename, CFile::modeRead | CFile::typeText | CFile::shareDenyWrite))
+	// open the text file either in ANSI (text) or Unicode (binary), this way we can read old and new files
+	// with nearly the same code..
+	bool bIsUnicodeFile = IsUnicodeFile(strFilename); // check for BOM
+	if (!f.Open(strFilename, CFile::modeRead | CFile::shareDenyWrite | (bIsUnicodeFile ? CFile::typeBinary : 0)))
 		return;
 
-	CString strLine;
-	while (f.ReadString(strLine))
-	{
-		// format is host:port,priority,Name
-		if (strLine.GetLength() < 5)
-			continue;
-		if (strLine.GetAt(0) == _T('#') || strLine.GetAt(0) == _T('/'))
-			continue;
+	try	{
+		if (bIsUnicodeFile)
+			f.Seek(sizeof(WORD), CFile::current); // skip BOM
 
-		// fetch host
-		int pos = strLine.Find(_T(':'));
-		if (pos == -1){
-			pos = strLine.Find(_T(','));
-			if (pos == -1) 
-			continue;
-		}
-		CString strHost = strLine.Left(pos);
-		strLine = strLine.Mid(pos+1);
-		// fetch  port
-		pos = strLine.Find(_T(','));
-		if (pos == -1)
-			continue;
-		CString strPort = strLine.Left(pos);
-		strLine = strLine.Mid(pos+1);
-
-		// Barry - fetch priority
-		pos = strLine.Find(_T(','));
-		int priority = SRV_PR_HIGH;
-		if (pos == 1)
+		CString strLine;
+		while (f.ReadString(strLine))
 		{
-			CString strPriority = strLine.Left(pos);
-			priority = _tstoi(strPriority);
-				if (priority < 0 || priority > 2)
-					priority = SRV_PR_HIGH;
-			strLine = strLine.Mid(pos+1);
-		}
-	
-		// fetch name
-		CString strName = strLine;
-		strName.Remove(_T('\r'));
-		strName.Remove(_T('\n'));
+			// format is host:port,priority,Name
+			if (strLine.GetLength() < 5)
+				continue;
+			if (strLine.GetAt(0) == _T('#') || strLine.GetAt(0) == _T('/'))
+				continue;
 
-		// create server object and add it to the list
-		CServer* nsrv = new CServer((uint16)_tstoi(strPort), strHost);
-		nsrv->SetListName(strName);
-		nsrv->SetIsStaticMember(true);
-		nsrv->SetPreference(priority); 
-		if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(nsrv, true))
-		{
-			delete nsrv;
-			CServer* srvexisting = GetServerByAddress(strHost, (uint16)_tstoi(strPort));
-			if (srvexisting) {
-				srvexisting->SetListName(strName);
-				srvexisting->SetIsStaticMember(true);
-				//srvexisting->SetPreference(priority); leuk_he priority is not so static. 
-				if (theApp.emuledlg->serverwnd)
-					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(srvexisting);
+			// fetch host
+			int pos = strLine.Find(_T(':'));
+			if (pos == -1){
+				pos = strLine.Find(_T(','));
+				if (pos == -1) 
+				continue;
 			}
+			CString strHost = strLine.Left(pos);
+			strLine = strLine.Mid(pos+1);
+			// fetch  port
+			pos = strLine.Find(_T(','));
+			if (pos == -1)
+				continue;
+			CString strPort = strLine.Left(pos);
+			strLine = strLine.Mid(pos+1);
 
+			// Barry - fetch priority
+			pos = strLine.Find(_T(','));
+			int priority = SRV_PR_HIGH;
+			if (pos == 1)
+			{
+				CString strPriority = strLine.Left(pos);
+				priority = _tstoi(strPriority);
+					if (priority < 0 || priority > 2)
+						priority = SRV_PR_HIGH;
+				strLine = strLine.Mid(pos+1);
+			}
+	
+			// fetch name
+			CString strName = strLine;
+			strName.Remove(_T('\r'));
+			strName.Remove(_T('\n'));
+
+			// create server object and add it to the list
+			CServer* nsrv = new CServer((uint16)_tstoi(strPort), strHost);
+			nsrv->SetListName(strName);
+			nsrv->SetIsStaticMember(true);
+			nsrv->SetPreference(priority); 
+			if (!theApp.emuledlg->serverwnd->serverlistctrl.AddServer(nsrv, true))
+			{
+				delete nsrv;
+				CServer* srvexisting = GetServerByAddress(strHost, (uint16)_tstoi(strPort));
+				if (srvexisting) {
+					srvexisting->SetListName(strName);
+					srvexisting->SetIsStaticMember(true);
+					//srvexisting->SetPreference(priority); leuk_he priority is not so static. 
+					if (theApp.emuledlg->serverwnd)
+						theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(srvexisting);
+				}
+			}
 		}
+		f.Close();
 	}
-
-	f.Close();
+	catch (CFileException* ex) {
+		ASSERT(0);
+		ex->Delete();
+	}
 }
 
 bool CServerList::SaveStaticServers()
 {
 	bool bResult = false;
 
-	FILE* fpStaticServers = _tfsopen(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("staticservers.dat"), _T("w"), _SH_DENYWR);
+	FILE* fpStaticServers = _tfsopen(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("staticservers.dat"), _T("wb"), _SH_DENYWR);
 	if (fpStaticServers == NULL) {
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERROR_SSF));
 		return bResult;
 	}
 
-	bResult = true;
-	POSITION pos = list.GetHeadPosition();
-	while (pos)
+	// write Unicode byte-order mark 0xFEFF
+	if (fputwc(0xFEFF, fpStaticServers) != _TEOF)
 	{
-		const CServer* pServer = list.GetNext(pos);
-		if (pServer->IsStaticMember())
+		bResult = true;
+		POSITION pos = list.GetHeadPosition();
+		while (pos)
 		{
-			if (_ftprintf(fpStaticServers, _T("%s:%i,%i,%s\n"), pServer->GetAddress(), pServer->GetPort(), pServer->GetPreference(), pServer->GetListName()) == EOF) {
-				bResult = false;
-				break;
+			const CServer* pServer = list.GetNext(pos);
+			if (pServer->IsStaticMember())
+			{
+				if (_ftprintf(fpStaticServers, _T("%s:%i,%i,%s\r\n"), pServer->GetAddress(), pServer->GetPort(), pServer->GetPreference(), pServer->GetListName()) == EOF) {
+					bResult = false;
+					break;
+				}
 			}
 		}
 	}

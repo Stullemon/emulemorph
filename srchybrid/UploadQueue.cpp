@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -1260,6 +1260,10 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
                 CUpDownClient* bestQueuedClient = FindBestClientInQueue(false);
                 if(bestQueuedClient == client) {
 					RemoveFromWaitingQueue(client, true);
+				// statistic values // TODO: Maybe we should change this to count each request for a file only once and ignore reasks
+				CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
+				if (reqfile)
+					reqfile->statistic.AddRequest();
 				    AddUpNextClient(_T("Adding ****lowid when reconnecting."), client);
 				    return;
                 //} else {
@@ -1337,7 +1341,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	// done
 
 	if(addInFirstPlace == false) {
-	    // statistic values
+	// statistic values // TODO: Maybe we should change this to count each request for a file only once and ignore reasks
 		//MORPH START - Adde by SiRoB, Optimization requpfile
 		/*
 		CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
@@ -1603,12 +1607,6 @@ bool CUploadQueue::RemoveFromWaitingQueue(CUpDownClient* client, bool updatewind
 	POSITION pos = waitinglist.Find(client);
 	if (pos){
 		RemoveFromWaitingQueue(pos,updatewindow);
-		if (updatewindow)
-			theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
-		//Removed by SiRoB, due to zz way m_dwWouldHaveGottenUploadSlotIfNotLowIdTick
-		/*
-		client->m_bAddNextConnect = false;
-		*/
 		return true;
 	}
 	else
@@ -1618,8 +1616,14 @@ bool CUploadQueue::RemoveFromWaitingQueue(CUpDownClient* client, bool updatewind
 void CUploadQueue::RemoveFromWaitingQueue(POSITION pos, bool updatewindow){	
 	CUpDownClient* todelete = waitinglist.GetAt(pos);
 	waitinglist.RemoveAt(pos);
-	if (updatewindow)
+	if (updatewindow) {
 		theApp.emuledlg->transferwnd->queuelistctrl.RemoveClient(todelete);
+		theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
+	}
+	//Removed by SiRoB, due to zz way m_dwWouldHaveGottenUploadSlotIfNotLowIdTick
+	/*
+	todelete->m_bAddNextConnect = false;
+	*/
 	//MORPH START - Added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if (theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 		todelete->Credits()->SaveUploadQueueWaitTime();	// Moonlight: SUQWT
@@ -1883,7 +1887,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 				theApp.emuledlg->ShowTransferRate(true);
 
 			sec++;
-			// 5 seconds
+			// *** 5 seconds **********************************************
 			if (sec>=5) {
 #ifdef _DEBUG
 				if (thePrefs.m_iDbgHeap > 0 && !AfxCheckMemory())
@@ -1926,7 +1930,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 			//Commander - Moved: Blinking Tray Icon On Message Recieve [emulEspaña] - End
 
 			statsave++;
-			// 60 seconds
+			// *** 60 seconds *********************************************
 			if (statsave>=60) {
 				statsave=0;
 
@@ -1934,6 +1938,9 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 					theApp.webserver->UpdateSessionCount();
 
 				theApp.serverconnect->KeepConnectionAlive();
+
+				if (thePrefs.GetPreventStandby())
+					theApp.ResetStandByIdleTimer(); // Reset Windows idle standby timer if necessary
 			}
 
 			_uSaveStatistics++;

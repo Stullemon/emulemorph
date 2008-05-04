@@ -51,21 +51,6 @@ void CMiscUtils::IPAddressToString(uint32 uIP, CString *pString)
 	                ((uIP      ) & 0xFF) );
 }
 
-/* MORPH REPLACED by the prefs.getconfig dir
-LPCTSTR CMiscUtils::GetAppDir()
-{
-	if (m_sAppDirectory.GetLength() == 0)
-	{
-		TCHAR *pcBuffer = new TCHAR[MAX_PATH];
-		GetModuleFileName(0, pcBuffer, MAX_PATH);
-		LPTSTR lpsEnd = _tcsrchr(pcBuffer, _T('\\')) + 1;
-		*lpsEnd = _T('\0');
-		m_sAppDirectory = pcBuffer;
-		delete [] pcBuffer;
-	}
-	return m_sAppDirectory;
-}
-MORPH END REPLACED*/
 
 void CMiscUtils::DebugHexDump(const byte *pbyData, uint32 uLenData)
 {

@@ -53,7 +53,7 @@ static char THIS_FILE[] = __FILE__;
 
 //////////////////////////////////////////////////////////////////////////////
 // CHistoryFileDetailsSheet
-
+#ifndef NO_HISTORY
 class CHistoryFileDetailsSheet : public CListViewWalkerPropertySheet
 {
 	DECLARE_DYNAMIC(CHistoryFileDetailsSheet)
@@ -422,9 +422,10 @@ void CHistoryListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 		rcCol.right = rcCol.left + GetColumnWidth(0);
 
 		//draw the item's icon
+		int iIconPosY = (rcCol.Height() > theApp.GetSmallSytemIconSize().cy) ? ((rcCol.Height() - theApp.GetSmallSytemIconSize().cy) / 2) : 0;
 		int iImage = theApp.GetFileTypeSystemImageIdx( file->GetFileName() );
 		if (theApp.GetSystemImageList() != NULL)
-			::ImageList_Draw(theApp.GetSystemImageList(), iImage, pDC, rcCol.left + 4, rcCol.top, ILD_NORMAL|ILD_TRANSPARENT);
+			::ImageList_Draw(theApp.GetSystemImageList(), iImage, pDC, rcCol.left + 4, rcCol.top + iIconPosY, ILD_NORMAL|ILD_TRANSPARENT);
 
 		//draw item label (column 0)
 		sLabel = file->GetFileName();
@@ -1078,3 +1079,4 @@ void CHistoryListCtrl::ShowFileDialog(CTypedPtrList<CPtrList, CKnownFile*>& aFil
 		dialog.DoModal();
 	}
 }
+#endif

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -636,7 +636,7 @@ void CIrcMain::ParseMessage(CString sRawMessage)
 				case 433:
 					if (sRawMessage.Mid(iIndex, 1) == _T(":"))
 						iIndex++;
-					m_pwndIRC->AddStatus(sRawMessage.Mid(iIndex));
+					m_pwndIRC->AddStatus(sRawMessage.Mid(iIndex), true, uCommand);
 					// clear nick and enter the IRC-nick message box on next connect
 					thePrefs.SetIRCNick(_T(""));
 					return;
@@ -1486,7 +1486,7 @@ void CIrcMain::ParseMessage(CString sRawMessage)
 				case 502:
 					if (sRawMessage.Mid(iIndex, 1) == _T(":"))
 						iIndex++;
-					m_pwndIRC->AddStatus(sRawMessage.Mid(iIndex));
+					m_pwndIRC->AddStatus(sRawMessage.Mid(iIndex), true, uCommand);
 					return;
 			}
 		}

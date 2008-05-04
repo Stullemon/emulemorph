@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -79,7 +79,7 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 	//		does work for all languages which are currently supported by eMule.
 	// 8pt 'MS Shell Dlg' -- this shall be available on all Windows systems..
 	if (sm_fontAxis.m_hObject == NULL) {
-		if (sm_fontAxis.CreatePointFont(8*10, _T("MS Shell Dlg")))
+		if (CreatePointFont(sm_fontAxis, 8*10, theApp.GetDefaultFontFaceName()))
 			sm_fontAxis.GetLogFont(&sm_logFontAxis);
 		else if (sm_logFontAxis.lfHeight == 0) {
 			memset(&sm_logFontAxis, 0, sizeof sm_logFontAxis);
@@ -462,7 +462,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	*/ // end no win98 vs2008
 	{
 		yUnitFont.CreateFont(FontPointSizeToLogUnits(8*10), 0, 900, 900, FW_NORMAL, FALSE, FALSE, 0, DEFAULT_CHARSET,
-							 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, _T("MS Shell Dlg"));
+							 OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, theApp.GetDefaultFontFaceName());
 	}
 
 	// grab the horizontal font

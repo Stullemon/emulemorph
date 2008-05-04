@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -43,9 +43,10 @@ public:
 	bool IsConnected();
 	void UpdateFonts(CFont* pFont);
 	void ParseChangeMode(const CString& sChannel, const CString& sChanger, CString sCommands, const CString& sParams);
-	void AddStatus(CString sLine, bool bShowActivity = true);
+	void AddStatus(CString sLine, bool bShowActivity = true, UINT uStatusCode = 0);
 	void AddStatusF(CString sReceived, ...);
-	void AddInfoMessage(const CString& sChannelName, CString sReceived);
+	void AddInfoMessage(Channel *pChannel, CString sLine);
+	void AddInfoMessage(const CString& sChannelName, CString sReceived, bool bShowChannel = false);
 	void AddInfoMessageF(const CString& sChannelName, CString sReceived, ...);
 	void AddMessage(const CString& sChannelName, CString sTargetname, CString sLine);
 	void AddMessageF(const CString& sChannelName, CString sTargetname, CString sLine, ...);

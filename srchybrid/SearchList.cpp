@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -32,6 +32,7 @@
 #include "CxImage/xImage.h"
 #include "kademlia/utils/uint128.h"
 #include "Kademlia/Kademlia/Entry.h"
+#include "Kademlia/Kademlia/SearchManager.h"
 #include "emuledlg.h"
 #include "SearchDlg.h"
 #include "SearchListCtrl.h"
@@ -45,6 +46,8 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 #define SPAMFILTER_FILENAME		_T("SearchSpam.met")
+#define STOREDSEARCHES_FILENAME	_T("StoredSearches.met")
+#define STOREDSEARCHES_VERSION	1
 ///////////////////////////////////////////////////////////////////////////////
 // CSearchList
 
@@ -1171,8 +1174,10 @@ void CSearchList::DoSpamRating(CSearchFile* pSearchFile, bool bIsClientFile, boo
 			{
 				if (pSearchFile->IsConsideredSpam())
 					pRecord->m_nSpamResults++;
-				else
+				else {
+					ASSERT( pRecord->m_nSpamResults > 0 );
 					pRecord->m_nSpamResults--;
+				}
 			}
 		}
 	}
@@ -1553,7 +1558,160 @@ void CSearchList::SaveSpamFilter(){
 		return;
 	}
 	DebugLog(_T("Stored searchspam.met, wrote %u records"), nCount);
+}
 
+void CSearchList::StoreSearches(){
+	// store open searches on shutdown to restore them on the next startup
+	CString fullpath = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR);
+	fullpath.Append(STOREDSEARCHES_FILENAME);
+
+	CSafeBufferedFile file;
+	CFileException fexp;
+	if (!file.Open(fullpath, CFile::modeWrite|CFile::modeCreate|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
+		if (fexp.m_cause != CFileException::fileNotFound){
+			CString strError(_T("Failed to load ") STOREDSEARCHES_FILENAME _T(" file"));
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
+				strError += _T(" - ");
+				strError += szError;
+			}
+			DebugLogError(_T("%s"), strError);
+		}
+		return;
+	}
+	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+	uint16 nCount = 0;
+	try{
+		file.WriteUInt8(MET_HEADER_I64TAGS);
+		uint8 byVersion = STOREDSEARCHES_VERSION;
+		file.WriteUInt8(byVersion);
+		// count how many (if any) open searches we have which are GUI related	
+		POSITION pos;
+		for (pos = m_listFileLists.GetHeadPosition(); pos != NULL; ){
+			SearchListsStruct* pSl = m_listFileLists.GetNext(pos);
+			if (theApp.emuledlg->searchwnd->GetSearchParamsBySearchID(pSl->m_nSearchID) != NULL)
+				nCount++;
+		}
+		file.WriteUInt16(nCount);
+		if (nCount > 0){
+			POSITION pos;
+			for (pos = m_listFileLists.GetTailPosition(); pos != NULL; ){
+				SearchListsStruct* pSl = m_listFileLists.GetPrev(pos);
+				SSearchParams* pParams = theApp.emuledlg->searchwnd->GetSearchParamsBySearchID(pSl->m_nSearchID);
+				if (pParams != NULL){
+					pParams->StorePartially(file);
+					file.WriteUInt32(pSl->m_listSearchFiles.GetCount());
+					POSITION pos2;
+					for (pos2 = pSl->m_listSearchFiles.GetHeadPosition(); pos2 != NULL;)
+						pSl->m_listSearchFiles.GetNext(pos2)->StoreToFile(file);
+				}
+			}
+		}
+		file.Close();
+	}
+	catch(CFileException* error){
+		TCHAR buffer[MAX_CFEXP_ERRORMSG];
+		error->GetErrorMessage(buffer, ARRSIZE(buffer));
+		DebugLogError(_T("Failed to save %s, %s"), STOREDSEARCHES_FILENAME, buffer);
+		error->Delete();
+		return;
+	}
+	DebugLog(_T("Stored %u open search for restoring on next start"), nCount);
+}
+
+void CSearchList::LoadSearches(){
+	ASSERT( m_listFileLists.GetCount() == 0 );
+	CString fullpath = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR);
+	fullpath.Append(STOREDSEARCHES_FILENAME);
+	CSafeBufferedFile file;
+	CFileException fexp;
+	if (!file.Open(fullpath,CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
+		if (fexp.m_cause != CFileException::fileNotFound){
+			CString strError(_T("Failed to load ") STOREDSEARCHES_FILENAME _T(" file"));
+			TCHAR szError[MAX_CFEXP_ERRORMSG];
+			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
+				strError += _T(" - ");
+				strError += szError;
+			}
+			DebugLogError(_T("%s"), strError);
+		}
+		return;
+	}
+	setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
+
+	try {
+		uint8 header = file.ReadUInt8();
+		if (header != MET_HEADER_I64TAGS){
+			file.Close();
+			DebugLogError(_T("Failed to load %s, invalid first byte"), STOREDSEARCHES_FILENAME);
+			return;
+		}
+		uint8 byVersion = file.ReadUInt8();
+		if (byVersion != STOREDSEARCHES_VERSION){
+			file.Close();
+			return;
+		}
+
+		uint32 nHighestKadSearchID = 0xFFFFFFFF;
+		uint32 nHighestEd2kSearchID = 0xFFFFFFFF;
+		uint16 nCount = file.ReadUInt16();
+		for (int i = 0; i < nCount; i++){
+			SSearchParams* pParams = new SSearchParams(file);
+			uint32 nFileCount = file.ReadUInt32();
+			
+			if (pParams->eType == SearchTypeKademlia && (nHighestKadSearchID == 0xFFFFFFFF || nHighestKadSearchID < pParams->dwSearchID)){
+				ASSERT( pParams->dwSearchID < 0x80000000 );
+				nHighestKadSearchID = pParams->dwSearchID;
+			}
+			else if (pParams->eType != SearchTypeKademlia && (nHighestEd2kSearchID == 0xFFFFFFFF || nHighestEd2kSearchID < pParams->dwSearchID)){
+				ASSERT( pParams->dwSearchID >= 0x80000000 );
+				nHighestEd2kSearchID = pParams->dwSearchID;
+			}
+
+			// create the new tab
+			CStringA strResultType = pParams->strFileType;
+			if (strResultType == ED2KFTSTR_PROGRAM)
+				strResultType.Empty();
+			NewSearch(NULL, strResultType, pParams->dwSearchID, pParams->eType, pParams->strExpression, false);
+			
+			bool bDeleteParams = false;
+			if (theApp.emuledlg->searchwnd->CreateNewTab(pParams, false)){
+				m_foundFilesCount.SetAt(pParams->dwSearchID, 0);
+				m_foundSourcesCount.SetAt(pParams->dwSearchID, 0);
+			}
+			else{
+				bDeleteParams = true;
+				ASSERT( false );
+			}
+
+			// fill the list with stored results
+			for (uint32 j = 0; j < nFileCount; j++) {
+				CSearchFile* toadd = new CSearchFile(&file, true, pParams->dwSearchID, 0, 0, NULL, pParams->eType == SearchTypeKademlia);
+				AddToList(toadd, pParams->bClientSharedFiles);
+			}
+			if (bDeleteParams){
+				delete pParams;
+				pParams = NULL;
+			}
+		}
+		file.Close();
+		// adjust the start values for searchids in order to not reuse IDs of our loaded searches
+		if (nHighestKadSearchID != 0xFFFFFFFF)
+			Kademlia::CSearchManager::SetNextSearchID(nHighestKadSearchID + 1);
+		if (nHighestEd2kSearchID != 0xFFFFFFFF)
+			theApp.emuledlg->searchwnd->SetNextSearchID(max(nHighestEd2kSearchID + 1, 0x80000000));
+	}
+	catch(CFileException* error){
+		if (error->m_cause == CFileException::endOfFile)
+			DebugLogError(_T("Failed to load %s, corrupt"), STOREDSEARCHES_FILENAME);
+		else{
+			TCHAR buffer[MAX_CFEXP_ERRORMSG];
+			error->GetErrorMessage(buffer, ARRSIZE(buffer));
+			DebugLogError(_T("Failed to load %s, %s"), STOREDSEARCHES_FILENAME, buffer);
+		}
+		error->Delete();
+		return;
+	}
 }
 
 //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]

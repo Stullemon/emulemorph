@@ -97,6 +97,7 @@ bool	CPreferences::addnewfilespaused;
 UINT	CPreferences::depth3D;
 bool	CPreferences::m_bEnableMiniMule;
 int		CPreferences::m_iStraightWindowStyles;
+bool	CPreferences::m_bUseSystemFontForMainControls;
 bool	CPreferences::m_bRTLWindowsLayout;
 CString	CPreferences::m_strSkinProfile;
 CString	CPreferences::m_strSkinProfileDir;
@@ -365,6 +366,7 @@ bool	CPreferences::dontcompressavi;
 int   CPreferences::m_iCompressLevel;   // MORPH setable compresslevel [leuk_he]
 bool	CPreferences::msgonlyfriends;
 bool	CPreferences::msgsecure;
+bool	CPreferences::m_bUseChatCaptchas;
 UINT	CPreferences::filterlevel;
 UINT	CPreferences::m_iFileBufferSize;
 UINT	CPreferences::m_iQueueSize;
@@ -677,6 +679,9 @@ bool	CPreferences::m_bIRCEnableSmileys;
 bool	CPreferences::m_bMessageEnableSmileys;
 
 BOOL	CPreferences::m_bIsRunningAeroGlass;
+bool	CPreferences::m_bPreventStandby;
+bool	CPreferences::m_bStoreSearches;
+
 bool    CPreferences::m_bCryptLayerRequiredStrictServer; // MORPH lh require obfuscated server connection 
 
 //MORPH START - Added by SiRoB, XML News [O²]
@@ -861,25 +866,25 @@ void CPreferences::Init()
 					continue;
 				*/
 
-			if (_taccess(toadd, 0) == 0){ // only add directories which still exist
+				if (_taccess(toadd, 0) == 0){ // only add directories which still exist
 					if (toadd.Right(1) != L'\\')
 						toadd.Append(L"\\");
-				shareddir_list.AddHead(toadd);
-			}
-      // MORPH START sharesubdir 
-			else
-			{   theApp.QueueLogLine(false,_T("Dir %s Added to inaccesable directories") , toadd);  // Note thate queue need to be used because logwindow is not initialized (logged time is wrong)
-				inactive_shareddir_list.AddHead(toadd); // sharedsubdir inactive
-			}
-      // MORPH END sharesubdir 
+					shareddir_list.AddHead(toadd);
+				}
+				// MORPH START sharesubdir 
+				else
+				{   theApp.QueueLogLine(false,_T("Dir %s Added to inaccesable directories") , toadd);  // Note thate queue need to be used because logwindow is not initialized (logged time is wrong)
+					inactive_shareddir_list.AddHead(toadd); // sharedsubdir inactive
+				}
+				// MORPH END sharesubdir 
 
-		}
+			}
+			sdirfile->Close();
 		}
 		catch (CFileException* ex) {
 			ASSERT(0);
 			ex->Delete();
 		}
-		sdirfile->Close();
 	}
 	delete sdirfile;
 	
@@ -916,12 +921,12 @@ void CPreferences::Init()
 				}
 
 			}
+			sdirfile->Close();
 		}
 		catch (CFileException* ex) {
 			ASSERT(0);
 			ex->Delete();
 		}
-		sdirfile->Close();
 	}
 	delete sdirfile;
 	delete[] fullpath;
@@ -2091,6 +2096,8 @@ void CPreferences::SavePreferences()
 		ini.WriteBool(L"MinToTray_Aero",mintotray);
 	else
 	ini.WriteBool(L"MinToTray",mintotray);
+	ini.WriteBool(L"PreventStandby", m_bPreventStandby);
+	ini.WriteBool(L"StoreSearches", m_bStoreSearches);
 	ini.WriteBool(L"AddServersFromServer",m_bAddServersFromServer);
 	ini.WriteBool(L"AddServersFromClient",m_bAddServersFromClients);
 	ini.WriteBool(L"Splashscreen",splashscreen);
@@ -2218,6 +2225,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"EnableScheduler",scheduler);
 	ini.WriteBool(L"MessagesFromFriendsOnly",msgonlyfriends);
 	ini.WriteBool(L"MessageFromValidSourcesOnly",msgsecure);
+	ini.WriteBool(L"MessageUseCaptchas", m_bUseChatCaptchas);
 	ini.WriteBool(L"ShowInfoOnCatTabs",showCatTabInfos);
 	ini.WriteBool(L"DontRecreateStatGraphsOnResize",dontRecreateGraphs);
 	ini.WriteBool(L"AutoFilenameCleanup",autofilenamecleanup);
@@ -2406,7 +2414,7 @@ void CPreferences::SavePreferences()
 	//
 	ini.WriteInt(L"LastSearch", m_uPeerCacheLastSearch, L"PeerCache");
 	ini.WriteBool(L"Found", m_bPeerCacheWasFound);
-	ini.WriteBool(L"Enabled", m_bPeerCacheEnabled);
+	ini.WriteBool(L"EnabledDeprecated", m_bPeerCacheEnabled);
 	ini.WriteInt(L"PCPort", m_nPeerCachePort);
         
 #ifdef USE_OFFICIAL_UPNP
@@ -3008,6 +3016,8 @@ void CPreferences::LoadPreferences()
 	else
 	mintotray=ini.GetBool(L"MinToTray",false);
 
+	m_bPreventStandby = ini.GetBool(L"PreventStandby", false);
+	m_bStoreSearches = ini.GetBool(L"StoreSearches", true);
 	m_bAddServersFromServer=ini.GetBool(L"AddServersFromServer",false); // MORPH leuk_he default to false to fight false servers
 	m_bAddServersFromClients=ini.GetBool(L"AddServersFromClient",false);
 	splashscreen=ini.GetBool(L"Splashscreen",true);
@@ -3200,6 +3210,7 @@ void CPreferences::LoadPreferences()
 	scheduler=ini.GetBool(L"EnableScheduler",false);
 	msgonlyfriends=ini.GetBool(L"MessagesFromFriendsOnly",false);
 	msgsecure=ini.GetBool(L"MessageFromValidSourcesOnly",true);
+	m_bUseChatCaptchas = ini.GetBool(L"MessageUseCaptchas", true);
 	autofilenamecleanup=ini.GetBool(L"AutoFilenameCleanup",false);
 	m_bUseAutocompl=ini.GetBool(L"UseAutocompletion",true);
 	m_bShowDwlPercentage=ini.GetBool(L"ShowDwlPercentage",false);
@@ -3231,7 +3242,7 @@ void CPreferences::LoadPreferences()
 		ff.Close();
 	}
 
-	messageFilter=ini.GetStringLong(L"MessageFilter",L"Your client has an infinite queue|Your client is connecting too fast|fastest download speed|DI-Emule|eMule FX|ZamBoR 2|HyperMu|Ultra"); // leuk_he: add some known spammers
+	messageFilter=ini.GetStringLong(L"MessageFilter",L"fastest download speed|fastest eMule|DI-Emule|eMule FX|ZamBoR 2|HyperMu|Ultra"); // leuk_he: add some known spammers
 	/* MORPH START modified commentfilter
 	commentFilter = ini.GetStringLong(L"CommentFilter",L"http://|https://|ftp://|www.|ftp.");
 	*/
@@ -3260,6 +3271,7 @@ void CPreferences::LoadPreferences()
 	m_bReBarToolbar = ini.GetBool(L"ReBarToolbar", 1);
 	m_sizToolbarIconSize.cx = m_sizToolbarIconSize.cy = ini.GetInt(L"ToolbarIconSize", 32);
 	m_iStraightWindowStyles=ini.GetInt(L"StraightWindowStyles",0);
+	m_bUseSystemFontForMainControls=ini.GetBool(L"UseSystemFontForMainControls",0);
 	m_bRTLWindowsLayout = ini.GetBool(L"RTLWindowsLayout");
 	m_strSkinProfile = ini.GetString(L"SkinProfile", L"");
 	m_strSkinProfileDir = ini.GetString(L"SkinProfileDir", _T(""));
@@ -3514,7 +3526,7 @@ void CPreferences::LoadPreferences()
 
 	m_bNotifierSendMail = ini.GetBool(L"NotifierSendMail", false);
 #if _ATL_VER >= 0x0710
-	if (!IsRunningXPSP2())
+	if (!IsRunningXPSP2OrHigher())
 		m_bNotifierSendMail = false;
 #endif
 	m_strNotifierMailSender = ini.GetString(L"NotifierMailSender", L"");
@@ -3639,7 +3651,7 @@ void CPreferences::LoadPreferences()
 	//
 	m_uPeerCacheLastSearch = ini.GetInt(L"LastSearch", 0, L"PeerCache");
 	m_bPeerCacheWasFound = ini.GetBool(L"Found", false);
-	m_bPeerCacheEnabled = ini.GetBool(L"Enabled", true);
+	m_bPeerCacheEnabled = ini.GetBool(L"EnabledDeprecated", false);
 	m_nPeerCachePort = (uint16)ini.GetInt(L"PCPort", 0);
 	m_bPeerCacheShow = true; //ini.GetBool(L"Show", false); //allways see peercache
 
@@ -4537,7 +4549,7 @@ CString CPreferences::GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCr
 									// strSelectedExpansionBaseDirectory stays default
 								}
 								else if (nRegistrySetting == -1 && !bConfigAvailableExecuteable){
-									if (ff.FindFile(CString(wchAppData) + _T("eMule\\") + CONFIGFOLDER + _T("preferences.ini"), 0)){
+									if (ff.FindFile(strAppData + _T("eMule\\") + CONFIGFOLDER + _T("preferences.ini"), 0)){
 										// preferences.ini found, so we use this as default
 										strSelectedDataBaseDirectory = strPersonal + _T("eMule Downloads\\");
 										strSelectedConfigBaseDirectory = strAppData + _T("eMule\\");

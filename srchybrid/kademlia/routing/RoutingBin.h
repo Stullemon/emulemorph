@@ -41,22 +41,32 @@ namespace Kademlia
 {
 	class CRoutingBin
 	{
-			friend class CRoutingZone;
-		public:
-			~CRoutingBin();
-		private:
-			CRoutingBin();
-			bool AddContact(CContact* pContact, bool validate = true); // netfinity: Safe KAD - Split and consolidate operations will be unreliable if the add operation fails
-			void SetAlive(CContact* pContact);
-			void SetTCPPort(uint32 uIP, uint16 uUDPPort, uint16 uTCPPort);
-			void RemoveContact(CContact *pContact);
-			CContact *GetContact(const CUInt128 &uID);
-			CContact *GetOldest();
-			UINT GetSize() const;
-			UINT GetRemaining() const;
-			void GetEntries(ContactList *plistResult, bool bEmptyFirst = true);
-			void GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst = true, bool bSetInUse = false);
-			bool m_bDontDeleteContacts;
-			ContactList m_listEntries;
+	public:
+		~CRoutingBin();
+		CRoutingBin();
+		bool AddContact(CContact* pContact);
+		void SetAlive(CContact* pContact);
+		void SetTCPPort(uint32 uIP, uint16 uUDPPort, uint16 uTCPPort);
+		void RemoveContact(CContact *pContact, bool bNoTrackingAdjust = false);
+		CContact *GetContact(const CUInt128 &uID);
+		CContact* GetContact(uint32 uIP, uint16 nPort, bool bTCPPort);
+		CContact *GetOldest();
+		UINT GetSize() const;
+		UINT GetRemaining() const;
+		void GetEntries(ContactList *plistResult, bool bEmptyFirst = true);
+		void GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst = true, bool bSetInUse = false);
+		bool ChangeContactIPAddress(CContact* pContact, uint32 uNewIP);
+		void PushToBottom(CContact* pContact); // puts an existing contact from X to the end of the list
+
+		bool m_bDontDeleteContacts;
+
+	protected:
+		static void			AdjustGlobalTracking(uint32 uIP, bool bIncrease);
+	
+	private:
+		ContactList m_listEntries;
+
+		static CMap<uint32, uint32, uint32, uint32> s_mapGlobalContactIPs;
+		static CMap<uint32, uint32, uint32, uint32> s_mapGlobalContactSubnets;
 	};
 }

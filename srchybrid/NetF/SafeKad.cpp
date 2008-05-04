@@ -5,6 +5,7 @@
 #include "SafeKad.h"
 #include "Opcodes.h"
 
+#ifdef USE_SAFEKAD
 using namespace Kademlia;
 
 namespace Kademlia
@@ -181,4 +182,4 @@ void CSafeKad::Cleanup()
 			++it;
 	}
 }
-
+#endif

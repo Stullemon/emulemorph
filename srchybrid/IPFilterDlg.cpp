@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -169,13 +169,8 @@ void CIPFilterDlg::OnLvnColumnClickIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
 	m_ipfilter.UpdateSortOrder(pNMLV, ARRSIZE(_aColumns), _aColumns);
 	SortIPFilterItems();
-	
-	// Update(-1) doesn't works on vista anymore
-	m_ipfilter.SetRedraw(FALSE);
-	for (int i = 0; i != m_ipfilter.GetItemCount(); i++)
-		m_ipfilter.Update(i);
-	m_ipfilter.SetRedraw(TRUE);
-
+	m_ipfilter.Invalidate();
+	m_ipfilter.UpdateWindow();
 	*pResult = 0;
 }
 

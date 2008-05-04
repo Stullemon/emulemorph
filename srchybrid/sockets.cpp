@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -623,6 +623,23 @@ bool CServerConnect::IsLocalServer(uint32 dwIP, uint16 nPort){
 void CServerConnect::InitLocalIP()
 {
 	m_nLocalIP = 0;
+
+	// Using 'gethostname/gethostbyname' does not solve the problem when we have more than 
+	// one IP address. Using 'gethostname/gethostbyname' even seems to return the last IP 
+	// address which we got. e.g. if we already got an IP from our ISP, 
+	// 'gethostname/gethostbyname' will returned that (primary) IP, but if we add another
+	// IP by opening a VPN connection, 'gethostname' will still return the same hostname, 
+	// but 'gethostbyname' will return the 2nd IP.
+	// To weaken that problem at least for users which are binding eMule to a certain IP,
+	// we use the explicitly specified bind address as our local IP address.
+	if (thePrefs.GetBindAddrA() != NULL) {
+		unsigned long ulBindAddr = inet_addr(thePrefs.GetBindAddrA());
+		if (ulBindAddr != INADDR_ANY && ulBindAddr != INADDR_NONE) {
+			m_nLocalIP = ulBindAddr;
+			return;
+		}
+	}
+
 	// Don't use 'gethostbyname(NULL)'. The winsock DLL may be replaced by a DLL from a third party
 	// which is not fully compatible to the original winsock DLL. ppl reported crash with SCORSOCK.DLL
 	// when using 'gethostbyname(NULL)'.

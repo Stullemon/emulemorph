@@ -322,9 +322,6 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CRect cur_rec(lpDrawItemStruct->rcItem);
 	*/
 	COLORREF crOldTextColor = dc.SetTextColor((lpDrawItemStruct->itemState & ODS_SELECTED) ? m_crHighlightText : m_crWindowText);
-	if(client->GetSlotNumber() > theApp.uploadqueue->GetActiveUploadsCount(client->GetClassID())) { //MORPH - Upload Splitting Class
-        dc.SetTextColor(::GetSysColor(COLOR_GRAYTEXT));
-    }
 
 	int iOldBkMode;
 	if (m_crWindowTextBk == CLR_NONE){
@@ -394,7 +391,8 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						nOverlayImage |= 1;
 					if (client->IsObfuscatedConnectionEstablished())
 						nOverlayImage |= 2;
-					POINT point = {cur_rec.left, cur_rec.top+1};
+					int iIconPosY = (cur_rec.Height() > 16) ? ((cur_rec.Height() - 16) / 2) : 1;
+					POINT point = {cur_rec.left, cur_rec.top + iIconPosY};
 					m_ImageList.Draw(dc,image, point, ILD_NORMAL | INDEXTOOVERLAYMASK(nOverlayImage));
 					
 					//MORPH START - Credit Overlay Icon
@@ -845,7 +843,6 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 	return iResult;
 }
 
-//SLAHAM: ADDED [TPT] - New Menu Styles =>
 void CDownloadClientsCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
 	int iSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);

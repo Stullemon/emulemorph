@@ -764,6 +764,7 @@
 #define IDS_FIRSTAUTODOWN               834
 #define IDS_FIRSTAUTOUP                 835
 #define IDS_FIRSTFULLCHUNK              836
+#define IDS_DELETEDRESTRING1            836
 #define IDS_FIRSTSAFECON                837
 #define IDS_FIRSTAUTOCON                838
 #define IDS_FIRSTCOMPLETE               839
@@ -1498,6 +1499,26 @@
 #define IDS_MARKNOTSPAM                 1539
 #define IDS_SEARCHSPAMFILTER            1540
 #define IDS_SHOWSMILEYS                 1541
+#define IDS_CAPTCHAREQUEST              1542
+#define IDS_CAPTCHAFAILED               1543
+#define IDS_CAPTCHASOLVED               1544
+#define IDS_USECAPTCHAS                 1545
+#define IDS_BOOTSRAPNODESDAT            1546
+#define IDS_DOWNLOADING_NODESDAT_FROM   1547
+#define IDS_DOWNLOADING_NODESDAT        1548
+#define IDS_ERR_FAILEDDOWNLOADNODES     1549
+#define IDS_PREVENTSTANDBY              1550
+#define IDS_KADID                       1551
+#define IDS_SEARCHINGFRIENDKAD          1552
+#define IDS_FOUND                       1553
+#define IDS_EXTERNUDPPORT               1554
+#define IDS_STORESEARCHES               1555
+#define IDS_WRN_INCFILE_EXISTS          1556
+#define IDS_EDITSPAMFILTER              1557
+#define IDS_EDITSPAMFILTERCOMMENTS      1558
+#define IDS_WIZZARDOBFUSCATION          1559
+#define IDS_BETANAG                     1560
+#define IDS_CONFIRMNODESDOWNLOAD        1561
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -1572,6 +1593,7 @@
 #define IDC_ADVSPAMFILTER2              2113
 #define IDC_MSHOWSMILEYS                2113
 #define IDC_NETWORK_KADEMLIA            2114
+#define IDC_USECAPTCHAS                 2114
 #define IDC_WIZARD_NETWORK_ED2K         2115
 #define IDC_SERVERMETURL                2118
 #define IDC_WIZ_XP_RADIO                2122
@@ -1619,6 +1641,7 @@
 #define IDC_STARTS                      2189
 #define IDC_SHOWTRANSTOOLBAR            2189
 #define IDC_UPDATESERVERCONNECT         2190
+#define IDC_STORESEARCHES               2190
 #define IDC_VWIDTH                      2191
 #define IDC_QUEUECOUNT                  2192
 #define IDC_VASPECT                     2192
@@ -1803,6 +1826,7 @@
 #define IDC_SEARCHLST_ICO               2448
 #define IDC_MINIMULE                    2448
 #define IDC_SERVLST_ICO                 2449
+#define IDC_PREVENTSTANDBY              2449
 #define IDC_DOWNLOAD_ICO                2452
 #define IDC_METH                        2456
 #define IDC_UPLOAD_ICO                  2457
@@ -1881,8 +1905,10 @@
 #define IDC_WSTIMEOUT                   2546
 #define IDC_BOOTSTRAPIP                 2547
 #define IDC_WIZARD                      2548
+#define IDC_BOOTSTRAPURL                2548
 #define IDC_USERHASH                    2549
 #define IDC_INCOMING                    2550
+#define IDC_AFKADID                     2550
 #define IDC_WSPASS                      2551
 #define IDC_IP                          2553
 #define IDC_COMMENT                     2554
@@ -2093,6 +2119,7 @@
 #define IDC_RADIP                       2791
 #define IDC_RADCLIENTS                  2792
 #define IDC_HSAV                        2793
+#define IDC_RADNODESURL                 2793
 #define IDC_FD_CORR                     2794
 #define IDC_FD_RECOV                    2795
 #define IDC_FD_COMPR                    2796
@@ -2259,6 +2286,11 @@
 #define IDC_UPNPPROGRESS                2988
 #define IDC_UPNPSTATUS                  2989
 #define IDC_PREF_UPNPONSTART            2990
+#define IDC_NODESDATLABEL               2991
+#define IDC_AFKADIDLABEL                2993
+#define IDC_SHAREDFILES_FILTER          2994
+#define IDC_EDITCOMMENTFILTER           2995
+#define IDC_WIZZARDOBFUSCATION          2996
 #define IDC_STATIC_PORT                 2996
 #define IDC_STATIC_CONTROLS             2997
 #define IDC_STATIC_NRBLOCKS             2998
@@ -3733,7 +3765,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NEXT_RESOURCE_VALUE        6225
 #define _APS_NEXT_COMMAND_VALUE         31257
-#define _APS_NEXT_CONTROL_VALUE         6212
+#define _APS_NEXT_CONTROL_VALUE         6218
 #define _APS_NEXT_SYMED_VALUE           106
 #endif
 #endif

@@ -38,10 +38,8 @@ there client on the eMule forum..
 #include "./RoutingBin.h"
 #include "./Contact.h"
 #include "../kademlia/Defines.h"
-#include "../kademlia/SearchManager.h"
 #include "../../Log.h"
-
-#include "NetF/SafeKad.h" // netfinity: Enable tracking of bad nodes
+#include "../../preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -50,6 +48,9 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 using namespace Kademlia;
+
+CMap<uint32, uint32, uint32, uint32> CRoutingBin::s_mapGlobalContactIPs;
+CMap<uint32, uint32, uint32, uint32> CRoutingBin::s_mapGlobalContactSubnets;
 
 CRoutingBin::CRoutingBin()
 {
@@ -61,11 +62,15 @@ CRoutingBin::~CRoutingBin()
 {
 	try
 	{
-		if (!m_bDontDeleteContacts)
+
+		// Delete all contacts
+		for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
 		{
-			// Delete all contacts
-			for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
-				delete *itContactList;
+			AdjustGlobalTracking((*itContactList)->GetIPAddress(), false);
+			if (!m_bDontDeleteContacts)
+			{
+					delete *itContactList;
+			}
 		}
 		// Remove all contact entries.
 		m_listEntries.clear();
@@ -76,43 +81,53 @@ CRoutingBin::~CRoutingBin()
 	}
 }
 
-bool CRoutingBin::AddContact(CContact *pContact, bool validate) // netfinity: Safe KAD - Split and consolidate operations will be unreliable if the add operation fails
+bool CRoutingBin::AddContact(CContact *pContact)
 {
 	ASSERT(pContact != NULL);
+	uint32 cSameSubnets = 0;
 	// Check if we already have a contact with this ID in the list.
-	CContact *pContactTest = GetContact(pContact->GetClientID());
-	if (!validate || pContactTest == NULL) // netfinity: Safe KAD - Split and consolidate operations will be unreliable if the add operation fails
+	for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
 	{
-		// BEGIN netfinity: Safe KAD - Restrict how many contacts that can be stored for certain IP (range)
-		if (validate)
-		{
-			// Only store one contact per IP
-			if (safeKad.IsIPInUse(pContact->GetIPAddress()))
-			{
-				AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - Already 1 contact stored with this IP") , ipstr(ntohl(pContact->GetIPAddress())));
-				return false;
-			}
-			// Only two nodes per IP range and bucket, unless closer
-			int	nSimilarIPs = 0;
-			for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
-			{
-				if ((((*itContactList)->GetIPAddress() & 0xFFFFF000) == (pContact->GetIPAddress() & 0xFFFFF000)) && ((*itContactList)->GetDistance() < pContact->GetDistance()))
-					++nSimilarIPs;
-				}
-			if (nSimilarIPs >= 2)
-			{
-				AddDebugLogLine(false, _T("Ignored kad contact(IP=%s) - Already 2 contacts in bucket with similar IP's that are closer") , ipstr(ntohl(pContact->GetIPAddress())));
-				return false;
-			}
+		if (pContact->GetClientID() == (*itContactList)->m_uClientID){
+			return false;
 		}
-		// END netfinity: Safe KAD - Restrict how many contacts that can be stored for certain IP (range) 
-		// If not full, add to end of list
-		if (!validate || m_listEntries.size() < K) // netfinity: Safe KAD - Split and consolidate operations will be unreliable if the add operation fails
-		{
-			safeKad.TrackContact(pContact); // netfinity: Safe KAD - Keep track that this IP is in use
-			m_listEntries.push_back(pContact);
-			return true;
-		}
+		if ((pContact->GetIPAddress() & 0xFFFFFF00) ==  ((*itContactList)->GetIPAddress() & 0xFFFFFF00))
+			cSameSubnets++;
+	}
+
+	// Several checks to make sure that we don't store multiple contacts from the same IP or too many contacts from the same subnet
+	// This is supposed to add a bit of protection against several attacks and raise the ressource needs (IPs) for a successful contact on the attacker side 
+	// Such IPs are not banned from Kad, they still can index, search, etc so multiple KAD clients behind one IP still work
+	
+	// no more than 1 KadID per IP
+	uint32 nSameIPCount = 0;
+	s_mapGlobalContactIPs.Lookup(pContact->GetIPAddress(), nSameIPCount);
+	if (nSameIPCount >= 1){
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s:%u) - too many contacts with the same IP (global)") , ipstr(ntohl(pContact->GetIPAddress())), pContact->GetUDPPort());
+		return false;	
+	}	
+	// no more than 2 IPs from the same /24 netmask in one bin, except if its a LANIP (if we don't accept LANIPs they already have been filtered before)
+	if (cSameSubnets >= 2 && !::IsLANIP(ntohl(pContact->GetIPAddress()))){
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s:%u) - too many contacts with the same subnet in RoutingBin") , ipstr(ntohl(pContact->GetIPAddress())), pContact->GetUDPPort());
+		return false;	
+	}
+	//  no more than 10 IPs from the same /24 netmask global, except if its a LANIP (if we don't accept LANIPs they already have been filtered before)
+	uint32 nSameSubnetGlobalCount = 0;
+	s_mapGlobalContactSubnets.Lookup(pContact->GetIPAddress() & 0xFFFFFF00, nSameSubnetGlobalCount);
+	if (nSameSubnetGlobalCount >= 10 && !::IsLANIP(ntohl(pContact->GetIPAddress()))){
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s:%u) - too many contacts with the same Subnet (global)") , ipstr(ntohl(pContact->GetIPAddress())), pContact->GetUDPPort());
+		return false;	
+	}		
+
+	// If not full, add to end of list
+	if ( m_listEntries.size() < K)
+	{
+		m_listEntries.push_back(pContact);
+		AdjustGlobalTracking(pContact->GetIPAddress(), true);
+		return true;
 	}
 	return false;
 }
@@ -128,8 +143,7 @@ void CRoutingBin::SetAlive(CContact *pContact)
 		// Mark contact as being alive.
 		pContactTest->UpdateType();
 		// Move to the end of the list
-		RemoveContact(pContactTest);
-		m_listEntries.push_back(pContactTest);
+		PushToBottom(pContactTest);
 	}
 }
 
@@ -145,15 +159,30 @@ void CRoutingBin::SetTCPPort(uint32 uIP, uint16 uUDPPort, uint16 uTCPPort)
 			pContact->SetTCPPort(uTCPPort);
 			pContact->UpdateType();
 			// Move to the end of the list
-			RemoveContact(pContact);
-			m_listEntries.push_back(pContact);
+			PushToBottom(pContact);
 			break;
 		}
 	}
 }
 
-void CRoutingBin::RemoveContact(CContact *pContact)
+CContact* CRoutingBin::GetContact(uint32 uIP, uint16 nPort, bool bTCPPort){
+	// Find contact with IP/Port
+	for (ContactList::iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
+	{
+		CContact* pContact = *itContactList;
+		if ((uIP == pContact->GetIPAddress()) 
+			&& ((!bTCPPort && nPort == pContact->GetUDPPort()) || (bTCPPort && nPort == pContact->GetTCPPort()) || nPort == 0))
 {
+			return pContact;
+		}
+	}
+	return NULL;
+}
+
+void CRoutingBin::RemoveContact(CContact *pContact,  bool bNoTrackingAdjust)
+{
+	if (!bNoTrackingAdjust)
+		AdjustGlobalTracking(pContact->GetIPAddress(), false);
 	m_listEntries.remove(pContact);
 }
 
@@ -233,4 +262,113 @@ void CRoutingBin::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 
 	}
 	// Return result count to the caller.
 	return;
+}
+
+void CRoutingBin::AdjustGlobalTracking(uint32 uIP, bool bIncrease){
+	// IP
+	uint32 nSameIPCount = 0;
+	s_mapGlobalContactIPs.Lookup(uIP, nSameIPCount);
+	if (bIncrease){
+		if (nSameIPCount >= 1){
+			ASSERT( false );
+			DebugLogError(_T("RoutingBin Global IP Tracking inconsitency on increase (%s)"), ipstr(ntohl(uIP)));
+		}
+		nSameIPCount++;
+	}
+	else if (!bIncrease){
+		if (nSameIPCount == 0){
+			ASSERT( false );
+			DebugLogError(_T("RoutingBin Global IP Tracking inconsitency on decrease (%s)"), ipstr(ntohl(uIP)));
+		}
+		else
+			nSameIPCount--;
+	}
+	if (nSameIPCount != 0)
+		s_mapGlobalContactIPs.SetAt(uIP, nSameIPCount);
+	else
+		s_mapGlobalContactIPs.RemoveKey(uIP);
+
+	// Subnet
+	uint32 nSameSubnetCount = 0;
+	s_mapGlobalContactSubnets.Lookup(uIP & 0xFFFFFF00, nSameSubnetCount);
+	if (bIncrease){
+		if (nSameSubnetCount >= 10 && !::IsLANIP(ntohl(uIP))){
+			ASSERT( false );
+			DebugLogError(_T("RoutingBin Global Subnet Tracking inconsitency on increase (%s)"), ipstr(ntohl(uIP)));
+		}
+		nSameSubnetCount++;
+	}
+	else if (!bIncrease){
+		if (nSameSubnetCount == 0){
+			ASSERT( false );
+			DebugLogError(_T("RoutingBin Global IP Subnet inconsitency on decrease (%s)"), ipstr(ntohl(uIP)));
+		}
+		else
+			nSameSubnetCount--;
+	}
+	if (nSameSubnetCount != 0)
+		s_mapGlobalContactSubnets.SetAt(uIP & 0xFFFFFF00, nSameSubnetCount);
+	else
+		s_mapGlobalContactSubnets.RemoveKey(uIP & 0xFFFFFF00);	
+}
+
+bool CRoutingBin::ChangeContactIPAddress(CContact* pContact, uint32 uNewIP)
+{
+	// Called if we want to update a indexed contact with a new IP. We have to check if we actually allow such a change
+	// and if adjust our tracking. Rejecting a change will in the worst case lead a node contact to become invalid and purged later, 
+	// but it also protects against a flood of malicous update requests from on IP which would be able to "reroute" all
+	// contacts to itself and by that making them useless
+	if (pContact->GetIPAddress() == uNewIP)
+		return true;
+
+	ASSERT( GetContact(pContact->GetClientID()) == pContact );
+
+	// no more than 1 KadID per IP
+	uint32 nSameIPCount = 0;
+	s_mapGlobalContactIPs.Lookup(uNewIP, nSameIPCount);
+	if (nSameIPCount >= 1){
+		if (::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("Rejected kad contact ip change on update (old IP=%s, requested IP=%s) - too many contacts with the same IP (global)") , ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(uNewIP)));
+		return false;
+	}
+
+	if ((pContact->GetIPAddress() & 0xFFFFFF00) != (uNewIP & 0xFFFFFF00)){
+		//  no more than 10 IPs from the same /24 netmask global, except if its a LANIP (if we don't accept LANIPs they already have been filtered before)
+		uint32 nSameSubnetGlobalCount = 0;
+		s_mapGlobalContactSubnets.Lookup(uNewIP & 0xFFFFFF00, nSameSubnetGlobalCount);
+		if (nSameSubnetGlobalCount >= 10 && !::IsLANIP(ntohl(uNewIP))){
+			if (::thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("Rejected kad contact ip change on update (old IP=%s, requested IP=%s) - too many contacts with the same Subnet (global)") , ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(uNewIP)));
+			return false;	
+		}
+
+		// no more than 2 IPs from the same /24 netmask in one bin, except if its a LANIP (if we don't accept LANIPs they already have been filtered before)
+		uint32 cSameSubnets = 0;
+		// Check if we already have a contact with this ID in the list.
+		for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
+		{
+			if ((uNewIP & 0xFFFFFF00) ==  ((*itContactList)->GetIPAddress() & 0xFFFFFF00))
+				cSameSubnets++;
+		}
+		if (cSameSubnets >= 2 && !::IsLANIP(ntohl(uNewIP))){
+			if (::thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("Rejected kad contact ip change on update (old IP=%s, requested IP=%s) - too many contacts with the same Subnet (local)") , ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(uNewIP)));
+			return false;	
+		}
+	}
+
+	// everything fine
+	// LOGTODO REMOVE
+	DebugLog(_T("Index contact IP change allowed %s -> %s"), ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(uNewIP)));
+	AdjustGlobalTracking(pContact->GetIPAddress(), false);
+	pContact->SetIPAddress(uNewIP);
+	AdjustGlobalTracking(pContact->GetIPAddress(), true);
+	return true;
+}
+
+void CRoutingBin::PushToBottom(CContact* pContact) // puts an existing contact from X to the end of the list
+{
+	ASSERT( GetContact(pContact->GetClientID()) == pContact );
+	RemoveContact(pContact, true);
+	m_listEntries.push_back(pContact);
 }

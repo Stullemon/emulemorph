@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -79,6 +79,7 @@ BOOL CAddFriend::OnInitDialog()
 			CTime t((time_t)m_pShowFriend->m_dwLastSeen);
 			SetDlgItemText(IDC_EDIT2, t.Format(thePrefs.GetDateTimeFormat()));
 		}
+		SetDlgItemText(IDC_AFKADID, m_pShowFriend->HasKadID() ? GetResString(IDS_KNOWN) : GetResString(IDS_UNKNOWN));
 		/*if (m_pShowFriend->m_dwLastChatted){
 			CTime t((time_t)m_pShowFriend->m_dwLastChatted);
 			SetDlgItemText(IDC_LAST_CHATTED, t.Format(thePrefs.GetDateTimeFormat()));
@@ -109,6 +110,7 @@ void CAddFriend::Localize()
 	GetDlgItem(IDC_STATIC34)->SetWindowText(m_pShowFriend ? GetResString(IDS_USERID)+_T(":") : GetResString(IDS_CD_UIP));
 	GetDlgItem(IDC_STATIC35)->SetWindowText(GetResString(IDS_PORT)+_T(":"));
 	SetDlgItemText(IDC_LAST_SEEN_LABEL, GetResString(IDS_LASTSEEN)+_T(":"));
+	SetDlgItemText(IDC_AFKADIDLABEL, GetResString(IDS_KADID)+_T(":"));
 	//SetDlgItemText(IDC_LAST_CHATTED_LABEL, GetResString(IDS_LASTCHATTED)+_T(":"));
 }
 

@@ -458,8 +458,7 @@ BOOL CemuleApp::InitInstance()
 
 	m_sizSmallSystemIcon.cx = GetSystemMetrics(SM_CXSMICON);
 	m_sizSmallSystemIcon.cy = GetSystemMetrics(SM_CYSMICON);
-	m_sizBigSystemIcon.cx = GetSystemMetrics(SM_CXICON);
-	m_sizBigSystemIcon.cy = GetSystemMetrics(SM_CYICON);
+	UpdateLargeIconSize();
 	UpdateDesktopColorDepth();
 
 	CWinApp::InitInstance();
@@ -1252,49 +1251,8 @@ void CemuleApp::ShowHelp(UINT uTopic, UINT uCmd)
 
 bool CemuleApp::ShowWebHelp(UINT uTopic)
 {
-	UINT nWebLanguage;
-	UINT nWebTopic = 0;
-	switch (thePrefs.GetLanguageID())
-	{
-		case LANGID_DE_DE:/*German (Germany)*/			nWebLanguage =  2; break;
-		case LANGID_FR_FR:/*French (France)*/			nWebLanguage = 13; break;
-		case LANGID_ZH_TW:/*Chinese (Traditional)*/		nWebLanguage = 16; break;
-		case LANGID_ES_ES_T:/*Spanish (Castilian)*/		nWebLanguage = 17; break;
-		case LANGID_IT_IT:/*Italian (Italy)*/			nWebLanguage = 18; break;
-		case LANGID_NL_NL:/*Dutch (Netherlands)*/		nWebLanguage = 29; break;
-		case LANGID_PT_BR:/*Portuguese (Brazilian)*/	nWebLanguage = 30; break;
-		default:
-			/*English*/
-			nWebLanguage = 1;
-			switch (uTopic)
-			{
-				case eMule_FAQ_Preferences_General:				nWebTopic = 107; break;
-				case eMule_FAQ_Preferences_Display:				nWebTopic = 108; break;
-				case eMule_FAQ_Preferences_Connection:			nWebTopic = 109; break;
-				case eMule_FAQ_Preferences_Proxy:				nWebTopic = 110; break;
-				case eMule_FAQ_Preferences_Server:				nWebTopic = 111; break;
-				case eMule_FAQ_Preferences_Directories:			nWebTopic = 112; break;
-				case eMule_FAQ_Preferences_Files:				nWebTopic = 113; break;
-				case eMule_FAQ_Preferences_Notifications:		nWebTopic = 114; break;
-				case eMule_FAQ_Preferences_Statistics:			nWebTopic = 115; break;
-				case eMule_FAQ_Preferences_IRC:					nWebTopic = 116; break;
-				case eMule_FAQ_Preferences_Scheduler:			nWebTopic = 117; break;
-				case eMule_FAQ_Preferences_WebInterface:		nWebTopic = 118; break;
-				case eMule_FAQ_Preferences_Security:			nWebTopic = 119; break;
-				case eMule_FAQ_Preferences_Extended_Settings:	nWebTopic = 120; break;
-				case eMule_FAQ_Update_Server:					nWebTopic = 130; break;
-				case eMule_FAQ_Search:							nWebTopic = 133; break;
-				case eMule_FAQ_Friends:							nWebTopic = 141; break;
-				case eMule_FAQ_IRC_Chat:						nWebTopic = 140; break;
-			}
-	}
-
-	// onlinehelp unfortunatly doesnt supports context based help yet, since the topic IDs
-	// differ for each language, maybe improved in later versions
 	CString strHelpURL;
-	strHelpURL.Format(_T("%s/home/perl/help.cgi?l=%u"), thePrefs.GetHomepageBaseURL(), nWebLanguage); 
-	if (nWebTopic)
-		strHelpURL.AppendFormat(_T("&topic_id=%u&rm=show_topic"), nWebTopic);
+	strHelpURL.Format(_T("http://onlinehelp.emule-project.net/help.php?language=%u&topic=%u"), thePrefs.GetLanguageID(), uTopic);
 	ShellExecute(NULL, NULL, strHelpURL, NULL, thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR), SW_SHOWDEFAULT);
 	return true;
 }
@@ -1307,7 +1265,7 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 	if (iLength == -1)
 	    {// morph, JUst woraaround a reported chrashdump 
 			if (pszFilePath== NULL) 
-               iLength ==0;
+               iLength =0;
 			else  //original:
 				iLength = _tcslen(pszFilePath); 
 	} // morph
@@ -1859,7 +1817,7 @@ void CemuleApp::SearchClipboard()
 	LPCTSTR pszTrimmedLinks = strLinks;
 	while (_istspace((_TUCHAR)*pszTrimmedLinks)) // Skip leading whitespaces
 		pszTrimmedLinks++;
-	if (_tcsncmp(pszTrimmedLinks, _T("ed2k://|file|"), 13) == 0)
+	if (_tcsnicmp(pszTrimmedLinks, _T("ed2k://|file|"), 13) == 0)
 	{
 		m_bGuardClipboardPrompt = true;
 
@@ -1907,7 +1865,7 @@ bool CemuleApp::IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen)
 				{
 					while (isspace((unsigned char)*pszText))
 						pszText++;
-					bFoundLink = (strncmp(pszText, pszLinkType, iLinkTypeLen) == 0);
+					bFoundLink = (strnicmp(pszText, pszLinkType, iLinkTypeLen) == 0);
 					GlobalUnlock(hText);
 				}
 			}
@@ -2072,7 +2030,7 @@ void CemuleApp::CreateAllFonts()
 	///////////////////////////////////////////////////////////////////////////
 	// Symbol font
 	//
-	//VERIFY( m_fontSymbol.CreatePointFont(10 * 10, _T("Marlett")) );
+	//VERIFY( CreatePointFont(m_fontSymbol, 10 * 10, _T("Marlett")) );
 	// Creating that font with 'SYMBOL_CHARSET' should be safer (seen in ATL/MFC code). Though
 	// it seems that it does not solve the problem with '6' and '9' characters which are
 	// shown for some ppl.
@@ -2081,45 +2039,97 @@ void CemuleApp::CreateAllFonts()
 
 
 	///////////////////////////////////////////////////////////////////////////
-	// Log-, Message- and IRC-Window fonts
+	// Default GUI Font
 	//
-	LPLOGFONT plfHyperText = thePrefs.GetHyperTextLogFont();
-	if (plfHyperText==NULL || plfHyperText->lfFaceName[0]==_T('\0') || !m_fontHyperText.CreateFontIndirect(plfHyperText))
-		m_fontHyperText.CreatePointFont(10 * 10, _T("MS Shell Dlg"));
-
-	LPLOGFONT plfLog = thePrefs.GetLogFont();
-	if (plfLog!=NULL && plfLog->lfFaceName[0]!=_T('\0'))
-		m_fontLog.CreateFontIndirect(plfLog);
-
-	///////////////////////////////////////////////////////////////////////////
-	// Font used for Message and IRC edit control, default font, just a little larger
-	//
-	m_fontChatEdit.CreatePointFont(11 * 10, _T("MS Shell Dlg"));
-
-	// Why can't this font set via the font dialog??
-//	HFONT hFontMono = CreateFont(10, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, _T("Lucida Console"));
-//	m_fontLog.Attach(hFontMono);
-
-
-	///////////////////////////////////////////////////////////////////////////
-	// Default GUI Font (Bold)
-	//
+	// Fonts which are returned by 'GetStockObject'
+	// --------------------------------------------
 	// OEM_FIXED_FONT		Terminal
 	// ANSI_FIXED_FONT		Courier
 	// ANSI_VAR_FONT		MS Sans Serif
 	// SYSTEM_FONT			System
 	// DEVICE_DEFAULT_FONT	System
 	// SYSTEM_FIXED_FONT	Fixedsys
-	// DEFAULT_GUI_FONT		MS Shell Dlg
+	// DEFAULT_GUI_FONT		MS Shell Dlg (*1)
+	//
+	// (*1) Do not use 'GetStockObject(DEFAULT_GUI_FONT)' to get the 'Tahoma' font. It does
+	// not work...
+	//	
+	// The documentation in MSDN states that DEFAULT_GUI_FONT returns 'Tahoma' on 
+	// Win2000/XP systems. Though this is wrong, it may be true for US-English locales, but
+	// it is wrong for other locales. Furthermore it is even documented that "MS Shell Dlg"
+	// gets mapped to "MS Sans Serif" on Windows XP systems. Only "MS Shell Dlg 2" would
+	// get mapped to "Tahoma", but "MS Shell Dlg 2" can not be used on prior Windows
+	// systems.
+	//
+	// The reason why "MS Shell Dlg" is though mapped to "Tahoma" when used within dialog
+	// resources is unclear.
+	//
+	// So, to get the same font which is used within dialogs which were created via dialog
+	// resources which have the "MS Shell Dlg, 8" specified (again, in that special case
+	// "MS Shell Dlg" gets mapped to "Tahoma" and not to "MS Sans Serif"), we just query
+	// the main window (which is also a dialog) for the current font.
+	//
+	LOGFONT lfDefault;
+	AfxGetMainWnd()->GetFont()->GetLogFont(&lfDefault);
+	// It would not be an error if that font name does not match our pre-determined
+	// font name, I just want to know if that ever happens.
+	ASSERT( m_strDefaultFontFaceName == lfDefault.lfFaceName ); // WinXP: "MS Shell Dlg 2" (!)
 
-	CFont* pFont = CFont::FromHandle((HFONT)GetStockObject(DEFAULT_GUI_FONT));
-	if (pFont)
+
+	///////////////////////////////////////////////////////////////////////////
+	// Bold Default GUI Font
+	//
+	LOGFONT lfDefaultBold = lfDefault;
+	lfDefaultBold.lfWeight = FW_BOLD;
+	VERIFY( m_fontDefaultBold.CreateFontIndirect(&lfDefaultBold) );
+
+
+	///////////////////////////////////////////////////////////////////////////
+	// Server Log-, Message- and IRC-Window font
+	//
+	// Since we use "MS Shell Dlg 2" under WinXP (which will give us "Tahoma"),
+	// that font is nevertheless set to "MS Sans Serif" because a scaled up "Tahoma"
+	// font unfortunately does not look as good as a scaled up "MS Sans Serif" font.
+	//
+	LPLOGFONT plfHyperText = thePrefs.GetHyperTextLogFont();
+	if (plfHyperText==NULL || plfHyperText->lfFaceName[0]==_T('\0') || !m_fontHyperText.CreateFontIndirect(plfHyperText))
+		CreatePointFont(m_fontHyperText, 11 * 10, _T("MS Sans Serif")/*lfDefault.lfFaceName*/);
+
+	///////////////////////////////////////////////////////////////////////////
+	// Verbose Log-font
+	//
+	// Why can't this font set via the font dialog??
+//	HFONT hFontMono = CreateFont(10, 0, 0, 0, FW_DONTCARE, FALSE, FALSE, FALSE, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, _T("Lucida Console"));
+//	m_fontLog.Attach(hFontMono);
+	LPLOGFONT plfLog = thePrefs.GetLogFont();
+	if (plfLog!=NULL && plfLog->lfFaceName[0]!=_T('\0'))
+		m_fontLog.CreateFontIndirect(plfLog);
+
+	///////////////////////////////////////////////////////////////////////////
+	// Font used for Message and IRC edit control, default font, just a little
+	// larger.
+	//
+	// Since we use "MS Shell Dlg 2" under WinXP (which will give us "Tahoma"),
+	// that font is nevertheless set to "MS Sans Serif" because a scaled up "Tahoma"
+	// font unfortunately does not look as good as a scaled up "MS Sans Serif" font.
+	//
+	CreatePointFont(m_fontChatEdit, 11 * 10, _T("MS Sans Serif")/*lfDefault.lfFaceName*/);
+}
+
+const CString &CemuleApp::GetDefaultFontFaceName()
 	{
-		LOGFONT lf;
-		pFont->GetLogFont(&lf);
-		lf.lfWeight = FW_BOLD;
-		VERIFY( m_fontDefaultBold.CreateFontIndirect(&lf) );
+	if (m_strDefaultFontFaceName.IsEmpty())
+	{
+		OSVERSIONINFO osvi;
+		osvi.dwOSVersionInfoSize = sizeof(osvi);
+		if (GetVersionEx(&osvi)
+			&& osvi.dwPlatformId == VER_PLATFORM_WIN32_NT
+			&& osvi.dwMajorVersion >= 5) // Win2000/XP or higher
+			m_strDefaultFontFaceName = _T("MS Shell Dlg 2");
+		else
+			m_strDefaultFontFaceName = _T("MS Shell Dlg");
 	}
+	return m_strDefaultFontFaceName;
 }
 
 void CemuleApp::CreateBackwardDiagonalBrush()
@@ -2253,6 +2263,46 @@ BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType)
 	if (thePrefs.GetDebug2Disk())
 		theVerboseLog.Logf(_T("%hs: returning"), __FUNCTION__);
 	return FALSE; // FALSE: Let the system kill the process with the default handler.
+}
+
+void CemuleApp::UpdateLargeIconSize()
+{
+	// initialize with system values in case we don't find the Shell's registry key
+	m_sizBigSystemIcon.cx = GetSystemMetrics(SM_CXICON);
+	m_sizBigSystemIcon.cy = GetSystemMetrics(SM_CYICON);
+
+	// get the Shell's registry key for the large icon size - the large icons which are 
+	// returned by the Shell are based on that size rather than on the system icon size
+	CRegKey key;
+	if (key.Open(HKEY_CURRENT_USER, _T("Control Panel\\desktop\\WindowMetrics"), KEY_READ) == ERROR_SUCCESS)
+	{
+		TCHAR szShellLargeIconSize[12];
+		ULONG ulChars = _countof(szShellLargeIconSize);
+		if (key.QueryStringValue(_T("Shell Icon Size"), szShellLargeIconSize, &ulChars) == ERROR_SUCCESS)
+		{
+			UINT uIconSize = 0;
+			if (_stscanf(szShellLargeIconSize, _T("%u"), &uIconSize) == 1 && uIconSize > 0)
+			{
+				m_sizBigSystemIcon.cx = uIconSize;
+				m_sizBigSystemIcon.cy = uIconSize;
+			}
+		}
+	}
+}
+
+void CemuleApp::ResetStandByIdleTimer()
+{
+	// check if anything is going on (ongoing upload, download or connected) and reset the idle timer if so
+	if (IsConnected() || (uploadqueue != NULL && uploadqueue->GetUploadQueueLength() > 0)
+		|| (downloadqueue != NULL && downloadqueue->GetDatarate() > 0))
+	{
+		EXECUTION_STATE (WINAPI *pfnSetThreadExecutionState)(EXECUTION_STATE);
+		(FARPROC&)pfnSetThreadExecutionState = GetProcAddress(GetModuleHandle(_T("kernel32")), "SetThreadExecutionState");
+		if (pfnSetThreadExecutionState)
+			VERIFY( pfnSetThreadExecutionState(ES_SYSTEM_REQUIRED) );
+		else
+			ASSERT( false );
+	}
 }
 
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start

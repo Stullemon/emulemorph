@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -615,9 +615,8 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 							client->SetCryptLayerRequires(false);
 						}
 						else{
-							client->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
-							client->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
-							client->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
+							client->SetConnectOptions(byCryptOptions, true, false);
+							client->SetDirectUDPCallbackSupport(false);
 						}
 					}
 					else if (size >= 23){
@@ -625,6 +624,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 						client->SetCryptLayerSupport((byCryptOptions & 0x01) != 0);
 						client->SetCryptLayerRequest((byCryptOptions & 0x02) != 0);
 						client->SetCryptLayerRequires((byCryptOptions & 0x04) != 0);
+						client->SetDirectUDPCallbackSupport(false);
 					}
 					//MORPH START - Changed by SiRoB, Force TryToConnect for OP_CALLBACKREQUESTED
 					/*

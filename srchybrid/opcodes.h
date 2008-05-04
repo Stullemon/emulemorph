@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -23,7 +23,10 @@
 #define KADEMLIA_VERSION1_46c			0x01 /*45b - 46c*/
 #define KADEMLIA_VERSION2_47a			0x02 /*47a*/
 #define KADEMLIA_VERSION3_47b			0x03 /*47b*/
-#define KADEMLIA_VERSION				0x05
+#define KADEMLIA_VERSION5_48a			0x05 // -0.48a
+#define KADEMLIA_VERSION6_49aBETA		0x06 // -0.49aBETA1, needs to support: OP_FWCHECKUDPREQ (!), obfuscation, direct callbacks, source type 6, UDP firewallcheck
+#define KADEMLIA_VERSION7_49a			0x07 // -0.49a needs to support OP_KAD_FWTCPCHECK_ACK, KADEMLIA_FIREWALLED2_REQ
+#define KADEMLIA_VERSION				0x07 // Change CT_EMULE_MISCOPTIONS2 if Kadversion becomes >= 15
 #define PREFFILE_VERSION		0x14	//<<-- last change: reduced .dat, by using .ini
 #define PARTFILE_VERSION		0xe0
 #define PARTFILE_SPLITTEDVERSION		0xe1
@@ -287,6 +290,10 @@
 #define OP_SENDINGPART_I64		0xA2	// <HASH 16><von 8><bis 8><Daten len:(von-bis)>
 #define	OP_REQUESTPARTS_I64		0xA3	// <HASH 16><von[3] 8*3><bis[3] 8*3>
 #define OP_MULTIPACKET_EXT		0xA4		
+#define OP_CHATCAPTCHAREQ		0xA5	// <tags 1>[tags]<Captcha BITMAP>
+#define OP_CHATCAPTCHARES		0xA6	// <status 1>
+#define OP_FWCHECKUDPREQ		0xA7	// <Inter_Port 2><Extern_Port 2><KadUDPKey 4> *Support required for Kadversion >= 6
+#define OP_KAD_FWTCPCHECK_ACK	0xA8	// (null/reserved), replaces KADEMLIA_FIREWALLED_ACK_RES, *Support required for Kadversion >= 7
 
 // extened prot client <-> extened prot client UDP
 #define OP_REASKFILEPING		0x90	// <HASH 16>
@@ -294,6 +301,7 @@
 #define OP_FILENOTFOUND			0x92	// (null)
 #define OP_QUEUEFULL			0x93	// (null)
 #define OP_REASKCALLBACKUDP		0x94
+#define OP_DIRECTCALLBACKREQ	0x95	// <TCPPort 2><Userhash 16><ConnectionOptions 1>
 #define OP_PORTTEST				0xFE	// Connection Test
 	
 // server.met
@@ -377,6 +385,8 @@
 #define TAG_COMPLETE_SOURCES	"\x30"
 #define  FT_COLLECTIONAUTHOR	 0x31
 #define  FT_COLLECTIONAUTHORKEY  0x32
+#define  FT_PUBLISHINFO			 0x33	// <uint32>
+#define TAG_PUBLISHINFO			"\x33"	// <uint32>
 // statistic
 #define  FT_ATTRANSFERRED		 0x50	// <uint32>
 #define FT_ATREQUESTED			 0x51	// <uint32>
@@ -635,6 +645,7 @@
 #define KADEMLIA_FIREWALLED_REQ	0x50	// <TCPPORT (sender) [2]>
 #define KADEMLIA_FINDBUDDY_REQ	0x51	// <TCPPORT (sender) [2]>
 #define KADEMLIA_CALLBACK_REQ	0x52	// <TCPPORT (sender) [2]>
+#define KADEMLIA_FIREWALLED2_REQ		0x53	// <TCPPORT (sender) [2]><userhash><connectoptions 1>
 
 #define KADEMLIA_FIREWALLED_RES	0x58	// <IP (sender) [4]>
 #define KADEMLIA_FIREWALLED_ACK_RES		0x59	// (null)
@@ -642,6 +653,8 @@
 
 #define KADEMLIA2_PING					0x60	// (null)
 #define KADEMLIA2_PONG					0x61	// (null)
+
+#define KADEMLIA2_FIREWALLUDP			0x62	// <errorcode [1]><UDPPort_Used [2]>
 
 // KADEMLIA (parameter)
 #define KADEMLIA_FIND_VALUE		0x02

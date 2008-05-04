@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -908,34 +908,13 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					if (length+2 != size)
 						throw CString(_T("invalid message packet"));
 					
-					//filter me?
-					//MORPH START - Changed by SiRoB, originaly in ChatSelector::IsSpam(), Added by IceCream, third fixed criteria: leechers who try to afraid other morph/lovelave/blackrat users (NOS, Darkmule ...)
-					/*
-					if ( (thePrefs.MsgOnlyFriends() && !client->IsFriend()) || (thePrefs.MsgOnlySecure() && client->GetUserName()==NULL) )
-					*/
-					if ( (thePrefs.MsgOnlyFriends() && !client->IsFriend()) || (thePrefs.MsgOnlySecure() && client->GetUserName()==NULL) || (thePrefs.GetEnableAntiLeecher() && (client->IsLeecher() || client->TestLeecher())))
-					//MORPH END - Changed by SiRoB, originaly in ChatSelector::IsSpam(), Added by IceCream, third fixed criteria: leechers who try to afraid other morph/lovelave/blackrat users (NOS, Darkmule ...)
-					{
-						if (!client->GetMessageFiltered()){
-							if (thePrefs.GetVerbose())
-							//MORPH START - Changed by SiRoB, Just Add client soft version
-								AddDebugLogLine(false,_T("Filtered Message from '%s' (IP:%s) (%s)"), client->GetUserName(), ipstr(client->GetConnectIP()), client->GetClientSoftVer());
-							//MORPH END   - Changed by SiRoB, Just Add client soft version
-						}
-						client->SetMessageFiltered(true);
-						break;
-					}
-
 					if (length > MAX_CLIENT_MSG_LEN){
 						if (thePrefs.GetVerbose())
 							AddDebugLogLine(false, _T("Message from '%s' (IP:%s) exceeds limit by %u chars, truncated."), client->GetUserName(), ipstr(client->GetConnectIP()), length - MAX_CLIENT_MSG_LEN);
 						length = MAX_CLIENT_MSG_LEN;
 					}
 
-					CString strMessage(data.ReadString(client->GetUnicodeSupport()!=utf8strNone, length));
-					if (thePrefs.GetDebugClientTCPLevel() > 0)
-						Debug(_T("  %s\n"), strMessage);
-					theApp.emuledlg->chatwnd->chatselector.ProcessMessage(client, strMessage);
+					client->ProcessChatMessage(&data, length);
 					break;
 				}
 				case OP_ASKSHAREDFILES:
@@ -1529,7 +1508,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 										if(tosend)
 										{
 											if (thePrefs.GetDebugClientTCPLevel() > 0)
-												DebugSend("OP__RequestSources", client, reqfile->GetFileHash());
+												DebugSend("OP__AnswerSources", client, reqfile->GetFileHash());
 											theStats.AddUpDataOverheadSourceExchange(tosend->size);
 											SendPacket(tosend, true);
 										}
@@ -2331,7 +2310,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							DebugRecv("OP_CompressedPart_I64", client, (size >= 16) ? packet : NULL);
 					}
 					
-					theStats.AddDownDataOverheadFileRequest(24);
+					theStats.AddDownDataOverheadFileRequest(16 + 2*(opcode == OP_COMPRESSEDPART ? 4 : 8));
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);//MOrph
 
 					if (client->GetRequestFile() && !client->GetRequestFile()->IsStopped() && (client->GetRequestFile()->GetStatus()==PS_READY || client->GetRequestFile()->GetStatus()==PS_EMPTY))
@@ -2348,6 +2327,48 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						client->SendCancelTransfer();
 						client->SetDownloadState((client->GetRequestFile()==NULL || client->GetRequestFile()->IsStopped()) ? DS_NONE : DS_ONQUEUE);
 					}
+					break;
+				}
+				case OP_CHATCAPTCHAREQ:
+				{
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_CHATCAPTCHAREQ", client);
+					theStats.AddDownDataOverheadOther(uRawSize);
+					CSafeMemFile data(packet, size);
+					client->ProcessCaptchaRequest(&data);
+					break;
+				}
+				case OP_CHATCAPTCHARES:
+				{
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_CHATCAPTCHARES", client);
+					theStats.AddDownDataOverheadOther(uRawSize);
+					if (size < 1)
+						throw GetResString(IDS_ERR_BADSIZE);
+					client->ProcessCaptchaReqRes(packet[0]);
+					break;
+				}
+				case OP_FWCHECKUDPREQ: //*Support required for Kadversion >= 6
+				{
+					// Kad related packet
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_FWCHECKUDPREQ", client);
+					theStats.AddDownDataOverheadOther(uRawSize);
+					CSafeMemFile data(packet, size);
+					client->ProcessFirewallCheckUDPRequest(&data);
+					break;
+				}
+				case OP_KAD_FWTCPCHECK_ACK: //*Support required for Kadversion >= 7
+				{
+					// Kad related packet, replaces KADEMLIA_FIREWALLED_ACK_RES
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_KAD_FWTCPCHECK_ACK", client);
+					if (theApp.clientlist->IsKadFirewallCheckIP(client->GetIP())){
+						if (Kademlia::CKademlia::IsRunning())
+							Kademlia::CKademlia::GetPrefs()->IncFirewalled();
+					}
+					else
+						DebugLogWarning(_T("Unrequested OP_KAD_FWTCPCHECK_ACK packet from client %s"), client->DbgGetClientInfo());
 					break;
 				}
 				

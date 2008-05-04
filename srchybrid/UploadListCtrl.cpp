@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -466,7 +466,8 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							nOverlayImage |= 1;
 						if (client->IsObfuscatedConnectionEstablished())
 							nOverlayImage |= 2;
-						POINT point = {cur_rec.left, cur_rec.top+1};
+					int iIconPosY = (cur_rec.Height() > 16) ? ((cur_rec.Height() - 16) / 2) : 1;
+					POINT point = {cur_rec.left, cur_rec.top + iIconPosY};
 						imagelist.Draw(dc,image, point, ILD_NORMAL | INDEXTOOVERLAYMASK(nOverlayImage));
 
 						//MORPH START - Credit Overlay Icon
@@ -1160,7 +1161,7 @@ void CUploadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 		::GetCursorPos(&hti.pt);
 		ScreenToClient(&hti.pt);
 		if (SubItemHitTest(&hti) == -1 || hti.iItem != pGetInfoTip->iItem || hti.iSubItem != 0){
-			// don' show the default label tip for the main item, if the mouse is not over the main item
+			// don't show the default label tip for the main item, if the mouse is not over the main item
 			if ((pGetInfoTip->dwFlags & LVGIT_UNFOLDED) == 0 && pGetInfoTip->cchTextMax > 0 && pGetInfoTip->pszText[0] != _T('\0'))
 				pGetInfoTip->pszText[0] = _T('\0');
 			return;
@@ -1169,35 +1170,33 @@ void CUploadListCtrl::OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult)
 		const CUpDownClient* client = (CUpDownClient*)GetItemData(pGetInfoTip->iItem);
 		if (client && pGetInfoTip->pszText && pGetInfoTip->cchTextMax > 0)
 		{
-			CString info;
+			CString strInfo;
+			strInfo.Format(GetResString(IDS_USERINFO), client->GetUserName());
 
 			//MORPH START - Adde by SiRoB, Optimization requpfile
 			/*
-			CKnownFile* file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
+			const CKnownFile* file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 			*/
-			CKnownFile* file = client->CheckAndGetReqUpFile();
+			const CKnownFile* file = client->CheckAndGetReqUpFile();
 			//MORPH END   - Adde by SiRoB, Optimization requpfile
 			// build info text and display it
-			info.Format(GetResString(IDS_USERINFO), client->GetUserName());
 			//MORPH START - Extra User Infos
-			info += GetResString(IDS_CD_CSOFT) + _T(": ") + client->GetClientSoftVer() + _T("\n");
-			info += GetResString(IDS_COUNTRY) + _T(": ") + client->GetCountryName(true) + _T("\n");
+			strInfo += GetResString(IDS_CD_CSOFT) + _T(": ") + client->GetClientSoftVer() + _T("\n");
+			strInfo += GetResString(IDS_COUNTRY) + _T(": ") + client->GetCountryName(true) + _T("\n");
 			//MORPH END   - Extra User Infos
 			if (file)
 			{
-				info += GetResString(IDS_SF_REQUESTED) + _T(" ") + CString(file->GetFileName()) + _T("\n");
-				CString stat;
-				stat.Format(GetResString(IDS_FILESTATS_SESSION)+GetResString(IDS_FILESTATS_TOTAL),
+				strInfo += GetResString(IDS_SF_REQUESTED) + _T(' ') + file->GetFileName() + _T('\n');
+				strInfo.AppendFormat(GetResString(IDS_FILESTATS_SESSION) + GetResString(IDS_FILESTATS_TOTAL),
 							file->statistic.GetAccepts(), file->statistic.GetRequests(), CastItoXBytes(file->statistic.GetTransferred(), false, false),
 							file->statistic.GetAllTimeAccepts(), file->statistic.GetAllTimeRequests(), CastItoXBytes(file->statistic.GetAllTimeTransferred(), false, false) );
-				info += stat;
 			}
 			else
 			{
-				info += GetResString(IDS_REQ_UNKNOWNFILE);
+				strInfo += GetResString(IDS_REQ_UNKNOWNFILE);
 			}
-
-			_tcsncpy(pGetInfoTip->pszText, info, pGetInfoTip->cchTextMax);
+			strInfo += TOOLTIP_AUTOFORMAT_SUFFIX_CH;
+			_tcsncpy(pGetInfoTip->pszText, strInfo, pGetInfoTip->cchTextMax);
 			pGetInfoTip->pszText[pGetInfoTip->cchTextMax-1] = _T('\0');
 		}
 	}

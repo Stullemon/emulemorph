@@ -96,11 +96,11 @@ CWebServer::CWebServer(void)
 	CIni ini( thePrefs.GetConfigFile(),_T("WebServer"));
 
 	ini.SerGet(true, WSdownloadColumnHidden, ARRSIZE(WSdownloadColumnHidden), _T("downloadColumnHidden"));
-	ini.SerGet(true, WSuploadColumnHidden, ARRSIZE(WSdownloadColumnHidden), _T("uploadColumnHidden"));
-	ini.SerGet(true, WSqueueColumnHidden, ARRSIZE(WSdownloadColumnHidden), _T("queueColumnHidden"));
-	ini.SerGet(true, WSsearchColumnHidden, ARRSIZE(WSdownloadColumnHidden), _T("searchColumnHidden"));
-	ini.SerGet(true, WSsharedColumnHidden, ARRSIZE(WSdownloadColumnHidden), _T("sharedColumnHidden"));
-	ini.SerGet(true, WSserverColumnHidden, ARRSIZE(WSdownloadColumnHidden), _T("serverColumnHidden"));
+	ini.SerGet(true, WSuploadColumnHidden, ARRSIZE(WSuploadColumnHidden), _T("uploadColumnHidden"));
+	ini.SerGet(true, WSqueueColumnHidden, ARRSIZE(WSqueueColumnHidden), _T("queueColumnHidden"));
+	ini.SerGet(true, WSsearchColumnHidden, ARRSIZE(WSsearchColumnHidden), _T("searchColumnHidden"));
+	ini.SerGet(true, WSsharedColumnHidden, ARRSIZE(WSsharedColumnHidden), _T("sharedColumnHidden"));
+	ini.SerGet(true, WSserverColumnHidden, ARRSIZE(WSserverColumnHidden), _T("serverColumnHidden"));
 
 	m_Params.bShowUploadQueue =			ini.GetBool(_T("ShowUploadQueue"),false);
 	m_Params.bShowUploadQueueBanned =	ini.GetBool(_T("ShowUploadQueueBanned"),false);
@@ -1031,7 +1031,7 @@ CString CWebServer::_GetHeader(ThreadData Data, long lSession)
 	Out.Replace(_T("[Shutdown]"), _GetPlainResString(IDS_WEB_SHUTDOWNSYSTEM));
 	Out.Replace(_T("[WebOptions]"), _GetPlainResString(IDS_WEB_ADMINMENU));
 	Out.Replace(_T("[Logout]"), _GetPlainResString(IDS_WEB_LOGOUT));
-	Out.Replace(_T("[Search]"), _GetPlainResString(IDS_SW_SEARCHBOX));
+	Out.Replace(_T("[Search]"), _GetPlainResString(IDS_EM_SEARCH));
 	Out.Replace(_T("[Download]"), _GetPlainResString(IDS_SW_DOWNLOAD));
 	Out.Replace(_T("[Start]"), _GetPlainResString(IDS_SW_START));
 	Out.Replace(_T("[Version]"), _GetPlainResString(IDS_VERSION));
@@ -5036,7 +5036,7 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 	Out.Replace(_T("[CDImage]"), _GetPlainResString(IDS_SEARCH_CDIMG));
 	Out.Replace(_T("[Program]"), _GetPlainResString(IDS_SEARCH_PRG));
 	Out.Replace(_T("[Archive]"), _GetPlainResString(IDS_SEARCH_ARC));
-	Out.Replace(_T("[Search]"), _GetPlainResString(IDS_SW_SEARCHBOX));
+	Out.Replace(_T("[Search]"), _GetPlainResString(IDS_EM_SEARCH));
 	Out.Replace(_T("[Unicode]"), _GetPlainResString(IDS_SEARCH_UNICODE));
 	Out.Replace(_T("[Size]"), _GetPlainResString(IDS_DL_SIZE));
 	Out.Replace(_T("[Start]"), _GetPlainResString(IDS_SW_START));
@@ -5597,7 +5597,7 @@ CString CWebServer::_GetCommentlist(ThreadData Data)
 
 		commentlines.AppendFormat( pThis->m_Templates.sCommentListLine,
 			_T(""),
-			_SpecialChars(entry->m_fileName),
+			_SpecialChars(entry->GetCommonFileName()),
 			_SpecialChars(entry->GetStrTagValue(TAG_DESCRIPTION)),
 			_SpecialChars(GetRateString((UINT)entry->GetIntTagValue(TAG_FILERATING)) )
 			);
@@ -5612,7 +5612,6 @@ CString CWebServer::_GetCommentlist(ThreadData Data)
 	Out.Replace(_T("[RATING]"), GetResString(IDS_QL_RATING));
 	Out.Replace(_T("[CLOSE]"), GetResString(IDS_CW_CLOSE));
 	Out.Replace(_T("[CharSet]"), HTTPENCODING );
-
 
 	return Out;
 }

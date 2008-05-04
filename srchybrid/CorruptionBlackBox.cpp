@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2007 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -97,7 +97,7 @@ void CCorruptionBlackBox::TransferredData(uint64 nStartPos, uint64 nEndPos, cons
 	}
 	//MORPH START - Import Parts
 	/*
-	uint32 dwSenderIP = 0;
+	uint32 dwSenderIP = pSender->GetIP();
 	*/
 	uint32 dwSenderIP = 0;
 	if(pSender)
@@ -272,13 +272,11 @@ void CCorruptionBlackBox::CorruptedData(uint64 nStartPos, uint64 nEndPos){
 		m_aaRecords.SetSize(nPart+1);
 	}
 	uint64 nDbgVerifiedBytes = 0;
-	CArray<uint32, uint32> aGuiltyClients;
 	for (int i= 0; i < m_aaRecords[nPart].GetCount(); i++){
 		if (m_aaRecords[nPart][i].m_BBRStatus == BBR_NONE){
 			if (m_aaRecords[nPart][i].m_nStartPos >= nRelStartPos && m_aaRecords[nPart][i].m_nEndPos <= nRelEndPos){
 				nDbgVerifiedBytes +=  (m_aaRecords[nPart][i].m_nEndPos-m_aaRecords[nPart][i].m_nStartPos)+1;
 				m_aaRecords[nPart][i].m_BBRStatus = BBR_CORRUPTED;
-				aGuiltyClients.Add(m_aaRecords[nPart][i].m_dwIP);
 			}
 			else if (m_aaRecords[nPart][i].m_nStartPos < nRelStartPos && m_aaRecords[nPart][i].m_nEndPos > nRelEndPos){
 			    // need to split it 2*
@@ -292,7 +290,6 @@ void CCorruptionBlackBox::CorruptedData(uint64 nStartPos, uint64 nEndPos){
 				m_aaRecords[nPart].Add(CCBBRecord(nTmpStartPos2, nTmpEndPos2, m_aaRecords[nPart][i].m_dwIP, m_aaRecords[nPart][i].m_BBRStatus));
 				nDbgVerifiedBytes +=  (m_aaRecords[nPart][i].m_nEndPos-m_aaRecords[nPart][i].m_nStartPos)+1;
 				m_aaRecords[nPart][i].m_BBRStatus = BBR_CORRUPTED;
-				aGuiltyClients.Add(m_aaRecords[nPart][i].m_dwIP);
 			}
 			else if (m_aaRecords[nPart][i].m_nStartPos >= nRelStartPos && m_aaRecords[nPart][i].m_nStartPos <= nRelEndPos){
 				// need to split it
@@ -302,7 +299,6 @@ void CCorruptionBlackBox::CorruptedData(uint64 nStartPos, uint64 nEndPos){
 				m_aaRecords[nPart].Add(CCBBRecord(nTmpStartPos, nTmpEndPos, m_aaRecords[nPart][i].m_dwIP, m_aaRecords[nPart][i].m_BBRStatus));
 				nDbgVerifiedBytes +=  (m_aaRecords[nPart][i].m_nEndPos-m_aaRecords[nPart][i].m_nStartPos)+1;
 				m_aaRecords[nPart][i].m_BBRStatus = BBR_CORRUPTED;
-				aGuiltyClients.Add(m_aaRecords[nPart][i].m_dwIP);
 			}
 			else if (m_aaRecords[nPart][i].m_nEndPos >= nRelStartPos && m_aaRecords[nPart][i].m_nEndPos <= nRelEndPos){
 				// need to split it
@@ -312,10 +308,19 @@ void CCorruptionBlackBox::CorruptedData(uint64 nStartPos, uint64 nEndPos){
 				m_aaRecords[nPart].Add(CCBBRecord(nTmpStartPos, nTmpEndPos, m_aaRecords[nPart][i].m_dwIP, m_aaRecords[nPart][i].m_BBRStatus));
 				nDbgVerifiedBytes +=  (m_aaRecords[nPart][i].m_nEndPos-m_aaRecords[nPart][i].m_nStartPos)+1;
 				m_aaRecords[nPart][i].m_BBRStatus = BBR_CORRUPTED;
-				aGuiltyClients.Add(m_aaRecords[nPart][i].m_dwIP);
 			}
 		}
 	}
+	AddDebugLogLine(DLP_HIGH, false, _T("Found and marked %I64u recorded bytes of %I64u as corrupted in the CorruptionBlackBox records"), nDbgVerifiedBytes, (nEndPos-nStartPos)+1);
+}
+
+void CCorruptionBlackBox::EvaluateData(uint16 nPart)
+{
+	CArray<uint32, uint32> aGuiltyClients;
+	for (int i= 0; i < m_aaRecords[nPart].GetCount(); i++)
+		if (m_aaRecords[nPart][i].m_BBRStatus == BBR_CORRUPTED)
+			aGuiltyClients.Add(m_aaRecords[nPart][i].m_dwIP);
+
 	// check if any IPs are already banned, so we can skip the test for those
 	for(int k = 0; k < aGuiltyClients.GetCount();){
 		// remove doubles
@@ -332,7 +337,6 @@ void CCorruptionBlackBox::CorruptedData(uint64 nStartPos, uint64 nEndPos){
 		else
 			k++;
 	}
-	AddDebugLogLine(DLP_HIGH, false, _T("Found and marked %I64u recorded bytes of %I64u as corrupted in the CorruptionBlackBox records, %u clients involved"), nDbgVerifiedBytes, (nEndPos-nStartPos)+1, aGuiltyClients.GetCount());
 	if (aGuiltyClients.GetCount() > 0){
 		// parse all recorded data for this file to produce a statistic for the involved clients
 		
@@ -367,7 +371,7 @@ void CCorruptionBlackBox::CorruptedData(uint64 nStartPos, uint64 nEndPos){
 			if ((aDataVerified[k] + aDataCorrupt[k]) > 0)
 				nCorruptPercentage = (int)(((uint64)aDataCorrupt[k]*100)/(aDataVerified[k] + aDataCorrupt[k]));
 			else {
-				AddDebugLogLine(DLP_HIGH, false, _T("CorruptionBlackBox: Program Error: No records for guilty client found!"));
+				AddDebugLogLine(DLP_HIGH, false, _T("CorruptionBlackBox: Programm Error: No records for guilty client found!"));
 				ASSERT( false );
 				nCorruptPercentage = 0;
 			}
