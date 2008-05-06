@@ -56,6 +56,8 @@ public:
 	uint16	GetClientServerPort() const		{ return m_nClientServerPort; }
 	void	SetClientServerPort(uint16 nPort) { m_nClientServerPort = nPort; }
 	int		GetClientsCount() const			{ return ((GetClientID() && GetClientPort()) ? 1 : 0) + m_aClients.GetSize(); }
+	void	SetKadPublishInfo(uint32 dwVal)	{ m_nKadPublishInfo = dwVal; }
+	uint32	GetKadPublishInfo() const		{ return m_nKadPublishInfo; } // == TAG_PUBLISHINFO
 
 	// Spamfilter
 	void	SetNameWithoutKeyword(CString strName)	{ m_strNameWithoutKeywords = strName; }
@@ -177,6 +179,7 @@ private:
 	uint32	m_nSearchID;
 	uint32	m_nClientServerIP;
 	uint16	m_nClientServerPort;
+	uint32	m_nKadPublishInfo;
 /* vs2008 start 
 	CSimpleArray<SClient> m_aClients;
 	CSimpleArray<SServer> m_aServers;

@@ -65,6 +65,7 @@ time_t		CKademlia::m_tNextFirewallCheck;
 time_t		CKademlia::m_tNextFindBuddy;
 time_t		CKademlia::m_tBootstrap;
 time_t		CKademlia::m_tConsolidate;
+time_t		CKademlia::m_tExternPortLookup;
 bool		CKademlia::m_bRunning = false;
 
 CKademlia::CKademlia()
@@ -110,6 +111,8 @@ void CKademlia::Start(CPrefs *pPrefs)
 		m_tNextFindBuddy = time(NULL) + (MIN2S(5));
 		// Init contact consolidate timer;
 		m_tConsolidate = time(NULL) + (MIN2S(45));
+		// Looking up our extern port
+		m_tExternPortLookup = time(NULL);
 		// Init bootstrap time.
 		m_tBootstrap = 0;
 		// Init our random seed.
@@ -202,7 +205,18 @@ void CKademlia::Process()
 	if (m_tNextFindBuddy <= tNow)
 	{
 		m_pInstance->m_pPrefs->SetFindBuddy();
-		m_tNextFindBuddy = MIN2S(5) + m_tNextFirewallCheck;
+		m_tNextFindBuddy = MIN2S(20) + tNow;
+	}
+	if (m_tExternPortLookup <= tNow && CUDPFirewallTester::IsFWCheckUDPRunning() && GetPrefs()->GetExternalKadPort() == 0){
+		// if our UDP firewallcheck is running and we don't know our external port, we send a request every 15 seconds
+		CContact* pContact = GetRoutingZone()->GetRandomContact(3, KADEMLIA_VERSION6_49aBETA);
+		if (pContact != NULL){
+			DEBUG_ONLY( DebugLog(_T("Requesting our external port from %s"), ipstr(ntohl(pContact->GetIPAddress()))) );
+			GetUDPListener()->SendNullPacket(KADEMLIA2_PING, pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetUDPKey(), &pContact->GetClientID());
+		}
+		else
+			DEBUG_ONLY( DebugLogWarning(_T("No valid client for requesting external port available")) );
+		m_tExternPortLookup = 15 + tNow;
 	}
 	for (EventMap::const_iterator itEventMap = m_mapEvents.begin(); itEventMap != m_mapEvents.end(); ++itEventMap)
 	{
@@ -382,9 +396,11 @@ void CKademlia::RecheckFirewalled()
 		m_pInstance->m_pPrefs->SetRecheckIP();
 		// also UDP check
 		CUDPFirewallTester::ReCheckFirewallUDP(false);
-		// Always set next buddy check 5 mins after a firewall check.
-		m_tNextFindBuddy = MIN2S(5) + m_tNextFirewallCheck;
-		m_tNextFirewallCheck = HR2S(1) + time(NULL);
+		
+		time_t tNow = time(NULL);
+		// Delay the next buddy search to at least 5 minutes after our firewallcheck so we are sure to be still firewalled
+		m_tNextFindBuddy = (m_tNextFindBuddy < MIN2S(5) + tNow) ?  (MIN2S(5) + tNow) : m_tNextFindBuddy;
+		m_tNextFirewallCheck = HR2S(1) + tNow;
 	}
 }
 
@@ -392,7 +408,7 @@ CPrefs *CKademlia::GetPrefs()
 {
 	if (m_pInstance == NULL || m_pInstance->m_pPrefs == NULL)
 	{
-		//ASSERT(0); // netfinity: Don't like these asserts as they trigger on every obfuscated UDP packet if Kad is not running
+		//ASSERT(0);
 		return NULL;
 	}
 	return m_pInstance->m_pPrefs;

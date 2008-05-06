@@ -2285,7 +2285,8 @@ void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED_REQ (const byte *pbyPacke
 	contact.SetIPAddress(uIP);
 	contact.SetTCPPort(uTCPPort);
 	contact.SetUDPPort(uUDPPort);
-	theApp.clientlist->RequestTCP(&contact, 0);
+	if (!theApp.clientlist->RequestTCP(&contact, 0))
+		return; // cancelled for some reason, don't send a response
 
 	// Send response
 	CSafeMemFile fileIO2(4);
@@ -2318,7 +2319,8 @@ void CKademliaUDPListener::Process_KADEMLIA_FIREWALLED2_REQ (const byte *pbyPack
 	contact.SetTCPPort(uTCPPort);
 	contact.SetUDPPort(uUDPPort);
 	contact.SetClientID(userID);
-	theApp.clientlist->RequestTCP(&contact, byConnectOptions);
+	if (!theApp.clientlist->RequestTCP(&contact, byConnectOptions))
+		return;  // cancelled for some reason, don't send a response
 
 	// Send response
 	CSafeMemFile fileIO2(4);
@@ -2384,7 +2386,7 @@ void CKademliaUDPListener::Process_KADEMLIA_FINDBUDDY_REQ (const byte *pbyPacket
 		throw strError;
 	}
 
-	if( CKademlia::GetPrefs()->GetFirewalled() || CUDPFirewallTester::IsFirewalledUDP(true))
+	if( CKademlia::GetPrefs()->GetFirewalled() || CUDPFirewallTester::IsFirewalledUDP(true) || !CUDPFirewallTester::IsVerified())
 		//We are firewalled but somehow we still got this packet.. Don't send a response..
 		return;
 	else if (theApp.clientlist->GetBuddyStatus() == Connected)
@@ -2403,13 +2405,15 @@ void CKademliaUDPListener::Process_KADEMLIA_FINDBUDDY_REQ (const byte *pbyPacket
 	contact.SetTCPPort(uTCPPort);
 	contact.SetUDPPort(uUDPPort);
 	contact.SetClientID(userID);
-	theApp.clientlist->IncomingBuddy(&contact, &BuddyID);
+	if (!theApp.clientlist->IncomingBuddy(&contact, &BuddyID))
+		 return; // cancelled for some reason, don't send a response
 
 	CSafeMemFile fileIO2(34);
 	fileIO2.WriteUInt128(&BuddyID);
 	fileIO2.WriteUInt128(&CKademlia::GetPrefs()->GetClientHash());
 	fileIO2.WriteUInt16(thePrefs.GetPort());
-	fileIO2.WriteUInt8(CKademlia::GetPrefs()->GetMyConnectOptions(true, false)); // new since 0.49a, old mules will ignore it (hopefully ;) )
+	if (!senderUDPKey.IsEmpty()) // remove check for later versions
+		fileIO2.WriteUInt8(CKademlia::GetPrefs()->GetMyConnectOptions(true, false)); // new since 0.49a, old mules will ignore it (hopefully ;) )
 	if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 		DebugSend("KADEMLIA_FINDBUDDY_RES", uIP, uUDPPort);
 
@@ -2517,15 +2521,36 @@ void CKademliaUDPListener::Process_KADEMLIA2_PONG (const byte* pbyPacketData, ui
 		throw strError;
 	}	
 	if (CKademlia::GetPrefs()->GetExternalKadPort() == 0){
+		// the reported port doesn't always has to be our true external port, esp. if we used our intern port
+		// and communicated recently with the client some routers might remember this and assign the intern port as source
+		// but this shouldn't be a problem because we prefer intern ports anyway.
+		// might have to be reviewed in later versions when more data is available
 		CKademlia::GetPrefs()->SetExternKadPort(PeekUInt16(pbyPacketData));
 		DebugLog(_T("Set external Kad Port to %u"), CKademlia::GetPrefs()->GetExternalKadPort());
 		if (CUDPFirewallTester::IsFWCheckUDPRunning())
 			CUDPFirewallTester::QueryNextClient();
 	}
+	theApp.emuledlg->ShowConnectionState();
 }
 
 void CKademliaUDPListener::Process_KADEMLIA2_FIREWALLUDP(const byte *pbyPacketData, uint32 uLenPacket,uint32 uIP, CKadUDPKey /*senderUDPKey*/)
 {
+#ifdef _DEBUG
+	// this is only for testing purposes to work arround an earlier bug, will be removed for release
+	// don't use this code for productive versions
+	uint8 byErrorCode;
+	uint16 nIncomingPort;
+	if (uLenPacket == 0){
+		byErrorCode = 0;
+		nIncomingPort = CKademlia::GetPrefs()->GetExternalKadPort();
+	}
+	else if (uLenPacket == 3){
+		byErrorCode = PeekUInt8(pbyPacketData);
+		nIncomingPort = PeekUInt16(pbyPacketData + 1);
+	}
+	else 
+		return;
+#else
 	// Verify packet is expected size
 	if (uLenPacket < 3)
 	{
@@ -2535,6 +2560,7 @@ void CKademliaUDPListener::Process_KADEMLIA2_FIREWALLUDP(const byte *pbyPacketDa
 	}
 	uint8 byErrorCode = PeekUInt8(pbyPacketData);
 	uint16 nIncomingPort = PeekUInt16(pbyPacketData + 1);
+#endif
 	if (nIncomingPort != CKademlia::GetPrefs()->GetExternalKadPort() && nIncomingPort != CKademlia::GetPrefs()->GetInternKadPort()){
 		DebugLogWarning(_T("Received UDP FirewallCheck on unexpected incoming port %u (%s)"), nIncomingPort, ipstr(ntohl(uIP)));
 		CUDPFirewallTester::SetUDPFWCheckResult(false, true, uIP, 0);		

@@ -40,7 +40,7 @@ public:
 	CKnownFile();
 	virtual ~CKnownFile();
 
-	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
+	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false, bool bRemoveControlChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
 
 	const CString& GetPath() const { return m_strDirectory; }
 	void SetPath(LPCTSTR path);

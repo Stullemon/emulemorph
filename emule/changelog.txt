@@ -2,6 +2,250 @@
 	http://emule-project.net
 	========================
 
+0.49a BETA3
+-----------------------
+- May, 5. 2008        -
+-----------------------
+.: Made sure to always use the intern UDP port if both (intern and extern) ports succeed in the firewall test
+.: Control chars are now filtered out of ed2k-links / received filenames [eklmn]
+.: Fixed a small bug with handling removed category directories on startup [tHeWiZaRdOfDoS]
+.: Changed installer to set the currently used shared usage setting as default if available
+
+-----------------------
+- May, 3. 2008        -
+-----------------------
+.: Fixed another bug in the new UDP firewalltest, causing it to fail for results on the extern UDP port and for unreachable clients
+.: Captchas can consist of numbers now too (except 0)
+.: Fixed a smaller issue with finding and connecting to a buddy
+.: Buddy search interval has been reduced, to increase the chance to find a buddy without waiting too long
+
+-----------------------
+- May, 1. 2008        -
+-----------------------
+.: Changed the Crypt functions a bit for faster processing [netfinity]
+
+0.49a BETA2
+-----------------------
+- Apr, 29. 2008       -
+-----------------------
+.: Fixed some rare bug which could cause rerequesting already transferred (buffered) data [tHeWiZaRdOfDoS]
+.: Tweaked UPnP a bit to support some more routers [leuk_he]
+.: Updated libpng to the most current version 1.2.27
+
+-----------------------
+- Apr, 27. 2008       -
+-----------------------
+.: Changed the kad tcp firewalltest protocol to make it possible to archive the tcp open state if the UDP port is firewalled 
+.: Each dialog (kad, server, etc) has now its own "doorway" helptopic which eMule shows when pressing F1 or the Helpbutton, instead of only calling the helpindex
+
+-----------------------
+- Apr, 23. 2008       -
+-----------------------
+.: Fixed two bugs in the new kad firewalltesting which may lead to wrong results [tHeWiZaRdOfDoS]
+.: eMule now supports ed2k-links for downloading the nodes.dat from an URL. A link to a nodes.dat should look this way: ed2k://|nodeslist|http://domain/nodes.dat|/
+.: Fixed two minor display bugs realted to the waiting queue and the requests statistics for files [tHeWiZaRdOfDoS]
+
+-----------------------
+- Apr, 20. 2008       -
+-----------------------
+.: Loading stored kad keywords and sources has been moved into a seperate thread to avoid interface lockups, while the data is loading
+.: Kad (tcp)firewalltest and buddy tcp connection now properly support protocol obfuscation too, on require obfuscation setting those connections (and therefore its functionality) didn't worked before
+
+-----------------------
+- Apr, 15. 2008       -
+-----------------------
+.: Ctrl+W now closes the active searchtab in the search dialog
+
+0.49a BETA1	
+-----------------------
+- Apr, 12. 2008      -
+-----------------------
+.: Beta versions now create a small test text file which is shared by eMule to help us debugging protocol changes (esp Kad). On exit this file is deleted
+.: Fixed a bug with the "Open Directory" menuitem in the shared files window [Stulle]
+
+-----------------------
+- Apr, 11. 2008       -
+-----------------------
+.: Added the obfuscation setting to the First Time wizard and removed the full chunk upload setting instead
+.: Disabled peercache downloads by default (deprecated)
+.: Added a Beta nagging dialog
+
+-----------------------
+- Apr, 6. 2008       -
+-----------------------
+.: Fixed several bugs in the new Kad firewall testing, obfuscation and direct callback functions
+
+-----------------------
+- Mar, 30. 2008       -
+-----------------------
+.: eMule is now aware of windows standby modes and reconnects after waking up [MorphXt]
+
+-----------------------
+- Mar, 18. 2008       -
+-----------------------
+.: Fixed: File tooltips used wrong font sizes when using customized Windows metrics.
+.: Added: Support for using Windows default fonts for listview and treeview controls in eMule's main windows. This way one can specify larger fonts for almost all eMule lists via the Windows System Metrics. Specify "UseSystemFontForMainControls=1" in "preferences.ini" to enable.
+.: Fixed: Shared directory treeview control lost icons after Windows System settings were changed.
+.: Fixed: Wrong font mapping for some GUI elements in non-Western locales.
+
+-----------------------
+- Mar, 17. 2008       -
+-----------------------
+.: Fixed: Shared Files list did not show focus rectangle for listview items.
+
+-----------------------
+- Mar, 16. 2008       -
+-----------------------
+.: Fixed: "Search related Files" context menu entry in search results pane was not properly enabled/disabled [Tuxman]
+.: Fixed: Memory corruption for column properties in WebServer [tHeWiZaRdOfDoS]
+.: Fixed: Normalized search labels in WebServer [ducho]
+.: Fixed: Some search results where still shown after invoking 'Close All Search Results' [bengarchy]
+.: Fixed: Enabling/Disabling the "Queued Clients" and "Known Clients" lists did not always fill/clear the list views [Xman]
+.: Fixed: Toolbars in Transfere window were not showing tooltips after enabling/disabling "Queued Clients" and/or "Known Clients".
+
+-----------------------
+- Mar, 15. 2008       -
+-----------------------
+.: Fixed some GDI resouce leaks. [Rapid_Mule]
+.: Fxied a minor possible bug in creating random numbers [leuk_he]
+.: Fxied a bug in the new store searches function [netfinity]
+
+-----------------------
+- Feb, 26. 2008       -
+-----------------------
+.: When deleting more than 50 files the first 50 names are shown in the confirmation dialog [tHeWiZaRdOfDoS]
+.: Fixed a bug in finding the senders of corrupt data which may lead to false positives [DavidXanatos]
+
+-----------------------
+- Feb, 10. 2008       -
+-----------------------
+.: Kad will now enforce certain limits when adding new contacts to the routing table: No more than 1 KadNode per IP, 2 similar KadNodes (same bin) from a /24 network and max 10 different KadNodes from a /24 network are allowed. This is supposed to make routing attacks against kad more difficult / resource-intensive
+You can still run more than one kad client from a single IP without any problems, they just don't become part of the internal kad routing but still work without any limitations.
+
+-----------------------
+- Feb, 3. 2008        -
+-----------------------
+.: The download comments dialog has now a direct possibility to edit the comment spam filter, changes are instantly applied to all existing comments
+.: Clients which sent comments which get filtered by the comment spam filter are now treated like message spammers (banned)
+.: The ed2k: in ed2k-links is no longer case sensitive
+.: When connecting to Ed2K eMule starts with a random server instead using first on in the server.met. Any sorting, priority, etc. is not affected by this
+
+-----------------------
+- Feb, 1. 2008        -
+-----------------------
+.: Several changes have been made to improve kads resistance against malicious keyword publishing:
+.:  Kad now keeps track which filenames were published by different sources for the same file and uses the most common name (instead the last published one) when responding search requests
+.:  Same hashs (files) which have different filesizes are now properly stored seperatly instead overwriting eachother
+.:  Kad calculates a rating based on how many different sources publish a file and how many files publishes a source. When responding to a search request, files with a rating below a set limit will be sent last in order to avoid that spammed files push out valid ones.
+.: The Kad rating for published files is also sent in search results to be used in the future version as indicator
+
+-----------------------
+- Jan, 16. 2008       -
+-----------------------
+.: Added a general anti-flood-protection to kad. If Kad receives more request of a specific type from one IP than it would expect, it starts ignoring those requests and envetually banning the source. This is supposed to avoid or slow down several attack scenarios.
+.: Fixed a problem with injection of DNS servers into the routing tables which were able to stay because of a porotcol mixup between kad and dns. Old sources with port 53 as kad port are ignored, new clients (0.49a+) can use port 53 as kad port again but it is not recommended [found by netfinity]
+.: Fixed a bug in kad2 with publishing >4GB files [netfinity]
+
+-----------------------
+- Jan, 11. 2008       -
+-----------------------
+.: If you select a non-default incoming directory which already contains files, eMule notices you that those files are automatically shared by eMule
+
+-----------------------
+- Jan, 8. 2008        -
+-----------------------
+.: Added a filter box (like in the search results) for on-the-fly filtering of shared files into the shared files tab. This filter is supposed to help finding specific shared files, it has no effect on which files are actually published
+.: Rearranged the symbols in the shared files directory tree a bit
+
+-----------------------
+- Dec, 15. 2007       -
+-----------------------
+.: The onlinehelp for the options dialog is now topic sensitive for all languages instead only for english (well actually it is not, but this is serverside work which will be done step by step till the release). More areas to get topic sensitive to come in the future
+.: Open searches are now stored if you close eMule and restored on restart. This way you don't have to research your favourite words in case you didn't get to finish looking at the results. Can be disabled in Options->Display
+
+-----------------------
+- Dec, 2. 2007        -
+-----------------------
+.: Reworked Kads Firewall handling and testing:
+The kad firewall state is now split into TCP and UDP. The TCP state is basically the old state, which tests if your TCP port is reachable. The UDP state is new and checks if your UDP port is reachable. For example on Full Cone NAT Routers, without portforwarding you will get TCP firewalled (as before) but UDP open (new). If you have the UDP open state, eMule doesn't needs a buddy any longer and will fully participate in the KAD network and therefore take away the overhead they caused in earlier versions (you still cannot connect to other TCP firewalled clients if you are TCP firewalled yourself).
+.: The new UDP state is shown in the MyInfo field in the Server Tab. As long as the UDP firewalltest is unfinished "(unverified)" is appended
+.: Clients which have the Kad UDP open state, now support direct callbacks (invoked by an UDP packet) to connect to not firewalled clients. These callbacks are faster, more reliable and use less ressources than buddy or server callbacks.
+.: The new firewall test also fixes a bug / design flaw which caused eMule to always use the use the clients source UDP port, instead testing if the internal set UDP port might be the propper choice instead. This was especially a problem on Restricted Cone Routers with PAT (Port Address Translation) 
+
+-----------------------
+- Nov, 29. 2007       -
+-----------------------
+.: Fixed bug with possible wrong local IP address in case the "BindAddr" option is used.
+.: Fixed bug with missing update of details of a selected friend in friends list.
+
+-----------------------
+- Nov, 24. 2007       -
+-----------------------
+.: Fixed bug in tooltips which were showing certain list items partially in bold.
+
+-----------------------
+- Nov, 19. 2007       -
+-----------------------
+.: Added missing Unicode support for 'Static Servers' feature.
+
+-----------------------
+- Nov, 12. 2007       -
+-----------------------
+.: Fixed several of our listcontrols to show Windows' context menu of scrollbars
+.: Added an option (Options->General) to prevent Windows from going into standby mode while eMule is running (and doing something)
+
+-----------------------
+- Nov, 11. 2007       -
+-----------------------
+.: Fixed bug in IRC window with channel windows opening in reverse order.
+.: Fixed bug with dead servers occasionally not deleted from GUI [fox88].
+.: Fixed bug with disabled E-Mail notifications on particular Windows systems [Lewpy]
+.: Added showing of IRC-warning and error messages to the active channel window.
+.: Added auto-activating of private IRC channel windows when self-initiating the conversation.
+.: Fixed bug with extra large icons in file tooltips.
+.: Fixed bug with HTTP downloads which could create a crash in case the HD is full.
+.: Fixed a memory leak with failed gzip'd HTTP downloads.
+
+-----------------------
+- Nov, 07. 2007       -
+-----------------------
+.: Fixed garbled display of HTTP download status information
+
+-----------------------
+- October, 31. 2007   -
+-----------------------
+.: The messagesystem is now able to find your friends even if their IP changed if you and they are in Kad and not firewalled. This will help to stay in contact with friends longer than one session (Only works for new added/new seen friends which have Kad enabled).
+.: When messaging a friend, eMule now makes sure that the userhash still matches after connecting and SecureIdent (if enabled) is passed in order to ensure that its really your friend.
+
+-----------------------
+- October, 28. 2007   -
+-----------------------
+.: You can now bootstrap to kad from an URL which points to a nodes.dat file (in the Kad tab)
+
+-----------------------
+- October, 22. 2007   -
+-----------------------
+.: In order to reduce spam messages and by this make the messagesystem more useable again, eMule now supports Captcha authentification:
+If enabled, someone who messages you has first to solve a cpatcha (an image which shows letters) before the message is shown to you. Older clients who do not support captchas will be unable to message you and receive a notice about this.
+
+-----------------------
+- Jule, 11. 2007      -
+-----------------------
+.: Added obfuscation to the Kad UDP protocol. Kad obfuscation is part of the protocol and is unrelated to the Ed2K-Obfuscation settings
+
+-----------------------
+- June, 5. 2007       -
+-----------------------
+.: Fixed a bug which let Kad try to load its preferences from the old config directory location
+
+-----------------------
+- May, 16. 2007       -
+-----------------------
+.: Added Uyghur translation [translated by Abduqadir]
+
+
+
+
 0.48a
 -----------------------
 - May, 13. 2007     -
@@ -19,12 +263,12 @@
 -----------------------
 - May, 08. 2007     -
 -----------------------
-Ornis: Changed to wizzard to set file proper file permission on installed config files
+Ornis: Changed to wizard to set file proper file permission on installed config files
 .: Fixed another Bug in the SourceExchange, which caused eMule to not response to requests in certain cases [Xman1]
 .: Sorting for cumulative stats in the sharedfiles list is now properly remembered when restarting eMule
 .: The "Disable UDP" and Enable "Kad" options now exclude eachother [leuk_he]
 .: Fixed a bug in UPnP when the UDP port has been disabled by the user [leuk_he]
-.: IRC optional serverports should work prorperly now
+.: IRC optional serverports should work properly now
 .: Fixed a bug in IRC when receiving ed2k links from other users
 .: Added a excess flood protection for eMule IRC responses
 

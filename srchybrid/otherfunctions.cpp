@@ -291,7 +291,9 @@ CString URLDecode(const CString& inStr)
 			x += 2;
 
 			// Convert the hex to ASCII
-			res.AppendChar((TCHAR)_tcstoul(hexstr, NULL, 16));
+			TCHAR ch = (TCHAR)_tcstoul(hexstr, NULL, 16);
+			if (ch > '\x1F') // filter control chars
+				res.AppendChar(ch);
 		}
 		else
 		{
@@ -2410,7 +2412,15 @@ CString DbgGetMuleClientTCPOpcode(UINT opcode)
 		_STRVAL(OP_AICHANSWER),
 		_STRVAL(OP_AICHREQUEST),
 		_STRVAL(OP_AICHFILEHASHANS),
-		_STRVAL(OP_AICHFILEHASHREQ)
+		_STRVAL(OP_AICHFILEHASHREQ),
+		_STRVAL(OP_COMPRESSEDPART_I64),
+		_STRVAL(OP_SENDINGPART_I64),
+		_STRVAL(OP_REQUESTPARTS_I64),
+		_STRVAL(OP_MULTIPACKET_EXT),
+		_STRVAL(OP_CHATCAPTCHAREQ),
+		_STRVAL(OP_CHATCAPTCHARES),
+		_STRVAL(OP_FWCHECKUDPREQ),
+		_STRVAL(OP_KAD_FWTCPCHECK_ACK)
 	};
 
 	for (int i = 0; i < _countof(_aOpcodes); i++)
@@ -3457,7 +3467,7 @@ RC4_Key_Struct* RC4CreateKey(const uchar* pachKeyData, uint32 nLen, RC4_Key_Stru
 	index1 = 0;
 	index2 = 0;
 	for (int i = 0; i < 256; i++){
-		index2 = (pachKeyData[index1] + pabyState[i] + index2) % 256;
+		index2 = (pachKeyData[index1] + pabyState[i] + index2);
 		swap_byte(&pabyState[i], &pabyState[index2]);
 		index1 = (uint8)((index1 + 1) % nLen);
 	}
@@ -3478,10 +3488,10 @@ void RC4Crypt(const uchar* pachIn, uchar* pachOut, uint32 nLen, RC4_Key_Struct* 
 
 	for (uint32 i = 0; i < nLen; i++)
 	{
-		byX = (byX + 1) % 256;
-		byY = (pabyState[byX] + byY) % 256;
+		byX = (byX + 1);
+		byY = (pabyState[byX] + byY);
 		swap_byte(&pabyState[byX], &pabyState[byY]);
-		byXorIndex = (pabyState[byX] + pabyState[byY]) % 256;
+		byXorIndex = (pabyState[byX] + pabyState[byY]);
 		
 		if (pachIn != NULL)
 			pachOut[i] = pachIn[i] ^ pabyState[byXorIndex];

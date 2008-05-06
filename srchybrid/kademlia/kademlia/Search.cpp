@@ -1152,11 +1152,13 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 		}
 		else if (!pTag->m_name.Compare(TAG_PUBLISHINFO))
 		{
+			// we don't keep this as tag, but as a member property of the searchfile, as we only need its informations
+			// in the search list and don't want to carry the tag over when downloading the file (and maybe even wrongly publishing it)
 			uPublishInfo = (uint32)pTag->GetInt();
 #ifdef _DEBUG
-			uint32 byDifferentNames = uPublishInfo && 0xFF000000;
-			uint32 byPublishersKnown = uPublishInfo && 0x00FF0000;
-			uint32 wTrustValue = uPublishInfo && 0x0000FFFF;
+			uint32 byDifferentNames = (uPublishInfo & 0xFF000000) >> 24;
+			uint32 byPublishersKnown = (uPublishInfo & 0x00FF0000) >> 16;
+			uint32 wTrustValue = uPublishInfo & 0x0000FFFF;
 			DebugLog(_T("Received PublishInfoTag: %u different names, %u Publishers, %.2f Trustvalue"), byDifferentNames, byPublishersKnown, (float)wTrustValue / 100.0f);  
 #endif
 		}
@@ -1194,7 +1196,7 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 	theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 	// Send we keyword to searchlist to be processed.
 	// This method is still legacy from the multithreaded Kad, maybe this can be changed for better handling.
-	theApp.searchlist->KademliaSearchKeyword(m_uSearchID, &uAnswer, sName, uSize, sType, 9,
+	theApp.searchlist->KademliaSearchKeyword(m_uSearchID, &uAnswer, sName, uSize, sType, uPublishInfo, 8,
 		    2, TAG_FILEFORMAT, (LPCTSTR)sFormat,
 		    2, TAG_MEDIA_ARTIST, (LPCTSTR)sArtist,
 		    2, TAG_MEDIA_ALBUM, (LPCTSTR)sAlbum,
@@ -1202,8 +1204,7 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 		    3, TAG_MEDIA_LENGTH, uLength,
 		    3, TAG_MEDIA_BITRATE, uBitrate,
 		    2, TAG_MEDIA_CODEC, (LPCTSTR)sCodec,
-		    3, TAG_SOURCES, uAvailability,
-			3, TAG_PUBLISHINFO, uPublishInfo);
+		    3, TAG_SOURCES, uAvailability);
 }
 
 void CSearch::SendFindValue(CContact* pContact)

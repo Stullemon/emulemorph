@@ -40,6 +40,7 @@ there client on the eMule forum..
 #include "../kademlia/Defines.h"
 #include "../../Log.h"
 #include "../../preferences.h"
+#include "../../OtherFunctions.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -371,4 +372,27 @@ void CRoutingBin::PushToBottom(CContact* pContact) // puts an existing contact f
 	ASSERT( GetContact(pContact->GetClientID()) == pContact );
 	RemoveContact(pContact, true);
 	m_listEntries.push_back(pContact);
+}
+
+CContact* CRoutingBin::GetRandomContact(uint32 nMaxType, uint32 nMinKadVersion)
+{
+	if (m_listEntries.empty())
+		return NULL;
+	// Find contact with IP/Port
+	CContact* pLastFit = NULL;
+	uint32 nRandomStartPos = GetRandomUInt16() % m_listEntries.size();
+	uint32 nIndex = 0;
+	for (ContactList::iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
+	{
+		CContact* pContact = *itContactList;
+		if (pContact->GetType() <= nMaxType && pContact->GetVersion() >= nMinKadVersion)
+		{
+			if (nIndex >= nRandomStartPos)
+				return pContact;
+			else
+				pLastFit = pContact;
+		}
+		nIndex++;
+	}
+	return pLastFit;
 }

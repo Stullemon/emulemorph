@@ -104,7 +104,7 @@ CPartFile::CPartFile(CSearchFile* searchresult, UINT cat)
 				ASSERT( pTag->IsStr() );
 				if (pTag->IsStr()){
 					if (GetFileName().IsEmpty())
-						SetFileName(pTag->GetStr(), true);
+						SetFileName(pTag->GetStr(), true, true);
 				}
 				break;
 			}
@@ -186,7 +186,7 @@ void CPartFile::InitializeFromLink(CED2KFileLink* fileLink, UINT cat)
 {
 	Init();
 	try{
-		SetFileName(fileLink->GetName(), true);
+		SetFileName(fileLink->GetName(), true, true);
 		SetFileSize(fileLink->GetSize());
 		md4cpy(m_abyFileHash, fileLink->GetHashKey());
 		if (!theApp.downloadqueue->IsFileExisting(m_abyFileHash))
@@ -7351,9 +7351,9 @@ bool CPartFile::CheckShowItemInGivenCat(int inCategory)
 }
 // khaos::categorymod-
 
-void CPartFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars)
+void CPartFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars, bool bRemoveControlChars)
 {
-	CKnownFile::SetFileName(pszFileName, bReplaceInvalidFileSystemChars);
+	CKnownFile::SetFileName(pszFileName, bReplaceInvalidFileSystemChars, bRemoveControlChars);
 
 	UpdateDisplayedInfo(true);
 	theApp.emuledlg->transferwnd->downloadlistctrl.UpdateCurrentCategoryView(this);

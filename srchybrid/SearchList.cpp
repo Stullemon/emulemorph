@@ -624,6 +624,10 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse, uint32 dwF
 
 			UINT uAllChildsSourceCount = 0;			// ed2k: sum of all sources, kad: the max. sources found
 			UINT uAllChildsCompleteSourceCount = 0; // ed2k: sum of all sources, kad: the max. sources found
+			UINT uDifferentNames = 0; // max known different names
+			UINT uPublishersKnown = 0; // max publishers known (might be changed to median)
+			UINT uTrustValue = 0; // average trust value (might be changed to median)
+			uint32 nPublishInfoTags = 0;
 			const CSearchFile* bestEntry = NULL;
 			for (POSITION pos2 = list->GetHeadPosition(); pos2 != NULL; )
 			{
@@ -636,6 +640,14 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse, uint32 dwF
 							uAllChildsSourceCount = child->GetListChildCount();
 						/*if (child->GetCompleteSourceCount() > uAllChildsCompleteSourceCount) // not yet supported
 							uAllChildsCompleteSourceCount = child->GetCompleteSourceCount();*/
+#ifdef _DEBUG
+						if (child->GetKadPublishInfo() != 0){
+							nPublishInfoTags++;
+							uDifferentNames = max(uDifferentNames, ((child->GetKadPublishInfo() & 0xFF000000) >> 24));
+							uPublishersKnown = max (uPublishersKnown, ((child->GetKadPublishInfo() & 0x00FF0000) >> 16));
+							uTrustValue += child->GetKadPublishInfo() & 0x0000FFFF;
+						}
+#endif
 					}
 					else
 					{
@@ -658,6 +670,11 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse, uint32 dwF
 				parent->CopyTags(bestEntry->GetTags());
 				parent->SetIntTagValue(FT_SOURCES, uAllChildsSourceCount);
 				parent->SetIntTagValue(FT_COMPLETE_SOURCES, uAllChildsCompleteSourceCount);
+#ifdef _DEBUG
+				if (uTrustValue > 0 && nPublishInfoTags > 0)
+					uTrustValue = uTrustValue / nPublishInfoTags;
+				parent->SetKadPublishInfo(((uDifferentNames % 256) << 24) | ((uPublishersKnown % 256) << 16) | ((uTrustValue % 32000) << 0));
+#endif
 			}
 			// recalculate spamrating
 			DoSpamRating(parent, bClientResponse, false, false, false, dwFromUDPServerIP);
@@ -775,8 +792,8 @@ void CSearchList::AddResultCount(uint32 nSearchID, const uchar* hash, UINT nCoun
 		+ ( (bSpam && thePrefs.IsSearchSpamFilterEnabled()) ? min(nCount, 5) : nCount) );
 }
 // FIXME LARGE FILES
-void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* fileID, 
-										LPCTSTR name, uint64 size, LPCTSTR type, UINT numProperties, ...)
+void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* fileID, LPCTSTR name,
+										uint64 size, LPCTSTR type, UINT uKadPublishInfo,  UINT numProperties, ...)
 {
 	va_list args;
 	va_start(args, numProperties);
@@ -854,6 +871,7 @@ void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt12
 	
 	temp->SeekToBegin();
 	CSearchFile* tempFile = new CSearchFile(temp, eStrEncode == utf8strRaw, searchID, 0, 0, 0, true);
+	tempFile->SetKadPublishInfo(uKadPublishInfo);
 	AddToList(tempFile);
 	
 	delete temp;

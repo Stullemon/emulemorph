@@ -67,6 +67,7 @@ namespace Kademlia
 			void ReadFile(CString strSpecialNodesdate = _T(""));
 			CContact* GetContact(const CUInt128 &uID) const;
 			CContact* GetContact(uint32 uIP, uint16 nPort, bool bTCPPort) const;
+			CContact* GetRandomContact(uint32 nMaxType, uint32 nMinKadVersion) const;
 			UINT GetNumContacts() const;
 			// Returns a list of all contacts in all leafs of this zone.
 			void GetAllEntries(ContactList *plistResult, bool bEmptyFirst = true);

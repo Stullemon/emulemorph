@@ -1815,6 +1815,13 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 					if (iClients > 0)
 						buffer.AppendFormat(_T(" (%u)"), iClients);
 				}
+#ifdef _DEBUG
+				if (src->GetKadPublishInfo() == 0)
+					buffer += _T(" | -");
+				else
+					buffer.AppendFormat(_T(" | Names:%u, Pubs:%u, Trust:%0.2f"), (src->GetKadPublishInfo() & 0xFF000000) >> 24
+					, (src->GetKadPublishInfo() & 0x00FF0000) >> 16, (float)(src->GetKadPublishInfo() & 0x0000FFFF) / 100.0f);
+#endif
 				dc->DrawText(buffer, buffer.GetLength(), lpRect, DLC_DT_TEXT | DT_RIGHT);
 				break;
 			case 3:{		// complete sources

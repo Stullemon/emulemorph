@@ -411,6 +411,17 @@ CContact* CRoutingZone::GetContact(uint32 uIP, uint16 nPort, bool bTCPPort) cons
 	}
 }
 
+CContact* CRoutingZone::GetRandomContact(uint32 nMaxType, uint32 nMinKadVersion) const
+{
+	if (IsLeaf())
+		return m_pBin->GetRandomContact(nMaxType, nMinKadVersion);
+	else{
+		uint32 nZone = GetRandomUInt16() % 2;
+		CContact* pContact = m_pSubZones[nZone]->GetRandomContact(nMaxType, nMinKadVersion);
+		return (pContact != NULL) ? pContact : m_pSubZones[nZone == 1 ? 0 : 1]->GetRandomContact(nMaxType, nMinKadVersion);
+	}
+}
+
 void CRoutingZone::GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, const CUInt128 &uDistance, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst, bool bInUse) const
 {
 	// If leaf zone, do it here

@@ -485,6 +485,7 @@ bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kad
 					m_uTotalIndexKeyword++;
 					DebugLogWarning(_T("Kad: Indexing: Keywords: Multiple sizes published for file %s"), pEntry->m_uSourceID.ToHexString());
 				}
+				DEBUG_ONLY( AddDebugLogLine(DLP_VERYLOW, false, _T("Indexed file %s"), pEntry->GetCommonFileName()) );
 				delete pOldEntry;
 				pOldEntry = NULL;
 			}

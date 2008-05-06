@@ -49,7 +49,7 @@ public:
 	virtual ~CAbstractFile();
 
 	const CString& GetFileName() const { return m_strFileName; }
-	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false, bool bAutoSetFileType = true); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
+	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false, bool bAutoSetFileType = true, bool bRemoveControlChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
 
 	// returns the ED2K file type (an ASCII string)
 	const CString& GetFileType() const { return m_strFileType; }

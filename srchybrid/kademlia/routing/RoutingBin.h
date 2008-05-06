@@ -57,6 +57,7 @@ namespace Kademlia
 		void GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst = true, bool bSetInUse = false);
 		bool ChangeContactIPAddress(CContact* pContact, uint32 uNewIP);
 		void PushToBottom(CContact* pContact); // puts an existing contact from X to the end of the list
+		CContact* GetRandomContact(uint32 nMaxType, uint32 nMinKadVersion);
 
 		bool m_bDontDeleteContacts;
 

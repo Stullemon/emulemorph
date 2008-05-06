@@ -620,6 +620,7 @@ void CClientList::Process()
 				//Ignore this state as we are just waiting for results.
 				break;
 			case KS_FWCHECK_UDP:
+			case KS_CONNECTING_FWCHECK_UDP:
 				// we want a UDP firewallcheck from this client and are just waiting to get connected to send the request
 				break;
 			case KS_CONNECTED_FWCHECK:
@@ -734,10 +735,13 @@ void CClientList::Process()
 		//we only need a buddy if direct callback is not available
 		if( Kademlia::CKademlia::IsFirewalled() && Kademlia::CUDPFirewallTester::IsFirewalledUDP(true))
 		{
-			//TODO: Kad buddies won'T work with RequireCrypt, so it is disabled for now but should (and will)
+			//TODO 0.49b: Kad buddies won'T work with RequireCrypt, so it is disabled for now but should (and will)
 			//be fixed in later version
+			// Update: Buddy connections itself support obfuscation properly since 0.49a (this makes it work fine if our buddy uses require crypt)
+			// ,however callback requests don't support it yet so we wouldn't be able to answer callback requests with RequireCrypt, protocolchange intended for the next version
 			if( m_nBuddyStatus == Disconnected && Kademlia::CKademlia::GetPrefs()->GetFindBuddy() && !thePrefs.IsClientCryptLayerRequired())
 			{
+				DEBUG_ONLY( DebugLog(_T("Starting Buddysearch")) );
 				//We are a firewalled client with no buddy. We have also waited a set time 
 				//to try to avoid a false firewalled status.. So lets look for a buddy..
 				if( !Kademlia::CSearchManager::PrepareLookup(Kademlia::CSearch::FINDBUDDY, true, Kademlia::CUInt128(true).Xor(Kademlia::CKademlia::GetPrefs()->GetKadID())) )
@@ -810,18 +814,20 @@ bool CClientList::IsValidClient(CUpDownClient* tocheck) const
 ///////////////////////////////////////////////////////////////////////////////
 // Kad client list
 
-void CClientList::RequestTCP(Kademlia::CContact* contact, uint8 byConnectOptions)
+bool CClientList::RequestTCP(Kademlia::CContact* contact, uint8 byConnectOptions)
 {
 	uint32 nContactIP = ntohl(contact->GetIPAddress());
 	// don't connect ourself
 	if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->GetTCPPort())
-		return;
+		return false;
 
 	CUpDownClient* pNewClient = FindClientByIP(nContactIP, contact->GetTCPPort());
 
 	bool bNewClient = true; //MOPRH - Added by SiRoB,  Fix adding multiple clientKnown with same ip port
 	if (!pNewClient)
 		pNewClient = new CUpDownClient(0, contact->GetTCPPort(), contact->GetIPAddress(), 0, 0, false );
+	else if (pNewClient->GetKadState() != KS_NONE)
+		return false; // already busy with this client in some way (probably buddy stuff), don't mess with it
 	//MORPH START - Added by SiRoB, Fix adding multiple clientKnown with same ip port
 	else
 		bNewClient = false;
@@ -849,6 +855,7 @@ void CClientList::RequestTCP(Kademlia::CContact* contact, uint8 byConnectOptions
 	} else
 		AddToKadList(pNewClient);
 	//MORPH END   - Changed by SiRoB, Optimization & Fix
+	return true;
 }
 
 void CClientList::RequestBuddy(Kademlia::CContact* contact, uint8 byConnectOptions)
@@ -861,6 +868,12 @@ void CClientList::RequestBuddy(Kademlia::CContact* contact, uint8 byConnectOptio
 	bool bNewClient = true; //MOPRH - Added by SiRoB,  Fix adding multiple clientKnown with same ip port
 	if (!pNewClient)
 		pNewClient = new CUpDownClient(0, contact->GetTCPPort(), contact->GetIPAddress(), 0, 0, false );
+	else if (pNewClient->GetKadState() != KS_NONE)
+		return; // already busy with this client in some way (probably fw stuff), don't mess with it
+	else if (IsKadFirewallCheckIP(nContactIP)){ // doing a kad firewall check with this IP, abort 
+		DEBUG_ONLY( DebugLogWarning(_T("KAD tcp Firewallcheck / Buddy request collosion for IP %s"), ipstr(nContactIP)) );
+		return;
+	}
 	//MORPH START - Added by SiRoB, Fix adding multiple clientKnown
 	else
 		bNewClient = false;
@@ -887,19 +900,19 @@ void CClientList::RequestBuddy(Kademlia::CContact* contact, uint8 byConnectOptio
 	//MORPH END   - Changed by SiRoB, Optimization
 }
 
-void CClientList::IncomingBuddy(Kademlia::CContact* contact, Kademlia::CUInt128* buddyID )
+bool CClientList::IncomingBuddy(Kademlia::CContact* contact, Kademlia::CUInt128* buddyID )
 {
 	uint32 nContactIP = ntohl(contact->GetIPAddress());
 	//If eMule already knows this client, abort this.. It could cause conflicts.
 	//Although the odds of this happening is very small, it could still happen.
 	if (FindClientByIP(nContactIP, contact->GetTCPPort()))
-	{
-		return;
+		return false;
+	else if (IsKadFirewallCheckIP(nContactIP)){ // doing a kad firewall check with this IP, abort 
+		DEBUG_ONLY( DebugLogWarning(_T("KAD tcp Firewallcheck / Buddy request collosion for IP %s"), ipstr(nContactIP)) );
+		return false;
 	}
-
-	// don't connect ourself
-	if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->GetTCPPort())
-		return;
+	else if (theApp.serverconnect->GetLocalIP() == nContactIP && thePrefs.GetPort() == contact->GetTCPPort())
+		return false; // don't connect ourself
 
 	//Add client to the lists to be processed.
 	CUpDownClient* pNewClient = new CUpDownClient(0, contact->GetTCPPort(), contact->GetIPAddress(), 0, 0, false );
@@ -918,6 +931,7 @@ void CClientList::IncomingBuddy(Kademlia::CContact* contact, Kademlia::CUInt128*
 	m_KadList.AddTail(pNewClient);
 	AddClient(pNewClient, true);
 	//MORPH END   - Changed by SiRoB, Optimization
+	return true;
 }
 
 void CClientList::RemoveFromKadList(CUpDownClient* torem){
@@ -946,7 +960,7 @@ void CClientList::AddToKadList(CUpDownClient* toadd){
 
 bool CClientList::DoRequestFirewallCheckUDP(const Kademlia::CContact& contact){
 	// first make sure we don't know this IP already from somewhere
-	if (FindClientByIP(contact.GetIPAddress()) != NULL)
+	if (FindClientByIP(ntohl(contact.GetIPAddress())) != NULL)
 		return false;
 	// fine, justcreate the client object, set the state and wait
 	// TODO: We don't know the clients usershash, this means we cannot build an obfuscated connection, which 

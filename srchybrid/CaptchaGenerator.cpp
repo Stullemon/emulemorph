@@ -23,8 +23,8 @@
 #define LETTERSIZE  32
 #define CROWDEDSIZE 18
 
-static const char schCaptchaContent[26] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'
-, 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'};
+static const char schCaptchaContent[34] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'
+, 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
 CCaptchaGenerator::CCaptchaGenerator(uint32 nLetterCount)
 {

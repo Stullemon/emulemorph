@@ -4,7 +4,7 @@ Changelog for eMule 0.49a MorphXT v11.0
 xx-xx-2008
 Compiled with visual stusio 2003 sp1. & 2005
 
-Merged to 0.49a *BETA2* [Stulle]
+Merged to 0.49a *BETA3* [Stulle]
 FIX: clients downloading during large file completion stuck with 'stalled, reading from disk' [fafner]
 ADD: spreadbars to history [fafner]
 ADD: percentage client already got in QueueList and UploadList [fafner]

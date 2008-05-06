@@ -161,6 +161,7 @@ CSearchFile::CSearchFile(const CSearchFile* copyfrom)
 	m_strNameWithoutKeywords = copyfrom->GetNameWithoutKeyword();
 	m_bServerUDPAnswer = copyfrom->m_bServerUDPAnswer;
 	m_nSpamRating = copyfrom->GetSpamRating();
+	m_nKadPublishInfo = copyfrom->GetKadPublishInfo();
 }
 
 CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8, 
@@ -234,7 +235,7 @@ CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8,
 	// but, in no case, we will use the receive file type when adding this search result to the download queue, to avoid
 	// that we are using 'wrong' file types in part files. (this has to be handled when creating the part files)
 	const CString& rstrFileType = GetStrTagValue(FT_FILETYPE);
-	SetFileName(GetStrTagValue(FT_FILENAME), false, rstrFileType.IsEmpty());
+	SetFileName(GetStrTagValue(FT_FILENAME), false, rstrFileType.IsEmpty(), true);
 
 	uint64 ui64FileSize = 0;
 	CTag* pTagFileSize = GetTag(FT_FILESIZE);
@@ -289,6 +290,7 @@ CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8,
 	m_bPreviewPossible = false;
 	m_eKnown = NotDetermined;
 	m_nSpamRating = 0;
+	m_nKadPublishInfo = 0;
 }
 
 CSearchFile::~CSearchFile()

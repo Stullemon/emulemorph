@@ -106,9 +106,9 @@ public:
 	void	RemoveAllTrackedClients();
 
 	// Kad client list, buddy handling
-	void	RequestTCP(Kademlia::CContact* contact, uint8 byConnectOptions);
+	bool	RequestTCP(Kademlia::CContact* contact, uint8 byConnectOptions);
 	void	RequestBuddy(Kademlia::CContact* contact, uint8 byConnectOptions);
-	void	IncomingBuddy(Kademlia::CContact* contact, Kademlia::CUInt128* buddyID);
+	bool	IncomingBuddy(Kademlia::CContact* contact, Kademlia::CUInt128* buddyID);
 	void	RemoveFromKadList(CUpDownClient* torem);
 	void	AddToKadList(CUpDownClient* toadd);
 	bool	DoRequestFirewallCheckUDP(const Kademlia::CContact& contact);

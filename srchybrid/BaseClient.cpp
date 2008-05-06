@@ -1782,10 +1782,12 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		DebugLog(_T("Direct Callback failed - %s"), DbgGetClientInfo());
 	}
 	
-	if (GetKadState() == KS_QUEUED_FWCHECK_UDP)
+	if (GetKadState() == KS_QUEUED_FWCHECK_UDP || GetKadState() == KS_CONNECTING_FWCHECK_UDP)
 		Kademlia::CUDPFirewallTester::SetUDPFWCheckResult(false, true, ntohl(GetConnectIP()), 0); // inform the tester that this test was cancelled
 	else if (GetKadState() == KS_FWCHECK_UDP)
 		Kademlia::CUDPFirewallTester::SetUDPFWCheckResult(false, false, ntohl(GetConnectIP()), 0); // inform the tester that this test has failed
+	else if (GetKadState() == KS_CONNECTED_BUDDY)
+		DebugLogWarning(_T("Buddy client disconnected - %s, %s"), pszReason, DbgGetClientInfo());
 	//If this is a KAD client object, just delete it!
 	SetKadState(KS_NONE);
 	
@@ -2049,7 +2051,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 		if( GetKadState() == KS_QUEUED_FWCHECK )
 			SetKadState(KS_CONNECTING_FWCHECK);
 	else if (GetKadState() == KS_QUEUED_FWCHECK_UDP)
-		SetKadState(KS_FWCHECK_UDP);
+		SetKadState(KS_CONNECTING_FWCHECK_UDP);
 
 		if ( HasLowID() )
 		{
@@ -2141,12 +2143,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket
 			data.WriteUInt16(thePrefs.GetPort()); // needs to know our port
 			data.WriteHash16(thePrefs.GetUserHash()); // and userhash
 			// our connection settings
-			const uint8 uSupportsCryptLayer	= thePrefs.IsClientCryptLayerSupported() ? 1 : 0;
-			const uint8 uRequestsCryptLayer	= thePrefs.IsClientCryptLayerRequested() ? 1 : 0;
-			const uint8 uRequiresCryptLayer	= thePrefs.IsClientCryptLayerRequired() ? 1 : 0;
-			const uint8 uDirectUDPCallback	= 0;
-			const uint8 byCryptOptions = (uDirectUDPCallback << 3) | (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
-			data.WriteUInt8(byCryptOptions);
+		data.WriteUInt8(GetMyConnectOptions(true, false));
 			if (thePrefs.GetDebugClientUDPLevel() > 0)
 				DebugSend("OP_DIRECTCALLBACKREQ", this);
 			Packet* packet = new Packet(&data, OP_EMULEPROT);
@@ -2317,9 +2314,12 @@ void CUpDownClient::ConnectionEstablished()
 			break;
 		case KS_CONNECTING_BUDDY:
 		case KS_INCOMING_BUDDY:
+			DEBUG_ONLY( DebugLog(_T("Set KS_CONNECTED_BUDDY for client %s"), DbgGetClientInfo()) );
 			SetKadState(KS_CONNECTED_BUDDY);
 			break;
-		case KS_FWCHECK_UDP:
+		case KS_CONNECTING_FWCHECK_UDP:
+			SetKadState(KS_FWCHECK_UDP);
+			DEBUG_ONLY( DebugLog(_T("Set KS_FWCHECK_UDP for client %s"), DbgGetClientInfo()) );
 			SendFirewallCheckUDPRequest();
 			break;
 	}
@@ -3268,7 +3268,10 @@ LPCTSTR CUpDownClient::DbgGetKadState() const
 		_T("BuddyQueued"),
 		_T("BuddyIncoming"),
 		_T("BuddyConnecting"),
-		_T("BuddyConnected")
+		_T("BuddyConnected"),
+		_T("QueuedFWCheckUDP"),
+		_T("FWCheckUDP"),
+		_T("FwCheckConnectingUDP")
 	};
 	if (GetKadState() >= ARRSIZE(apszState))
 		return _T("*Unknown*");
@@ -3932,7 +3935,7 @@ void CUpDownClient::ProcessFirewallCheckUDPRequest(CSafeMemFile* data){
 		fileTestPacket2.WriteUInt16(nRemoteExternPort);
 		if (thePrefs.GetDebugClientKadUDPLevel() > 0)
 			DebugSend("KADEMLIA2_FIREWALLUDP", ntohl(GetConnectIP()), nRemoteExternPort);
-		Kademlia::CKademlia::GetUDPListener()->SendPacket(&fileTestPacket1, KADEMLIA2_FIREWALLUDP, ntohl(GetConnectIP())
+		Kademlia::CKademlia::GetUDPListener()->SendPacket(&fileTestPacket2, KADEMLIA2_FIREWALLUDP, ntohl(GetConnectIP())
 			, nRemoteExternPort, Kademlia::CKadUDPKey(dwSenderKey, theApp.GetPublicIP(false)), NULL);
 	}
 	DebugLog(_T("Answered UDP Firewallcheck request (%s)"), DbgGetClientInfo());

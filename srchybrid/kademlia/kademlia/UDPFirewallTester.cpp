@@ -45,6 +45,7 @@ bool CUDPFirewallTester::m_bTimedOut = false;
 uint8 CUDPFirewallTester::m_byFWChecksRunningUDP = 0;
 uint8 CUDPFirewallTester::m_byFWChecksFinishedUDP = 0;
 uint32 CUDPFirewallTester::m_dwTestStart = 0;
+uint32 CUDPFirewallTester::m_dwLastSucceededTime = 0;
 CList<CContact> CUDPFirewallTester::m_liPossibleTestClients;
 CList<UsedClient_Struct, UsedClient_Struct&> CUDPFirewallTester::m_liUsedTestClients;
 
@@ -76,18 +77,27 @@ bool CUDPFirewallTester::GetUDPCheckClientsNeeded()
 	return (m_byFWChecksRunningUDP + m_byFWChecksFinishedUDP) < UDP_FIREWALLTEST_CLIENTSTOASK;
 }
 
-void CUDPFirewallTester::SetUDPFWCheckResult(bool bSucceeded, bool bTestCancelled, uint32 uFromIP, uint16 nIncomingPort){
-	if (!IsFWCheckUDPRunning())
-		return;
-		
+void CUDPFirewallTester::SetUDPFWCheckResult(bool bSucceeded, bool bTestCancelled, uint32 uFromIP, uint16 nIncomingPort){	
 	// check if we actually requested a firewallcheck from this cleint
 	bool bRequested = false;
 	for (POSITION pos = m_liUsedTestClients.GetHeadPosition(); pos != NULL; m_liUsedTestClients.GetNext(pos)){
 		if (m_liUsedTestClients.GetAt(pos).contact.GetIPAddress() == uFromIP){
-			if (m_liUsedTestClients.GetAt(pos).bAnswered){
+			
+			if (!IsFWCheckUDPRunning() && !m_bFirewalledUDP && m_bIsFWVerifiedUDP && m_dwLastSucceededTime + SEC2MS(10) > ::GetTickCount()
+				&& nIncomingPort == CKademlia::GetPrefs()->GetInternKadPort() && CKademlia::GetPrefs()->GetUseExternKadPort())
+			{
+				// our test finished already in the last 10 seconds with being open because we received a proper result packet before
+				// however we now receive another answer packet on our incoming port (which is not unusal as both resultpackets are sent
+				// nearly at the same time and UDP doesn't cares if the order stays), while the one before was received on our extern port
+				// Because a proper forwarded intern port is more reliable to stay open, than a extern port set by the NAT, we prefer
+				// intern ports and change the setting.
+				CKademlia::GetPrefs()->SetUseExternKadPort(false);
+				DebugLog(_T("Corrected UDP firewall result: Using open internal (%u) instead open external port"), nIncomingPort);
+				return;
+			}
+			else if (m_liUsedTestClients.GetAt(pos).bAnswered){
 				// we already received an answer. This may happen since all tests contain of two answer pakcets
-				// , but the answer could also be too late and we already counted it as failure. In any way, we ignore
-				// multiple answers
+				// , but the answer could also be too late and we already counted it as failure.
 				return;
 			}
 			else
@@ -101,6 +111,9 @@ void CUDPFirewallTester::SetUDPFWCheckResult(bool bSucceeded, bool bTestCancelle
 		return;
 	}
 
+	if (!IsFWCheckUDPRunning()) // its all over already
+		return;
+
 	if (m_byFWChecksRunningUDP == 0)
 		ASSERT( false );
 	else
@@ -109,21 +122,26 @@ void CUDPFirewallTester::SetUDPFWCheckResult(bool bSucceeded, bool bTestCancelle
 	if (!bTestCancelled){
 		m_byFWChecksFinishedUDP++;
 		if (bSucceeded){	//one positive result is enough
-			DebugLog(_T("New KAD Firewallstate (UDP): Open"));
 			m_dwTestStart = 0;
 			m_bFirewalledUDP = false;
 			m_bIsFWVerifiedUDP = true;
 			m_bTimedOut = false;
-			m_byFWChecksFinishedUDP = UDP_FIREWALLTEST_CLIENTSTOASK; // dont do any more tests			
-			theApp.emuledlg->ShowConnectionState();
+			m_byFWChecksFinishedUDP = UDP_FIREWALLTEST_CLIENTSTOASK; // dont do any more tests
+			m_byFWChecksRunningUDP = 0; // all other tests are cancelled
 			m_liPossibleTestClients.RemoveAll(); // clear list, keep used clients list through
+			m_dwLastSucceededTime = ::GetTickCount(); // for delayed results, see above
 			CSearchManager::CancelNodeFWCheckUDPSearch(); // cancel firewallnode searches if any are still active
 			// if this packet came to our internal port, explict set the interal port as used port from now on
-			if (nIncomingPort == CKademlia::GetPrefs()->GetExternalKadPort())
-				CKademlia::GetPrefs()->SetUseExternKadPort(true);
-			else if (nIncomingPort == CKademlia::GetPrefs()->GetInternKadPort())
+			if (nIncomingPort == CKademlia::GetPrefs()->GetInternKadPort()){
 				CKademlia::GetPrefs()->SetUseExternKadPort(false);
-			
+				DebugLog(_T("New KAD Firewallstate (UDP): Open, using intern port"));
+			}
+			else if (nIncomingPort == CKademlia::GetPrefs()->GetExternalKadPort()){
+				CKademlia::GetPrefs()->SetUseExternKadPort(true);
+				DebugLog(_T("New KAD Firewallstate (UDP): Open, using extern port"));
+			}
+			theApp.emuledlg->ShowConnectionState();
+
 			return;
 		}
 		else if (m_byFWChecksFinishedUDP >= UDP_FIREWALLTEST_CLIENTSTOASK) {
@@ -141,12 +159,15 @@ void CUDPFirewallTester::SetUDPFWCheckResult(bool bSucceeded, bool bTestCancelle
 		else
 			DebugLogWarning(_T("Kad UDP firewalltest from %s result: Firewalled, continue testing"), ipstr(ntohl(uFromIP)));
 	}
+	else
+		DebugLogWarning(_T("Kad UDP firewalltest from %s cancelled"), ipstr(ntohl(uFromIP)));
 	QueryNextClient();
 }
 void CUDPFirewallTester::ReCheckFirewallUDP(bool bSetUnverified){
 	ASSERT( m_byFWChecksRunningUDP == 0 );
 	m_byFWChecksRunningUDP = 0;
 	m_byFWChecksFinishedUDP = 0;
+	m_dwLastSucceededTime = 0;
 	m_dwTestStart = ::GetTickCount();
 	m_bTimedOut = false;
 	m_bFirewalledLastStateUDP = m_bFirewalledUDP;
@@ -179,8 +200,10 @@ void CUDPFirewallTester::Reset(){
 	m_byFWChecksRunningUDP = 0;
 	m_byFWChecksFinishedUDP = 0;
 	m_dwTestStart = 0;
+	m_dwLastSucceededTime = 0;
 	CSearchManager::CancelNodeFWCheckUDPSearch(); // cancel firewallnode searches if any are stilla ctive
 	m_liPossibleTestClients.RemoveAll();
+	CKademlia::GetPrefs()->SetUseExternKadPort(true);
 	// keep the list of used clients
 }
 

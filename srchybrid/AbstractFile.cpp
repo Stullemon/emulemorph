@@ -168,7 +168,7 @@ void CAbstractFile::AddTagUnique(CTag* pTag)
 	taglist.Add(pTag);
 }
 
-void CAbstractFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars, bool bAutoSetFileType)
+void CAbstractFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars, bool bAutoSetFileType, bool bRemoveControlChars)
 { 
 	m_strFileName = pszFileName;
 	if (bReplaceInvalidFileSystemChars){
@@ -184,6 +184,14 @@ void CAbstractFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSys
 	}
 	if (bAutoSetFileType)
 		SetFileType(GetFileTypeByName(m_strFileName));
+	
+	if (bRemoveControlChars){
+		for (int i = 0; i < m_strFileName.GetLength(); )
+			if (m_strFileName.GetAt(i) < '\x1F')
+				m_strFileName.Delete(i);
+			else
+				i++;
+	}
 } 
       
 void CAbstractFile::SetFileType(LPCTSTR pszFileType)

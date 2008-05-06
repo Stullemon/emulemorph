@@ -139,16 +139,16 @@ void CFriend::LoadFromFile(CFileDataIO* file)
 				break;
 			}
 			//MORPH END - Added by Yun.SF3, ZZ Upload System
-		// MORPH (CB) Friendnote START
-		case FF_FRIENDNOTE: {
-			ASSERT( newtag->IsStr() );
-			if (newtag->IsStr()) {
-				if (m_frNote.IsEmpty())
-				m_frNote = newtag->GetStr();
+			// MORPH (CB) Friendnote START
+			case FF_FRIENDNOTE: {
+				ASSERT( newtag->IsStr() );
+				if (newtag->IsStr()) {
+					if (m_frNote.IsEmpty())
+					m_frNote = newtag->GetStr();
+				}
+				break;
 			}
-			break;
-		}
-		// MORPH (CB) Friendnote END
+			// MORPH (CB) Friendnote END
 		}
 		delete newtag;
 	}
@@ -267,6 +267,7 @@ CUpDownClient* CFriend::GetLinkedClient(bool bValidCheck) const
 	}
 	return m_LinkedClient; 
 };
+
 CUpDownClient* CFriend::GetClientForChatSession()
 {
 	CUpDownClient* pResult;

@@ -145,7 +145,7 @@ public:
 	bool	IsPartFile() const { return !(status == PS_COMPLETE); }
 
 	// eD2K filename
-	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
+	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false, bool bRemoveControlChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
 
 	// part.met filename (without path!)
 	const CString& GetPartMetFileName() const { return m_partmetfilename; }

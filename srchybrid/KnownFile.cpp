@@ -486,7 +486,7 @@ void Dump(const Kademlia::WordList& wordlist)
 }
 #endif
 
-void CKnownFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars)
+void CKnownFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars, bool bRemoveControlChars)
 { 
 	CKnownFile* pFile = NULL;
 
@@ -499,7 +499,7 @@ void CKnownFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystem
 	if (pFile && pFile == this)
 		theApp.sharedfiles->RemoveKeywords(this);
 
-	CAbstractFile::SetFileName(pszFileName, bReplaceInvalidFileSystemChars);
+	CAbstractFile::SetFileName(pszFileName, bReplaceInvalidFileSystemChars, true, bRemoveControlChars);
 
 	wordlist.clear();
 	if(m_pCollection)

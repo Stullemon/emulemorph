@@ -87,7 +87,7 @@ public:
 	void	AddFileToDownloadByHash(const uchar* hash, int cat);
 	bool	AddToList(CSearchFile* toadd, bool bClientResponse = false, uint32 dwFromUDPServerIP = 0);
 	CSearchFile* GetSearchFileByHash(const uchar* hash) const;
-	void	KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* pfileID, LPCTSTR name, uint64 size, LPCTSTR type, UINT numProperties, ...);
+	void	KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* pfileID, LPCTSTR name, uint64 size, LPCTSTR type, UINT uKadPublishInfo, UINT numProperties, ...);
 	bool	AddNotes(Kademlia::CEntry* entry, const uchar* hash);
 	void	SetNotesSearchStatus(const uchar* pFileHash, bool bSearchRunning);
 	void	SentUDPRequestNotification(uint32 nSearchID, uint32 dwServerIP);	

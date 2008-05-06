@@ -87,6 +87,7 @@ namespace Kademlia
 			static time_t m_tBigTimer;
 			static time_t m_tBootstrap;
 			static time_t m_tConsolidate;
+			static time_t m_tExternPortLookup;
 			static bool	m_bRunning;
 			CPrefs *m_pPrefs;
 			CRoutingZone *m_pRoutingZone;

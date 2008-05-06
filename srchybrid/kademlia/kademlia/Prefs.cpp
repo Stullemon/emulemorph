@@ -253,7 +253,7 @@ void CPrefs::SetKademliaFiles()
 		nKadAverage = 108;
 	}
 #ifdef _DEBUG
-	AddDebugLogLine(false, method);
+	AddDebugLogLine(DLP_VERYLOW, false, method);
 #endif
 
 	m_uKademliaFiles = nKadAverage*m_uKademliaUsers;

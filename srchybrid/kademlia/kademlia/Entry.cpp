@@ -611,10 +611,9 @@ void CKeyEntry::ReadPublishTrackingDataFromFile(CDataIO* pData){
 		m_pliPublishingIPs->AddTail(sToAdd);
 	}
 	RecalcualteTrustValue();
-	//LOGTODO
 #ifdef _DEBUG 
-	if (GetTrustValue() < 1.0f)
-		DEBUG_ONLY( DebugLog(_T("Loaded %u different names, %u different publishIPs (trustvalue = %.2f) for file %s"), nNameCount, nIPCount, GetTrustValue(), m_uSourceID.ToHexString()) );
+	//if (GetTrustValue() < 1.0f)
+		//DEBUG_ONLY( DebugLog(_T("Loaded %u different names, %u different publishIPs (trustvalue = %.2f) for file %s"), nNameCount, nIPCount, GetTrustValue(), m_uSourceID.ToHexString()) );
 #endif
 }
 
