@@ -1778,6 +1778,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	if (m_dwDirectCallbackTimeout != 0){
 		theApp.clientlist->RemoveDirectCallback(this);
 		m_dwDirectCallbackTimeout = 0;
+		theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 		// TODO LOGREMOVE
 		DebugLog(_T("Direct Callback failed - %s"), DbgGetClientInfo());
 	}
@@ -3191,7 +3192,7 @@ void CUpDownClient::AssertValid() const
 	CHECK_BOOL(m_bUDPPending);
 	CHECK_BOOL(m_bTransferredDownMini);
 	CHECK_BOOL(m_bUnicodeSupport);
-	ASSERT( m_nKadState >= KS_NONE && m_nKadState <= KS_CONNECTED_BUDDY );
+	ASSERT( m_nKadState >= KS_NONE && m_nKadState <= KS_CONNECTING_FWCHECK_UDP);
 	m_AvarageDDR_list.AssertValid();
 	(void)m_nSumForAvgUpDataRate;
 	m_PendingBlocks_list.AssertValid();
@@ -3800,7 +3801,7 @@ void CUpDownClient::ProcessCaptchaRequest(CSafeMemFile* data){
 			CTag tag(data, true);
 		// sanitize checks - we want a small captcha not a wallpaper
 		uint32 nSize = (uint32)(data->GetLength() - data->GetPosition());
-		if ( nSize > 128 && nSize < 2048)
+		if ( nSize > 128 && nSize < 4096)
 		{
 			ULONGLONG pos = data->GetPosition();
 			BYTE* byBuffer = data->Detach();

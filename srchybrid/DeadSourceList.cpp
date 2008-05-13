@@ -106,7 +106,7 @@ bool CDeadSourceList::IsDeadSource(const CUpDownClient* pToCheck) const{
 		}
 		bDbgCheck = true;
 	}
-	if ((pToCheck->HasValidBuddyID() && isnulmd4(pToCheck->GetUserHash()) == FALSE) || (pToCheck->HasLowID() && pToCheck->GetServerIP() == 0) ){
+	if (((pToCheck->HasValidBuddyID() || pToCheck->SupportsDirectUDPCallback()) && isnulmd4(pToCheck->GetUserHash()) == FALSE) || (pToCheck->HasLowID() && pToCheck->GetServerIP() == 0) ){
 		if (m_mapDeadSources.Lookup(CDeadSource(pToCheck->GetUserHash()), dwExpTime)){
 			if (dwExpTime > ::GetTickCount())
 				return true;
@@ -130,7 +130,7 @@ void CDeadSourceList::AddDeadSource(const CUpDownClient* pToAdd){
 			bDbgCheck = true;
 			m_mapDeadSources.SetAt(CDeadSource(pToAdd->GetUserIDHybrid(), pToAdd->GetUserPort(), pToAdd->GetServerIP(), 0), BLOCKTIMEFW);
 		}
-		if (pToAdd->HasValidBuddyID()){
+		if (pToAdd->HasValidBuddyID() || pToAdd->SupportsDirectUDPCallback()){
 			bDbgCheck = true;
 			m_mapDeadSources.SetAt(CDeadSource(pToAdd->GetUserHash()), BLOCKTIMEFW);
 		}
@@ -148,7 +148,7 @@ void CDeadSourceList::RemoveDeadSource(const CUpDownClient* client)
 	{
 		if (client->GetServerIP() != 0)
 			m_mapDeadSources.RemoveKey(CDeadSource(client->GetUserIDHybrid(), client->GetUserPort(), client->GetServerIP(), 0));
-		if (client->HasValidBuddyID())
+		if (client->HasValidBuddyID() || client->SupportsDirectUDPCallback())
 			m_mapDeadSources.RemoveKey(CDeadSource(client->GetUserHash()));
 	}
 }

@@ -764,7 +764,6 @@
 #define IDS_FIRSTAUTODOWN               834
 #define IDS_FIRSTAUTOUP                 835
 #define IDS_FIRSTFULLCHUNK              836
-#define IDS_DELETEDRESTRING1            836
 #define IDS_FIRSTSAFECON                837
 #define IDS_FIRSTAUTOCON                838
 #define IDS_FIRSTCOMPLETE               839

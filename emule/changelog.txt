@@ -2,6 +2,15 @@
 	http://emule-project.net
 	========================
 
+0.49a
+-----------------------
+- May, 8. 2008        -
+-----------------------
+.: If extended controls are enabled (and if available) Kad search results show the amount of known unique publishers for a file in parentheses in the availability column (this isn't equal to sources, but it is a bit more trustworthy indicator how common a file is).
+.: Updated CxImage lib to the latest version (6.0), fixes some image processing vulnability (low risk for eMule) [reported: Steve Manzuik/Juniper Networks]
+.: Fixed Unicode issue in stored and loading searches
+.: DirectCallback sources are now properly added to and checked against the deadsource list 
+
 0.49a BETA3
 -----------------------
 - May, 5. 2008        -

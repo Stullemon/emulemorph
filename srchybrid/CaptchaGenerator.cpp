@@ -23,6 +23,8 @@
 #define LETTERSIZE  32
 #define CROWDEDSIZE 18
 
+// fairly simply captcha generator, might be improved is spammers think its really worth it solving captchas on eMule
+
 static const char schCaptchaContent[34] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L'
 , 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '1', '2', '3', '4', '5', '6', '7', '8', '9'};
 
@@ -51,24 +53,15 @@ void CCaptchaGenerator::ReGenerateCaptcha(uint32 nLetterCount)
 	for (uint32 i = 0; i < nLetterCount; i++) {
 		CxImage imgLetter(imgBlank);
 		
-		//MORPH START - Changed, new version of CxImage lib
-		/*
-		CStringA strLetter(schCaptchaContent[GetRandomUInt16() % ARRSIZE(schCaptchaContent)]);
-		*/
 		CString strLetter(schCaptchaContent[GetRandomUInt16() % ARRSIZE(schCaptchaContent)]);
-		//MORPH END   - Changed, new version of CxImage lib
 		m_strCaptchaText += strLetter;
 
 		uint16 nRandomSize = GetRandomUInt16() % 10;
 		uint16 nRandomOffset = 3 + GetRandomUInt16() % 11;
-		//MORPH START - Changed, new version of CxImage lib
-		/*
-		imgLetter.DrawTextA(NULL, nRandomOffset, 32, strLetter, imgLetter.RGBtoRGBQUAD(RGB(0, 0, 0)), "Arial", 40 - nRandomSize, 1000);
-		*/
 		imgLetter.DrawString(NULL, nRandomOffset, 32, strLetter, imgLetter.RGBtoRGBQUAD(RGB(0, 0, 0)), _T("Arial"), 40 - nRandomSize, 1000);
-		//MORPH END   - Changed, new version of CxImage lib
+		//imgLetter.DrawTextA(NULL, nRandomOffset, 32, strLetter, imgLetter.RGBtoRGBQUAD(RGB(0, 0, 0)), "Arial", 40 - nRandomSize, 1000);
 		float fRotate = (float)(35 - (GetRandomUInt16() % 70));
-		imgLetter.Rotate2(fRotate, NULL, false, true);
+		imgLetter.Rotate2(fRotate, NULL, CxImage::IM_BILINEAR,  CxImage::OM_BACKGROUND, 0, false, true);
 		uint32 nOffset = i * CROWDEDSIZE; 
 		ASSERT( imgLetter.GetHeight() == pimgResult->GetHeight() && pimgResult->GetWidth() >= nOffset + imgLetter.GetWidth() );
 		for (uint32 j = 0; j < imgLetter.GetHeight(); j++)

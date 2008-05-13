@@ -2,6 +2,258 @@
         http://emule-project.net
         ========================
 
+0.49a
+-----------------------
+-  8. Mai  2008       -
+-----------------------
+.: Wenn erweiterte Steuerelemente eingeschaltet sind (und die Daten verfügbar) zeigt eMule bei Kad-Suchen in der Verfügbarkeitsspalte die Zahl der Bekannten Publisher in Klammern (das ist nicht das gleiche wie Quellen, aber ein etwas vertrauenswürdigerer Indikator wie verbreitet eine Datei ist).
+.: CxImagelib wurde auf die aktuellste Version aktualisiert, wobei eine Schwachstelle behoben wurde (geringes Risiko für eMule) [Berichtet: Steve Manzuik/Juniper Networks]
+.: Ein Unicode-Problem beim anzeigen von gespeicherten Suchergebnissen wurde behoben
+.: DirectCallback-Quellen werden nun korrekt zur "Deadsources"-Liste hinzugefügt bzw. getestet
+
+0.49a BETA3
+-----------------------
+-  5. Mai  2008       -
+-----------------------
+.: Wenn sowohl der externe als auch der interne UDP Port beim Firewalltest ereichbar sind, wird nun sichergestellt dass immer der Interne genutzt wird
+.: Steuerzeichen werden aus ed2k-links / empfangenden Dateinamen nun herausgefiltert [eklmn]
+.: Ein kleiner Bug beim Laden von nicht mehr existierenden Kategorie-Verzeichnisse wurde behoben [tHeWiZaRdOfDoS]
+.: Der Installer wählt nun die derzeit bereits genutzte Einstellung für die "Gemeinsame Nutzung" von eMule als Standardeinstellungen bei Updates/Neuinstallationen
+
+-----------------------
+-  3. Mai  2008       -
+-----------------------
+.: Ein weitere Bug beim neuen UDP firewalltest, der Ergebnisse zum externen Port und unerreichbaren Clienten falsch auswertete, wurde behoben
+.: Captchas können nun auch aus Zahlen bestehen (außer 0)
+.: Einige Probleme bei Suchen und Verbinden zu Buddys wurden behoben
+.: Das Interval der Buddy-Suche wurde verringert, um die Chance zeitnahe einen Buddy zu finden zu erhöhen
+
+-----------------------
+-  1. Mai  2008       -
+-----------------------
+.: Die Krypt-Funktionen wurden etwas für Geschwindigkeit optimier [netfinity]
+
+0.49a BETA2
+-----------------------
+- 29. April  2008     -
+-----------------------
+.: Ein seltener Bug, der doppeltes Download von Daten die Bereits in eMules Puffern liegen möglich machte, wurde behoben [tHeWiZaRdOfDoS]
+.: Der UPnP Support wurde ein wenig angepasst um einige zusätzliche Router zu unterstützen [leuk_he]
+.: Libpng wurde auf die aktuellste Version 1.2.27 aktualisiert
+
+-----------------------
+- 27. April  2008     -
+-----------------------
+.: Das Protokoll für Kad-TCP-Firewalltests wurde geändert um es möglich zu machen den "Offen"-Status für TCP zu erhalten auch wenn der UDP Port nicht erreichbar ist
+.: Jeder Dialog (Kad, Server, usw) hat nun seine eigene Einstiegs-Hilfeseite, die von eMule statt der Indexseite beim drücken von F1 aufgerufen (Derzeit noch nicht in allen Sprachen) 
+
+-----------------------
+- 20. April  2008     -
+-----------------------
+.: Zwei Bugs im neuem Firewalltest, die zu falschen Ergenissen führen konnten, wurden behoben [tHeWiZaRdOfDoS]
+.: eMule unterstützt nun ed2k-Links zum Downloaden der nodes.dat von einer URL. Ein solcher Link sollte so aussehen: ed2k://|nodeslist|http://domain/nodes.dat|/
+.: Zwei kleinere Anzeigefehler in den Statistiken und der Warteschleife wurden behoben [tHeWiZaRdOfDoS]
+
+-----------------------
+- 23. April  2008     -
+-----------------------
+.: Das Laden und Speichern von Kad-Schlüßelwörtern und Quellen wurde in einen seperaten Thread verlegt um eine Interface-Blockierung während des Ladens der Daten zu vermeiden
+.: Kad (tcp) Firewall und Buddy TCP Verbindungen unterstützen nun die Protokoll-Obfuskation korrekt
+
+-----------------------
+- 15. April  2008     -
+-----------------------
+.: Strg+W schließt nun den aktiven Reiter im Suchfenster
+
+0.49a BETA1	
+-----------------------
+- 12. April  2008     -
+-----------------------
+.: Betaversionen erzeugen nun eine kleine Testdatei welche von eMule freigegeben wird. Sie soll uns helfen, Änderungen im Protokoll zu debuggen (besonders Kad). Bei Programmende wird diese Datei gelöscht.
+.: Korrektur eines Fehlers mit dem "Eingangsverzeichnis öffnen..." Menüeintrag bei den freigegebenen Dateien [Stulle]
+
+-----------------------
+- 11. April 2008      -
+-----------------------
+.: Obfuskation-Einstellung zum Erststart-Assistenten hinzugefügt
+.: Peercache Downloads standardmäßig deaktiviert (veraltet)
+.: Beta nagging Dialog hinzugefügt
+
+-----------------------
+- 06. April 2008      -
+-----------------------
+.: mehrere Fehler in den neuen Kad Firewall-Tests, Obfuskation und Callbackfunktionen korrigiert
+
+-----------------------
+- 30, März 2008       -
+-----------------------
+.: eMule erkennt nun Windows' Standby-Modus und stellt Verbindungen nach dem Aufwachen wieder her [MorphXt]
+
+-----------------------
+- 18. März 2008       -
+-----------------------
+.: Korrektur: Datei-Tooltips nutzten falsche Schriftgrößen wenn eigene Windows Metriken benutzt wurden
+.: Hinzugefügt: Windows Standardschriftarten können nun in Listen und Baumansichten von eMules Hauptfenstern benutzt werden. Dadurch können größere Schriften für fast alle eMule-Listenanzeigen verwendet werden (Systemeinstellung/Anzeige). Setze "UseSystemFontForMainControls=1" in "preferences.ini" um dies zu aktivieren.
+.: Korrektur: Baumansicht der freigegebenen Verzeichnisse verlor die Icons nach dem Ändern von Windows Systemeinstellungen.
+.: Korrektur von falschen Schriftarten für einzelne GUI-Elemente bei manchen Systemsprachen
+
+-----------------------
+- 17. März 2008       -
+-----------------------
+.: Korrektur: Liste freigegebener Dateien zeigte nicht Fokus-Umrandung der Einträge
+
+-----------------------
+- 16. März 2008       -
+-----------------------
+.: Korrektur: Menüpunkt "Suche zugehörige Dateien" im Kontextmenü von Suchergebnissen war nicht immer korrekt aktiviert/deaktiviert [Tuxman]
+.: Korrektur: Speicherfehler bei Spalteneigenschaften im Webinterface [tHeWiZaRdOfDoS]
+.: Korrektur: Such-Labels im Webinterface normalisiert [ducho]
+.: Korrektur: Einige Suchresultate tauchten noch auf, nachdem "Schließe alle Ergebnisse" betätigt wurde [bengarchy]
+.: Korrektur: (De)Aktivieren der Transferanzeige von "In Warteschlange" und "Bekannte Clients" aktualisierte nicht immer korrekt die Liste [Xman]
+.: Korrektur: Toolbars im Transferfenster zeigten nicht Tooltips nach dem Wechseln von "In Warteschlange" und "Bekannte Clients"
+
+-----------------------
+- 15. März 2008       -
+-----------------------
+.: Korrektur einiger GDI Ressource-Lecks [Rapid_Mule]
+.: Korrektur beim Erzeugen von Zufallszahlen [leuk_he]
+.: Korrektur eines Fehlers beim Speichern von Suchen [netfinity]
+
+-----------------------
+- 26. Februar 2008    -
+-----------------------
+.: Beim Löschen vor mehr als 50 Dateien werden nur die ersten 50 Namen im Bestätigungsdialog angezeigt [tHeWiZaRdOfDoS]
+.: Korrektur eines Fehlers beim Aufspüren von Sendern korrupter Daten, welcher zu falschen Treffern führen konnte [DavidXanatos]
+
+-----------------------
+- 10. Februar 2008    -
+-----------------------
+.: Kad erzwingt nun einige Limits beim Hinzufügen von neuen Kontakten zur Routingtablelle: Nicht mehr als 1 KadNode pro IP, 2 ähnliche KadNodes (gleicher bin) von einem /24 Netzwerk und maximal 10 verschiedene KadNodes von einem /24 Netzwerk sind erlaubt. Dies soll Routingattacken gegen Kad schwieriger machen (bzw ressourcenintensiver).
+(Man kann weiterhin mehr als einen Kad Client pro IP ohne Probleme oder Einschränkungen nutzen. Sie werden nur nicht beide Teil des internen Kad Routings.)
+
+-----------------------
+- 03. Februar 2008    -
+-----------------------
+.: Im Downloadkommentar-Dialog kann der Kommentarspamfilter nun direkt bearbeitet werden. Änderungen werden sofort auf alle Kommentare angewendet.
+.: Clients, welche Kommentare senden die vom Spamfilter ausgefiltert werden, werden nun wie Nachrichten-Spammer behandelt und gebannt.
+.: Das "ed2k:" in ed2k-Links ist nicht mehr case sensitive
+.: Beim Verbinden zum Ed2k-Netz wird mit einem zufälligen Server begonnen, anstatt des Ersten aus der server.met. Sortierungen, Prioritäten,... haben keinen Einfluss auf die Erstauswahl.
+
+-----------------------
+- 01. Februar 2008    -
+-----------------------
+.: Mehrere Änderungen wurden implementiert um die Widerstandsfähigkeit gegen bösartiges keyword publishing zu verbessern:
+.:  Kad merkt sich nun, welche Dateinamen von verschiedenen Quellen für die gleiche Datei bekanntgegeben wurden und nutzt den häufigsten Namen (anstatt des letzten gesendeten) beim Beantworten von Suchanfragen.
+.:  Gleiche File-Hashs mit verschiedenen Dateigrößen werden nun separat gespeichert anstatt sich gegenseitig zu überschreiben.
+.:  Kad errechnet eine Bewertung basierend darauf, wieviele verschiedene Quellen eine Datei veröffentlichen und wieviele Dateien eine Quelle veröffentlicht. Beim Beantworten einer Suchanfrage werden Dateien mit einer Bewertung kleiner als ein gesetztes Limit als letztes gesendet um zu verhindern, dass gespammte Dateien die gültigen ausstechen.
+.: Das Kad-Rating für veröffentlichte Dateien wird auch in den Suchresultaten mitgesendet (als Indikator für zukünftige Versionen) 
+
+-----------------------
+- 16. Januar 2008     -
+-----------------------
+.: Ein Anti-Flood-Schutz wurde zu Kad hinzugefügt. Wenn Kad mehr Anfragen eines spezifischen Typs von einer IP als erwartet erhält, werden weitere dieser Anfragen ignoriert und evtl die Quelle gebannt. Dies soll verschiedene Angriffsszenarios verhindern oder erschweren.
+.: Korrektur eines Fehlers, welcher DNS Server in die Routingtabellen einfließen lassen konnte. Alte Quellen mit Port 53 als Kad Port werden ignoriert, neue Clients (0.49a+) können den Port 53 als Kad Port wieder nutzen, es ist aber nicht empfohlen. [gefunden von netfinity]
+.: Korrektur eines Fehlers in Kad2 bzgl. des Veröffentlichens von Dateien >4GB [netfinity]
+
+-----------------------
+- 11. Januar 2008     -
+-----------------------
+.: Wird ein neues Eingangsverzeichnis ausgewählt welches Dateien enthält, werden diese nun in die Liste freigegebener Dateien aufgenommen.
+
+-----------------------
+- 08. Januar 2008     -
+-----------------------
+.: Eine Filtereingabe wurde zur Liste freigegebener Dateien hinzugefügt (wie bei Suchresultaten). Der Filter soll nur helfen, freigegebene Dateien zu finden, es hat keinen Einfluss darauf, welche Dateien nun veröffentlicht werden.
+.: Die Symbole im Verzeichnisbaum der freigegebenen Dateien wurden leicht umgeordnet.
+
+-----------------------
+- 15. Dezember 2007   -
+-----------------------
+.: Die Onlinehilfe für die Optionen-Dialoge sind nun themensensitiv (Hilfeseite des aktiven Dialog öffnet sich) für alle Sprachen außer Englisch. Weitere Stellen werden in Zukunft Schritt für Schritt erledigt.
+.: Offene Suchen werden nun beim Beenden von eMule gespeichert und bei Neustart wiederhergestellt. Dies kann in den Optionen (Anzeige) deaktiviert werden.
+
+-----------------------
+- 02. Dezember 2007   -
+-----------------------
+.: Kads Firewallhandling und -testen wurde überarbeitet:
+Der Kad Firewallzustand ist jetzt in TCP und UDP aufgeteilt. Der TCP-Zustand ist quasi der der alte Zustand, welcher testet, ob die TCP-Port erreichbar ist. Der UDP-Zustand ist neu und prüft ob dein UDP-Port erreichbar ist. Zum Beispiel bei "Full Cone" Routern ohne Portweiterleitung wirst du TCP-Firewalled erhalten (wie bisher) aber UDP-Offen (neu). Wenn der UDP-Test erfolgreich war (Offen), braucht eMule keinen Buddy mehr und kann vollständig am Kad Netzwerk teilnehmen. Dadurch wird der Overhead wegfallen, welcher in vorigen Versionen auftrat. Du kannst dich aber weiterhin nicht zu anderen TCP-Firewalled Clients verbinden wenn du auch TCP-Firewalled bist.
+.: Der neue UDP-Zustand wird im "Meine Info"-Feld des Server-Fensters angezeigt. Solange der UDP-Firewalltest nicht fertig ist, wird "unbestätigt" angezeigt.
+.: Clients mit dem Kad UDP-Offen Zustand unterstützen nun direkte Callbacks (gestartet durch ein UDP Paket) um sich mit nicht-firewalled Clients zu verbinden. Diese Callbacks sind schneller, zuverlässiger und nutzen weniger Ressourcen als Buddies oder Server-Callbacks.
+.: Der neue Firewall-Test korrigiert nun auch einen Fehler / Designschwäche welcher dazu führte dass eMule immer des Clients Quell-IP-Port nutzte anstatt zu testen ob der intern gesetzte UDP-Port die bessere Wahl wäre. Dies war vor allem bei "Restricted Cone" Routern mit PAT (Port Address Translation) ein Problem.
+
+-----------------------
+- 29. November 2007   -
+-----------------------
+.: Korrektur eines Fehlers von u.U. einer falschen lokalen IP-Adresse wenn die "BindAddr" Option genutzt wurde
+.: Korrektur eines Fehlers welche Details von markierten Freunden in der Freundesliste nicht aktualisierte
+
+-----------------------
+- 24. November 2007   -
+-----------------------
+.: Korrektur eines Fehlers in Tooltips, welcher einige Inhalte teilweise in Fettschrift darstellte
+
+-----------------------
+- 19. November 2007   -
+-----------------------
+.: Unicode-Unterstützung für das "statische Server"-Feature hinzugefügt
+
+-----------------------
+- 12. November 2007   -
+-----------------------
+.: Korrektur mehrerer Listenanzeigen in eMule um Windows' Kontextmenüs der Scrollbalken zu unterstützen
+.: Option hinzugefügt (Optionen->Allgemein) um Windows daran zu hindern, in den Standbymodus zu wechseln während eMule läuft (und etwas tut)
+
+-----------------------
+- 11. November 2007   -
+-----------------------
+.: Korrektur eines Fehlers im IRC-Fenster, welcher die Kanal-Fenster in verkehrter Reihenfolge öffnete
+.: Korrektur eines Fehlers welcher tote Server manchmal nicht aus der GUI entfernte [fox88].
+.: Korrektur eines Fehlers welcher auf einigen Windowssystemen die E-Mail Benachrichtigung deaktivierte [Lewpy]
+.: Hinzugefügt: IRC-Warnungen und -Fehler werden im aktiven Kanal-Fenster angezeigt
+.: Hinzugefügt: Privater IRC-Kanal wird automatisch aktiviert wenn Unterhaltung initiiert wird
+.: Korrektur eines Fehlers mit extra großen Icons in den Dateitooltips
+.: Korrektur eines Fehlers der bei HTTP-Downloads zu einem Crash bei voller Festplatte führen konnte
+.: Korrektur eines Speicherlecks bei fehlgeschlagenen "ge-gzipten" HTTP Downloads.
+
+-----------------------
+- 07. November 2007   -
+-----------------------
+- Korrektur der Anzeige des HTTP-Statusfensters
+
+-----------------------
+- 31. Oktober 2007    -
+-----------------------
+.: Das Nachrichtensystem ist jetzt in der Lage eure Freunde auch dann zu finden wenn ihre IP wechselte, solange alle Beteiligten 'Offen' mit Kad verbunden sind, also nicht 'Firewalled'. Dies ermöglicht es, mit Freunden länger als nur für die jeweilige Session in Kontakt zu bleiben. (Funktioniert nur mit neu hinzugefügten bzw. neu gefundenen Freunden, die mit Kademlia verbunden sind)
+.: Wenn einem Freund eine Nachricht geschickt wird, stellt eMule jetzt nach dem Verbinden sicher, dass der Userhash tatsächlich übereinstimmt und SecureIdent benutzt wird (wenn aktiviert) um sicherzustellen, dass es sich auch wirklich um euren Freund handelt.
+
+-----------------------
+- 28. Oktober 2007    -
+-----------------------
+.: Jetzt kann mit Angabe einer URL, welche auf eine nodes.dat verweist, mit dem Kademlia Netzwerk verbunden werden. (im Kademlia Reiter)
+
+-----------------------
+- 22. Oktober 2007    -
+-----------------------
+.: Um Spamnachrichten zu reduzieren und somit das Nachrichtensystem wieder benutzbarer zu machen unterstützt eMule nun Captcha Authentifizierung. Wenn aktiviert muss jemand der euch eine Nachricht schicken will erst ein Captcha lösen (die Buchstaben aus einem Bildchen abschreiben) bevor die Nachricht bei euch angezeigt wird.
+Ältere Clients ohne diese Unterstützung für Captchas können euch dann keine Nachrichten mehr schicken und erhalten eine dahingehende Rückmeldung.
+
+-----------------------
+- 11. Juli 2007       -
+-----------------------
+.: Obfuskation zum Kad UDP Protokoll hinzugefügt. Kad Obfuskation ist Teil des Protokolls und unabhängig von den Einstellungen der Ed2K-Obfuskation.
+
+-----------------------
+- 5. Juni 2007        -
+-----------------------
+.: Korrektur eines Fehlers, durch welchen Kad versuchte, seine Einstellungen vom ehemals gültigen config-Ordner zu laden.
+
+-----------------------
+- 16. Mai 2007        -
+-----------------------
+- neue Übersetzung hinzugefügt: Uyghur 		[von Abduqadir]
+
+
+
 0.48a
 -----------------------
 - May, 13. 2007     -

@@ -1811,9 +1811,17 @@ void CSearchListCtrl::DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*co
 			case 2:			// avail
 				buffer.Format(_T("%u"), src->GetSourceCount());
 				if (thePrefs.IsExtControlsEnabled()){
-				int iClients = src->GetClientsCount();
-					if (iClients > 0)
-						buffer.AppendFormat(_T(" (%u)"), iClients);
+					if (src->IsKademlia()){
+						uint32 nKnownPublisher = (src->GetKadPublishInfo() & 0x00FF0000) >> 16;
+						if (nKnownPublisher > 0)
+							buffer.AppendFormat(_T(" (%u)"), nKnownPublisher);
+					}
+					else
+					{
+						int iClients = src->GetClientsCount();
+						if (iClients > 0)
+							buffer.AppendFormat(_T(" (%u)"), iClients);
+					}
 				}
 #ifdef _DEBUG
 				if (src->GetKadPublishInfo() == 0)

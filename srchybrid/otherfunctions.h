@@ -104,7 +104,7 @@ void HTMLParse(CString &buffer); // Added by N_OxYdE
 ///////////////////////////////////////////////////////////////////////////////
 // URL conversion
 //
-CString URLDecode(const CString& sIn);
+CString URLDecode(const CString& sIn, bool bKeepNewLine = false);
 CString URLEncode(const CString& sIn);
 CString EncodeURLQueryParam(const CString& rstrQuery);
 CString MakeStringEscaped(CString in);

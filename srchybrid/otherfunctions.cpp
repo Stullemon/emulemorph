@@ -277,7 +277,7 @@ namespace {
 	}
 }
 
-CString URLDecode(const CString& inStr)
+CString URLDecode(const CString& inStr, bool bKeepNewLine)
 {
 	// decode escape sequences
 	CString res;
@@ -292,7 +292,7 @@ CString URLDecode(const CString& inStr)
 
 			// Convert the hex to ASCII
 			TCHAR ch = (TCHAR)_tcstoul(hexstr, NULL, 16);
-			if (ch > '\x1F') // filter control chars
+			if (ch > '\x1F' || (bKeepNewLine && ch == '\x0A')) // filter control chars
 				res.AppendChar(ch);
 		}
 		else

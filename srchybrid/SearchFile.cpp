@@ -319,7 +319,7 @@ void CSearchFile::StoreToFile(CFileDataIO& rFile) const
 			temp.WriteNewEd2kTag(&rFile);
 			continue;
 		}
-		tag->WriteNewEd2kTag(&rFile);
+		tag->WriteNewEd2kTag(&rFile, utf8strRaw);
 	}
 }
 

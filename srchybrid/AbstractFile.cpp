@@ -187,7 +187,7 @@ void CAbstractFile::SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSys
 	
 	if (bRemoveControlChars){
 		for (int i = 0; i < m_strFileName.GetLength(); )
-			if (m_strFileName.GetAt(i) < '\x1F')
+			if (m_strFileName.GetAt(i) <= '\x1F')
 				m_strFileName.Delete(i);
 			else
 				i++;

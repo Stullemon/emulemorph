@@ -640,14 +640,12 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse, uint32 dwF
 							uAllChildsSourceCount = child->GetListChildCount();
 						/*if (child->GetCompleteSourceCount() > uAllChildsCompleteSourceCount) // not yet supported
 							uAllChildsCompleteSourceCount = child->GetCompleteSourceCount();*/
-#ifdef _DEBUG
 						if (child->GetKadPublishInfo() != 0){
 							nPublishInfoTags++;
 							uDifferentNames = max(uDifferentNames, ((child->GetKadPublishInfo() & 0xFF000000) >> 24));
 							uPublishersKnown = max (uPublishersKnown, ((child->GetKadPublishInfo() & 0x00FF0000) >> 16));
 							uTrustValue += child->GetKadPublishInfo() & 0x0000FFFF;
 						}
-#endif
 					}
 					else
 					{
@@ -670,11 +668,9 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse, uint32 dwF
 				parent->CopyTags(bestEntry->GetTags());
 				parent->SetIntTagValue(FT_SOURCES, uAllChildsSourceCount);
 				parent->SetIntTagValue(FT_COMPLETE_SOURCES, uAllChildsCompleteSourceCount);
-#ifdef _DEBUG
 				if (uTrustValue > 0 && nPublishInfoTags > 0)
 					uTrustValue = uTrustValue / nPublishInfoTags;
-				parent->SetKadPublishInfo(((uDifferentNames % 256) << 24) | ((uPublishersKnown % 256) << 16) | ((uTrustValue % 32000) << 0));
-#endif
+				parent->SetKadPublishInfo(((uDifferentNames & 0xFF) << 24) | ((uPublishersKnown & 0xFF) << 16) | ((uTrustValue & 0xFFFF) << 0));
 			}
 			// recalculate spamrating
 			DoSpamRating(parent, bClientResponse, false, false, false, dwFromUDPServerIP);

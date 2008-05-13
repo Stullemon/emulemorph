@@ -28,11 +28,11 @@ public:
 
 	void	ReGenerateCaptcha(uint32 nLetterCount = 4);
 	void	Clear();
-	CString	GetCaptchaText() const						{return CString(m_strCaptchaText);}
+	CString	GetCaptchaText() const						{return m_strCaptchaText;}
 	bool	WriteCaptchaImage(CFileDataIO& file);
 
 
 private:
 	CxImage*	m_pimgCaptcha;
-	CStringA		m_strCaptchaText;
+	CString		m_strCaptchaText;
 };

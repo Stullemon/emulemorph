@@ -454,6 +454,7 @@ bool CClientUDPSocket::ProcessPacket(const BYTE* packet, UINT size, uint8 opcode
 			// do we accept callbackrequests at all?
 			if (Kademlia::CKademlia::IsRunning() && Kademlia::CKademlia::IsFirewalled())
 			{
+				theApp.clientlist->AddTrackCallbackRequests(ip);
 				CSafeMemFile data(packet, size);
 				uint16 nRemoteTCPPort = data.ReadUInt16();
 				uchar uchUserHash[16];

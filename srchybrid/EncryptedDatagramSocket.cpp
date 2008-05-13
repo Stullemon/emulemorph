@@ -221,7 +221,7 @@ int CEncryptedDatagramSocket::DecryptReceivedClient(BYTE* pbyBufIn, int nBufLen,
 
 		RC4CreateKey(md5.GetRawHash(), 16, &keyReceiveKey, true);
 		RC4Crypt(pbyBufIn + 3, (uchar*)&dwValue, sizeof(dwValue), &keyReceiveKey);
-		byCurrentTry = ++byCurrentTry % 3;
+		byCurrentTry = (byCurrentTry + 1) % 3;
 	} while (dwValue != MAGICVALUE_UDP_SYNC_CLIENT && byTries > 0); // try to decrypt as ed2k as well as kad packet if needed (max 3 rounds)
 	
 	if (dwValue == MAGICVALUE_UDP_SYNC_CLIENT){

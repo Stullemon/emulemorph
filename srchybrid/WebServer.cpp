@@ -919,7 +919,7 @@ CString CWebServer::_ParseURL(CString URL, CString fieldname)
 
 			// decode value ...
 			value.Replace(_T("+"), _T(" "));
-			value=URLDecode(value);
+			value=URLDecode(value, true);
 		}
 	}
 
