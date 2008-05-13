@@ -552,6 +552,7 @@ void CTaskbarNotifier::Show(LPCTSTR pszCaption, int nMsgType, LPCTSTR pszLink, B
 	DWORD dwTimeToHide = m_bBitmapAlpha ? 0 : m_dwTimeToHide;
 	if (dwTimeToHide > m_dwTimerPrecision) {
 		nEvents = min((dwTimeToHide / m_dwTimerPrecision / 2), nBitmapSize); //<<-- enkeyDEV(Ottavio84) -Reduced frames of a half-
+		if  (nEvents == 0) nEvents =1; // leuk_he divide by zero in a certain charshdump. 
 		m_dwHideEvents = dwTimeToHide / nEvents;
 		m_nIncrementHide = nBitmapSize / nEvents;
 	}
