@@ -54,13 +54,6 @@ CPPgDirectories::CPPgDirectories()
 {
 }
 
-void CPPgDirectories::OnDestroy(){
-	   // => Start	  rapid mule gdi leak 
-    HIMAGELIST handle = TreeView_GetImageList(m_ShareSelector.GetSafeHwnd(), TVSIL_STATE);
-    if (handle != NULL)
-        ImageList_Destroy(handle);
-    // <= End
-}
 
 CPPgDirectories::~CPPgDirectories()
 {
