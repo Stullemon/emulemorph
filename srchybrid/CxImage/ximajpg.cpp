@@ -2,7 +2,7 @@
  * File:	ximajpg.cpp
  * Purpose:	Platform Independent JPEG Image Class Loader and Writer
  * 07/Aug/2001 Davide Pizzolato - www.xdp.it
- * CxImage version 5.99c 17/Oct/2004
+ * CxImage version 6.0.0 02/Feb/2008
  */
  
 #include "ximajpg.h"
@@ -67,6 +67,8 @@ bool CxImageJPG::DecodeExif(CxFile * hFile)
 }
 #endif //CXIMAGEJPG_SUPPORT_EXIF
 ////////////////////////////////////////////////////////////////////////////////
+#if CXIMAGE_SUPPORT_DECODE
+////////////////////////////////////////////////////////////////////////////////
 bool CxImageJPG::Decode(CxFile * hFile)
 {
 
@@ -122,7 +124,7 @@ bool CxImageJPG::Decode(CxFile * hFile)
 		cinfo.out_color_space = JCS_GRAYSCALE;
 	if ((GetCodecOption(CXIMAGE_FORMAT_JPG) & DECODE_QUANTIZE) != 0) {
 		cinfo.quantize_colors = TRUE;
-		cinfo.desired_number_of_colors = info.nQuality;
+		cinfo.desired_number_of_colors = GetJpegQuality();
 	}
 	if ((GetCodecOption(CXIMAGE_FORMAT_JPG) & DECODE_DITHER) != 0)
 		cinfo.dither_mode = m_nDither;
@@ -148,6 +150,7 @@ bool CxImageJPG::Decode(CxFile * hFile)
 		jpeg_calc_output_dimensions(&cinfo);
 		head.biWidth = cinfo.output_width;
 		head.biHeight = cinfo.output_height;
+		info.dwType = CXIMAGE_FORMAT_JPG;
 		jpeg_destroy_decompress(&cinfo);
 		return true;
 	}
@@ -174,10 +177,17 @@ bool CxImageJPG::Decode(CxFile * hFile)
 		SetYDPI((long)(m_exifinfo.Yresolution/m_exifinfo.ResolutionUnit));
 #endif
 	} else {
-		if (cinfo.density_unit==2){
-			SetXDPI((long)floor(cinfo.X_density * 254.0 / 10000.0 + 0.5));
-			SetYDPI((long)floor(cinfo.Y_density * 254.0 / 10000.0 + 0.5));
-		} else {
+		switch (cinfo.density_unit) {
+		case 0:	// [andy] fix for aspect ratio...
+			if((cinfo.Y_density > 0) && (cinfo.X_density > 0)){
+				SetYDPI((long)(GetXDPI()*(float(cinfo.Y_density)/float(cinfo.X_density))));
+			}
+			break;
+		case 2: // [andy] fix: cinfo.X/Y_density is pixels per centimeter
+			SetXDPI((long)floor(cinfo.X_density * 2.54 + 0.5));
+			SetYDPI((long)floor(cinfo.Y_density * 2.54 + 0.5));
+			break;
+		default:
 			SetXDPI(cinfo.X_density);
 			SetYDPI(cinfo.Y_density);
 		}
@@ -187,7 +197,7 @@ bool CxImageJPG::Decode(CxFile * hFile)
 		SetGrayPalette();
 		head.biClrUsed =256;
 	} else {
-		if (cinfo.quantize_colors==TRUE){
+		if (cinfo.quantize_colors){
 			SetPalette(cinfo.actual_number_of_colors, cinfo.colormap[0], cinfo.colormap[1], cinfo.colormap[2]);
 			head.biClrUsed=cinfo.actual_number_of_colors;
 		} else {
@@ -260,6 +270,8 @@ bool CxImageJPG::Decode(CxFile * hFile)
 	/* And we're done! */
 	return true;
 }
+////////////////////////////////////////////////////////////////////////////////
+#endif //CXIMAGE_SUPPORT_DECODE
 ////////////////////////////////////////////////////////////////////////////////
 #if CXIMAGE_SUPPORT_ENCODE
 ////////////////////////////////////////////////////////////////////////////////
@@ -384,6 +396,36 @@ bool CxImageJPG::Encode(CxFile * hFile)
 	if ((GetCodecOption(CXIMAGE_FORMAT_JPG) & ENCODE_LOSSLESS) != 0)
 		jpeg_simple_lossless(&cinfo, m_nPredictor, m_nPointTransform);
 #endif
+
+	//SetCodecOption(ENCODE_SUBSAMPLE_444 | GetCodecOption(CXIMAGE_FORMAT_JPG),CXIMAGE_FORMAT_JPG);
+
+		// 2x2, 1x1, 1x1 (4:1:1) : High (default sub sampling)
+		cinfo.comp_info[0].h_samp_factor = 2;
+		cinfo.comp_info[0].v_samp_factor = 2;
+		cinfo.comp_info[1].h_samp_factor = 1;
+		cinfo.comp_info[1].v_samp_factor = 1;
+		cinfo.comp_info[2].h_samp_factor = 1;
+		cinfo.comp_info[2].v_samp_factor = 1;
+
+	if ((GetCodecOption(CXIMAGE_FORMAT_JPG) & ENCODE_SUBSAMPLE_422) != 0){
+		// 2x1, 1x1, 1x1 (4:2:2) : Medium
+		cinfo.comp_info[0].h_samp_factor = 2;
+		cinfo.comp_info[0].v_samp_factor = 1;
+		cinfo.comp_info[1].h_samp_factor = 1;
+		cinfo.comp_info[1].v_samp_factor = 1;
+		cinfo.comp_info[2].h_samp_factor = 1;
+		cinfo.comp_info[2].v_samp_factor = 1;
+	}
+
+	if ((GetCodecOption(CXIMAGE_FORMAT_JPG) & ENCODE_SUBSAMPLE_444) != 0){
+		// 1x1 1x1 1x1 (4:4:4) : None
+		cinfo.comp_info[0].h_samp_factor = 1;
+		cinfo.comp_info[0].v_samp_factor = 1;
+		cinfo.comp_info[1].h_samp_factor = 1;
+		cinfo.comp_info[1].v_samp_factor = 1;
+		cinfo.comp_info[2].h_samp_factor = 1;
+		cinfo.comp_info[2].v_samp_factor = 1;
+	}
 
 	cinfo.density_unit=1;
 	cinfo.X_density=(unsigned short)GetXDPI();

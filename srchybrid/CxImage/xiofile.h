@@ -2,6 +2,7 @@
 #define __xiofile_h
 
 #include "xfile.h"
+//#include <TCHAR.h>
 
 class DLL_EXP CxIOFile : public CxFile
 	{
@@ -17,11 +18,11 @@ public:
 		Close();
 	}
 //////////////////////////////////////////////////////////
-	bool Open(const char *filename, const char *mode)
+	bool Open(LPCTSTR filename, LPCTSTR mode)
 	{
 		if (m_fp) return false;	// Can't re-open without closing first
 
-		m_fp = fopen(filename, mode);
+		m_fp = _tfopen(filename, mode);
 		if (!m_fp) return false;
 
 		m_bCloseFile = true;
@@ -68,9 +69,9 @@ public:
 		if (!m_fp) return -1;
 		long pos,size;
 		pos = ftell(m_fp);
-		(void)fseek(m_fp, 0, SEEK_END);
+		fseek(m_fp, 0, SEEK_END);
 		size = ftell(m_fp);
-		(void)fseek(m_fp, pos,SEEK_SET);
+		fseek(m_fp, pos,SEEK_SET);
 		return size;
 	}
 //////////////////////////////////////////////////////////
@@ -102,6 +103,18 @@ public:
 	{
 		if (!m_fp) return EOF;
 		return getc(m_fp);
+	}
+//////////////////////////////////////////////////////////
+	virtual char *	GetS(char *string, int n)
+	{
+		if (!m_fp) return NULL;
+		return fgets(string,n,m_fp);
+	}
+//////////////////////////////////////////////////////////
+	virtual long	Scanf(const char *format, void* output)
+	{
+		if (!m_fp) return EOF;
+		return fscanf(m_fp, format, output);
 	}
 //////////////////////////////////////////////////////////
 protected:

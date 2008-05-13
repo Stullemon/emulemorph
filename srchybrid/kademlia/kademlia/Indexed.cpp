@@ -793,7 +793,7 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 		} while (!bOnlyTrusted);
 
 		// LOGTODO: Remove Log
-		DebugLog(_T("Kad Keyword search Result Request: Send %u trusted and %u untrusted results"), dbgResultsTrusted, dbgResultsUntrusted);
+		//DebugLog(_T("Kad Keyword search Result Request: Send %u trusted and %u untrusted results"), dbgResultsTrusted, dbgResultsUntrusted);
 
 		if(iCount > 0)
 		{

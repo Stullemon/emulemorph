@@ -1,6 +1,6 @@
 // xImaWnd.cpp : Windows functions
 /* 07/08/2001 v1.00 - Davide Pizzolato - www.xdp.it
- * CxImage version 5.99c 17/Oct/2004
+ * CxImage version 6.0.0 02/Feb/2008
  */
 
 #include "ximage.h"
@@ -9,24 +9,171 @@
 #include "ximabmp.h"
 
 ////////////////////////////////////////////////////////////////////////////////
-#if CXIMAGE_SUPPORT_WINCE
+#if defined (_WIN32_WCE)
+
+#ifndef DEFAULT_GUI_FONT
+#define DEFAULT_GUI_FONT 17
+#endif
+
+#ifndef PROOF_QUALITY
+#define PROOF_QUALITY 2
+#endif
+
+struct DIBINFO : public BITMAPINFO
+{
+	RGBQUAD    arColors[255];    // Color table info - adds an extra 255 entries to palette
+	operator LPBITMAPINFO()          { return (LPBITMAPINFO) this; }
+	operator LPBITMAPINFOHEADER()    { return &bmiHeader;          }
+	RGBQUAD* ColorTable()            { return bmiColors;           }
+};
+
+int BytesPerLine(int nWidth, int nBitsPerPixel)
+{
+    return ( (nWidth * nBitsPerPixel + 31) & (~31) ) / 8;
+}
+
+int NumColorEntries(int nBitsPerPixel, int nCompression, DWORD biClrUsed)
+{
+	int nColors = 0;
+	switch (nBitsPerPixel)
+	{
+	case 1:
+		nColors = 2;  break;
+	case 2:
+		nColors = 4;  break;   // winCE only
+	case 4:
+		nColors = 16; break;
+	case 8:
+		nColors =256; break;
+	case 24:
+		nColors = 0;  break;
+	case 16:
+	case 32:
+		nColors = 3;  break; // I've found that PocketPCs need this regardless of BI_RGB or BI_BITFIELDS
+	default:
+		ASSERT(FALSE);
+	}
+	// If biClrUsed is provided, and it is a legal value, use it
+	if (biClrUsed > 0 && biClrUsed <= (DWORD)nColors)
+		return biClrUsed;
+	
+	return nColors;
+}
+
+int GetDIBits(
+  HDC hdc,           // handle to DC
+  HBITMAP hbmp,      // handle to bitmap
+  UINT uStartScan,   // first scan line to set
+  UINT cScanLines,   // number of scan lines to copy
+  LPVOID lpvBits,    // array for bitmap bits
+  LPBITMAPINFO lpbi, // bitmap data buffer
+  UINT uUsage        // RGB or palette index
+)
+{
+	UINT	iColorTableSize = 0;
+
+	if (!hbmp)
+		return 0;
+
+	// Get dimensions of bitmap
+	BITMAP bm;
+	if (!::GetObject(hbmp, sizeof(bm),(LPVOID)&bm))
+		return 0;
+
+	//3. Creating new bitmap and receive pointer to it's bits.
+	HBITMAP hTargetBitmap;
+	void *pBuffer;
+	
+	//3.1 Initilize DIBINFO structure
+	DIBINFO  dibInfo;
+	dibInfo.bmiHeader.biBitCount = 24;
+	dibInfo.bmiHeader.biClrImportant = 0;
+	dibInfo.bmiHeader.biClrUsed = 0;
+	dibInfo.bmiHeader.biCompression = 0;
+	dibInfo.bmiHeader.biHeight = bm.bmHeight;
+	dibInfo.bmiHeader.biPlanes = 1;
+	dibInfo.bmiHeader.biSize = 40;
+	dibInfo.bmiHeader.biSizeImage = bm.bmHeight*BytesPerLine(bm.bmWidth,24);
+	dibInfo.bmiHeader.biWidth = bm.bmWidth;
+	dibInfo.bmiHeader.biXPelsPerMeter = 3780;
+	dibInfo.bmiHeader.biYPelsPerMeter = 3780;
+	dibInfo.bmiColors[0].rgbBlue = 0;
+	dibInfo.bmiColors[0].rgbGreen = 0;
+	dibInfo.bmiColors[0].rgbRed = 0;
+	dibInfo.bmiColors[0].rgbReserved = 0;
+
+	//3.2 Create bitmap and receive pointer to points into pBuffer
+	HDC hDC = ::GetDC(NULL);
+	ASSERT(hDC);
+	hTargetBitmap = CreateDIBSection(
+		hDC,
+		(const BITMAPINFO*)dibInfo,
+		DIB_RGB_COLORS,
+		(void**)&pBuffer,
+		NULL,
+		0);
+
+	::ReleaseDC(NULL, hDC);
+
+	//4. Copy source bitmap into the target bitmap.
+
+	//4.1 Create 2 device contexts
+	HDC memDc = CreateCompatibleDC(NULL);
+	if (!memDc) {
+		ASSERT(FALSE);
+	}
+	
+	HDC targetDc = CreateCompatibleDC(NULL);
+	if (!targetDc) {
+		ASSERT(FALSE);
+	}
+
+	//4.2 Select source bitmap into one DC, target into another
+	HBITMAP hOldBitmap1 = (HBITMAP)::SelectObject(memDc, hbmp);
+	HBITMAP hOldBitmap2 = (HBITMAP)::SelectObject(targetDc, hTargetBitmap);
+
+	//4.3 Copy source bitmap into the target one
+	BitBlt(targetDc, 0, 0, bm.bmWidth, bm.bmHeight, memDc, 0, 0, SRCCOPY);
+
+	//4.4 Restore device contexts
+	::SelectObject(memDc, hOldBitmap1);
+	::SelectObject(targetDc, hOldBitmap2);
+	DeleteDC(memDc);
+	DeleteDC(targetDc);
+
+	//Here we can bitmap bits: pBuffer. Note:
+	// 1. pBuffer contains 3 bytes per point
+	// 2. Lines ane from the bottom to the top!
+	// 3. Points in the line are from the left to the right
+	// 4. Bytes in one point are BGR (blue, green, red) not RGB
+	// 5. Don't delete pBuffer, it will be automatically deleted
+	//    when delete hTargetBitmap
+	lpvBits = pBuffer;
+
+	DeleteObject(hbmp);
+	//DeleteObject(hTargetBitmap);
+
+	return 1;
+}
+#endif 
+
+////////////////////////////////////////////////////////////////////////////////
+#if CXIMAGE_SUPPORT_WINDOWS
 ////////////////////////////////////////////////////////////////////////////////
 long CxImage::Blt(HDC pDC, long x, long y)
 {
 	if((pDib==0)||(pDC==0)||(!info.bEnabled)) return 0;
 
     HBRUSH brImage = CreateDIBPatternBrushPt(pDib, DIB_RGB_COLORS);
+    POINT pt;
+    SetBrushOrgEx(pDC,x,y,&pt); //<RT>
     HBRUSH brOld = (HBRUSH) SelectObject(pDC, brImage);
-    PatBlt(pDC, 0, 0, head.biWidth, head.biHeight, PATCOPY);
+    PatBlt(pDC, x, y, head.biWidth, head.biHeight, PATCOPY);
     SelectObject(pDC, brOld);
+    SetBrushOrgEx(pDC,pt.x,pt.y,NULL);
     DeleteObject(brImage);
-	return 1;
+    return 1;
 }
-#endif //CXIMAGE_SUPPORT_WINCE
-////////////////////////////////////////////////////////////////////////////////
-
-////////////////////////////////////////////////////////////////////////////////
-#if CXIMAGE_SUPPORT_WINDOWS
 ////////////////////////////////////////////////////////////////////////////////
 /**
  * Transfer the image in a global bitmap handle (clipboard copy)
@@ -70,14 +217,17 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
 
 		//copy the bitmap header
 		memcpy(&head,pHead,sizeof(BITMAPINFOHEADER));
+		//check if it's a top-down bitmap
+		bool bTopDownDib = head.biHeight<0;
+		if (bTopDownDib) head.biHeight=-head.biHeight;
 		//create the image
 		if(!Create(head.biWidth,head.biHeight,head.biBitCount)){
 			GlobalUnlock(lpVoid);
 			return false;
 		}
 		//preserve DPI
-		if (head.biXPelsPerMeter) SetXDPI((long)floor(head.biXPelsPerMeter * 254.0 / 10000.0 + 0.5)); else SetXDPI(96);
-		if (head.biYPelsPerMeter) SetYDPI((long)floor(head.biYPelsPerMeter * 254.0 / 10000.0 + 0.5)); else SetYDPI(96);
+		SetXDPI((long)floor(head.biXPelsPerMeter * 254.0 / 10000.0 + 0.5));
+		SetYDPI((long)floor(head.biYPelsPerMeter * 254.0 / 10000.0 + 0.5));
 
 		/*//copy the pixels (old way)
 		if((pHead->biCompression != BI_RGB) || (pHead->biBitCount == 32)){ //<Jörgen Alfredsson>
@@ -88,7 +238,7 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
 			DWORD bf[3];
 			memcpy(bf,lpVoid+pHead->biSize,12);
 			// transform into RGB
-			Bitfield2RGB(lpVoid+pHead->biSize+12,(WORD)bf[0],(WORD)bf[1],(WORD)bf[2],(BYTE)pHead->biBitCount);
+			Bitfield2RGB(lpVoid+pHead->biSize+12,bf[0],bf[1],bf[2],(BYTE)pHead->biBitCount);
 		} else { //normal bitmap
 			memcpy(pDib,lpVoid,GetSize());
 		}*/
@@ -124,7 +274,7 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
 		// <Michael Gandyra>
 		DWORD dwCompression = pHead->biCompression;
 		// compressed bitmap ?
-		if(dwCompression!=BI_RGB || pHead->biBitCount==32) {
+		if(dwCompression!=BI_RGB || pHead->biBitCount==32 || pHead->biBitCount ==16) {
 			// get the bitmap bits
 			LPSTR lpDIBBits = (LPSTR)((BYTE*)pHead + *(DWORD*)pHead + (WORD)(GetNumColors() * sizeof(RGBQUAD)));
 			// decode and copy them to our image
@@ -137,9 +287,12 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
 						DWORD bf[3];
 						memcpy(bf,lpVoid+pHead->biSize,12);
 						// transform into RGB
-						Bitfield2RGB(lpVoid+pHead->biSize+12,(WORD)bf[0],(WORD)bf[1],(WORD)bf[2],(BYTE)pHead->biBitCount);
-					} else 
-						throw "unknown compression";
+						Bitfield2RGB(lpVoid+pHead->biSize+12,bf[0],bf[1],bf[2],(BYTE)pHead->biBitCount);
+					} else {
+						// "unknown compression";
+						GlobalUnlock(lpVoid);
+						return false;
+					}
 				}
 				break;
 			case 16 :
@@ -158,7 +311,7 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
 					// copy the pixels
 					memcpy(info.pImage, lpDIBBits + offset, head.biHeight*((head.biWidth+1)/2)*4);
 					// transform into RGB
-					Bitfield2RGB(info.pImage, (WORD)bf[0], (WORD)bf[1], (WORD)bf[2], 16);
+					Bitfield2RGB(info.pImage, bf[0], bf[1], bf[2], 16);
 				}
 				break;
 			case 8 :
@@ -205,44 +358,54 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
 										second_byte = *(lpDIBBits++);
 										BYTE* sline = iter.GetRow(scanline);
 										for (int i = 0; i < status_byte; i++) {
-											if (low_nibble) {
-												if ((DWORD)(sline + bits) < (DWORD)(info.pImage + head.biSizeImage)) {
-													*(sline + bits) |=  second_byte & 0x0F;
-												}
-												if (i != status_byte - 1)
-													second_byte = *(lpDIBBits++);
-												bits++;
-											} else {
-												if ((DWORD)(sline + bits) <(DWORD)(info.pImage + head.biSizeImage)) {
-													*(sline + bits) = (BYTE)(second_byte & 0xF0);
+											if ((BYTE*)(sline+bits) < (BYTE*)(info.pImage+head.biSizeImage)){
+												if (low_nibble) {
+													if (i&1)
+														*(sline + bits) |= (second_byte & 0x0f);
+													else
+														*(sline + bits) |= (second_byte & 0xf0)>>4;
+													bits++;
+												} else {
+													if (i&1)
+														*(sline + bits) = (BYTE)(second_byte & 0x0f)<<4;
+													else
+														*(sline + bits) = (BYTE)(second_byte & 0xf0);
 												}
 											}
+
+											if ((i & 1) && (i != (status_byte - 1)))
+												second_byte = *(lpDIBBits++);
+
 											low_nibble = !low_nibble;
 										}
-										if ((((status_byte+1) >> 1) & 1 )== 1)
-											second_byte = *(lpDIBBits++);
+										if ((((status_byte+1) >> 1) & 1 ) == 1)
+											second_byte = *(lpDIBBits++);												
 										break;
 									};
 									break;
 									default :
-										{
-											BYTE* sline = iter.GetRow(scanline);
-											second_byte = *(lpDIBBits++);
-											for (unsigned i = 0; i < status_byte; i++) {
+									{
+										BYTE* sline = iter.GetRow(scanline);
+										second_byte = *(lpDIBBits++);
+										for (unsigned i = 0; i < status_byte; i++) {
+											if ((BYTE*)(sline+bits) < (BYTE*)(info.pImage+head.biSizeImage)){
 												if (low_nibble) {
-													if ((DWORD)(sline + bits) <(DWORD)(info.pImage + head.biSizeImage)) {
-														*(sline + bits) |= second_byte & 0x0F;
-													}
+													if (i&1)
+														*(sline + bits) |= (second_byte & 0x0f);
+													else
+														*(sline + bits) |= (second_byte & 0xf0)>>4;
 													bits++;
 												} else {
-													if ((DWORD)(sline + bits) <(DWORD)(info.pImage + head.biSizeImage))	{
-														*(sline + bits) = (BYTE)(second_byte & 0xF0);
-													}
+													if (i&1)
+														*(sline + bits) = (BYTE)(second_byte & 0x0f)<<4;
+													else
+														*(sline + bits) = (BYTE)(second_byte & 0xf0);
 												}
-												low_nibble = !low_nibble;
 											}
+											low_nibble = !low_nibble;
 										}
-										break;
+									}
+									break;
 								};
 							}
 						}
@@ -297,7 +460,7 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
 											*(sline + bits) = second_byte;
 											bits++;
 										} else {
-											bContinue = FALSE;
+											bContinue = FALSE; //don't delete: we are in memory, it is not as with files
 											break;
 										}
 									}
@@ -306,7 +469,11 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
 						}
 						break;
 					default :
-						throw "compression type not supported";
+						{
+							// "compression type not supported";
+							GlobalUnlock(lpVoid);
+							return false;
+						}
 					}
 				}
 			}
@@ -316,6 +483,9 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
 		}
 
 		GlobalUnlock(lpVoid);
+
+		if (bTopDownDib) Flip();
+
 		return true;
 	}
 	return false;
@@ -345,8 +515,12 @@ HBITMAP CxImage::MakeBitmap(HDC hdc)
 	}
 
 	// this single line seems to work very well
-	HBITMAP bmp = CreateDIBitmap(hdc, (LPBITMAPINFOHEADER)pDib, CBM_INIT,
-		GetBits(), (LPBITMAPINFO)pDib, DIB_RGB_COLORS);
+	//HBITMAP bmp = CreateDIBitmap(hdc, (LPBITMAPINFOHEADER)pDib, CBM_INIT,
+	//	GetBits(), (LPBITMAPINFO)pDib, DIB_RGB_COLORS);
+	// this alternative works also with _WIN32_WCE
+	LPVOID pBit32;
+	HBITMAP bmp = CreateDIBSection(hdc, (LPBITMAPINFO)pDib, DIB_RGB_COLORS, &pBit32, NULL, 0);
+	if (pBit32) memcpy(pBit32, GetBits(), head.biSizeImage);
 
 	return bmp;
 }
@@ -396,30 +570,71 @@ bool CxImage::CreateFromHBITMAP(HBITMAP hbmp, HPALETTE hpal)
  * icon resource constructor
  * \param hico : icon resource handle
  * \return true if everything is ok
+ * \author []; changes [Arlen Albert Keshabian]
  */
+#if !defined (_WIN32_WCE)
 bool CxImage::CreateFromHICON(HICON hico)
 {
-	if (!Destroy())
+	if (!Destroy() || !hico)
 		return false;
 
-	if (hico) { 
-		ICONINFO iinfo;
-		GetIconInfo(hico,&iinfo);
-		if (!CreateFromHBITMAP(iinfo.hbmColor))
-			return false;
+	bool l_bResult = true;
+
+	ICONINFO iinfo;
+	GetIconInfo(hico,&iinfo);
+
+	BITMAP l_Bitmap;
+	GetObject(iinfo.hbmColor, sizeof(BITMAP), &l_Bitmap);
+
+	if(l_Bitmap.bmBitsPixel == 32)
+	{
+		BITMAPINFO l_BitmapInfo;
+		l_BitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+		l_BitmapInfo.bmiHeader.biWidth = l_Bitmap.bmWidth;
+		l_BitmapInfo.bmiHeader.biHeight = l_Bitmap.bmHeight;
+		l_BitmapInfo.bmiHeader.biPlanes = l_Bitmap.bmPlanes;
+		l_BitmapInfo.bmiHeader.biBitCount = l_Bitmap.bmBitsPixel;
+		l_BitmapInfo.bmiHeader.biCompression = BI_RGB;
+
+		RGBQUAD *l_pRawBytes = new RGBQUAD[l_Bitmap.bmWidth * l_Bitmap.bmHeight];
+
+		HDC dc = ::GetDC(NULL);
+
+		if(dc)
+		{
+			if(GetDIBits(dc, iinfo.hbmColor, 0, l_Bitmap.bmHeight, l_pRawBytes, &l_BitmapInfo, DIB_RGB_COLORS))
+				l_bResult = CreateFromArray((BYTE*)l_pRawBytes, l_Bitmap.bmWidth, l_Bitmap.bmHeight, l_Bitmap.bmBitsPixel, l_Bitmap.bmWidthBytes, false);
+			else
+				l_bResult = false;
+
+			::ReleaseDC(NULL, dc);
+		}
+		else
+			l_bResult = false;
+
+		delete [] l_pRawBytes;
+	}
+	else
+	{
+		l_bResult = CreateFromHBITMAP(iinfo.hbmColor);
 #if CXIMAGE_SUPPORT_ALPHA
-		CxImage mask;
-		mask.CreateFromHBITMAP(iinfo.hbmMask);
-		mask.GrayScale();
-		mask.Negative();
-		AlphaSet(mask);
+		if(l_bResult)
+		{
+			CxImage mask;
+			mask.CreateFromHBITMAP(iinfo.hbmMask);
+			mask.GrayScale();
+			mask.Negative();
+			AlphaSet(mask);
+		}
 #endif
-		DeleteObject(iinfo.hbmColor); //<Sims>
-		DeleteObject(iinfo.hbmMask);  //<Sims>
-		return true;
-    }
-	return false;
+	}
+
+	DeleteObject(iinfo.hbmColor); //<Sims>
+	DeleteObject(iinfo.hbmMask);  //<Sims>
+	
+	return l_bResult;
 }
+#endif //_WIN32_WCE
 ////////////////////////////////////////////////////////////////////////////////
 long CxImage::Draw(HDC hdc, const RECT& rect, RECT* pClipRect, bool bSmooth)
 {
@@ -445,9 +660,15 @@ long CxImage::Draw(HDC hdc, long x, long y, long cx, long cy, RECT* pClipRect, b
 
 	if (cx < 0) cx = head.biWidth;
 	if (cy < 0) cy = head.biHeight;
-	bool bTransparent = info.nBkgndIndex != -1;
+	bool bTransparent = info.nBkgndIndex >= 0;
 	bool bAlpha = pAlpha != 0;
 
+	//required for MM_ANISOTROPIC, MM_HIENGLISH, and similar modes [Greg Peatfield]
+	int hdc_Restore = ::SaveDC(hdc);
+	if (!hdc_Restore) 
+		return 0;
+
+#if !defined (_WIN32_WCE)
 	RECT mainbox; // (experimental) 
 	if (pClipRect){
 		GetClipBox(hdc,&mainbox);
@@ -455,6 +676,7 @@ long CxImage::Draw(HDC hdc, long x, long y, long cx, long cy, RECT* pClipRect, b
 		ExtSelectClipRgn(hdc,rgn,RGN_AND);
 		DeleteObject(rgn);
 	}
+#endif
 
 	//find the smallest area to paint
 	RECT clipbox,paintbox;
@@ -470,7 +692,9 @@ long CxImage::Draw(HDC hdc, long x, long y, long cx, long cy, RECT* pClipRect, b
 
 	if (!(bTransparent || bAlpha || info.bAlphaPaletteEnabled)){
 		if (cx==head.biWidth && cy==head.biHeight){ //NORMAL
-			SetStretchBltMode(hdc,COLORONCOLOR);	
+#if !defined (_WIN32_WCE)
+			SetStretchBltMode(hdc,COLORONCOLOR);
+#endif
 			SetDIBitsToDevice(hdc, x, y, cx, cy, 0, 0, 0, cy,
 						info.pImage,(BITMAPINFO*)pDib,DIB_RGB_COLORS);
 		} else { //STRETCH
@@ -514,7 +738,11 @@ long CxImage::Draw(HDC hdc, long x, long y, long cx, long cy, RECT* pClipRect, b
 						sx = max(0L,(long)floor(dx));
 #if CXIMAGE_SUPPORT_INTERPOLATION
 						if (bSmooth){
-							c = GetPixelColorInterpolated(dx - 0.5f, dy - 0.5f, CxImage::IM_BILINEAR, CxImage::OM_REPEAT);
+							if (fx > 1 && fy > 1) { 
+								c = GetAreaColorInterpolated(dx - 0.5f, dy - 0.5f, fx, fy, CxImage::IM_BILINEAR, CxImage::OM_REPEAT); 
+							} else { 
+								c = GetPixelColorInterpolated(dx - 0.5f, dy - 0.5f, CxImage::IM_BILINEAR, CxImage::OM_REPEAT); 
+							} 
 						} else
 #endif //CXIMAGE_SUPPORT_INTERPOLATION
 						{
@@ -548,7 +776,7 @@ long CxImage::Draw(HDC hdc, long x, long y, long cx, long cy, RECT* pClipRect, b
 		long* pc = (long*)&c;
 		long* pct= (long*)&ct;
 		long cit = GetTransIndex();
-		long ci;
+		long ci = 0;
 
 		//Preparing Bitmap Info
 		BITMAPINFO bmInfo;
@@ -602,7 +830,11 @@ long CxImage::Draw(HDC hdc, long x, long y, long cx, long cy, RECT* pClipRect, b
 							ci = GetPixelIndex(sx,sy);
 #if CXIMAGE_SUPPORT_INTERPOLATION
 							if (bSmooth){
-								c = GetPixelColorInterpolated(dx - 0.5f, dy - 0.5f, CxImage::IM_BILINEAR, CxImage::OM_REPEAT);
+								if (fx > 1 && fy > 1) { 
+									c = GetAreaColorInterpolated(dx - 0.5f, dy - 0.5f, fx, fy, CxImage::IM_BILINEAR, CxImage::OM_REPEAT); 
+								} else { 
+									c = GetPixelColorInterpolated(dx - 0.5f, dy - 0.5f, CxImage::IM_BILINEAR, CxImage::OM_REPEAT); 
+								} 
 							} else
 #endif //CXIMAGE_SUPPORT_INTERPOLATION
 							{
@@ -614,7 +846,11 @@ long CxImage::Draw(HDC hdc, long x, long y, long cx, long cy, RECT* pClipRect, b
 						} else {
 #if CXIMAGE_SUPPORT_INTERPOLATION
 							if (bSmooth){
-								c = GetPixelColorInterpolated(dx - 0.5f, dy - 0.5f, CxImage::IM_BILINEAR, CxImage::OM_REPEAT);
+								if (fx > 1 && fy > 1) { 
+									c = GetAreaColorInterpolated(dx - 0.5f, dy - 0.5f, fx, fy, CxImage::IM_BILINEAR, CxImage::OM_REPEAT); 
+								} else { 
+									c = GetPixelColorInterpolated(dx - 0.5f, dy - 0.5f, CxImage::IM_BILINEAR, CxImage::OM_REPEAT); 
+								} 
 							} else
 #endif //CXIMAGE_SUPPORT_INTERPOLATION
 							{
@@ -698,12 +934,15 @@ long CxImage::Draw(HDC hdc, long x, long y, long cx, long cy, RECT* pClipRect, b
 		DeleteDC(TmpDC);
 	}
 
+#if !defined (_WIN32_WCE)
 	if (pClipRect){  // (experimental)
 		HRGN rgn = CreateRectRgnIndirect(&mainbox);
 		ExtSelectClipRgn(hdc,rgn,RGN_OR);
 		DeleteObject(rgn);
 	}
+#endif
 
+	::RestoreDC(hdc,hdc_Restore);
 	return 1;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -727,10 +966,17 @@ long CxImage::Draw2(HDC hdc, long x, long y, long cx, long cy)
 	if((pDib==0)||(hdc==0)||(cx==0)||(cy==0)||(!info.bEnabled)) return 0;
 	if (cx < 0) cx = head.biWidth;
 	if (cy < 0) cy = head.biHeight;
-	bool bTransparent = (info.nBkgndIndex != -1);
+	bool bTransparent = (info.nBkgndIndex >= 0);
+
+	//required for MM_ANISOTROPIC, MM_HIENGLISH, and similar modes [Greg Peatfield]
+	int hdc_Restore = ::SaveDC(hdc);
+	if (!hdc_Restore) 
+		return 0;
 
 	if (!bTransparent){
+#if !defined (_WIN32_WCE)
 		SetStretchBltMode(hdc,COLORONCOLOR);	
+#endif
 		StretchDIBits(hdc, x, y, cx, cy, 0, 0, head.biWidth, head.biHeight,
 						info.pImage,(BITMAPINFO*)pDib, DIB_RGB_COLORS,SRCCOPY);
 	} else {
@@ -748,7 +994,9 @@ long CxImage::Draw2(HDC hdc, long x, long y, long cx, long cy)
 			// Select the image into the appropriate dc
 			HBITMAP bm = CreateCompatibleBitmap(hdc, nWidth, nHeight);
 			HBITMAP pOldBitmapImage = (HBITMAP)SelectObject(dcImage,bm);
+#if !defined (_WIN32_WCE)
 			SetStretchBltMode(dcImage,COLORONCOLOR);
+#endif
 			StretchDIBits(dcImage, 0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight,
 							info.pImage,(BITMAPINFO*)pDib,DIB_RGB_COLORS,SRCCOPY);
 
@@ -779,6 +1027,7 @@ long CxImage::Draw2(HDC hdc, long x, long y, long cx, long cy)
 			DeleteObject(bm);
 		}
 	}
+	::RestoreDC(hdc,hdc_Restore);
 	return 1;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -799,7 +1048,9 @@ long CxImage::Stretch(HDC hdc, long xoffset, long yoffset, long xsize, long ysiz
 {
 	if((pDib)&&(hdc)) {
 		//palette must be correctly filled
+#if !defined (_WIN32_WCE)
 		SetStretchBltMode(hdc,COLORONCOLOR);	
+#endif
 		StretchDIBits(hdc, xoffset, yoffset,
 					xsize, ysize, 0, 0, head.biWidth, head.biHeight,
 					info.pImage,(BITMAPINFO*)pDib,DIB_RGB_COLORS,dwRop);
@@ -842,7 +1093,12 @@ long CxImage::DrawString(HDC hdc, long x, long y, const TCHAR* text, RGBQUAD col
 {
 	if (IsValid()){
 		//get the background
-		HDC TmpDC=CreateCompatibleDC(hdc);
+		HDC pDC;
+		if (hdc) pDC=hdc; else pDC = ::GetDC(0);
+		if (pDC==NULL) return 0;
+		HDC TmpDC=CreateCompatibleDC(pDC);
+		if (hdc==NULL) ::ReleaseDC(0, pDC);
+   		if (TmpDC==NULL) return 0;
 		//choose the font
 		HFONT m_Font;
 		LOGFONT* m_pLF;
@@ -921,8 +1177,11 @@ long CxImage::DrawStringEx(HDC hdc, long x, long y, CXTEXTINFO *pTextType, bool 
 	//get the background
 	HDC pDC;
 	if (hdc) pDC=hdc; else pDC = ::GetDC(0);
+	if (pDC==NULL) return 0;
 	HDC TmpDC=CreateCompatibleDC(pDC);
-   	
+	if (hdc==NULL) ::ReleaseDC(0, pDC);
+   	if (TmpDC==NULL) return 0;
+
     //choose the font
 	HFONT m_Font;
     m_Font=CreateFontIndirect( &pTextType->lfont );
@@ -938,7 +1197,7 @@ long CxImage::DrawStringEx(HDC hdc, long x, long y, CXTEXTINFO *pTextType, bool 
         pTextType->align = DT_CENTER;
 
     // check rounding radius and re-set default if necessary
-    if ( pTextType->b_round > 50 || pTextType->b_round < 0 )
+    if ( pTextType->b_round > 50 )
         pTextType->b_round = 10;
 
     // check opacity and re-set default if necessary
@@ -1004,6 +1263,14 @@ long CxImage::DrawStringEx(HDC hdc, long x, long y, CXTEXTINFO *pTextType, bool 
 	itext.CreateFromHBITMAP(TmpBmp);
     y=head.biHeight-y-1;
 
+	itext.Negative();
+
+	if (pTextType->smooth==FALSE){
+		itext.Threshold(128);
+	} else {
+		//itext.TextBlur();
+	}
+
     //move the insertion point according to alignment type
     // DT_CENTER: cursor points to the center of text rectangle
     // DT_RIGHT:  cursor points to right side end of text rectangle
@@ -1050,14 +1317,23 @@ long CxImage::DrawStringEx(HDC hdc, long x, long y, CXTEXTINFO *pTextType, bool 
 			}
 		}
     }
-	
+
     // draw the text itself
     for (ix=0;ix<width;ix++)
     {
 		for (iy=0;iy<height;iy++)
         {
-            if (itext.GetPixelColor(ix,iy).rgbBlue )
-                SetPixelColor(x+ix+frame,y+iy-frame,p_forecolor,bSetAlpha);
+			RGBQUAD pcolor = GetPixelColor(x+ix,y+iy);
+			RGBQUAD tcolor = itext.GetPixelColor(ix,iy);
+            if (tcolor.rgbBlue!=255){
+				float a = tcolor.rgbBlue/255.0f;
+				pcolor.rgbBlue  = (unsigned char)(a * (pcolor.rgbBlue  - p_forecolor.rgbBlue)  + p_forecolor.rgbBlue );
+                pcolor.rgbRed   = (unsigned char)(a * (pcolor.rgbRed   - p_forecolor.rgbRed)   + p_forecolor.rgbRed ) ;
+                pcolor.rgbGreen = (unsigned char)(a * (pcolor.rgbGreen - p_forecolor.rgbGreen) + p_forecolor.rgbGreen );
+                pcolor.rgbReserved = 0;
+                SetPixelColor(x+ix+frame,y+iy-frame,pcolor,bSetAlpha);
+              //SetPixelColor(x+ix+frame,y+iy-frame,p_forecolor,bSetAlpha);
+			}
 		}
 	}
 
@@ -1093,10 +1369,11 @@ void CxImage::InitTextInfo( CXTEXTINFO *txt )
 
     // initial colors
     txt->fcolor = RGB( 255,255,160 );  // default foreground: light goldyellow
-    txt->bcolor = RGB( 32, 96, 0 );    // default background: deep green
+    txt->bcolor = RGB(   0, 80,160 );  // default background: light blue
 
     // background
     txt->opaque    = TRUE;  // text has a non-transparent background;
+	txt->smooth    = TRUE;
     txt->b_opacity = 0.0;   // default: opaque background
     txt->b_outline = 0;     // default: no outline (OUTLINE NOT IMPLEMENTED AT THIS TIME)
     txt->b_round   = 20;    // default: rounding radius is 20% of the rectangle height
@@ -1105,6 +1382,28 @@ void CxImage::InitTextInfo( CXTEXTINFO *txt )
     txt->align = DT_CENTER;
     return;
 }
+
+#if CXIMAGE_SUPPORT_LAYERS
+////////////////////////////////////////////////////////////////////////////////
+long CxImage::LayerDrawAll(HDC hdc, const RECT& rect, RECT* pClipRect, bool bSmooth)
+{
+	return LayerDrawAll(hdc, rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top, pClipRect,bSmooth);
+}
+////////////////////////////////////////////////////////////////////////////////
+long CxImage::LayerDrawAll(HDC hdc, long x, long y, long cx, long cy, RECT* pClipRect, bool bSmooth)
+{
+	long n=0;
+	CxImage* pLayer;
+	while(pLayer=GetLayer(n++)){
+		if (pLayer->Draw(hdc,x+pLayer->info.xOffset,y+pLayer->info.yOffset,cx,cy,pClipRect,bSmooth)==0)
+			return 0;
+		if (pLayer->LayerDrawAll(hdc,x+pLayer->info.xOffset,y+pLayer->info.yOffset,cx,cy,pClipRect,bSmooth)==0)
+			return 0;
+	}
+	return 1;
+}
+#endif //CXIMAGE_SUPPORT_LAYERS
+
 ////////////////////////////////////////////////////////////////////////////////
 #endif //CXIMAGE_SUPPORT_WINDOWS
 ////////////////////////////////////////////////////////////////////////////////

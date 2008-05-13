@@ -439,7 +439,7 @@ void CKeyEntry::MergeIPsAndFilenames(CKeyEntry* pFromEntry){
 			if (Cur.m_uIP == m_uIP){
 				bRefresh = true;
 				if ((time(NULL) - Cur.m_tLastPublish) < (KADEMLIAREPUBLISHTIMES - HR2S(1))){
-					DebugLog(_T("KadEntryTracking: FastRefresh publish, ip: %s"), ipstr(ntohl(m_uIP)));
+					DEBUG_ONLY( DebugLog(_T("KadEntryTracking: FastRefresh publish, ip: %s"), ipstr(ntohl(m_uIP))) );
 					bFastRefresh = true; // refreshed faster than expected, will not count into filenamepopularity index
 				}
 				Cur.m_tLastPublish = time(NULL);

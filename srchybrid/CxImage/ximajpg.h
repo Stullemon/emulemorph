@@ -20,7 +20,7 @@
  * ==========================================================
  */
 #if !defined(__ximaJPEG_h)
-#define __ixmaJPEG_h
+#define __ximaJPEG_h
 
 #include "ximage.h"
 
@@ -39,8 +39,8 @@ public:
 	CxImageJPG();
 	~CxImageJPG();
 
-//	bool Load(const char * imageFileName){ return CxImage::Load(imageFileName,CXIMAGE_FORMAT_JPG);}
-//	bool Save(const char * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_JPG);}
+//	bool Load(const TCHAR * imageFileName){ return CxImage::Load(imageFileName,CXIMAGE_FORMAT_JPG);}
+//	bool Save(const TCHAR * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_JPG);}
 	bool Decode(CxFile * hFile);
 	bool Decode(FILE *hFile) { CxIOFile file(hFile); return Decode(&file); }
 
@@ -154,7 +154,7 @@ protected:
 	double ConvertAnyFormat(void * ValuePtr, int Format);
 	void* FindSection(int SectionType);
 	bool ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsigned ExifLength,
-                           EXIFINFO * const pInfo, unsigned char ** const LastExifRefdP);
+                           EXIFINFO * const pInfo, unsigned char ** const LastExifRefdP, int NestingLevel=0);
 	int ExifImageWidth;
 	int MotorolaOrder;
 	Section_t Sections[MAX_SECTIONS];
@@ -275,7 +275,7 @@ public:
 		}
 	}
 
-	static void TermSource(j_decompress_ptr cinfo)
+	static void TermSource(j_decompress_ptr /*cinfo*/)
 	{
 		return;
 	}
@@ -299,7 +299,9 @@ public:
 		DECODE_QUANTIZE = 0x100,
 		DECODE_DITHER = 0x200,
 		DECODE_ONEPASS = 0x400,
-		DECODE_NOSMOOTH = 0x800
+		DECODE_NOSMOOTH = 0x800,
+		ENCODE_SUBSAMPLE_422 = 0x1000,
+		ENCODE_SUBSAMPLE_444 = 0x2000
 	}; 
 
 	int m_nPredictor;

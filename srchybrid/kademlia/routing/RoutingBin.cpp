@@ -360,7 +360,7 @@ bool CRoutingBin::ChangeContactIPAddress(CContact* pContact, uint32 uNewIP)
 
 	// everything fine
 	// LOGTODO REMOVE
-	DebugLog(_T("Index contact IP change allowed %s -> %s"), ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(uNewIP)));
+	DEBUG_ONLY( DebugLog(_T("Index contact IP change allowed %s -> %s"), ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(uNewIP))) );
 	AdjustGlobalTracking(pContact->GetIPAddress(), false);
 	pContact->SetIPAddress(uNewIP);
 	AdjustGlobalTracking(pContact->GetIPAddress(), true);

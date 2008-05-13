@@ -2,7 +2,7 @@
  * File:	ximaexif.cpp
  * Purpose:	EXIF reader
  * 18/Aug/2002 Davide Pizzolato - www.xdp.it
- * CxImage version 5.99c 17/Oct/2004
+ * CxImage version 6.0.0 02/Feb/2008
  * based on jhead-1.8 by Matthias Wandel <mwandel(at)rim(dot)net>
  */
 
@@ -377,13 +377,18 @@ static const int BytesPerFormat[] = {0,1,1,2,4,8,1,1,2,4,8,4,8};
    Process one of the nested EXIF directories.
 --------------------------------------------------------------------------*/
 bool CxImageJPG::CxExifInfo::ProcessExifDir(unsigned char * DirStart, unsigned char * OffsetBase, unsigned ExifLength,
-                           EXIFINFO * const m_exifinfo, unsigned char ** const LastExifRefdP )
+                           EXIFINFO * const m_exifinfo, unsigned char ** const LastExifRefdP, int NestingLevel)
 {
     int de;
     int a;
     int NumDirEntries;
     unsigned ThumbnailOffset = 0;
     unsigned ThumbnailSize = 0;
+
+    if (NestingLevel > 4){
+        strcpy(m_szLastError,"Maximum directory nesting exceeded (corrupt exif header)");
+        return false;
+    }
 
     NumDirEntries = Get16u(DirStart);
 
@@ -649,7 +654,7 @@ bool CxImageJPG::CxExifInfo::ProcessExifDir(unsigned char * DirStart, unsigned c
 					strcpy(m_szLastError,"Illegal subdirectory link");
 					return false;
 				}
-				ProcessExifDir(SubdirStart, OffsetBase, ExifLength, m_exifinfo, LastExifRefdP);
+				ProcessExifDir(SubdirStart, OffsetBase, ExifLength, m_exifinfo, LastExifRefdP, NestingLevel+1);
 			}
             continue;
         }
@@ -672,7 +677,7 @@ bool CxImageJPG::CxExifInfo::ProcessExifDir(unsigned char * DirStart, unsigned c
                 strcpy(m_szLastError,"Illegal subdirectory link");
 				return false;
             }
-            ProcessExifDir(SubdirStart, OffsetBase, ExifLength, m_exifinfo, LastExifRefdP);
+            ProcessExifDir(SubdirStart, OffsetBase, ExifLength, m_exifinfo, LastExifRefdP, NestingLevel+1);
         }
     }
 
@@ -819,7 +824,7 @@ bool CxImageJPG::CxExifInfo::EncodeExif(CxFile * hFile)
     // Write all the misc sections
     for (a=0;a<SectionsRead-1;a++){
         hFile->PutC(0xff);
-        hFile->PutC(Sections[a].Type);
+        hFile->PutC((unsigned char)(Sections[a].Type));
         hFile->Write(Sections[a].Data, Sections[a].Size, 1);
     }
 

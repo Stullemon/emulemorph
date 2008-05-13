@@ -93,6 +93,7 @@ void CUDPFirewallTester::SetUDPFWCheckResult(bool bSucceeded, bool bTestCancelle
 				// intern ports and change the setting.
 				CKademlia::GetPrefs()->SetUseExternKadPort(false);
 				DebugLog(_T("Corrected UDP firewall result: Using open internal (%u) instead open external port"), nIncomingPort);
+				theApp.emuledlg->ShowConnectionState();
 				return;
 			}
 			else if (m_liUsedTestClients.GetAt(pos).bAnswered){
