@@ -7,6 +7,7 @@ Compiled with visual studio 2003 sp1.
 
 Merged to 0.49a [Stulle]
 CHANGE:update libping to 1.28 (which is same source as 1.27) [leuk_he]
+CHANGE:update CxImage to 6.00 (we use the rather complete lib) [Stulle]
 FIX: clients downloading during large file completion stuck with 'stalled, reading from disk' [fafner]
 ADD: spreadbars to history [fafner]
 ADD: percentage client already got in QueueList and UploadList [fafner]
