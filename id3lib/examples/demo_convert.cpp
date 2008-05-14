@@ -1,4 +1,4 @@
-// $Id: demo_convert.cpp,v 1.1 2007-11-12 21:32:53 pindakaasmod Exp $
+// $Id: demo_convert.cpp,v 1.2 2008-05-14 09:21:36 pindakaasmod Exp $
 //
 //  The authors have released ID3Lib as Public Domain (PD) and claim no
 //  copyright, patent or other intellectual property protection in this work.
@@ -24,7 +24,7 @@
 using std::cout;
 using std::endl;
 
-static const char* VERSION_NUMBER = "$Revision: 1.1 $";
+static const char* VERSION_NUMBER = "$Revision: 1.2 $";
 
 void PrintUsage(const char *sName)
 {

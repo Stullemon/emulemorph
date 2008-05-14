@@ -70,7 +70,9 @@ void CCaptchaGenerator::ReGenerateCaptcha(uint32 nLetterCount)
 					pimgResult->SetPixelIndex(nOffset + k, j, imgLetter.GetPixelIndex(k, j));
 	}
 	pimgResult->Jitter(1);
-	//pimgResult->Save("D:\\CaptchaTest.bmp", CXIMAGE_FORMAT_BMP);
+#ifdef DEBUG
+	pimgResult->Save(_T("C:\\CaptchaTest.bmp"), CXIMAGE_FORMAT_BMP);
+#endif
 	m_pimgCaptcha = pimgResult;
 }
 

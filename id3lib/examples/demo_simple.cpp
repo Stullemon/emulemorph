@@ -1,4 +1,4 @@
-/* $Id: demo_simple.cpp,v 1.1 2007-11-12 21:32:55 pindakaasmod Exp $
+/* $Id: demo_simple.cpp,v 1.2 2008-05-14 09:21:36 pindakaasmod Exp $
 
  * Copyright 2000 Scott Thomas Haug <scott@id3.org>
  *  
