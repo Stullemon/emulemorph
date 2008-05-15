@@ -271,7 +271,7 @@ BEGIN
     IDS_ERR_BADSERVERLISTRECEIVED "收到无效的服务器列表数据包"
     IDS_STATUS              "状态"
     IDS_DL_REMAINS          "剩余"
-    IDS_UPDATEFROM          "从此URL更新: (filter.dat 或者 PeerGuardian 格式)"
+    IDS_UPDATEFROM          "从此URL更新: (Ipfilter.dat 或者 PeerGuardian 格式)"
     IDS_QL_USERNAME         "用户名"
     IDS_LOADURL             "加载"
     IDS_DELETEAFTERALLOC    "文件 '%s' 正在分配磁盘空间,完成之后此文件会被删除."
@@ -1780,7 +1780,7 @@ BEGIN
     IDS_DOWNLOAD_LANGFILE   "正在下载语言文件..."
     IDS_DOWNLOADING_SERVERMET_FROM "正在下载来自 %s 的 server.met 文件..."
     IDS_DOWNLOADING_SERVERMET "正在下载 server.met 文件..."
-    IDS_FULLALLOC           "为非稀疏文件分配硬盘空间"
+    IDS_FULLALLOC           "为临时文件足额分配硬盘空间"
 END
 
 STRINGTABLE 
@@ -1816,7 +1816,7 @@ BEGIN
     IDS_ARCHTYPE            "文件类型"
     IDS_ATTRIBUTES          "属性"
     IDS_LASTMODIFIED        "上次修改"
-    IDS_ARCPREV_DIRSUCCREAD "内容表读取成功." //"Table of contents successfully read."
+    IDS_ARCPREV_DIRSUCCREAD "内容表读取成功." 
 END
 
 STRINGTABLE 
@@ -1841,7 +1841,7 @@ BEGIN
     IDS_LOADFILTER_EMTOOLBAR "eMule工具条位图文件"
     IDS_LOADFILTER_EMSKINFILES "eMule外观文件"
     IDS_ARCHPREV_ATTRIBINFO "文件属性可能包括:\r\n\r\nP\t文件受密码保护\r\nD\t是一个目录文件\r\nC\tComment\r\nLx\t压缩级别为 x\r\nM\t压缩数据尚未从\r\n<\t上一分卷中完全下载\r\n>\t文件还有下一分卷\r\n"
-    IDS_CONTENT_INFO        "内容"// "There is no MediaInfo library installed. If you want to get more information about audio/video files in this dialog,\r\ndownload the MediaInfo library from http://sourceforge.net/projects/mediainfo/ and copy the MediaInfo.dll file into\r\neMule's installation folder ""%s"".\r\n"
+    IDS_CONTENT_INFO        "内容"
     
 END
 
@@ -1876,6 +1876,30 @@ BEGIN
     IDS_MARKNOTSPAM         "标记为非垃圾信息"
     IDS_SEARCHSPAMFILTER    "对搜索结果进行垃圾信息过滤"
     IDS_SHOWSMILEYS         "显示表情图标"
+    IDS_CAPTCHAREQUEST      "为避免垃圾信息, 这个用户需要先你通过captcha认证才能给他发消息.\n请输入你在图片中看到的数字:"
+    IDS_CAPTCHAFAILED       "你未能通过captcha认证, 所发消息将被忽略. \n你可以通过发送新消息再次申请认证."
+    IDS_CAPTCHASOLVED       "你已通过captcha认证, 对方将收到你的消息."
+    IDS_USECAPTCHAS         "需要captcha认证"
+    IDS_BOOTSRAPNODESDAT    "从指定链接下载Nodes.dat:"
+    IDS_DOWNLOADING_NODESDAT_FROM "正在从 %s 下载nodes.dat"
+    IDS_DOWNLOADING_NODESDAT "正在下载nodes.dat..."
+    IDS_ERR_FAILEDDOWNLOADNODES "无法从 %s 下载nodes.dat"
+    IDS_PREVENTSTANDBY      "eMule运行时禁用待机模式"
+    IDS_KADID               "KadID"
+END
+	 
+STRINGTABLE
+BEGIN
+    IDS_SEARCHINGFRIENDKAD  "在Kad网络中寻找好友"
+    IDS_FOUND               "已找到"
+    IDS_EXTERNUDPPORT       "外部UDP端口"
+    IDS_STORESEARCHES       "启动时记住打开搜索"
+    IDS_WRN_INCFILE_EXISTS  "你选择了一个已经存在文件的新目录作为下载目录. \n目录中已有的所有文件将自动为eMule共享."
+    IDS_EDITSPAMFILTER      "修改垃圾信息过滤器..."
+    IDS_EDITSPAMFILTERCOMMENTS "修改评论垃圾信息过滤器"
+    IDS_WIZZARDOBFUSCATION  "启用此选项以便使用协议加密.\n\n如果你的网络提供商试图封杀eMule, 启用协议加密将有助于突破封锁."
+    IDS_BETANAG             "这是一个beta版的eMule. 请访问我们的论坛反馈问题或获取更新 (http://forum.emule-project.net)."
+    IDS_CONFIRMNODESDOWNLOAD "你是否想从此链接下载和使用Kad节点(nodes.dat):\n%s ?"
 END
 
 STRINGTABLE 
@@ -3389,7 +3413,7 @@ BEGIN
     IDS_INTERNETSECURITYZONE_TIP 
                             "按照IE的安全设置设定安全区域. \n设定允许哪些使用HTML编码的内容. \n此设置和迷你骡窗口的设置相关.\n允许范围=<b>Untrusted</b>|Internet|Intranet|Trusted|LocalMachine\n(<b>受限制的站点</b>|Internet|本地Intranet|受信任的站点|本机)"
     IDS_TXTEDITOR_TIP       "输入修改网络服务和Ipfilter.dat的默认编辑器.\n如果不使用默认的notepad.exe,\n则需要输入程序的完整路径."
-    IDS_DATETIMEFORMAT_TIP  "日期格式为=%A, %x, %X\n此功能设定eMule中显示日期和时间的格式.\n%a, %A(略写), 显示星期几\n%b, %B(略写), 显示月份\n%c  日期和时间的表示方式\n%d  显示在该月中的天数(01-31)\n%H      24小时格式 (00-23)\n%I  12小时格式 (01-12)\n%j 显示在一年中的天数(001-366)\n%m  显示在一年中的月数(01-12)\n%M  显示分钟(00-59)\n%p  A.M./P.M.\n%S  以数字显示秒数\n%U  在一年中的周数, \n%w  以数字显示一周中的日期 (0-6; 周日为0)\n%x 当前日期\n%X  当前时间\n%y  完整年份\n%Y  略写年份\n%z, %Z  使用完整时区名或略写时区名"
+    IDS_DATETIMEFORMAT_TIP  "日期格式为=%A, %x, %X\n此功能设定eMule中显示日期和时间的格式.\n%a, %A(略写), 显示星期几\n%b, %B(略写), 显示月份\n%c  根据区域设置选择适当的表示方式\n%d  显示在该月中的天数(01-31)\n%H      24小时格式 (00-23)\n%I  12小时格式 (01-12)\n%j 显示在一年中的天数(001-366)\n%m  显示在一年中的月数(01-12)\n%M  显示分钟(00-59)\n%p  A.M./P.M.\n%S  以数字显示秒数\n%U  在一年中的周数, \n%w  以数字显示一周中的日期 (0-6; 周日为0)\n%x 当前日期\n%X  当前时间\n%y  完整年份\n%Y  略写年份\n%z, %Z  使用完整时区名或略写时区名"
     IDS_SERVERUDPPORT_TIP   "通常情况下, 连接到服务器并查找来源\n或搜索文件时使用的本地端口是随机的.\n但如果eMule在网络环境比较复杂的电脑上运行,\n尤其是在使用了路由器的情况下,\n可能就需要把端口设为固定值,\n甚至禁用此项功能. 如果此处的端口被禁用, 就意味着\neMule将不能更新服务器栏中的服务器状态,\n也不能从服务器获得来源及进行全局搜索,\n除非eMule已经实际连接到了该服务器. \n此处的默认设置通常不需更改.\n可用的UDP端口设定值为\n0                   禁用\n1 - 65534  固定的本地UDP 端口\n<b>65535</b> 使用随机端口(默认设置)"
     IDS_REMOVEFILESTOBIN_TIP 
                             "本设置将影响在共享文件窗口点击右键后删除文件的效果.\n如禁用此项, 文件将从硬盘永久删除, 不会移动到回收站."
@@ -3573,7 +3597,7 @@ BEGIN
     IDS_X_SHOWCOPYED2KLINK  "显示'复制ed2k链接'命令"
     IDS_X_ICON_FLASH_ON_NEW_MESSAGE "收到新消息时闪烁任务栏图标"
     IDS_X_SHOWVERTICALHOURMARKERS "在统计信息窗口显示垂直线"
-    IDS_X_REBARTOOLBAR      "禁用一些工具条选项"
+    IDS_X_REBARTOOLBAR      "附加工具条选项"
  
  
  END

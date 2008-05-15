@@ -1072,7 +1072,7 @@ BEGIN
     IDS_SHOWOVERHEAD        "Mostra OverHead"
     IDS_UPDOWNSMALL         "Up: %.1f | Down: %.1f" //!
     IDS_EDITLIST            "Lista..."
-    IDS_SP_ICONBAR          "Barra della Velocità nella Trayicon"
+    IDS_SP_ICONBAR          "Barra della Velocità nella TrayIcon"
     IDS_RATINGRECV          "Dai un voto al File ricevuto ""%s"": %u"
     IDS_DESCRIPTIONRECV     "Descrizione per il File ricevuto ""%s"": %s"
     IDS_WEBSERVICES         "Risorse Web"
@@ -1114,7 +1114,7 @@ BEGIN
     IDS_USECREDITSYSTEM     "Usa il Sistema dei Crediti (Favorirai chi ti fa scaricare)"
     IDS_FIRSTAUTODOWN       "Vuoi che eMule gestisca le priorità dei File in Download?\n\nAttivando quest'opzione permetterai ad eMule di controllare che i File con molte fonti non interferiscano con quelli con poche fonti. Quest'opzione avrà effetto solo sui Download futuri."
     IDS_FIRSTAUTOUP         "Vuoi che eMule gestisca le priorità degli Upload?\n\nAttivando quest'opzione consentirai ad eMule di accelerare la diffusione dei File più rari, inviando di meno i File popolari. Disattivando quest'opzione consentirai ad eMule di inviare con la stessa intensità i File rari e quelli popolari. Quest'opzione avrà effetto solo sui File condivisi in futuro."
-    IDS_FIRSTFULLCHUNK      "Vuoi inviare parti complete?\n\nAttivando quest'opzione darai ai Client ai quali invii File una possibilità maggiore di completare il Download di una parte intera (9.5 Mb). Disattivandola farai girare la tua coda più velocemente. Se sei un Releaser è facile che tu voglia attivare quest'opzione."
+//    IDS_DELETEDRESTRING1    "[Resstring deleted]"
     IDS_FIRSTSAFECON        "Vuoi che eMule si connetta ai Server utilizzando una connessione sicura?\n\nDisattivando questa funzione, permetterai ad eMule di connettersi ai Server più velocemente, ma sarà maggiore la possibilità di ottenere falsi ID Bassi."
     IDS_FIRSTAUTOCON        "Connetti automaticamente eMule al suo avvio."
     IDS_FIRSTCOMPLETE       "Hai completato il processo d'impostazione passo-passo.\n\nTutte queste ed altre opzioni possono essere modificate cliccando sul pulsante 'Opzioni'. Per spiegazioni e supporto controlla la guida premendo F1 in eMule!"
@@ -1326,7 +1326,7 @@ BEGIN
     IDS_STATS_TIMESTATS     "Durata Statistiche"
     IDS_STATS_AVGANDPROJ    "Medie Programmate"
     IDS_STATS_TIMESINCERESET "Tempo dall'Ultimo Azzeramento: %s"
-    IDS_CRYPT_INITFAILED    "Inizializzazione chiave di cifratura fallita - identificazione sicura disabilitata"
+    IDS_CRYPT_INITFAILED    "Inizializzazione chiave di cifratura fallita - identificazione sicura disabilitata.\nControlla i permessi delle cartelle nelle impostazioni delle cartelle."
     IDS_CD_IDENT            "Identificazione:"
     IDS_IDENTOK             "Corretta"
     IDS_IDENTFAILED         "Non valida"
@@ -1406,7 +1406,7 @@ BEGIN
     IDS_VERSION             "Versione"
     IDS_OPTIONS             "Opzioni"
     IDS_PASTE               "Incolla"
-    IDS_SEARCHAUTHORCOLLECTION "Cerca l'Autore delle Collezioni"
+    IDS_SEARCHAUTHORCOLLECTION "Cerca l'Autore delle Collezioni..."
     IDS_ERR_DUPL_FILES      "File condivisi doppi: ""%s"" e ""%s"""
     IDS_USS_TRACEROUTEOFTENFAILED 
                             "UploadSpeedSense: Traceroute fallito troppe volte. Upload SpeedSense disattivato."
@@ -1456,7 +1456,7 @@ BEGIN
     IDS_FILEINFORMATION     "Informazioni sul File"
     IDS_STATS_FREESPACE     "Spazio libero su Disco"
     IDS_IRC_HELPCHANNEL     "Connettiti ai canali di Aiuto"
-    IDS_IRC_HELPCHANNELPERFORM "/join #emule | /join #emule-italian | /join #emule-morphxt-italian"
+    IDS_IRC_HELPCHANNELPERFORM "/join #emule-italian | /join #emule-morphxt-italian"
     IDS_IRC_ACCEPTLINKSFRIENDS "Solo dagli Amici"
     IDS_COMPLSOURCES        "Fonti Complete"
     IDS_CHECKNOENDTIME      "Nessuna fine"
@@ -1758,13 +1758,13 @@ BEGIN
     IDS_RELATED             "File correlati"
     IDS_COLL_REPLACEEXISTING "Vuoi sostituire il File esistente?"
     IDS_COLL_ERR_DELETING   "Si è verificato un errore durante l'eliminazione del File precedente. Uscire senza salvare?"
-    IDS_CREATECOLLECTION    "Crea una Collezione"
-    IDS_MODIFYCOLLECTION    "Modifica Collezione"
+    IDS_CREATECOLLECTION    "Crea una Collezione..."
+    IDS_MODIFYCOLLECTION    "Modifica Collezione..."
     IDS_COLL_SIGN           "Segna la Collezione con Nome e Chiave"
     IDS_AUTHOR              "Autore"
     IDS_AUTHORKEY           "Chiave Autore"
     IDS_COLL_ADDINCAT       "Aggiungi i nuovi Download in una Categoria di Collezione"
-    IDS_VIEWCOLLECTION      "Vedi Collezione"
+    IDS_VIEWCOLLECTION      "Vedi Collezione..."
 END
 
 STRINGTABLE 
@@ -1895,6 +1895,31 @@ BEGIN
     IDS_MARKNOTSPAM         "Segna come non Spam"
     IDS_SEARCHSPAMFILTER    "Abilita il Filtro Anti-Spam per la ricerca"
     IDS_SHOWSMILEYS         "Mostra Smiley (faccine)"
+    IDS_CAPTCHAREQUEST      "Per evitare i messaggi di Spam, questo utente richiede che tu risolva un 'Captcha' prima che tu possa inviargli un messaggio. Inserisci come risposta le lettere che vedi in questa immagine:"
+    IDS_CAPTCHAFAILED       "La tua risposta al 'Captcha' è errata e il tuo messaggio è stato ignorato. Puoi richiedere un nuovo 'Captcha' inviando un nuovo messaggio."
+    IDS_CAPTCHASOLVED       "Hai superato il controllo 'Captcha' e l'utente ha ricevuto il tuo messaggio."
+    IDS_USECAPTCHAS         "Richiedi un'autenticazione 'Captcha'"
+    IDS_BOOTSRAPNODESDAT    "'nodes.dat' dall'URL:"
+    IDS_DOWNLOADING_NODESDAT_FROM "Scaricamento del File 'nodes.dat' da %s"
+    IDS_DOWNLOADING_NODESDAT "Scaricamento del File 'nodes.dat' in corso..."
+    IDS_ERR_FAILEDDOWNLOADNODES "Si è verificato un errore nello scaricare il File 'nodes.dat' da %s"
+    IDS_PREVENTSTANDBY      "Previeni la modalità Standby quando eMule è in esecuzione"
+    IDS_KADID               "ID Kad"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_SEARCHINGFRIENDKAD  "Ricerca di amici nella rete Kad in corso..."
+    IDS_FOUND               "trovato"
+    IDS_EXTERNUDPPORT       "Porta UDP Esterna"
+    IDS_STORESEARCHES       "Ricorda le ricerche aperte tra i riavvii"
+    IDS_WRN_INCFILE_EXISTS  "Hai selezionato una nuova cartella per i tuoi File scaricati che non è vuota. Tutti i File esistenti in questa cartella verranno automaticamente condivisi da eMule."
+    IDS_EDITSPAMFILTER      "Modifica il filtro Anti-Spam..."
+    IDS_EDITSPAMFILTERCOMMENTS "Modifica il filtro Anti-Spam per i commenti"
+    IDS_WIZZARDOBFUSCATION  "Abilita questa funzione se vuoi attivare l'offuscamento del protocollo.\n\nSe il tuo ISP tenta di limitare o bloccare eMule, l'attivazione\ndell'offuscamento aiuterà ad aggirare alcune restrizioni."
+    IDS_BETANAG             "Questa è una versione beta di eMule. Riferisci i problemi e controlla regolarmente la presenza di aggiornamenti nel nostro forum (http://forum.emule-project.net)."
+    IDS_CONFIRMNODESDOWNLOAD 
+                            "Vuoi scaricare ed usare i contatti Kad (nodes.dat) da questo indirizzo:\n%s ?"
 END
 
 //////////////////////////// MorphXT strings //////////////////////////////////
@@ -3413,8 +3438,8 @@ BEGIN
     IDS_MAXMSGSESSIONS      "maxmsgsessions (sessioni Chat)"
     IDS_PREFERRESTRICTEDOVERUSER "PreferRestrictedOverUser"
     IDS_WEBFILEUPLOADSIZELIMITMB "WebFileUploadSizeLimitMB (Default 5, 0=tutto)"
-    IDS_HIGHRESTIMER        "HighresTimer"
-    IDS_HIGHRESTIMER_TIP    "?"
+    IDS_HIGHRESTIMER        "Timer alta risoluzione"
+    IDS_HIGHRESTIMER_TIP    "Il timer ad alta risoluzione permette al programma di effettuare misurazioni più\nfrequenti e precise, questo comporta una maggiore stabilità e armonia nell'Upload\ne nel calcolo del Ping"
     IDS_TRUSTEVERYHASH_TIP  "(Sola Sessione, non salvata). SOLO DEBUG. Disattivazione votazione"
     IDS_INSPECTALLFILETYPES_TIP 
                             "Se attiva determina il formato dei File scaricati/condivisi analizzando gli Header\n(molto utile quando la libreria MediaInfo è installata)"

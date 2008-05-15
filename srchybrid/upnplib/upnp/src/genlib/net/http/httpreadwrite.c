@@ -667,9 +667,10 @@ http_Download( IN const char *url_str,
                "HOSTNAME : %s Length : %d\n", hoststr, hostlen );
          )
 
-        ret_code = http_MakeMessage( &request, 1, 1, "QsbcDCUc",
-                                     HTTPMETHOD_GET, url.pathquery.buff,
-                                     url.pathquery.size, "Host: ", hoststr,
+        ret_code = http_MakeMessage( &request, 1, 1, "Qsbcc", // leuk_he: remove user agent. 
+                                     HTTPMETHOD_GET, 
+									 url.pathquery.buff,  url.pathquery.size, 
+									 "Host: ", hoststr,
                                      hostlen );
     if( ret_code != 0 ) {
         DBGONLY( UpnpPrintf
@@ -823,18 +824,18 @@ MakePostMessage( const char *url_str,
          )
 
         if( contentLength >= 0 ) {
-        ret_code = http_MakeMessage( request, 1, 1, "QsbcDCUTNc",
+        ret_code = http_MakeMessage( request, 1, 1, "QsbcDTNc",
                                      HTTPMETHOD_POST, url->pathquery.buff,
                                      url->pathquery.size, "Host: ",
                                      hoststr, hostlen, contentType,
                                      contentLength );
     } else if( contentLength == UPNP_USING_CHUNKED ) {
-        ret_code = http_MakeMessage( request, 1, 1, "QsbcDCUTKc",
+        ret_code = http_MakeMessage( request, 1, 1, "QsbcDTKc",
                                      HTTPMETHOD_POST, url->pathquery.buff,
                                      url->pathquery.size, "Host: ",
                                      hoststr, hostlen, contentType );
     } else if( contentLength == UPNP_UNTIL_CLOSE ) {
-        ret_code = http_MakeMessage( request, 1, 1, "QsbcDCUTc",
+        ret_code = http_MakeMessage( request, 1, 1, "QsbcDTc",
                                      HTTPMETHOD_POST, url->pathquery.buff,
                                      url->pathquery.size, "Host: ",
                                      hoststr, hostlen, contentType );

@@ -5917,6 +5917,7 @@ BEGIN
     IDS_ADVADMIN_USER       "Username:"
     IDS_ADVADMIN_CAT        "Categories (sep. by |):"
     IDS_WS_COOKIE_LOGGEDIN  "Remain Logged In:"
+	IDS_WS_COOKIE_LASTUSER  "Memorize Last User:"
 END
 
 STRINGTABLE 
