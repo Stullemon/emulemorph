@@ -8223,9 +8223,7 @@ void CPartFile::ProcessSourceCache()
 		{
 			PartfileSourceCache currentsource=m_sourcecache.RemoveHead();
 			CUpDownClient* newsource = new CUpDownClient(this,currentsource.nPort, currentsource.dwID,currentsource.dwServerIP,currentsource.nServerPort,currentsource.ed2kIDFlag);
-			newsource->SetCryptLayerSupport((currentsource.byCryptOptions & 0x01) != 0);
-			newsource->SetCryptLayerRequest((currentsource.byCryptOptions & 0x02) != 0);
-			newsource->SetCryptLayerRequires((currentsource.byCryptOptions & 0x04) != 0);
+			newsource->SetConnectOptions(currentsource.byCryptOptions,true,false);
 			newsource->SetSourceFrom(currentsource.sourcefrom);
 			if(currentsource.withuserhash==true)
 				newsource->SetUserHash(currentsource.achUserHash);
