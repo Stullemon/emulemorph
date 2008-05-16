@@ -24,7 +24,6 @@ CHANGE: Using a different method to create captcha due to new version of CxImage
 CHANGE: FriendSlots now saved in 0x66 (0x2 occupied by official) [Stulle]
 REMOVED: SafeKAD (the Officials did a big step in that direction) [Stulle]
 REMOVED: KAD optimizations (what ever :P) [Stulle]
-REMOVED: <<morphXt>> text in user nick. half antimodfaker
 
 --------------------------------------
 Changelog for eMule 0.48a MorphXT v10.5 installer

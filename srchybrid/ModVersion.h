@@ -26,10 +26,6 @@
 #define	MOD_VERSION_LONG	_T("MorphXT v")
 //END   - This part should not be changed in anyway
 
-// Send << morphxt versoin>> in nickname?
-#undef MOD_ALTER_NICK 
-
-
 #define	MOD_MOD_VERSION		_T("") //Use this to define your version based on MorphXT mod
 
 //MORPH END  - Added by SiRoB, [-modname-]

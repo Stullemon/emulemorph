@@ -1564,10 +1564,7 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	CTag tagName(CT_NAME, (!m_bGPLEvildoer) ? thePrefs.GetUserNick() : _T("Please use a GPL-conform version of eMule") );
 	*/
 	CString m_strTemp = thePrefs.GetUserNick();
-#ifdef MOD_ALTER_NICK 
-	// leuk_he: defined (OR NOT) in modversion.h
     m_strTemp.AppendFormat(_T("\x20\xAB%s\xBB"), theApp.m_strModVersion);
-#endif
 	CTag tagName(CT_NAME, (!m_bGPLEvildoer) ? m_strTemp : _T("Please use a GPL-conform version of eMule") );
 	//MOPRH END   - Anti ModID Faker [Xman]
 	tagName.WriteTagToFile(data, utf8strRaw);
