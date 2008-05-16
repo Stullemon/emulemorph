@@ -82,6 +82,16 @@ void CStatisticsTree::OnRButtonDown(UINT /*nFlags*/, CPoint point)
 
 void CStatisticsTree::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 {
+	if (point.x != -1 || point.y != -1) {
+		CRect rcClient;
+		GetClientRect(&rcClient);
+		ClientToScreen(&rcClient);
+		if (!rcClient.PtInRect(point)) {
+			Default();
+			return;
+		}
+	}
+
 	DoMenu(point, TPM_LEFTALIGN | TPM_RIGHTBUTTON);
 }
 

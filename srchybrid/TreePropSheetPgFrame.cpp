@@ -8,9 +8,9 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.4 $
+* $Revision: 1.5 $
 * $Modtime:$
-* $Author: sirob $
+* $Author: stulleamgym $
 *
 * Revision History:
 *	$History:$
@@ -142,7 +142,7 @@ CRect CPropPageFrame::CalcMsgArea()
 
 void CPropPageFrame::DrawMsg(CDC *pDc, CRect rect, LPCTSTR /*lpszMsg*/, DWORD /*dwFormat*/) 
 {
-	CFont	*pPrevFont = (CFont*)pDc->SelectStockObject(DEFAULT_GUI_FONT);
+	CFont	*pPrevFont = (CFont*)pDc->SelectObject(AfxGetMainWnd()->GetFont());
 	int		nPrevBkMode = pDc->SetBkMode(TRANSPARENT);
 
 	pDc->DrawText(GetMsgText(), rect, GetMsgFormat());

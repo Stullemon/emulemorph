@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.8 $
+* $Revision: 1.9 $
 * $Modtime:$
 * $Author: stulleamgym $
 *
@@ -876,6 +876,11 @@ BOOL CTreePropSheet::OnInitDialog()
 			rectTree, this, s_unPageTreeId);
 	}
 	#endif
+	
+	// This treeview control was created dynamically, thus it does not derive the font
+	// settings from the parent dialog. Need to set the font explicitly so that it fits
+	// to the font which is used for the property pages.
+	m_pwndPageTree->SendMessage(WM_SETFONT, (WPARAM)AfxGetMainWnd()->GetFont()->m_hObject, TRUE);
 	
 	// Win98: Explicitly set to Unicode to receive Unicode notifications.
 	m_pwndPageTree->SendMessage(CCM_SETUNICODEFORMAT, TRUE);
