@@ -1,27 +1,27 @@
 --------------------------------------
 Changelog for eMule 0.49a MorphXT v11.0
 --------------------------------------
-xx-05-2008
+18-05-2008
 Compiled with visual studio 2003 sp1. 
   should also work with vs 2005 sp1
 
-Merged to 0.49a [Stulle]
+Merged to 0.49a [Stulle] 
 CHANGE:update libping to 1.28 (which is same source as 1.27) [leuk_he]
 CHANGE:update CxImage to 6.00 (we use the rather complete lib) [Stulle]
+CHANGE:update cryptolib Version 5.5.2 (9/24/2007)
 FIX: clients downloading during large file completion stuck with 'stalled, reading from disk' [fafner]
 ADD: spreadbars to history [fafner]
 ADD: percentage client already got in QueueList and UploadList [fafner]
 ADD: chunk number to chunk details in UploadList [fafner]
-ADD: Show  much verbose info on content-> mediafinfo.dll (if you disable advanedoptions mediainfo_RIFF for avi files...)
+ADD: Show  much verbose info on content-> mediafinfo.dll (if you disable advanced options mediainfo_RIFF for avi files...)
 ADD: (BETA!) download ack overhead used in in upload calculation
 ADD: show if server obfuscation key is available
 FIX: use part.met.bak files instead of hardly ever seen valid part.met.backup files. [leuk_he]
-CHANGE: update cryptolib Version 5.5.2 (9/24/2007)
 ADD: experimental support for visual studio 2005 sp1. See readme. [fafner/rapid mule/leuk_he]
 ADD: alpha support for vs2008, make very sure to read the readme.
 CHANGE: reduce some cpu under wine [leuk_he]
 CHANGE: Using a different method to create captcha due to new version of CxImage lib [Stulle]
-CHANGE: FriendSlots now saved in 0x66 (0x2 occupied by official) [Stulle]
+CHANGE: FriendSlots now saved in 0x03 (0x2 occupied by official) [Stulle]
 REMOVED: SafeKAD (the Officials did a big step in that direction) [Stulle]
 REMOVED: KAD optimizations (what ever :P) [Stulle]
 

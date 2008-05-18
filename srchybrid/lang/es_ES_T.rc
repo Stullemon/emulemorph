@@ -3081,7 +3081,7 @@ BEGIN
     IDS_ADVADMIN_PASS       "Contraseña:"
     IDS_ADVADMIN_USER       "Usuario:"
     IDS_ADVADMIN_CAT        "Categorías ( | ):"
-    IDS_WS_COOKIE_LOGGEDIN  "Recordar Logged In:"
+    IDS_WS_COOKIE_LOGGEDIN  "Permanecer conectado:"
 END
 
 STRINGTABLE 
@@ -3296,7 +3296,7 @@ BEGIN
 	IDS_WIZ8_MORPH          "Configuraciones del MorphXT"
 	IDS_MORPHWIZ_GUI        "Opciones del MorphXT"
 	IDS_MORPHWIZ_SHOWMORE   "Mostrar más controles (Avanzado)"
-	IDS_MORPHWIZ_SHOWLESS   "Mostrar menos controles (Principiante/Simple)"
+	IDS_MORPHWIZ_SHOWLESS   "Mostrar menos controles (Simple)"
 END
   
 STRINGTABLE
@@ -3458,7 +3458,7 @@ BEGIN
 	IDS_CAPTCHAREQUEST      "Con el fin de evitar mensajes del tipo spam, este usuario requiere una comprobación del tipo captcha antes de poder enviarle un mensaje. Por fevor, introduzca las letras que vea en la imágen como respuesta:"
 	IDS_CAPTCHAFAILED       "Tu respuesta del captcha es incorrecta y tu mensaje ha sido ignorado. Puedes solicitar un nuevo captcha enviando otro mensaje nuevo."
 	IDS_CAPTCHASOLVED       "Ha pasado la comprobación del captcha y el usuario ha recibido tu mensaje."
-	IDS_USECAPTCHAS         "Requiere autentificación por captcha"
+	IDS_USECAPTCHAS         "Requerir autentificación por captcha"
 	IDS_BOOTSRAPNODESDAT    "URL del archivo de nodos de KAD (nodes.dat):"
 	IDS_DOWNLOADING_NODESDAT_FROM "Descargando archivo de nodos de KAD (nodes.dat) de %s"
 	IDS_DOWNLOADING_NODESDAT "Descargando archivo de nodos de KAD (nodes.dat)..."
@@ -3467,6 +3467,19 @@ BEGIN
 	IDS_KADID               "IDKAD"
 	IDS_SEARCHINGFRIENDKAD  "Buscando amigo en la red KAD"
 	IDS_FOUND               "encontrado"
+END
+
+STRINGTABLE
+BEGIN
+	IDS_EXTERNUDPPORT       "Puerto UDP Externo"
+	IDS_STORESEARCHES       "Recordar las búsquedas aunque se reinicie"
+	IDS_WRN_INCFILE_EXISTS  "Has seleccionado un nuevo directorio para tus archivos entrantes, que no está vacío. Todos los archivos de este directorio serán compartidos automáticamente por el eMule."
+	IDS_EDITSPAMFILTER      "Editar el filtro de Spam"
+	IDS_EDITSPAMFILTERCOMMENTS "Editar el filtro de Spam de los Comentarios"
+	IDS_WIZZARDOBFUSCATION  "Activa esta opción si quieres usar el protocolo ofuscado\n\nSi tu ISP intenta bloquear el eMule, activar la ofuscación ayudará a eludir esas restricciones."
+	IDS_BETANAG             "Esta es una versión Beta de eMule. Por favor, reporta los problemas y comprueba regularmente las actualizaciones en nuestro foro (http://spanishmorphxt.activoforo.com)."
+	IDS_CONFIRMNODESDOWNLOAD "¿Quieres descargar y usar los contactos de KAD (nodes.dat) de esta dirección:\n%s ?"
+	IDS_WS_COOKIE_LASTUSER  "Memorizar Último Usuario:"
 END
 #endif    // Spanish (Castilian) resources
 /////////////////////////////////////////////////////////////////////////////

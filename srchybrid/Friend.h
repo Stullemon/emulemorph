@@ -40,7 +40,7 @@ enum EFriendConnectReport{
 #define	FF_NAME		0x01
 #define	FF_KADID	0x02
 //MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
-#define FF_FRIENDSLOT 0x66
+#define FF_FRIENDSLOT 0x03
 //MORPH END - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 // MORPH (CB) Friendnote
 #define FF_FRIENDNOTE 0x77
