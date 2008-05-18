@@ -4454,7 +4454,7 @@ void CemuleDlg::SetClipboardWatch(bool enable)
 			}
 		// start temp fix
 		if (in_OnDrawClipboard==true) {
-			DebugLog(LOG_WARNING,_T("OnDrawclipboard: clipboard chain has loop to self. If you can tell the steps to reproduce please open a topic in the morph support forum"));
+			DebugLog(LOG_WARNING,_T("OnDrawclipboard: clipboard chain has loop to self." ));
 			ASSERT(in_OnDrawClipboard==false)   ;
 			return;
 		}
