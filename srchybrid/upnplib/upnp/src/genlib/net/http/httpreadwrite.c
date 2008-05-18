@@ -824,18 +824,18 @@ MakePostMessage( const char *url_str,
          )
 
         if( contentLength >= 0 ) {
-        ret_code = http_MakeMessage( request, 1, 1, "QsbcDTNc",
+        ret_code = http_MakeMessage( request, 1, 1, "QsbcDCUTNc",
                                      HTTPMETHOD_POST, url->pathquery.buff,
                                      url->pathquery.size, "Host: ",
                                      hoststr, hostlen, contentType,
                                      contentLength );
     } else if( contentLength == UPNP_USING_CHUNKED ) {
-        ret_code = http_MakeMessage( request, 1, 1, "QsbcDTKc",
+        ret_code = http_MakeMessage( request, 1, 1, "QsbcDCUTKc",
                                      HTTPMETHOD_POST, url->pathquery.buff,
                                      url->pathquery.size, "Host: ",
                                      hoststr, hostlen, contentType );
     } else if( contentLength == UPNP_UNTIL_CLOSE ) {
-        ret_code = http_MakeMessage( request, 1, 1, "QsbcDTc",
+        ret_code = http_MakeMessage( request, 1, 1, "QsbcDCUTc",
                                      HTTPMETHOD_POST, url->pathquery.buff,
                                      url->pathquery.size, "Host: ",
                                      hoststr, hostlen, contentType );
@@ -1863,7 +1863,8 @@ http_MakeMessage( INOUT membuffer * buf,
             // SERVER or USER-AGENT header
 
             temp_str = ( c == 'S' ) ? "Server: " : "User-Agent: ";
-            get_sdk_info( tempbuf, 200 );
+            //get_sdk_info( tempbuf, 200 );
+			strcpy(tempbuf,"Morph"); // shorter is more compatible, leuk_he
             if( http_MakeMessage
                 ( buf, http_major_version, http_minor_version, "ss",
                   temp_str, tempbuf ) != 0 ) {

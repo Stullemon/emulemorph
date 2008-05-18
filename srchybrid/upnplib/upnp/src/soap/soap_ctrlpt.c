@@ -650,7 +650,8 @@ SoapSendAction( IN char *action_url,
 
     // make request msg
     request.size_inc = 50;
-    if( http_MakeMessage( &request, 1, 1, "Q" "s" "sssbs" "Hc" "Nc" "C" "s" "c" "bbbc", // leuk_he add newlines, remove user agent
+    // if( http_MakeMessage( &request, 1, 1, "Q" "s" "sssbs" "Hc" "Nc" "C" "s" "c" "bbbc", // leuk_he add newlines, remove user agent ???
+    if( http_MakeMessage( &request, 1, 1, "Q" "s" "sssbs" "U" "H" "N" "C" "s" "c" "bbb",
                           SOAPMETHOD_POST, url.pathquery.buff, url.pathquery.size,
                           ContentTypeHeader,
                           "SOAPAction: \"", service_type, "#", name.buf, name.length, "\"\r\n",
