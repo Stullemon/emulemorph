@@ -1077,7 +1077,7 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 		}
 		else{
 			if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: Couldn't add mapping: \"%s\". The port %d is already mapped to other application (\"%s\" on %s:%d). [%s]"), desc, mapping->externalPort, fullMapping.description, fullMapping.internalClient, fullMapping.internalPort, srv->ServiceType);
+					theApp.QueueDebugLogLine(false, _T("UPnP: Couldn't add mapping: \"%s\". The port %d is already mapped to other pc/application (\"%s\" on %s:%d). [%s]"), desc, mapping->externalPort, fullMapping.description, fullMapping.internalClient, fullMapping.internalPort, srv->ServiceType);
 			return UNAT_NOT_OWNED_PORTMAPPING;
 		}
 	}
