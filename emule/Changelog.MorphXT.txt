@@ -1,6 +1,8 @@
 --------------------------------------
 Changelog for eMule 0.49a MorphXT v11.0
 --------------------------------------
+19-05-2008
+FIX: Release build instead of alpha build.
 18-05-2008
 Compiled with visual studio 2003 sp1. 
   should also work with vs 2005 sp1
