@@ -445,12 +445,16 @@ void CUpDownClient::DrawCompletedPercent(CDC* dc, RECT* cur_rec) const //Fafner:
 
 float CUpDownClient::GetCompletedPercent() const //Fafner: client percentage - 080325
 {
-	try { //Fafner: try to avoid crash on removed file - 070516
-		return (float)(m_uiCompletedParts + m_uiCurrentChunks) / (float)CheckAndGetReqUpFile()->GetPartCount() * 100.0f;
-}		//m_uiCompletedParts is what we got reported from client and m_uiCurrentChunks is what we guess during upload
-	catch (...) {
+	//MORPH START - Changed by Stulle, try to avoid crash
+	CKnownFile* currequpfile = CheckAndGetReqUpFile();
+	uint16 uPartCount = 0;
+	if(currequpfile) // no NULL-pointer
+		uPartCount = currequpfile->GetPartCount();
+	if(uPartCount > 0) // no division by zero
+		return (float)(m_uiCompletedParts + m_uiCurrentChunks) / (float)uPartCount * 100.0f;
+	else
 		return 0.0f;
-	}
+	//MORPH END   - Changed by Stulle, try to avoid crash
 }
 
 void CUpDownClient::SetUploadState(EUploadState eNewState)
