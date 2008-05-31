@@ -1,4 +1,10 @@
 --------------------------------------
+Changelog for eMule 0.49a MorphXT v11.X
+--------------------------------------
+XX-XX-2008
+FIX: Improperly reloading icons for SharedDirsTree [Stulle]
+
+--------------------------------------
 Changelog for eMule 0.49a MorphXT v11.0
 --------------------------------------
 19-05-2008
