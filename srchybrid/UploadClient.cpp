@@ -446,14 +446,21 @@ void CUpDownClient::DrawCompletedPercent(CDC* dc, RECT* cur_rec) const //Fafner:
 float CUpDownClient::GetCompletedPercent() const //Fafner: client percentage - 080325
 {
 	//MORPH START - Changed by Stulle, try to avoid crash
-	CKnownFile* currequpfile = CheckAndGetReqUpFile();
-	uint16 uPartCount = 0;
-	if(currequpfile) // no NULL-pointer
-		uPartCount = currequpfile->GetPartCount();
-	if(uPartCount > 0) // no division by zero
-		return (float)(m_uiCompletedParts + m_uiCurrentChunks) / (float)uPartCount * 100.0f;
-	else
+	try
+	{
+		CKnownFile* currequpfile = CheckAndGetReqUpFile();
+		if(!currequpfile) // no NULL-pointer
+			return 0.0f;
+		const uint16 uPartCount = currequpfile->GetPartCount();
+		if(uPartCount > 0) // no division by zero
+			return (float)(m_uiCompletedParts + m_uiCurrentChunks) / (float)uPartCount * 100.0f;
+		else
+			return 0.0f;
+	}
+	catch(...)
+	{
 		return 0.0f;
+	}
 	//MORPH END   - Changed by Stulle, try to avoid crash
 }
 
