@@ -3,6 +3,9 @@ Changelog for eMule 0.49a MorphXT v11.X
 --------------------------------------
 XX-XX-2008
 FIX: Improperly reloading icons for SharedDirsTree [Stulle]
+ADD: DirectX (Preview feature) support for VS05 [eMF]
+ADD: TextToSpeech support for VS05 [Stulle]
+CHANGE: Exception Handling Model to /EHa [fafner]
 
 --------------------------------------
 Changelog for eMule 0.49a MorphXT v11.0

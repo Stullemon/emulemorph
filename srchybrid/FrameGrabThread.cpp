@@ -20,7 +20,11 @@
 #include "CxImage/xImage.h"
 #include "OtherFunctions.h"
 #include "quantize.h"
+//MORPH START - Added, DirectX (Preview feature) support for VS05 [eMF]
+/*
 #if _MSC_VER<1400
+*/
+//MORPH END   - Added, DirectX (Preview feature) support for VS05 [eMF]
 // DirectShow MediaDet
 #include <strmif.h>
 //#include <uuids.h>
@@ -51,7 +55,11 @@ typedef struct tagVIDEOINFOHEADER {
     REFERENCE_TIME  AvgTimePerFrame;   // Average time per frame (100ns units)
     BITMAPINFOHEADER bmiHeader;
 } VIDEOINFOHEADER;
+//MORPH START - Added, DirectX (Preview feature) support for VS05 [eMF]
+/*
 #endif
+*/
+//MORPH END   - Added, DirectX (Preview feature) support for VS05 [eMF]
 #include "emuledlg.h"
 
 #ifdef _DEBUG
@@ -97,7 +105,11 @@ UINT CFrameGrabThread::GrabFrames(){
 	#define TIMEBETWEENFRAMES	50.0 // could be a param later, if needed
 	for (int i = 0; i!= nFramesToGrab; i++)
 		imgResults[i] = NULL;
+//MORPH START - Added, DirectX (Preview feature) support for VS05 [eMF]
+/*
 #if _MSC_VER<1400
+*/
+//MORPH END   - Added, DirectX (Preview feature) support for VS05 [eMF]
 	try{
 		HRESULT hr;
 		CComPtr<IMediaDet> pDet;
@@ -234,9 +246,13 @@ UINT CFrameGrabThread::GrabFrames(){
 		ASSERT(0);
 		return 0;
 	}
+//MORPH START - Added, DirectX (Preview feature) support for VS05 [eMF]
+/*
 #else
 	return 0;
 #endif
+*/
+//MORPH END   - Added, DirectX (Preview feature) support for VS05 [eMF]
 }
 
 void CFrameGrabThread::SetValues(const CKnownFile* in_pOwner, CString in_strFileName,uint8 in_nFramesToGrab, double in_dStartTime, bool in_bReduceColor, uint16 in_nMaxWidth, void* in_pSender){
