@@ -3638,7 +3638,6 @@ void CUpDownClient::ProcessChatMessage(CSafeMemFile* data, uint32 nLength)
 				*/
 				AddDebugLogLine(false,_T("Filtered Message from '%s' (IP:%s) (%s)"), GetUserName(), ipstr(GetConnectIP()),GetClientSoftVer());
 				//MORPH END   - Changed by SiRoB, Just Add client soft version
-				AddDebugLogLine(false,_T("Filtered Message from '%s' (IP:%s)"), GetUserName(), ipstr(GetConnectIP()));
 		}
 		SetMessageFiltered(true);
 		return;
