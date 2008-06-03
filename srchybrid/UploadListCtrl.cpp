@@ -572,7 +572,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							cur_rec.bottom--;
 							cur_rec.top++;
 							client->DrawUpStatusBar(dc,&cur_rec,false,thePrefs.UseFlatBar());
-							client->DrawCompletedPercent(dc,&cur_rec); //Fafner: client percentage - 080325
+							// MORPH START
+							if (file)  // protect against deleted file
+								client->DrawCompletedPercent(dc,&cur_rec); //Fafner: client percentage - 080325
+							// MORPH END
 							cur_rec.bottom++;
 							cur_rec.top--;
 						break;
