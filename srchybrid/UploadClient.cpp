@@ -458,7 +458,9 @@ float CUpDownClient::GetCompletedPercent() const //Fafner: client percentage - 0
 			return 0.0f;
 	}
 	catch(...)
-	{
+	{	//Note: although we check for currequpfile != NULL above, there may be cases where GetPartCount() crashes anyway. Further investigation ist needed.
+		//Note: DebugLogError may be removed later
+		DebugLogError(_T("CUpDownClient::GetCompletedPercent: exception - client %s"), DbgGetClientInfo());
 		return 0.0f;
 	}
 	//MORPH END   - Changed by Stulle, try to avoid crash
@@ -474,7 +476,7 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 			m_readblockthread = NULL;
 			if (m_abyfiledata != (byte*)-2 && m_abyfiledata != (byte*)-1 && m_abyfiledata != NULL)
 				delete[] m_abyfiledata;
-			m_abyfiledata = NULL; //Fafner: missing? (clients don't restart CReadBlockFromFileThread) - 080421
+			m_abyfiledata = NULL; //Fafner: important! (clients don't restart CReadBlockFromFileThread otherwise) - 080421
 		}
 		//MORPH END   - ReadBlockFromFileThread
 		if (m_nUploadState == US_UPLOADING)
@@ -747,7 +749,13 @@ void CUpDownClient::CreateNextBlockPackage(){
         while (!m_BlockRequests_queue.IsEmpty() && m_abyfiledata != (byte*)-2) {
 			if (m_abyfiledata == (byte*)-1) {
 				//An error occured //Fafner: note: this error is common during file copying - 080421
-				if (!CheckAndGetReqUpFile()->IsPartFile() || ((CPartFile*)CheckAndGetReqUpFile())->GetFileOp() != PFOP_COPYING)
+				if (m_readblockthread)
+					m_readblockthread = NULL; //thread already terminated
+				m_abyfiledata = NULL; //Fafner: important! (clients don't restart CReadBlockFromFileThread otherwise) - 080421
+				if (CheckAndGetReqUpFile() &&
+					CheckAndGetReqUpFile()->IsPartFile() && ((CPartFile*)CheckAndGetReqUpFile())->GetFileOp() == PFOP_COPYING)
+					; //do nothing, no real error here since the partfile is just copying and hence locked
+				else
 				theApp.sharedfiles->Reload();
 				throw GetResString(IDS_ERR_OPEN);
 			}
@@ -930,8 +938,10 @@ void CUpDownClient::CreateNextBlockPackage(){
 
 bool CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqfile)
 {
+	if (m_abyUpPartStatus) { //Fafner: missing? - 080325
 	delete[] m_abyUpPartStatus;
 	m_abyUpPartStatus = NULL;
+	}
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
 	m_uiCompletedParts = 0; //Fafner: client percentage - 080325
@@ -1244,8 +1254,10 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 		return;
 
 	// clear old status
+	if (m_abyUpPartStatus) { //Fafner: missing? - 080325
 	delete[] m_abyUpPartStatus;
 	m_abyUpPartStatus = NULL;
+	}
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
 	m_nSelectedChunk = 0;	// SLUGFILLER: hideOS - TODO: Notify the file the chunk is free for all
@@ -1886,9 +1898,11 @@ int CReadBlockFromFileThread::Run() {
 				theApp.QueueDebugLogLine(false,GetResString(IDS_ERR_CLIENTERRORED), m_clientname, error); //Fafner: avoid possible crash - 080421
 			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
-			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL) {
 				delete[] filedata;
-			//return 1; //Fafner: note: exit here gives corrupted heap; so let the thread end by StopReadBlock() - 080421
+				filedata = NULL;
+			}
+			return 1;
 		}
 		catch(CFileException* e)
 		{
@@ -1902,10 +1916,12 @@ int CReadBlockFromFileThread::Run() {
 				theApp.QueueDebugLogLine(false,_T("Failed to create upload package for %s - %s"), m_clientname, szError); //Fafner: avoid possible crash - 080421
 			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
-			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL) {
 				delete[] filedata;
+				filedata = NULL;
+			}
 			e->Delete();
-			//return 2; //Fafner: note: exit here gives corrupted heap; so let the thread end by StopReadBlock() - 080421
+			return 2;
 		}
 		catch(...)
 		{
@@ -1915,9 +1931,11 @@ int CReadBlockFromFileThread::Run() {
 			}
 			if (theApp.emuledlg && theApp.emuledlg->IsRunning())
 				PostMessage(theApp.emuledlg->m_hWnd,TM_READBLOCKFROMFILEDONE,(WPARAM)-1,(LPARAM)m_client);
-			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL)
+			else if (filedata != (byte*)-1 && filedata != (byte*)-2 && filedata != NULL) {
 				delete[] filedata;
-			//return 3; //Fafner: note: exit here gives corrupted heap; so let the thread end by StopReadBlock() - 080421
+				filedata = NULL;
+			}
+			return 3;
 		}
 		
 		pauseEvent.Lock();
