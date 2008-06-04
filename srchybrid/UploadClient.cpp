@@ -474,9 +474,6 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 		if (m_readblockthread) {
 			m_readblockthread->StopReadBlock();
 			m_readblockthread = NULL;
-			if (m_abyfiledata != (byte*)-2 && m_abyfiledata != (byte*)-1 && m_abyfiledata != NULL)
-				delete[] m_abyfiledata;
-			m_abyfiledata = NULL; //Fafner: important! (clients don't restart CReadBlockFromFileThread otherwise) - 080421
 		}
 		//MORPH END   - ReadBlockFromFileThread
 		if (m_nUploadState == US_UPLOADING)
@@ -749,9 +746,8 @@ void CUpDownClient::CreateNextBlockPackage(){
         while (!m_BlockRequests_queue.IsEmpty() && m_abyfiledata != (byte*)-2) {
 			if (m_abyfiledata == (byte*)-1) {
 				//An error occured //Fafner: note: this error is common during file copying - 080421
-				if (m_readblockthread)
-					m_readblockthread = NULL; //thread already terminated
-				m_abyfiledata = NULL; //Fafner: important! (clients don't restart CReadBlockFromFileThread otherwise) - 080421
+				m_readblockthread = NULL; //thread already terminated at this point
+				m_abyfiledata = NULL;
 				if (CheckAndGetReqUpFile() &&
 					CheckAndGetReqUpFile()->IsPartFile() && ((CPartFile*)CheckAndGetReqUpFile())->GetFileOp() == PFOP_COPYING)
 					; //do nothing, no real error here since the partfile is just copying and hence locked
