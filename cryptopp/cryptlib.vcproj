@@ -22,7 +22,7 @@
 			WholeProgramOptimization="FALSE">
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zm400 "
+				AdditionalOptions="/Zm400 /EHa"
 				Optimization="3"
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
@@ -34,6 +34,7 @@
 				OptimizeForWindowsApplication="TRUE"
 				PreprocessorDefinitions="NDEBUG;_WINDOWS;USE_PRECOMPILED_HEADERS;WIN32"
 				StringPooling="TRUE"
+				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="3"

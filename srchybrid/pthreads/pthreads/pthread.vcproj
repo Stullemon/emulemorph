@@ -22,6 +22,7 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/EHa"
 				Optimization="2"
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="1"
@@ -32,6 +33,7 @@
 				AdditionalIncludeDirectories="."
 				PreprocessorDefinitions="__CLEANUP_C;WIN32;NDEBUG;_WINDOWS;PTW32_STATIC_LIB"
 				StringPooling="TRUE"
+				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"

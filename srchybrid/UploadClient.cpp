@@ -935,8 +935,8 @@ void CUpDownClient::CreateNextBlockPackage(){
 bool CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqfile)
 {
 	if (m_abyUpPartStatus) { //Fafner: missing? - 080325
-	delete[] m_abyUpPartStatus;
-	m_abyUpPartStatus = NULL;
+		delete[] m_abyUpPartStatus;
+		m_abyUpPartStatus = NULL;
 	}
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;
@@ -1251,8 +1251,8 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 
 	// clear old status
 	if (m_abyUpPartStatus) { //Fafner: missing? - 080325
-	delete[] m_abyUpPartStatus;
-	m_abyUpPartStatus = NULL;
+		delete[] m_abyUpPartStatus;
+		m_abyUpPartStatus = NULL;
 	}
 	m_nUpPartCount = 0;
 	m_nUpCompleteSourcesCount= 0;

@@ -73,10 +73,12 @@
 			CharacterSet="2">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/EHa"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories=".\;..\;..\include;..\include\id3;..\..\zlib\include;..\..\cryptopp"
 				PreprocessorDefinitions="NDEBUG,WIN32,_LIB,_WINDOWS,HAVE_CONFIG_H,ID3LIB_LINKOPTION=1"
 				StringPooling="TRUE"
+				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				UsePrecompiledHeader="2"

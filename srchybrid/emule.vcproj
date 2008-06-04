@@ -85,6 +85,7 @@
 			WholeProgramOptimization="TRUE">
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/EHa"
 				Optimization="3"
 				GlobalOptimizations="TRUE"
 				InlineFunctionExpansion="2"
@@ -97,6 +98,7 @@
 				AdditionalIncludeDirectories="..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
 				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_RELEASE;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB"
 				StringPooling="TRUE"
+				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="TRUE"
 				EnableFunctionLevelLinking="TRUE"
@@ -2792,10 +2794,10 @@
 				RelativePath="res\Proxy.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\queue.ico">
+				RelativePath="res\queue.ico">
 			</File>
 			<File
-				RelativePath="res\queue.ico">
+				RelativePath=".\res\Mod\queue.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\Rating-Excellent.ico">
@@ -3029,16 +3031,16 @@
 				RelativePath="res\TrayBtnMetallic.bmp">
 			</File>
 			<File
-				RelativePath=".\res\MOD\TrayConnected.ico">
-			</File>
-			<File
 				RelativePath="res\TrayConnected.ico">
 			</File>
 			<File
-				RelativePath=".\res\MOD\Traydisconnected.ico">
+				RelativePath=".\res\MOD\TrayConnected.ico">
 			</File>
 			<File
 				RelativePath="res\TrayDisconnected.ico">
+			</File>
+			<File
+				RelativePath=".\res\MOD\Traydisconnected.ico">
 			</File>
 			<File
 				RelativePath=".\res\MOD\traylowid.ico">
