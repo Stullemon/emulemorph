@@ -334,7 +334,7 @@ CUpDownClient* CClientList::FindClientByIP(uint32 clientip, UINT port) const
 			return cur_client;
 		//Fafner: error? (GetIP() doesn't always seem to work) - 070920
 		if (cur_client->GetConnectIP() == clientip && cur_client->GetUserPort() == port) {
-			ASSERT(cur_client->GetConnectIP() == cur_client->GetIP()); // Official uses getip? do we have a bug here?
+//			ASSERT(cur_client->GetConnectIP() == cur_client->GetIP()); // Official uses getip? do we have a bug here?
 			return cur_client;
 		}
 	}
@@ -511,10 +511,14 @@ void CClientList::TrackBadRequest(const CUpDownClient* upcClient, int nIncreaseC
 	if (m_trackedClientsList.Lookup(upcClient->GetIP(), pResult)){
 		pResult->m_dwInserted = ::GetTickCount();
 		pResult->m_cBadRequest += nIncreaseCounter;
+		// morph some extra verbose tracking, read http://forum.emule-project.net/index.php?showtopic=136682
+		AddDebugLogLine(false, _T("Client: %s (%s), Increased badrequestcounter to %d"), upcClient->GetUserName(), ipstr(upcClient->GetConnectIP()),pResult->m_cBadRequest);
 	}
 	else{
 		CDeletedClient* ccToAdd = new CDeletedClient(upcClient);
 		ccToAdd->m_cBadRequest = nIncreaseCounter;
+		// morph some extra verbose tracking, read http://forum.emule-project.net/index.php?showtopic=136682
+		AddDebugLogLine(false, _T("Client: %s (%s), Increased set badrequestcounter to %d"), upcClient->GetUserName(), ipstr(upcClient->GetConnectIP()),pResult->m_cBadRequest);
 		m_trackedClientsList.SetAt(upcClient->GetIP(), ccToAdd);
 	}
 }

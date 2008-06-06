@@ -695,6 +695,7 @@ public:
 	static bool	m_bDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 	static bool m_bDontRemoveSpareTrickleSlot;//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	static bool	m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
+	static bool m_bUseDownloadOverhead; // MORPH leuk_he include download overhead in upload stats
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	static SYSTEMTIME		m_FakesDatVersion;
 	static bool		UpdateFakeStartup;

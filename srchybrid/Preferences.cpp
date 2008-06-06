@@ -530,6 +530,7 @@ bool	CPreferences::m_bSaveUploadQueueWaitTime;//Morph - added by AndCycle, Save 
 int	CPreferences::m_iKnownMetDays; // EastShare - Added by TAHO, .met file control
 bool	CPreferences::m_bDateFileNameLog;//Morph - added by AndCycle, Date File Name Log
 bool	CPreferences::m_bDontRemoveSpareTrickleSlot;//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+bool	CPreferences::m_bUseDownloadOverhead;//Morph - leuk_he use download overhead in upload
 bool	CPreferences::m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
 
 //MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
@@ -2610,6 +2611,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("SaveUploadQueueWaitTime"), m_bSaveUploadQueueWaitTime,_T("eMule"));//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
 	ini.WriteBool(_T("DateFileNameLog"), m_bDateFileNameLog,_T("eMule"));//Morph - added by AndCycle, Date File Name Log
 	ini.WriteBool(_T("DontRemoveSpareTrickleSlot"), m_bDontRemoveSpareTrickleSlot,_T("eMule"));//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	ini.WriteBool(_T("UseDownloadOverhead"),m_bUseDownloadOverhead,_T("eMule"));//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 	ini.WriteBool(_T("DisplayFunnyNick"), m_bFunnyNick,_T("eMule"));//MORPH - Added by SiRoB, Optionnal funnynick display
 	//EastShare Start - Added by Pretender, TBH-AutoBackup
 	ini.WriteBool(_T("AutoBackup"),autobackup,_T("eMule"));
@@ -3430,7 +3432,9 @@ void CPreferences::LoadPreferences()
 	m_iPayBackFirstLimit=(uint8)min(ini.GetInt(_T("PayBackFirstLimit"),10),255);//MORPH - Added by SiRoB, Pay Back First Tweak
 	m_bOnlyDownloadCompleteFiles = ini.GetBool(_T("OnlyDownloadCompleteFiles"), false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), true );//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	m_bDontRemoveSpareTrickleSlot = ini.GetBool(_T("DontRemoveSpareTrickleSlot"), true);//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	m_bDontRemoveSpareTrickleSlot = ini.GetBool(_T("DontRemoveSpareTrickleSlot"), false);//Morph - added by AndCycle, Dont Remove Spare Trickle Slot --> default is now false because it disables slotfocus
+	m_bUseDownloadOverhead= ini.GetBool(_T("UseDownloadOverhead"), true); //Morph - leuk_he use download overhead in upload
+	
 	m_bFunnyNick = ini.GetBool(_T("DisplayFunnyNick"), true);//MORPH - Added by SiRoB, Optionnal funnynick display
 	_stprintf(UpdateURLFakeList,_T("%s"),ini.GetString(_T("UpdateURLFakeList"),_T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip")));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	if (!_tcsicmp(UpdateURLFakeList, _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes")))

@@ -3575,7 +3575,11 @@ void CUpDownClient::CheckFailedFileIdReqs(const uchar* aucFileHash)
 	//if (GetDownloadState() != DS_DOWNLOADING) // filereq floods are never allowed!
 	{
 		if (m_fFailedFileIdReqs < 6)// NOTE: Do not increase this nr. without increasing the bits for 'm_fFailedFileIdReqs'
+		{
 			m_fFailedFileIdReqs++;
+     		// morph some extra suprious verbose tracking, read http://forum.emule-project.net/index.php?showtopic=136682
+	    	AddDebugLogLine(false, _T("Client: %s (%s), Increased set m_fFailedFileIdReqs to %d"), GetUserName(), ipstr(GetConnectIP()),m_fFailedFileIdReqs );
+		}
 		if (m_fFailedFileIdReqs == 6)
 		{
 			if (theApp.clientlist->GetBadRequests(this) < 2)

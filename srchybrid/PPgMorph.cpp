@@ -116,6 +116,7 @@ CPPgMorph::CPPgMorph()
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
 	m_htiInfiniteQueue = NULL;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	m_htiDontRemoveSpareTrickleSlot = NULL; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	m_htiUseDownloadOverhead = NULL ;//
 	m_htiCompressLevel =NULL ;// morph settable compresslevel
 	m_htiUseCompression=NULL ;// morph Use compress 
 
@@ -370,7 +371,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 
 		m_htiInfiniteQueue = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_INFINITEQUEUE), m_htiUM, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 		m_htiDontRemoveSpareTrickleSlot = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DONTREMOVESPARETRICKLESLOT), m_htiUM, m_bDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-		
+		m_htiUseDownloadOverhead = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USEDOWNLOADOVERHEAD), m_htiUM, m_bUseDownloadOverhead); //Morph - leuk_he use download overhead in upload
 		m_htiCompressLevel = m_ctrlTreeOptions.InsertItem(GetResString(IDS_COMPRESSLEVEL), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUM);
 		m_ctrlTreeOptions.AddEditBox(m_htiCompressLevel, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_htiUseCompression= m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_USECOMPRESS), m_htiUM, m_bUseCompression); //MORPH - added by Commander, Show WC Session stats
@@ -435,6 +436,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiInfiniteQueue, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDontRemoveSpareTrickleSlot, m_bDontRemoveSpareTrickleSlot); //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseDownloadOverhead, m_bUseDownloadOverhead);//Morph - leuk_he use download overhead in upload
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiCompressLevel, m_iCompressLevel); //Morph - Compresslevel
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseCompression, m_bUseCompression); //Morph - Compresslevel
 	DDV_MinMaxInt(pDX, m_iCompressLevel,1,9);//Morph - Compresslevel
@@ -541,6 +543,7 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bEnableAntiCreditHack = thePrefs.enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
 	m_bInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	m_bDontRemoveSpareTrickleSlot = thePrefs.m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	m_bUseDownloadOverhead= thePrefs.m_bUseDownloadOverhead; // MORPH leuk_he include download overhead in upload stats
     m_iCompressLevel = thePrefs.m_iCompressLevel; //Compresslevel
 	m_bUseCompression = thePrefs.m_bUseCompression; // use compression
 	m_bFunnyNick = thePrefs.m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
@@ -676,6 +679,7 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	thePrefs.infiniteQueue = m_bInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	thePrefs.m_bDontRemoveSpareTrickleSlot = m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	thePrefs.m_bUseDownloadOverhead= m_bUseDownloadOverhead; // MORPH leuk_he include download overhead in upload stats
 	thePrefs.m_iCompressLevel = m_iCompressLevel; // morph settable compression
 	thePrefs.m_bUseCompression = m_bUseCompression; // use compression
 	thePrefs.m_bFunnyNick = m_bFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
@@ -859,6 +863,11 @@ void CPPgMorph::Localize(void)
 		if (m_htiDontRemoveSpareTrickleSlot){m_ctrlTreeOptions.SetItemText(m_htiDontRemoveSpareTrickleSlot, GetResString(IDS_DONTREMOVESPARETRICKLESLOT));//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
 											 SetTool(m_htiDontRemoveSpareTrickleSlot,IDS_DONTREMOVESPARETRICKLESLOT_TIP);
 		}
+		if (m_htiUseDownloadOverhead){m_ctrlTreeOptions.SetItemText(m_htiUseDownloadOverhead, GetResString(IDS_USEDOWNLOADOVERHEAD));//Morph 
+											 SetTool(m_htiUseDownloadOverhead,IDS_USEDOWNLOADOVERHEAD_TIP);
+		}
+
+
 		if (m_htiDisplayFunnyNick) {m_ctrlTreeOptions.SetItemText(m_htiDisplayFunnyNick, GetResString(IDS_DISPLAYFUNNYNICK));//MORPH - Added by SiRoB, Optionnal funnynick display
 				                    SetTool(m_htiDisplayFunnyNick,IDS_DISPLAYFUNNYNICK_TIP);
 		}

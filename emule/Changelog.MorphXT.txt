@@ -7,6 +7,7 @@ ADD: DirectX (Preview feature) support for VS05 [eMF]
 ADD: TextToSpeech support for VS05 [Stulle]
 CHANGE: Exception Handling Model to /EHa [fafner]
 Changed: (Morph) Reverted a fix to fafner style [Stulle]
+Changed: made download ack overhead (morph -> upload management) optional [leuk_he]
 
 --------------------------------------
 Changelog for eMule 0.49a MorphXT v11.0

@@ -48,6 +48,7 @@ protected:
 	bool m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	bool m_bInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	bool m_bDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	bool m_bUseDownloadOverhead; //// MORPH leuk_he include download overhead in upload stats
     int  m_iCompressLevel; // MORPH compresslevel
 	bool  m_bUseCompression; // Use compression. 
 	bool m_bFunnyNick; //MORPH - Added by SiRoB, Optionnal funnynick display
@@ -136,6 +137,7 @@ protected:
 	HTREEITEM m_htiEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	HTREEITEM m_htiInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	HTREEITEM m_htiDontRemoveSpareTrickleSlot; //Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	HTREEITEM m_htiUseDownloadOverhead; //// MORPH leuk_he include download overhead in upload stats
 	HTREEITEM m_htiCompressLevel; //Morph - compresslevel
 	HTREEITEM m_htiUseCompression; //Morph - compresslevel
 	HTREEITEM m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display

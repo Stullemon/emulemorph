@@ -2852,8 +2852,10 @@ void CUpDownClient::CheckQueueRankFlood()
 	{
 		if (GetDownloadState() != DS_DOWNLOADING)
 		{
-			if (m_fUnaskQueueRankRecv < 3) // NOTE: Do not increase this nr. without increasing the bits for 'm_fUnaskQueueRankRecv'
-				m_fUnaskQueueRankRecv++;
+			if (m_fUnaskQueueRankRecv < 3) {// NOTE: Do not increase this nr. without increasing the bits for 'm_fUnaskQueueRankRecv'
+                m_fUnaskQueueRankRecv++;
+				AddDebugLogLine(false, _T("Clients: %s (%s),m_fUnaskQueueRankRecv =%d (3+badrequest=ban) "), GetUserName(), ipstr(GetConnectIP()),m_fUnaskQueueRankRecv); //morph extra logging
+			}
 			if (m_fUnaskQueueRankRecv == 3)
 			{
 				if (theApp.clientlist->GetBadRequests(this) < 2)

@@ -3755,7 +3755,8 @@
 #define  IDS_USS_INITIAL_TTL_TIP  31298
 #define  IDC_SELFILES 31299
 #define  IDS_SELFILES_TIP 31300
-                    
+#define  IDS_USEDOWNLOADOVERHEAD 31301
+#define  IDS_USEDOWNLOADOVERHEAD_TIP 31302
 
 
 // Next default values for new objects

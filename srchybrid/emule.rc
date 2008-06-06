@@ -6302,6 +6302,8 @@ BEGIN
    IDS_USS_INITIAL_TTL     "Initial TTL" // [MoNKi: -USS initial TTL-] - Stulle
    IDS_USS_INITIAL_TTL_TIP	"In finding the last common router Skip the first n routers\nThis might be usefule if the providers blocks pings at the\ninternel routers. Test this with the 'tracert' command. Default =0, \nIf you go higher than 8 you have a strange ISP network. max = 20\n20 is not recommended. Setting a too high value will cause\n'Network topology has changed.' verbose messages. Loosing the \neffectiveness  of the USS"
    IDS_SELFILES_TIP "Filesname that were in the link queue at the first display \nof this category selection. More may be added during \n the category selection but are not displayed here"
+   IDS_USEDOWNLOADOVERHEAD "Use download overhead"
+   IDS_USEDOWNLOADOVERHEAD_TIP "Use the ack traffic coming from the download session\nIn the upload statistics, allowing to set your upload\nslightly higher when downloading a lot(default=on)"
 END
 
 
