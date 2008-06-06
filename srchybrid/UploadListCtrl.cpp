@@ -749,6 +749,18 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		else
 			dc.FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
 	}
+	//MORPH START - Fafner: missing - 080606
+	//draw focus rectangle around non-highlightable items when they have the focus
+	else if (((lpDrawItemStruct->itemState & ODS_FOCUS) == ODS_FOCUS) && (GetFocus() == this))
+	{
+		RECT focus_rec;
+		focus_rec.top    = lpDrawItemStruct->rcItem.top;
+		focus_rec.bottom = lpDrawItemStruct->rcItem.bottom;
+		focus_rec.left   = lpDrawItemStruct->rcItem.left + 1;
+		focus_rec.right  = lpDrawItemStruct->rcItem.right - 1;
+		dc.FrameRect(&focus_rec, &CBrush(m_crNoFocusLine));
+	}
+	//MORPH END - Fafner: missing - 080606
 
 	if (m_crWindowTextBk == CLR_NONE)
 		dc.SetBkMode(iOldBkMode);
