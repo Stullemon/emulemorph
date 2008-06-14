@@ -826,7 +826,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			}
 			// add in any tcp overhead we got from ack download frames
 			if(thePrefs.m_bUseDownloadOverhead) //MORPH leuk_he include download overhead in upload stats
-			   {ControlspentBytes+=	GetDownDataOverheadOtherPackets_andreset()	;}
+			   { uint64 downloadoverhead =GetDownDataOverheadOtherPackets_andreset()	;
+			     ControlspentBytes+=	downloadoverhead ;
+			     m_SentBytesSinceLastCallOverheadClass[2] +=downloadoverhead ; // so it correctly displayed in statistics
+			   }
 			else 
 				GetDownDataOverheadOtherPackets_andreset(); // just reset stats (when enabled later in session)
 			//
