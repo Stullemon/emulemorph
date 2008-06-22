@@ -6,11 +6,13 @@ XX-XX-2008
 ADD: DirectX (Preview feature) support for VS05 [eMF]
 ADD: TextToSpeech support for VS05 [Stulle]
 CHANGE: Exception Handling Model to /EHa [fafner]
-Changed: (Morph) Reverted a fix to fafner style [Stulle]
-Changed: Made download ack overhead (morph -> upload management) optional [leuk_he]
+CHANGE: (Morph) Reverted a fix to fafner style [Stulle]
+CHANGE: Made download ack overhead (morph -> upload management) optional [leuk_he]
+CHANGE: Bring eMule to front when double click on static TrayIcon [Stulle]
 FIX: Display download ack overhead in statistics correct [leuk_he]
 FIX: Improperly reloading icons for SharedDirsTree [Stulle]
-Fix: Store searches if enabled [Stulle]
+FIX: Store searches if enabled [Stulle]
+FIX: Unjustified bans as reported here http://forum.emule-project.net/index.php?showtopic=137052
 
 
 --------------------------------------

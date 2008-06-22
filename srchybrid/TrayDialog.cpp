@@ -379,5 +379,6 @@ void CTrayDialog::RestoreWindow()
 		ShowWindow(SW_SHOWMAXIMIZED);
 	else
 		ShowWindow(SW_SHOW);
+	SetForegroundWindow();
 	//MORPH END   - Added, Static Tray Icon
 }
