@@ -521,7 +521,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							break;
 						//MORPH - Source cache
 						case SF_CACHE_SOURCE_EXCHANGE:
-							Sbuffer = GetResString(IDS_KADEMLIA) + _T(" (SC)");
+							Sbuffer = GetResString(IDS_SE) + _T(" (SC)");
 							break;
 						//MORPH - Source cache
 						case SF_PASSIVE:
