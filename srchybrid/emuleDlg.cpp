@@ -4367,9 +4367,9 @@ void CemuleDlg::SaveSettings (bool _shutdown) {
 	theApp.m_pPeerCache->Save();
 	if (_shutdown) {
 		theApp.scheduler->RestoreOriginals();
-	}
-	if (_shutdown) {
 		theApp.searchlist->SaveSpamFilter();
+		if (thePrefs.IsStoringSearchesEnabled())
+			theApp.searchlist->StoreSearches();
 	}
 	thePrefs.Save();
 	if (_shutdown) {
