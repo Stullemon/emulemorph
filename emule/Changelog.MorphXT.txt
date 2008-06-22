@@ -2,13 +2,15 @@
 Changelog for eMule 0.49a MorphXT v11.X
 --------------------------------------
 XX-XX-2008
-FIX: Improperly reloading icons for SharedDirsTree [Stulle]
+
 ADD: DirectX (Preview feature) support for VS05 [eMF]
 ADD: TextToSpeech support for VS05 [Stulle]
 CHANGE: Exception Handling Model to /EHa [fafner]
 Changed: (Morph) Reverted a fix to fafner style [Stulle]
-Changed: made download ack overhead (morph -> upload management) optional [leuk_he]
-FIX: display download ack overhead in statistics correct [leuk_he]
+Changed: Made download ack overhead (morph -> upload management) optional [leuk_he]
+FIX: Display download ack overhead in statistics correct [leuk_he]
+FIX: Improperly reloading icons for SharedDirsTree [Stulle]
+Fix: Store searches if enabled [Stulle]
 
 
 --------------------------------------
