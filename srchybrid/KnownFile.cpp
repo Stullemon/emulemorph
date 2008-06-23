@@ -1492,6 +1492,7 @@ void CKnownFile::CreateHash(CFile* pFile, uint64 Length, uchar* pMd4HashOut, CAI
 	}
 
 	delete pHashAlg;
+	sLock1.Unlock();// SLUGFILLER: SafeHash - only one chunk-hash at a time
 }
 
 bool CKnownFile::CreateHash(FILE* fp, uint64 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut) const
