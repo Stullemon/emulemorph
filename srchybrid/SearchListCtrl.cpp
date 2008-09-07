@@ -368,6 +368,7 @@ void CSearchListCtrl::AddResult(const CSearchFile* toshow)
 					}
 					else
 						strTabLabel.Format(_T("%s (%u)"), pSearchParams->strSearchTitle, iAvailResults);
+					strTabLabel.Replace(_T("&"), _T("&&"));
 					ti.pszText = const_cast<LPTSTR>((LPCTSTR)strTabLabel);
 					ti.mask = TCIF_TEXT;
 					searchselect.SetItem(iItem, &ti);

@@ -335,7 +335,11 @@ void CPPgConnection::LoadSettings(void)
 			GetDlgItem(IDC_PREF_UPNPONSTART)->EnableWindow(false);
     */
 
+#ifdef USE_OFFICIAL_UPNP
 		if (thePrefs.IsUPnPEnabled())
+#else
+		if (thePrefs.IsUPnPNat())
+#endif
 			CheckDlgButton(IDC_PREF_UPNPONSTART, 1);
 		else
 			CheckDlgButton(IDC_PREF_UPNPONSTART, 0);
@@ -499,7 +503,22 @@ BOOL CPPgConnection::OnApply()
 		}
 	}
 	thePrefs.maxconnections = tempcon;
-	theApp.scheduler->SaveOriginals();
+
+#ifdef USE_OFFICIAL_UPNP
+	if (IsDlgButtonChecked(IDC_PREF_UPNPONSTART) != 0){
+		if (!thePrefs.IsUPnPEnabled()){
+			thePrefs.m_bEnableUPnP = true;
+			theApp.emuledlg->StartUPnP();
+		}
+	}
+	else
+		thePrefs.m_bEnableUPnP = false;
+#else /* MORPH START unpnp */
+	if((BOOL)thePrefs.IsUPnPNat() != (IsDlgButtonChecked(IDC_PREF_UPNPONSTART) != 0) )
+	{
+  		theApp.m_UPnP_IGDControlPoint->SetUPnPNat((IsDlgButtonChecked(IDC_PREF_UPNPONSTART) != 0)); // and start/stop nat. 
+	}
+#endif /* MORPH END unpnp */
 
 	//MORPH START - Added by SiRoB, [MoNKi: [MoNKi: -Random Ports-]
 	bool oldUseRandom = thePrefs.GetUseRandomPorts();
@@ -561,14 +580,7 @@ BOOL CPPgConnection::OnApply()
 	}
 	// End emulEspaña
   
- /* MORPH START unpnp */
-	if((BOOL)thePrefs.IsUPnPEnabled() != (IsDlgButtonChecked(IDC_PREF_UPNPONSTART) != 0) )
-	{
-  		theApp.m_UPnP_IGDControlPoint->SetUPnPNat((IsDlgButtonChecked(IDC_PREF_UPNPONSTART) != 0)); // and start/stop nat. 
-	}
-/* MORPH END unpnp */
-
-  theApp.scheduler->SaveOriginals();
+	theApp.scheduler->SaveOriginals();
 
 	SetModified(FALSE);
 	LoadSettings();

@@ -2,6 +2,8 @@
 #include "tabctrl.hpp"
 #include <algorithm>
 #include "UserMsgs.h"
+#include "emule.h"
+#include "VisualStylesXP.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -293,7 +295,7 @@ BOOL TabControl::ReorderTab(unsigned int nSrcTab, unsigned int nDstTab)
 	unsigned int nSelectedTab = GetCurSel();
 
 	// Get information from the tab to move (to be deleted)
-	TCHAR sBuffer[50];
+	TCHAR sBuffer[256];
 	TCITEM item;
 	item.mask = TCIF_IMAGE | TCIF_PARAM | TCIF_TEXT; //| TCIF_STATE;
 	item.pszText = sBuffer;
@@ -374,27 +376,136 @@ BOOL TabControl::DragDetectPlus(CWnd* Handle, CPoint p)
 
 void TabControl::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 {
-     TC_ITEM tci;
-     CDC* pDC = CDC::FromHandle(lpDIS->hDC);
      CRect rect(lpDIS->rcItem);
-     TCHAR szTabText[256];
-     memset(szTabText,'\0',sizeof(szTabText));
+	int nTabIndex = lpDIS->itemID;
+	if (nTabIndex < 0)
+		return;
      
+	TCHAR szLabel[256];
+	TC_ITEM tci;
      tci.mask = TCIF_TEXT | TCIF_PARAM;
-     tci.pszText = szTabText;
-     tci.cchTextMax = sizeof(szTabText) -1;
-     GetItem(lpDIS->itemID, &tci);
+	tci.pszText = szLabel;
+	tci.cchTextMax = _countof(szLabel);
+	if (!GetItem(nTabIndex, &tci))
+		return;
      
-	 pDC->SetBkMode(TRANSPARENT);
+	CDC* pDC = CDC::FromHandle(lpDIS->hDC);
+	if (!pDC)
+		return;
 	 
-	 if ( lpDIS->itemAction & ODA_DRAWENTIRE) {
-		 if (tci.lParam != (DWORD)-1 )
-			 pDC->SetTextColor(tci.lParam);
-		 else
-			 pDC->SetTextColor( GetSysColor(COLOR_BTNTEXT) );
-	 }
+	CRect rcFullItem(lpDIS->rcItem);
+	bool bSelected = (lpDIS->itemState & ODS_SELECTED) != 0;
 
-     pDC->TextOut(rect.left+5, rect.top+5, tci.pszText);
+	HTHEME hTheme = NULL;
+	int iPartId = TABP_TABITEM;
+	int iStateId = TIS_NORMAL;
+	bool bVistaHotTracked = false;
+	bool bVistaThemeActive = theApp.IsVistaThemeActive();
+	if (bVistaThemeActive)
+	{
+		// To determine if the current item is in 'hot tracking' mode, we need to evaluate
+		// the current foreground color - there is no flag which would indicate this state 
+		// more safely. This applies only for Vista and for tab controls which have the
+		// TCS_OWNERDRAWFIXED style.
+		bVistaHotTracked = pDC->GetTextColor() == GetSysColor(COLOR_HOTLIGHT);
+
+		hTheme = g_xpStyle.OpenThemeData(m_hWnd, L"TAB");
+		if (hTheme)
+		{
+			if (bSelected) {
+				// get the real tab item rect
+				rcFullItem.left += 1;
+				rcFullItem.right -= 1;
+				rcFullItem.bottom -= 1;
+			}
+			else
+				rcFullItem.InflateRect(2, 2); // get the real tab item rect
+
+			CRect rcBk(rcFullItem);
+			if (bSelected)
+			{
+			    iStateId = TTIS_SELECTED;
+			    if (nTabIndex == 0) {
+				    // First item
+				    if (nTabIndex == GetItemCount() - 1)
+					    iPartId = TABP_TOPTABITEMBOTHEDGE; // First & Last item
+				    else
+					    iPartId = TABP_TOPTABITEMLEFTEDGE;
+			    }
+			    else if (nTabIndex == GetItemCount() - 1) {
+				    // Last item
+				    iPartId = TABP_TOPTABITEMRIGHTEDGE;
+			    }
+			    else {
+				    iPartId = TABP_TOPTABITEM;
+			    }
+		    }
+		    else
+		    {
+			    rcBk.top += 2;
+				iStateId = bVistaHotTracked ? TIS_HOT : TIS_NORMAL;
+			    if (nTabIndex == 0) {
+				    // First item
+				    if (nTabIndex == GetItemCount() - 1)
+					    iPartId = TABP_TABITEMBOTHEDGE; // First & Last item
+		 else
+					    iPartId = TABP_TABITEMLEFTEDGE;
+	 }
+			    else if (nTabIndex == GetItemCount() - 1) {
+				    // Last item
+				    iPartId = TABP_TABITEMRIGHTEDGE;
+			    }
+			    else {
+				    iPartId = TABP_TABITEM;
+			    }
+		    }
+		    if (g_xpStyle.IsThemeBackgroundPartiallyTransparent(hTheme, iPartId, iStateId))
+				g_xpStyle.DrawThemeParentBackground(m_hWnd, *pDC, &rcFullItem);
+		    g_xpStyle.DrawThemeBackground(hTheme, *pDC, iPartId, iStateId, &rcBk, NULL);
+	    }
+	}
+
+	// Vista: Need to clear the background explicitly to avoid glitches with
+	//	*) a changed icon
+	//	*) hot tracking effect
+	if (hTheme == NULL && bVistaThemeActive)
+		pDC->FillSolidRect(&lpDIS->rcItem, GetSysColor(COLOR_BTNFACE));
+
+	int iOldBkMode = pDC->SetBkMode(TRANSPARENT);
+
+	COLORREF crOldColor = CLR_NONE;
+	if (tci.lParam != (DWORD)-1)
+		crOldColor = pDC->SetTextColor(tci.lParam);
+	else if (bVistaHotTracked)
+		crOldColor = pDC->SetTextColor(GetSysColor(COLOR_BTNTEXT));
+
+	rect.top += bSelected ? 4 : 3;
+	// Vista: Tab control has troubles with determining the width of a tab if the
+	// label contains one '&' character. To get around this, we use the old code which
+	// replaces one '&' character with two '&' characters and we do not specify DT_NOPREFIX
+	// here when drawing the text.
+	//
+	// Vista: "DrawThemeText" can not be used in case we need a certain foreground color. Thus we always us
+	// "DrawText" to always get the same font and metrics (just for safety).
+	pDC->DrawText(szLabel, rect, DT_SINGLELINE | DT_TOP | DT_CENTER /*| DT_NOPREFIX*/);
+
+	if (crOldColor != CLR_NONE)
+		pDC->SetTextColor(crOldColor);
+	pDC->SetBkMode(iOldBkMode);
+
+	if (hTheme)
+	{
+		CRect rcClip(rcFullItem);
+		if (bSelected) {
+			rcClip.left -= 2 + 1;
+			rcClip.right += 2 + 1;
+		}
+		else {
+			rcClip.top += 2;
+		}
+		pDC->ExcludeClipRect(&rcClip);
+		g_xpStyle.CloseThemeData(hTheme);
+	}
 }
 
 void TabControl::SetTabTextColor(int index, DWORD color) {

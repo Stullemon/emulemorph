@@ -1739,7 +1739,7 @@ void CTreeOptionsCtrl::SetEditText(HTREEITEM hItem, const CString& sEditText)
 		int buffLen = sEditText.GetLength()+1;
 		if(buffLen){
 			buffer = new char[buffLen];
-			strnset(buffer, '*',buffLen-1);
+			_strnset(buffer, '*',buffLen-1); //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
 			buffer[buffLen-1] = 0;
 			sNewText = CStringA(buffer);
 			delete[] buffer;

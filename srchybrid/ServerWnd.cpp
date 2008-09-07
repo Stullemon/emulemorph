@@ -74,6 +74,7 @@ BEGIN_MESSAGE_MAP(CServerWnd, CResizableDialog)
 	ON_NOTIFY(EN_LINK, IDC_SERVMSG, OnEnLinkServerBox)
 	ON_BN_CLICKED(IDC_ED2KCONNECT, OnBnConnect)
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_CTLCOLOR()
 	ON_BN_CLICKED(IDC_DD,OnDDClicked)
 	ON_WM_HELPINFO()
 	ON_EN_CHANGE(IDC_IPADDRESS, OnSvrTextChange)
@@ -243,18 +244,21 @@ BOOL CServerWnd::OnInitDialog()
 	TCITEM newitem;
 	CString name;
 	name = GetResString(IDS_SV_SERVERINFO);
+	name.Replace(_T("&"), _T("&&"));
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 1;
 	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneServerInfo );
 
 	name = GetResString(IDS_SV_LOG);
+	name.Replace(_T("&"), _T("&&"));
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 0;
 	VERIFY( StatusSelector.InsertItem(StatusSelector.GetItemCount(), &newitem) == PaneLog );
 
 	name=SZ_DEBUG_LOG_TITLE;
+	name.Replace(_T("&"), _T("&&"));
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 0;
@@ -501,16 +505,19 @@ void CServerWnd::Localize()
 	    TCITEM item;
 	    CString name;
 	    name = GetResString(IDS_SV_SERVERINFO);
+	name.Replace(_T("&"), _T("&&"));
 	    item.mask = TCIF_TEXT;
 		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		StatusSelector.SetItem(PaneServerInfo, &item);
 
 	    name = GetResString(IDS_SV_LOG);
+	name.Replace(_T("&"), _T("&&"));
 	    item.mask = TCIF_TEXT;
 		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		StatusSelector.SetItem(PaneLog, &item);
 
 	    name = SZ_DEBUG_LOG_TITLE;
+	name.Replace(_T("&"), _T("&&"));
 	    item.mask = TCIF_TEXT;
 		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		StatusSelector.SetItem(PaneVerboseLog, &item);
@@ -828,6 +835,7 @@ void CServerWnd::ToggleDebugWindow()
 		TCITEM newitem;
 		CString name;
 		name = SZ_DEBUG_LOG_TITLE;
+		name.Replace(_T("&"), _T("&&"));
 		newitem.mask = TCIF_TEXT|TCIF_IMAGE;
 		newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		newitem.iImage = 0;
@@ -881,8 +889,13 @@ BOOL CServerWnd::PreTranslateMessage(MSG* pMsg)
 		if (pMsg->wParam == VK_ESCAPE)
 			return FALSE;
 
-		if (m_pacServerMetURL && m_pacServerMetURL->IsBound() && (pMsg->wParam == VK_DELETE && pMsg->hwnd == GetDlgItem(IDC_SERVERMETURL)->m_hWnd && (GetAsyncKeyState(VK_MENU)<0 || GetAsyncKeyState(VK_CONTROL)<0)))
+		if (pMsg->wParam == VK_DELETE && m_pacServerMetURL && m_pacServerMetURL->IsBound() && pMsg->hwnd == GetDlgItem(IDC_SERVERMETURL)->m_hWnd)
+		{
+			if (GetAsyncKeyState(VK_MENU)<0 || GetAsyncKeyState(VK_CONTROL)<0)
 			m_pacServerMetURL->Clear();
+			else
+				m_pacServerMetURL->RemoveSelectedItem();
+		}
 
 		if (pMsg->wParam == VK_RETURN)
 		{
@@ -1300,6 +1313,14 @@ void CServerWnd::OnSplitterMoved(NMHDR* pNMHDR, LRESULT* /*pResult*/)
 {
 	SPC_NMHDR* pHdr = (SPC_NMHDR*)pNMHDR;
 	DoResize(pHdr->delta);
+}
+
+HBRUSH CServerWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = theApp.emuledlg->GetCtlColor(pDC, pWnd, nCtlColor);
+	if (hbr)
+		return hbr;
+	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
 }
 
 //MORPH START - Added by SiRoB, XML News [O²]

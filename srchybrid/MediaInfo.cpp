@@ -350,9 +350,9 @@ typedef struct
 
 static BOOL ReadChunkHeader(int fd, FOURCC *pfccType, DWORD *pdwLength)
 {
-	if (read(fd, pfccType, sizeof(*pfccType)) != sizeof(*pfccType))
+	if (_read(fd, pfccType, sizeof(*pfccType)) != sizeof(*pfccType))
 		return FALSE;
-	if (read(fd, pdwLength, sizeof(*pdwLength)) != sizeof(*pdwLength))
+	if (_read(fd, pdwLength, sizeof(*pdwLength)) != sizeof(*pdwLength))
 		return FALSE;
 	return TRUE;
 }
@@ -379,18 +379,18 @@ static BOOL ParseStreamHeader(int hAviFile, DWORD dwLengthLeft, STREAMHEADER* pS
 			if (dwLength < sizeof(pStrmHdr->hdr))
 			{
 				memset(&pStrmHdr->hdr, 0x00, sizeof(pStrmHdr->hdr));
-				if (read(hAviFile, &pStrmHdr->hdr, dwLength) != (int)dwLength)
+				if (_read(hAviFile, &pStrmHdr->hdr, dwLength) != (int)dwLength)
 					return FALSE;
 				if (dwLength & 1) {
-					if (lseek(hAviFile, 1, SEEK_CUR) == -1)
+					if (_lseek(hAviFile, 1, SEEK_CUR) == -1)
 						return FALSE;
 				}
 			}
 			else
 			{
-				if (read(hAviFile, &pStrmHdr->hdr, sizeof(pStrmHdr->hdr)) != sizeof(pStrmHdr->hdr))
+				if (_read(hAviFile, &pStrmHdr->hdr, sizeof(pStrmHdr->hdr)) != sizeof(pStrmHdr->hdr))
 					return FALSE;
-				if (lseek(hAviFile, dwLength + (dwLength & 1) - sizeof(pStrmHdr->hdr), SEEK_CUR) == -1)
+				if (_lseek(hAviFile, dwLength + (dwLength & 1) - sizeof(pStrmHdr->hdr), SEEK_CUR) == -1)
 					return FALSE;
 			}
 			dwLength = 0;
@@ -403,10 +403,10 @@ static BOOL ParseStreamHeader(int hAviFile, DWORD dwLengthLeft, STREAMHEADER* pS
 				errno = ENOMEM;
 				return FALSE;
 			}
-			if (read(hAviFile, pStrmHdr->fmt.dat, dwLength) != (int)dwLength)
+			if (_read(hAviFile, pStrmHdr->fmt.dat, dwLength) != (int)dwLength)
 				return FALSE;
 			if (dwLength & 1) {
-				if (lseek(hAviFile, 1, SEEK_CUR) == -1)
+				if (_lseek(hAviFile, 1, SEEK_CUR) == -1)
 					return FALSE;
 			}
 			dwLength = 0;
@@ -419,11 +419,11 @@ static BOOL ParseStreamHeader(int hAviFile, DWORD dwLengthLeft, STREAMHEADER* pS
 				errno = ENOMEM;
 				return FALSE;
 			}
-			if (read(hAviFile, pStrmHdr->nam, dwLength) != (int)dwLength)
+			if (_read(hAviFile, pStrmHdr->nam, dwLength) != (int)dwLength)
 				return FALSE;
 			pStrmHdr->nam[dwLength] = '\0';
 			if (dwLength & 1) {
-				if (lseek(hAviFile, 1, SEEK_CUR) == -1)
+				if (_lseek(hAviFile, 1, SEEK_CUR) == -1)
 					return FALSE;
 			}
 			dwLength = 0;
@@ -431,13 +431,13 @@ static BOOL ParseStreamHeader(int hAviFile, DWORD dwLengthLeft, STREAMHEADER* pS
 		}
 
 		if (dwLength) {
-			if (lseek(hAviFile, dwLength + (dwLength & 1), SEEK_CUR) == -1)
+			if (_lseek(hAviFile, dwLength + (dwLength & 1), SEEK_CUR) == -1)
 				return FALSE;
 		}
 	}
 
 	if (dwLengthLeft) {
-		if (lseek(hAviFile, dwLengthLeft, SEEK_CUR) == -1)
+		if (_lseek(hAviFile, dwLengthLeft, SEEK_CUR) == -1)
 			return FALSE;
 	}
 
@@ -483,7 +483,7 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 	// Read 'AVI ' or 'WAVE' header
 	//
 	FOURCC fccMain;
-	if (read(hAviFile, &fccMain, sizeof(fccMain)) != sizeof(fccMain))
+	if (_read(hAviFile, &fccMain, sizeof(fccMain)) != sizeof(fccMain))
 		goto cleanup;
 	if (fccMain == formtypeAVI)
 		rbIsAVI = true;
@@ -523,7 +523,7 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 		switch (fccType)
 		{
 			case FOURCC_LIST:
-				if (read(hAviFile, &fccType, sizeof(fccType)) != sizeof(fccType))
+				if (_read(hAviFile, &fccType, sizeof(fccType)) != sizeof(fccType))
 					goto inv_format_errno;
 				if (fccType != listtypeAVIHEADER && bInvalidLength)
 					goto inv_format;
@@ -709,7 +709,7 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 						{
 							bool bError = false;
 							BYTE* pChunk = new BYTE[dwLength];
-							if ((UINT)read(hAviFile, pChunk, dwLength) == dwLength)
+							if ((UINT)_read(hAviFile, pChunk, dwLength) == dwLength)
 							{
 								CSafeMemFile ck(pChunk, dwLength);
 								try {
@@ -781,7 +781,7 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 							}
 							else {
 								if (dwLength & 1) {
-									if (lseek(hAviFile, 1, SEEK_CUR) == -1)
+									if (_lseek(hAviFile, 1, SEEK_CUR) == -1)
 										bHaveReadAllStreams = TRUE;
 								}
 								dwLength = 0;
@@ -796,10 +796,10 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 				if (dwLength == sizeof(MainAVIHeader))
 				{
 					MainAVIHeader avihdr;
-					if (read(hAviFile, &avihdr, sizeof(avihdr)) != sizeof(avihdr))
+					if (_read(hAviFile, &avihdr, sizeof(avihdr)) != sizeof(avihdr))
 						goto inv_format_errno;
 					if (dwLength & 1) {
-						if (lseek(hAviFile, 1, SEEK_CUR) == -1)
+						if (_lseek(hAviFile, 1, SEEK_CUR) == -1)
 							goto inv_format_errno;
 					}
 					dwLength = 0;
@@ -821,10 +821,10 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 						errno = ENOMEM;
 						goto inv_format_errno;
 					}
-					if (read(hAviFile, strmhdr.fmt.dat, dwLength) != (int)dwLength)
+					if (_read(hAviFile, strmhdr.fmt.dat, dwLength) != (int)dwLength)
 						goto inv_format_errno;
 					if (dwLength & 1) {
-						if (lseek(hAviFile, 1, SEEK_CUR) == -1)
+						if (_lseek(hAviFile, 1, SEEK_CUR) == -1)
 							goto inv_format_errno;
 					}
 					dwLength = 0;
@@ -855,7 +855,7 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 			break;
 		if (dwLength)
 		{
-			if (lseek(hAviFile, dwLength + (dwLength & 1), SEEK_CUR) == -1)
+			if (_lseek(hAviFile, dwLength + (dwLength & 1), SEEK_CUR) == -1)
 				goto inv_format_errno;
 		}
 	}
@@ -880,7 +880,7 @@ BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFu
 	bResult = TRUE;
 
 cleanup:
-	close(hAviFile);
+	_close(hAviFile);
 	return bResult;
 
 inv_format:
@@ -1454,9 +1454,9 @@ bool GetMimeType(LPCTSTR pszFilePath, CString& rstrMimeType)
 	if (fd != -1)
 	{
 		BYTE aucBuff[8192];
-		int iRead = read(fd, aucBuff, sizeof aucBuff);
+		int iRead = _read(fd, aucBuff, sizeof aucBuff);
 		
-		close(fd);
+		_close(fd);
 		fd = -1;
 
 		if (iRead > 0)
@@ -1522,8 +1522,8 @@ bool GetDRM(LPCTSTR pszFilePath)
 	if (fd != -1)
 	{
 		BYTE aucBuff[8192];
-		int iRead = read(fd, aucBuff, sizeof aucBuff);
-		close(fd);
+		int iRead = _read(fd, aucBuff, sizeof aucBuff);
+		_close(fd);
 		fd = -1;
 
 		if (iRead > 0)

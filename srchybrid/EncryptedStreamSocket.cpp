@@ -464,7 +464,7 @@ int CEncryptedStreamSocket::Negotiate(const uchar* pBuffer, uint32 nLen){
 					uint32 dwValue = m_pfiReceiveBuffer->ReadUInt32();
 					if (dwValue == MAGICVALUE_SYNC){
 						// yup, the one or the other way it worked, this is an encrypted stream
-						DEBUG_ONLY( DebugLog(_T("Received proper magic value, clientIP: %s"), DbgGetIPString()) );
+						//DEBUG_ONLY( DebugLog(_T("Received proper magic value, clientIP: %s"), DbgGetIPString()) );
 						// set the receiver key
 						m_NegotiatingState = ONS_BASIC_CLIENTA_METHODTAGSPADLEN;
 						m_nReceiveBytesWanted = 3;	

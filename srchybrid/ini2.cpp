@@ -37,7 +37,6 @@ void CIni::AddModulPath(CString& strFileName,bool bModulPath /*= true*/)
          strModule.TrimRight(_T('/'));
          strModule += _T("\\");
       }
-      strModule.ReleaseBuffer();
       _tsplitpath( strModule, drive, dir, fname, ext );
       strModule = drive;
       strModule+= dir;

@@ -17,7 +17,7 @@ protected:
 
 	void InternalInit();
 	void SetAllIcons();
-	void GetCloseButtonRect(const CRect& rcItem, CRect& rcCloseButton);
+	void GetCloseButtonRect(int iItem, const CRect& rcItem, CRect& rcCloseButton, bool bItemSelected, bool bVistaThemeActive);
 	int GetTabUnderContextMenu() const;
 	int GetTabUnderPoint(CPoint point) const;
 	bool SetDefaultContextMenuPos();
@@ -34,4 +34,9 @@ protected:
 	afx_msg void OnSysColorChange();
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg LRESULT _OnThemeChanged();
+	afx_msg HBRUSH CtlColor(CDC* /*pDC*/, UINT /*nCtlColor*/);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	afx_msg void OnMeasureItem(int, LPMEASUREITEMSTRUCT);
+	afx_msg void MeasureItem(LPMEASUREITEMSTRUCT);
 };

@@ -272,7 +272,7 @@ void CHttpClientReqSocket::ProcessHttpHeaderPacket(const char* packet, UINT size
 			int iLineLen = pszNl - p;
 			ASSERT( iLineLen >= 0 );
 			if (iLineLen > 0)
-				m_strHttpCurHdrLine += CString(p, iLineLen - 1); // do not copy the '\r' character
+				m_strHttpCurHdrLine += CStringA(p, iLineLen - 1); // do not copy the '\r' character
 
 			// in case the CRLF were split up in different packets, the currenty line may contain a '\r' character, remove it
 			int iCurHdrLineLen = m_strHttpCurHdrLine.GetLength();
@@ -304,7 +304,7 @@ void CHttpClientReqSocket::ProcessHttpHeaderPacket(const char* packet, UINT size
 		else
 		{
 			// partial line, add to according buffer
-			m_strHttpCurHdrLine += CString(p, iLeft);
+			m_strHttpCurHdrLine += CStringA(p, iLeft);
 			iLeft = 0;
 
 			// safety check

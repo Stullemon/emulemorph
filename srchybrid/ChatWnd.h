@@ -81,6 +81,7 @@ protected:
 	afx_msg void OnBnClickedSmiley();
 	afx_msg void OnBnClickedClose();
 	afx_msg void OnBnClickedSend();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 public:
 	bool	UpdateEmfriendsMetFromURL(const CString& strURL);

@@ -434,7 +434,7 @@ UINT AFX_CDECL WapSocketListeningFunc(LPVOID pThis)
 						mapping.protocol = CUPnP_IGDControlPoint::UNAT_TCP;
 						mapping.description = "Wap Interface";
 						
-						if(thePrefs.IsUPnPEnabled())
+						if(thePrefs.IsUPnPNat())
 							UPnP = theApp.m_UPnP_IGDControlPoint->AddPortMapping(&mapping);
 						// End emulEspaña
 

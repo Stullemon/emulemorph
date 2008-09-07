@@ -421,9 +421,6 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 		SetCheck(hItem);
 	// SLUGFILLER END : shareSubdir
 
-
-	strText.ReleaseBuffer();
-
 	return hItem;
 }
 

@@ -245,7 +245,7 @@ void CScheduler::ActivateSchedule(int index,bool makedefault) {
 
 	for (int ai=0;ai<16;ai++) {
 		if (schedule->actions[ai]==0) break;
-		if (schedule->values[ai]=="" /* maybe ignore in some future cases...*/ ) continue;
+		if (schedule->values[ai]==_T("") /* maybe ignore in some future cases...*/ ) continue;
 
 		switch (schedule->actions[ai]) {
 			case 1 :

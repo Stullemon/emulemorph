@@ -672,6 +672,9 @@ bool	CPreferences::m_bSkipWANIPSetup;
 bool	CPreferences::m_bSkipWANPPPSetup;
 bool	CPreferences::m_bEnableUPnP;
 bool	CPreferences::m_bCloseUPnPOnExit;
+bool	CPreferences::m_bIsWinServImplDisabled;
+bool	CPreferences::m_bIsMinilibImplDisabled;
+int		CPreferences::m_nLastWorkingImpl;
 #endif
 
 bool	CPreferences::m_bEnableSearchResultFilter;
@@ -2426,6 +2429,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"SkipWANIPSetup", m_bSkipWANIPSetup);
 	ini.WriteBool(L"SkipWANPPPSetup", m_bSkipWANPPPSetup);
 	ini.WriteBool(L"CloseUPnPOnExit", m_bCloseUPnPOnExit);
+	ini.WriteInt(L"LastWorkingImplementation", m_nLastWorkingImpl);
 #endif
 
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
@@ -3216,7 +3220,7 @@ void CPreferences::LoadPreferences()
 	autofilenamecleanup=ini.GetBool(L"AutoFilenameCleanup",false);
 	m_bUseAutocompl=ini.GetBool(L"UseAutocompletion",true);
 	m_bShowDwlPercentage=ini.GetBool(L"ShowDwlPercentage",false);
-	networkkademlia=ini.GetBool(L"NetworkKademlia",false);
+	networkkademlia=ini.GetBool(L"NetworkKademlia",true);
 	networked2k=ini.GetBool(L"NetworkED2K",true);
 	m_bRemove2bin=ini.GetBool(L"RemoveFilesToBin",true);
 	m_bShowCopyEd2kLinkCmd=ini.GetBool(L"ShowCopyEd2kLinkCmd",false);
@@ -3667,6 +3671,9 @@ void CPreferences::LoadPreferences()
 	m_bSkipWANIPSetup = ini.GetBool(L"SkipWANIPSetup", false);
 	m_bSkipWANPPPSetup = ini.GetBool(L"SkipWANPPPSetup", false);
 	m_bCloseUPnPOnExit = ini.GetBool(L"CloseUPnPOnExit", true);
+	m_nLastWorkingImpl = ini.GetInt(L"LastWorkingImplementation", 1 /*MiniUPnPLib*/);
+	m_bIsMinilibImplDisabled = ini.GetBool(L"DisableMiniUPNPLibImpl", false);
+	m_bIsWinServImplDisabled = ini.GetBool(L"DisableWinServImpl", false);
 #endif
 
     //MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
@@ -4081,7 +4088,7 @@ DWORD CPreferences::GetCatColor(int index) {
 			return catMap.GetAt(index)->color; 
 	}
 
-	return GetSysColor(COLOR_WINDOWTEXT);
+	return GetSysColor(COLOR_BTNTEXT);
 }
 
 

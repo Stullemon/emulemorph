@@ -21,6 +21,7 @@
 #include "SearchParamsWnd.h"
 #include "SearchResultsWnd.h"
 #include "OtherFunctions.h"
+#include "HelpIDs.h"
 #include "NTService.h" // MORPH leuk_he:run as ntservice v1..
 
 #ifdef _DEBUG
@@ -41,6 +42,7 @@ BEGIN_MESSAGE_MAP(CSearchDlg, CFrameWnd)
 	ON_WM_SETFOCUS()
 	ON_WM_CLOSE()
 	ON_WM_SYSCOMMAND()
+	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
 
 CSearchDlg::CSearchDlg()
@@ -327,4 +329,10 @@ BOOL CSearchDlg::PreTranslateMessage(MSG* pMsg)
 		}
 	}
 	return CFrameWnd::PreTranslateMessage(pMsg);
+}
+
+BOOL CSearchDlg::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
+{
+	theApp.ShowHelp(eMule_FAQ_GUI_Search);
+	return TRUE;
 }

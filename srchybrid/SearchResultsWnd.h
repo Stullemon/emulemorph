@@ -30,6 +30,7 @@ class CSafeMemFile;
 class CSearchParamsWnd;
 struct SSearchParams;
 class CDropDownButton;
+class CButtonsTabCtrl;
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -96,7 +97,7 @@ public:
 
 	bool	CreateNewTab(SSearchParams* pParams, bool bActiveIcon = true);
 	void	ShowSearchSelector(bool visible);
-	int		GetSelectedCat() { return m_cattabs.GetCurSel(); }
+	int		GetSelectedCat();
 	void	UpdateCatTabs();
 
 	SSearchParams* GetSearchResultsParams(UINT uSearchID) const;
@@ -117,7 +118,7 @@ protected:
 	bool		globsearch;
 	uint32		m_nEd2kSearchID;
 	CImageList	m_imlSearchResults;
-	CTabCtrl	m_cattabs;
+	CButtonsTabCtrl	*m_cattabs;
 	CDropDownButton* m_btnSearchListMenu;
 	int			m_iSentMoreReq;
 	uint32		m_nFilterColumn;
@@ -155,6 +156,7 @@ protected:
 	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 	afx_msg LRESULT OnChangeFilter(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnSearchListMenuBtnDropDown(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnNMClickCattab2(NMHDR *pNMHDR, LRESULT *pResult); //MORPH - Added by SiRoB, Selection category support
 
 };

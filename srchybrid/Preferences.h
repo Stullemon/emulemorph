@@ -899,6 +899,9 @@ public:
 	static bool		m_bSkipWANPPPSetup;
 	static bool		m_bEnableUPnP;
 	static bool		m_bCloseUPnPOnExit;
+	static bool		m_bIsWinServImplDisabled;
+	static bool		m_bIsMinilibImplDisabled;
+	static int		m_nLastWorkingImpl;
 #endif
 
 	// Spam
@@ -1775,6 +1778,10 @@ public:
 	static void		SetSkipWANIPSetup(bool nv)			{m_bSkipWANIPSetup = nv;}
 	static void		SetSkipWANPPPSetup(bool nv)			{m_bSkipWANPPPSetup = nv;}
 	static bool		CloseUPnPOnExit()					{return m_bCloseUPnPOnExit;}
+	static bool		IsWinServUPnPImplDisabled()			{return m_bIsWinServImplDisabled;}
+	static bool		IsMinilibUPnPImplDisabled()			{return m_bIsMinilibImplDisabled;}
+	static int		GetLastWorkingUPnPImpl()			{return m_nLastWorkingImpl;}
+	static void		SetLastWorkingUPnPImpl(int val)		{m_nLastWorkingImpl = val;}
 #endif
 
 	// Spamfilter
@@ -2012,7 +2019,7 @@ protected:
 	static CString	GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCreate = true);
 public:
 	//MORPH START - Added by SiRoB [MoNKi: -UPnPNAT Support-]
-	static	bool	IsUPnPEnabled()						{ return m_bUPnPNat; }
+	static	bool	IsUPnPNat()						{ return m_bUPnPNat; }
 	static	bool	GetUPnPNatWeb()						{ return m_bUPnPNatWeb; }
 	static	void	SetUPnPNatWeb(bool on)				{ m_bUPnPNatWeb = on; }
 	static	void	SetUPnPVerboseLog(bool on)			{ m_bUPnPVerboseLog = on; }

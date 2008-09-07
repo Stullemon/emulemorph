@@ -260,7 +260,7 @@ extern "C" {
 #if _MSC_VER < 1400
 #   if (! defined (malloc) && ! defined (YYINCLUDED_STDLIB_H) \
 	&& (defined (__STDC__) || defined (__cplusplus)))
-void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
+//void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 #  endif
@@ -269,7 +269,7 @@ void *malloc (YYSIZE_T); /* INFRINGES ON USER NAME SPACE */
 #if _MSC_VER < 1400
 #   if (! defined (free) && ! defined (YYINCLUDED_STDLIB_H) \
 	&& (defined (__STDC__) || defined (__cplusplus)))
-void free (void *); /* INFRINGES ON USER NAME SPACE */
+//void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 #  endif
@@ -1984,7 +1984,7 @@ int yyerror(const char* errstr)
 			return EXIT_FAILURE;
 	}
 	else {
-		if (_astrParserErrors.GetCount() > 0 && _astrParserErrors[_astrParserErrors.GetCount() - 1] != "syntax error")
+		if (_astrParserErrors.GetCount() > 0 && _astrParserErrors[_astrParserErrors.GetCount() - 1] != _T("syntax error"))
 			return EXIT_FAILURE;
 	}
 

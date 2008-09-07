@@ -403,7 +403,9 @@ bool CIrcNickListCtrl::ChangeAllNick(const CString& sOldNick, const CString& sNe
 			if ((Channel*)item.lParam == pChannel)
 			{
 				item.mask = TCIF_TEXT;
-				item.pszText = const_cast<LPTSTR>((LPCTSTR)sNewNick);
+				CString strTcLabel(sNewNick);
+				strTcLabel.Replace(_T("&"), _T("&&"));
+				item.pszText = const_cast<LPTSTR>((LPCTSTR)strTcLabel);
 				m_pParent->m_wndChanSel.SetItem(iItem, &item);
 				return true;
 			}

@@ -43,6 +43,7 @@ namespace Kademlia
 	class CEntry;
 	typedef std::map<CUInt128, CContact*> ContactMap;
 	typedef std::list<CContact*> ContactList;
+	typedef CTypedPtrList<CPtrList, CContact*> _ContactList;
 	typedef std::list<CUInt128> UIntList;
 	typedef std::list<CKadTag*> TagList;
 	typedef std::list<CStringW> WordList;

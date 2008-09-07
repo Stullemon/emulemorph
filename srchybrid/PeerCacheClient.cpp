@@ -357,7 +357,7 @@ bool CUpDownClient::ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHe
 	for (int i = 1; i < astrHeaders.GetCount(); i++)
 	{
 		const CStringA& rstrHdr = astrHeaders.GetAt(i);
-		if (bExpectData && strnicmp(rstrHdr, "Content-Length:", 15) == 0)
+		if (bExpectData && _strnicmp(rstrHdr, "Content-Length:", 15) == 0)
 		{
 			uContentLength = _atoi64((LPCSTR)rstrHdr + 15);
 			if (uContentLength > m_uReqEnd - m_uReqStart + 1){
@@ -366,7 +366,7 @@ bool CUpDownClient::ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHe
 				throw strError;
 			}
 		}
-		else if (bExpectData && strnicmp(rstrHdr, "Content-Range:", 14) == 0)
+		else if (bExpectData && _strnicmp(rstrHdr, "Content-Range:", 14) == 0)
 		{
 			uint64 ui64Start = 0, ui64End = 0, ui64Len = 0;
 			if (sscanf((LPCSTR)rstrHdr + 14," bytes %I64u - %I64u / %I64u", &ui64Start, &ui64End, &ui64Len) != 3){
@@ -386,16 +386,16 @@ bool CUpDownClient::ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHe
 			bValidContentRange = true;
 			m_nUrlStartPos = ui64Start;
 		}
-		else if (strnicmp(rstrHdr, "Server:", 7) == 0)
+		else if (_strnicmp(rstrHdr, "Server:", 7) == 0)
 		{
 			if (m_strClientSoftware.IsEmpty())
 				m_strClientSoftware = rstrHdr.Mid(7).Trim();
 		}
-		else if (bExpectData && strnicmp(rstrHdr, "X-Cache: MISS", 13) == 0)
+		else if (bExpectData && _strnicmp(rstrHdr, "X-Cache: MISS", 13) == 0)
 		{
 			bCacheHit = false;
 		}
-		else if (bExpectData && strnicmp(rstrHdr, "X-Cache: HIT", 12) == 0)
+		else if (bExpectData && _strnicmp(rstrHdr, "X-Cache: HIT", 12) == 0)
 		{
 			bCacheHit = true;
 		}
@@ -490,7 +490,7 @@ UINT CUpDownClient::ProcessPeerCacheUpHttpRequest(const CStringAArray& astrHeade
 	for (int i = 1; i < astrHeaders.GetCount(); i++)
 	{
 		const CStringA& rstrHdr = astrHeaders.GetAt(i);
-		if (strnicmp(rstrHdr, "Range:", 6) == 0)
+		if (_strnicmp(rstrHdr, "Range:", 6) == 0)
 		{
 			int iParams;
 			if (   (iParams = sscanf((LPCSTR)rstrHdr+6," bytes = %I64u - %I64u", &ui64RangeStart, &ui64RangeEnd)) != 2
@@ -510,7 +510,7 @@ UINT CUpDownClient::ProcessPeerCacheUpHttpRequest(const CStringAArray& astrHeade
 
 			bValidRange = true;
 		}
-		else if (strnicmp(rstrHdr, "X-ED2K-PushId:", 14) == 0)
+		else if (_strnicmp(rstrHdr, "X-ED2K-PushId:", 14) == 0)
 		{
 			if (sscanf((LPCSTR)rstrHdr+14, "%u", &dwPushID) != 1){
 				DebugHttpHeaders(astrHeaders);

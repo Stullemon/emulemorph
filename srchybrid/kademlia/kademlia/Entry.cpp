@@ -259,7 +259,7 @@ bool CKeyEntry::SearchTermsMatch(const SSearchTerm* pSearchTerm) const
 				int iExt = strCommonFileName.ReverseFind(_T('.'));
 				if (iExt != -1)
 				{
-					if (wcsicmp((LPCWSTR)strCommonFileName + iExt + 1, pSearchTerm->m_pTag->GetStr()) == 0)
+					if (_wcsicmp((LPCWSTR)strCommonFileName + iExt + 1, pSearchTerm->m_pTag->GetStr()) == 0)
 						return true;
 				}
 			}

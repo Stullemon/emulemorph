@@ -22,6 +22,7 @@ protected:
 	CSpinButtonCtrl * m_pSpinCtrl;
 
 	
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDIS);
 	BOOL DragDetectPlus(CWnd* Handle, CPoint p);
 	bool DrawIndicator(CPoint point);
 
@@ -30,7 +31,4 @@ protected:
 	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
 	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void OnCaptureChanged(CWnd *);
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDIS);
-	
-
 };

@@ -878,7 +878,7 @@ void CUDPSocket::SendPacket(Packet* packet, CServer* pServer, uint16 nSpecialPor
 		POSITION pos = m_aDNSReqs.GetHeadPosition();
 		while (pos) {
 			SServerDNSRequest* pDNSReq = m_aDNSReqs.GetNext(pos);
-			if (stricmp(CStringA(pDNSReq->m_pServer->GetAddress()), pszHostAddressA) == 0) {
+			if (_stricmp(CStringA(pDNSReq->m_pServer->GetAddress()), pszHostAddressA) == 0) {
 				SRawServerPacket* pServerPacket = new SRawServerPacket(pRawPacket, uRawPacketSize, nPort);
 				pDNSReq->m_aPackets.AddTail(pServerPacket);
 				return;

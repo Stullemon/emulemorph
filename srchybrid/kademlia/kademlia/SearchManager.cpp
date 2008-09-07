@@ -175,7 +175,7 @@ CSearch* CSearchManager::PrepareFindKeywords(bool bUnicode, LPCTSTR szKeyword, U
 	catch (CFileException* e)
 	{
 		TCHAR szError[MAX_CFEXP_ERRORMSG];
-		e->m_strFileName = "search packet";
+		e->m_strFileName = _T("search packet");
 		e->GetErrorMessage(szError, ARRSIZE(szError));
 		CString strError;
 		strError.Format(_T("Exception in %hs: %s"), __FUNCTION__, szError);

@@ -908,7 +908,7 @@ void CClientCreditsList::InitalizeCrypting()
 		LogError(LOG_STATUSBAR, GetResString(IDS_CRYPT_INITFAILED));
 		ASSERT(0);
 	}
-	//Debug_CheckCrypting();
+	ASSERT( Debug_CheckCrypting() );
 }
 
 bool CClientCreditsList::CreateKeyPair()

@@ -73,6 +73,7 @@ BEGIN_MESSAGE_MAP(CMuleToolbarCtrl, CToolBarCtrl)
 	ON_NOTIFY_REFLECT(TBN_INITCUSTOMIZE, OnTbnInitCustomize)
 	ON_NOTIFY_REFLECT(TBN_ENDADJUST, OnTbnEndAdjust)
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_SETTINGCHANGE()
 END_MESSAGE_MAP()
 
 CMuleToolbarCtrl::CMuleToolbarCtrl()
@@ -992,6 +993,46 @@ void CMuleToolbarCtrl::OnSysColorChange()
 {
 	CToolBarCtrl::OnSysColorChange();
 	ChangeToolbarBitmap(thePrefs.GetToolbarBitmapSettings(), true);
+}
+
+void CMuleToolbarCtrl::OnSettingChange(UINT uFlags, LPCTSTR lpszSection)
+{
+	CToolBarCtrl::OnSettingChange(uFlags, lpszSection);
+
+	// Vista: There are certain situations where the toolbar control does not redraw/resize
+	// correctly under Vista. Unfortunately Vista just sends a WM_SETTINGCHANGE when certain
+	// system settings have changed. Furthermore Vista sends that particular message way 
+	// more often than WinXP.
+	// Whenever the toolbar control receives a WM_SETTINGCHANGE, it tries to resize itself 
+	// (most likely because it thinks that some system font settings have changed). However, 
+	// that resizing does fail when the toolbar control has certain non-standard metrics 
+	// applied (see the table below).
+	//
+	// Toolbar configuration		Redraw due to WM_SETTINGCHANGE
+	// ----------------------------------------------------------
+	// Large Icons + No Text		Fail
+	// Small Icons + No Text		Fail
+	//
+	// Large Icons + Text on Right	Ok
+	// Small Icons + Text on Right	Fail
+	//
+	// Large Icons + Text on Bottom	Ok
+	// Small Icons + Text on Bottom	Ok
+	//
+	// The problem with this kind of 'correction' is that the WM_SETTINGCHANGE message is
+	// sometimes sent very often and we need to try to invoke our 'correction' code as seldom
+	// as possible to avoid too much window flickering.
+	//
+	// The toolbar control seems to *not* evaluate the "lpszSection" parameter of the WM_SETTINGCHANGE
+	// message to determine if it really needs to resize itself, it seems to just resize itself
+	// whenever a WM_SETTINGCHANGE is received, regardless the value of that parameter. Thus, we can
+	// not use the value of that parameter to limit the invokation of our correction code.
+	//
+
+	if (   theApp.m_ullComCtrlVer >= MAKEDLLVERULL(6,16,0,0)
+		&& (m_eLabelType == NoLabels || (m_eLabelType == LabelsRight && m_sizBtnBmp.cx == 16))) {
+		ChangeToolbarBitmap(thePrefs.GetToolbarBitmapSettings(), true);
+	}
 }
 
 void CMuleToolbarCtrl::PressMuleButton(int nID)

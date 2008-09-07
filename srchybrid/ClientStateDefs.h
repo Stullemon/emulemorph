@@ -19,12 +19,8 @@
 enum EUploadState{
 	US_UPLOADING,
 	US_ONUPLOADQUEUE,
-	US_WAITCALLBACK,
 	US_CONNECTING,
-	US_PENDING,
-	US_LOWTOLOWIP,
 	US_BANNED,
-	US_ERROR,
 	US_NONE
 };
 
@@ -132,14 +128,14 @@ enum EChatCaptchaState{
 	CA_SOLUTIONSENT
 };
 
-//MORPH START - Added
-enum EHelloPacketState{
-	HP_NONE				= 0,
-	HP_HELLO			= 1,
-	HP_HELLOANSWER		= 2,
-	HP_BOTH				= 3,
+enum EConnectingState{
+	CCS_NONE				= 0,
+	CCS_DIRECTTCP,
+	CCS_DIRECTCALLBACK,
+	CCS_KADCALLBACK,
+	CCS_SERVERCALLBACK,
+	CCS_PRECONDITIONS
 };
-//MORPH END   - Added
 
 //MORPH START - Added by SiRoB, See chunk that we hide
 enum EChunkStatus{
@@ -177,6 +173,7 @@ enum EModClient{
 #define _EDownloadState		EDownloadState
 #define _ESourceFrom		ESourceFrom
 #define _EChatCaptchaState  EChatCaptchaState
+#define _EConnectingState	EConnectingState
 #define _EModClient			EModClient //MOPPH - Added by Stulle, Mod Icons
 #else
 #define _EClientSoftware	uint8
@@ -187,5 +184,6 @@ enum EModClient{
 #define _EDownloadState		uint8
 #define _ESourceFrom		uint8
 #define _EChatCaptchaState	uint8
+#define _EConnectingState	uint8
 #define _EModClient			uint8 //MOPPH - Added by Stulle, Mod Icons
 #endif

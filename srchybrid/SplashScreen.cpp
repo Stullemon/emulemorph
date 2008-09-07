@@ -113,7 +113,7 @@ void CSplashScreen::OnPaint()
 			lf.lfHeight = 14;
 			lf.lfWeight = FW_BOLD;
 			/* morph no win98
-			lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
+			lf.lfQuality = afxIsWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
 			*/
 			lf.lfQuality = ANTIALIASED_QUALITY;
 			// end

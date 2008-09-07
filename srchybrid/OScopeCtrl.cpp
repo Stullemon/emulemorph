@@ -158,6 +158,9 @@ COScopeCtrl::COScopeCtrl(int NTrends)
 
 	m_bDoUpdate = true;
 	m_nRedrawTimer = 0;
+	m_uLastMouseFlags = 0;
+	m_ptLastMousePos.x = -1;
+	m_ptLastMousePos.y = -1;
 
 	ready = false;
 }
@@ -327,6 +330,13 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 	COLORREF crLabelFg;
 	bool bStraightGraphs = true;
 	if (bStraightGraphs) {
+		// Get the background color from the parent window. This way the controls which are
+		// embedded in a dialog window can get painted with the same background color as
+		// the dialog window.
+		HBRUSH hbr = (HBRUSH)GetParent()->SendMessage(WM_CTLCOLORSTATIC, (WPARAM)dc.m_hDC, (LPARAM)m_hWnd);
+		if (hbr == GetSysColorBrush(COLOR_WINDOW))
+			crLabelBk = GetSysColor(COLOR_WINDOW);
+		else
 		crLabelBk = GetSysColor(COLOR_BTNFACE);
 		crLabelFg = GetSysColor(COLOR_WINDOWTEXT);
 	}
@@ -452,7 +462,7 @@ void COScopeCtrl::InvalidateCtrl(bool deleteGraph)
 		}
 	}
 /* no win98 vs2008 
-	if (afxData.bWin95) {
+	if (afxIsWin95) {
 		// Win98: To get a rotated font it has to be specified as "Arial" ("MS Shell Dlg" 
 		// and "MS Sans Serif" are not created with rotation)
 		yUnitFont.CreateFont(FontPointSizeToLogUnits(8*10), 0, 900, 900, FW_NORMAL, FALSE, FALSE, 0, DEFAULT_CHARSET,
@@ -978,20 +988,52 @@ void COScopeCtrl::OnMouseMove(UINT nFlags, CPoint point)
 {
 	CWnd::OnMouseMove(nFlags, point);
 
-	if (GetKeyState(VK_LBUTTON) >= 0)
+	if ((nFlags & MK_LBUTTON) == 0) {
+		if (m_uLastMouseFlags & MK_LBUTTON) {
+			// Mouse button was released -> explicitly clear the tooltip.
+			CWnd* pwndParent = GetParent();
+			if (pwndParent)
+				pwndParent->SendMessage(UM_OSCOPEPOSITION, 0, (LPARAM)(LPCTSTR)_T(""));
+		}
+		m_uLastMouseFlags = nFlags;
 		return;
+	}
+	m_uLastMouseFlags = nFlags;
+
+	// If that check is not there, it may lead to 100% CPU usage because Windows (Vista?)
+	// keeps sending mouse messages even if the mouse does not move but when the mouse
+	// button stays pressed.
+	if (point == m_ptLastMousePos)
+		return;
+	m_ptLastMousePos = point;
+
 	CRect plotRect;
 	GetPlotRect(plotRect);
-	if (point.x < 60 || point.x > plotRect.Width() + 60) // outside the axis
+	if (!plotRect.PtInRect(point))
 		return;
 	
 	CWnd* pwndParent = GetParent();
 	if (pwndParent)
 	{
-		int mypos = (plotRect.Width() - point.x) + 60;
+		int yValue = -1;
+		int plotHeight = plotRect.Height();
+		if (plotHeight > 0) {
+			int yPixel = plotHeight - (point.y - plotRect.top);
+			yValue = (int)(m_PlotData[0].dLowerLimit + yPixel * m_PlotData[0].dRange / plotHeight);
+		}
+
+		int mypos = (plotRect.Width() - point.x) + plotRect.left;
 		int shownsecs = plotRect.Width() * thePrefs.GetTrafficOMeterInterval();
 		float apixel = (float)shownsecs / (float)plotRect.Width();
-		pwndParent->SendMessage(UM_OSCOPEPOSITION, plotRect.Width(), (int)(mypos * apixel));
+
+		CString strInfo;
+		DWORD dwTime = (DWORD)(mypos * apixel);
+		time_t tNow = time(NULL) - dwTime;
+		TCHAR szDate[128];
+		_tcsftime(szDate, _countof(szDate), thePrefs.GetDateTimeFormat4Log(), localtime(&tNow));
+		strInfo.Format(_T("%s: %u @ %s ") + GetResString(IDS_TIMEBEFORE), m_str.YUnits, yValue, szDate, CastSecondsToLngHM(dwTime));
+
+		pwndParent->SendMessage(UM_OSCOPEPOSITION, 0, (LPARAM)(LPCTSTR)strInfo);
 	}
 }
 

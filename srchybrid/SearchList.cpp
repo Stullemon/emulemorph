@@ -153,6 +153,7 @@ void CSearchList::NewSearch(CSearchListCtrl* pWnd, CStringA strResultFileType, u
 		outputwnd = pWnd;
 
 	m_strResultFileType = strResultFileType;
+	ASSERT( eSearchType != SearchTypeAutomatic );
 	if (eSearchType == SearchTypeEd2kServer || eSearchType == SearchTypeEd2kGlobal){
 		m_nCurED2KSearchID = nSearchID;
 		m_aCurED2KSentRequestsIPs.RemoveAll();
@@ -1672,6 +1673,12 @@ void CSearchList::LoadSearches(){
 		for (int i = 0; i < nCount; i++){
 			SSearchParams* pParams = new SSearchParams(file);
 			uint32 nFileCount = file.ReadUInt32();
+			
+			// backward compability fix for new automatic option
+			if (pParams->eType == SearchTypeAutomatic)
+				pParams->eType = SearchTypeEd2kServer;
+			else if (pParams->eType == SearchTypeEd2kGlobal && pParams->dwSearchID < 0x80000000)
+				pParams->eType = SearchTypeKademlia;
 			
 			if (pParams->eType == SearchTypeKademlia && (nHighestKadSearchID == 0xFFFFFFFF || nHighestKadSearchID < pParams->dwSearchID)){
 				ASSERT( pParams->dwSearchID < 0x80000000 );

@@ -63,6 +63,7 @@ BEGIN_MESSAGE_MAP(CTransferWnd, CResizableDialog)
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_CTLCOLOR()
 	ON_WM_SETTINGCHANGE()
 	ON_WM_WINDOWPOSCHANGED()
 	ON_WM_HELPINFO()
@@ -183,6 +184,9 @@ switch (thePrefs.GetTransferWnd1()) {
 // khaos::categorymod+
 	// show & cat-tabs
 	m_dlTab.ModifyStyle(0,TCS_OWNERDRAWFIXED);
+	m_dlTab.SetPadding(CSize(6, 4));
+	if (theApp.IsVistaThemeActive())
+		m_dlTab.ModifyStyle(0, WS_CLIPCHILDREN);
 	/*
 	thePrefs.GetCategory(0)->strTitle = GetCatTitle(thePrefs.GetCategory(0)->filter);
 	thePrefs.GetCategory(0)->strIncomingPath = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
@@ -343,6 +347,10 @@ void CTransferWnd::UpdateSplitterRange()
 {
 	CRect rcWnd;
 	GetWindowRect(rcWnd);
+	if (rcWnd.Height() == 0){
+		ASSERT( false );
+		return;
+	}
 
 	CRect rcDown;
 	downloadlistctrl.GetWindowRect(rcDown);
@@ -1000,7 +1008,7 @@ void CTransferWnd::CreateCategoryMenus()
 	m_mnuCategory.AppendMenu(MF_SEPARATOR);
 	m_mnuCategory.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_mnuCatA4AF.m_hMenu, GetResString(IDS_CAT_ADVA4AF),_T("ADVA4AF"));
 	m_mnuCategory.AppendMenu(MF_SEPARATOR);
-	m_mnuCategory.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC), _T("FOLDERS") );
+	m_mnuCategory.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC), _T("Incoming") );
 	m_mnuCategory.AppendMenu(MF_SEPARATOR);
 	m_mnuCategory.AppendMenu(MF_STRING | MF_POPUP, (UINT_PTR)m_mnuCatPriority.m_hMenu, GetResString(IDS_PRIORITY), _T("FILEPRIORITY"));
 	m_mnuCategory.AppendMenu(MF_STRING, MP_CANCEL, GetResString(IDS_MAIN_BTN_CANCEL), _T("DELETE"));
@@ -2305,4 +2313,12 @@ BOOL CTransferWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	theApp.ShowHelp(eMule_FAQ_GUI_Transfers);
 	return TRUE;
+}
+
+HBRUSH CTransferWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = theApp.emuledlg->GetCtlColor(pDC, pWnd, nCtlColor);
+	if (hbr)
+		return hbr;
+	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
 }

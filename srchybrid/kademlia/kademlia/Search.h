@@ -119,6 +119,7 @@ namespace Kademlia
 			ContactMap m_mapBest;
 			ContactList m_listDelete;
 			ContactMap m_mapInUse;
+			CUInt128 m_uClosestDistantFound; // not used for the search itself, but for statistical data collecting
 	};
 }
 void KadGetKeywordHash(const CStringW& rstrKeywordW, Kademlia::CUInt128* puKadID);

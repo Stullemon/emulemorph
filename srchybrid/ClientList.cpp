@@ -137,7 +137,7 @@ void CClientList::GetStatistics(uint32 &ruTotalClients, int stats[NUM_CLIENTLIST
 			}
 		}
 
-		if (cur_client->GetDownloadState()==DS_ERROR || cur_client->GetUploadState()==US_ERROR)
+		if (cur_client->GetDownloadState()==DS_ERROR)
 			stats[6]++; // Error
 
 		switch (cur_client->GetUserPort())
@@ -251,10 +251,10 @@ void CClientList::RemoveClient(CUpDownClient* toremove, LPCTSTR pszReason){
 		 // EastShare END - Added by TAHO, modified SUQWT
 		theApp.downloadqueue->RemoveSource(toremove);
 		theApp.emuledlg->transferwnd->clientlistctrl.RemoveClient(toremove);
-		RemoveFromKadList(toremove);
-		RemoveDirectCallback(toremove);
 		list.RemoveAt(pos);
 	}
+	RemoveFromKadList(toremove);
+	RemoveConnectingClient(toremove);
 }
 
 void CClientList::DeleteAll(){
@@ -618,7 +618,7 @@ void CClientList::Process()
 			case KS_QUEUED_FWCHECK:
 			case KS_QUEUED_FWCHECK_UDP:
 				//Another client asked us to try to connect to them to check their firewalled status.
-				cur_client->TryToConnect(true);
+				cur_client->TryToConnect(true, true);
 				break;
 			case KS_CONNECTING_FWCHECK:
 				//Ignore this state as we are just waiting for results.
@@ -667,7 +667,7 @@ void CClientList::Process()
 					buddy = Connecting;
 					m_nBuddyStatus = Connecting;
 					cur_client->SetKadState(KS_CONNECTING_BUDDY);
-					cur_client->TryToConnect(true);
+					cur_client->TryToConnect(true, true);
 					theApp.emuledlg->serverwnd->UpdateMyInfo();
 				}
 				else if( m_nBuddyStatus == Connected )
@@ -787,7 +787,7 @@ void CClientList::Process()
 	///////////////////////////////////////////////////////////////////////////
 	// Process Direct Callbacks for Timeouts
 	//
-	ProcessDirectCallbackList();
+	ProcessConnectingClientsList();
 }
 
 #ifdef _DEBUG
@@ -1075,36 +1075,43 @@ bool CClientList::IsKadFirewallCheckIP(uint32 dwIP) const{
 	return false;
 }
 
-void CClientList::AddDirectCallbackClient(CUpDownClient* pToAdd){
-	ASSERT( pToAdd->GetDirectCallbackTimeout() != 0 );
-	POSITION pos;
-	if ((pos = m_liCurrentDirectCallbacks.Find(pToAdd)) == 0)
-		m_liCurrentDirectCallbacks.AddTail(pToAdd);
-	else
-		ASSERT( false ); // might happen very rarely on multiple conection tries, could be fixed in the client class till then its not much of a problem through
+void CClientList::AddConnectingClient(CUpDownClient* pToAdd){
+	for (POSITION pos = m_liConnectingClients.GetHeadPosition(); pos != NULL; m_liConnectingClients.GetNext(pos)){
+		if (m_liConnectingClients.GetAt(pos).pClient == pToAdd){
+			ASSERT( false );
+			return;
+		}
+	}
+	ASSERT( pToAdd->GetConnectingState() != CCS_NONE );
+	CONNECTINGCLIENT cc = {pToAdd, ::GetTickCount()};
+	m_liConnectingClients.AddTail(cc);
 }
-void CClientList::ProcessDirectCallbackList(){
-	// we do check if any direct callbacks have timed out by now
+
+void CClientList::ProcessConnectingClientsList(){
+	// we do check if any connects have timed out by now
 	const uint32 cur_tick = ::GetTickCount();
 	POSITION pos1, pos2;
-	for (pos1 = m_liCurrentDirectCallbacks.GetHeadPosition();( pos2 = pos1 ) != NULL;){
-		m_liCurrentDirectCallbacks.GetNext(pos1);
-		CUpDownClient* pCurClient =	m_liCurrentDirectCallbacks.GetAt(pos2);
-		if (pCurClient->GetDirectCallbackTimeout() < cur_tick)
+	for (pos1 = m_liConnectingClients.GetHeadPosition();( pos2 = pos1 ) != NULL;){
+		m_liConnectingClients.GetNext(pos1);
+		CONNECTINGCLIENT cc = m_liConnectingClients.GetAt(pos2);
+		if (cc.dwInserted + SEC2MS(45) < cur_tick)
 		{
-			ASSERT( pCurClient->GetDirectCallbackTimeout() != 0 );
-			// TODO LOGREMOVE
-			DebugLog(_T("DirectCallback timed out (%s)"), pCurClient->DbgGetClientInfo());
-			m_liCurrentDirectCallbacks.RemoveAt(pos2);
-			pCurClient->Disconnected(_T("Direct Callback Timeout"));
+			ASSERT( cc.pClient->GetConnectingState() != CCS_NONE );
+			m_liConnectingClients.RemoveAt(pos2);
+			CString dbgInfo;
+			if (cc.pClient->Disconnected(_T("Connectiontry Timeout")))
+				delete cc.pClient;
 		}
 	}
 }
 
-void CClientList::RemoveDirectCallback(CUpDownClient* pToRemove){
-	POSITION pos;
-	if ((pos = m_liCurrentDirectCallbacks.Find(pToRemove)) != 0)
-		m_liCurrentDirectCallbacks.RemoveAt(pos);
+void CClientList::RemoveConnectingClient(CUpDownClient* pToRemove){
+	for (POSITION pos = m_liConnectingClients.GetHeadPosition(); pos != NULL; m_liConnectingClients.GetNext(pos)){
+		if (m_liConnectingClients.GetAt(pos).pClient == pToRemove){
+			m_liConnectingClients.RemoveAt(pos);
+			return;
+		}
+	}
 }
 
 void CClientList::AddTrackCallbackRequests(uint32 dwIP){

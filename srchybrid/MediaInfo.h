@@ -49,7 +49,7 @@ protected:
 };
 
 // DirectShow MediaDet
-#if _MSC_VER<1400
+#ifdef HAVE_QEDIT_H
 #include <strmif.h>
 //#include <uuids.h>
 #define _DEFINE_GUID(name, l, w1, w2, b1, b2, b3, b4, b5, b6, b7, b8) \
@@ -70,11 +70,12 @@ _DEFINE_GUID(FORMAT_WaveFormatEx,0x05589f81, 0xc356, 0x11ce, 0xbf, 0x01, 0x00, 0
 #define MMNOMCI			// mmsystem: MCI support
 //#define MMNOMMIO		// mmsystem: Multimedia file I/O support
 #define MMNOMMSYSTEM	// mmsystem: General MMSYSTEM functions
+// NOTE: If you get a compile error due to missing 'qedit.h', look at "emule_site_config.h" for further information.
 #include <qedit.h>
-#else
+#else//HAVE_QEDIT_H
 #include <mmsystem.h>
 typedef LONGLONG REFERENCE_TIME;
-#endif
+#endif//HAVE_QEDIT_H
 typedef struct tagVIDEOINFOHEADER {
 	RECT			rcSource;		   // The bit we really want to use
 	RECT			rcTarget;		   // Where the video should go

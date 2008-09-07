@@ -284,6 +284,8 @@ BOOL CTaskbarNotifier::LoadConfiguration(LPCTSTR pszFilePath)
 			if (!SetBitmap(&imgTaskbar, iBmpTransparentRed, iBmpTransparentGreen, iBmpTransparentBlue))
 				return FALSE;
 		}
+		else
+			return FALSE;
 	}
 
 	SetTextFont(strFontType, iFontSize, TN_TEXT_NORMAL, TN_TEXT_UNDERLINE);
@@ -397,6 +399,11 @@ BOOL CTaskbarNotifier::SetBitmap(UINT nBitmapID, int red, int green, int blue)
 		SetWindowRgn(m_hBitmapRegion, TRUE);
 	}
 
+	if (m_nBitmapWidth == 0 || m_nBitmapHeight == 0){
+		ASSERT( false );
+		return FALSE;
+	}
+	else
 	return TRUE;
 }
 
@@ -488,7 +495,10 @@ void CTaskbarNotifier::Show(LPCTSTR pszCaption, int nMsgType, LPCTSTR pszLink, B
 	if (nMsgType == TBN_NONOTIFY)
 		return;
 
-	LoadConfiguration(m_strConfigFilePath);
+	if (LoadConfiguration(m_strConfigFilePath) == FALSE || m_nBitmapHeight == 0 || m_nBitmapWidth == 0){
+		ASSERT( false );
+		return;
+	}
 
 	UINT nScreenWidth;
 	UINT nScreenHeight;
@@ -537,8 +547,7 @@ void CTaskbarNotifier::Show(LPCTSTR pszCaption, int nMsgType, LPCTSTR pszLink, B
 	// For transparent bitmaps, all animations are disabled.
 	DWORD dwTimeToShow = m_bBitmapAlpha ? 0 : m_dwTimeToShow;
 	if (dwTimeToShow > m_dwTimerPrecision) {
-		nEvents = min((dwTimeToShow / m_dwTimerPrecision) / 2, nBitmapSize); //<<-- enkeyDEV(Ottavio84) -Reduced frames of a half-
-		if (nEvents==0 )nEvents=1; // leuk_he prevent a divede by zero chrash reported by GROSNON 
+		nEvents = max(min((dwTimeToShow / m_dwTimerPrecision) / 2, nBitmapSize), 1); //<<-- enkeyDEV(Ottavio84) -Reduced frames of a half-
 		m_dwShowEvents = dwTimeToShow / nEvents;
 		m_nIncrementShow = nBitmapSize / nEvents;
 	}
@@ -551,8 +560,7 @@ void CTaskbarNotifier::Show(LPCTSTR pszCaption, int nMsgType, LPCTSTR pszLink, B
 	// For transparent bitmaps, all animations are disabled.
 	DWORD dwTimeToHide = m_bBitmapAlpha ? 0 : m_dwTimeToHide;
 	if (dwTimeToHide > m_dwTimerPrecision) {
-		nEvents = min((dwTimeToHide / m_dwTimerPrecision / 2), nBitmapSize); //<<-- enkeyDEV(Ottavio84) -Reduced frames of a half-
-		if  (nEvents == 0) nEvents =1; // leuk_he divide by zero in a certain charshdump. 
+		nEvents = max(min((dwTimeToHide / m_dwTimerPrecision / 2), nBitmapSize), 1); //<<-- enkeyDEV(Ottavio84) -Reduced frames of a half-
 		m_dwHideEvents = dwTimeToHide / nEvents;
 		m_nIncrementHide = nBitmapSize / nEvents;
 	}

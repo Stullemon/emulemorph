@@ -52,12 +52,14 @@ namespace Kademlia
 		CContact* GetContact(uint32 uIP, uint16 nPort, bool bTCPPort);
 		CContact *GetOldest();
 		UINT GetSize() const;
+		void GetNumContacts(uint32& nInOutContacts, uint32& nInOutFilteredContacts, uint8 byMinVersion) const;
 		UINT GetRemaining() const;
 		void GetEntries(ContactList *plistResult, bool bEmptyFirst = true);
 		void GetClosestTo(uint32 uMaxType, const CUInt128 &uTarget, uint32 uMaxRequired, ContactMap *pmapResult, bool bEmptyFirst = true, bool bSetInUse = false);
 		bool ChangeContactIPAddress(CContact* pContact, uint32 uNewIP);
 		void PushToBottom(CContact* pContact); // puts an existing contact from X to the end of the list
 		CContact* GetRandomContact(uint32 nMaxType, uint32 nMinKadVersion);
+		void SetAllContactsVerified();
 
 		bool m_bDontDeleteContacts;
 

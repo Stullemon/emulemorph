@@ -480,6 +480,7 @@ void CSearchParamsWnd::SetAllIcons()
 	CImageList iml;
 	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 	iml.SetBkColor(CLR_NONE);
+	iml.Add(CTempIconLoader(_T("KadServer"), 16, 16));
 	iml.Add(CTempIconLoader(_T("SearchMethod_SERVER"), 16, 16));
 	iml.Add(CTempIconLoader(_T("SearchMethod_GLOBAL"), 16, 16));
 	iml.Add(CTempIconLoader(_T("SearchMethod_KADEMLIA"), 16, 16));
@@ -521,12 +522,13 @@ void CSearchParamsWnd::InitMethodsCtrl()
 {
 	int iMethod = m_ctlMethod.GetCurSel();
 	m_ctlMethod.ResetContent();
-	VERIFY( m_ctlMethod.AddItem(GetResString(IDS_SERVER), 0) == SearchTypeEd2kServer );
-	VERIFY( m_ctlMethod.AddItem(GetResString(IDS_GLOBALSEARCH), 1) == SearchTypeEd2kGlobal );
-	VERIFY( m_ctlMethod.AddItem(GetResString(IDS_KADEMLIA) + _T(" ") + GetResString(IDS_NETWORK), 2) == SearchTypeKademlia );
-	VERIFY( m_ctlMethod.AddItem(_T("FileDonkey (Web)"), 3) == SearchTypeFileDonkey );
+	VERIFY( m_ctlMethod.AddItem(GetResString(IDS_AUTOMATIC), 0) == SearchTypeAutomatic );
+	VERIFY( m_ctlMethod.AddItem(GetResString(IDS_SERVER), 1) == SearchTypeEd2kServer );
+	VERIFY( m_ctlMethod.AddItem(GetResString(IDS_GLOBALSEARCH), 2) == SearchTypeEd2kGlobal );
+	VERIFY( m_ctlMethod.AddItem(GetResString(IDS_KADEMLIA) + _T(" ") + GetResString(IDS_NETWORK), 3) == SearchTypeKademlia );
+	VERIFY( m_ctlMethod.AddItem(_T("FileDonkey (Web)"), 4) == SearchTypeFileDonkey );
 	UpdateHorzExtent(m_ctlMethod, 16); // adjust dropped width to ensure all strings are fully visible
-	m_ctlMethod.SetCurSel(iMethod != CB_ERR ? iMethod : SearchTypeEd2kServer);
+	m_ctlMethod.SetCurSel(iMethod != CB_ERR ? iMethod : SearchTypeAutomatic);
 }
 
 class SFileTypeCbEntry
@@ -651,9 +653,13 @@ BOOL CSearchParamsWnd::PreTranslateMessage(MSG* pMsg)
 		if (pMsg->wParam == VK_ESCAPE)
 	   		return FALSE;
 
-		if (   m_pacSearchString && m_pacSearchString->IsBound() 
-			&& (pMsg->wParam == VK_DELETE && pMsg->hwnd == m_ctlName.m_hWnd && (GetAsyncKeyState(VK_MENU)<0 || GetAsyncKeyState(VK_CONTROL)<0)))
-			m_pacSearchString->Clear();
+		if (pMsg->wParam == VK_DELETE && m_pacSearchString && m_pacSearchString->IsBound() && pMsg->hwnd == m_ctlName.m_hWnd)
+		{
+			if (GetAsyncKeyState(VK_MENU)<0 || GetAsyncKeyState(VK_CONTROL)<0)
+				m_pacSearchString->Clear();
+			else
+				m_pacSearchString->RemoveSelectedItem();
+		}
 
 		if (pMsg->wParam == VK_RETURN && m_ctlStart.IsWindowEnabled())
 		{

@@ -17,6 +17,7 @@
 #pragma once
 #include "ResizableLib/ResizableDialog.h"
 #include "IconStatic.h"
+#include "ButtonsTabCtrl.h"
 
 
 class CDirectDownloadDlg : public CResizableDialog
@@ -33,7 +34,7 @@ public:
 protected:
 	HICON m_icnWnd;
 	CIconStatic m_ctrlDirectDlFrm;
-	CTabCtrl	m_cattabs;
+	CButtonsTabCtrl	m_cattabs;
 
 	void UpdateControls();
 	void UpdateCatTabs();

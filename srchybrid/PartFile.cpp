@@ -1751,7 +1751,7 @@ bool CPartFile::SavePartFile()
 					if (end - start < EMBLOCKSIZE && count > hideOS)
 						continue;
 					//MORPH - Smooth sample
-					itoa(i_sbpos,sbnumber,10);
+					_itoa(i_sbpos,sbnumber,10); //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
 					sbnamebuffer[0] = FT_SPREADSTART;
 					CTag(sbnamebuffer,start,true).WriteTagToFile(&file);
 					uTagCount++;
@@ -1784,7 +1784,7 @@ bool CPartFile::SavePartFile()
 					if (end - start < EMBLOCKSIZE && count > hideOS)
 						continue;
 					//MORPH - Smooth sample
-					itoa(i_sbpos,sbnumber,10);
+					_itoa(i_sbpos,sbnumber,10); //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
 					sbnamebuffer[0] = FT_SPREADSTART;
 					CTag(sbnamebuffer,start).WriteTagToFile(&file);
 					uTagCount++;
@@ -1897,7 +1897,7 @@ bool CPartFile::SavePartFile()
 		for (POSITION pos = gaplist.GetHeadPosition();pos != 0;)
 		{
 			Gap_Struct* gap = gaplist.GetNext(pos);
-			itoa(i_pos,number,10);
+			_itoa(i_pos, number, 10);
 			namebuffer[0] = FT_GAPSTART;
 			CTag gapstarttag(namebuffer,gap->start, IsLargeFile());
 			gapstarttag.WriteTagToFile(&file);
@@ -2420,7 +2420,7 @@ bool CPartFile::GetNextEmptyBlockInPart(UINT partNumber, Requested_Block_Struct 
 
             bool shrinkSucceeded = ShrinkToAvoidAlreadyRequested(tempStart, tempEnd);
             if(shrinkSucceeded) {
-				//AddDebugLogLine(false, _T("Shrunk interval to prevent collision with already requested block: Old interval %i-%i. New interval: %i-%i. File %s."), start, end, tempStart, tempEnd, GetFileName());
+                AddDebugLogLine(false, _T("Shrunk interval to prevent collision with already requested block: Old interval %I64u-%I64u. New interval: %I64u-%I64u. File %s."), start, end, tempStart, tempEnd, GetFileName());
 
                 // Was this block to be returned
 			    if (result != NULL)
@@ -3263,7 +3263,7 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 					if( cur_src->HasLowID() )
 					{
 						//Make sure we still cannot callback to this Client..
-						if( !theApp.DoCallback( cur_src ) )
+						if( !theApp.CanDoCallback( cur_src ) )
 						{
 							//If we are almost maxed on sources, slowly remove these client to see if we can find a better source.
 							if( ((dwCurTick - lastpurgetime) > SEC2MS(30)) && (this->GetSourceCount() >= (GetMaxSources()*.8 )) )
@@ -5705,6 +5705,21 @@ uint32 CPartFile::WriteToBuffer(uint64 transize, const BYTE *data, uint64 start,
 		return 0;
 	}
 #endif
+	// security sanitize check to make sure we do not write anything into an already hashed complete chunk
+	const uint64 nStartChunk = start / PARTSIZE;
+	const uint64 nEndChunk = end / PARTSIZE;
+	if (IsComplete(PARTSIZE * (uint64)nStartChunk, (PARTSIZE * (uint64)(nStartChunk + 1)) - 1, false)){
+		DebugLogError( _T("PrcBlkPkt: Received data touches already hashed chunk - ignored (start) %s; File=%s; %s"), DbgGetBlockInfo(start, end), GetFileName(), client->DbgGetClientInfo());
+		return 0;
+	}
+	else if (nStartChunk != nEndChunk) {
+		if (IsComplete(PARTSIZE * (uint64)nEndChunk, (PARTSIZE * (uint64)(nEndChunk + 1)) - 1, false)){
+			DebugLogError( _T("PrcBlkPkt: Received data touches already hashed chunk - ignored (end) %s; File=%s; %s"), DbgGetBlockInfo(start, end), GetFileName(), client->DbgGetClientInfo());
+			return 0;
+		}
+		else
+			DEBUG_ONLY( DebugLogWarning(_T("PrcBlkPkt: Received data crosses chunk boundaries %s; File=%s; %s"), DbgGetBlockInfo(start, end), GetFileName(), client->DbgGetClientInfo()) );
+	}
 
 	// SLUGFILLER: SafeHash
 	CSingleLock sLock(&ICH_mut,true);	// Wait for ICH result

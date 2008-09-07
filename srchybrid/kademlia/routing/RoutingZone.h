@@ -36,6 +36,7 @@ there client on the eMule forum..
 
 #pragma once
 #include "./Maps.h"
+#include "../../SafeFile.h"
 
 namespace Kademlia
 {
@@ -61,14 +62,16 @@ namespace Kademlia
 			uint32 Consolidate();
 			bool OnBigTimer();
 			void OnSmallTimer();
-			bool Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, CKadUDPKey cUDPKey, bool bIPVerified, bool bUpdate);
-			bool AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, CKadUDPKey cUDPKey, bool bIPVerified, bool bUpdate);
-			bool Add(CContact* pContact, bool bUpdate);
+			bool		Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, CKadUDPKey cUDPKey, bool& bIPVerified, bool bUpdate, bool bFromNodesDat, bool bFromHello);
+			bool		AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, CKadUDPKey cUDPKey, bool& bIPVerified, bool bUpdate, bool bFromNodesDat, bool bFromHello);
+			bool		Add(CContact* pContact, bool& bUpdate, bool& bOutIPVerified);
 			void ReadFile(CString strSpecialNodesdate = _T(""));
+			bool		VerifyContact(const CUInt128 &uID, uint32 uIP);
 			CContact* GetContact(const CUInt128 &uID) const;
 			CContact* GetContact(uint32 uIP, uint16 nPort, bool bTCPPort) const;
 			CContact* GetRandomContact(uint32 nMaxType, uint32 nMinKadVersion) const;
-			UINT GetNumContacts() const;
+			uint32		GetNumContacts() const;
+			void		GetNumContacts(uint32& nInOutContacts, uint32& nInOutFilteredContacts, uint8 byMinVersion) const;
 			// Returns a list of all contacts in all leafs of this zone.
 			void GetAllEntries(ContactList *plistResult, bool bEmptyFirst = true);
 			// Returns the *maxRequired* tokens that are closest to the target within this zone's subtree.
@@ -82,6 +85,8 @@ namespace Kademlia
 		private:
 			CRoutingZone(CRoutingZone *pSuper_zone, int iLevel, const CUInt128 &uZone_index);
 			void Init(CRoutingZone *pSuper_zone, int iLevel, const CUInt128 &uZone_index);
+			void ReadBootstrapNodesDat(CFileDataIO& file);
+			void DbgWriteBootstrapFile();
 			
 			void WriteFile();
 			bool IsLeaf() const;
@@ -95,6 +100,7 @@ namespace Kademlia
 			void StartTimer();
 			void StopTimer();
 			void RandomLookup();
+			void SetAllContactsVerified();
 			/**
 			* Generates a new TokenBin for this zone. Used when the current zone is becoming a leaf zone.
 			* Must be deleted by caller

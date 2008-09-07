@@ -147,7 +147,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				AdditionalIncludeDirectories="..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc;DirectX\Include;DirectX\Extras\DirectShow\Include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_RELEASE;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;HAVE_SAPI_H"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_RELEASE;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB"
 				StringPooling="true"
 				ExceptionHandling="2"
 				RuntimeLibrary="0"
@@ -246,7 +246,7 @@
 				OmitFramePointers="true"
 				EnableFiberSafeOptimizations="true"
 				AdditionalIncludeDirectories="..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc;DirectX\Include;DirectX\Extras\DirectShow\Include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;HAVE_SAPI_H"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB"
 				StringPooling="true"
 				ExceptionHandling="2"
 				BasicRuntimeChecks="0"
@@ -340,7 +340,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				AdditionalIncludeDirectories=".;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc;DirectX\Include;DirectX\Extras\DirectShow\Include"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;PNG_DEBUG=1;PNG_USE_PNGVCRD;PNG_LIBPNG_SPECIALBUILD;HAVE_SAPI_H"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;PNG_DEBUG=1;PNG_USE_PNGVCRD;PNG_LIBPNG_SPECIALBUILD"
 				MinimalRebuild="true"
 				ExceptionHandling="2"
 				BasicRuntimeChecks="3"
@@ -1061,10 +1061,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UPnPFinder.cpp"
-				>
-			</File>
-			<File
 				RelativePath="URLClient.cpp"
 				>
 			</File>
@@ -1279,6 +1275,10 @@
 			</File>
 			<File
 				RelativePath="Emule.h"
+				>
+			</File>
+			<File
+				RelativePath=".\emule_site_config.h"
 				>
 			</File>
 			<File
@@ -1578,10 +1578,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\UPnPFinder.h"
-				>
-			</File>
-			<File
 				RelativePath="URLClient.h"
 				>
 			</File>
@@ -1649,10 +1645,6 @@
 					>
 				</File>
 				<File
-					RelativePath=".\kademlia\net\PacketTracking.h"
-					>
-				</File>
-				<File
 					RelativePath="kademlia\kademlia\Kademlia.h"
 					>
 				</File>
@@ -1674,6 +1666,10 @@
 				</File>
 				<File
 					RelativePath="kademlia\utils\MiscUtils.h"
+					>
+				</File>
+				<File
+					RelativePath=".\kademlia\net\PacketTracking.h"
 					>
 				</File>
 				<File
@@ -1759,6 +1755,10 @@
 			</File>
 			<File
 				RelativePath="BtnST.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\ButtonsTabCtrl.cpp"
 				>
 			</File>
 			<File
@@ -2375,6 +2375,10 @@
 			</File>
 			<File
 				RelativePath="BtnST.h"
+				>
+			</File>
+			<File
+				RelativePath=".\ButtonsTabCtrl.h"
 				>
 			</File>
 			<File
@@ -3912,11 +3916,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\Mod\queue.ico"
+				RelativePath="res\queue.ico"
 				>
 			</File>
 			<File
-				RelativePath="res\queue.ico"
+				RelativePath=".\res\Mod\queue.ico"
 				>
 			</File>
 			<File
@@ -4228,19 +4232,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\MOD\TrayConnected.ico"
-				>
-			</File>
-			<File
 				RelativePath="res\TrayConnected.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\MOD\Traydisconnected.ico"
+				RelativePath=".\res\MOD\TrayConnected.ico"
 				>
 			</File>
 			<File
 				RelativePath="res\TrayDisconnected.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\res\MOD\Traydisconnected.ico"
 				>
 			</File>
 			<File

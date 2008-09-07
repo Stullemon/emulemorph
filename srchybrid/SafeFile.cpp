@@ -484,7 +484,12 @@ int CSafeBufferedFile::printf(LPCTSTR pszFmt, ...)
 	va_start(args, pszFmt);
 	int iResult = _vftprintf(m_pStream, pszFmt, args);
 	va_end(args);
-	if (iResult < 0)
+	if (iResult < 0) {
+#if _MFC_VER>=0x0800
+		AfxThrowFileException(CFileException::genericException, _doserrno, m_strFileName);
+#else
 		AfxThrowFileException(CFileException::generic, _doserrno, m_strFileName);
+#endif
+	}
 	return iResult;
 }

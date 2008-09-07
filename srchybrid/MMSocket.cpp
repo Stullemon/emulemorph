@@ -123,7 +123,7 @@ void CMMSocket::OnReceive(int nErrorCode){
 
 						// check this header
 						char szMatch[] = "content-length";
-						if (!strnicmp(m_pBuf + dwPos, szMatch, sizeof(szMatch) - 1))
+						if (!_strnicmp(m_pBuf + dwPos, szMatch, sizeof(szMatch) - 1))
 						{
 							dwPos += sizeof(szMatch) - 1;
 							pPtr = (char*)memchr(m_pBuf + dwPos, ':', m_dwHttpHeaderLen - dwPos);
@@ -255,7 +255,7 @@ void CMMSocket::OnSend(int /*nErrorCode*/)
 void CMMSocket::OnRequestReceived(char* pHeader, DWORD dwHeaderLen, char* pData, DWORD dwDataLen)
 {
 	CString sHeader(pHeader, dwHeaderLen);
-	if(sHeader.Left(4) != "POST")
+	if(sHeader.Left(4) != _T("POST"))
 		return;
 	if (!m_pOwner->PreProcessPacket(pData, dwDataLen, this))
 		return;

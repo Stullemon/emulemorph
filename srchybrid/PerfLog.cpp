@@ -117,7 +117,7 @@ void CPerfLog::WriteSamples(UINT nCurDn, UINT nCurUp, UINT nCurDnOH, UINT nCurUp
 			return;
 		}
 		setvbuf(fp, NULL, _IOFBF, 16384); // ensure that all lines are written to file with one call
-		if (m_eMode == OneSample || _filelength(fileno(fp)) == 0)
+		if (m_eMode == OneSample || _filelength(_fileno(fp)) == 0)
 			fprintf(fp, "\"(PDH-CSV 4.0)\",\"DatDown\",\"DatUp\",\"OvrDown\",\"OvrUp\"\n");
 		fprintf(fp, "\"%s\",\"%u\",\"%u\",\"%u\",\"%u\"\n", szTime, nCurDn, nCurUp, nCurDnOH, nCurUpOH);
 		fclose(fp);

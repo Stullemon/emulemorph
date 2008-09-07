@@ -92,7 +92,7 @@ BEGIN
     CONTROL         "Wnd1Toolbar",IDC_DOWNLOAD_ICO,"ToolbarWindow32",
                     WS_TABSTOP | 0x994e,5,5,74,12
     CONTROL         "",IDC_DLTAB,"SysTabControl32",TCS_RAGGEDRIGHT | 
-                    TCS_TOOLTIPS,239,2,263,17,WS_EX_RIGHT
+                    TCS_TOOLTIPS | WS_TABSTOP,239,2,263,17,WS_EX_RIGHT
     CONTROL         "Wnd2Toolbar",IDC_UPLOAD_ICO,"ToolbarWindow32",
                     WS_TABSTOP | 0x994e,5,99,74,12
     CONTROL         "",IDC_SPLITTER,"Static",SS_BLACKFRAME | NOT WS_VISIBLE,
@@ -174,7 +174,7 @@ BEGIN
     CONTROL         "",IDC_SEARCHLIST,"SysListView32",LVS_REPORT | 
                     LVS_NOLABELWRAP | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
                     WS_BORDER | WS_TABSTOP,5,30,275,82
-    CONTROL         "",IDC_TAB1,"SysTabControl32",0x0,5,17,157,16
+    CONTROL         "",IDC_TAB1,"SysTabControl32",WS_TABSTOP,5,17,157,16
     LTEXT           "Do *NOT* resize this dlg resource!",IDC_STATIC,151,14,
                     55,16,NOT WS_VISIBLE
     PUSHBUTTON      "Search Parameters...",IDC_OPEN_PARAMS_WND,164,1,116,14
@@ -184,7 +184,8 @@ BEGIN
     PUSHBUTTON      "&Download Selected",IDC_SDOWNLOAD,5,120,88,14
     LTEXT           "->",IDC_STATIC_DLTOof,101,123,8,10
     CONTROL         "",IDC_CATTAB2,"SysTabControl32",TCS_BUTTONS | 
-                    TCS_RAGGEDRIGHT | TCS_TOOLTIPS,114,121,55,14
+                    TCS_RAGGEDRIGHT | TCS_TOOLTIPS | WS_TABSTOP,114,121,55,
+                    14
     PUSHBUTTON      "C&lose All Search Results",IDC_CLEARALL,172,120,108,14
     CONTROL         "SearchListToolbar",IDC_SEARCHLST_ICO,"ToolbarWindow32",
                     WS_TABSTOP | 0x994e,5,5,74,12
@@ -195,7 +196,8 @@ STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | DS_CONTROL | WS_CHILD |
     WS_SYSMENU
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
-    CONTROL         "",IDC_CHATSEL,"SysTabControl32",0x0,140,16,367,254
+    CONTROL         "",IDC_CHATSEL,"SysTabControl32",WS_TABSTOP,140,16,367,
+                    255
     EDITTEXT        IDC_CMESSAGE,158,273,245,12,ES_AUTOHSCROLL
     DEFPUSHBUTTON   "Send",IDC_CSEND,405,272,50,14
     PUSHBUTTON      "Close",IDC_CCLOSE,456,272,50,14
@@ -579,7 +581,7 @@ BEGIN
     CONTROL         "IRCNicksLv",IDC_NICKLIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
                     WS_BORDER | WS_TABSTOP,5,5,105,264
-    CONTROL         "",IDC_TAB2,"SysTabControl32",0x0,113,4,393,16
+    CONTROL         "",IDC_TAB2,"SysTabControl32",WS_TABSTOP,113,4,393,16
     CONTROL         "IRCChannelsLv",IDC_SERVERCHANNELLIST,"SysListView32",
                     LVS_REPORT | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
                     WS_BORDER | WS_TABSTOP,113,19,393,250
@@ -1656,11 +1658,11 @@ BEGIN
                     WS_GROUP,13,16,125,8
     EDITTEXT        IDC_ELINK,13,25,297,70,ES_MULTILINE | ES_AUTOVSCROLL | 
                     ES_AUTOHSCROLL | ES_WANTRETURN | WS_VSCROLL
+    LTEXT           "->",IDC_CATLABEL,9,111,11,8
+    CONTROL         "",IDC_CATS,"SysTabControl32",TCS_BUTTONS | TCS_TOOLTIPS | 
+                    WS_TABSTOP,19,109,167,18
     DEFPUSHBUTTON   "OK",IDOK,187,108,74,14
     PUSHBUTTON      "Cancel",IDCANCEL,266,108,50,14
-    LTEXT           "->",IDC_CATLABEL,9,111,11,8
-    CONTROL         "",IDC_CATS,"SysTabControl32",TCS_BUTTONS | TCS_TOOLTIPS,
-                    19,109,167,18
 END
 
 IDD_SEARCH_PARAMS DIALOGEX 0, 0, 478, 55
@@ -2296,7 +2298,8 @@ INFO                    ICON                    "res\\Info.ico"
 CANCEL                  ICON                    "res\\Cancel.ico"
 FORWARD                 ICON                    "res\\NavigateForward.ico"
 BACK                    ICON                    "res\\NavigateBack.ico"
-CLOSETAB                ICON                    "res\\Close.ico"
+CLOSETAB                ICON                    "res\\CloseTab.ico"
+CLOSETABSELECTED        ICON                    "res\\CloseTabSelected.ico"
 DOWNLOAD                ICON                    "res\\Download.ico"
 MESSAGE                 ICON                    "res\\Message.ico"
 MESSAGEPENDING          ICON                    "res\\MessagePending.ico"
@@ -2409,6 +2412,7 @@ COLLECTION_SEARCH       ICON                    "res\\emuleCollSearch.ico"
 COLLECTION              ICON                    "res\\emuleColl.ico"
 ALLFILES                ICON                    "res\\all.ico"
 INCOMPLETE              ICON                    "res\\incomplete.ico"
+INCOMING                ICON                    "res\\Incoming.ico"
 AABCOLLECTIONFILETYPE   ICON                    "res\\emuleCollectionFileType.ico"
 SEARCHEDIT              ICON                    "res\\SearchEdit.ico"
 FILTERCLEAR2            ICON                    "res\\clear2.ico"
@@ -2434,6 +2438,8 @@ SMILEY_OMG              ICON                    "res\\Smiley_omg.ico"
 SMILEY_SADQ             ICON                    "res\\Smiley_sadq.ico"
 SMILEY_SMILEQ           ICON                    "res\\Smiley_smileq.ico"
 SMILEY_LOOKSIDE         ICON                    "res\\Smiley_lookside.ico"
+SHAREDFOLDEROVL         ICON                    "res\\SharedFolderOvl.ico"
+KADSERVER               ICON                    "res\\KadServer.ico"
 SUC                     ICON                    "res\\MOD\\suc.ico"
 CLIENTRIGHTEDONKEY      ICON                    "res\\MOD\\ClienteDonkey.ico"
 CLIENTCREDITOVL         ICON                    "res\\MOD\\CreditOvl.ico"
@@ -2612,7 +2618,7 @@ UPLOAD.GIF              HTML                    "res\\Upload.gif"
 DOWNLOAD.GIF            HTML                    "res\\Download.gif"
 COMPLETED.GIF           HTML                    "res\\FileInfo.gif"
 FREESPACE.GIF           HTML                    "res\\HardDisk.gif"
-OPENINCOMING.GIF        HTML                    "res\\FolderOpen.gif"
+OPENINCOMING.GIF        HTML                    "res\\Incoming.gif"
 RESTOREWINDOW.GIF       HTML                    "res\\RestoreWindow.gif"
 TABLEBACKGND.GIF        HTML                    "res\\MiniMuleBack.gif"
 PREFERENCES.GIF         HTML                    "res\\Preferences.gif"
@@ -3798,6 +3804,7 @@ BEGIN
     IDS_USECREDITSYSTEM     "Use credit system (reward uploaders)"
     IDS_FIRSTAUTODOWN       "Enable this option if you want eMule to manage your download priorities.\n\nTurning this on will allow eMule to make sure downloads with a lot of sources do not interfere with downloads that have few sources. This option will only affect future downloads."
     IDS_FIRSTAUTOUP         "Enable this option if you want eMule to manage your upload priorities.\n\nTurning this on will allow eMule to boost rare files meaning popular files will be harder for other people to get. Turning this off will allow eMule to upload popular files more often meaning rare files will be harder for other people to get. This option will only affect future shared files."
+    IDS_AUTOMATIC           "Automatic"
     IDS_FIRSTSAFECON        "Enable this option if you want eMule to connect using Safe Connect.\n\nTurning this feature off allows eMule to connect to servers a little faster, but can cause you to get more false LowID connects."
     IDS_FIRSTAUTOCON        "Enable this option if you want eMule to connect at startup."
     IDS_FIRSTCOMPLETE       "You have now completed the first runtime wizard.\n\nAll these settings and more can be changed by clicking the preferences icon. For explanations and support check out the help by pressing F1 in eMule!"
@@ -4427,14 +4434,14 @@ BEGIN
     IDS_INCOMPLETE_FILES    "Incomplete Files"
     IDS_SHARED_DIRECTORIES  "Shared Directories"
     IDS_COLLECTIONLIST      "Collection List"
-    IDS_SHAREDIR            "Share directory"
+    IDS_SHAREDIR            "Share Directory"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_SHAREDIRSUB         "Share with subdirectories"
-    IDS_UNSHAREDIR          "Unshare directory"
-    IDS_UNSHAREDIRSUB       "Unshare with subdirectories"
+    IDS_SHAREDIRSUB         "Share with Subdirectories"
+    IDS_UNSHAREDIR          "Unshare Directory"
+    IDS_UNSHAREDIRSUB       "Unshare with Subdirectories"
     IDS_ALLSHAREDFILES      "All Shared Files"
     IDS_ALLDIRECTORIES      "All Directories"
     IDS_SEARCHRELATED       "Search Related Files"
@@ -4602,6 +4609,7 @@ BEGIN
     IDS_BETANAG             "This is a beta version of eMule. Please report problems and check regulary for updates in our forum (http://forum.emule-project.net)."
     IDS_CONFIRMNODESDOWNLOAD 
                             "Do you want to download and use Kad contacts (nodes.dat) from this address:\n%s ?"
+    IDS_NOTCONNECTEDANY     "You are not connected to a server or the Kad network!"
 END
 
 STRINGTABLE 

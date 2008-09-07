@@ -38,6 +38,7 @@ protected:
 	COLORREF m_crTooltipTextColor;
 	DWORD m_dwCol1DrawTextFlags;
 	DWORD m_dwCol2DrawTextFlags;
+	LOGFONT m_lfNormal;
 	CFont m_fontBold;
 	CFont m_fontNormal;
 

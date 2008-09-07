@@ -8,9 +8,9 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.3 $
+* $Revision: 1.4 $
 * $Modtime:$
-* $Author: sirob $
+* $Author: stulleamgym $
 *
 * Revision History:
 *	$History:$
@@ -182,7 +182,7 @@ void CPropPageFrameDefault::DrawCaption(CDC *pDc, CRect rect, LPCTSTR lpszCaptio
 	{
 		IMAGEINFO	ii;
 		m_Images.GetImageInfo(0, &ii);
-		CPoint		pt(3, rect.CenterPoint().y - (ii.rcImage.bottom-ii.rcImage.top)/2);
+		CPoint		pt(rect.left + 3, rect.CenterPoint().y - (ii.rcImage.bottom-ii.rcImage.top)/2);
 		m_Images.Draw(pDc, 0, pt, ILD_TRANSPARENT);
 		rect.left+= (ii.rcImage.right-ii.rcImage.left) + 3;
 	}

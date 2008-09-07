@@ -64,6 +64,7 @@ BEGIN_MESSAGE_MAP(CIrcWnd, CResizableDialog)
 	ON_WM_CREATE()
 	ON_WM_CONTEXTMENU()
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_CTLCOLOR()
 	ON_WM_HELPINFO()
 	ON_MESSAGE(UM_CLOSETAB, OnCloseTab)
 	ON_MESSAGE(UM_QUERYTAB, OnQueryTab)
@@ -1568,4 +1569,12 @@ void CIrcWnd::OnEnRequestResizeTitle(NMHDR *pNMHDR, LRESULT *pResult)
 		::SetWindowPos(pReqResize->nmhdr.hwndFrom, NULL, 0, 0, rcTitle.Width(), rcTitle.Height(), SWP_NOMOVE | SWP_NOACTIVATE | SWP_NOZORDER);
 
 	*pResult = 0;
+}
+
+HBRUSH CIrcWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = theApp.emuledlg->GetCtlColor(pDC, pWnd, nCtlColor);
+	if (hbr)
+		return hbr;
+	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
 }

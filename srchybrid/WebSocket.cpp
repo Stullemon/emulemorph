@@ -120,7 +120,7 @@ void CWebSocket::OnReceived(void* pData, DWORD dwSize, in_addr inad)
 
 						// check this header
 						char szMatch[] = "content-length";
-						if (!strnicmp(m_pBuf + dwPos, szMatch, sizeof(szMatch) - 1))
+						if (!_strnicmp(m_pBuf + dwPos, szMatch, sizeof(szMatch) - 1))
 						{
 							dwPos += sizeof(szMatch) - 1;
 							pPtr = (char*)memchr(m_pBuf + dwPos, ':', m_dwHttpHeaderLen - dwPos);

@@ -85,7 +85,7 @@ int CPartFileConvert::ScanFolderToAdd(CString folder,bool deletesource) {
 	while (bWorking) {
         bWorking = finder.FindNextFile();
 		CString test=finder.GetFilePath();
-		if (finder.IsDirectory() && finder.GetFileName().Left(1)!=".")
+		if (finder.IsDirectory() && finder.GetFileName().Left(1)!=_T("."))
 			ScanFolderToAdd(finder.GetFilePath(),deletesource);
 	}
 
@@ -673,7 +673,7 @@ void CPartFileConvertDlg::UpdateJobInfo(ConvertJob* job) {
 	if (itemnr != -1) {
 		joblist.SetItemText(itemnr,0, job->filename.IsEmpty()?job->folder:job->filename  );
 		joblist.SetItemText(itemnr,1, CPartFileConvert::GetReturncodeText(job->state) );
-		buffer="";
+		buffer=_T("");
 		if (job->size>0)
 			buffer.Format(GetResString(IDS_IMP_SIZE),CastItoXBytes(job->size, false, false),CastItoXBytes(job->spaceneeded, false, false));
 		joblist.SetItemText(itemnr,2, buffer );

@@ -325,7 +325,7 @@ bool CLogFile::Open()
 	if (m_fp != NULL)
 	{
 		m_tStarted = time(NULL);
-		m_uBytesWritten = _filelength(fileno(m_fp));
+		m_uBytesWritten = _filelength(_fileno(m_fp));
 		if (m_uBytesWritten == 0)
 		{
 			if (m_eFileFormat == Unicode)

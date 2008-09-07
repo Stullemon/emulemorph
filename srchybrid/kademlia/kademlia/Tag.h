@@ -156,7 +156,7 @@ namespace Kademlia
 
 			virtual CKadTagValueString GetStr() const
 			{
-				ASSERT(0);
+				//ASSERT(0);
 				return L"";
 			}
 			virtual uint64 GetInt() const

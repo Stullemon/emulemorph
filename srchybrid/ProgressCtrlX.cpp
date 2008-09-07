@@ -246,13 +246,13 @@ void CProgressCtrlX::DrawText(const CDrawInfo& info, const CRect &rcMax, const C
 	{
 		case PBS_SHOW_PERCENT:
 			if(sFormat.IsEmpty())
-				sFormat = "%d%%";
+				sFormat = _T("%d%%");
 			// retrieve current position and range
 			nValue = (int)((float)(info.nCurPos-info.nLower) * 100 / ((info.nUpper-info.nLower == 0) ? 1 : info.nUpper-info.nLower));
 			break;
 		case PBS_SHOW_POSITION:
 			if(sFormat.IsEmpty())
-				sFormat = "%d";
+				sFormat = _T("%d");
 			// retrieve current position
 			nValue = info.nCurPos;
 			break;

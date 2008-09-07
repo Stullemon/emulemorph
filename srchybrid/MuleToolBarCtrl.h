@@ -71,6 +71,7 @@ protected:
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg void OnSysColorChange();
+	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg void OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTbnQueryDelete(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnTbnQueryInsert(NMHDR *pNMHDR, LRESULT *pResult);

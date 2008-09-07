@@ -106,7 +106,7 @@ CUPnP_IGDControlPoint::~CUPnP_IGDControlPoint(void)
 // Eanble or disbale upnp. Note that this is indepednge of accepting ports to map. 
 bool CUPnP_IGDControlPoint::SetUPnPNat(bool upnpNat)
 {
-	if (upnpNat==true && thePrefs.IsUPnPEnabled()==false ) {
+	if (upnpNat==true && thePrefs.IsUPnPNat()==false ) {
 		thePrefs.m_bUPnPNat=true;
 		Init(thePrefs.GetUPnPLimitToFirstConnection()); 
 		UpdateAllMappings(true,false); // send any queued mappings to device. 
@@ -114,7 +114,7 @@ bool CUPnP_IGDControlPoint::SetUPnPNat(bool upnpNat)
 			PostMessage(theApp.emuledlg->GetSafeHwnd(),WEB_GUI_INTERACTION,WEBGUIIA_UPDATEMYINFO,0); // update myinfo if device detected. (from different thread!)
 
 	}
-	else if (upnpNat==false && thePrefs.IsUPnPEnabled()==true ){
+	else if (upnpNat==false && thePrefs.IsUPnPNat()==true ) {
    		DeleteAllPortMappingsOnClose(); // idependand of setting thePrefs.GetUPnPClearOnClose
 	    // Note that devices are not removed. 
 		thePrefs.m_bUPnPNat=false;
@@ -138,9 +138,9 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 		&& IsLANIP((char *) thePrefs.GetBindAddrA()) )
 		HostIp=thePrefs.GetBindAddrA();
 	else if  ( thePrefs.GetUpnpBindAddr()!= 0 )
-		HostIp=strdup(ipstrA(htonl(thePrefs.GetUpnpBindAddr())));
-	 if ((HostIp!= NULL) && (inet_addr(HostIp)==INADDR_NONE))
-		 HostIp=NULL; // prevent failing if in prev version there was no valid interface. 
+		HostIp=_strdup(ipstrA(htonl(thePrefs.GetUpnpBindAddr()))); //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
+	if ((HostIp!= NULL) && (inet_addr(HostIp)==INADDR_NONE))
+		HostIp=NULL; // prevent failing if in prev version there was no valid interface. 
 	rc = UpnpInit( HostIp, thePrefs.GetUPnPPort() );
     /*
 	rc = UpnpInit( NULL, thePrefs.GetUPnPPort() );
@@ -347,7 +347,7 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPn
 			pos = NULL;
 		}
 	}
-	if(!m_bInit ||thePrefs.IsUPnPEnabled()==false){ // if not initialized then just note the mappings for later adding. 
+	if(!m_bInit ||thePrefs.IsUPnPNat()==false){ // if not initialized then just note the mappings for later adding. 
 
 	   if(!found ){
 			//If we do not have this mapping, add it to our list when enabled
@@ -430,19 +430,18 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::DeletePortMapping(C
 	}
 
 	UPNPNAT_MAPPING item;
-	if(!m_bInit || thePrefs.IsUPnPEnabled()==false) {
+	if (!m_bInit || thePrefs.IsUPnPNat()==false) {
 		// remove the queued mapping (only in queue, not in device) 
 		m_MappingsLock.Lock();
         POSITION pos = m_Mappings.GetHeadPosition();
 		if (pos) (item = m_Mappings.GetNext(pos));
-	    while(pos && (item.externalPort != mapping.externalPort 
-			          ||item.protocol != mapping.protocol)		){
-  		   item = m_Mappings.GetNext(pos);
+	    while (pos && (item.externalPort != mapping.externalPort || item.protocol != mapping.protocol)) {
+			item = m_Mappings.GetNext(pos);
 		}
-	   if( pos && removeFromList)
+		if( pos && removeFromList)
 			m_Mappings.RemoveAt(pos);
 	   	m_MappingsLock.Unlock();
-       m_devListLock.Unlock();
+		m_devListLock.Unlock();
        return UNAT_OK;
 	}
 
@@ -523,7 +522,7 @@ bool CUPnP_IGDControlPoint::DeleteAllPortMappings(){
 }
 
 bool CUPnP_IGDControlPoint::UpdateAllMappings( bool bLockDeviceList, bool bUpdating){
-    if (thePrefs.IsUPnPEnabled()==false) // upnp portmapping disabled. 
+    if (thePrefs.IsUPnPNat()==false) // upnp portmapping disabled. 
 		return true;
 
 	if(bLockDeviceList)

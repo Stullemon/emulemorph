@@ -394,7 +394,7 @@ HRESULT CMainFrameDropTarget::PasteText(CLIPFORMAT cfData, COleDataObject& data)
 				pszUrlA++;
 			
 			hrPasteResult = S_FALSE; // default: nothing was pasted
-			if (strnicmp(pszUrlA, "ed2k://|", 8) == 0)
+			if (_strnicmp(pszUrlA, "ed2k://|", 8) == 0)
 			{
 				CString strData(pszUrlA);
 				int iPos = 0;
@@ -548,7 +548,7 @@ BOOL CMainFrameDropTarget::IsSupportedDropData(COleDataObject* pDataObject)
 					{
 						int iLen = wcslen(pszFileW);
 						LPCWSTR pszExtW = GetFileExtW(pszFileW, iLen);
-						if (pszExtW != NULL && wcsicmp(pszExtW, FILEEXTDOT_INETSHRTCUTW) == 0)
+						if (pszExtW != NULL && _wcsicmp(pszExtW, FILEEXTDOT_INETSHRTCUTW) == 0)
 						{
 							bResult = TRUE;
 							break;
@@ -563,7 +563,7 @@ BOOL CMainFrameDropTarget::IsSupportedDropData(COleDataObject* pDataObject)
 					{
 						int iLen = strlen(pszFileA);
 						LPCSTR pszExtA = GetFileExtA(pszFileA, iLen);
-						if (pszExtA != NULL && stricmp(pszExtA, FILEEXTDOT_INETSHRTCUTA) == 0)
+						if (pszExtA != NULL && _stricmp(pszExtA, FILEEXTDOT_INETSHRTCUTA) == 0)
 						{
 							bResult = TRUE;
 							break;

@@ -8,7 +8,8 @@
 enum ESearchType
 {
 	//NOTE: The numbers are *equal* to the entries in the comboxbox -> TODO: use item data
-	SearchTypeEd2kServer = 0,
+	SearchTypeAutomatic = 0,
+	SearchTypeEd2kServer,
 	SearchTypeEd2kGlobal,
 	SearchTypeKademlia,
 	SearchTypeFileDonkey

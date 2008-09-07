@@ -1349,7 +1349,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 				if (end - start < EMBLOCKSIZE && count > hideOS)
 					continue;
 				//MORPH - Smooth sample
-				itoa(i_pos,number,10);
+				_itoa(i_pos,number,10); //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
 				namebuffer[0] = FT_SPREADSTART;
 				CTag(namebuffer,start,true).WriteTagToFile(file);
 				namebuffer[0] = FT_SPREADEND;
@@ -1380,7 +1380,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 				if (end - start < EMBLOCKSIZE && count > hideOS)
 					continue;
 				//MORPH - Smooth sample
-				itoa(i_pos,number,10);
+				_itoa(i_pos,number,10); //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
 				namebuffer[0] = FT_SPREADSTART;
 				CTag(namebuffer,start).WriteTagToFile(file);
 				namebuffer[0] = FT_SPREADEND;
@@ -2126,7 +2126,7 @@ void CKnownFile::UpdateMetaDataTags()
 		delete mi;
 		}
 
-#if _MSC_VER<1400
+#ifdef HAVE_QEDIT_H
 		if (thePrefs.GetExtractMetaData() >= 2)
 		{
 			// starting the MediaDet object takes a noticeable amount of time.. avoid starting that object
@@ -2273,7 +2273,9 @@ void CKnownFile::UpdateMetaDataTags()
 				}
 			}
 		}
-#endif
+#else//HAVE_QEDIT_H
+#pragma message("WARNING: Missing 'qedit.h' header file - some features will get disabled. See the file 'emule_site_config.h' for more information.")
+#endif//HAVE_QEDIT_H
 	}
 }
 
@@ -2288,7 +2290,7 @@ bool CKnownFile::PublishNotes()
 	{
 		return false;
 	}
-	if(GetFileComment() != "")
+	if(GetFileComment() != _T(""))
 	{
 		m_lastPublishTimeKadNotes = (uint32)time(NULL)+KADEMLIAREPUBLISHTIMEN;
 		return true;

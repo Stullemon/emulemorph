@@ -2284,20 +2284,20 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 						bool validdelete = false;
 						bool removecompl = false;
 						int cFiles = 0;
+						const int iMaxDisplayFiles = 10;
 						for (pos = selectedList.GetHeadPosition(); pos != 0; )
 						{
 							CPartFile* cur_file = selectedList.GetNext(pos);
 							if (cur_file->GetStatus() != PS_COMPLETING && (cur_file->GetStatus() != PS_COMPLETE || wParam == MP_CANCEL) ){
 								validdelete = true;
 								cFiles++;
-								if (cFiles < 50)
+								if (cFiles < iMaxDisplayFiles)
 									fileList.Append(_T("\n") + CString(cur_file->GetFileName()));
-								else if(cFiles == 50)
+								else if(cFiles == iMaxDisplayFiles && pos != NULL)
 									fileList.Append(_T("\n..."));
 							}
 							else if (cur_file->GetStatus() == PS_COMPLETE)
 								removecompl = true;
-
 						}
 						CString quest;
 						if (selectedCount == 1)

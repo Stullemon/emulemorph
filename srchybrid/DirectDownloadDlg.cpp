@@ -138,6 +138,9 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 	InitWindowStyles(this);
 	SetIcon(m_icnWnd = theApp.LoadIcon(_T("PasteLink")), FALSE);
 
+	if (theApp.IsVistaThemeActive())
+		m_cattabs.ModifyStyle(0, TCS_HOTTRACK);
+
 	AddAnchor(IDC_DDOWN_FRM, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_ELINK, TOP_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDCANCEL, BOTTOM_RIGHT);

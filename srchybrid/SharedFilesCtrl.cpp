@@ -487,7 +487,7 @@ void CSharedFilesCtrl::AddFile(const CKnownFile* file)
 	// check filter conditions if we should show this file right now
 	if (m_pDirectoryFilter != NULL){
 		CString strFilePath = file->GetPath();
-		if (strFilePath.Right(1) == "\\"){
+		if (strFilePath.Right(1) == _T("\\")){
 			strFilePath = strFilePath.Left(strFilePath.GetLength()-1);
 		}
 		switch(m_pDirectoryFilter->m_eItemType){

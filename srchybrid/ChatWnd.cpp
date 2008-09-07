@@ -65,6 +65,7 @@ BEGIN_MESSAGE_MAP(CChatWnd, CResizableDialog)
 	ON_WM_SHOWWINDOW()
 	ON_MESSAGE(UM_CLOSETAB, OnCloseTab)
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_CTLCOLOR()
     ON_WM_CONTEXTMENU()
 	ON_WM_HELPINFO()
 	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_FRIENDS_LIST, OnLvnItemActivateFriendList)
@@ -696,6 +697,13 @@ void CChatWnd::OnBnClickedSend()
 	m_wndMessage.SetFocus();
 }
 
+HBRUSH CChatWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = theApp.emuledlg->GetCtlColor(pDC, pWnd, nCtlColor);
+	if (hbr)
+		return hbr;
+	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
+}
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 bool CChatWnd::UpdateEmfriendsMetFromURL(const CString& strURL)
 {

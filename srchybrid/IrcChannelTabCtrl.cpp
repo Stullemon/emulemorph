@@ -97,7 +97,7 @@ void CIrcChannelTabCtrl::SetAllIcons()
 	SetImageList(&imlist);
 	m_imlistIRC.DeleteImageList();
 	m_imlistIRC.Attach(imlist.Detach());
-	SetPadding(CSize(10, 3));
+	SetPadding(CSize(12, 3));
 }
 
 Channel* CIrcChannelTabCtrl::FindChannelByName(const CString& sName)
@@ -235,7 +235,9 @@ Channel* CIrcChannelTabCtrl::NewChannel(const CString& sName, Channel::EType eTy
 	TCITEM newitem;
 	newitem.mask = TCIF_PARAM | TCIF_TEXT | TCIF_IMAGE;
 	newitem.lParam = (LPARAM)pChannel;
-	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)sName);
+	CString strTcLabel(sName);
+	strTcLabel.Replace(_T("&"), _T("&&"));
+	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)strTcLabel);
 	if (eType == Channel::ctStatus)
 		newitem.iImage = 0;
 	else if (eType == Channel::ctChannelList)
@@ -743,17 +745,19 @@ void CIrcChannelTabCtrl::Localize()
 			{
 				pCurChan->m_sTitle = GetResString(IDS_STATUS);
 				item.mask = TCIF_TEXT;
-				item.pszText = const_cast<LPTSTR>((LPCTSTR)pCurChan->m_sTitle);
+				CString strTcLabel(pCurChan->m_sTitle);
+				strTcLabel.Replace(_T("&"), _T("&&"));
+				item.pszText = const_cast<LPTSTR>((LPCTSTR)strTcLabel);
 				SetItem(iIndex, &item);
-				pCurChan->m_sTitle.ReleaseBuffer();
 			}
 			else if (pCurChan->m_eType == Channel::ctChannelList)
 			{
 				pCurChan->m_sTitle = GetResString(IDS_IRC_CHANNELLIST);
 				item.mask = TCIF_TEXT;
-				item.pszText = const_cast<LPTSTR>((LPCTSTR)pCurChan->m_sTitle);
+				CString strTcLabel(pCurChan->m_sTitle);
+				strTcLabel.Replace(_T("&"), _T("&&"));
+				item.pszText = const_cast<LPTSTR>((LPCTSTR)strTcLabel);
 				SetItem(iIndex, &item);
-				pCurChan->m_sTitle.ReleaseBuffer();
 			}
 		}
 	}

@@ -24,7 +24,7 @@
 				AdditionalOptions="/EHa"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
-				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB;PNG_DEBUG=1;PNG_USE_PNGVCRD;PNG_LIBPNG_SPECIALBUILD"
+				PreprocessorDefinitions="WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;PNG_DEBUG=1;PNG_USE_PNGVCRD;PNG_LIBPNG_SPECIALBUILD"
 				MinimalRebuild="TRUE"
 				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="3"
@@ -98,7 +98,7 @@
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_RELEASE;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_RELEASE;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
@@ -171,7 +171,7 @@
 				OptimizeForProcessor="2"
 				OptimizeForWindowsApplication="TRUE"
 				AdditionalIncludeDirectories="..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc"
-				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;HAVE_SAPI_H;PTW32_STATIC_LIB"
+				PreprocessorDefinitions="WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
 				BasicRuntimeChecks="0"
@@ -1202,6 +1202,9 @@
 				RelativePath="BtnST.cpp">
 			</File>
 			<File
+				RelativePath=".\ButtonsTabCtrl.cpp">
+			</File>
+			<File
 				RelativePath="CatDialog.cpp">
 			</File>
 			<File
@@ -1667,6 +1670,9 @@
 			</File>
 			<File
 				RelativePath="BtnST.h">
+			</File>
+			<File
+				RelativePath=".\ButtonsTabCtrl.h">
 			</File>
 			<File
 				RelativePath="CatDialog.h">
@@ -2799,10 +2805,10 @@
 				RelativePath="res\Proxy.ico">
 			</File>
 			<File
-				RelativePath="res\queue.ico">
+				RelativePath=".\res\Mod\queue.ico">
 			</File>
 			<File
-				RelativePath=".\res\Mod\queue.ico">
+				RelativePath="res\queue.ico">
 			</File>
 			<File
 				RelativePath=".\res\Mod\Rating-Excellent.ico">
@@ -3036,16 +3042,16 @@
 				RelativePath="res\TrayBtnMetallic.bmp">
 			</File>
 			<File
-				RelativePath="res\TrayConnected.ico">
-			</File>
-			<File
 				RelativePath=".\res\MOD\TrayConnected.ico">
 			</File>
 			<File
-				RelativePath="res\TrayDisconnected.ico">
+				RelativePath="res\TrayConnected.ico">
 			</File>
 			<File
 				RelativePath=".\res\MOD\Traydisconnected.ico">
+			</File>
+			<File
+				RelativePath="res\TrayDisconnected.ico">
 			</File>
 			<File
 				RelativePath=".\res\MOD\traylowid.ico">

@@ -71,7 +71,6 @@ CUploadQueue::CUploadQueue()
 		AddDebugLogLine(true,_T("Failed to create 'upload queue' timer - %s"),GetErrorMessage(GetLastError()));
 	datarate = 0;
 	datarateoverhead = 0; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
-	friendDatarate = 0;  //MORPH - Moved by SiRoB, Upload Friend from uploadbandwidththrottler
 	powershareDatarate = 0; //MORPH - Moved by SiRoB, Upload Powershare from uploadbandwidththrottler
 	datarate_USS = 0; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
 	counter=0;
@@ -98,13 +97,18 @@ CUploadQueue::CUploadQueue()
 	memset(m_aiSlotCounter,0,sizeof(m_aiSlotCounter));
 	//MORPH END  - Added by SiRoB, Upload Splitting Class
 
-	//MORPH - Removed By SiRoB, not needed call UpdateDatarate only once in the process
+	//MORPH START - Removed By SiRoB, not needed call UpdateDatarate only once in the process
 	/*
 	m_lastCalculatedDataRateTick = 0;
 	*/
-	avarage_tick_listLastRemovedTimestamp = avarage_dr_USS_listLastRemovedTimestamp = GetTickCount(); //MORPH - Added by SiRoB, Better Upload rate calcul
+	//MORPH END   - Removed By SiRoB, not needed call UpdateDatarate only once in the process
+
+	//MORPH START - Added by SiRoB, Better Upload rate calcul
+	avarage_tick_listLastRemovedTimestamp = avarage_dr_USS_listLastRemovedTimestamp = GetTickCount();
+	//MORPH END   - Added by SiRoB, Better Upload rate calcul
 
 	m_avarage_dr_sum = 0;
+    friendDatarate = 0;
 	m_avarage_dr_USS_sum = 0; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
 	m_avarage_overhead_dr_sum = 0; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 	m_avarage_friend_dr_sum = 0; //MORPH - Added by SiRoB, Upload Friend from uploadbandwidththrottler
@@ -422,12 +426,13 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		CUpDownClient* cur_client =	waitinglist.GetAt(pos2);
 		//While we are going through this list.. Lets check if a client appears to have left the network..
 		ASSERT ( cur_client->GetLastUpRequest() );
-		//MORPH - Changed by SiRoB, Optimization requpfile
+		//MORPH START - Changed by SiRoB, Optimization requpfile
 		/*
 		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID()))
 		*/
 
 		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !cur_client->CheckAndGetReqUpFile())
+		//MORPH END   - Changed by SiRoB, Optimization requpfile
 		{
 			//This client has either not been seen in a long time, or we no longer share the file he wanted anymore..
 			cur_client->ClearWaitStartTime();
@@ -439,7 +444,12 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		    // finished clearing
 			uint32 cur_score = cur_client->GetScore(false);
 
-			if (RightClientIsBetter(newclient, bestscore, cur_client, cur_score, checkforaddinuploadinglist)) //MORPH - Changed by SiRoB, Upload Splitting Class
+			//MORPH START - Changed by SiRoB, Upload Splitting Class
+			/*
+		    if ( cur_score > bestscore)
+			*/
+			if (RightClientIsBetter(newclient, bestscore, cur_client, cur_score, checkforaddinuploadinglist))
+			//MORPH END   - Changed by SiRoB, Upload Splitting Class
 			{
                 // cur_client is more worthy than current best client that is ready to go (connected).
 				if(!cur_client->HasLowID() || (cur_client->socket && cur_client->socket->IsConnected())) {
@@ -449,14 +459,24 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 					toadd = pos2;
                     newclient = waitinglist.GetAt(toadd);
                 }
+				//MORPH START - Changed by SiRoB, Upload Splitting Class
+				/*
+				else if(!cur_client->m_bAddNextConnect) 
+				*/
 				else if(allowLowIdAddNextConnectToBeSet /*&& !cur_client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick*/)
+				//MORPH END   - Changed by SiRoB, Upload Splitting Class
 				{
                     // this client is a lowID client that is not ready to go (not connected)
     
                     // now that we know this client is not ready to go, compare it to the best not ready client
                     // the best not ready client may be better than the best ready client, so we need to check
                     // against that client
+					//MORPH START - Changed by SiRoB, Upload Splitting Class
+					/*
+				        if (cur_score > bestlowscore)
+					*/
 					if (RightClientIsBetter(lowclient, bestlowscore, cur_client, cur_score, checkforaddinuploadinglist)) //MORPH - Changed by SiRoB, Upload Splitting Class
+					//MORPH END   - Changed by SiRoB, Upload Splitting Class
 					{
                         // it is more worthy, keep it
 						bestlowscore = cur_score;
@@ -468,6 +488,11 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		}
 	}
 		
+	//MORPH START - Changed by SiRoB, Upload Splitting Class
+	/*
+	if (bestlowscore > bestscore && lowclient)
+		lowclient->m_bAddNextConnect = true;
+	*/
 	if (bestlowscore > bestscore && lowclient && allowLowIdAddNextConnectToBeSet)
 	{
 		//MORPH - Only set m_dwWouldHaveGottenUploadSlotIfNotLowIdTick when we are going to add a client (newsclient) from the same class
@@ -484,6 +509,7 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		      lowclient->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = connectTick;
 		}
 	}
+	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
 	if (!toadd)
 		return NULL;
@@ -524,6 +550,17 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
  * @param newclient address of the client that should be inserted in the uploading list
  */
 void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
+/*
+{
+	//Lets make sure any client that is added to the list has this flag reset!
+	newclient->m_bAddNextConnect = false;
+    // Add it last
+    theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket());
+	uploadinglist.AddTail(newclient);
+    newclient->SetSlotNumber(uploadinglist.GetCount());
+}
+
+*/
 	POSITION insertPosition = NULL;
 	uint32 posCounter = uploadinglist.GetCount();
 	
@@ -784,13 +821,11 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	*/
 	//MORPH END   - Upload Splitting Class
 
-	//MORPH - Changed by SiRoB, Fix Connection Collision
 	// tell the client that we are now ready to upload
-	if (!newclient->socket || !newclient->socket->IsConnected() || !newclient->CheckHandshakeFinished())
+	if (!newclient->socket || !newclient->socket->IsConnected())
 	{
 		newclient->SetUploadState(US_CONNECTING);
-		/*MORPH*/bool filtered = false;
-		/*MORPH*/if (!newclient->TryToConnect(true, NULL, &filtered) || filtered)
+		if (!newclient->TryToConnect(true))
 			return false;
 	}
 	else

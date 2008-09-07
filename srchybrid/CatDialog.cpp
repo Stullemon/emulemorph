@@ -53,7 +53,8 @@ CCatDialog::CCatDialog(int index)
 	if (m_myCat == NULL)
 		return;
 	m_pacRegExp=NULL;
-  end morph */
+end morph */
+	newcolor = (DWORD)-1;
 }
 
 CCatDialog::~CCatDialog()
@@ -109,9 +110,8 @@ void CCatDialog::UpdateData()
 	CheckDlgButton(IDC_REGEXPR,m_myCat->ac_regexpeval);
  end morph */
 
-	COLORREF selcolor=m_myCat->color;
 	newcolor=m_myCat->color;
-	m_ctlColor.SetColor(selcolor);
+	m_ctlColor.SetColor(m_myCat->color == -1 ? m_ctlColor.GetDefaultColor() : m_myCat->color);
 
 	// HoaX_69: AutoCat
 	//MORPH START - Changed by SiRoB, Due to Khaos Categorie
@@ -224,7 +224,6 @@ void CCatDialog::Localize()
 
 	m_ctlColor.CustomText = GetResString(IDS_COL_MORECOLORS);
 	m_ctlColor.DefaultText = GetResString(IDS_DEFAULT);
-	m_ctlColor.SetDefaultColor(NULL);
 
 	SetWindowText(GetResString(IDS_EDITCAT));
 

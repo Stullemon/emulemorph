@@ -160,6 +160,7 @@ protected:
 	afx_msg void OnSplitterMoved(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnWindowPosChanged(WINDOWPOS* lpwndpos);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	// khaos::categorymod+
 	void		CreateCategoryMenus();

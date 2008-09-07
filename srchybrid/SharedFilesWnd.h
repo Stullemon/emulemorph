@@ -81,6 +81,7 @@ protected:
 	afx_msg void OnSize(UINT nType, int cx, int cy);
 	afx_msg LRESULT OnChangeFilter(WPARAM wParam, LPARAM lParam);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	//MORPH START - Added, Downloaded History [Monki/Xman]
 #ifndef NO_HISTORY
 	afx_msg void OnShowWindow( BOOL bShow,UINT nStatus  );

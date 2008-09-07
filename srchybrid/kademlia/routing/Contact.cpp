@@ -115,6 +115,7 @@ void CContact::Copy(const CContact& fromContact){
 	m_bCheckKad2 = fromContact.m_bCheckKad2;
 	m_bIPVerified = fromContact.m_bIPVerified;
 	m_cUDPKey = fromContact.m_cUDPKey;
+	m_bReceivedHelloPacket = fromContact.m_bReceivedHelloPacket;
 }
 
 void CContact::InitContact()
@@ -122,10 +123,11 @@ void CContact::InitContact()
 	m_byType = 3;
 	m_tExpires = 0;
 	m_tLastTypeSet = time(NULL);
-	m_bGuiRefs = 0;
+	m_bGuiRefs = false;
 	m_uInUse = 0;
 	m_tCreated = time(NULL);
 	m_bCheckKad2 = true;
+	m_bReceivedHelloPacket = false;
 }
 
 void CContact::GetClientID(CUInt128 *puId) const

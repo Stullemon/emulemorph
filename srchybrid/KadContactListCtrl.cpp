@@ -96,6 +96,7 @@ void CKadContactListCtrl::SetAllIcons()
 	iml.Add(CTempIconLoader(_T("Contact2")));
 	iml.Add(CTempIconLoader(_T("Contact3")));
 	iml.Add(CTempIconLoader(_T("Contact4")));
+	iml.Add(CTempIconLoader(_T("SrcUnknown"))); // replace
 	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
 	HIMAGELIST himl = ApplyImageList(iml.Detach());
 	if (himl)
@@ -141,7 +142,10 @@ void CKadContactListCtrl::UpdateContact(int iItem, const Kademlia::CContact* con
 		contact->GetDistance(&id);
 		SetItemText(iItem,colDistance,id);
 
-		SetItem(iItem,0,LVIF_IMAGE,0,contact->GetType()>4?4:contact->GetType(),0,0,0,0);
+		uint32 nImageShown = contact->GetType() > 4 ? 4 : contact->GetType();
+		if (nImageShown < 3 && !contact->IsIpVerified())
+			nImageShown = 5; // if we have an active contact, which is however not IP verified (and therefore not used), show this icon instead
+		SetItem(iItem,0,LVIF_IMAGE,0,nImageShown,0,0,0,0);
 	}
 }
 
@@ -166,7 +170,7 @@ bool CKadContactListCtrl::ContactAdd(const Kademlia::CContact* contact)
 	//		ContactRef(contact);
 			// If it still doesn't work under Win98, uncomment the '!afxData.bWin95' term
 			/* no win95 vs2008
-			if (!afxData.bWin95 && iItem >= 0)
+			if (!aafxIsWin95 && iItem >= 0)
 			*/
 			if (iItem >= 0)
             //end no win98
@@ -258,6 +262,8 @@ int CKadContactListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamS
 		}
 		case colType:
 			iResult = item1->GetType() - item2->GetType();
+			if (iResult == 0)
+				iResult = item1->GetVersion() - item2->GetVersion();
 			break;
 		case colDistance:
 		{

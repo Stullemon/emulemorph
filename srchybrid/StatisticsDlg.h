@@ -78,6 +78,7 @@ private:
 	HTREEITEM	cli_other[MAX_SUB_CLIENT_VERSIONS/2];
 	HTREEITEM	hclinet, clinet[4]; // Clients Section
 	HTREEITEM	hcliport, cliport[2]; // Clients Section
+	HTREEITEM	hclifirewalled, clifirewalled[2]; // Clients Section
 	HTREEITEM	h_servers, srv[6], srv_w[3], hsrv_records, srv_r[3]; // Servers Section
 	HTREEITEM	h_shared, shar[4], hshar_records, shar_r[4]; // Shared Section
 	// The time/projections section.  Yes, it's huge.
@@ -88,7 +89,6 @@ private:
 	HTREEITEM	time_aap_up_ds[3][2], time_aap_up_s[3][2], time_aap_up_oh[3][4];
 	HTREEITEM	time_aap_down[3][7], time_aap_down_dc[3][8], time_aap_down_dp[3][3];
 	HTREEITEM	time_aap_down_s[3][2], time_aap_down_oh[3][4];
-	// <-----khaos- End Changes
 
 	HTREEITEM h_total_downloads;
 	HTREEITEM h_total_num_of_dls;
@@ -142,4 +142,5 @@ protected:
 	afx_msg void OnStnDblclickStatsscope();
 	afx_msg LRESULT OnOscopePositionMsg(WPARAM wParam, LPARAM lParam);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 };

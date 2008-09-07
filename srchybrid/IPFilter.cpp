@@ -104,7 +104,7 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 			eFileType = FilterDat;
 		else
 		{
-			VERIFY( _setmode(fileno(readFile), _O_BINARY) != -1 );
+			VERIFY( _setmode(_fileno(readFile), _O_BINARY) != -1 );
 			static const BYTE _aucP2Bheader[] = "\xFF\xFF\xFF\xFFP2B";
 			BYTE aucHeader[sizeof _aucP2Bheader - 1];
 			if (fread(aucHeader, sizeof aucHeader, 1, readFile) == 1)
@@ -114,7 +114,7 @@ int CIPFilter::AddFromFile(LPCTSTR pszFilePath, bool bShowResponse)
 				else
 				{
 					(void)fseek(readFile, 0, SEEK_SET);
-					VERIFY( _setmode(fileno(readFile), _O_TEXT) != -1 ); // ugly!
+					VERIFY( _setmode(_fileno(readFile), _O_TEXT) != -1 ); // ugly!
 				}
 			}
 		}
@@ -636,7 +636,7 @@ void CIPFilter::AddFromFile2(LPCTSTR pszFilePath)
 			eFileType = FilterDat;
 		else
 		{
-			_setmode(fileno(readFile), _O_BINARY);
+			_setmode(_fileno(readFile), _O_BINARY); //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
 			static const BYTE _aucP2Bheader[] = "\xFF\xFF\xFF\xFFP2B";
 			BYTE aucHeader[sizeof _aucP2Bheader - 1];
 			if (fread(aucHeader, sizeof aucHeader, 1, readFile) == 1)
@@ -646,7 +646,7 @@ void CIPFilter::AddFromFile2(LPCTSTR pszFilePath)
 				else
 				{
 					fseek(readFile, 0, SEEK_SET);
-					_setmode(fileno(readFile), _O_TEXT); // ugly!
+					_setmode(_fileno(readFile), _O_TEXT); // ugly! //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
 				}
 			}
 		}

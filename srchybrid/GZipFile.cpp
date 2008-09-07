@@ -108,13 +108,13 @@ bool CGZIPFile::Extract(LPCTSTR pszFilePath)
 			bResult = false;
 			break;
 		}
-		if (write(fdOut, pucBuff, iRead) != iRead){
+		if (_write(fdOut, pucBuff, iRead) != iRead){
 			bResult = false;
 			break;
 		}
 	}
 	delete[] pucBuff;
-	close(fdOut);
+	_close(fdOut);
 	if (!bResult)
 		VERIFY( _tremove(pszFilePath) == 0 );
 	return bResult;

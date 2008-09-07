@@ -47,6 +47,7 @@
 #include "Log.h"
 #include "MenuCmds.h"
 #include "DropDownButton.h"
+#include "ButtonsTabCtrl.h"
 #include "TransferWnd.h" //MORPH - Added by SiRoB, Selective Category
 
 #ifdef _DEBUG
@@ -94,6 +95,7 @@ BEGIN_MESSAGE_MAP(CSearchResultsWnd, CResizableFormView)
 	ON_MESSAGE(UM_DBLCLICKTAB, OnDblClickTab)
 	ON_WM_DESTROY()
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_CTLCOLOR()
 	ON_WM_SIZE()
 	ON_WM_CLOSE()
 	ON_WM_CREATE()
@@ -121,10 +123,12 @@ CSearchResultsWnd::CSearchResultsWnd(CWnd* /*pParent*/)
 	searchselect.m_bCloseable = true;
 	m_btnSearchListMenu = new CDropDownButton;
 	m_nFilterColumn = 0;
+	m_cattabs = new CButtonsTabCtrl;
 }
 
 CSearchResultsWnd::~CSearchResultsWnd()
 {
+	delete m_cattabs;
 	m_ctlSearchListHeader.Detach();
 	delete m_btnSearchListMenu;
 	if (globsearch)
@@ -171,7 +175,7 @@ void CSearchResultsWnd::OnInitialUpdate()
 	AddAnchor(IDC_OPEN_PARAMS_WND, TOP_RIGHT);
 	AddAnchor(searchselect.m_hWnd,TOP_LEFT,TOP_RIGHT);
 	AddAnchor(IDC_STATIC_DLTOof,BOTTOM_LEFT);
-	AddAnchor(IDC_CATTAB2,BOTTOM_LEFT,BOTTOM_RIGHT);
+	AddAnchor(*m_cattabs, BOTTOM_LEFT, BOTTOM_RIGHT);
 
 	ShowSearchSelector(false);
 
@@ -187,7 +191,7 @@ void CSearchResultsWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_SEARCHLIST, searchlistctrl);
 	DDX_Control(pDX, IDC_PROGRESS1, searchprogress);
 	DDX_Control(pDX, IDC_TAB1, searchselect);
-	DDX_Control(pDX, IDC_CATTAB2, m_cattabs);
+	DDX_Control(pDX, IDC_CATTAB2, *m_cattabs);
 	DDX_Control(pDX, IDC_FILTER, m_ctlFilter);
 	DDX_Control(pDX, IDC_OPEN_PARAMS_WND, m_ctlOpenParamsWnd);
 	DDX_Control(pDX, IDC_SEARCHLST_ICO, *m_btnSearchListMenu);
@@ -197,6 +201,7 @@ void CSearchResultsWnd::StartSearch(SSearchParams* pParams)
 {
 	switch (pParams->eType)
 	{
+		case SearchTypeAutomatic:
 		case SearchTypeEd2kServer:
 		case SearchTypeEd2kGlobal:
 		case SearchTypeKademlia:
@@ -564,7 +569,7 @@ void CSearchResultsWnd::DownloadSelected(bool bPaused)
 	// khaos::categorymod+ Category selection stuff...
 	if (!pos) return; // No point in asking for a category if there are no selected files to download.
 
-	int useCat = m_cattabs.GetCurSel();
+	int useCat = GetSelectedCat();
 	bool	bCreatedNewCat = false;
 	if (useCat==-1 && thePrefs.SelectCatForNewDL())
 	{
@@ -621,10 +626,10 @@ void CSearchResultsWnd::DownloadSelected(bool bPaused)
 				if (!fileCat && thePrefs.UseActiveCatForLinks())
 					fileCat = theApp.emuledlg->transferwnd->GetActiveCategory();
 			}
-			 else 
-			 {
-                   fileCat = useCat;
-             }
+			else 
+			{
+				fileCat = useCat;
+			}
 			
 			if (thePrefs.SmallFileDLPush() && parent->GetFileSize() < (uint64)154624)
 				theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, fileCat, 0);
@@ -633,7 +638,6 @@ void CSearchResultsWnd::DownloadSelected(bool bPaused)
 			else
 			// khaos::categorymod-
 			theApp.downloadqueue->AddSearchToDownload(&tempFile, bPaused, fileCat, (uint16)(theApp.downloadqueue->GetMaxCatResumeOrder(fileCat)));
-
 			// update parent and all childs
 			searchlistctrl.UpdateSources(parent);
 		}
@@ -669,7 +673,7 @@ void CSearchResultsWnd::SetAllIcons()
 	searchselect.SetImageList(&iml);
 	m_imlSearchResults.DeleteImageList();
 	m_imlSearchResults.Attach(iml.Detach());
-	searchselect.SetPadding(CSize(10, 3));
+	searchselect.SetPadding(CSize(12, 3));
 }
 
 void CSearchResultsWnd::Localize()
@@ -1201,8 +1205,40 @@ bool GetSearchPacket(CSafeMemFile* pData, SSearchParams* pParams, bool bTargetSu
 
 bool CSearchResultsWnd::StartNewSearch(SSearchParams* pParams)
 {
-	ESearchType eSearchType = pParams->eType;
 
+	if (pParams->eType == SearchTypeAutomatic){
+		// select between kad and server
+		// its easy if we are connected to one network only anyway
+		if (!theApp.serverconnect->IsConnected() && Kademlia::CKademlia::IsRunning() && Kademlia::CKademlia::IsConnected())
+			pParams->eType = SearchTypeKademlia;
+		else if (theApp.serverconnect->IsConnected() && (!Kademlia::CKademlia::IsRunning() || !Kademlia::CKademlia::IsConnected()))
+			pParams->eType = SearchTypeEd2kServer;
+		else if (!theApp.serverconnect->IsConnected() && (!Kademlia::CKademlia::IsRunning() || !Kademlia::CKademlia::IsConnected())){
+			AfxMessageBox(GetResString(IDS_NOTCONNECTEDANY), MB_ICONWARNING);
+			delete pParams;
+			return false;
+		}
+		else {
+			// connected to both
+			// We choose Kad, except 
+			// - if we are connected to a static server 
+			// - or a server with more than 40k and less than 2mio users connected, more than 5 mio files and if our serverlist contains less than
+			// 40 servers (otherwise we have assume that its polluted with fake server and we might just as well be connected to one) 
+			// might be further optmized in the future
+			if (theApp.serverconnect->IsConnected() && theApp.serverconnect->GetCurrentServer() != NULL 
+				&& (theApp.serverconnect->GetCurrentServer()->IsStaticMember()
+				|| (theApp.serverconnect->GetCurrentServer()->GetUsers() > 40000 && theApp.serverlist->GetServerCount() < 40
+					&& theApp.serverconnect->GetCurrentServer()->GetUsers() < 5000000 
+					&& theApp.serverconnect->GetCurrentServer()->GetFiles() > 5000000)))
+			{
+				pParams->eType = SearchTypeEd2kServer;
+			}
+			else
+				pParams->eType = SearchTypeKademlia;
+		}
+	}
+
+	ESearchType eSearchType = pParams->eType;
 	if (eSearchType == SearchTypeEd2kServer || eSearchType == SearchTypeEd2kGlobal)
 	{
 		if (!theApp.serverconnect->IsConnected()) {
@@ -1421,7 +1457,9 @@ bool CSearchResultsWnd::CreateNewTab(SSearchParams* pParams, bool bActiveIcon)
 	newitem.mask = TCIF_PARAM | TCIF_TEXT | TCIF_IMAGE;
 	newitem.lParam = (LPARAM)pParams;
 	pParams->strSearchTitle = (pParams->strSpecialTitle.IsEmpty() ? pParams->strExpression : pParams->strSpecialTitle);
-	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)pParams->strSearchTitle);
+	CString strTcLabel(pParams->strSearchTitle);
+	strTcLabel.Replace(_T("&"), _T("&&"));
+	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)strTcLabel);
 	newitem.cchTextMax = 0;
 	if (pParams->bClientSharedFiles)
 		newitem.iImage = sriClient;
@@ -1609,33 +1647,37 @@ LRESULT CSearchResultsWnd::OnDblClickTab(WPARAM wParam, LPARAM /*lParam*/)
 	return TRUE;
 }
 
+int CSearchResultsWnd::GetSelectedCat()
+{
+	return m_cattabs->GetCurSel();
+}
+
 void CSearchResultsWnd::UpdateCatTabs()
 {
-	int oldsel=m_cattabs.GetCurSel();
-	m_cattabs.DeleteAllItems();
+	int oldsel=m_cattabs->GetCurSel();
+	m_cattabs->DeleteAllItems();
 	for (int ix=0;ix<thePrefs.GetCatCount();ix++){
 	//MORPH START - Changed by SiRoB, Selection category support
 	/*
 		CString label=(ix==0)?GetResString(IDS_ALL):thePrefs.GetCategory(ix)->strTitle;
 		label.Replace(_T("&"),_T("&&"));
-		m_cattabs.InsertItem(ix,label);
+		m_cattabs->InsertItem(ix,label);
 	}
-	if (oldsel>=m_cattabs.GetItemCount() || oldsel==-1)
+	if (oldsel>=m_cattabs->GetItemCount() || oldsel==-1)
 		oldsel=0;
 	*/
 		CString label=thePrefs.GetCategory(ix)->strTitle;
 		label.Replace(_T("&"),_T("&&"));
-		m_cattabs.InsertItem(ix,label);
+		m_cattabs->InsertItem(ix,label);
 	}
-	if (oldsel>=m_cattabs.GetItemCount())
+	if (oldsel>=m_cattabs->GetItemCount())
 		oldsel=-1;
 	//MORPH END   - Changed by SiRoB, Selection category support
 
-	m_cattabs.SetCurSel(oldsel);
+	m_cattabs->SetCurSel(oldsel);
 	int flag;
-	flag=(m_cattabs.GetItemCount()>1) ? SW_SHOW:SW_HIDE;
-	
-	GetDlgItem(IDC_CATTAB2)->ShowWindow(flag);
+	flag=(m_cattabs->GetItemCount()>1) ? SW_SHOW:SW_HIDE;
+	m_cattabs->ShowWindow(flag);
 	GetDlgItem(IDC_STATIC_DLTOof)->ShowWindow(flag);
 }
 
@@ -1886,6 +1928,13 @@ BOOL CSearchResultsWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 	return CResizableFormView::OnCommand(wParam, lParam);
 }
 
+HBRUSH CSearchResultsWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = theApp.emuledlg->GetCtlColor(pDC, pWnd, nCtlColor);
+	if (hbr)
+		return hbr;
+	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
+}
 //MORPH START - Added by SiRoB, Selection category support
 void CSearchResultsWnd::OnNMClickCattab2(NMHDR* /*pNMHDR*/, LRESULT *pResult)
 {
@@ -1895,16 +1944,16 @@ void CSearchResultsWnd::OnNMClickCattab2(NMHDR* /*pNMHDR*/, LRESULT *pResult)
 	CPoint pt(point);
 	TCHITTESTINFO hitinfo;
 	CRect rect;
-	m_cattabs.GetWindowRect(&rect);
+	m_cattabs->GetWindowRect(&rect);
 	pt.Offset(0-rect.left,0-rect.top);
 	hitinfo.pt = pt;
 
 	// Find the destination tab...
-	int nTab = m_cattabs.HitTest( &hitinfo );
+	int nTab = m_cattabs->HitTest( &hitinfo );
 	if( hitinfo.flags != TCHT_NOWHERE )
-		if(nTab==m_cattabs.GetCurSel())
+		if(nTab==m_cattabs->GetCurSel())
 		{
-			m_cattabs.DeselectAll(false);
+			m_cattabs->DeselectAll(false);
 		}
 	*pResult = 0;
 }

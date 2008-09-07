@@ -16,6 +16,7 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #pragma once
+#include "../utils/UInt128.h"
 
 namespace Kademlia
 {
@@ -23,6 +24,14 @@ namespace Kademlia
 		uint32 dwIP;
 		uint32 dwInserted;
 		uint8  byOpcode;
+	};
+
+	struct TrackChallenge_Struct{
+		uint32 uIP;
+		uint32 dwInserted;
+		uint8  byOpcode;
+		CUInt128 uContactID;
+		CUInt128 uChallenge;
 	};
 
 	struct TrackPacketsIn_Struct{
@@ -51,9 +60,14 @@ namespace Kademlia
 			bool IsOnOutTrackList(uint32 dwIP, uint8 byOpcode, bool bDontRemove = false);
 			bool InTrackListIsAllowedPacket(uint32 uIP, uint8 byOpcode, bool bValidReceiverkey);
 			void InTrackListCleanup();
+			void AddLegacyChallenge(CUInt128 uContactID, CUInt128 uChallengeID, uint32 uIP, uint8 byOpcode);
+			bool IsLegacyChallenge(CUInt128 uChallengeID, uint32 uIP, uint8 byOpcode, CUInt128& ruContactID);
+			bool HasActiveLegacyChallenge(uint32 uIP) const;
 
 		private:
+			bool IsTrackedOutListRequestPacket(uint8 byOpcode) const;
 			CList<TrackPackets_Struct> listTrackedRequests;
+			CList<TrackChallenge_Struct> listChallengeRequests;
 			CTypedPtrList<CPtrList, TrackPacketsIn_Struct*>					m_liTrackPacketsIn;
 			CMap<int, int, TrackPacketsIn_Struct*, TrackPacketsIn_Struct*>	m_mapTrackPacketsIn;
 			uint32 dwLastTrackInCleanup;

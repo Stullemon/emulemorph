@@ -161,6 +161,27 @@ BOOL CCustomAutoComplete::RemoveItem(const CString& p_sItem)
 	return FALSE;
 }
 
+BOOL CCustomAutoComplete::RemoveSelectedItem()
+{
+	if (m_pac == NULL || !IsBound())
+		return FALSE;
+	CComQIPtr<IAutoCompleteDropDown> pIAutoCompleteDropDown = m_pac;
+	if (!pIAutoCompleteDropDown)
+		return FALSE;
+
+	DWORD dwFlags;
+	LPWSTR pwszItem;
+	if (FAILED(pIAutoCompleteDropDown->GetDropDownStatus(&dwFlags, &pwszItem)))
+		return FALSE;
+	if (dwFlags != ACDD_VISIBLE)
+		return FALSE;
+	if (pwszItem == NULL)
+		return FALSE;
+	CString strItem(pwszItem);
+	CoTaskMemFree(pwszItem);
+
+	return RemoveItem(strItem);
+}
 
 BOOL CCustomAutoComplete::Clear()
 {

@@ -31,6 +31,10 @@
 #include "UpDownClient.h"
 #include "UserMsgs.h"
 #include "HelpIDs.h"
+#include "Kademlia/Kademlia/kademlia.h"
+#include "Kademlia/Kademlia/Prefs.h"
+#include "kademlia/kademlia/UDPFirewallTester.h"
+
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -52,6 +56,7 @@ BEGIN_MESSAGE_MAP(CStatisticsDlg, CResizableDialog)
 	ON_WM_SIZE()
 	ON_BN_CLICKED(IDC_BNMENU, OnMenuButtonClicked)	
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_CTLCOLOR()
 	ON_STN_DBLCLK(IDC_SCOPE_D, OnStnDblclickScopeD)
 	ON_STN_DBLCLK(IDC_SCOPE_U, OnStnDblclickScopeU)
 	ON_STN_DBLCLK(IDC_STATSSCOPE, OnStnDblclickStatsscope)
@@ -375,9 +380,10 @@ BOOL CStatisticsDlg::OnInitDialog()
 	m_TimeToolTips->AddTool(GetDlgItem(IDC_SCOPE_D),	_T(""),NULL,0);
 	m_TimeToolTips->AddTool(GetDlgItem(IDC_SCOPE_U),	_T(""),NULL,0);
 	m_TimeToolTips->AddTool(GetDlgItem(IDC_STATSSCOPE),	_T(""),NULL, 0);
+	// Any Autopop-Time which is specified higher than ~30 sec. will get reset to 5 sec.
+	m_TimeToolTips->SetDelayTime(TTDT_AUTOPOP, 30000);
 	m_TimeToolTips->SetDelayTime(TTDT_INITIAL,	30000);
 	m_TimeToolTips->SetDelayTime(TTDT_RESHOW,	30000);
-	m_TimeToolTips->SetDelayTime(TTDT_AUTOPOP,	300);
 	EnableToolTips(TRUE);
 
 	return true;
@@ -3060,6 +3066,29 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 			stattree.SetItemText(cliport[1], cbuffer);
 		} // - End Clients -> Port Section
 
+		// CLIENTS -> FIREWALLED (KAD) SECTION
+		if (forceUpdate || stattree.IsExpanded(hclifirewalled)) 
+		{
+			if (!Kademlia::CKademlia::IsRunning() || Kademlia::CUDPFirewallTester::IsFirewalledUDP(true)) {
+				cbuffer.Format(_T("UDP: %s"), GetResString(IDS_KAD_UNKNOWN));
+				stattree.SetItemText(clifirewalled[0], cbuffer);
+				cbuffer.Format(_T("TCP: %s"), GetResString(IDS_KAD_UNKNOWN));
+				stattree.SetItemText(clifirewalled[1], cbuffer);
+			}
+			else {
+				if (Kademlia::CKademlia::GetPrefs()->StatsGetFirewalledRatio(true) > 0)
+					cbuffer.Format(_T("UDP: %1.1f%%"), Kademlia::CKademlia::GetPrefs()->StatsGetFirewalledRatio(true) * 100);
+				else
+					cbuffer.Format(_T("UDP: %s"), GetResString(IDS_FSTAT_WAITING));
+				stattree.SetItemText(clifirewalled[0], cbuffer);
+				if (Kademlia::CKademlia::GetPrefs()->StatsGetFirewalledRatio(false) > 0)
+					cbuffer.Format(_T("TCP: %1.1f%%"), Kademlia::CKademlia::GetPrefs()->StatsGetFirewalledRatio(false) * 100);
+				else
+					cbuffer.Format(_T("TCP: %s"), GetResString(IDS_FSTAT_WAITING));
+				stattree.SetItemText(clifirewalled[1], cbuffer);
+			}
+		} // - End Clients -> Firewalled (Kad) Section
+
 		// General Client Statistics
 		cbuffer.Format(_T("%s: %u (%1.1f%%)"), GetResString(IDS_STATS_PROBLEMATIC), myStats[6],(double)100*myStats[6]/totalclient);
 		stattree.SetItemText(cligen[0], cbuffer);
@@ -3549,6 +3578,9 @@ void CStatisticsDlg::CreateMyTree()
 		hcliport = stattree.InsertItem(GetResString(IDS_PORT),h_clients);						// Client Port Section
 	for(int i = 0; i<2; i++)
 		cliport[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hcliport);
+	hclifirewalled = stattree.InsertItem(GetResString(IDS_FIREWALLED) + _T(" (") + GetResString(IDS_KADEMLIA) + _T(")"),h_clients);
+	for (int i = 0; i < 2; i++)
+		clifirewalled[i] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), hclifirewalled);	
 		cligen[4] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients);
 		cligen[3] = stattree.InsertItem(GetResString(IDS_FSTAT_WAITING), h_clients);
 		for(int i = 0; i<3; i++)
@@ -3673,23 +3705,11 @@ void CStatisticsDlg::OnStnDblclickStatsscope()
 
 LRESULT CStatisticsDlg::OnOscopePositionMsg(WPARAM /*wParam*/, LPARAM lParam)
 {
-	time_t tNow = time(NULL) - lParam;
-	TCHAR szDate[128];
-	size_t uDateLen = _tcsftime(szDate, _countof(szDate), thePrefs.GetDateTimeFormat4Log(), localtime(&tNow));
-	
-	TCHAR szAgo[64];
-	_sntprintf(szAgo, _countof(szAgo), _T(" ") + GetResString(IDS_TIMEBEFORE), CastSecondsToLngHM(lParam));
-	szAgo[_countof(szAgo) - 1] = _T('\0');
-
-	_tcsncat(szDate, szAgo, _countof(szDate) - uDateLen);
-	szDate[_countof(szDate) - 1] = _T('\0');
-
-	m_TimeToolTips->UpdateTipText(szDate,GetDlgItem(IDC_SCOPE_D));
-	m_TimeToolTips->UpdateTipText(szDate,GetDlgItem(IDC_SCOPE_U));
-	m_TimeToolTips->UpdateTipText(szDate,GetDlgItem(IDC_STATSSCOPE));
-	
+	LPCTSTR pszInfo = (LPCTSTR)lParam;
+	m_TimeToolTips->UpdateTipText(pszInfo, GetDlgItem(IDC_SCOPE_D));
+	m_TimeToolTips->UpdateTipText(pszInfo, GetDlgItem(IDC_SCOPE_U));
+	m_TimeToolTips->UpdateTipText(pszInfo, GetDlgItem(IDC_STATSSCOPE));
 	m_TimeToolTips->Update();
-
 	return 0;
 }
 
@@ -3711,4 +3731,12 @@ BOOL CStatisticsDlg::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	theApp.ShowHelp(eMule_FAQ_GUI_Statistics);
 	return TRUE;
+}
+
+HBRUSH CStatisticsDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = theApp.emuledlg->GetCtlColor(pDC, pWnd, nCtlColor);
+	if (hbr)
+		return hbr;
+	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
 }

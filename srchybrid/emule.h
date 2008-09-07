@@ -53,7 +53,7 @@ class CUpDownClient;
 class CPeerCacheFinder;
 class CFirewallOpener;
 #ifdef USE_OFFICIAL_UPNP
-class CUPnPFinder;
+class CUPnPImplWrapper;
 #endif
 
 struct SLogItem;
@@ -96,7 +96,7 @@ public:
 	CPeerCacheFinder*	m_pPeerCache;
 	CFirewallOpener*	m_pFirewallOpener;
 #ifdef USE_OFFICIAL_UPNP
-	CUPnPFinder*		m_pUPnPFinder;
+	CUPnPImplWrapper*		m_pUPnPFinder;
 #endif
 
 	CFakecheck*			FakeCheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
@@ -186,7 +186,7 @@ public:
 	bool		IsPortchangeAllowed();
 	bool		IsConnected();
 	bool		IsFirewalled();
-	bool		DoCallback( CUpDownClient *client );
+	bool		CanDoCallback( CUpDownClient *client );
 	uint32		GetID();
 	uint32		GetPublicIP(bool bIgnoreKadIP = false) const;	// return current (valid) public IP or 0 if unknown
 	void		SetPublicIP(const uint32 dwIP);
@@ -205,6 +205,7 @@ public:
 	void		DisableRTLWindowsLayout();
 	void		UpdateDesktopColorDepth();
 	void		UpdateLargeIconSize();
+	bool		IsVistaThemeActive() const;
 
 	bool		GetLangHelpFilePath(CString& strResult);
 	void		SetHelpFilePath(LPCTSTR pszHelpFilePath);

@@ -2347,7 +2347,7 @@ bool CDownloadQueue::DoKademliaFileRequest()
 	return ((::GetTickCount() - lastkademliafilerequest) > KADEMLIAASKTIME);
 }
 
-void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, const Kademlia::CUInt128* pbuddyID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 serverip, uint16 serverport, uint8 byCryptOptions)
+void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt128* pcontactID, const Kademlia::CUInt128* pbuddyID, uint8 type, uint32 ip, uint16 tcp, uint16 udp, uint32 dwBuddyIP, uint16 dwBuddyPort, uint8 byCryptOptions)
 {
 	//Safty measure to make sure we are looking for these sources
 	CPartFile* temp = GetFileByKadFileSearchID(searchID);
@@ -2372,7 +2372,7 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 	if( (ip == Kademlia::CKademlia::GetIPAddress() || ED2Kip == theApp.serverconnect->GetClientID()) && tcp == thePrefs.GetPort())
 		return;
 	CUpDownClient* ctemp = NULL; 
-	DEBUG_ONLY( DebugLog(_T("Kadsource received, type %u, IP %s"), type, ipstr(ED2Kip)) );
+	//DEBUG_ONLY( DebugLog(_T("Kadsource received, type %u, IP %s"), type, ipstr(ED2Kip)) );
 	switch( type )
 	{
 		case 4:
@@ -2387,8 +2387,9 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 			}
 			ctemp = new CUpDownClient(temp,tcp,ip,0,0,false);
 			ctemp->SetSourceFrom(SF_KADEMLIA);
-			ctemp->SetServerIP(serverip);
-			ctemp->SetServerPort(serverport);
+			// not actually sent or needed for HighID sources
+			//ctemp->SetServerIP(serverip);
+			//ctemp->SetServerPort(serverport);
 			ctemp->SetKadPort(udp);
 			byte cID[16];
 			pcontactID->ToByteArray(cID);
@@ -2419,8 +2420,8 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 			ctemp->SetUserHash(cID);
 			pbuddyID->ToByteArray(cID);
 			ctemp->SetBuddyID(cID);
-			ctemp->SetBuddyIP(serverip);
-			ctemp->SetBuddyPort(serverport);
+			ctemp->SetBuddyIP(dwBuddyIP);
+			ctemp->SetBuddyPort(dwBuddyPort);
 			break;
 		}
 		case 6:
@@ -2441,7 +2442,6 @@ void CDownloadQueue::KademliaSearchFile(uint32 searchID, const Kademlia::CUInt12
 			byte cID[16];
 			pcontactID->ToByteArray(cID);
 			ctemp->SetUserHash(cID);
-			pbuddyID->ToByteArray(cID);
 		}
 	}
 

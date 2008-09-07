@@ -1,5 +1,6 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
+Copyright (C)2004-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
  
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -83,10 +84,31 @@ CSearch::CSearch()
 	m_pucSearchTermsData = NULL;
 	m_uSearchTermsDataSize = 0;
 	pNodeSpecialSearchRequester = NULL;
+	m_uClosestDistantFound = 0;
 }
 
 CSearch::~CSearch()
 {
+	
+	// remember the closest node we found and tried to contact (if any) during this search
+	// for statistical caluclations, but only if its a certain type
+	switch(m_uType)
+	{
+		case NODECOMPLETE:
+		case FILE:
+		case KEYWORD:
+		case NOTES:
+		case STOREFILE:
+		case STOREKEYWORD:
+		case STORENOTES:
+		case FINDSOURCE: // maybe also exclude
+			if (m_uClosestDistantFound != 0)
+				CKademlia::StatsAddClosestDistance(m_uClosestDistantFound);
+			break;
+		default: // NODE, NODESPECIAL, NODEFWCHECKUDP, FINDBUDDY
+			break;
+	}
+
 	if (pNodeSpecialSearchRequester != NULL){
 		// inform requester that our search failed
 		pNodeSpecialSearchRequester->KadSearchIPByNodeIDResult(KCSR_NOTFOUND, 0, 0);
@@ -318,6 +340,7 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 				// Add to list of people who responded
 				m_mapResponded[uFromDistance] = pFromContact;
 
+				std::map<uint32, uint32> mapReceivedIPs;
 				// Loop through their responses
 				for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
 				{
@@ -333,7 +356,15 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 						continue;
 					if (m_mapTried.count(uDistance) > 0)
 						continue;
-
+					// we only accept unique IPs in the answer, having multiple IDs pointing to one IP in the routing tables
+					// is no longer allowed since 0.49a anyway
+					if (mapReceivedIPs.count(pContact->GetIPAddress()) > 0){
+						DebugLogWarning(_T("Multiple KadIDs pointing to same IP (%s) in KADEMLIA(2)_RES answer - ignored, sent by %s")
+							, ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(pFromContact->GetIPAddress())));
+						continue;
+					}
+					else
+						mapReceivedIPs[pContact->GetIPAddress()] = 1;
 					// Add to possible
 					m_mapPossible[uDistance] = pContact;
 
@@ -397,6 +428,8 @@ void CSearch::StorePacket()
 	CUInt128 uFromDistance(itContactMap->first);
 	CContact* pFromContact = itContactMap->second;
 
+	if (uFromDistance < m_uClosestDistantFound || m_uClosestDistantFound == 0)
+		m_uClosestDistantFound = uFromDistance;
 	// Make sure this is a valid Node to store too.
 	// Shouldn't LAN IPs already be filtered?
 	if(thePrefs.FilterLANIPs() && uFromDistance.Get32BitChunk(0) > SEARCHTOLERANCE)
@@ -771,7 +804,7 @@ void CSearch::StorePacket()
 					listTag.push_back(new CKadTagStr(TAG_FILENAME, pFile->GetFileName()));
 					if(pFile->GetFileRating() != 0)
 						listTag.push_back(new CKadTagUInt(TAG_FILERATING, pFile->GetFileRating()));
-					if(pFile->GetFileComment() != "")
+					if(pFile->GetFileComment() != _T(""))
 						listTag.push_back(new CKadTagStr(TAG_DESCRIPTION, pFile->GetFileComment()));
 					if (pFromContact->GetVersion() >= 2/*47a*/)
 						listTag.push_back(new CKadTagUInt(TAG_FILESIZE, pFile->GetFileSize()));
@@ -922,11 +955,9 @@ void CSearch::ProcessResultFile(const CUInt128 &uAnswer, TagList *plistInfo)
 	uint32 uIP = 0;
 	uint16 uTCPPort = 0;
 	uint16 uUDPPort = 0;
-	uint32 uServerIP = 0;
-	uint16 uServerPort = 0;
+	uint32 uBuddyIP = 0;
+	uint16 uBuddyPort = 0;
 	//    uint32 uClientID = 0;
-	uchar ucharBuddyHash[16];
-	md4clr(ucharBuddyHash);
 	CUInt128 uBuddy;
 	uint8 byCryptOptions = 0; // 0 = not supported
 
@@ -942,15 +973,18 @@ void CSearch::ProcessResultFile(const CUInt128 &uAnswer, TagList *plistInfo)
 		else if (!pTag->m_name.Compare(TAG_SOURCEUPORT))
 			uUDPPort = (uint16)pTag->GetInt();
 		else if (!pTag->m_name.Compare(TAG_SERVERIP))
-			uServerIP = (uint32)pTag->GetInt();
+			uBuddyIP = (uint32)pTag->GetInt();
 		else if (!pTag->m_name.Compare(TAG_SERVERPORT))
-			uServerPort = (uint16)pTag->GetInt();
+			uBuddyPort = (uint16)pTag->GetInt();
 		//        else if (!pTag->m_name.Compare(TAG_CLIENTLOWID))
 		//            uClientID = pTag->GetInt();
 		else if (!pTag->m_name.Compare(TAG_BUDDYHASH))
 		{
-			strmd4(pTag->GetStr(), ucharBuddyHash);
+			uchar ucharBuddyHash[16];
+			if (pTag->IsStr() && strmd4(pTag->GetStr(), ucharBuddyHash))
 			md4cpy(uBuddy.GetDataPtr(), ucharBuddyHash);
+			else
+				TRACE("+++ Invalid TAG_BUDDYHASH tag\n");
 		}
 		else if (!pTag->m_name.Compare(TAG_ENCRYPTION))
 			byCryptOptions = (uint8)pTag->GetInt();
@@ -969,7 +1003,7 @@ void CSearch::ProcessResultFile(const CUInt128 &uAnswer, TagList *plistInfo)
 		case 6:
 			m_uAnswers++;
 			theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
-			theApp.downloadqueue->KademliaSearchFile(m_uSearchID, &uAnswer, &uBuddy, uType, uIP, uTCPPort, uUDPPort, uServerIP, uServerPort, byCryptOptions);
+			theApp.downloadqueue->KademliaSearchFile(m_uSearchID, &uAnswer, &uBuddy, uType, uIP, uTCPPort, uUDPPort, uBuddyIP, uBuddyPort, byCryptOptions);
 			break;
 	}
 }
@@ -1109,7 +1143,7 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 		{
 			// Set flag based on last tag we saw.
 			sName = pTag->GetStr();
-			if( sName != "" )
+			if( sName != _T("") )
 				bFileName = true;
 			else
 				bFileName = false;

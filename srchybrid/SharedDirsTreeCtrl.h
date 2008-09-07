@@ -67,7 +67,7 @@ public:
 	CDirectoryItem* GetSelectedFilter() const;
 	bool			IsCreatingTree() const		{return m_bCreatingTree;};
 	void			Localize();
-	void			EditSharedDirectories(CDirectoryItem* pDir, bool bAdd, bool bSubDirectories);
+	void			EditSharedDirectories(const CDirectoryItem* pDir, bool bAdd, bool bSubDirectories);
 	void			Reload(bool bFore = false);
 
 	CDirectoryItem*		pHistory; //MORPH - Added, Downloaded History [Monki/Xman]
@@ -118,8 +118,9 @@ private:
 	bool	FileSystemTreeIsShared(CString strDir);
   */
 	bool	FileSystemTreeIsShared(CString strDir, bool bCheckParent = false, bool bCheckIncoming = false,bool bOnlySubdir = false);	// SLUGFILLER: shareSubdir - allow checking indirect share
-	void	FileSystemTreeUpdateBoldState(CDirectoryItem* pDir = NULL);
-	void	FileSystemTreeSetShareState(CDirectoryItem* pDir, bool bShared, bool bSubDirectories);
+	void	FileSystemTreeUpdateBoldState(const CDirectoryItem* pDir = NULL);
+	void	FileSystemTreeUpdateShareState(const CDirectoryItem* pDir = NULL);
+	void	FileSystemTreeSetShareState(const CDirectoryItem* pDir, bool bShared, bool bSubDirectories);
 
 	void	FilterTreeAddSharedDirectory(CDirectoryItem* pDir, bool bRefresh);
 	void	FilterTreeAddSubDirectories(CDirectoryItem* pDirectory, CStringList& liDirs, int nLevel = 0);

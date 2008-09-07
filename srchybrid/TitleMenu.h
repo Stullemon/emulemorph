@@ -5,7 +5,7 @@
 //////////////////////////////////////////////////////////////////////
 #pragma once
 
-#ifndef MIM_APPLYTOSUBMENUS 
+#if (WINVER < 0x0500)
 typedef struct tagMENUINFO
 {
     DWORD   cbSize;
@@ -33,6 +33,10 @@ class CTitleMenu : public CMenu
 public:
 	CTitleMenu();
 	virtual ~CTitleMenu();
+
+	BOOL CreateMenu();
+	BOOL DestroyMenu();
+	void DeleteIcons();
 
 	void EnableIcons();
 	void AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu = false);
@@ -66,7 +70,9 @@ protected:
 	bool m_bIconMenu;
 	UINT m_uEdgeFlags;
 	CImageList m_ImageList;
-	CMap<int, int, int, int> m_mapIconPos;
+	CMap<int, int, int, int> m_mapMenuIdToIconIdx;
+	CMapStringToPtr m_mapIconNameToIconIdx;
+	CMapStringToPtr m_mapIconNameToBitmap;
 
 	typedef UINT (WINAPI* LPFNGRADIENTFILL)(HDC, CONST PTRIVERTEX, DWORD, CONST PVOID, DWORD, DWORD);
 	LPFNGRADIENTFILL m_pfnGradientFill;

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2006 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -15,10 +15,10 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #include "stdafx.h"
-#ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <crtdbg.h>
-#endif
+//#ifdef _DEBUG
+//#define _CRTDBG_MAP_ALLOC
+//#include <crtdbg.h>
+//#endif
 #include <locale.h>
 #include <io.h>
 #include <share.h>
@@ -72,8 +72,9 @@
 #include "LangIDs.h"
 #include "HelpIDs.h"
 #ifdef USE_OFFICIAL_UPNP
-#include "UPnPFinder.h"
+#include "UPnPImplWrapper.h"
 #endif
+#include "VisualStylesXP.h"
 #include "ed2kLink.h" // morph - CATEGORY SELECTION CLIPNOARD
 #include "fakecheck.h" //MORPH - Added by SiRoB
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
@@ -297,8 +298,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 CemuleApp theApp(_T("eMule"));
 
 
-// Workaround for buggy 'AfxSocketTerm' (needed at least for MFC 7.0) 
-//morph, alslo for vs2008now ???
+// Workaround for bugged 'AfxSocketTerm' (needed at least for MFC 7.0, 7.1, 8.0, 9.0)
 #if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900
 void __cdecl __AfxSocketTerm()
 {
@@ -426,6 +426,10 @@ BOOL CemuleApp::InitInstance()
 	///////////////////////////////////////////////////////////////////////////
 	// Common Controls initialization
 	//
+	//          Mjr Min
+	// -------------------------
+	// XP SP3	6   0
+	// Vista    6   16
 	InitCommonControls();
 	DWORD dwComCtrlMjr = 4;
 	DWORD dwComCtrlMin = 0;
@@ -474,7 +478,6 @@ BOOL CemuleApp::InitInstance()
 	}
 		}
 	//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
-// mfc90 for vs2008
 #if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900
 	atexit(__AfxSocketTerm);
 #else
@@ -613,11 +616,11 @@ BOOL CemuleApp::InitInstance()
 
 #ifdef USE_OFFICIAL_UPNP
 	// UPnP Port forwarding
-	m_pUPnPFinder = new CUPnPFinder();
+	m_pUPnPFinder = new CUPnPImplWrapper();
 #endif
 
 	// emulEspaña: Added by MoNKi [MoNKi: -UPnPNAT Support-]
-	if((m_UPnP_IGDControlPoint != NULL && thePrefs.IsUPnPEnabled()) || thePrefs.GetUpnpDetect()>0){  //leuk_he add startupwizard auto detect
+	if((m_UPnP_IGDControlPoint != NULL && thePrefs.IsUPnPNat()) || thePrefs.GetUpnpDetect()>0){  //leuk_he add startupwizard auto detect
       m_UPnP_IGDControlPoint->Init(thePrefs.GetUPnPLimitToFirstConnection());
 		if(thePrefs.GetUPnPClearOnClose() /*|| thePrefs.GetUseRandomPorts()*/)
 			m_UPnP_IGDControlPoint->DeleteAllPortMappingsOnClose();
@@ -1141,7 +1144,7 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 			}
 			file.Write("|",1); 
 			if(serverconnect->IsConnected()){
-				itoa(serverconnect->GetCurrentServer()->GetPort(),buffer,10); 
+				_itoa(serverconnect->GetCurrentServer()->GetPort(),buffer,10); 
 				file.Write(buffer,strlen(buffer));
 			}
 			else{
@@ -1163,7 +1166,7 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 		sprintf(buffer,"%.1f",(float)uploadqueue->GetDatarate(true)/1024); 
 		file.Write(buffer,strlen(buffer)); 
 		file.Write("|",1); 
-		itoa(uploadqueue->GetWaitingUserCount(),buffer,10); 
+		_itoa(uploadqueue->GetWaitingUserCount(),buffer,10); 
 		file.Write(buffer,strlen(buffer)); 
 
 		file.Close(); 
@@ -1394,7 +1397,7 @@ bool CemuleApp::IsFirewalled()
 	return true; // firewalled
 }
 
-bool CemuleApp::DoCallback( CUpDownClient *client )
+bool CemuleApp::CanDoCallback( CUpDownClient *client )
 {
 	if(Kademlia::CKademlia::IsConnected())
 	{
@@ -1865,7 +1868,7 @@ bool CemuleApp::IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen)
 				{
 					while (isspace((unsigned char)*pszText))
 						pszText++;
-					bFoundLink = (strnicmp(pszText, pszLinkType, iLinkTypeLen) == 0);
+					bFoundLink = (_strnicmp(pszText, pszLinkType, iLinkTypeLen) == 0);
 					GlobalUnlock(hText);
 				}
 			}
@@ -2071,9 +2074,12 @@ void CemuleApp::CreateAllFonts()
 	//
 	LOGFONT lfDefault;
 	AfxGetMainWnd()->GetFont()->GetLogFont(&lfDefault);
+	// WinXP: lfDefault.lfFaceName = "MS Shell Dlg 2" (!)
+	// Vista: lfDefault.lfFaceName = "MS Shell Dlg 2"
+	//
 	// It would not be an error if that font name does not match our pre-determined
 	// font name, I just want to know if that ever happens.
-	ASSERT( m_strDefaultFontFaceName == lfDefault.lfFaceName ); // WinXP: "MS Shell Dlg 2" (!)
+	ASSERT( m_strDefaultFontFaceName == lfDefault.lfFaceName );
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -2091,9 +2097,14 @@ void CemuleApp::CreateAllFonts()
 	// that font is nevertheless set to "MS Sans Serif" because a scaled up "Tahoma"
 	// font unfortunately does not look as good as a scaled up "MS Sans Serif" font.
 	//
+	// No! Do *not* use "MS Sans Serif" (never!). This will give a very old fashioned
+	// font on certain Asian Windows systems. So, better use "MS Shell Dlg" or 
+	// "MS Shell Dlg 2" to let Windows map that font to the proper font on all Windows
+	// systems.
+	//
 	LPLOGFONT plfHyperText = thePrefs.GetHyperTextLogFont();
 	if (plfHyperText==NULL || plfHyperText->lfFaceName[0]==_T('\0') || !m_fontHyperText.CreateFontIndirect(plfHyperText))
-		CreatePointFont(m_fontHyperText, 11 * 10, _T("MS Sans Serif")/*lfDefault.lfFaceName*/);
+		CreatePointFont(m_fontHyperText, 10 * 10, lfDefault.lfFaceName);
 
 	///////////////////////////////////////////////////////////////////////////
 	// Verbose Log-font
@@ -2113,7 +2124,12 @@ void CemuleApp::CreateAllFonts()
 	// that font is nevertheless set to "MS Sans Serif" because a scaled up "Tahoma"
 	// font unfortunately does not look as good as a scaled up "MS Sans Serif" font.
 	//
-	CreatePointFont(m_fontChatEdit, 11 * 10, _T("MS Sans Serif")/*lfDefault.lfFaceName*/);
+	// No! Do *not* use "MS Sans Serif" (never!). This will give a very old fashioned
+	// font on certain Asian Windows systems. So, better use "MS Shell Dlg" or 
+	// "MS Shell Dlg 2" to let Windows map that font to the proper font on all Windows
+	// systems.
+	//
+	CreatePointFont(m_fontChatEdit, 11 * 10, lfDefault.lfFaceName);
 }
 
 const CString &CemuleApp::GetDefaultFontFaceName()
@@ -2181,7 +2197,7 @@ void CemuleApp::UpdateDesktopColorDepth()
 		}
 /* MORPH win95 is not supported, vs2008 does not support .win95
 		// Don't use >8-bit image lists with OSs with restricted memory for GDI resources
-		if (afxData.bWin95) {
+		if (afxIsWin95) {
 			// NOTE: ILC_COLOR8 leads to converting all icons to the standard windows system
 			// 256 color palette. Thus this option leads to loosing some color resolution.
 			// Though there is no other chance with Win98 because of the 64K GDI limit.
@@ -2305,6 +2321,10 @@ void CemuleApp::ResetStandByIdleTimer()
 	}
 }
 
+bool CemuleApp::IsVistaThemeActive() const
+{
+	return theApp.m_ullComCtrlVer >= MAKEDLLVERULL(6,16,0,0) && g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed();
+}
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
 void CemuleApp::AddIncomingFolderIcon(){
 	CString desktopFile, exePath;

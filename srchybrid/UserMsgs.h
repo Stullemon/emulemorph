@@ -49,7 +49,7 @@ enum EUserWndMessages
 
 #ifdef USE_OFFICIAL_UPNP
 	// UPnP
-	UM_UPNP_RESULT
+	UM_UPNP_RESULT,
 #endif
 
 	// Mighty Knife: CRC32-Tag - save rename

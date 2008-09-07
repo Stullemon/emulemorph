@@ -117,8 +117,8 @@ public:
 	virtual void SendCancelTransfer(Packet* packet = NULL);
 	virtual bool	IsEd2kClient() const { return true; }
 	virtual bool	Disconnected(LPCTSTR pszReason, bool bFromSocket = false);
-	virtual bool	TryToConnect(bool bIgnoreMaxCon = false, CRuntimeClass* pClassSocket = NULL, bool* filtered = NULL);
-	virtual bool	Connect();
+	virtual bool	TryToConnect(bool bIgnoreMaxCon = false, bool bNoCallbacks = false, CRuntimeClass* pClassSocket = NULL);
+	virtual void	Connect();
 	virtual void	ConnectionEstablished();
 	virtual void	OnSocketConnected(int nErrorCode);
 	bool			CheckHandshakeFinished(UINT protocol = 0, UINT opcode = 0) const;
@@ -186,12 +186,13 @@ public:
 	uint8			GetExtendedRequestsVersion() const				{ return m_byExtendedRequestsVer; }
 	void			RequestSharedFileList();
 	void			ProcessSharedFileList(const uchar* pachPacket, UINT nSize, LPCTSTR pszDirectory = NULL);
+	EConnectingState GetConnectingState() const						{ return (EConnectingState)m_nConnectingState; }
 
 	void			ClearHelloProperties();
 	bool			ProcessHelloAnswer(const uchar* pachPacket, UINT nSize);
 	bool			ProcessHelloPacket(const uchar* pachPacket, UINT nSize);
 	void			SendHelloAnswer();
-	virtual bool	SendHelloPacket();
+	virtual void	SendHelloPacket();
 	void			SendMuleInfoPacket(bool bAnswer);
 	void			ProcessMuleInfoPacket(const uchar* pachPacket, UINT nSize);
 	void			ProcessMuleCommentPacket(const uchar* pachPacket, UINT nSize);
@@ -273,7 +274,6 @@ public:
 	void			SetConnectOptions(uint8 byOptions, bool bEncryption = true, bool bCallback = true); // shortcut, sets crypt, callback etc based from the tagvalue we recieve
 	bool			IsObfuscatedConnectionEstablished() const;
 	bool			ShouldReceiveCryptUDPPackets() const;
-	uint32			GetDirectCallbackTimeout() const				{ return m_dwDirectCallbackTimeout; }
 
 	///////////////////////////////////////////////////////////////////////////////////////////////////////////
 	// Upload
@@ -745,7 +745,7 @@ protected:
 	bool	m_bIsML;
 //--group to aligned int32
 	bool	m_bGPLEvildoer;
-	uint8	m_byHelloPacketState; //MORPH - Changed by SiRoB, Fix Connection Collision
+	bool	m_bHelloAnswerPending;
 	uint8	m_byInfopacketsReceived;	// have we received the edonkeyprot and emuleprot packet already (see InfoPacketsReceived() )
 	uint8	m_bySupportSecIdent;
 //--group to aligned int32
@@ -771,7 +771,6 @@ protected:
 	uint8	m_byKadVersion;
 	uint8	m_cCaptchasSent;
 
-	uint32	m_dwDirectCallbackTimeout;
 	uint32	m_nBuddyIP;
 	uint32	m_dwLastBuddyPingPongTime;
 	uchar	m_achBuddyID[16];
@@ -790,6 +789,7 @@ protected:
 	_EDownloadState		m_nDownloadState;
 	_ESourceFrom		m_nSourceFrom;
 	_EChatCaptchaState	m_nChatCaptchaState;
+	_EConnectingState	m_nConnectingState;
 	_EModClient         m_uModClient; //MORPH - Added by Stulle, Mod Icons
 
 	CTypedPtrList<CPtrList, Packet*> m_WaitingPackets_list;
@@ -950,8 +950,7 @@ protected:
 		 m_fRequiresCryptLayer: 1,
 		 m_fSupportsSourceEx2 : 1,
 		 m_fSupportsCaptcha	  : 1,
-		 m_fDirectUDPCallback : 1,	// 1 bits left
-		 m_fFailedDownload	  : 1; //MORPH - Added by SiRoB, Fix Connection Collision
+		 m_fDirectUDPCallback : 1;	// 1 bits left
 
 	CTypedPtrList<CPtrList, Pending_Block_Struct*>	 m_PendingBlocks_list;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DownloadBlocks_list;

@@ -743,9 +743,9 @@ CString CStatisticsTree::GetExpandedMask(HTREEITEM theItem)
 	{
 		if (ItemHasChildren(hCurrent) && IsBold(hCurrent)) {
 			if (IsExpanded(hCurrent))
-				tempMask += "1";
+				tempMask += _T("1");
 			if (!IsExpanded(hCurrent))
-				tempMask += "0";
+				tempMask += _T("0");
 			tempMask += GetExpandedMask(GetChildItem(hCurrent));
 		}
 		hCurrent = GetNextItem(hCurrent, TVGN_NEXT);

@@ -56,7 +56,7 @@ namespace Kademlia
 			static bool	IsConnected();
 			static bool	IsFirewalled();
 			static void	RecheckFirewalled();
-			static uint32 GetKademliaUsers();
+			static uint32 GetKademliaUsers(bool bNewMethod = false);
 			static uint32 GetKademliaFiles();
 			static uint32 GetTotalStoreKey();
 			static uint32 GetTotalStoreSrc();
@@ -71,12 +71,17 @@ namespace Kademlia
 			static void	RemoveEvent(CRoutingZone *pZone);
 			static void	Process();
 			static bool	InitUnicode(HMODULE hInst);
+			static void StatsAddClosestDistance(CUInt128 uDist);
 			
 			static bool	FindNodeIDByIP(CKadClientSearcher& rRequester, uint32 dwIP, uint16 nTCPPort, uint16 nUDPPort);
 			static bool FindIPByNodeID(CKadClientSearcher& rRequester, const uchar* pachNodeID);
 			static void	CancelClientSearch(CKadClientSearcher& rFromRequester);
 
+			static _ContactList	s_liBootstapList;
+
 		private:
+			static uint32 CalculateKadUsersNew();
+
 			static CKademlia *m_pInstance;
 			static EventMap	m_mapEvents;
 			static time_t m_tNextSearchJumpStart;
@@ -89,6 +94,7 @@ namespace Kademlia
 			static time_t m_tConsolidate;
 			static time_t m_tExternPortLookup;
 			static bool	m_bRunning;
+			static CList<uint32, uint32> m_liStatsEstUsersProbes;
 			CPrefs *m_pPrefs;
 			CRoutingZone *m_pRoutingZone;
 			CKademliaUDPListener *m_pUDPListener;

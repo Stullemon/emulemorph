@@ -138,7 +138,7 @@ int __cdecl CompareIPFilterItems(const void* lParam1, const void* lParam2)
 	}
 	else if (_lParamSort == IPFILTER_COL_DESC)
 	{
-		iResult = stricmp/*CompareLocaleStringNoCase*/((*((const SIPFilter**)lParam1))->desc, (*((const SIPFilter**)lParam2))->desc);
+		iResult = _stricmp/*CompareLocaleStringNoCase*/((*((const SIPFilter**)lParam1))->desc, (*((const SIPFilter**)lParam2))->desc);
 	}
 	else
 	{

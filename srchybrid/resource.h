@@ -764,6 +764,7 @@
 #define IDS_FIRSTAUTODOWN               834
 #define IDS_FIRSTAUTOUP                 835
 #define IDS_FIRSTFULLCHUNK              836
+#define IDS_AUTOMATIC                   836
 #define IDS_FIRSTSAFECON                837
 #define IDS_FIRSTAUTOCON                838
 #define IDS_FIRSTCOMPLETE               839
@@ -1518,6 +1519,7 @@
 #define IDS_WIZZARDOBFUSCATION          1559
 #define IDS_BETANAG                     1560
 #define IDS_CONFIRMNODESDOWNLOAD        1561
+#define IDS_NOTCONNECTEDANY             1562
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -3763,7 +3765,7 @@
 // 
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        6225
+#define _APS_NEXT_RESOURCE_VALUE        6226
 #define _APS_NEXT_COMMAND_VALUE         31257
 #define _APS_NEXT_CONTROL_VALUE         6218
 #define _APS_NEXT_SYMED_VALUE           106

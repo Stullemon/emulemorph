@@ -21,6 +21,7 @@
 #include "preferences.h"
 #include "otherfunctions.h"
 #include "CxImage/xImage.h"
+#include <atlimage.h>
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -77,20 +78,59 @@ CTitleMenu::CTitleMenu()
 	m_bDrawEdge = false;
 	m_uEdgeFlags = BDR_SUNKENINNER;
 	m_bIconMenu = false;
-	m_mapIconPos.InitHashTable(29);
+	m_mapMenuIdToIconIdx.InitHashTable(29);
 }
 
 CTitleMenu::~CTitleMenu()
 {
+	DeleteIcons();
+
 	if (m_hLibMsimg32)
 		FreeLibrary(m_hLibMsimg32);
+}
+
+void CTitleMenu::DeleteIcons()
+{
+	m_ImageList.DeleteImageList();
+	m_mapIconNameToIconIdx.RemoveAll();
+	m_mapMenuIdToIconIdx.RemoveAll();
+
+	POSITION pos = m_mapIconNameToBitmap.GetStartPosition();
+	while (pos) {
+		CString strKey;
+		void *pvBmp;
+		m_mapIconNameToBitmap.GetNextAssoc(pos, strKey, pvBmp);
+		VERIFY( DeleteObject((HBITMAP)pvBmp) );
+	}
+	m_mapIconNameToBitmap.RemoveAll();
+}
+
+BOOL CTitleMenu::CreateMenu()
+{
+	ASSERT( m_mapIconNameToIconIdx.GetCount() == 0 );
+	ASSERT( m_mapMenuIdToIconIdx.GetCount() == 0 );
+	ASSERT( m_ImageList.m_hImageList == NULL || m_ImageList.GetImageCount() == 0 );
+	ASSERT( m_mapIconNameToBitmap.GetCount() == 0 );
+	return __super::CreateMenu();
+}
+
+BOOL CTitleMenu::DestroyMenu()
+{
+	BOOL bResult = __super::DestroyMenu();
+	DeleteIcons();
+	return bResult;
 }
 
 void CTitleMenu::AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu)
 {
 	// insert an empty owner-draw item at top to serve as the title
 	// note: item is not selectable (disabled) but not grayed
-	if (lpszTitle != NULL)
+	//
+	// Vista: Adding at least one MF_OWNERDRAW item would render the entire menu in owner drawn mode,
+	// and it would be quite expensive to get the native Vista menu styles back. We would need to draw
+	// the entire menu with the Vista theme API -- no way. Thus, there is no title for context menus
+	// under Vista - the title doesn't fit to the native Vista menu style anway.
+	if (lpszTitle != NULL && !theApp.IsVistaThemeActive())
 	{
 		m_strTitle = lpszTitle;
 		m_strTitle.Remove(_T('&'));
@@ -102,7 +142,10 @@ void CTitleMenu::AddMenuTitle(LPCTSTR lpszTitle, bool bIsIconMenu)
 
 void CTitleMenu::EnableIcons()
 {
-	if (thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_ || thePrefs.GetWindowsVersion() == _WINVER_2003_ || thePrefs.GetWindowsVersion() == _WINVER_VISTA_)
+	if (thePrefs.GetWindowsVersion() == _WINVER_XP_ || 
+		thePrefs.GetWindowsVersion() == _WINVER_2K_ || 
+		thePrefs.GetWindowsVersion() == _WINVER_2003_ || 
+		thePrefs.GetWindowsVersion() == _WINVER_VISTA_)
 	{
 		m_bIconMenu = true;
 		m_ImageList.DeleteImageList();
@@ -120,6 +163,7 @@ void CTitleMenu::EnableIcons()
 	}
 }
 
+// NOTE: This function is no longer used for Vista!
 void CTitleMenu::MeasureItem(LPMEASUREITEMSTRUCT mi)
 {
 	if (mi->itemID == MP_TITLE)
@@ -147,6 +191,7 @@ void CTitleMenu::MeasureItem(LPMEASUREITEMSTRUCT mi)
 	}
 }
 
+// NOTE: This function is no longer used for Vista!
 void CTitleMenu::DrawItem(LPDRAWITEMSTRUCT di)
 {
 	if (di->itemID == MP_TITLE)
@@ -198,7 +243,7 @@ void CTitleMenu::DrawItem(LPDRAWITEMSTRUCT di)
 		CDC* dc = CDC::FromHandle(di->hDC);
 		int posY = di->rcItem.top + ((di->rcItem.bottom - di->rcItem.top) - ICONSIZE) / 2;
 		int nIconPos;
-		if (!m_mapIconPos.Lookup(di->itemID, nIconPos))
+		if (!m_mapMenuIdToIconIdx.Lookup(di->itemID, nIconPos))
 			return;
 
 		if ((di->itemState & ODS_GRAYED) != 0) {
@@ -227,6 +272,48 @@ BOOL CTitleMenu::InsertMenu(UINT nPosition, UINT nFlags, UINT_PTR nIDNewItem, LP
 	return bResult;
 }
 
+static HBITMAP Create32BitHBITMAP(HDC hdc, int cx, int cy, void **ppvBits = NULL)
+{
+	HBITMAP hBmp = NULL;
+	BITMAPINFO bmi = {0};
+    bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+    bmi.bmiHeader.biPlanes = 1;
+    bmi.bmiHeader.biCompression = BI_RGB;
+    bmi.bmiHeader.biWidth = cx;
+    bmi.bmiHeader.biHeight = cy;
+    bmi.bmiHeader.biBitCount = 32;
+
+    HDC hdcUsed = hdc ? hdc : GetDC(NULL);
+    if (hdcUsed)
+    {
+        hBmp = CreateDIBSection(hdcUsed, &bmi, DIB_RGB_COLORS, ppvBits, NULL, 0);
+        if (hdc != hdcUsed)
+            ReleaseDC(NULL, hdcUsed);
+    }
+    return hBmp;
+}
+
+static HBITMAP IconToBitmap32(HICON hIcon, int cx, int cy)
+{
+	HBITMAP hBmp = NULL;
+    HDC hdcDest = CreateCompatibleDC(NULL);
+    if (hdcDest)
+    {
+        hBmp = Create32BitHBITMAP(hdcDest, cx, cy);
+        if (hBmp)
+        {
+            HBITMAP hbmpOld = (HBITMAP)SelectObject(hdcDest, hBmp);
+            if (hbmpOld)
+            {
+				DrawIconEx(hdcDest, 0, 0, hIcon, cx, cy, 0, NULL, DI_NORMAL);
+                SelectObject(hdcDest, hbmpOld);
+            }
+        }
+        DeleteDC(hdcDest);
+	}
+	return hBmp;
+}
+
 void CTitleMenu::SetMenuBitmap(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR /*lpszNewItem*/, LPCTSTR lpszIconName)
 {
 	if (!m_bIconMenu || (nFlags & MF_SEPARATOR) != 0 ||
@@ -246,22 +333,64 @@ void CTitleMenu::SetMenuBitmap(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR /*lpszN
 	//if (nFlags & MF_POPUP)
 	//	TRACE(_T("TitleMenu: adding popup menu item id=%x  str=%s\n"), nIDNewItem, lpszNewItem);
 
-	MENUITEMINFOEX info;
-	ZeroMemory(&info, sizeof(info));
+	CString strIconLower(lpszIconName);
+	strIconLower.MakeLower();
+	if (thePrefs.GetWindowsVersion() == _WINVER_VISTA_)
+	{
+		// Vista: Use the Windows built-in feature for 32-bit menu item bitmaps.
+		// 'MeasureItem', 'DrawItem' will not get called any longer and Vista 
+		// cares properly about grayed/selected menu item bitmaps.
+		if (!strIconLower.IsEmpty())
+		{
+			HBITMAP hBmp = NULL;
+			void *pvBmp;
+			if (m_mapIconNameToBitmap.Lookup(strIconLower, pvBmp))
+			{
+				hBmp = (HBITMAP)pvBmp;
+			}
+			else
+			{
+				HICON hIcon = theApp.LoadIcon(strIconLower);
+				if (hIcon)
+				{
+					hBmp = IconToBitmap32(hIcon, ICONSIZE, ICONSIZE);
+					VERIFY( DestroyIcon(hIcon) );
+				}
+			}
+
+			if (hBmp)
+			{
+				MENUITEMINFOEX info = {0};
 	info.fMask = MIIM_BITMAP;
-	info.hbmpItem = HBMMENU_CALLBACK;
+				info.hbmpItem = hBmp;
 	info.cbSize = sizeof(info);
 	VERIFY( SetMenuItemInfo(nIDNewItem, (MENUITEMINFO*)&info, FALSE) );
-
-	if (lpszIconName != NULL)
+				m_mapIconNameToBitmap.SetAt(strIconLower, hBmp);
+			}
+		}
+	}
+	else
 	{
-		HICON hIcon = theApp.LoadIcon(lpszIconName);
+		// pre-Vista: Use owner drawn menu items which are handled in 'MeasureItem' and 'DrawItem'
+		int nPos = -1;
+		if (!strIconLower.IsEmpty())
+		{
+			void *pvIndex;
+			if (m_mapIconNameToIconIdx.Lookup(strIconLower, pvIndex))
+			{
+				nPos = (int)pvIndex;
+				m_mapMenuIdToIconIdx.SetAt(nIDNewItem, nPos);
+			}
+			else
+			{
+				HICON hIcon = theApp.LoadIcon(strIconLower);
 		if (hIcon)
 		{
-			int nPos = m_ImageList.Add(hIcon);
+					nPos = m_ImageList.Add(hIcon);
 			if (nPos != -1)
 			{
-				m_mapIconPos.SetAt(nIDNewItem, nPos);
+						m_mapIconNameToIconIdx.SetAt(strIconLower, (void *)nPos);
+						m_mapMenuIdToIconIdx.SetAt(nIDNewItem, nPos);
 
 				// It doesn't work to use API checkmark bitmaps in an sufficient way. The size
 				// of those bitmaps is limited and smaller than our menu item bitmaps.
@@ -297,8 +426,22 @@ void CTitleMenu::SetMenuBitmap(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR /*lpszN
 	}
 }
 
+		if (nPos != -1)
+		{
+			MENUITEMINFOEX info;
+			ZeroMemory(&info, sizeof(info));
+			info.fMask = MIIM_BITMAP;
+			info.hbmpItem = HBMMENU_CALLBACK;
+			info.cbSize = sizeof(info);
+			VERIFY( SetMenuItemInfo(nIDNewItem, (MENUITEMINFO*)&info, FALSE) );
+		}
+	}
+}
+
+// NOTE: This function is no longer used for Vista!
 void CTitleMenu::DrawMonoIcon(int nIconPos, CPoint nDrawPos, CDC *dc)
 {
+#if 1
 	CWindowDC windowDC(0);
 	CDC colorDC;
 	colorDC.CreateCompatibleDC(0);
@@ -316,11 +459,61 @@ void CTitleMenu::DrawMonoIcon(int nIconPos, CPoint nDrawPos, CDC *dc)
 		imgGray.GrayScale();
 		imgBk.GrayScale();
 		imgGray.SetTransIndex(imgGray.GetNearestIndex(imgBk.GetPixelColor(0, 0)));
+		// Vista: "CxImage::Draw" fails because 'SaveDC' fails (without any specific Win32 error code).
+		// I don't think that it is a bug in 'CxImage'. It seems to be related to the special DC which
+		// is provided by Vista for disabled menu items which are not selected. The code below which
+		// is using GDI+ instead of CxImage has a very similar problem due to that special DC.
 		imgGray.Draw((HDC)*dc, nDrawPos.x, nDrawPos.y);
 	}
 	colorDC.SelectObject(bmpOldColor);
 	colorDC.DeleteDC();
 	bmpColor.DeleteObject();
+#else
+	// The code below does not solve the problems under Vista. I though want to keep the code 
+	// as it does not require any "CxImage" functions.
+	ULONG_PTR gdiplusToken = 0;
+	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+	if (Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL) == Gdiplus::Ok)
+	{
+		HICON hIcon = m_ImageList.ExtractIconW(nIconPos);
+		if (hIcon)
+		{
+			Gdiplus::Bitmap bmp(hIcon);
+			VERIFY( DestroyIcon(hIcon) );
+
+			static const Gdiplus::ColorMatrix colorMatrix = {
+				0.299f, 0.299f, 0.299f, 0.0f, 0.0f,
+				0.588f, 0.588f, 0.588f, 0.0f, 0.0f,
+				0.111f, 0.111f, 0.111f, 0.0f, 0.0f,
+				0.0f,   0.0f,   0.0f,   1.0f, 0.0f,
+				0.0f,   0.0f,   0.0f,   0.0f, 1.0f
+			};
+			Gdiplus::ImageAttributes  imageAttributes;
+			imageAttributes.SetColorMatrix(&colorMatrix, Gdiplus::ColorMatrixFlagsDefault, Gdiplus::ColorAdjustTypeBitmap);
+
+#if 0
+			// This does not create any visual result if the menu item is not selected ???
+			// If the menu item is selected, the grayscaled icon is drawn correctly.
+			Gdiplus::Graphics graphics(*dc);
+			graphics.DrawImage(&bmp, Gdiplus::Rect(nDrawPos.x, nDrawPos.y, ICONSIZE, ICONSIZE),
+				0, 0, ICONSIZE, ICONSIZE, Gdiplus::UnitPixel, &imageAttributes);
+#else
+			// This creates a bad looking visual result if the menu item is not selected.
+			// If the menu item is selected, the grayscaled icon is drawn correctly.
+			Gdiplus::Bitmap bmp2(ICONSIZE, ICONSIZE, PixelFormat32bppARGB/*TODO: REMOVE!!*/);
+			Gdiplus::Graphics graphics2(&bmp2);
+			graphics2.DrawImage(&bmp, Gdiplus::Rect(nDrawPos.x, nDrawPos.y, ICONSIZE, ICONSIZE),
+				0, 0, ICONSIZE, ICONSIZE, Gdiplus::UnitPixel, &imageAttributes);
+			HICON ico2;
+			if (bmp2.GetHICON(&ico2) == Gdiplus::Ok) {
+				::DrawIconEx(*dc, nDrawPos.x, nDrawPos.y, ico2, 0, 0, 0, 0, DI_NORMAL);
+				VERIFY( DestroyIcon(ico2) );
+			}
+#endif
+		}
+		Gdiplus::GdiplusShutdown(gdiplusToken);
+	}
+#endif
 }
 
 bool CTitleMenu::LoadAPI()

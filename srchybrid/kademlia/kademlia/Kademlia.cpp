@@ -67,6 +67,8 @@ time_t		CKademlia::m_tBootstrap;
 time_t		CKademlia::m_tConsolidate;
 time_t		CKademlia::m_tExternPortLookup;
 bool		CKademlia::m_bRunning = false;
+CList<uint32, uint32> CKademlia::m_liStatsEstUsersProbes;
+_ContactList CKademlia::s_liBootstapList;
 
 CKademlia::CKademlia()
 {}
@@ -173,6 +175,9 @@ void CKademlia::Stop()
 
 	delete m_pInstance;
 	m_pInstance = NULL;
+
+	while (!s_liBootstapList.IsEmpty())
+		delete s_liBootstapList.RemoveHead();
 
 	// Make sure all zones are removed.
 	m_mapEvents.clear();
@@ -283,6 +288,16 @@ void CKademlia::Process()
 		}
 	}
 
+	if(!IsConnected() && !s_liBootstapList.IsEmpty() 
+		&& (tNow - m_tBootstrap > 15 || (GetRoutingZone()->GetNumContacts() == 0 && tNow - m_tBootstrap >= 2)))
+	{
+		CContact* pContact = s_liBootstapList.RemoveHead();
+		m_tBootstrap = tNow;
+		DebugLog(_T("Trying to Bootstrap Kad from %s, Distance: %s, Version: %u, %u Contacts left"), ipstr(ntohl(pContact->GetIPAddress())), pContact->GetDistance().ToHexString(),  pContact->GetVersion(), s_liBootstapList.GetCount());
+		m_pInstance->m_pUDPListener->Bootstrap(pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetVersion() > 1, pContact->GetVersion(), &pContact->GetClientID());
+		delete pContact;
+	}
+
 	if (GetUDPListener() != NULL)
 		GetUDPListener()->ExpireClientSearch(); // function does only one compare in most cases, so no real need for a timer
 }
@@ -311,10 +326,14 @@ bool CKademlia::IsFirewalled()
 	return true;
 }
 
-uint32 CKademlia::GetKademliaUsers()
+uint32 CKademlia::GetKademliaUsers(bool bNewMethod)
 {
-	if( m_pInstance && m_pInstance->m_pPrefs )
+	if( m_pInstance && m_pInstance->m_pPrefs ){
+		if (bNewMethod)
+			return CalculateKadUsersNew();
+		else
 		return m_pInstance->m_pPrefs->GetKademliaUsers();
+	}
 	return 0;
 }
 
@@ -375,14 +394,18 @@ bool CKademlia::GetPublish()
 
 void CKademlia::Bootstrap(LPCTSTR szHost, uint16 uPort, bool bKad2)
 {
-	if( m_pInstance && m_pInstance->m_pUDPListener && !IsConnected() && time(NULL) - m_tBootstrap > MIN2S(1) )
+	if( m_pInstance && m_pInstance->m_pUDPListener && !IsConnected() && time(NULL) - m_tBootstrap > 10 ){
+		m_tBootstrap = time(NULL);
 		m_pInstance->m_pUDPListener->Bootstrap( szHost, uPort, bKad2 );
+}
 }
 
 void CKademlia::Bootstrap(uint32 uIP, uint16 uPort, bool bKad2)
 {
-	if( m_pInstance && m_pInstance->m_pUDPListener && !IsConnected() && time(NULL) - m_tBootstrap > MIN2S(1) )
+	if( m_pInstance && m_pInstance->m_pUDPListener && !IsConnected() && time(NULL) - m_tBootstrap > 10 ){
+		m_tBootstrap = time(NULL);
 		m_pInstance->m_pUDPListener->Bootstrap( uIP, uPort, bKad2 );
+}
 }
 
 void CKademlia::RecheckFirewalled()
@@ -508,4 +531,79 @@ CStringA KadGetKeywordBytes(const CStringW& rstrKeywordW)
 void KadGetKeywordHash(const CStringW& rstrKeywordW, Kademlia::CUInt128* pKadID)
 {
 	KadGetKeywordHash(KadGetKeywordBytes(rstrKeywordW), pKadID);
+}
+
+void CKademlia::StatsAddClosestDistance(CUInt128 uDist){
+	if (uDist.Get32BitChunk(0) > 0){
+		uint32 nToAdd = (0xFFFFFFFF / uDist.Get32BitChunk(0)) / 2;
+		if (m_liStatsEstUsersProbes.Find(nToAdd) == NULL)
+			m_liStatsEstUsersProbes.AddHead(nToAdd);
+	}
+	if (m_liStatsEstUsersProbes.GetCount() > 100)
+		m_liStatsEstUsersProbes.RemoveTail();
+}
+
+uint32 CKademlia::CalculateKadUsersNew(){
+	// the idea of calculating the user count with this method is simple:
+	// whenever we do search for any NodeID (except in certain cases were the result is not usable),
+	// we remember the distance of the closest node we found. Because we assume all NodeIDs are distributed
+	// equally, we can calcualte based on this distance how "filled" the possible NodesID room is and by this
+	// calculate how many users there are. Of course this only works if we have enough samples, because
+	// each single sample will be wrong, but the average of them should produce a usable number. To avoid
+	// drifts caused by a a single (or more) really close or really far away hits, we do use median-average instead through
+
+	// doesnt works well if we have no files to index and nothing to download and the numbers seems to be a bit too low
+	// compared to out other method. So lets stay with the old one for now, but keeps this here as alternative
+
+	if (m_liStatsEstUsersProbes.GetCount() < 10)
+		return 0;
+	uint32 nMedian = 0;
+
+	CList<uint32, uint32> liMedian;
+	for (POSITION pos1 = m_liStatsEstUsersProbes.GetHeadPosition(); pos1 != NULL; )
+	{
+		uint32 nProbe = m_liStatsEstUsersProbes.GetNext(pos1);
+		bool bInserted = false;
+		for (POSITION pos2 = liMedian.GetHeadPosition(); pos2 != NULL; liMedian.GetNext(pos2)){
+			if (liMedian.GetAt(pos2) > nProbe){
+				liMedian.InsertBefore(pos2, nProbe);
+				bInserted = true;
+				break;
+			}
+		}
+		if (!bInserted)
+			liMedian.AddTail(nProbe);
+	}
+	// cut away 1/3 of the values - 1/6 of the top and 1/6 of the bottom  to avoid spikes having too much influence, build the average of the rest 
+	sint32 nCut = liMedian.GetCount() / 6;
+	for (int i = 0; i != nCut; i++){
+		liMedian.RemoveHead();
+		liMedian.RemoveTail();
+	}
+	uint64 nAverage = 0;
+	for (POSITION pos1 = liMedian.GetHeadPosition(); pos1 != NULL; )
+		nAverage += liMedian.GetNext(pos1);
+	nMedian = (uint32)(nAverage / liMedian.GetCount());
+
+	// LowIDModififier
+	// Modify count by assuming 20% of the users are firewalled and can't be a contact for < 0.49b nodes
+	// Modify count by actual statistics of Firewalled ratio for >= 0.49b if we are not firewalled ourself
+	// Modify count by 40% for >= 0.49b if we are firewalled outself (the actual Firewalled count at this date on kad is 35-55%)
+	const float fFirewalledModifyOld = 1.20F;
+	float fFirewalledModifyNew = 0;
+	if (CUDPFirewallTester::IsFirewalledUDP(true))
+		fFirewalledModifyNew = 1.40F; // we are firewalled and get get the real statistic, assume 40% firewalled >=0.49b nodes
+	else if (GetPrefs()->StatsGetFirewalledRatio(true) > 0) {
+		fFirewalledModifyNew = 1.0F + (CKademlia::GetPrefs()->StatsGetFirewalledRatio(true)); // apply the firewalled ratio to the modify
+		ASSERT( fFirewalledModifyNew > 1.0F && fFirewalledModifyNew < 1.90F );
+	}
+	float fNewRatio = CKademlia::GetPrefs()->StatsGetKadV8Ratio();
+	float fFirewalledModifyTotal = 0;
+	if (fNewRatio > 0 && fFirewalledModifyNew > 0) // weigth the old and the new modifier based on how many new contacts we have
+		fFirewalledModifyTotal = (fNewRatio * fFirewalledModifyNew) + ((1 - fNewRatio) * fFirewalledModifyOld); 
+	else
+		fFirewalledModifyTotal = fFirewalledModifyOld;
+	ASSERT( fFirewalledModifyTotal > 1.0F && fFirewalledModifyTotal < 1.90F );
+
+	return (uint32)((float)nMedian*fFirewalledModifyTotal);
 }

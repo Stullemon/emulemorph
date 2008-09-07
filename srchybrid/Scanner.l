@@ -266,7 +266,7 @@ number			{num1}|{num2}
 						yylval.pstr = new CStringA(ED2KFTSTR_VIDEO);
 						return TOK_TYPEVAL;
 					}
-					else if (opt_strnicmp(yytext, "image", 3) == 0 || stricmp(yytext, "img") == 0)
+					else if (opt_strnicmp(yytext, "image", 3) == 0 || _stricmp(yytext, "img") == 0)
 					{
 						yylval.pstr = new CStringA(ED2KFTSTR_IMAGE);
 						return TOK_TYPEVAL;
@@ -286,7 +286,7 @@ number			{num1}|{num2}
 						yylval.pstr = new CStringA(ED2KFTSTR_ARCHIVE);
 						return TOK_TYPEVAL;
 					}
-					else if (stricmp(yytext, "iso") == 0 || stricmp(yytext, "cd") == 0)
+					else if (_stricmp(yytext, "iso") == 0 || _stricmp(yytext, "cd") == 0)
 					{
 						yylval.pstr = new CStringA(ED2KFTSTR_CDIMAGE);
 						return TOK_TYPEVAL;
@@ -532,5 +532,5 @@ int opt_strnicmp(const char* pszString, const char* pszMatch, size_t nMinMatch)
 	ASSERT( nMatchLen >= nMinMatch );
 	if (nStringLen > nMatchLen)
 		return 1;
-	return strnicmp(pszString, pszMatch, nStringLen);
+	return _strnicmp(pszString, pszMatch, nStringLen);
 }

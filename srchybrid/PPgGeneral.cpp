@@ -344,7 +344,7 @@ BOOL CPPgGeneral::OnApply()
 
 void CPPgGeneral::UpdateEd2kLinkFixCtrl()
 {
-	GetDlgItem(IDC_ED2KFIX)->EnableWindow(HaveEd2kRegAccess() && Ask4RegFix(true));
+	GetDlgItem(IDC_ED2KFIX)->EnableWindow(HaveEd2kRegAccess() && Ask4RegFix(true, false, true));
 }
 
 BOOL CPPgGeneral::OnSetActive()

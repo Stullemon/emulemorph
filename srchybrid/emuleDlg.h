@@ -106,6 +106,10 @@ public:
 	bool IsPreferencesDlgOpen() const;
 	bool IsTrayIconToFlash()	{ return m_iMsgIcon!=0; }
 	void SetToolTipsDelay(UINT uDelay);
+#ifdef USE_OFFICIAL_UPNP
+	void StartUPnP(bool bReset = true, uint16 nForceTCPPort = 0, uint16 nForceUDPPort = 0);
+#endif
+	HBRUSH GetCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
 	virtual void TrayMinimizeToTrayChange();
 	virtual void RestoreWindow();
@@ -231,6 +235,7 @@ protected:
 	afx_msg void OnBnClickedHotmenu();
 	afx_msg LRESULT OnMenuChar(UINT nChar, UINT nFlags, CMenu* pMenu);
 	afx_msg void OnSysColorChange();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg BOOL OnQueryEndSession();
 	afx_msg void OnEndSession(BOOL bEnding);

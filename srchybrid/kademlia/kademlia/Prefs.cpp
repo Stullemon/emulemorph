@@ -32,6 +32,7 @@ there client on the eMule forum..
 #include "./Prefs.h"
 #include "./kademlia.h"
 #include "./indexed.h"
+#include "../routing/RoutingZone.h"
 #include "../utils/MiscUtils.h"
 #include "../../opcodes.h"
 #include "../../preferences.h"
@@ -86,6 +87,12 @@ void CPrefs::Init(LPCTSTR szFilename)
 	m_bLastFirewallState = true;
 	m_nExternKadPort = 0;
 	m_bUseExternKadPort = true;
+	m_nStatsUDPOpenNodes = 0;
+	m_nStatsUDPFirewalledNodes = 0;
+	m_nStatsTCPOpenNodes = 0;
+	m_nStatsTCPFirewalledNodes = 0;
+	m_nStatsKadV8LastChecked = 0;
+	m_fKadV8Ratio = 0;
 	ReadFile();
 }
 
@@ -124,7 +131,7 @@ void CPrefs::WriteFile()
 	{
 		CSafeBufferedFile file;
 		CFileException fexp;
-		if (file.Open(m_sFilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareExclusive, &fexp))
+		if (file.Open(m_sFilename, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite, &fexp))
 		{
 			setvbuf(file.m_pStream, NULL, _IOFBF, 16384);
 			file.WriteUInt32(m_uIP);
@@ -453,4 +460,53 @@ uint16 CPrefs::GetInternKadPort() const
 
 uint8 CPrefs::GetMyConnectOptions(bool bEncryption, bool bCallback){
 	return ::GetMyConnectOptions(bEncryption, bCallback);
+}
+
+float CPrefs::StatsGetFirewalledRatio(bool bUDP) const
+{
+	// gives an estimated percentage of TCP firewalled clients in the network
+	// will only work once enough > 0.49b nodes have spread and only if we are not UDP firewalled ourself
+	if (bUDP){
+		if (m_nStatsUDPFirewalledNodes > 0 && m_nStatsUDPOpenNodes > 10)
+			return ((float)m_nStatsUDPFirewalledNodes / (float)(m_nStatsUDPFirewalledNodes + m_nStatsUDPOpenNodes));
+		else
+			return 0;
+	}
+	else {
+		if (m_nStatsTCPFirewalledNodes > 0 && m_nStatsTCPOpenNodes > 10)
+			return ((float)m_nStatsTCPFirewalledNodes / (float)(m_nStatsTCPFirewalledNodes + m_nStatsTCPOpenNodes));
+		else
+			return 0;
+	}
+}
+
+void CPrefs::StatsIncUDPFirewalledNodes(bool bFirewalled){
+	if (bFirewalled)
+		m_nStatsUDPFirewalledNodes++;
+	else
+		m_nStatsUDPOpenNodes++;
+}
+
+void CPrefs::StatsIncTCPFirewalledNodes(bool bFirewalled){
+	if (bFirewalled)
+		m_nStatsTCPFirewalledNodes++;
+	else
+		m_nStatsTCPOpenNodes++;
+}
+
+float CPrefs::StatsGetKadV8Ratio(){
+	// this function is basically just a buffer, so we don't recount all nodes everytime we need the result
+	if (m_nStatsKadV8LastChecked + 60 < time(NULL)){
+		m_nStatsKadV8LastChecked = time(NULL);
+		uint32 nV8Contacts = 0;
+		uint32 nNonV8Contacts = 0;
+		CKademlia::GetRoutingZone()->GetNumContacts(nV8Contacts, nNonV8Contacts, KADEMLIA_VERSION8_49b);
+		DEBUG_ONLY( AddDebugLogLine(DLP_LOW, false, _T("Counted Kad V8 Contacts: %u out of %u in routing table. FirewalledRatios: UDP - %.02f%% | TCP - %.02f%%")
+			, nV8Contacts, nNonV8Contacts, StatsGetFirewalledRatio(true) * 100, StatsGetFirewalledRatio(false) * 100) );
+		if (nV8Contacts > 0)
+			m_fKadV8Ratio = ((float)nV8Contacts / (float)(nV8Contacts + nNonV8Contacts));
+		else
+			m_fKadV8Ratio = 0;
+	}
+	return m_fKadV8Ratio;
 }

@@ -347,7 +347,7 @@ int yyerror(const char* errstr)
 			return EXIT_FAILURE;
 	}
 	else {
-		if (_astrParserErrors.GetCount() > 0 && _astrParserErrors[_astrParserErrors.GetCount() - 1] != "syntax error")
+		if (_astrParserErrors.GetCount() > 0 && _astrParserErrors[_astrParserErrors.GetCount() - 1] != _T("syntax error"))
 			return EXIT_FAILURE;
 	}
 

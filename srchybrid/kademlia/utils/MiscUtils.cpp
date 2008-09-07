@@ -74,15 +74,14 @@ void CMiscUtils::DebugHexDump(const byte *pbyData, uint32 uLenData)
 				if (i == 7)
 					sLine += " ";
 			}
-			sLine += CString(' ', 60 - sLine.GetLength());
+			sLine += CStringA(' ', 60 - sLine.GetLength());
 			for (int i=0; i<iLenLine; i++)
 			{
 				byC = pbyData[uPos + i];
 				sSingle.Format("%c", (((byC > 31) && (byC < 127)) ? byC : '.'));
 				sLine += sSingle;
 			}
-			//JOHNTODO Is this method Unicode friendly?
-			AddDebugLogLine(false, _T("%s"), sLine);
+			AddDebugLogLine(false, _T("%hs"), sLine);
 			uPos += iLenLine;
 		}
 	}

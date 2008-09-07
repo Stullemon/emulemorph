@@ -83,6 +83,9 @@ namespace Kademlia
 			time_t GetLastSeen() const;
 			bool CheckIfKad2();
 			
+			bool		GetReceivedHelloPacket() const					{return m_bReceivedHelloPacket;}
+			void		SetReceivedHelloPacket()						{m_bReceivedHelloPacket = true;}
+			
 			CKadUDPKey	GetUDPKey()	const;
 			void		SetUDPKey(CKadUDPKey cUDPKey);
 			bool		IsIpVerified()	const;
@@ -106,6 +109,7 @@ namespace Kademlia
 			bool m_bGuiRefs;
 			bool m_bCheckKad2;
 			bool m_bIPVerified;
+			bool m_bReceivedHelloPacket;
 			CKadUDPKey	m_cUDPKey;
 	};
 }

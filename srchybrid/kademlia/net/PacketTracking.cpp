@@ -43,6 +43,9 @@ CPacketTracking::~CPacketTracking(){
 
 void CPacketTracking::AddTrackedOutPacket(uint32 dwIP, uint8 byOpcode){
 	// this tracklist tacks _outgoing_ request packets, to make sure incoming answer packets were requested
+	// only track packets which we actually check for later
+	if (!IsTrackedOutListRequestPacket(byOpcode))
+		return;
 	TrackPackets_Struct sTrack = {dwIP, ::GetTickCount(), byOpcode};
 	listTrackedRequests.AddHead(sTrack);
 	while (!listTrackedRequests.IsEmpty()){
@@ -53,7 +56,39 @@ void CPacketTracking::AddTrackedOutPacket(uint32 dwIP, uint8 byOpcode){
 	}
 }
 
+bool CPacketTracking::IsTrackedOutListRequestPacket(uint8 byOpcode) const
+{
+	switch(byOpcode){
+		case KADEMLIA_BOOTSTRAP_REQ:
+		case KADEMLIA2_BOOTSTRAP_REQ:
+		case KADEMLIA_HELLO_REQ:
+		case KADEMLIA2_HELLO_REQ:
+		case KADEMLIA2_HELLO_RES:
+		case KADEMLIA_REQ:
+		case KADEMLIA2_REQ:
+		case KADEMLIA_SEARCH_NOTES_REQ:
+		case KADEMLIA2_SEARCH_NOTES_REQ:
+		case KADEMLIA_PUBLISH_REQ:
+		case KADEMLIA_PUBLISH_NOTES_REQ:
+		case KADEMLIA2_PUBLISH_KEY_REQ:
+		case KADEMLIA2_PUBLISH_SOURCE_REQ:
+		case KADEMLIA2_PUBLISH_NOTES_REQ:
+		case KADEMLIA_FINDBUDDY_REQ:
+		case KADEMLIA_CALLBACK_REQ:
+		case KADEMLIA2_PING:
+			return true;
+			break;
+		default:
+			return false;
+	}
+
+}
+
 bool CPacketTracking::IsOnOutTrackList(uint32 dwIP, uint8 byOpcode, bool bDontRemove){
+#ifdef _DEBUG
+		if (!IsTrackedOutListRequestPacket(byOpcode))
+			ASSERT( false ); // code error / bug
+#endif
 	for (POSITION pos = listTrackedRequests.GetHeadPosition(); pos != NULL; listTrackedRequests.GetNext(pos)){
 		if (listTrackedRequests.GetAt(pos).dwIP == dwIP && listTrackedRequests.GetAt(pos).byOpcode == byOpcode && ::GetTickCount() - listTrackedRequests.GetAt(pos).dwInserted < SEC2MS(180)){
 			if (!bDontRemove)
@@ -221,4 +256,47 @@ void CPacketTracking::InTrackListCleanup(){
 		}
 	}
 	DebugLog(_T("Cleaned up Kad Incoming Requests Tracklist, entries before: %u, after %u"), dbgOldSize, m_liTrackPacketsIn.GetCount());
+}
+
+void CPacketTracking::AddLegacyChallenge(CUInt128 uContactID, CUInt128 uChallengeID, uint32 uIP, uint8 byOpcode){
+	TrackChallenge_Struct sTrack = {uIP, ::GetTickCount(), byOpcode, uContactID, uChallengeID};
+	listChallengeRequests.AddHead(sTrack);
+	while (!listChallengeRequests.IsEmpty()){
+		if (::GetTickCount() - listChallengeRequests.GetTail().dwInserted > SEC2MS(180)){
+			DEBUG_ONLY( DebugLog(_T("Challenge timed out, client not verified - %s"), ipstr(ntohl(listChallengeRequests.GetTail().uIP))) ); 
+			listChallengeRequests.RemoveTail();
+		}
+		else
+			break;
+	}
+}
+
+bool CPacketTracking::IsLegacyChallenge(CUInt128 uChallengeID, uint32 uIP, uint8 byOpcode, CUInt128& ruContactID){
+	bool bDbgWarning = false;
+	for (POSITION pos = listChallengeRequests.GetHeadPosition(); pos != NULL; listChallengeRequests.GetNext(pos)){
+		if (listChallengeRequests.GetAt(pos).uIP == uIP && listChallengeRequests.GetAt(pos).byOpcode == byOpcode 
+			&& ::GetTickCount() - listChallengeRequests.GetAt(pos).dwInserted < SEC2MS(180))
+		{
+			ASSERT( listChallengeRequests.GetAt(pos).uChallenge != 0 || byOpcode == KADEMLIA2_PING );
+			if (listChallengeRequests.GetAt(pos).uChallenge == 0 || listChallengeRequests.GetAt(pos).uChallenge == uChallengeID) {
+				ruContactID = listChallengeRequests.GetAt(pos).uContactID;
+				listChallengeRequests.RemoveAt(pos);
+				return true;
+			}
+			else
+				bDbgWarning = true;
+		}
+	}
+	if (bDbgWarning)
+				DebugLogWarning(_T("Kad: IsLegacyChallenge: Wrong challenge answer received, client not verified (%s)"), ipstr(ntohl(uIP)));
+	return false;
+		}
+
+bool CPacketTracking::HasActiveLegacyChallenge(uint32 uIP) const
+{
+	for (POSITION pos = listChallengeRequests.GetHeadPosition(); pos != NULL; listChallengeRequests.GetNext(pos)){
+		if (listChallengeRequests.GetAt(pos).uIP == uIP && ::GetTickCount() - listChallengeRequests.GetAt(pos).dwInserted < SEC2MS(180))
+			return true;
+	}
+	return false;
 }

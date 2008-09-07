@@ -93,6 +93,10 @@ public:
 			m_nServerIP = nServerIP;
 			m_nServerPort = nServerPort;
 		}
+		friend __inline bool __stdcall operator==(const CSearchFile::SClient& c1, const CSearchFile::SClient& c2) {
+			return c1.m_nIP==c2.m_nIP && c1.m_nPort==c2.m_nPort &&
+				   c1.m_nServerIP==c2.m_nServerIP && c1.m_nServerPort==c2.m_nServerPort;
+		}
 		uint32 m_nIP;
 		uint32 m_nServerIP;
 		uint16 m_nPort;
@@ -125,6 +129,9 @@ public:
 			m_nPort = nPort;
 			m_uAvail = 0;
 			m_bUDPAnswer = bUDPAnswer;
+		}
+		friend __inline bool __stdcall operator==(const CSearchFile::SServer& s1, const CSearchFile::SServer& s2) {
+			return s1.m_nIP==s2.m_nIP && s1.m_nPort==s2.m_nPort;
 		}
 		uint32 m_nIP;
 		uint16 m_nPort;

@@ -372,7 +372,7 @@ void CCreditsThread::InitFonts()
 	lf.lfWeight = 700;
 	//lf.lfItalic = TRUE;
 	/* MORPH win95 is not supported, vs2008 does not support .win95
-	lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
+	lf.lfQuality = afxIsWin95() ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
 	*/
 	lf.lfQuality = ANTIALIASED_QUALITY;
 	// MORPH END
@@ -390,7 +390,7 @@ void CCreditsThread::InitFonts()
 	lf.lfHeight = 25;
 	lf.lfWeight = 900;
 	/* MORPH
-	lf.lfQuality = afxData.bWin95 ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
+	lf.lfQuality = afxIsWin95() ? NONANTIALIASED_QUALITY : ANTIALIASED_QUALITY;
 	 */
 	lf.lfQuality = ANTIALIASED_QUALITY;
 	// MORPH END

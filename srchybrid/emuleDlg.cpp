@@ -104,7 +104,8 @@
 #include "CollectionViewDialog.h"
 #include "VisualStylesXP.h"
 #ifdef USE_OFFICIAL_UPNP
-#include "UPnPFinder.h"
+#include "UPnPImpl.h"
+#include "UPnPImplWrapper.h"
 #endif
 #include "SR13-ImportParts.h"
 #include "fakecheck.h" //MORPH - Added by SiRoB
@@ -165,6 +166,7 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_WM_MENUCHAR()
 	ON_WM_QUERYENDSESSION()
 	ON_WM_SYSCOLORCHANGE()
+	ON_WM_CTLCOLOR()
 	ON_MESSAGE(WM_COPYDATA, OnWMData)
 	ON_MESSAGE(WM_KICKIDLE, OnKickIdle)
 	ON_MESSAGE(WM_USERCHANGED, OnUserChanged)
@@ -668,18 +670,8 @@ BOOL CemuleDlg::OnInitDialog()
 
 #ifdef USE_OFFICIAL_UPNP
 	// Start UPnP prot forwarding
-	if (theApp.m_pUPnPFinder != NULL && thePrefs.IsUPnPEnabled()){
-		try
-		{
-			if (theApp.m_pUPnPFinder->AreServicesHealthy()){
-				theApp.m_pUPnPFinder->SetMessageOnResult(GetSafeHwnd(), UM_UPNP_RESULT);
-				VERIFY( (m_hUPnPTimeOutTimer = ::SetTimer(NULL, NULL, SEC2MS(30), UPnPTimeOutTimer)) != NULL );
-				theApp.m_pUPnPFinder->StartDiscovery(thePrefs.GetPort(), thePrefs.GetUDPPort());
-			}
-		}
-		catch ( CUPnPFinder::UPnPError& ) {}
-		catch ( CException* e ) { e->Delete(); }
-	}
+	if (thePrefs.IsUPnPEnabled())
+		StartUPnP();
 #endif
 
 	if (thePrefs.IsFirstStart())
@@ -879,7 +871,7 @@ void CALLBACK CemuleDlg::StartupTimer(HWND /*hwnd*/, UINT /*uiMsg*/, UINT /*idEv
 				theApp.emuledlg->status = 255;
 				//autoconnect only after emule loaded completely
 				if(thePrefs.DoAutoConnect()) {
-				    if (thePrefs.IsUPnPEnabled()) // MOPRH lh: -UPnPNAT- : prevent race condition between upnp& first connection
+				    if (thePrefs.IsUPnPNat()) // MOPRH lh: -UPnPNAT- : prevent race condition between upnp& first connection
 					   theApp.m_UPnP_IGDControlPoint->PauseForUpnpCompletion();// MOPRH lh : -UPnPNAT- : prevent race condition between upnp& first connection
 					theApp.emuledlg->OnBnClickedButton2();
 				}
@@ -1266,7 +1258,6 @@ void CemuleDlg::ShowConnectionState()
 			tbi.iImage = 2;
 			tbi.pszText = const_cast<LPTSTR>((LPCTSTR)strPane);
 			toolbar->SetButtonInfo(TBBTN_CONNECT, &tbi);
-			ShowUserCount();
 		} 
 		else 
 		{
@@ -1277,10 +1268,9 @@ void CemuleDlg::ShowConnectionState()
 			tbi.iImage = 0;
 			tbi.pszText = const_cast<LPTSTR>((LPCTSTR)strPane);
 			toolbar->SetButtonInfo(TBBTN_CONNECT, &tbi);
-			ShowUserCount();
 		}
-
 	}
+	ShowUserCount();
 }
 
 void CemuleDlg::ShowUserCount()
@@ -1289,7 +1279,14 @@ void CemuleDlg::ShowUserCount()
 	totaluser = totalfile = 0;
 	theApp.serverlist->GetUserFileStatus( totaluser, totalfile );
 	CString buffer;
+	if (theApp.serverconnect->IsConnected() && Kademlia::CKademlia::IsRunning() && Kademlia::CKademlia::IsConnected())
 	buffer.Format(_T("%s:%s(%s)|%s:%s(%s)"), GetResString(IDS_UUSERS), CastItoIShort(totaluser, false, 1), CastItoIShort(Kademlia::CKademlia::GetKademliaUsers(), false, 1), GetResString(IDS_FILES), CastItoIShort(totalfile, false, 1), CastItoIShort(Kademlia::CKademlia::GetKademliaFiles(), false, 1));
+	else if (theApp.serverconnect->IsConnected())
+		buffer.Format(_T("%s:%s|%s:%s"), GetResString(IDS_UUSERS), CastItoIShort(totaluser, false, 1), GetResString(IDS_FILES), CastItoIShort(totalfile, false, 1));
+	else if (Kademlia::CKademlia::IsRunning() && Kademlia::CKademlia::IsConnected())
+		buffer.Format(_T("%s:%s|%s:%s"), GetResString(IDS_UUSERS), CastItoIShort(Kademlia::CKademlia::GetKademliaUsers(), false, 1), GetResString(IDS_FILES), CastItoIShort(Kademlia::CKademlia::GetKademliaFiles(), false, 1));
+	else
+		buffer.Format(_T("%s:0|%s:0"), GetResString(IDS_UUSERS), GetResString(IDS_FILES));
 	statusbar->SetText(buffer, SBarUsers, 0);
 }
 
@@ -1396,7 +1393,7 @@ void CemuleDlg::ShowTransferRate(bool bForceAll)
 
 		/* MORPH vs2008
 		// Win98: '\r\n' is not displayed correctly in tooltip
-		if (afxData.bWin95) {
+		if (afxIsWin95) {
 			LPTSTR psz = buffer2;
 			while (*psz) {
 				if (*psz == _T('\r') || *psz == _T('\n'))
@@ -2212,9 +2209,9 @@ void CemuleDlg::OnClose()
 	
 #ifdef USE_OFFICIAL_UPNP
 	// close uPnP Ports
-	theApp.m_pUPnPFinder->StopAsyncFind();
+	theApp.m_pUPnPFinder->GetImplementation()->StopAsyncFind();
 	if (thePrefs.CloseUPnPOnExit())
-		theApp.m_pUPnPFinder->DeletePorts();
+		theApp.m_pUPnPFinder->GetImplementation()->DeletePorts();
 #endif
 
 	thePrefs.Save();
@@ -2841,6 +2838,30 @@ void CemuleDlg::OnSysColorChange()
 	SetAllIcons();
 }
 
+HBRUSH CemuleDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
+{
+	HBRUSH hbr = GetCtlColor(pDC, pWnd, nCtlColor);
+	if (hbr)
+		return hbr;
+	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
+}
+
+HBRUSH CemuleDlg::GetCtlColor(CDC* /*pDC*/, CWnd* /*pWnd*/, UINT nCtlColor)
+{
+	UNREFERENCED_PARAMETER(nCtlColor);
+	// This function could be used to give the entire eMule (at least all of the main windows)
+	// a somewhat more Vista like look by giving them all a bright background color.
+	// However, again, the ownerdrawn tab controls are noticeable disturbing that attempt. They
+	// do not change their background color accordingly. They don't use NMCUSTOMDRAW nor to they
+	// use WM_CTLCOLOR...
+	//
+	//if (theApp.m_ullComCtrlVer >= MAKEDLLVERULL(6,16,0,0) && g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed()) {
+	//	if (nCtlColor == CTLCOLOR_DLG || nCtlColor == CTLCOLOR_STATIC)
+	//		return GetSysColorBrush(COLOR_WINDOW);
+	//}
+	return NULL;
+}
+
 void CemuleDlg::SetAllIcons()
 {
 	// application icon (although it's not customizable, we may need to load a different color resolution)
@@ -3234,7 +3255,7 @@ void CemuleDlg::ShowToolPopup(bool toolsonly)
 		menu.AppendMenu(MF_SEPARATOR);
 	}
 
-	menu.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC) + _T("..."), _T("OPENFOLDER"));
+	menu.AppendMenu(MF_STRING,MP_HM_OPENINC, GetResString(IDS_OPENINC) + _T("..."), _T("INCOMING"));
 	menu.AppendMenu(MF_STRING,MP_HM_CONVERTPF, GetResString(IDS_IMPORTSPLPF) + _T("..."), _T("CONVERT"));
 	menu.AppendMenu(MF_STRING,MP_HM_1STSWIZARD, GetResString(IDS_WIZ1) + _T("..."), _T("WIZARD"));
 	menu.AppendMenu(MF_STRING,MP_HM_IPFILTER, GetResString(IDS_IPFILTER) + _T("..."), _T("IPFILTER"));
@@ -4177,11 +4198,20 @@ void CemuleDlg::SetToolTipsDelay(UINT uMilliseconds)
 
 #ifdef USE_OFFICIAL_UPNP
 void CemuleDlg::UPnPTimeOutTimer(HWND /*hwnd*/, UINT /*uiMsg*/, UINT /*idEvent*/, DWORD /*dwTime*/){
-	::PostMessage(theApp.emuledlg->GetSafeHwnd(), UM_UPNP_RESULT, (WPARAM)CUPnPFinder::UPNP_TIMEOUT, 0);
+	::PostMessage(theApp.emuledlg->GetSafeHwnd(), UM_UPNP_RESULT, (WPARAM)CUPnPImpl::UPNP_TIMEOUT, 0);
 }
 
-LRESULT CemuleDlg::OnUPnPResult(WPARAM /*wParam*/, LPARAM /*lParam*/){
-	// the actual result if UPnP was successful is delivered in wParam, but we don't really care about this right now
+LRESULT CemuleDlg::OnUPnPResult(WPARAM wParam, LPARAM /*lParam*/){
+	if (wParam == CUPnPImpl::UPNP_FAILED){		
+		// UPnP failed, check if we can retry it with another implementation
+		if (theApp.m_pUPnPFinder->SwitchImplentation()){
+			StartUPnP(false);
+			return 0;
+}
+		else
+			DebugLog(_T("No more available UPnP implementations left"));
+
+	}
 	if (m_hUPnPTimeOutTimer != 0){
 		VERIFY( ::KillTimer(NULL, m_hUPnPTimeOutTimer) );
 		m_hUPnPTimeOutTimer = 0;
@@ -4189,6 +4219,15 @@ LRESULT CemuleDlg::OnUPnPResult(WPARAM /*wParam*/, LPARAM /*lParam*/){
 	if(IsRunning() && m_bConnectRequestDelayedForUPnP){
 		StartConnection();
 	}
+	if (wParam == CUPnPImpl::UPNP_OK){
+		// remember the last working implementation
+		thePrefs.SetLastWorkingUPnPImpl(theApp.m_pUPnPFinder->GetImplementation()->GetImplementationID());
+		Log(GetResString(IDS_UPNPSUCCESS), theApp.m_pUPnPFinder->GetImplementation()->GetUsedTCPPort()
+			, theApp.m_pUPnPFinder->GetImplementation()->GetUsedUDPPort());
+	}
+	else
+		LogWarning(GetResString(IDS_UPNPFAILED));
+
 	return 0;
 }
 #endif
@@ -4222,6 +4261,33 @@ LRESULT  CemuleDlg::OnPowerBroadcast(WPARAM wParam, LPARAM lParam)
 	}
 
 }
+
+#ifdef USE_OFFICIAL_UPNP
+void CemuleDlg::StartUPnP(bool bReset, uint16 nForceTCPPort, uint16 nForceUDPPort) {
+	if (theApp.m_pUPnPFinder != NULL && (m_hUPnPTimeOutTimer == 0 || !bReset)){
+		if (bReset){
+			theApp.m_pUPnPFinder->Reset();
+			Log(GetResString(IDS_UPNPSETUP));
+		}
+		try
+		{
+			if (theApp.m_pUPnPFinder->GetImplementation()->IsReady()){
+				theApp.m_pUPnPFinder->GetImplementation()->SetMessageOnResult(GetSafeHwnd(), UM_UPNP_RESULT);
+				if (bReset)
+					VERIFY( (m_hUPnPTimeOutTimer = ::SetTimer(NULL, NULL, SEC2MS(40), UPnPTimeOutTimer)) != NULL );
+				theApp.m_pUPnPFinder->GetImplementation()->StartDiscovery(((nForceTCPPort != 0) ? nForceTCPPort : thePrefs.GetPort())
+					, ((nForceUDPPort != 0) ? nForceUDPPort :thePrefs.GetUDPPort()));
+			}
+			else
+				::PostMessage(theApp.emuledlg->GetSafeHwnd(), UM_UPNP_RESULT, (WPARAM)CUPnPImpl::UPNP_FAILED, 0);
+		}
+		catch ( CUPnPImpl::UPnPError& ) {}
+		catch ( CException* e ) { e->Delete(); }
+	}
+	else
+		ASSERT( false );
+}
+#endif
 
 //Commander - Added: Invisible Mode [TPT] - Start
 LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM /*lParam*/)

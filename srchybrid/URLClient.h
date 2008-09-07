@@ -34,12 +34,12 @@ public:
 	virtual void SetRequestFile(CPartFile* pReqFile);
 	virtual bool IsEd2kClient() const { return false; }
 
-	/*MORPH*/virtual bool TryToConnect(bool bIgnoreMaxCon, CRuntimeClass* pClassSocket = NULL, bool* filtered = NULL);
-	virtual bool Connect();
+	virtual bool TryToConnect(bool bIgnoreMaxCon, bool bNoCallbacks = false, CRuntimeClass* pClassSocket = NULL);
+	virtual void Connect();
 	virtual void OnSocketConnected(int nErrorCode);
 	virtual bool Disconnected(LPCTSTR pszReason, bool bFromSocket = false);
 
-	virtual bool SendHelloPacket();
+	virtual void SendHelloPacket();
 	virtual void SendBlockRequests();
 	virtual bool SendHttpBlockRequests();
 	virtual void SendFileRequest();

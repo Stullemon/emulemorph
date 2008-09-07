@@ -114,7 +114,7 @@ void CChatSelector::SetAllIcons()
 	SetImageList(&iml);
 	m_imlChat.DeleteImageList();
 	m_imlChat.Attach(iml.Detach());
-	SetPadding(CSize(10, 0));
+	SetPadding(CSize(12, 0));
 }
 
 void CChatSelector::UpdateFonts(CFont* pFont)
@@ -180,6 +180,7 @@ CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 	TCITEM newitem;
 	newitem.mask = TCIF_PARAM | TCIF_TEXT | TCIF_IMAGE;
 	newitem.lParam = (LPARAM)chatitem;
+	name.Replace(_T("&"), _T("&&"));
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 0;
 	int iItemNr = InsertItem(GetItemCount(), &newitem);
@@ -341,12 +342,7 @@ bool CChatSelector::SendMessage(const CString& rstrMessage)
 		ci->log->AppendKeyWord(_T("*** ") + GetResString(IDS_CONNECTING), STATUS_MSG_COLOR);
 		ci->strMessagePending = rstrMessage;
 		ci->client->SetChatState(MS_CONNECTING);
-		//MORPH START - Changed by SiRoB, Ignore Max Connection -Patch-
-		/*
-		ci->client->TryToConnect();
-		*/
 		ci->client->TryToConnect(true);
-		//MORPH END   - Changed by SiRoB, Ignore Max Connection -Patch-
 	}
 	return true;
 }

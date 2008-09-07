@@ -104,6 +104,8 @@ protected:
 
 	bool m_bDoUpdate;
 	UINT m_nRedrawTimer;
+	UINT m_uLastMouseFlags;
+	CPoint m_ptLastMousePos;
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnPaint();

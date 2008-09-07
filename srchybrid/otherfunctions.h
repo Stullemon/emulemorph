@@ -229,6 +229,7 @@ void DebugHttpHeaders(const CStringAArray& astrHeaders);
 // Win32 specifics
 //
 bool HaveEd2kRegAccess();
+bool DoRegFixElevated();
 bool Ask4RegFix(bool checkOnly, bool dontAsk = false, bool bAutoTakeCollections = false); // Barry - Allow forced update without prompt
 void BackupReg(void); // Barry - Store previous values
 void RevertReg(void); // Barry - Restore previous values
