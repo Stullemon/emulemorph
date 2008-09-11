@@ -1037,33 +1037,14 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	if (GetFriend() == NULL || GetFriend()->HasUserhash() || GetFriend()->m_dwLastUsedIP != GetConnectIP()
 		|| GetFriend()->m_nLastUsedPort != GetUserPort())
 	{
-	// MORPH START  always call setLinked_client
-//	/*  original officila code:always call setLinke_client
-	if ((m_Friend = theApp.friendlist->SearchFriend(m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){
-		// Link the friend to that client
-		m_Friend->SetLinkedClient(this);
-	}
-	else{
-		// avoid that an unwanted client instance keeps a friend slot
-		SetFriendSlot(false);
-	}
-//	*/
-	// TODO: Is this fix/ change still right?
-	/*
-	CFriend*	new_friend ;
-    if ((new_friend = theApp.friendlist->SearchFriend(m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){
-		// Link the friend to that client
-		m_Friend=new_friend;
-		m_Friend->SetLinkedClient(this);
-	}
-	else{
-		// avoid that an unwanted client instance keeps a friend slot
-		SetFriendSlot(false);
-		if (m_Friend) m_Friend->SetLinkedClient(NULL); // morph, does this help agianst chrashing due to friend slots?
-		m_Friend=NULL;//is newfriend
-	}
-	*/
-	// MORPH END  always call setLinke_client
+		if ((m_Friend = theApp.friendlist->SearchFriend(m_achUserHash, m_dwUserIP, m_nUserPort)) != NULL){
+			// Link the friend to that client
+			m_Friend->SetLinkedClient(this);
+		}
+		else{
+			// avoid that an unwanted client instance keeps a friend slot
+			SetFriendSlot(false);
+		}
 	}
 	else{
 		// however, copy over our userhash in this case
