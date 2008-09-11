@@ -2151,7 +2151,6 @@ bool CPartFile::ShrinkToAvoidAlreadyRequested(uint64& start, uint64& end) const
         if ((start <= cur_block->EndOffset) && (end >= cur_block->StartOffset)) {
             if(start < cur_block->StartOffset) {
                 end = cur_block->StartOffset - 1;
-// ==> new code
                 if(start == end)
                     return false;
             }
@@ -2165,34 +2164,6 @@ bool CPartFile::ShrinkToAvoidAlreadyRequested(uint64& start, uint64& end) const
                 return false;
         }
 	}
-// <== new code
-// ==> old code
-/*
-		// netfinity: Removed as it is actually a one byte request
-		// TODO: Is this still valid?
-// comment start
-                if(start == end) {
-                    return false;
-                }
-// comment end
-            } else if(end > cur_block->EndOffset) {
-                start = cur_block->EndOffset + 1;
-
-		// netfinity: Removed as it is actually a one byte request
-		// TODO: Is this still valid?
-// comment start
-                if(start == end) {
-                    return false;
-                }
-// comment end
-            } else {
-                return false;
-            }
-        }
-	}
-*/
-// <== old code
-// ==> new code
 
 	// has been shrunk to fit requested, if needed shrink it further to not collidate with buffered data
 	// check our buffers
@@ -2215,7 +2186,6 @@ bool CPartFile::ShrinkToAvoidAlreadyRequested(uint64& start, uint64& end) const
         }
 	}
 
-// <== new code
     ASSERT(start >= startOrig && start <= endOrig);
     ASSERT(end >= startOrig && end <= endOrig);
 
