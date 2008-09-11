@@ -266,6 +266,7 @@ BOOL CServerWnd::OnInitDialog()
 
 	//MORPH START - Added by SiRoB, XML News [O²]
 	name = GetResString(IDS_FEED);
+	name.Replace(_T("&"), _T("&&"));
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 0;
@@ -274,6 +275,7 @@ BOOL CServerWnd::OnInitDialog()
 
 	//MORPH START - Added by SiRoB, Morph Log
 	name = GetResString(IDS_MORPH_LOG);
+	name.Replace(_T("&"), _T("&&"));
 	newitem.mask = TCIF_TEXT|TCIF_IMAGE;
 	newitem.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 	newitem.iImage = 0;
@@ -524,6 +526,7 @@ void CServerWnd::Localize()
 
 	    //MORPH START - Added by SiRoB, XML News [O²]
 		name = GetResString(IDS_FEED);
+	name.Replace(_T("&"), _T("&&"));
 	    item.mask = TCIF_TEXT;
 		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		StatusSelector.SetItem(PaneNews, &item);
@@ -531,6 +534,7 @@ void CServerWnd::Localize()
 
 	    //MORPH START - Added by SiRoB, Morph LOg
 		name = GetResString(IDS_MORPH_LOG);
+	name.Replace(_T("&"), _T("&&"));
 	    item.mask = TCIF_TEXT;
 		item.pszText = const_cast<LPTSTR>((LPCTSTR)name);
 		StatusSelector.SetItem(PaneMorphLog, &item);
