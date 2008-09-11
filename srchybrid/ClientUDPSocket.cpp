@@ -151,6 +151,22 @@ void CClientUDPSocket::OnReceive(int nErrorCode)
 					case OP_KADEMLIAHEADER:
 					{
 						theStats.AddDownDataOverheadKad(nPacketLen);
+						//MORPH START - Vagaa detection [zz_fly]
+						//note: emule 0.48a can not send a packet with KADEMLIA_FIREWALLED2_REQ tag
+						if(thePrefs.GetEnableAntiLeecher())
+						{
+							byte byOpcode = pBuffer[1];
+							if(byOpcode == KADEMLIA_FIREWALLED2_REQ)
+							{
+								CUpDownClient* client = theApp.clientlist->FindClientByIP(sockAddr.sin_addr.S_un.S_addr);
+								if(client != NULL && client->GetClientSoft() == SO_EMULE && client->GetVersion() != 0 && client->GetVersion() < MAKE_CLIENT_VERSION(0, 49, 0))
+								{
+									client->BanLeecher(_T("Vagaa detected")); //Bad Leecher, Hard Ban
+									break;
+								}
+							}
+						}
+						//MORPH END   - Vagaa detection [zz_fly]
 						if (nPacketLen >= 2)
 							Kademlia::CKademlia::ProcessPacket(pBuffer, nPacketLen, ntohl(sockAddr.sin_addr.S_un.S_addr), ntohs(sockAddr.sin_port)
 							, (Kademlia::CPrefs::GetUDPVerifyKey(sockAddr.sin_addr.S_un.S_addr) == nReceiverVerifyKey)

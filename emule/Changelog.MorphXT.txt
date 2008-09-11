@@ -5,10 +5,17 @@ XX-XX-2008
 
 ADD: DirectX (Preview feature) support for VS05 [eMF]
 ADD: TextToSpeech support for VS05 [Stulle]
+ADD: Community/Corrupt userhash check [zz_fly/squallATF]
+ADD: Bad Shareaza detection [zz_fly]
+	Clients pretending to be eMule clients but sending UDP and Misc tags like Shareaza
+ADD: Vagaa check [zz_fly]
+	Clients sending a KAD tag from 0.49a+ but pretending to be 0.48a
 CHANGE: Exception Handling Model to /EHa [fafner]
 CHANGE: (Morph) Reverted a fix to fafner style [Stulle]
 CHANGE: Made download ack overhead (morph -> upload management) optional [leuk_he]
 CHANGE: Bring eMule to front when double click on static TrayIcon [Stulle]
+CHANGE: Updated SNAFU Anti-Leecher Protection [Xman/zz_fly]
+CHANGE: Updated Bad Mod List (DLP v33) [Xman/zz_fly/JvA/DLarge/WiZ/more?]
 FIX: Display download ack overhead in statistics correct [leuk_he]
 FIX: Improperly reloading icons for SharedDirsTree [Stulle]
 FIX: Store searches if enabled [Stulle]
