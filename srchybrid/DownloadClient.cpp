@@ -2813,7 +2813,8 @@ void CUpDownClient::ProcessAcceptUpload()
 				}
 			}
 			//MORPH END   - Added by SiRoB, Debug To catch the failed up/dw reason
-		}	}
+		}
+	}
 	else
 	{
 		//MORPH START - Added by SiRoB, Debug To catch the failed up/dw reason

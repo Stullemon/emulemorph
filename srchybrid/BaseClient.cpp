@@ -1880,42 +1880,6 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	// is supposed to be valid until the proxy itself tells us that the IP can not be
 	// connected to (e.g. 504 Bad Gateway)
 	//
-//BEGIN OLD MORPH //TODOMORPH - must be checked
-	//bool bAddDeadSource = true;
-	//switch(m_nUploadState){
-	//	case US_CONNECTING:
-	//		if (socket && socket->GetProxyConnectFailed())
-	//			bAddDeadSource = false;
-	//		if (thePrefs.GetLogUlDlEvents())
- //               AddDebugLogLine(DLP_VERYLOW, true,_T("Removing connecting client from upload list: %s Client: %s"), pszReason, DbgGetClientInfo());
-	//	case US_WAITCALLBACK:
-	//		//MORPH START - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend.
-	//		if(reqfile && !reqfile->IsPartFile() && reqfile->m_nCompleteSourcesCountLo <= 1  || IsFriend())
-	//			bAddDeadSource = false;
-	//		//MORPH END   - Added by SiRoB, Don't kill client if we are the only one complet source or it's a friend.
-	//	case US_ERROR:
-	//		if (bAddDeadSource)
-	//			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
-	//		bDelete = true;
-	//}
-	//
-	//bAddDeadSource = true;
-	//switch(m_nDownloadState){
-	//	case DS_CONNECTING:
-	//		if (socket && socket->GetProxyConnectFailed())
-	//			bAddDeadSource = false;
-	//	case DS_WAITCALLBACK:
-	//		//MORPH START - Added by SiRoB, Don't kill source if it's the only one complet source or it's a friend
-	//		if(m_bCompleteSource && reqfile->m_nCompleteSourcesCountLo == 1 || IsFriend() || !IsEd2kClient())
-	//			bAddDeadSource = false;
-	//		//MORPH END   - Added by SiRoB, Don't kill source if it's the only one complet source or it's a friend
-	//	case DS_ERROR:
-	//		if (bAddDeadSource)
-	//			theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
-	//		bDelete = true;
-	//}
-//END OLD MORPH
-//BEGIN NEW OFFICIAL
 	if ( (m_nConnectingState != CCS_NONE && !(socket && socket->GetProxyConnectFailed()))
 		|| m_nDownloadState == DS_ERROR)
 	{
@@ -1924,7 +1888,6 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
 		bDelete = true;
 	}
-//END NEW OFFICIAL
 
 	// We keep chat partners in any case
 	if (GetChatState() != MS_NONE){

@@ -1589,10 +1589,8 @@ CString CWebServer::_GetServerList(ThreadData Data)
 		Entry.nServerSoftLimit = cur_file->GetSoftFiles();
 		Entry.nServerHardLimit = cur_file->GetHardFiles();
 		Entry.sServerVersion = cur_file->GetVersion();
-//TODOMORPH - begin missing official code (already forgotten in 0.49a merge?)
 		if (inet_addr(CStringA(Entry.sServerIP)) != INADDR_NONE)
 		{
-//TODOMORPH - end missing official code (already forgotten in 0.49a merge?)
 			int counter=0;
 			CString temp,newip;
 			for(int j=0; j<4; j++)
@@ -1606,11 +1604,9 @@ CString CWebServer::_GetServerList(ThreadData Data)
 					newip.AppendFormat(_T("") + temp);
 			}
 			Entry.sServerFullIP = newip;
-//TODOMORPH - begin missing official code (already forgotten in 0.49a merge?)
 		}
 		else
 			Entry.sServerFullIP = Entry.sServerIP;
-//TODOMORPH - end missing official code (already forgotten in 0.49a merge?)
 		if (cur_file->GetFailedCount() > 0)
 			Entry.sServerState = _T("failed");
 		else
