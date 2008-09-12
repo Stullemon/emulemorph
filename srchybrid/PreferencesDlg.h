@@ -109,7 +109,6 @@ public:
 	CImageList		ImageList;
 	int				m_iPrevPage;
 	CSlideBar	 	m_slideBar;
-	void OpenPage(UINT uResourceID);
 protected:
 	UINT m_nActiveWnd;
 	afx_msg LRESULT		OnSlideBarSelChanged(WPARAM wParam, LPARAM lParam);

@@ -46,7 +46,7 @@ CPPgNTService::CPPgNTService()
 	// MORPH start tabbed option [leuk_he]
 	m_imageList.DeleteImageList();
 	m_imageList.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 14+1, 0);
-	m_imageList.Add(CTempIconLoader(_T("CLIENTSONQUEUE")));
+	m_imageList.Add(CTempIconLoader(_T("WEB")));
 	// MORPH end tabbed option [leuk_he]
 }
 
@@ -133,20 +133,6 @@ BOOL CPPgNTService::OnApply()
 		  (i_startupmode ==1 && (IsDlgButtonChecked(IDC_SVC_MANUALSTART)==BST_CHECKED)))
 			NTServiceSetStartupMode(IsDlgButtonChecked(IDC_SVC_STARTWITHSYSTEM)==BST_CHECKED);
    // TODO: Appy setting 
-	if (IsDlgButtonChecked(IDC_SVC_SETTINGS )==BST_CHECKED) 	{
-		thePrefs.startupsound=false;
-		thePrefs.SetAutoConnect(true);
-		thePrefs.SetWSIsEnabled(true); 
-		RemAutoStart(); // remove from windows startup. 
-		thePrefs.m_bEnableMiniMule=false;
-		thePrefs.m_bSelCatOnAdd=false;
-		thePrefs.notifierSoundType = ntfstNoSound;
-		thePrefs.notifierOnDownloadFinished =false;
-		thePrefs.splashscreen=false;
-		thePrefs.startMinimized=true;
-		thePrefs.beepOnError=false;
-		thePrefs.bringtoforeground=false;
-	}
 	if ( IsDlgButtonChecked(IDC_SVC_RUNBROWSER)==BST_CHECKED)
 	   thePrefs.m_iServiceStartupMode=1;
 	else 
@@ -269,16 +255,17 @@ int  CPPgNTService::FillStatus(){
 
 void CPPgNTService::OnBnClickedInstall()
 {
-	if (CmdInstallService((IsDlgButtonChecked(IDC_SVC_STARTWITHSYSTEM))==BST_CHECKED )==0) {
-	  FillStatus();
-      CheckDlgButton(IDC_SVC_SETTINGS, BST_CHECKED);
- 	  SetModified();
-    	if (thePrefs.m_nCurrentUserDirMode == 0) // my documents and running as a service is not a good idea. but leave it to user
-			AfxMessageBox (	  GetResString(IDS_CHANGEUSERASSERVICE),MB_OK);
-
-   }
- else
-	 SetDlgItemText(IDC_SVC_CURRENT_STATUS,GetResString(IDS_SVC_INSTALLFAILED)); 
+	if (CmdInstallService((IsDlgButtonChecked(IDC_SVC_STARTWITHSYSTEM))==BST_CHECKED )==0)
+	{
+		FillStatus();
+		if(AfxMessageBox(GetResString(IDS_APPLY_SETTINGS),MB_YESNO) == IDYES)
+			OnBnAllSettings();
+		SetModified();
+		if (thePrefs.m_nCurrentUserDirMode == 0) // my documents and running as a service is not a good idea. but leave it to user
+			AfxMessageBox(GetResString(IDS_CHANGEUSERASSERVICE),MB_OK);
+	}
+	else
+		SetDlgItemText(IDC_SVC_CURRENT_STATUS,GetResString(IDS_SVC_INSTALLFAILED)); 
 }
 
 
@@ -307,7 +294,19 @@ void CPPgNTService::OnBnManualStart(){
 };	
 
 void CPPgNTService::OnBnAllSettings(){
-	SetModified();
+	thePrefs.startupsound=false;
+	thePrefs.SetAutoConnect(true);
+	thePrefs.SetWSIsEnabled(true); 
+	RemAutoStart(); // remove from windows startup. 
+	thePrefs.m_bEnableMiniMule=false;
+	thePrefs.m_bSelCatOnAdd=false;
+	thePrefs.notifierSoundType = ntfstNoSound;
+	thePrefs.notifierOnDownloadFinished =false;
+	thePrefs.splashscreen=false;
+	thePrefs.startMinimized=true;
+	thePrefs.beepOnError=false;
+	thePrefs.bringtoforeground=false;
+//	SetModified();
 };	
 
 void CPPgNTService::OnBnReplaceStart(){
@@ -333,7 +332,7 @@ void CPPgNTService::InitTab(bool firstinit, int Page)
 		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, MULTIWEBSERVER, _T("Multi user"), 0, (LPARAM)MULTIWEBSERVER); // note that the string Multi user is REAL HARD coded 
 		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, NTSERVICE   , _T("NT Service"), 0, (LPARAM)NTSERVICE); // note that the string Multi user is REAL HARD coded 
 	}
-	if (m_tabCtr.GetSafeHwnd() != NULL     )
+	if (m_tabCtr.GetSafeHwnd() != NULL)
 		m_tabCtr.SetCurSel(Page);
 }
 void CPPgNTService::OnTcnSelchangeTab(NMHDR * /*pNMHDR */, LRESULT *pResult)
@@ -343,4 +342,3 @@ void CPPgNTService::OnTcnSelchangeTab(NMHDR * /*pNMHDR */, LRESULT *pResult)
 	*pResult = 0;
 }
 // MORPH end tabbed option [leuk_he]
-

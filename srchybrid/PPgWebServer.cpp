@@ -365,14 +365,14 @@ BOOL CPPgWebServer::OnSetActive()
 	{
 		GetDlgItem(IDC_WSPASS)->EnableWindow(FALSE);	
 		GetDlgItem(IDC_WSENABLEDLOW)->EnableWindow(FALSE);	
-		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(FALSE);	
+//		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(FALSE);	
 		GetDlgItem(IDC_WSPASSLOW)->EnableWindow(FALSE);	
 	}
 	else
 	{
 		GetDlgItem(IDC_WSPASS)->EnableWindow(TRUE);	
 		GetDlgItem(IDC_WSENABLEDLOW)->EnableWindow(TRUE);	
-		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(TRUE);	
+//		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(TRUE);	
 		GetDlgItem(IDC_WSPASSLOW)->EnableWindow(TRUE);	
 	}
 	return TRUE;
@@ -390,7 +390,8 @@ void CPPgWebServer::InitTab(bool firstinit, int Page)
 		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, NTSERVICE, _T("NT Service"), 0, (LPARAM)NTSERVICE); 
 	}
 
-	m_tabCtr.SetCurSel(Page);
+	if (m_tabCtr.GetSafeHwnd() != NULL)
+		m_tabCtr.SetCurSel(Page);
 }
 void CPPgWebServer::OnTcnSelchangeTab(NMHDR * /* pNMHDR */, LRESULT *pResult)
 {

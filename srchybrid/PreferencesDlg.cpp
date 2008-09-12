@@ -220,24 +220,16 @@ BOOL CPreferencesDlg::OnInitDialog()
 	{
 		if (GetPage(i)->m_psp.pszTemplate == m_pPshStartPage)
 		{
+			SetActivePage(i);
 			// MORPH start tabbed options [leuk_he]
 			if ((i==Multiwebserver)||(i==NTService) ) //MORPH leuk_he:run as ntservice v1..
 			{
-					SetActivePage(Webserver);
 				m_wndWebServer.InitTab(false,StartPageWebServer);
 				m_wndIonixWebServer.InitTab(false,StartPageWebServer);
 			    m_wndNTService.InitTab(false,StartPageWebServer);//MORPH leuk_he:run as ntservice v1..
-				break;
 			}
-			else
-			{
-				SetActivePage(i);
-				break;
-			}
-			/*   commented out morph :
-			SetActivePage(i);
-			break;*/
-		  // MORPH end tabbed options [leuk_he]
+			// MORPH end tabbed options [leuk_he]
+			break;
 		}
 		
 			
@@ -388,6 +380,7 @@ void CPreferencesDlg::Localize()
 	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, c++);
 	m_slideBar.AddGroupItem(_T("emulEspaña"), iGroup, c++); //MORPH - Added by SiRoB, emulEspaña preferency
 	//m_slideBar.AddGroupItem(_T(" "), iGroup, Multiwebserver=c++); // ionix advnaced webserver
+	c++; // MORPH start tabbed option [leuk_he]
 	Multiwebserver=c++;
 	NTService=c++;
 
@@ -539,6 +532,18 @@ LRESULT CPreferencesDlg::OnSlideBarSelChanged(WPARAM /*wParam*/, LPARAM /*lParam
 {
 	int iCurrentGlobalSel	= m_slideBar.GetGlobalSelectedItem();
 
+	// MORPH start tabbed option [leuk_he]
+	if(iCurrentGlobalSel == Webserver)
+	{
+		if(ActivePageWebServer == Multiwebserver)
+			SetActivePage(&m_wndIonixWebServer);
+		else if(ActivePageWebServer == NTService)
+			SetActivePage(&m_wndNTService);
+		else
+			SetActivePage(&m_wndWebServer);
+	}
+	else
+	// MORPH end tabbed option [leuk_he]
 	SetActivePage(iCurrentGlobalSel);
 
 	CListBoxST* pListBox = m_slideBar.GetGroupListBox(m_slideBar.GetSelectedGroupIndex());
@@ -570,21 +575,5 @@ HBRUSH CPreferencesDlg::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		hbr = GetSysColorBrush(COLOR_BTNFACE);
 	}
 	return hbr;
-}
-
-void CPreferencesDlg::OpenPage(UINT uResourceID)
-{
-	int iCurActiveWnd = m_nActiveWnd;
-	for (int i = 0; i < m_pages.GetSize(); i++)
-	{
-		CPropertyPage* pPage = GetPage(i);
-		if (pPage->m_psp.pszTemplate == MAKEINTRESOURCE(uResourceID))
-		{
-			m_nActiveWnd = i;
-			break;
-		}
-	}
-	DoModal();
-	m_nActiveWnd = iCurActiveWnd;
 }
 //MORPH END   - Preferences groups [ePlus/Sirob]

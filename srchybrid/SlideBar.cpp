@@ -1,6 +1,12 @@
 //SLAHAM: ADDED Preferences Groups ePlus =>
 #include "stdafx.h"
 #include "SlideBar.h"
+//MORPH start tabbed options [leuk_he]
+#include "resource.h"
+#include "emule.h"
+#include "emuleDlg.h"
+#include "PreferencesDlg.h"
+//MORPH end tabbed options [leuk_he]
 
 
 /////////////////////////////////////////////////////////////////////////////////////////////
@@ -550,7 +556,12 @@ void CSlideBar::SelectGroup(INT iIndex)
 // all listboxes as if they were only 1 listbox).
 void CSlideBar::SelectGlobalItem(INT iIndex)
 {
+	//MORPH start tabbed options [leuk_he]
+	/*
 	ASSERT((iIndex >= 0) && (iIndex < GetNumberOfGroupItems()));
+	*/
+	ASSERT(((iIndex >= 0) && (iIndex < GetNumberOfGroupItems())) || (iIndex == theApp.emuledlg->preferenceswnd->Multiwebserver) || (iIndex == theApp.emuledlg->preferenceswnd->NTService));
+	//MORPH end tabbed options [leuk_he]
 
 	if (GetNumberOfGroups() > 0)
 	{
@@ -566,7 +577,12 @@ void CSlideBar::SelectGlobalItem(INT iIndex)
 
 			int iItemCount = pListBox->GetCount();
 
-			iTemp = iIndex - iItemCount;
+			//MORPH start tabbed options [leuk_he]
+			if(iIndex == theApp.emuledlg->preferenceswnd->Multiwebserver || iIndex == theApp.emuledlg->preferenceswnd->NTService)
+				iTemp = theApp.emuledlg->preferenceswnd->Webserver - iItemCount;
+			else
+			//MORPH end tabbed options [leuk_he]
+				iTemp = iIndex - iItemCount;
 
 			if (iTemp >= 0)
 			{

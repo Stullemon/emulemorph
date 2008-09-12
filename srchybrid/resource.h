@@ -3759,7 +3759,7 @@
 #define  IDS_SELFILES_TIP 31300
 #define  IDS_USEDOWNLOADOVERHEAD 31301
 #define  IDS_USEDOWNLOADOVERHEAD_TIP 31302
-
+#define IDS_APPLY_SETTINGS              31303
 
 // Next default values for new objects
 // 

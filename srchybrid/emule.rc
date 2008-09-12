@@ -1701,7 +1701,7 @@ BEGIN
     CONTROL         "",IDC_TAB_WEBSERVER2,"SysTabControl32",0x0,0,0,229,240
     CONTROL         "Check1",IDC_ADVADMINENABLED,"Button",BS_AUTOCHECKBOX | 
                     BS_FLAT | WS_TABSTOP,13,20,195,8
-    GROUPBOX        "Advance Webserver Config",IDC_STATIC_ADVADMIN,9,32,219,
+    GROUPBOX        "Advance Webserver Config",IDC_STATIC_ADVADMIN,9,32,216,
                     155,BS_FLAT
     COMBOBOX        IDC_ACCOUNTSELECT,119,49,103,110,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
@@ -2177,24 +2177,24 @@ BEGIN
     CONTROL         "",IDC_TAB_SERVICE3,"SysTabControl32",0x0,0,0,229,240
     LTEXT           "Current status:",IDC_SVC_CURRENT_STATUS_LABEL,19,26,168,
                     14
-    EDITTEXT        IDC_SVC_CURRENT_STATUS,20,44,166,14,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_SVC_CURRENT_STATUS,20,44,167,14,ES_AUTOHSCROLL | 
                     WS_DISABLED | NOT WS_TABSTOP,WS_EX_CLIENTEDGE
-    PUSHBUTTON      "Install",IDC_SVC_INSTALLSERVICE,23,64,80,14
-    PUSHBUTTON      "Unnistall",IDC_SVC_SERVERUNINSTALL,112,64,71,13
+    PUSHBUTTON      "Install",IDC_SVC_INSTALLSERVICE,20,64,80,14
+    PUSHBUTTON      "Unnistall",IDC_SVC_SERVERUNINSTALL,107,64,80,14
     GROUPBOX        "Startup",IDC_SVC_STARTUPBOX,20,84,167,48
     CONTROL         "Start with system startup",IDC_SVC_STARTWITHSYSTEM,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,26,
-                    97,143,10
+                    97,160,10
     CONTROL         "Manual start",IDC_SVC_MANUALSTART,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,26,113,125,10
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,26,113,160,10
     CONTROL         "Set setting appropriate for service use ",
-                    IDC_SVC_SETTINGS,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,
-                    22,145,163,10
-    GROUPBOX        "On start of eMule.",IDC_SVC_ONSTARTBOX,20,159,173,48
+                    IDC_SVC_SETTINGS,"Button",BS_PUSHBUTTON | WS_TABSTOP,
+                    20,139,167,14
+    GROUPBOX        "On start of eMule.",IDC_SVC_ONSTARTBOX,20,159,167,48
     CONTROL         "Browse to webservice",IDC_SVC_RUNBROWSER,"Button",
-                    BS_AUTORADIOBUTTON | WS_GROUP,26,172,163,10
+                    BS_AUTORADIOBUTTON | WS_GROUP,26,172,160,10
     CONTROL         "Stop service and start gui",IDC_SVC_REPLACESERVICE,
-                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,26,190,159,10
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP,26,190,160,10
 END
 
 IDD_ADDSHAREDIR DIALOGEX 0, 0, 277, 70
@@ -6312,9 +6312,8 @@ BEGIN
    IDS_SELFILES_TIP "Filesname that were in the link queue at the first display \nof this category selection. More may be added during \n the category selection but are not displayed here"
    IDS_USEDOWNLOADOVERHEAD "Use download overhead"
    IDS_USEDOWNLOADOVERHEAD_TIP "Use the ack traffic coming from the download session\nIn the upload statistics, allowing to set your upload\nslightly higher when downloading a lot(default=on)"
+   IDS_APPLY_SETTINGS       "Should the necessary settings be applied now?"
 END
-
-
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////

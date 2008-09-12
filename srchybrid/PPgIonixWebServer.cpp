@@ -27,7 +27,7 @@ CPPgIonixWebServer::CPPgIonixWebServer()
 	// MORPH start tabbed option [leuk_he]
 	m_imageList.DeleteImageList();
 	m_imageList.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 14+1, 0);
-	m_imageList.Add(CTempIconLoader(_T("CLIENTSONQUEUE")));
+	m_imageList.Add(CTempIconLoader(_T("WEB")));
 	// MORPH end tabbed option [leuk_he]
 }
 
