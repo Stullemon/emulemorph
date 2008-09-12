@@ -134,9 +134,11 @@ CPreferencesDlg::CPreferencesDlg()
 	AddPage(&m_wndEastShare); //EastShare - Added by Pretender, ES Prefs
 	AddPage(&m_wndEmulespana); //MORPH - Added by SiRoB, emulEspaña preferency
 	
+	/* morph moved:
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	AddPage(&m_wndDebug);
 #endif
+	*/
      AddPage(&m_wndIonixWebServer); // Morph - ionix advanced webserver	  tab
 	 AddPage(&m_wndNTService); // MORPH leuk_he:run as ntservice v1.. tab
 
@@ -380,7 +382,6 @@ void CPreferencesDlg::Localize()
 	m_slideBar.AddGroupItem(_T("EastShare"), iGroup, c++);
 	m_slideBar.AddGroupItem(_T("emulEspaña"), iGroup, c++); //MORPH - Added by SiRoB, emulEspaña preferency
 	//m_slideBar.AddGroupItem(_T(" "), iGroup, Multiwebserver=c++); // ionix advnaced webserver
-	c++; // MORPH start tabbed option [leuk_he]
 	Multiwebserver=c++;
 	NTService=c++;
 
