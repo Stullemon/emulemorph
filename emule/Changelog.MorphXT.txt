@@ -1,5 +1,5 @@
 --------------------------------------
-Changelog for eMule 0.49a MorphXT v11.X
+Changelog for eMule 0.49b MorphXT v11.X
 --------------------------------------
 XX-XX-2008
 
