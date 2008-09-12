@@ -385,9 +385,9 @@ void CPPgWebServer::InitTab(bool firstinit, int Page)
 	if (firstinit) {
 		m_tabCtr.DeleteAllItems();
 		m_tabCtr.SetImageList(&m_imageList);
-		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, WEBSERVER, _T("Web server"), 0, (LPARAM)WEBSERVER); 
-		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, MULTIWEBSERVER, _T("Multi user"), 0, (LPARAM)MULTIWEBSERVER); 
-		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, NTSERVICE, _T("NT Service"), 0, (LPARAM)NTSERVICE); 
+		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, WEBSERVER, GetResString(IDS_TAB_WEB_SERVER), 0, (LPARAM)WEBSERVER); 
+		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, MULTIWEBSERVER, GetResString(IDS_TAB_MULTI_USER), 0, (LPARAM)MULTIWEBSERVER); 
+		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, NTSERVICE, GetResString(IDS_TAB_NT_SERVICE), 0, (LPARAM)NTSERVICE); 
 	}
 
 	if (m_tabCtr.GetSafeHwnd() != NULL)

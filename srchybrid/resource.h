@@ -3760,6 +3760,9 @@
 #define  IDS_USEDOWNLOADOVERHEAD 31301
 #define  IDS_USEDOWNLOADOVERHEAD_TIP 31302
 #define IDS_APPLY_SETTINGS              31303
+#define IDS_TAB_WEB_SERVER              31304
+#define IDS_TAB_MULTI_USER              31305
+#define IDS_TAB_NT_SERVICE              31306
 
 // Next default values for new objects
 // 

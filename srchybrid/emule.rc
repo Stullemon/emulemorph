@@ -1068,11 +1068,11 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     LTEXT           "",IDC_IBLABEL,2,2,245,26
     EDITTEXT        IDC_TEXT,2,25,245,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_TEXTNUM,2,25,245,12,ES_AUTOHSCROLL | ES_NUMBER | NOT 
+                    WS_VISIBLE | WS_TABSTOP
     PUSHBUTTON      "&Cleanup",IDC_CLEANFILENAME,2,40,59,14
     DEFPUSHBUTTON   "OK",IDOK,143,40,50,14
     PUSHBUTTON      "Abbrechen",IDCANCEL,197,40,50,14
-    EDITTEXT        IDC_TEXTNUM,2,25,245,12,ES_AUTOHSCROLL | ES_NUMBER | NOT 
-                    WS_VISIBLE
 END
 
 IDD_SELCATEGORY DIALOGEX 0, 0, 186, 118
@@ -6313,6 +6313,9 @@ BEGIN
    IDS_USEDOWNLOADOVERHEAD "Use download overhead"
    IDS_USEDOWNLOADOVERHEAD_TIP "Use the ack traffic coming from the download session\nIn the upload statistics, allowing to set your upload\nslightly higher when downloading a lot(default=on)"
    IDS_APPLY_SETTINGS       "Should the necessary settings be applied now?"
+   IDS_TAB_WEB_SERVER       "Web Server"
+   IDS_TAB_MULTI_USER       "Multi User"
+   IDS_TAB_NT_SERVICE       "NT Service"
 END
 
 #endif    // English (U.S.) resources

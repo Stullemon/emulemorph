@@ -20,6 +20,7 @@ CHANGE: Updated Bad Mod List (DLP v33) [Xman/zz_fly/JvA/DLarge/WiZ/more?]
 CHANGE: Cleaned up the group box code a bit [Stulle]
 CHANGE: Enable highlevel functions in Webserver panel when Multi enabled [Stulle]
 CHANGE: Use PushButton for applying the right settings for using NT Service [Stulle]
+CHANGE: Web Interface tabs now multilingual [Stulle]
 FIX: Display download ack overhead in statistics correct [leuk_he]
 FIX: Improperly reloading icons for SharedDirsTree [Stulle]
 FIX: Store searches if enabled [Stulle]
@@ -27,6 +28,7 @@ FIX: Unjustified bans as reported here http://forum.emule-project.net/index.php?
 FIX: Show proper icon on all Webserver tabs [Stulle]
 FIX: Show proper tab when closing and reopening Preferences (for Multi and NT service) [Stulle]
 FIX: Show proper tab when switching group box from and to Multi or NT service [Stulle]
+FIX: Set focus to EditBox for setting Linear Priority [fafner]
 
 
 --------------------------------------
