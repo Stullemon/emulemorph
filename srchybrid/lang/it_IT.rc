@@ -391,7 +391,7 @@ BEGIN
     IDS_DL_TRANSFCOMPL      "Completati"
     IDS_DL_ACTIVE_TIME      "Durata Download"
     IDS_STATS_FILTEREDCLIENTS "Filtrati: %u"
-    IDS_FILTERLABEL         "Filtra Messaggi Contenenti: (Separatore: | )"
+    IDS_FILTERLABEL         "Filtra Messaggi Contenenti: (Separatore | )"
     IDS_ERR_LARGEREQBLOCK   "Un Client ha richiesto una parte troppo grande."
     IDS_SHOWRATEONTITLE     "Mostra le velocità di trasferimento nella barra del titolo"
     IDS_TBN_NOMESSAGEHISTORY "Nessun messaggio presente nella Cronologia!"
@@ -1114,7 +1114,7 @@ BEGIN
     IDS_USECREDITSYSTEM     "Usa il Sistema dei Crediti (Favorirai chi ti fa scaricare)"
     IDS_FIRSTAUTODOWN       "Vuoi che eMule gestisca le priorità dei File in Download?\n\nAttivando quest'opzione permetterai ad eMule di controllare che i File con molte fonti non interferiscano con quelli con poche fonti. Quest'opzione avrà effetto solo sui Download futuri."
     IDS_FIRSTAUTOUP         "Vuoi che eMule gestisca le priorità degli Upload?\n\nAttivando quest'opzione consentirai ad eMule di accelerare la diffusione dei File più rari, inviando di meno i File popolari. Disattivando quest'opzione consentirai ad eMule di inviare con la stessa intensità i File rari e quelli popolari. Quest'opzione avrà effetto solo sui File condivisi in futuro."
-//    IDS_DELETEDRESTRING1    "[Resstring deleted]"
+    IDS_AUTOMATIC           "Automatico"
     IDS_FIRSTSAFECON        "Vuoi che eMule si connetta ai Server utilizzando una connessione sicura?\n\nDisattivando questa funzione, permetterai ad eMule di connettersi ai Server più velocemente, ma sarà maggiore la possibilità di ottenere falsi ID Bassi."
     IDS_FIRSTAUTOCON        "Connetti automaticamente eMule al suo avvio."
     IDS_FIRSTCOMPLETE       "Hai completato il processo d'impostazione passo-passo.\n\nTutte queste ed altre opzioni possono essere modificate cliccando sul pulsante 'Opzioni'. Per spiegazioni e supporto controlla la guida premendo F1 in eMule!"
@@ -1223,7 +1223,7 @@ BEGIN
     IDS_DEBUG_SOURCE_EXCHANGE
                             "Registra lo scambio fonti tra Client e le richieste/risposte delle fonti ai Server"
     IDS_SHAREDREQ1          "L'utente %s (%u) ha richiesto la lista delle tue cartelle condivise -> ""%s"""
-    IDS_SHAREDREQ2          "L'utente %s (%u) ha richiesto la lista dei tuoi File codivisi in cartelle ""%s"" -> ""%s"""
+    IDS_SHAREDREQ2          "L'utente %s (%u) ha richiesto la lista dei tuoi File condivisi nella cartella ""%s"" -> ""%s"""
     IDS_SHAREDANSW          "L'utente %s (%u) condivide la cartella ""%s"""
     IDS_SHAREDANSW2         "L'utente %s (%u) ha inviato una lista delle cartelle condivise non richiesta - ignorato"
     IDS_SHAREDINFO1         "L'utente %s (%u) ha inviato la lista dei File condivisi nella cartella ""%s"""
@@ -1920,6 +1920,7 @@ BEGIN
     IDS_BETANAG             "Questa è una versione beta di eMule. Riferisci i problemi e controlla regolarmente la presenza di aggiornamenti nel nostro forum (http://forum.emule-project.net)."
     IDS_CONFIRMNODESDOWNLOAD 
                             "Vuoi scaricare ed usare i contatti Kad (nodes.dat) da questo indirizzo:\n%s ?"
+    IDS_NOTCONNECTEDANY     "Non sei connesso ad un Server o alla rete Kad!"
 END
 
 //////////////////////////// MorphXT strings //////////////////////////////////
@@ -2245,7 +2246,7 @@ BEGIN
     IDS_USSFOUNDLASTCOMMON  "UploadSpeedSense: Trovati ultimi Host comuni. LastCommonHost: %s @ TTL: %i HostToPing: %s"
     IDS_USSSTARTLOWPING     "UploadSpeedSense: Ricerca di un valore di partenza per il Ping più basso..."
     IDS_USSCOLLECTINGHOSTS  "UploadSpeedSense: Prova #%i. Ordinamento degli Host..."
-    IDS_USSENOUGHHOSTS      "UploadSpeedSense: Troppi Host. Rintracciamento Ping degli altri Host:"
+    IDS_USSENOUGHHOSTS      "UploadSpeedSense: Trovati sufficienti Host. Creazione lista degli Host che saranno tracciati:"
     IDS_USSHOSTLISTING      "UploadSpeedSense: Host #%i: %s"
     IDS_USSLOWESTPING       "UploadSpeedSense: Ping più basso: %i ms"
     IDS_USSREADY            "UploadSpeedSense: Eseguito correttamente. Inizio controllo della velocità di Upload."
@@ -2257,7 +2258,7 @@ BEGIN
     IDS_USSCANTPINGREMOVE   "UploadSpeedSense: Errore durante il Ping ad un Host! (TTL: %i IP: %s Errore: %i). Rimosso questo Host and inizio raccolta Host. Motivo errore."
     IDS_USSHOSTTOOCLOSE     "UploadSpeedSense: Host chiuso! (TTL: %i IP: %s status: %i). Rimosso questo Host and inizio raccolta Host."
     IDS_USSHOSTTTL          "UploadSpeedSense: Host a TTL %i: %s"
-    IDS_USSPINGFAILED       "UploadSpeedSense: Ping #%i fallito. Motivo seguente"
+    IDS_USSPINGFAILED       "UploadSpeedSense: Ping #%i fallito. Segue il motivo"
     IDS_USSNEWTRACEROUTE    "UploadSpeedSense: Topologia della rete cambiata. TTL: %i Previsto ip: %s real ip: %s verrà eseguito un nuovo tracciamento."
     IDS_USSPINGNUMCONTINUE  "UploadSpeedSense: Ping #%i conseguito con successo. Continuo."
     IDS_USSNEWLOWEST        "UploadSpeedSense: Nuovo Ping più basso: %i ms. Vecchio: %i ms"
@@ -2267,7 +2268,7 @@ BEGIN
     IDS_USSPINGERLOADLIB    "Pinger: LoadLibrary() fallito: non in grado di localizzare il File ICMP.DLL!"
     IDS_USSPINGERGPAFAIL    "Pinger: GetProcAddr() fallito per almeno una funzione."
     IDS_USSPINGERICFFAIL    "Pinger: IcmpCreateFile() fallito, err: "
-    IDS_USSPINGERICMPENDERR "Errore durante la chiusura manuale dell'ICMP , err: "
+    IDS_USSPINGERICMPENDERR "Errore durante la chiusura del gestore ICMP, errore: "
 END
 
 STRINGTABLE 
@@ -3258,6 +3259,7 @@ BEGIN
     IDS_ADVADMIN_USER       "Nome Ut.:"
     IDS_ADVADMIN_CAT        "Categorie (sep. da |):"
     IDS_WS_COOKIE_LOGGEDIN  "Rimani connesso:"
+	IDS_WS_COOKIE_LASTUSER  "Memorizza L'Ultimo Utente:"
 END
 
 STRINGTABLE 
@@ -3640,6 +3642,12 @@ BEGIN
    IDS_USS_INITIAL_TTL     "TTL Iniziale" // [MoNKi: -USS initial TTL-] - Stulle
    IDS_USS_INITIAL_TTL_TIP	"Salta i primi n Router nel trovare l'ultimo Common Router. Potrebbe essere utile se i\nprovider bloccano i Ping ai Router internet. Da testare col comando 'tracert' del\nPrompt dei comandi (Default=0).\nSe superi un valore di 8 allora hai una insolita rete ISP (max=20, 20 non è consigliato).\nL'impostazione di un valore troppo alto causerà un 'Network topology has changed.' come\nmessaggio nel registro avanzato, perdendo l'efficacia dell'USS"
    IDS_SELFILES_TIP "I nomi dei File che erano in coda durante la prima visualizzazione nella selezione\ndi questa categoria. Ne potrebbero essere aggiunti degli altri durante la selezione\ndella categoria ma non saranno mostrati qui"
+   IDS_USEDOWNLOADOVERHEAD "Usa l'OverHead del Download"
+   IDS_USEDOWNLOADOVERHEAD_TIP "Usa il traffico acquisito proveniente dalla sessione di Download.\nNelle statistiche di Upload, consente di incrementare un po' il\ntuo Upload quando stai scaricando molto (Default=on)"
+   IDS_APPLY_SETTINGS       "Le impostazioni necessarie devono essere applicate adesso?"
+   IDS_TAB_WEB_SERVER       "WebServer"
+   IDS_TAB_MULTI_USER       "Multi Utente"
+   IDS_TAB_NT_SERVICE       "Servizio NT"
 END
 
 #endif    // Italian (Italy) resources

@@ -1,7 +1,7 @@
 --------------------------------------
-Changelog for eMule 0.49b MorphXT v11.X
+Changelog for eMule 0.49b MorphXT v11.1
 --------------------------------------
-XX-XX-2008
+1x-08-2008
 
 Merged to 0.49b [fafner]
 ADD: DirectX (Preview feature) support for VS05 [eMF]

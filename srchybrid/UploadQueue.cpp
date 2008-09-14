@@ -1056,7 +1056,7 @@ void CUploadQueue::Process() {
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
 				RemoveFromUploadQueue(cur_client, (CString)_T("Scheduled for removal: ") + cur_client->GetScheduledRemovalDebugReason(), true, keepWaitingTime);
-				AddClientToQueue(cur_client,true,keepWaitingTime);
+				AddClientToQueue(cur_client,keepWaitingTime); //http://forum.emule-project.net/index.php?showtopic=136682
 				m_nLastStartUpload = m_lastproccesstick-SEC2MS(9); //no more needed?
 			}
 		}

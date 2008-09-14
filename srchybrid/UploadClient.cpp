@@ -1564,7 +1564,7 @@ void  CUpDownClient::AddRequestCount(const uchar* fileid)
 			if (::GetTickCount() - cur_struct->lastasked < MIN_REQUESTTIME && !GetFriendSlot()){ 
 				if (GetDownloadState() != DS_DOWNLOADING) {
 			   		// morph some extra suprious verbose tracking, read http://forum.emule-project.net/index.php?showtopic=136682
-                	AddDebugLogLine(false, _T("Client: %s (%s), Increased bad request to %d"), GetUserName(), ipstr(GetConnectIP()),cur_struct->badrequests++);
+                	DebugLogError( _T("Client: %s (%s), Increased bad request to %d"), GetUserName(), ipstr(GetConnectIP()),cur_struct->badrequests++);
 					cur_struct->badrequests++;
 				}
 				if (cur_struct->badrequests == BADCLIENTBAN){

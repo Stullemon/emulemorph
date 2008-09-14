@@ -3680,7 +3680,7 @@ void CUpDownClient::CheckFailedFileIdReqs(const uchar* aucFileHash)
 		{
 			m_fFailedFileIdReqs++;
      		// morph some extra suprious verbose tracking, read http://forum.emule-project.net/index.php?showtopic=136682
-	    	AddDebugLogLine(false, _T("Client: %s (%s), Increased set m_fFailedFileIdReqs to %d"), GetUserName(), ipstr(GetConnectIP()),m_fFailedFileIdReqs );
+	    	DebugLogError( _T("Client: %s (%s), Increased set m_fFailedFileIdReqs to %d"), GetUserName(), ipstr(GetConnectIP()),m_fFailedFileIdReqs );
 		}
 		if (m_fFailedFileIdReqs == 6)
 		{

@@ -512,13 +512,13 @@ void CClientList::TrackBadRequest(const CUpDownClient* upcClient, int nIncreaseC
 		pResult->m_dwInserted = ::GetTickCount();
 		pResult->m_cBadRequest += nIncreaseCounter;
 		// morph some extra verbose tracking, read http://forum.emule-project.net/index.php?showtopic=136682
-		AddDebugLogLine(false, _T("Client: %s (%s), Increased badrequestcounter to %d"), upcClient->GetUserName(), ipstr(upcClient->GetConnectIP()),pResult->m_cBadRequest);
+		DebugLogError( _T("Client: %s (%s), Increased badrequestcounter to %d"), upcClient->GetUserName(), ipstr(upcClient->GetConnectIP()),pResult->m_cBadRequest);
 	}
 	else{
 		CDeletedClient* ccToAdd = new CDeletedClient(upcClient);
 		ccToAdd->m_cBadRequest = nIncreaseCounter;
 		// morph some extra verbose tracking, read http://forum.emule-project.net/index.php?showtopic=136682
-		AddDebugLogLine(false, _T("Client: %s (%s), Increased set badrequestcounter to %d"), upcClient->GetUserName(), ipstr(upcClient->GetConnectIP()),pResult->m_cBadRequest);
+		DebugLogError( _T("Client: %s (%s), Increased set badrequestcounter to %d"), upcClient->GetUserName(), ipstr(upcClient->GetConnectIP()),pResult->m_cBadRequest);
 		m_trackedClientsList.SetAt(upcClient->GetIP(), ccToAdd);
 	}
 }
