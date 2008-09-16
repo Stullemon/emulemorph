@@ -1003,7 +1003,7 @@ BEGIN
     IDS_USECREDITSYSTEM     "Usar Sistema de créditos (Se premia a los que más suben)"
     IDS_FIRSTAUTODOWN       "Activa esta opción si quieres que eMule controle las prioridades de descarga.\n\nSi la activas, eMule se asegura que las descargas con muchas fuentes\nno interfieran con las que tienen pocas fuentes. Esta opción sólo afectará a futuras descargas.\nPor defecto: Activado"
     IDS_FIRSTAUTOUP         "Activa esta opción si quieres que eMule controle las prioridades de subida.\n\nSi la activas, permites a eMule subir mejor los archivos con pocas fuentes\nrespecto a los de muchas fuentes. Si lo desactivas eMule subirá mejor los archivos con muchas fuentes\nrespecto a archivos que tienen pocas fuentes. Esta opción sólo afectará a futuros archivos compartidos.\nPor defecto: Activado"
-    IDS_FIRSTFULLCHUNK      "Activa esta opción si quieres subir partes completas.\n\nEl uso de partes completas proporciona a un cliente más posibilidades de completar la parte.\nSi lo desactivas la cola de espera rotar más rápidamente. Si te dedicas a lanzar archivos nuevos,\nquizás quieras activarlo.\nPor defecto: Activado"
+	IDS_AUTOMATIC           "Automático"
     IDS_FIRSTSAFECON        "Activa esta opción si quieres que eMule se conecte de modo Seguro.\n\nSi lo desactivas, eMule se conectará a los Servidores un poco más rápido,\npero puedes obtener más conexiones con una falsa ID baja.\nPor defecto: Desactivado"
     IDS_FIRSTAUTOCON        "Activa esta opción si quieres que eMule se conecte al inicio.\nPor defecto: Desactivado"
     IDS_FIRSTCOMPLETE       "Has completado por primera vez el asistente.\r\rTodas estas y otras configuraciones pueden ser cambiadas en el icono de Opciones.\nPara más información acude a la ayuda pulsando F1 dentro de eMule!"
@@ -2201,9 +2201,9 @@ BEGIN
     IDS_PAYBACKFIRST        "Dar Primero"
     IDS_USS_USEMAXPING      "Usar el valor máximo del Ping (Tolerancia en ms)"
     IDS_CREDIT_SYSTEM       "Sistema de Créditos"
-    IDS_OFFICIAL_CREDIT     "Crédito Oficial"
-    IDS_LOVELACE_CREDIT     "Crédito por Fidelidad"
-    IDS_RATIO_CREDIT        "Crédito por Ratio"
+    IDS_OFFICIAL_CREDIT     "Oficial"
+    IDS_LOVELACE_CREDIT     "Lovelace"
+    IDS_RATIO_CREDIT        "Por Ratio"
     IDS_EASTSHARE_CREDIT    "EastShare"
     IDS_PREFER_SHARE_ALL    "Preferir Compartir Toda La Lista"
     IDS_MET_FILE_CONTROL    "Control de Archivos .met (Cuidado con modificar este valor)"
@@ -2800,7 +2800,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_COMMUNITYTAG_TIP    "Las etiquetas de la comunidad son reconocidas en otras etiquetas,\npor ejemplo: un usuario <i>nombre_usuario [<b>SpanishMorphXT</b>]</i>\nserá aqui reconocido como una\ncomunidad de etiqueta 'NWO'. La comunidad solamente se usa para mostrar al resto de la\ncomunidad los ficheros compartidos (¡Ningún estímulo para la comunidad!). Para mostrar los archivos\ncompartidos lo tienes que establecer en las opciones de los archivos, el MorphXT permite mostrar los archivos de forma\nindividual. No tienes lo tienes que fijar la [etiqueta] en tu nombre, la etiqueta también será agregado por\neste ajuste"
+    IDS_COMMUNITYTAG_TIP    "Las etiquetas de la comunidad son reconocidas en otras etiquetas,\npor ejemplo: un usuario <i>nombre_usuario [<b>SpanishMorphXT</b>]</i>\nserá aqui reconocido como una\ncomunidad de etiqueta 'NWO'. La comunidad solamente se usa para mostrar al resto de la\ncomunidad los ficheros compartidos (¡Ninguma ventaja para la comunidad!). Para mostrar los archivos\ncompartidos lo tienes que establecer en las opciones de los archivos, el MorphXT permite mostrar los archivos de forma\nindividual. No tienes lo tienes que fijar la [etiqueta] en tu nombre, la etiqueta también será agregado por\neste ajuste"
     IDS_MORPH_RFHA_TIP      "Informar de las actividades que realiza el Hashing"
     IDS_MORPH_RAIF_TIP      "Informar de las actividades de los amigos en el registro"
     IDS_MORPH_KSSERV_SIP    "Si un servidor estático de la lista de servidores ha pasado\nel número máximo de intentos de conexión, se deshabilita\nen vez de eliminarlo de la lista, hasta reiniciar el eMule"
@@ -2858,14 +2858,14 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDC_PORT_TIP            "Número de puerto para el acceso del TCP que utiliza el eMule.\nEste puede ser cualquier número comprendido entre 1 y 65535 por lo que otra\naplicación no puede usar este puerto. Puedes conectar con más clientes si el puerto\nes accesible desde Internet, indicado por una flecha de hacia arriba verde\nen la barra de estado (si se está redireccionado correctamente en el router y abierto en tu firewall).\n\n<b>Se recomienda usar puertos comprendidos entre 2000 y 65534,\nya que los puertos inferiores a 2000, son reservados para el sistema,\ny podría provocar inestabilidad en el sistema si se usan.</b>\n\n(Para más información entra http://spanishmorphxt.activoforo.com)"
-    IDC_UDPPORT_TIP         "Número de puerto para el acceso del UDP que utiliza el eMule.\nEste puede ser cualquier número comprendido entre 1 y 65535 por lo que otra\naplicación no puede usar este puerto. Puede ser incluso el mismo que el TCP, ya que\néste utiliza diferente protocolo. Redireccionar el puerto del router y firewall\npara un funcionamiento óptimo.\n\n<b>Se recomienda usar puertos comprendidos entre 2000 y 65534,\nya que los puertos inferiores a 2000, son reservados para el sistema,\ny podría provocar inestabilidad en el sistema si se usan.</b>\n\n(Para más información entra http://spanishmorphxt.activoforo.com)"
+    IDC_PORT_TIP            "Número de puerto para el acceso del TCP que utiliza el eMule.\nEste puede ser cualquier número comprendido entre 1 y 65535 por lo que otra\naplicación no puede usar este puerto. Puedes conectar con más clientes si el puerto\nes accesible desde Internet, indicado por una flecha de hacia arriba verde\nen la barra de estado (si se está redireccionado correctamente en el router y abierto en tu firewall).\n\n<b>Se recomienda usar puertos comprendidos entre 2000 y 65534,\nya que los puertos inferiores a 2000, son reservados para el sistema,\ny podría provocar inestabilidad en el sistema si se usan.</b>\n\n(Para más información entra http://www.spanishmorphxt.es)"
+    IDC_UDPPORT_TIP         "Número de puerto para el acceso del UDP que utiliza el eMule.\nEste puede ser cualquier número comprendido entre 1 y 65535 por lo que otra\naplicación no puede usar este puerto. Puede ser incluso el mismo que el TCP, ya que\néste utiliza diferente protocolo. Redireccionar el puerto del router y firewall\npara un funcionamiento óptimo.\n\n<b>Se recomienda usar puertos comprendidos entre 2000 y 65534,\nya que los puertos inferiores a 2000, son reservados para el sistema,\ny podría provocar inestabilidad en el sistema si se usan.</b>\n\n(Para más información entra http://www.spanishmorphxt.es)"
     IDC_MAXSOURCEPERFILE_TIP "Número máximo de fuentes que el eMule cogerá para un archivo.\nObservar que el MorphXT también tiene la opción en los ajustes del MorphXT, de activar\nun límite global que defina un límite máximo para todas las fuentes de los archivos\nen lugar de ajustar el máximo por archivo"
     IDC_MAXCON_TIP          "Número máximo de conexiones simultáneas TCP/IP que el eMule puede hacer.\nReduce este número si tienes problemas en la red, aumenta este número para\nencontrar fuentes más rápidamente, (Mirar también la opción conexiones/5 segundos\npara las fuentes en estado 'demasiadas conexiones'"
     IDC_NETWORK_KADEMLIA_TIP  "Permitir la red KAD. Esta red encuentra mejor las fuentes para archivos pequeños\ny no es dependiente del servidor, puesto que cada uno de los clientes eMule, será\nun pequeño servidor. Esta red usa el protocolo UDP"
     IDC_NETWORK_ED2K_TIP    "Permitir la red eD2K. Muchos de los servidores centralizados mantienen los datos\nde los archivos donde pueden ser localizados en la red. Asegurate de conectarte\na un buen servidor (Este te devolverá los resultados apropiados de la busqueda).\nEste protocolo es compatible con los clientes que la red KAD, pero depende de la\ncalidad de los servidores"
     IDS_QL_USERNAME_TIP     "El nombre de usuario que se exhibe a otros usuarios.\nPon tu publicidad o [el nombre de tu comunidad]\nPor ejemplo: <b>nombre_usuario [SpanishMorphXT]</b>"
-    IDS_PW_LANG_TIP         "Lenguaje de la interfaz gráfica. El eMule descargará una librería (dll) y lo pondrá en el directorio 'lang' si\nhas selecionado un idioma que todavía no este instalado. Las librerías para las extensiones\ndel MorphXT no se descargan y se deben poner manualmente en el directorio 'lang' o\ninstalarlas allí por el instalador del MorphXT.\n\nCreado por <b>guijarrelson™</b>: http://spanishmorphxt.activoforo.com"
+    IDS_PW_LANG_TIP         "Lenguaje de la interfaz gráfica. El eMule descargará una librería (dll) y lo pondrá en el directorio 'lang' si\nhas selecionado un idioma que todavía no este instalado. Las librerías para las extensiones\ndel MorphXT no se descargan y se deben poner manualmente en el directorio 'lang' o\ninstalarlas allí por el instalador del MorphXT.\n\nCreado por <b>guijarrelson™</b>: http://www.spanishmorphxt.es"
     IDS_PW_BEEP_TIP         "Señal sonora al producirse un error"
     IDS_PW_PROMPT_TIP       "Preguntar ¿Quieres realmente cerrar el eMule? cuando se intente cerrar el eMule"
     IDS_PW_SPLASH_TIP       "Mostrar la ventana de inicio al comenzar el eMule"
@@ -2963,9 +2963,9 @@ BEGIN
     IDC_WSPASS_TIP          "Pon una contraseña para tener acceso al Servidor web.\nEs importante poner una contraseña apropiada o cualquier persona puede acceder\na tu eMule a traves del servidor web. Cuando introduces tu contraseña, esta no es\nvisible, ya que se camufla con '*', por defecto no hay contraseña"
     IDC_WSPASSLOW_TIP       "Permitir una cuenta de invitado en la que este no puede\ncambiar ningun ajuste, tan solo puede mirar"
     IDC_MMPASSWORDFIELD_TIP "Contraseña para el acceso de clientes java"
-    IDC_WSPORT_TIP          "Puerto para el servidor web, por defecto está el 4711.\nCambia el puerto si quieres que sea más dificil encontrar tu acceso, o cambialo\npor el puerto 80. Es el mejor metodo para acceder desde algunas localizaciones si\npermites el acceso en tu route o permites el uPnp"
+    IDC_WSPORT_TIP          "Puerto para el servidor web, por defecto es el puerto 4711.\nCambia el puerto si quieres que sea más dificil encontrar tu acceso, o cámbialo\npor el puerto 80. Es el mejor método para acceder desde algunas localizaciones si\npermites el acceso en tu router o permites el uPnp"
     IDC_MMPORT_FIELD_TIP    "Puerto por el que el eMule escuchará el eMuleMóvil.\nLa mayoría de los teléfonos java prefieren el puerto 80 (por defecto)"
-    IDC_TMPLPATH_TIP        "Plantilla para la interfaz web.\nEsta plantilla también contiene los codigos html"
+    IDC_TMPLPATH_TIP        "Plantilla para la interfaz web.\nEsta plantilla también contiene los códigos html"
     IDC_WSTIMEOUT_TIP       "Minutos antes de salir automáticamente.\nSi pones un cero desactivas esta opción"
     IDC_WSENABLED_TIP       "Habilitar el Servidor Web. Puedes controlar tu eMule desde\nun navegador en una posición remota"
     IDC_WSENABLEDLOW_TIP    "Permitir una cuenta de invitado que solo permita leer.\nPor defecto: Deshabilitado"
@@ -2977,25 +2977,25 @@ END
 STRINGTABLE 
 BEGIN
     IDC_WSRELOADTMPL_TIP    "Recarga la plantilla"
-    IDC_TMPLBROWSE_TIP      "Busca en el sistema de archivos la plantilla que contiene\nel codigo html para el Servidor Web"
+    IDC_TMPLBROWSE_TIP      "Busca en el sistema de archivos la plantilla que contiene\nel código html para el Servidor Web"
     IDC_GUIDELINK_TIP       "Abre la guia del eMuleMóvil en una ventana del navegador\nhttp://mobil.emule-project.net/"
     IDS_PREFER_SHARE_ALL_TIP"Conectar primero con los servidores que pueden manejar el número de archivos\nque tu puedes compartir, para que todos tengan las mismas posibilidades"
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES_TIP "Comenzar a descargar un archivo tan solo si este se ha visto completo por lo menos\nuna vez, pero por fuerza la descarga se retrasa si se piden muchas solicitudes\nde tan solo una fuente completa"
-    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP "Guarda el tiempo de espera en tu cola. Básicamente te permite que el tiempo muerto\nque tarda en formarse la cola de subida, se vea reducido al ser guardado, y aunque tu\ndesaparezcas tu puesto en la cola este reservado, por defecto esta activado"
+    IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP "Guarda el tiempo de espera en tu cola. Básicamente te permite que el tiempo muerto\nque tarda en formarse la cola de subida, se vea reducido al ser guardado, y aunque tu\ndesaparezcas, tu puesto en la cola este reservado. Por defecto: activado"
     IDS_ENABLE_CHUNKDOTS_TIP "Mostrar puntos en la barra de progreso para cada paquete, 9,28Mb"
     IDS_ECFEF_TIP           "Una cola para todos los archivos con las mismas posibilidades.\nCambia la prioridad de cada archivo basado en los datos y peticiones\nde subida en esta sesion"
     IDS_IP2COUNTRY_TIP      "Nombres y banderas de cada país, en los detalles del cliente en la ventana\nde transferencias. Necesitas un archivo actualizado de IP_to_country.csv que lo puedes\ndescargar o actualizar en MorphXT Update para mostrar correctamente los datos basados\nen la localizacion estimada del número IP de la persona"
     IDS_DISABLED_TIP        "Sin letras de paises. (deshabilitar la columna del pais en el siguiente inicio)"
     IDS_COUNTRYNAME_SHOWFLAG_TIP "Mostar la bandera del pais en la columna de país o al principio de la línea"
-    IDS_CREDIT_SYSTEM_TIP   "Que sistema de créditos usas. Para el funcionamiento del MorphXT se requiere un sistema.\nLa prioridad de avance en tu cola de subida depende del sistema de credito que elijas"
-    IDS_OFFICIAL_CREDIT_TIP "Inicio:1 Mín: 1 Máx: 10\nRatio1 = Total subido x 2 / Total descargado\nRatio2 = SQRT(Total subido + 2 )\nSe comparan los dos coeficientes y el valor más bajo se utiliza como coeficiente\nmodificador. Tambien existen algunas condiciones límite:\n      Subida total menor que 1MB => Modificador = 1\n      Descarga total = 0 => Modificador = 10"
+    IDS_CREDIT_SYSTEM_TIP   "Elije tu sistema de crédito. Para el funcionamiento del MorphXT se requiere un sistema.\nLa prioridad de avance en tu cola de subida depende del sistema de crédito que elijas"
+    IDS_OFFICIAL_CREDIT_TIP "<b>Crédito Oficial</b>\nInicio:1 Mín: 1 Máx: 10\nRatio1 = Total subido x 2 / Total descargado\nRatio2 = SQRT(Total subido + 2 )\nSe comparan los dos coeficientes y el valor más bajo se utiliza como coeficiente\nmodificador. Tambien existen algunas condiciones límite:\n      Subida total menor que 1MB => Modificador = 1\n      Descarga total = 0 => Modificador = 10"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOVELACE_CREDIT_TIP "Inicio:1 Máx:100 Mín:0.1 Ratio:1:1.5\n1-modificador=100*((1-1/(1+exp((3*{MB Subido}^2-{MB descargado}^2)/1000)))^6.6667)\nTan solo los clientes que usan el 'SecureHash' pueden conseguir un multiplicador de 100, todos los\ndemas se quedaran en 10. La gran diferencia con el sistema de créditos oficial, es que\nlos créditos se evaluan en diferencias y no en coeficientes. Usando el sistema oficial\nobtienes los mejores créditos después de generar un nuevo Hash de usuario (cuando\nhaces una instalación limpia). Con este sistema de créditos consigues mejores\ncréditos cuantos más MB subas"
-    IDS_PAWCIO_CREDIT_TIP   "Inicio:3 Mín:1 Máx:100.\nRatio = 3 * Descargado / Subido - Para nuevos clientes (Datos descargados y subidos menor que 1MB)\nratio = 3.0 (en vez de 1.0) - Si has recibido más de 1MB de alguien pero no han dado cualquier cosa al usuario, este\nconsigue un ratio = 100.0 - Pequeña prima para aquellos clientes que te han dado muchos MB:\n- Si tu recibes 100MB entonces el usuario recibe un ratio = 50.0"
-    IDS_EASTSHARE_CREDIT_TIP "Inicio:100 mín: 10 máx: 5000\nRatio = +6 por MB subido y -2 por descargado\nbonus  +100 si subes 1MB+\nvalor bajo si subes por debajo de tus posibilidades 1MB+, ratio = 50"
+    IDS_LOVELACE_CREDIT_TIP "<b>Crédito Lovelace ó por Fidelidad</b>\nInicio:1 Máx:100 Mín:0.1 Ratio:1:1.5\n1-modificador=100*((1-1/(1+exp((3*{MB Subido}^2-{MB descargado}^2)/1000)))^6.6667)\nTan solo los clientes que usan el 'SecureHash' pueden conseguir un multiplicador de 100, todos los\ndemás se quedarán en 10. La gran diferencia con el sistema de créditos oficial, es que\nlos créditos se evaluan en diferencias y no en coeficientes. Usando el sistema oficial\nobtienes los mejores créditos después de generar un nuevo Hash de usuario (cuando\nhaces una instalación limpia). Con este sistema de créditos consigues mejores\ncréditos cuantos más MB subas"
+    IDS_PAWCIO_CREDIT_TIP   "<b>Crédito Pawcio</b>\nInicio:3 Mín:1 Máx:100.\nRatio = 3 * Descargado / Subido - Para nuevos clientes (Datos descargados y subidos menor que 1MB)\nratio = 3.0 (en vez de 1.0) - Si has recibido más de 1MB de alguien pero no han dado cualquier cosa al usuario, este\nconsigue un ratio = 100.0 - Pequeña prima para aquellos clientes que te han dado muchos MB:\n- Si tu recibes 100MB entonces el usuario recibe un ratio = 50.0"
+    IDS_EASTSHARE_CREDIT_TIP "<b>Crédito EastShare</b>\nInicio:100 mín: 10 máx: 5000\nRatio = +6 por MB subido y -2 por descargado\nbonus  +100 si subes 1MB+\nvalor bajo si subes por debajo de tus posibilidades 1MB+, ratio = 50"
     IDS_PAYBACKFIRST_TIP    "Abrir un slot con PowerShare para subir datos inmediatamente a un cliente.\nTrabaja solo sobre archivos descargados completamente y no sobre los que están parcialmente descargados"
     IDS_PAYBACKFIRSTLIMI_TIP "Sube la cantidad de MB que tenemos que dar al cliente\nantes de que nosotros empecemos a descargar de él.\nPor defecto: 10MB"
     IDS_EXPIRED_KNOWN_TIP   "Limpiar los archivos .met después de que el archivo no se haya modificado por x días\npara ahorrar espacio en el disco duro.\nSolicitar known*.met. No poner un valor muy pequeño, por debajo de 30.\nPor defecto: 90"
@@ -3051,7 +3051,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_TRAY_TIP         "eMule no se minimiza a la barra de tareas, sino que se va a la barra de sistema.\nAdemas se muestra un nuevo icono en la barra de ventana para minimizar"
+    IDS_PW_TRAY_TIP         "eMule no se minimiza a la barra de tareas, sino que se va a la barra de sistema.\nAdemás se muestra un nuevo icono en la barra de ventana para minimizar"
     IDS_PW_DBLCLICK_TIP     "Con esta opción puedes elegir la forma de desplegar las tranferencias, con uno o dos click"
     IDS_3DDEP_TIP           "El desplazador afecta a la cantidad de sombra en las barras de progreso"
     IDS_UPDATEQUEUE_TIP     "La información exhibida en la lista de cola no será actualizada\npara ahorrar CPU"
@@ -3477,12 +3477,21 @@ BEGIN
 	IDS_EDITSPAMFILTER      "Editar el filtro de Spam"
 	IDS_EDITSPAMFILTERCOMMENTS "Editar el filtro de Spam de los Comentarios"
 	IDS_WIZZARDOBFUSCATION  "Activa esta opción si quieres usar el protocolo ofuscado\n\nSi tu ISP intenta bloquear el eMule, activar la ofuscación ayudará a eludir esas restricciones."
-	IDS_BETANAG             "Esta es una versión Beta de eMule. Por favor, reporta los problemas y comprueba regularmente las actualizaciones en nuestro foro (http://spanishmorphxt.activoforo.com)."
+	IDS_BETANAG             "Esta es una versión Beta de eMule. Por favor, reporta los problemas y comprueba regularmente las actualizaciones en nuestro foro (http://www.spanishmorphxt.es)."
 	IDS_CONFIRMNODESDOWNLOAD "¿Quieres descargar y usar los contactos de KAD (nodes.dat) de esta dirección:\n%s ?"
-	IDS_WS_COOKIE_LASTUSER  "Memorizar Último Usuario:"
+	IDS_NOTCONNECTEDANY     "¡No estás conectado a nigún servidor eD2K o a la red KAD!"
+	IDS_WS_COOKIE_LASTUSER  "Memorizar último usuario:"
+	IDS_USEDOWNLOADOVERHEAD "Usar el excedente de la Descarga"
+	IDS_USEDOWNLOADOVERHEAD_TIP "Usa el ACK del tráfico entrante de las sesiones de descarga\nen las estadísticas de las sesiones de subida, permitiendo ajustar tu subida\nligeramente mayor cuando descargas a gran velocidad (Por defecto: Activado)"
+	IDS_APPLY_SETTINGS       "¿Se deben aplicar los cambios necesarios ahora?"
+	IDS_TAB_WEB_SERVER       "Servidor Web"
+	IDS_TAB_MULTI_USER       "Multi Usuario"
+	IDS_TAB_NT_SERVICE       "Servicio NT"
 END
 #endif    // Spanish (Castilian) resources
 /////////////////////////////////////////////////////////////////////////////
+// Líneas que han sido suprimidas:
+// IDS_FIRSTFULLCHUNK      "Activa esta opción si quieres subir partes completas.\n\nEl uso de partes completas proporciona a un cliente más posibilidades de completar la parte.\nSi lo desactivas la cola de espera rotar más rápidamente. Si te dedicas a lanzar archivos nuevos,\nquizás quieras activarlo.\nPor defecto: Activado"
 
 
 

@@ -1109,7 +1109,6 @@ BEGIN
     IDS_USECREDITSYSTEM     "启用信用系统 - Credit System(受益上传者)"
     IDS_FIRSTAUTODOWN       "如果你想eMule管理你的下载优先级,请启动这个选项.\n\n启动后将允许eMule保证来源很多的下载不影响来源较少的. 这个选项只影响将来的下载.(默认: 开启)"
     IDS_FIRSTAUTOUP         "如果你想eMule管理你的上传优先级,请启动这个选项.\n\n启动这个选项将允许eMule优先上传稀有文件,意味着其他人较难得到受欢迎的文件.关闭这个选项将允许eMule更多地上传受欢迎的文件,意味着其他人较难得到稀有文件. 这个选项只影响将来分享的文件.(默认:开启)"
-    IDS_FIRSTFULLCHUNK      "如果你想上传整个文件块,请启动这个选项.\n\n开启这个选项给客户一个更好的机会得到整个文件块.关闭这个选项有助于更快地循环你的队列.若你的专门的文件发布者,你会想开启这个选项.(默认:开启)"
     IDS_FIRSTSAFECON        "启动这个选项若你想eMule连接时使用安全连接.\n\n关闭这个功能会使eMule连接服务器时快一点,但可能会使你更多地得到虚假的低ID.(默认:关闭)"
     IDS_FIRSTAUTOCON        "启动这个选项若你想eMule启动时就连接.(默认:关闭)"
     IDS_FIRSTCOMPLETE       "你已经完成了首次运行向导.\n\n所有的这些设定还有其它设定可以通过点击选项图标来更改.如果你想得到相关的解释和支持,可以在运行eMule时按F1键来打开帮助文档!"
@@ -1341,13 +1340,13 @@ BEGIN
     IDS_NOTES               "注释"
     IDS_KADSEARCHALREADY    "另一个搜索正在进行中,请稍候重试!"
     IDS_WEB_SHUTDOWN        "关闭 eMule"
-    IDS_WEB_REBOOT          "重起系统"
+    IDS_WEB_REBOOT          "重启系统"
     IDS_WEB_SHUTDOWNSYSTEM  "关闭系统"
     IDS_WEB_ADMINMENU       "管理员菜单"
-    IDS_WEB_MAIN_CLOSE      "你真的想退出eMule?"
-    IDS_WEB_MAIN_REBOOT     "你真的想重起系统?"
-    IDS_WEB_MAIN_SHUTDOWN   "你真的想关闭系统么?"
-    IDS_WEB_SHOW_UPLOAD_QUEUE_BANNED "在队列中显示被ban的客户端"
+    IDS_WEB_MAIN_CLOSE      "真的要退出eMule吗?"
+    IDS_WEB_MAIN_REBOOT     "真的要重启系统吗?"
+    IDS_WEB_MAIN_SHUTDOWN   "真的要关闭系统吗?"
+    IDS_WEB_SHOW_UPLOAD_QUEUE_BANNED "在队列中显示被禁止连接的客户端"
 END
 
 STRINGTABLE 
@@ -1569,7 +1568,7 @@ BEGIN
     IDS_MINLENGTH           "最小长度[hh:mm:ss]"
     IDS_EM_HELP             "帮助(&H)"
     IDS_WRN_FRIENDDUPLIPPORT 
-                            "朋友没有添加.\r\n\r\n已存在一个有着相同的IP和端口的朋友."
+                            "好友没有添加.\r\n\r\n已存在一个有着相同的IP和端口的好友."
     IDS_DYNUP               "上传速度侦测(USS)"
     IDS_KADOVERHEAD         "Kad开销(包):%s (%s)"
     IDS_FIND                "查找 ..."
@@ -1815,7 +1814,7 @@ BEGIN
     IDS_ARCHIVEDETAILS      "文件详情"
     IDS_ARCHTYPE            "文件类型"
     IDS_ATTRIBUTES          "属性"
-    IDS_LASTMODIFIED        "上次修改"
+    IDS_LASTMODIFIED        "最后修改"
     IDS_ARCPREV_DIRSUCCREAD "内容表读取成功." 
 END
 
@@ -1855,14 +1854,14 @@ BEGIN
     IDS_CONNECTINGTOOBFUSCATED 
                             "连接到 %s (%s:%i - 使用协议加密)..."
     IDS_CONNECTEDTOOBFUSCATED "加密连接建立于: %s"
-    IDS_VERIFIED            "已认证"
-    IDS_OBFUSCATED          "已加密"
-    IDS_UNVERIFIED          "未认证"
+    IDS_VERIFIED            "已经验证"
+    IDS_OBFUSCATED          "加密"
+    IDS_UNVERIFIED          "未经验证"
     IDS_INVALIDFILEEXT      "无效的文件扩展名"
     IDS_UNKNOWNFILEEXT      "未知的文件扩展名"
     IDS_ENABLEMINIMULE      "启用迷你骡(MiniMule)"
     IDS_DISABLE_AUTOARCHPREV 
-                            "在查看文件详情时禁用档案自动预览"
+                            "禁止在查看文件详情时自动预览档案内容"
     IDS_US_STALLEDW4BR      "停止! 正在请求文件段."
     IDS_US_STALLEDREADINGFDISK "停止! 正在读盘."
     IDS_SERVERFEATURE_INTTYPETAGS "整数编码"
@@ -1877,9 +1876,9 @@ BEGIN
     IDS_SEARCHSPAMFILTER    "对搜索结果进行垃圾信息过滤"
     IDS_SHOWSMILEYS         "显示表情图标"
     IDS_CAPTCHAREQUEST      "为避免垃圾信息, 这个用户需要先你通过captcha认证才能给他发消息.\n请输入你在图片中看到的数字:"
-    IDS_CAPTCHAFAILED       "你未能通过captcha认证, 所发消息将被忽略. \n你可以通过发送新消息再次申请认证."
-    IDS_CAPTCHASOLVED       "你已通过captcha认证, 对方将收到你的消息."
-    IDS_USECAPTCHAS         "需要captcha认证"
+    IDS_CAPTCHAFAILED       "你未能通过验证, 所发消息将被忽略. \n你可以通过发送新消息再次申请认证."
+    IDS_CAPTCHASOLVED       "你已通过验证, 对方将收到你的消息."
+    IDS_USECAPTCHAS         "需要验证码验证"
     IDS_BOOTSRAPNODESDAT    "从指定链接下载Nodes.dat:"
     IDS_DOWNLOADING_NODESDAT_FROM "正在从 %s 下载nodes.dat"
     IDS_DOWNLOADING_NODESDAT "正在下载nodes.dat..."
@@ -1900,6 +1899,9 @@ BEGIN
     IDS_WIZZARDOBFUSCATION  "启用此选项以便使用协议加密.\n\n如果你的网络提供商试图封杀eMule, 启用协议加密将有助于突破封锁."
     IDS_BETANAG             "这是一个beta版的eMule. 请访问我们的论坛反馈问题或获取更新 (http://forum.emule-project.net)."
     IDS_CONFIRMNODESDOWNLOAD "你是否想从此链接下载和使用Kad节点(nodes.dat):\n%s ?"
+    IDS_AUTOMATIC           "自动"
+    IDS_NOTCONNECTEDANY     "尚未连接到服务器或Kad网络!"
+
 END
 
 STRINGTABLE 
@@ -2839,7 +2841,7 @@ BEGIN
                             "仅连接到设为静态的服务器. 如果没有静态服务器, 自动连接将会失败."
     IDS_MAXCONNECTIONSSWITCHBORDER_TIP 
                             "在USS和SUC之间进行切换所需的最大当前连接数.\nUSS更适用于连接数较少的情形, SUC需要通过一定的连接才能确定一个最佳平均值."
-    IDS_SUC_TIP             "启用智能上传控制.\n通过分析连接到来源的周转时间确定连接所需的迟延. \n优点: 无额外消耗\n缺点: 需要一些正在连接的客户来检验速度"
+    IDS_SUC_TIP             "启用智能上传控制.\n通过分析连接到来源的周转时间确定连接所需的迟延. \n优点: 无额外开销\n缺点: 需要一些正在连接的客户来检验速度"
     IDC_USS_TIP             "通过ping上一个作为通用路由器的ISP边界路由器\n(随机选择10个来源 )\n来确定实际反应速度."
     IDC_SUC_LOG_TIP         "在详细日志中记录"
     IDS_SUC_HIGH_TIP        "如果客户的平均响应时间超出这个值则降低上传速度."
@@ -2987,7 +2989,7 @@ BEGIN
     IDS_PW_DOWNL_TIP        "设定下载速度上限. eMule的下载将不会高于这个速度.\n注意, 如果你的上传太低(平均速度低于每秒10 KB),\n下载速度也会根据你的上传速度按比例降低."
     IDS_PW_UPL_TIP          "设定上传速度上限\n(如果禁用, eMule将尝试自动设定最优化的上传速度).\n将这个速度设为理论上传极限的80%为宜.\n这个值如果设得太高, 你的internet连接可能会不稳定,\n如果设得太低, 又将使你得不到理想的信用积分\n进而影响你在连接到其他来源时的排队速度.\n低于10 KB的上传更将以一定比例降低你的下载速度"
     IDS_NETWORK_TIP         "启用至少一种网络连接, 让eMule可以用来查找来源和在Internet中发布你的共享文件"
-    IDS_SHOWOVERHEAD_TIP    "在状态栏中以括号显示实际消耗的带宽(额外消耗的带宽).\n额外消耗的带宽是ed2k所占用的, 不实际用于文件传输\n但记载了队列位置及其他相关信息"
+    IDS_SHOWOVERHEAD_TIP    "在状态栏中以括号显示实际消耗的带宽(额外开销的带宽).\n额外开销是ed2k所占用的, 不实际用于文件传输\n但记载了队列位置及其他相关信息"
 END
 
 STRINGTABLE 
@@ -2996,7 +2998,7 @@ BEGIN
     IDS_PW_AUTOCON_TIP      "自动连接到eD2K和/或Kad网络. "
     IDS_PW_RECON_TIP        "在和服务器断开连接时自动尝试重新连接到ed2k网络."
     IDS_WIZARD_TIP          "显示用于设定internet连接的运行向导.\n运行向导将会把这个界面中的一些数值替换为普通值.\n完整的启动向导可以在""工具""菜单中运行"
-    IDS_UDPDISABLED_TIP     "禁止UDP通讯.\n如果你的internet连接(或路由器)由于UDP传输而不稳定\n则可以用这个选项禁用\n这样将造成更多额外消耗, 但eMule仍然可以运行."
+    IDS_UDPDISABLED_TIP     "禁止UDP通讯.\n如果你的internet连接(或路由器)由于UDP传输而不稳定\n则可以用这个选项禁用\n这样将造成更多额外开销, 但eMule仍然可以运行."
     IDS_STARTTEST_TIP       "启动浏览器并连接到emule-project.net以测试eMule端口是否可以连接到服务器.\n即使端口不能连接到服务器, eMule仍然可以运行, 但是将会慢一些.\n如果连接测试失败请检查是否有阻止internet通讯返回的设置"
     IDS_RANDOMPORTS_TIP     "不设定固定端口, 而是在指定范围内使用随机端口\n请确认那些端口可以直接用来连接internet.\n或者使用uPnP(详见eMulEspana设置)来应对路由器端口设置 ."
     IDS_MINPORT_TIP         "用于选择随机端口的最小端口号.\n一些服务商禁用了1024以下端口."
@@ -3077,7 +3079,7 @@ BEGIN
     IDS_MAXCON5SECLABEL_TIP "在这里设置允许eMule在每5秒内新建的连接数.\n(默认值为20)\n如果提升了这个值, 也必须提升半开连接数"
 							 
     IDS_MAXHALFOPENCONS_TIP "未完成的连接的最大数目, 必须和每秒新建连接数同步提升.\n如果这个值设得太高, 你可能必须打上tcp/ip.sys补丁(XPSP2)\n并且可能会导致你的路由器超载. 增加这个值,\n将让eMule在'连接数过多'状态下尽快连接到下载源."
-    IDS_CONDTCPACCEPT_TIP   "使用更有效率的手段来拒绝被阻止的用户发出的tcp连接\n也可以用于阻止IP地址在IP-filter列表中的用户连接.\n使用了名为'SO_CONDITIONAL_ACCEPT'的功能, \n可以减少因拒绝连接造成的额外带宽消耗.\n但如果客户被拒绝将占用更多的CPU资源"
+    IDS_CONDTCPACCEPT_TIP   "使用更有效率的手段来拒绝被阻止的用户发出的tcp连接\n也可以用于阻止IP地址在IP-filter列表中的用户连接.\n使用了名为'SO_CONDITIONAL_ACCEPT'的功能, \n可以减少因拒绝连接造成的额外带宽开销.\n但如果客户被拒绝将占用更多的CPU资源"
 END
 
 STRINGTABLE 
@@ -3530,7 +3532,7 @@ STRINGTABLE
 BEGIN
 	IDS_DEBUGSEARCHDETAILLEVEL    "详细搜索级别"
 	IDS_CRYPTTCPPADDINGLENGTH	 "协议加密长度=[1-254]"
-	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "用于协议加密的随机字节的数量(默认为128). \n较小的数值意味着较少的额外带宽消耗(如16), \n较大的数值意味着较好的加密效果."
+	IDS_CRYPTTCPPADDINGLENGTH_TIP	 "用于协议加密的随机字节的数量(默认为128). \n较小的数值意味着较少的额外带宽开销(如16), \n较大的数值意味着较好的加密效果."
 END
 
 STRINGTABLE 
@@ -3636,8 +3638,13 @@ BEGIN
    IDS_USS_INITIAL_TTL     "TTL初始化" // [MoNKi: -USS initial TTL-] - Stulle
    IDS_USS_INITIAL_TTL_TIP      "在搜索路由的过程中忽略找到的第一个路由设备.\n如果网络提供者禁止了来自网内的ping则很有效.\n可使用'tracert'命令测试效果, 默认设置: 关闭.\n如果设置的值大于8, 你的ISP网络就很奇怪了. 最大值=20\n不推荐使用最大值20. 设得太高会导致详细日志中出现'网络拓扑变化'的信息,\n并且会失去USS的效果."
    IDS_SELFILES_TIP "第一次出现在选择类别对话框中的名称. \n在选择类别后还可以改为其它名称, 但不会在这里显示." 
+IDS_USEDOWNLOADOVERHEAD "使用下载额外开销"
+IDS_USEDOWNLOADOVERHEAD_TIP "通过下载进程确认数据开销\n在大量下载时, 在上传统计中\n将上传设置得稍微高一点(默认=启用)"
+IDS_APPLY_SETTINGS "是否立刻应用必须的设置?"
+IDS_TAB_WEB_SERVER "远程网络服务"
+IDS_TAB_MULTI_USER "多用户"
+IDS_TAB_NT_SERVICE "系统服务"
 END
-
 
 #endif    // Chinese (P.R.C.) resources
 /////////////////////////////////////////////////////////////////////////////
