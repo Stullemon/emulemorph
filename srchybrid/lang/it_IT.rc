@@ -1456,7 +1456,7 @@ BEGIN
     IDS_FILEINFORMATION     "Informazioni sul File"
     IDS_STATS_FREESPACE     "Spazio libero su Disco"
     IDS_IRC_HELPCHANNEL     "Connettiti ai canali di Aiuto"
-    IDS_IRC_HELPCHANNELPERFORM "/join #emule-italian | /join #emule-morphxt-italian"
+    IDS_IRC_HELPCHANNELPERFORM "/join #emule-italian"
     IDS_IRC_ACCEPTLINKSFRIENDS "Solo dagli Amici"
     IDS_COMPLSOURCES        "Fonti Complete"
     IDS_CHECKNOENDTIME      "Nessuna fine"

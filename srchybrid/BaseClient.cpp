@@ -682,7 +682,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 
 	//corrupt userhash check
 	static const TCHAR refuserhash3[] = _T("00000000000E00000000000000006F00");
-	if(_tcsicmp(userhash,refuserhash2)==0)
+	if(_tcsicmp(userhash,refuserhash3)==0)
 		return _T("Corrupt userhash");
 	//MORPH END   - Added, Community/Corrupt userhash check [zz_fly/squallATF]
 

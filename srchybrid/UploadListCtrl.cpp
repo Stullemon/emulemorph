@@ -613,7 +613,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							}
 							else if (qr)
 									Sbuffer.Format(_T("QR: %u"),qr);
-							
+							//Dia+ Show NoNeededParts
+							else if (client->GetDownloadState()==DS_NONEEDEDPARTS)
+								Sbuffer.Format(_T("%s"),GetResString(IDS_NONEEDEDPARTS));
+							//Dia- Show NoNeededParts							
 							else if(client->IsRemoteQueueFull())
 								Sbuffer.Format(_T("%s"),GetResString(IDS_QUEUEFULL));
 							else

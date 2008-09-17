@@ -1058,9 +1058,6 @@
 				RelativePath=".\UPnP_IGDControlPoint.h">
 			</File>
 			<File
-				RelativePath=".\UPnPFinder.h">
-			</File>
-			<File
 				RelativePath="URLClient.h">
 			</File>
 			<File

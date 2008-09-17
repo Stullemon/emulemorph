@@ -1,7 +1,16 @@
 --------------------------------------
+Changelog for eMule 0.49b MorphXT v11.x
+--------------------------------------
+XX-XX-2008
+
+CHANGE: Display NNS in UploadListCtrl [Diabolo111]
+FIX: Corrupted userhash ban [taz-me]
+
+
+--------------------------------------
 Changelog for eMule 0.49b MorphXT v11.1
 --------------------------------------
-1x-08-2008
+15-09-2008
 
 Merged to 0.49b [fafner]
 ADD: DirectX (Preview feature) support for VS05 [eMF]
