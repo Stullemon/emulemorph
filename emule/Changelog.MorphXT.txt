@@ -4,7 +4,8 @@ Changelog for eMule 0.49b MorphXT v11.x
 XX-XX-2008
 
 CHANGE: Display NNS in UploadListCtrl [Diabolo111]
-FIX: Corrupted userhash ban [taz-me]
+FIX: Corrupted userhash ban [taz]
+FIX: Double increase for badrequests [taz]
 
 
 --------------------------------------
