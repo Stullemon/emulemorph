@@ -3,7 +3,10 @@ Changelog for eMule 0.49b MorphXT v11.x
 --------------------------------------
 XX-XX-2008
 
+ADD: Autojoin to #emule-morph in IRC [Stulle]
 CHANGE: Display NNS in UploadListCtrl [Diabolo111]
+CHANGE: Updated German language file [Morella/Myth88]
+CHANGE: Updated French language file [Nicolas_FR]
 FIX: Corrupted userhash ban [taz]
 FIX: Double increase for badrequests [taz]
 

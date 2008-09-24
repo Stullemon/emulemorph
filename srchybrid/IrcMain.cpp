@@ -1557,7 +1557,13 @@ void CIrcMain::ParsePerform()
 			// be change to what ever channel by just changing the language.. I will just have to check these strings
 			// before release.
 			// This also allows the help string to do more then join one channel. It could add other features later.
+			//MORPH START - Changed by Stulle, Autojoin help channel
+			/*
 			CString sJoinHelpChannel = GetResString(IDS_IRC_HELPCHANNELPERFORM);
+			*/
+			CString sJoinHelpChannel;
+			sJoinHelpChannel.Format(_T("/join #emule-morph|%s"),GetResString(IDS_IRC_HELPCHANNELPERFORM));
+			//MORPH END   - Changed by Stulle, Autojoin help channel
 			sJoinHelpChannel.Trim();
 			if (!sJoinHelpChannel.IsEmpty())
 			{
