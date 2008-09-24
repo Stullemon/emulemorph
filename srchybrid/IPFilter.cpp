@@ -617,144 +617,39 @@ void CIPFilter::AddFromFile2(LPCTSTR pszFilePath)
 	FILE* readFile = _tfsopen(pszFilePath, _T("r"), _SH_DENYWR);
 	if (readFile != NULL)
 	{
-		enum EIPFilterFileType
-		{
-			Unknown = 0,
-			FilterDat = 1,		// ipfilter.dat/ip.prefix format
-			PeerGuardian = 2,	// PeerGuardian text format
-			PeerGuardian2 = 3	// PeerGuardian binary format
-		} eFileType = Unknown;
-
-		setvbuf(readFile, NULL, _IOFBF, 32768);
-
-		TCHAR szNam[_MAX_FNAME];
-		TCHAR szExt[_MAX_EXT];
-		_tsplitpath(pszFilePath, NULL, NULL, szNam, szExt);
-		if (_tcsicmp(szExt, _T(".p2p")) == 0 || (_tcsicmp(szNam, _T("guarding.p2p")) == 0 && _tcsicmp(szExt, _T(".txt")) == 0))
-			eFileType = PeerGuardian;
-		else if (_tcsicmp(szExt, _T(".prefix")) == 0)
-			eFileType = FilterDat;
-		else
-		{
-			_setmode(_fileno(readFile), _O_BINARY); //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
-			static const BYTE _aucP2Bheader[] = "\xFF\xFF\xFF\xFFP2B";
-			BYTE aucHeader[sizeof _aucP2Bheader - 1];
-			if (fread(aucHeader, sizeof aucHeader, 1, readFile) == 1)
-			{
-				if (memcmp(aucHeader, _aucP2Bheader, sizeof _aucP2Bheader - 1)==0)
-					eFileType = PeerGuardian2;
-				else
-				{
-					fseek(readFile, 0, SEEK_SET);
-					_setmode(_fileno(readFile), _O_TEXT); // ugly! //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
-				}
-			}
-		}
+		_setmode(fileno(readFile), _O_TEXT);
 
 		int iLine = 0;
-		if (eFileType == PeerGuardian2)
+		CStringA sbuffer;
+		CHAR szBuffer[1024];
+		while (fgets(szBuffer, _countof(szBuffer), readFile) != NULL)
 		{
-			// Version 1: strings are ISO-8859-1 encoded
-			// Version 2: strings are UTF-8 encoded
-			uint8 nVersion;
-			if (fread(&nVersion, sizeof nVersion, 1, readFile)==1 && (nVersion==1 || nVersion==2))
-			{
-				while (!feof(readFile))
-				{
-					CHAR szName[256];
-					int iLen = 0;
-					for (;;) // read until NUL or EOF
-					{
-						int iChar = getc(readFile);
-						if (iChar == EOF)
-							break;
-						if (iLen < sizeof szName - 1)
-							szName[iLen++] = (CHAR)iChar;
-						if (iChar == '\0')
-							break;
-					}
-					szName[iLen] = '\0';
-					
-					uint32 uStart;
-					if (fread(&uStart, sizeof uStart, 1, readFile) != 1)
-						break;
-					uStart = ntohl(uStart);
-
-					uint32 uEnd;
-					if (fread(&uEnd, sizeof uEnd, 1, readFile) != 1)
-						break;
-					uEnd = ntohl(uEnd);
-
-					iLine++;
-					// (nVersion == 2) ? OptUtf8ToStr(szName, iLen) : 
-					AddIPRange(uStart, uEnd, DFLT_FILTER_LEVEL, CStringA(szName, iLen));
-				}
+			iLine++;
+			sbuffer = szBuffer;
+			
+			// ignore comments & too short lines
+			if (sbuffer.GetAt(0) == '#' || sbuffer.GetAt(0) == '/' || sbuffer.GetLength() < 5) {
+				sbuffer.Trim(" \t\r\n");
+				DEBUG_ONLY( (!sbuffer.IsEmpty()) ? TRACE("IP filter (static): ignored line %u\n", iLine) : 0 );
+				continue;
 			}
-		}
-		else
-		{
-			CStringA sbuffer;
-			CHAR szBuffer[1024];
-			while (fgets(szBuffer, _countof(szBuffer), readFile) != NULL)
+
+			bool bValid = false;
+			uint32 start = 0;
+			uint32 end = 0;
+			UINT level = 0;
+			CStringA desc;
+			bValid = ParseFilterLine1(sbuffer, start, end, level, desc);
+
+			// add a filter
+			if (bValid)
 			{
-				iLine++;
-				sbuffer = szBuffer;
-				
-				// ignore comments & too short lines
-				if (sbuffer.GetAt(0) == '#' || sbuffer.GetAt(0) == '/' || sbuffer.GetLength() < 5) {
-					sbuffer.Trim(" \t\r\n");
-					DEBUG_ONLY( (!sbuffer.IsEmpty()) ? TRACE("IP filter (static): ignored line %u\n", iLine) : 0 );
-					continue;
-				}
-
-				if (eFileType == Unknown)
-				{
-					// looks like html
-					if (sbuffer.Find('>') > -1 && sbuffer.Find('<') > -1)
-						sbuffer.Delete(0, sbuffer.ReverseFind('>') + 1);
-
-					// check for <IP> - <IP> at start of line
-					UINT u1, u2, u3, u4, u5, u6, u7, u8;
-					if (sscanf(sbuffer, "%u.%u.%u.%u - %u.%u.%u.%u", &u1, &u2, &u3, &u4, &u5, &u6, &u7, &u8) == 8)
-					{
-						eFileType = FilterDat;
-					}
-					else
-					{
-						// check for <description> ':' <IP> '-' <IP>
-						int iColon = sbuffer.Find(':');
-						if (iColon > -1)
-						{
-							CStringA strIPRange = sbuffer.Mid(iColon + 1);
-							UINT u1, u2, u3, u4, u5, u6, u7, u8;
-							if (sscanf(strIPRange, "%u.%u.%u.%u - %u.%u.%u.%u", &u1, &u2, &u3, &u4, &u5, &u6, &u7, &u8) == 8)
-							{
-								eFileType = PeerGuardian;
-							}
-						}
-					}
-				}
-
-				bool bValid = false;
-				uint32 start = 0;
-				uint32 end = 0;
-				UINT level = 0;
-				CStringA desc;
-				if (eFileType == FilterDat)
-					bValid = ParseFilterLine1(sbuffer, start, end, level, desc);
-				else if (eFileType == PeerGuardian)
-					bValid = ParseFilterLine2(sbuffer, start, end, level, desc);
-
-				// add a filter
-				if (bValid)
-				{
-					AddIPRange(start, end, level, desc);
-				}
-				else
-				{
-					sbuffer.Trim(" \t\r\n");
-					DEBUG_ONLY( (!sbuffer.IsEmpty()) ? TRACE("IP filter (static): ignored line %u\n", iLine) : 0 );
-				}
+				AddIPRange(start, end, level, desc);
+			}
+			else
+			{
+				sbuffer.Trim(" \t\r\n");
+				DEBUG_ONLY( (!sbuffer.IsEmpty()) ? TRACE("IP filter (static): ignored line %u\n", iLine) : 0 );
 			}
 		}
 		fclose(readFile);

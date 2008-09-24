@@ -7,6 +7,8 @@ ADD: Autojoin to #emule-morph in IRC [Stulle]
 CHANGE: Display NNS in UploadListCtrl [Diabolo111]
 CHANGE: Updated German language file [Morella/Myth88]
 CHANGE: Updated French language file [Nicolas_FR]
+CHANGE: Cleaned up Static IP Filter code [Stulle]
+	+ only ipfilter.dat layout allowed!
 FIX: Corrupted userhash ban [taz]
 FIX: Double increase for badrequests [taz]
 
