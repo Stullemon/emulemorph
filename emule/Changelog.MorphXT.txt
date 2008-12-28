@@ -11,7 +11,7 @@ CHANGE: Cleaned up Static IP Filter code [Stulle]
 	+ only ipfilter.dat layout allowed!
 FIX: Corrupted userhash ban [taz]
 FIX: Double increase for badrequests [taz]
-
+FIX: incorrect and redundent operation for Double backup [AndCycle]
 
 --------------------------------------
 Changelog for eMule 0.49b MorphXT v11.1

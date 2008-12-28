@@ -2221,10 +2221,11 @@ void CemuleDlg::OnClose()
 	// [end] Mighty Knife
 
 	//EastShare START - Pretender, TBH-AutoBackup
-	if (thePrefs.GetAutoBackup2())
-		theApp.ppgbackup->Backup3();
 	if (thePrefs.GetAutoBackup())
 	{
+		if (thePrefs.GetAutoBackup2()) {
+			theApp.ppgbackup->Backup3();
+		}
 		theApp.ppgbackup->Backup(_T("*.ini"), false);
 		theApp.ppgbackup->Backup(_T("*.dat"), false);
 		theApp.ppgbackup->Backup(_T("*.met"), false);
