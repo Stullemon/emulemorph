@@ -643,7 +643,7 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 												(float)client->Credits()->GetUploadedTotal(),false,false));
 							}
 							//EastShare	Start - FairPlay by AndCycle
-							if (file->statistic.GetFairPlay()) {
+							if (!file->IsPartFile() && file->statistic.GetFairPlay()) {
 								Sbuffer.Append(_T(",FairPlay"));
 							}
 							//EastShare	End   - FairPlay by AndCycle

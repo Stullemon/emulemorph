@@ -14,6 +14,8 @@
 #define SZSERVICENAME        "eMule"
 // displayed name of the service
 #define SZSERVICEDISPLAYNAME "eMule %s as a service"
+// displayed descrption for the service
+#define SZSERVICEDISCR		 L"Provides capability to let eMule run as a NT system service."
 // list of service dependencies - "dep1\0dep2\0\0"
 #define SZDEPENDENCIE     "Tcpip\0"
 //////////////////////////////////////////////////////////////////////////////

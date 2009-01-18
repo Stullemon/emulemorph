@@ -1,9 +1,10 @@
 --------------------------------------
 Changelog for eMule 0.49b MorphXT v11.x
 --------------------------------------
-XX-XX-2008
+XX-XX-2009
 
 ADD: Autojoin to #emule-morph in IRC [Stulle]
+ADD: Service description (Service needs to be reinstalled) [Stulle]
 CHANGE: Display NNS in UploadListCtrl [Diabolo111]
 CHANGE: Updated German language file [Morella/Myth88]
 CHANGE: Updated French language file [Nicolas_FR]
@@ -11,7 +12,9 @@ CHANGE: Cleaned up Static IP Filter code [Stulle]
 	+ only ipfilter.dat layout allowed!
 FIX: Corrupted userhash ban [taz]
 FIX: Double increase for badrequests [taz]
-FIX: incorrect and redundent operation for Double backup [AndCycle]
+FIX: Incorrect and redundent operation for Double backup [AndCycle]
+FIX: Display FairPlay in lists only if requested file is complete [gomez82]
+
 
 --------------------------------------
 Changelog for eMule 0.49b MorphXT v11.1
