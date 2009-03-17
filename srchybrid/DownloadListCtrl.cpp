@@ -994,7 +994,7 @@ void CDownloadListCtrl::GetSourceItemDisplayText(const CtrlItem_Struct *pCtrlIte
 			if (pClient->GetUserName() == NULL)
 				_sntprintf(pszText, cchTextMax, _T("(%i) (%s)"),pClient->m_OtherRequests_list.GetCount()+1+pClient->m_OtherNoNeeded_list.GetCount(), GetResString(IDS_UNKNOWN));
 			else
-				_sntprintf(pszText, cchTextMax, _T("(%i) (%s)"),pClient->m_OtherRequests_list.GetCount()+1+pClient->m_OtherNoNeeded_list.GetCount(), pClient->GetUserName());
+				_sntprintf(pszText, cchTextMax, _T("(%i) %s"),pClient->m_OtherRequests_list.GetCount()+1+pClient->m_OtherNoNeeded_list.GetCount(), pClient->GetUserName());
 			//MORPH END   - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 			break;
 	
