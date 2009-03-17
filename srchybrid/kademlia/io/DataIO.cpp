@@ -435,7 +435,7 @@ namespace Kademlia
 	}
 }
 
-static WCHAR _awcLowerMap[0x10000];
+static WCHAR s_awcLowerMap[0x10000];
 
 bool CKademlia::InitUnicode(HMODULE hInst)
 {
@@ -449,10 +449,10 @@ bool CKademlia::InitUnicode(HMODULE hInst)
 			LPBYTE pRes = (LPBYTE)LockResource(hRes);
 			if (pRes)
 			{
-				if (SizeofResource(hInst, hResInfo) == sizeof _awcLowerMap)
+				if (SizeofResource(hInst, hResInfo) == sizeof s_awcLowerMap)
 				{
-					memcpy(_awcLowerMap, pRes, sizeof _awcLowerMap);
-					if (_awcLowerMap[L'A'] == L'a' && _awcLowerMap[L'Z'] == L'z')
+					memcpy(s_awcLowerMap, pRes, sizeof s_awcLowerMap);
+					if (s_awcLowerMap[L'A'] == L'a' && s_awcLowerMap[L'Z'] == L'z')
 						bResult = true;
 				}
 				UnlockResource(hRes);
@@ -462,6 +462,73 @@ bool CKademlia::InitUnicode(HMODULE hInst)
 	}
 	return bResult;
 }
+
+// This is the function which is used to pre-create the "WIDECHARMAP" resource for mapping
+// Unicode characters to lowercase characters in a way which is *IDENTICAL* on each single
+// node within the network. It is *MANDATORY* that each single Kad node is using the
+// exactly same character mapping. Thus, this array is pre-created at compile time and *MUST*
+// get used by each node in the network.
+//
+// However, the Unicode standard gets developed further during the years and new characters
+// where added which also do have a corresponding lowercase version. So, that "WIDECHARMAP"
+// should get updated at least with each new Windows version. Windows Vista indeed added
+// around 200 new characters.
+//
+//void gen_wclwrtab()
+//{
+//	FILE* fpt = fopen("wclwrtab_gen.txt", "wb");
+//	fputwc(0xFEFF, fpt);
+//
+//	int iDiffs = 0;
+//	FILE* fp = fopen("wclwrtab.bin", "wb");
+//	for (UINT ch = 0; ch < 0x10000; ch++)
+//	{
+//		WCHAR wch = (WCHAR)ch;
+//		int iRes = LCMapString(MAKELCID(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US), SORT_DEFAULT), LCMAP_LOWERCASE, &wch, 1, &wch, 1);
+//		ASSERT( iRes == 1);
+//		if (wch != ch)
+//		{
+//			fwprintf(fpt, L"%04x != %04x: %c %c\r\n", ch, wch, ch, wch);
+//			iDiffs++;
+//		}
+//		fwrite(&wch, sizeof(wch), 1, fp);
+//	}
+//	fclose(fp);
+//
+//	fclose(fpt);
+//	printf("Diffs=%u\n", iDiffs);
+//}
+//
+//void use_wclwrtab(const char *fname)
+//{
+//	size_t uMapSize = sizeof(wchar_t) * 0x10000;
+//	wchar_t *pLowerMap = (wchar_t *)malloc(uMapSize);
+//	FILE* fp = fopen(fname, "rb");
+//	if (!fp) {
+//		perror(fname);
+//		exit(1);
+//	}
+//	fread(pLowerMap, uMapSize, 1, fp);
+//	fclose(fp);
+//	fp = NULL;
+//
+//	FILE* fpt = fopen("wclwrtab_use.txt", "wb");
+//	fputwc(0xFEFF, fpt);
+//	int iDiffs = 0;
+//	for (UINT ch = 0; ch < 0x10000; ch++)
+//	{
+//		WCHAR wch = ch;
+//		wch = pLowerMap[wch];
+//		if (wch != ch)
+//		{
+//			fwprintf(fpt, L"%04x != %04x: %c %c\r\n", ch, wch, ch, wch);
+//			iDiffs++;
+//		}
+//	}
+//	fclose(fpt);
+//	free(pLowerMap);
+//	printf("Diffs=%u\n", iDiffs);
+//}
 
 void KadTagStrMakeLower(CKadTagValueString& rwstr)
 {
@@ -483,7 +550,7 @@ void KadTagStrMakeLower(CKadTagValueString& rwstr)
 	rwstr.ReleaseBuffer(iLen);
 #else
 	// NOTE: It's very important that the Unicode->LowerCase map already was initialized!
-	if (_awcLowerMap[L'A'] != L'a')
+	if (s_awcLowerMap[L'A'] != L'a')
 	{
 		AfxMessageBox(_T("Kad Unicode lowercase character map not initialized!"));
 		exit(1);
@@ -491,8 +558,26 @@ void KadTagStrMakeLower(CKadTagValueString& rwstr)
 
 	int iLen = rwstr.GetLength();
 	LPWSTR pwsz = rwstr.GetBuffer(iLen);
-	while ((*pwsz = _awcLowerMap[*pwsz]) != L'\0')
+	while ((*pwsz = s_awcLowerMap[*pwsz]) != L'\0')
 		pwsz++;
 	rwstr.ReleaseBuffer(iLen);
 #endif
+}
+
+int KadTagStrCompareNoCase(LPCWSTR dst, LPCWSTR src)
+{
+	// NOTE: It's very important that the Unicode->LowerCase map already was initialized!
+	if (s_awcLowerMap[L'A'] != L'a')
+	{
+		AfxMessageBox(_T("Kad Unicode lowercase character map not initialized!"));
+		exit(1);
+	}
+
+    WCHAR d, s;
+	do {
+        d = s_awcLowerMap[*dst++];
+        s = s_awcLowerMap[*src++];
+    }
+	while (d != L'\0' && (d == s));
+    return (int)(d - s);
 }

@@ -150,7 +150,6 @@ void CTitleMenu::EnableIcons()
 		m_bIconMenu = true;
 		m_ImageList.DeleteImageList();
 		m_ImageList.Create(ICONSIZE, ICONSIZE, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
-		m_ImageList.SetBkColor(CLR_NONE);
 		if (LoadAPI())
 		{
 			MENUINFO mi;
@@ -299,13 +298,26 @@ static HBITMAP IconToBitmap32(HICON hIcon, int cx, int cy)
     HDC hdcDest = CreateCompatibleDC(NULL);
     if (hdcDest)
     {
-        hBmp = Create32BitHBITMAP(hdcDest, cx, cy);
+		hBmp = Create32BitHBITMAP(hdcDest, cx, cy);
         if (hBmp)
         {
             HBITMAP hbmpOld = (HBITMAP)SelectObject(hdcDest, hBmp);
             if (hbmpOld)
             {
-				DrawIconEx(hdcDest, 0, 0, hIcon, cx, cy, 0, NULL, DI_NORMAL);
+				// "DrawIconEx" works only well for icons which do also have an XP version specified.
+				// For 256 color icons the icons drawn by "DrawIconEx" are way too "bright" ?
+				//DrawIconEx(hdcDest, 0, 0, hIcon, cx, cy, 0, NULL, DI_NORMAL);
+
+				// Not as efficient as "DrawIconEx", but using an image list works for XP icons
+				// as well as for 256 color icons.
+				HIMAGELIST himl = ImageList_Create(cx, cy, theApp.m_iDfltImageListColorFlags | ILC_MASK, 1, 0);
+				if (himl)
+				{
+					ImageList_AddIcon(himl, hIcon);
+					ImageList_Draw(himl, 0, hdcDest, 0, 0, ILD_NORMAL);
+					ImageList_Destroy(himl);
+				}
+
                 SelectObject(hdcDest, hbmpOld);
             }
         }
@@ -361,10 +373,10 @@ void CTitleMenu::SetMenuBitmap(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR /*lpszN
 			if (hBmp)
 			{
 				MENUITEMINFOEX info = {0};
-	info.fMask = MIIM_BITMAP;
+				info.fMask = MIIM_BITMAP;
 				info.hbmpItem = hBmp;
-	info.cbSize = sizeof(info);
-	VERIFY( SetMenuItemInfo(nIDNewItem, (MENUITEMINFO*)&info, FALSE) );
+				info.cbSize = sizeof(info);
+				VERIFY( SetMenuItemInfo(nIDNewItem, (MENUITEMINFO *)&info, FALSE) );
 				m_mapIconNameToBitmap.SetAt(strIconLower, hBmp);
 			}
 		}
@@ -384,47 +396,47 @@ void CTitleMenu::SetMenuBitmap(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR /*lpszN
 			else
 			{
 				HICON hIcon = theApp.LoadIcon(strIconLower);
-		if (hIcon)
-		{
+				if (hIcon)
+				{
 					nPos = m_ImageList.Add(hIcon);
-			if (nPos != -1)
-			{
+					if (nPos != -1)
+					{
 						m_mapIconNameToIconIdx.SetAt(strIconLower, (void *)nPos);
 						m_mapMenuIdToIconIdx.SetAt(nIDNewItem, nPos);
 
-				// It doesn't work to use API checkmark bitmaps in an sufficient way. The size
-				// of those bitmaps is limited and smaller than our menu item bitmaps.
-				/*if (nFlags & MF_CHECKED)
-				{
-					HDC hdcScreen = ::GetDC(HWND_DESKTOP);
-					if (hdcScreen)
-					{
-						CDC* pdcScreen = CDC::FromHandle(hdcScreen);
-						CDC dcMem;
-						dcMem.CreateCompatibleDC(pdcScreen);
-						
-						CBitmap bmpCheckmark;
-						bmpCheckmark.CreateCompatibleBitmap(pdcScreen, ICONSIZE+4, ICONSIZE+4);
-						CBitmap* pBmpOld = dcMem.SelectObject(&bmpCheckmark);
-						CRect rc(0, 0, ICONSIZE+4, ICONSIZE+4);
-						dcMem.FillSolidRect(&rc, RGB(255,255,255));
-						m_ImageList.Draw(&dcMem, nPos, CPoint(0,0), ILD_TRANSPARENT);
-						dcMem.SelectObject(pBmpOld);
+						// It doesn't work to use API checkmark bitmaps in an sufficient way. The size
+						// of those bitmaps is limited and smaller than our menu item bitmaps.
+						/*if (nFlags & MF_CHECKED)
+						{
+							HDC hdcScreen = ::GetDC(HWND_DESKTOP);
+							if (hdcScreen)
+							{
+								CDC* pdcScreen = CDC::FromHandle(hdcScreen);
+								CDC dcMem;
+								dcMem.CreateCompatibleDC(pdcScreen);
+								
+								CBitmap bmpCheckmark;
+								bmpCheckmark.CreateCompatibleBitmap(pdcScreen, ICONSIZE+4, ICONSIZE+4);
+								CBitmap* pBmpOld = dcMem.SelectObject(&bmpCheckmark);
+								CRect rc(0, 0, ICONSIZE+4, ICONSIZE+4);
+								dcMem.FillSolidRect(&rc, RGB(255,255,255));
+								m_ImageList.Draw(&dcMem, nPos, CPoint(0,0), ILD_TRANSPARENT);
+								dcMem.SelectObject(pBmpOld);
 
-						MENUITEMINFO mii = {0};
-						mii.cbSize = sizeof mii;
-						mii.fMask = MIIM_CHECKMARKS;
-						mii.hbmpChecked = (HBITMAP)bmpCheckmark.Detach(); // resource leak
-						VERIFY( SetMenuItemInfo(nIDNewItem, &mii) );
+								MENUITEMINFO mii = {0};
+								mii.cbSize = sizeof mii;
+								mii.fMask = MIIM_CHECKMARKS;
+								mii.hbmpChecked = (HBITMAP)bmpCheckmark.Detach(); // resource leak
+								VERIFY( SetMenuItemInfo(nIDNewItem, &mii) );
 
-						ReleaseDC(HWND_DESKTOP, hdcScreen);
+								ReleaseDC(HWND_DESKTOP, hdcScreen);
+							}
+						}*/
 					}
-				}*/
+					VERIFY( DestroyIcon(hIcon) );
+				}
 			}
-			VERIFY( DestroyIcon(hIcon) );
 		}
-	}
-}
 
 		if (nPos != -1)
 		{

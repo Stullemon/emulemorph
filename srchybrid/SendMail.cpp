@@ -19,7 +19,7 @@
 #include "emuleDlg.h"
 #include "TaskbarNotifier.h"
 #include "OtherFunctions.h"
-#include "atlsmtpconnection.h"
+#include <atlsmtpconnection.h>
 #include "Log.h"
 #include "Preferences.h"
 

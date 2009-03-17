@@ -119,6 +119,7 @@ struct SMediaInfo
 		bFileLengthEstimated = false;
 		(void)strTitle;
 		(void)strAuthor;
+		(void)strAlbum;
 
 		iVideoStreams = 0;
 		(void)strVideoFormat;
@@ -146,6 +147,7 @@ struct SMediaInfo
 		bFileLengthEstimated = strm.bFileLengthEstimated;
 		strTitle = strm.strTitle;
 		strAuthor = strm.strAuthor;
+		strAlbum = strm.strAlbum;
 
 		iVideoStreams = strm.iVideoStreams;
 		strVideoFormat = strm.strVideoFormat;
@@ -201,6 +203,7 @@ struct SMediaInfo
 	bool			bFileLengthEstimated;
 	CString			strTitle;
 	CString			strAuthor;
+	CString			strAlbum;
 
 	int				iVideoStreams;
 	CString			strVideoFormat;
@@ -226,8 +229,13 @@ bool GetMimeType(LPCTSTR pszFilePath, CString& rstrMimeType);
 bool GetDRM(LPCTSTR pszFilePath);
 BOOL GetRIFFHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsAVI, bool bFullInfo = false);
 BOOL GetRMHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsRM, bool bFullInfo = false);
-CString GetWaveFormatTagName(UINT uWavFmtTag, CString& rstrComment);
-CString GetWaveFormatTagName(UINT wFormatTag);
+#ifdef HAVE_WMSDK_H
+BOOL GetWMHeaders(LPCTSTR pszFileName, SMediaInfo* mi, bool& rbIsWM, bool bFullInfo = false);
+#endif//HAVE_WMSDK_H
+CString GetAudioFormatName(WORD wFormatTag, CString& rstrComment);
+CString GetAudioFormatName(WORD wFormatTag);
+CString GetAudioFormatCodecId(WORD wFormatTag);
 BOOL IsEqualFOURCC(FOURCC fccA, FOURCC fccB);
 CString GetVideoFormatName(DWORD biCompression);
 CString GetKnownAspectRatioDisplayString(float fAspectRatio);
+CString GetCodecDisplayName(const CString &strCodecId);

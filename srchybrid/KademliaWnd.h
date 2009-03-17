@@ -37,8 +37,6 @@ public:
 	BOOL SaveAllSettings();
 
 protected:
-	CStatic kadContactLab;
-	CStatic kadSearchLab;
 	CIconStatic m_ctrlBootstrap;
 	CKadContactListCtrl* m_contactListCtrl;
 	CKadContactHistogramCtrl* m_contactHistogramCtrl;

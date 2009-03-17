@@ -108,7 +108,7 @@ CED2KLink::LinkType CED2KServerListLink::GetKind() const
 	return kServerList;
 }
 
-/////////////////////////////////////////////
+///////////////////////////////////////////// 
 // CED2KNodesListLink implementation 
 ///////////////////////////////////////////// 
 CED2KNodesListLink::CED2KNodesListLink(const TCHAR* address)
@@ -155,7 +155,6 @@ CED2KLink::LinkType CED2KNodesListLink::GetKind() const
 /////////////////////////////////////////////
 CED2KServerLink::CED2KServerLink(const TCHAR* ip, const TCHAR* port)
 {
-	USES_CONVERSION;
 	m_strAddress = ip;
 	unsigned long ul = _tcstoul(port, 0, 10);
 	if (ul > 0xFFFF)
@@ -270,7 +269,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 				Url.dwUrlPathLength = ARRSIZE(szUrlPath);
 				Url.lpszExtraInfo = szExtraInfo;
 				Url.dwExtraInfoLength = ARRSIZE(szExtraInfo);
-				if (InternetCrackUrl(strURL, 0, 0, &Url) && Url.dwHostNameLength > 0)
+				if (InternetCrackUrl(strURL, 0, 0, &Url) && Url.dwHostNameLength > 0 && Url.dwHostNameLength < INTERNET_MAX_HOST_NAME_LENGTH)
 				{
 					SUnresolvedHostname* hostname = new SUnresolvedHostname;
 					hostname->strURL = strURL;

@@ -43,9 +43,9 @@ enum ECols
 IMPLEMENT_DYNAMIC(CCommentListCtrl, CMuleListCtrl)
 
 BEGIN_MESSAGE_MAP(CCommentListCtrl, CMuleListCtrl)
-	ON_WM_CONTEXTMENU()
-	ON_NOTIFY_REFLECT(LVN_DELETEITEM, OnLvnDeleteItem)
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnClick)
+	ON_NOTIFY_REFLECT(LVN_DELETEITEM, OnLvnDeleteItem)
+	ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
 CCommentListCtrl::CCommentListCtrl()
@@ -58,26 +58,26 @@ CCommentListCtrl::~CCommentListCtrl()
 
 void CCommentListCtrl::Init(void)
 {
-	SetName(_T("CommentListCtrl"));
+	SetPrefsKey(_T("CommentListCtrl"));
 	ASSERT( (GetStyle() & LVS_SINGLESEL) == 0 );
 	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
-	InsertColumn(colRating, GetResString(IDS_QL_RATING), LVCFMT_LEFT, 80);
-	InsertColumn(colComment, GetResString(IDS_COMMENT), LVCFMT_LEFT, 340);
-	InsertColumn(colFileName, GetResString(IDS_DL_FILENAME), LVCFMT_LEFT, 130);
-	InsertColumn(colUserName, GetResString(IDS_QL_USERNAME), LVCFMT_LEFT, 130);
-	InsertColumn(colOrigin, GetResString(IDS_NETWORK), LVCFMT_LEFT, 80);
-	InsertColumn(colClientSoft, GetResString(IDS_CD_CSOFT), LVCFMT_LEFT, 130); //Commander - Added: ClientSoftware Column
-	InsertColumn(colClientCountry, GetResString(IDS_COUNTRY), LVCFMT_LEFT, 130); //Commander - Added: ClientCountry Column
+
+	InsertColumn(colRating,		GetResString(IDS_QL_RATING),	LVCFMT_LEFT,  80);
+	InsertColumn(colComment,	GetResString(IDS_COMMENT),		LVCFMT_LEFT, 340);
+	InsertColumn(colFileName,	GetResString(IDS_DL_FILENAME),	LVCFMT_LEFT, DFLT_FILENAME_COL_WIDTH);
+	InsertColumn(colUserName,	GetResString(IDS_QL_USERNAME),	LVCFMT_LEFT, DFLT_CLIENTNAME_COL_WIDTH);
+	InsertColumn(colOrigin,		GetResString(IDS_NETWORK),		LVCFMT_LEFT,  80);
+	InsertColumn(colClientSoft,	GetResString(IDS_CD_CSOFT),	LVCFMT_LEFT, 130); //Commander - Added: ClientSoftware Column
+	InsertColumn(colClientCountry,	GetResString(IDS_COUNTRY),	LVCFMT_LEFT, 130); //Commander - Added: ClientCountry Column
 
 	CImageList iml;
 	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
-	iml.SetBkColor(CLR_NONE);
-	iml.Add(CTempIconLoader(_T("Rating_NotRated"), 16, 16));
-	iml.Add(CTempIconLoader(_T("Rating_Fake"), 16, 16));
-	iml.Add(CTempIconLoader(_T("Rating_Poor"), 16, 16));
-	iml.Add(CTempIconLoader(_T("Rating_Fair"), 16, 16));
-	iml.Add(CTempIconLoader(_T("Rating_Good"), 16, 16));
-	iml.Add(CTempIconLoader(_T("Rating_Excellent"), 16, 16));
+	iml.Add(CTempIconLoader(_T("Rating_NotRated")));
+	iml.Add(CTempIconLoader(_T("Rating_Fake")));
+	iml.Add(CTempIconLoader(_T("Rating_Poor")));
+	iml.Add(CTempIconLoader(_T("Rating_Fair")));
+	iml.Add(CTempIconLoader(_T("Rating_Good")));
+	iml.Add(CTempIconLoader(_T("Rating_Excellent")));
 	CImageList* pimlOld = SetImageList(&iml, LVSIL_SMALL);
 	iml.Detach();
 	if (pimlOld)
@@ -85,13 +85,13 @@ void CCommentListCtrl::Init(void)
 
 	LoadSettings();
 	SetSortArrow();
-	SortItems(SortProc, MAKELONG(GetSortItem(), (GetSortAscending() ? 0:1)));
+	SortItems(SortProc, MAKELONG(GetSortItem(), (GetSortAscending() ? 0 : 1)));
 }
 
 int CCommentListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	const SComment* item1 = (SComment*)lParam1;
-	const SComment* item2 = (SComment*)lParam2;
+	const SComment *item1 = (SComment *)lParam1;
+	const SComment *item2 = (SComment *)lParam2;
 	if (item1 == NULL || item2 == NULL)
 		return 0;
 
@@ -106,15 +106,19 @@ int CCommentListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			else
 				iResult = 0;
 			break;
+		
 		case colComment:
-			iResult = item1->m_strComment.Compare(item2->m_strComment);
+			iResult = CompareLocaleStringNoCase(item1->m_strComment, item2->m_strComment);
 			break;
+		
 		case colFileName:
-			iResult = item1->m_strFileName.Compare(item2->m_strFileName);
+			iResult = CompareLocaleStringNoCase(item1->m_strFileName, item2->m_strFileName);
 			break;
+
 		case colUserName:
-			iResult = item1->m_strUserName.Compare(item2->m_strUserName);
+			iResult = CompareLocaleStringNoCase(item1->m_strUserName, item2->m_strUserName);
 			break;
+		
 		case colOrigin:
 			if (item1->m_iOrigin < item2->m_iOrigin)
 				iResult = -1;

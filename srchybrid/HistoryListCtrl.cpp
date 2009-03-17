@@ -195,13 +195,12 @@ BOOL CHistoryFileDetailsSheet::OnCommand(WPARAM wParam, LPARAM lParam)
 //////////////////////////////
 // CHistoryListCtrl
 
-#define MLC_DT_TEXT (DT_SINGLELINE | DT_NOPREFIX | DT_VCENTER | DT_END_ELLIPSIS)
-
 IMPLEMENT_DYNAMIC(CHistoryListCtrl, CListCtrl)
 CHistoryListCtrl::CHistoryListCtrl()
 	: CListCtrlItemWalk(this)
 {
-	SetGeneralPurposeFind(true, false);
+	SetGeneralPurposeFind(true);
+	SetSkinKey(L"HistoryListCtrl");
 }
 
 CHistoryListCtrl::~CHistoryListCtrl()
@@ -212,20 +211,14 @@ CHistoryListCtrl::~CHistoryListCtrl()
 
 
 BEGIN_MESSAGE_MAP(CHistoryListCtrl, CMuleListCtrl)
-	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnClick)
 	ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
 
 void CHistoryListCtrl::Init(void)
 {
-	SetName(_T("HistoryListCtrl"));
-	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
-	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy,theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
-	SetImageList(&ilDummyImageList, LVSIL_SMALL);
-	ASSERT( (GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
-	ilDummyImageList.Detach();
-
+	SetPrefsKey(_T("HistoryListCtrl"));
 	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 	ModifyStyle(LVS_SINGLESEL,0);
 	
@@ -322,31 +315,19 @@ void CHistoryListCtrl::Reload(void)
 	}
 }
 
-void CHistoryListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
+void CHistoryListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+{
 	if (!theApp.emuledlg->IsRunning())
 		return;
-	if( !lpDrawItemStruct->itemData)
+	if (!lpDrawItemStruct->itemData)
 		return;
 
-	//MORPH START - Added by SiRoB, Don't draw hidden Rect
-	RECT clientRect;
-	GetClientRect(&clientRect);
-	CRect rcItem(lpDrawItemStruct->rcItem);
-	if (rcItem.top >= clientRect.bottom || rcItem.bottom <= clientRect.top)
-		return;
-	//MORPH END   - Added by SiRoB, Don't draw hidden Rect
-
-	//set up our ficker free drawing
-	
-	//MORPH - Moved by SiRoB, Don't draw hidden Rect
-	/*
-	CRect rcItem(lpDrawItemStruct->rcItem);
-	*/
-	CDC *oDC = CDC::FromHandle(lpDrawItemStruct->hDC);
-	COLORREF crOldDCBkColor = oDC->SetBkColor(m_crWindow);
-	CMemDC pDC(oDC, &rcItem);	
-	CFont *pOldFont = pDC.SelectObject(GetFont());
-	COLORREF crOldTextColor;
+	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
+	BOOL bCtrlFocused;
+	InitItemMemDC(dc, lpDrawItemStruct, bCtrlFocused);
+	CRect cur_rec(lpDrawItemStruct->rcItem);
+	CRect rcClient;
+	GetClientRect(&rcClient);
 
 	//Fafner: possible exception in history - 070626
 	//Fafner: note: I got this when replacing known.met (e.g., with backup) and some of
@@ -354,214 +335,60 @@ void CHistoryListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	CString sText;
 	try {
 		CKnownFile* file = (CKnownFile*)lpDrawItemStruct->itemData;
-		
-		if(m_bCustomDraw)
-			crOldTextColor = pDC.SetTextColor(m_lvcd.clrText);
-		else
-			crOldTextColor = pDC.SetTextColor(m_crWindowText);
 
-		int iOffset = pDC.GetTextExtent(_T(" "), 1 ).cx*2;
-		int iItem = lpDrawItemStruct->itemID;
 		CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
-
-		//gets the item image and state info
-		LV_ITEM lvi;
-		lvi.mask = LVIF_IMAGE | LVIF_STATE;
-		lvi.iItem = iItem;
-		lvi.iSubItem = 0;
-		lvi.stateMask = LVIS_DROPHILITED | LVIS_FOCUSED | LVIS_SELECTED;
-		GetItem(&lvi);
-
-		//see if the item be highlighted
-		BOOL bHighlight = ((lvi.state & LVIS_DROPHILITED) || (lvi.state & LVIS_SELECTED));
-		BOOL bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
-
-		//get rectangles for drawing
-		CRect rcBounds, rcLabel, rcIcon;
-		GetItemRect(iItem, rcBounds, LVIR_BOUNDS);
-		GetItemRect(iItem, rcLabel, LVIR_LABEL);
-		GetItemRect(iItem, rcIcon, LVIR_ICON);
-		CRect rcCol(rcBounds);
-
-		//the label!
-		CString sLabel = GetItemText(iItem, 0);
-		sText = sLabel;
-		//labels are offset by a certain amount
-		//this offset is related to the width of a space character
-		CRect rcHighlight;
-		CRect rcWnd;
-
-		//should I check (GetExtendedStyle() & LVS_EX_FULLROWSELECT) ?
-		rcHighlight.top    = rcBounds.top;
-		rcHighlight.bottom = rcBounds.bottom;
-		rcHighlight.left   = rcBounds.left  + 1;
-		rcHighlight.right  = rcBounds.right - 1;
-
-		COLORREF crOldBckColor;
-		//draw the background color
-		if(bHighlight) 
-		{
-			if(bCtrlFocused) 
-			{
-				pDC.FillRect(rcHighlight, &CBrush(m_crHighlight));
-				crOldBckColor = pDC.SetBkColor(m_crHighlight);
-			} 
-			else 
-			{
-				pDC.FillRect(rcHighlight, &CBrush(m_crNoHighlight));
-				crOldBckColor = pDC.SetBkColor(m_crNoHighlight);
-			}
-		} 
-		else 
-		{
-			pDC.FillRect(rcHighlight, &CBrush(m_crWindow));
-			crOldBckColor = pDC.SetBkColor(GetBkColor());
-		}
-
-		//update column
-		rcCol.right = rcCol.left + GetColumnWidth(0);
-
-		//draw the item's icon
-		int iIconPosY = (rcCol.Height() > theApp.GetSmallSytemIconSize().cy) ? ((rcCol.Height() - theApp.GetSmallSytemIconSize().cy) / 2) : 0;
-		int iImage = theApp.GetFileTypeSystemImageIdx( file->GetFileName() );
-		if (theApp.GetSystemImageList() != NULL)
-			::ImageList_Draw(theApp.GetSystemImageList(), iImage, pDC, rcCol.left + 4, rcCol.top + iIconPosY, ILD_NORMAL|ILD_TRANSPARENT);
-
-		//draw item label (column 0)
-		sLabel = file->GetFileName();
-		rcLabel.left += 16;
-		rcLabel.left += iOffset / 2;
-		rcLabel.right -= iOffset;
-		pDC.DrawText(sLabel, -1, rcLabel, MLC_DT_TEXT | DT_LEFT | DT_NOCLIP);
-
-		//draw labels for remaining columns
-		LV_COLUMN lvc;
-		lvc.mask = LVCF_FMT | LVCF_WIDTH;
-		rcBounds.right = rcHighlight.right > rcBounds.right ? rcHighlight.right : rcBounds.right;
-
 		int iCount = pHeaderCtrl->GetItemCount();
-		for(int iCurrent = 0; iCurrent < iCount; iCurrent++) 
+		cur_rec.right = cur_rec.left - sm_iLabelOffset;
+		cur_rec.left += sm_iIconOffset;
+		int iIconDrawWidth = theApp.GetSmallSytemIconSize().cx;
+		for (int iCurrent = 0; iCurrent < iCount; iCurrent++)
 		{
 			int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
-
-			if(iColumn == 0)
-				continue;
-
-			GetColumn(iColumn, &lvc);
-			//don't draw anything with 0 width
-			if(lvc.cx == 0)
-				continue;
-
-			rcCol.left = rcCol.right;
-			rcCol.right += lvc.cx;
-
-			//EastShare START - Added by Pretender
-			CString buffer;
-			//EastShare END
-			switch(iColumn){
-				case 1:
-					sLabel = CastItoXBytes(file->GetFileSize());
-					break;
-				case 2:
-					sLabel = file->GetFileTypeDisplayStr();
-					break;
-				case 3:
-					sLabel = EncodeBase16(file->GetFileHash(),16);
-					break;
-				case 4:
-					sLabel = file->GetUtcCFileDate().Format("%x %X");
-					break;
-				case 5:
-					if (theApp.sharedfiles->IsFilePtrInList(file))
-						sLabel=GetResString(IDS_YES);
-					else
-						sLabel=GetResString(IDS_NO);
-					break;
-				case 6:
-					sLabel = file->GetFileComment();
-					break;
-				
-				//EastShare START - Added by Pretender
-				case 7:
-					sLabel = CastItoXBytes(file->statistic.GetAllTimeTransferred());
-					break;
-				case 8:
-					buffer.Format(_T("%u"), file->statistic.GetAllTimeRequests());
-					sLabel = buffer;
-					break;
-				case 9:
-					buffer.Format(_T("%u"), file->statistic.GetAllTimeAccepts());
-					sLabel = buffer;
-					break;
-				//EastShare
-
-				// SLUGFILLER: Spreadbars //Fafner: added to history - 080318
-				case 10:
-					rcCol.bottom--;
-					rcCol.top++;
-					file->statistic.DrawSpreadBar(pDC,&rcCol,thePrefs.UseFlatBar());
-					rcCol.bottom++;
-					rcCol.top--;
-					break;
-				case 11:
-					buffer.Format(_T("%.2f"),file->statistic.GetSpreadSortValue());
-					sLabel = buffer;
-					break;
-				case 12:
-					if (file->GetFileSize()>(uint64)0)
-						buffer.Format(_T("%.2f"),((double)file->statistic.GetAllTimeTransferred())/((double)file->GetFileSize()));
-					else
-						buffer.Format(_T("%.2f"),0.0f);
-					sLabel = buffer;
-					break;
-				case 13:
-					buffer.Format(_T("%.2f"),file->statistic.GetFullSpreadCount());
-					sLabel = buffer;
-					break;
-				// SLUGFILLER: Spreadbars
-			}
-			if (sLabel.GetLength() == 0)
-				continue;
-
-			//get the text justification
-			UINT nJustify = DT_LEFT;
-			switch(lvc.fmt & LVCFMT_JUSTIFYMASK) 
+			if (!IsColumnHidden(iColumn))
 			{
-				case LVCFMT_RIGHT:
-					nJustify = DT_RIGHT;
-					break;
-				case LVCFMT_CENTER:
-					nJustify = DT_CENTER;
-					break;
-				default:
-					break;
+				UINT uDrawTextAlignment;
+				int iColumnWidth = GetColumnWidth(iColumn, uDrawTextAlignment);
+				cur_rec.right += iColumnWidth;
+				if (cur_rec.left < cur_rec.right && HaveIntersection(rcClient, cur_rec))
+				{
+					TCHAR szItem[1024];
+					GetItemDisplayText(file, iColumn, szItem, _countof(szItem));
+					switch (iColumn)
+					{
+						case 0:
+						{
+							int iIconPosY = (cur_rec.Height() > theApp.GetSmallSytemIconSize().cy) ? ((cur_rec.Height() - theApp.GetSmallSytemIconSize().cy) / 2) : 0;
+							int iImage = theApp.GetFileTypeSystemImageIdx(file->GetFileName());
+							if (theApp.GetSystemImageList() != NULL)
+								::ImageList_Draw(theApp.GetSystemImageList(), iImage, dc.GetSafeHdc(), cur_rec.left, cur_rec.top + iIconPosY, ILD_TRANSPARENT);
+							cur_rec.left += iIconDrawWidth;
+
+							cur_rec.left += sm_iLabelOffset;
+							dc.DrawText(szItem, -1, &cur_rec, MLC_DT_TEXT | uDrawTextAlignment);
+							cur_rec.left -= iIconDrawWidth;
+							cur_rec.right -= sm_iSubItemInset;
+							break;
+						}
+						// SLUGFILLER: Spreadbars //Fafner: added to history - 080318
+						case 10:
+							cur_rec.bottom--;
+							cur_rec.top++;
+							file->statistic.DrawSpreadBar(dc,&cur_rec,thePrefs.UseFlatBar());
+							cur_rec.bottom++;
+							cur_rec.top--;
+							break;
+						// SLUGFILLER: Spreadbars //Fafner: added to history - 080318
+
+						default:
+							dc.DrawText(szItem, -1, &cur_rec, MLC_DT_TEXT | uDrawTextAlignment);
+							break;
+					}
+				}
+				cur_rec.left += iColumnWidth;
 			}
-
-			rcLabel = rcCol;
-			rcLabel.left += iOffset;
-			rcLabel.right -= iOffset;
-
-			if (iColumn != 10) //Fafner: added to history - 080318
-				pDC.DrawText(sLabel, -1, rcLabel, MLC_DT_TEXT | nJustify);
 		}
 
-		//draw focus rectangle if item has focus
-		if((lvi.state & LVIS_FOCUSED) && (bCtrlFocused || (lvi.state & LVIS_SELECTED))) 
-		{
-			if(!bCtrlFocused || !(lvi.state & LVIS_SELECTED))
-				pDC.FrameRect(rcHighlight, &CBrush(m_crNoFocusLine));
-			else
-				pDC.FrameRect(rcHighlight, &CBrush(m_crFocusLine));
-		}
-
-		//Xman Code Improvement
-		//not needed
-		//pDC.Flush();
-		//restore old font
-		pDC.SelectObject(pOldFont);
-		pDC.SetTextColor(crOldTextColor);
-		pDC.SetBkColor(crOldBckColor);
-		oDC->SetBkColor(crOldDCBkColor);
+		DrawFocusRect(dc, lpDrawItemStruct->rcItem, lpDrawItemStruct->itemState & ODS_FOCUS, bCtrlFocused, lpDrawItemStruct->itemState & ODS_SELECTED);
 		if (!theApp.IsRunningAsService(SVC_LIST_OPT)) // MORPH leuk_he:run as ntservice v1..
 			m_updatethread->AddItemUpdated((LPARAM)file); //MORPH - UpdateItemThread
 	}
@@ -572,17 +399,95 @@ void CHistoryListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct) {
 	}
 }
 
-void CHistoryListCtrl::OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult){
-	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+void CHistoryListCtrl::GetItemDisplayText(CKnownFile* file, int iSubItem, LPTSTR pszText, int cchTextMax) const
+{
+	if (pszText == NULL || cchTextMax <= 0) {
+		ASSERT(0);
+		return;
+	}
+	pszText[0] = _T('\0');
+	switch (iSubItem)
+	{
+	case 0:
+		_tcsncpy(pszText, file->GetFileName(), cchTextMax);
+		break;
+	case 1:
+		_tcsncpy(pszText, CastItoXBytes(file->GetFileSize()), cchTextMax);
+		break;
+	case 2:
+		_tcsncpy(pszText, file->GetFileTypeDisplayStr(), cchTextMax);
+		break;
+	case 3:
+		_tcsncpy(pszText, EncodeBase16(file->GetFileHash(),16), cchTextMax);
+		break;
+	case 4:
+		_tcsncpy(pszText, file->GetUtcCFileDate().Format("%x %X"), cchTextMax);
+		break;
+	case 5:
+		if (theApp.sharedfiles->IsFilePtrInList(file))
+			_tcsncpy(pszText, GetResString(IDS_YES), cchTextMax);
+		else
+			_tcsncpy(pszText, GetResString(IDS_NO), cchTextMax);
+		break;
+	case 6:
+		_tcsncpy(pszText, file->GetFileComment(), cchTextMax);
+		break;
+	//EastShare START - Added by Pretender
+	case 7:
+		_tcsncpy(pszText, CastItoXBytes(file->statistic.GetAllTimeTransferred()), cchTextMax);
+		break;
+	case 8:
+		_sntprintf(pszText, cchTextMax, _T("%u"), file->statistic.GetAllTimeRequests());
+		break;
+	case 9:
+		_sntprintf(pszText, cchTextMax, _T("%u"), file->statistic.GetAllTimeAccepts());
+		break;
+	//EastShare
+	// SLUGFILLER: Spreadbars //Fafner: added to history - 080318
+	case 10:
+		break;
+	case 11:
+		_sntprintf(pszText, cchTextMax, _T("%.2f"),file->statistic.GetSpreadSortValue());
+		break;
+	case 12:
+		if (file->GetFileSize()>(uint64)0)
+			_sntprintf(pszText, cchTextMax, _T("%.2f"),((double)file->statistic.GetAllTimeTransferred())/((double)file->GetFileSize()));
+		else
+			_sntprintf(pszText, cchTextMax, _T("%.2f"),0.0f);
+		break;
+	case 13:
+		_sntprintf(pszText, cchTextMax, _T("%.2f"),file->statistic.GetFullSpreadCount());
+		break;
+	// SLUGFILLER: Spreadbars
+	}
+	pszText[cchTextMax - 1] = _T('\0');
+}
 
-	// Barry - Store sort order in preferences
-	// Determine ascending based on whether already sorted on this column
-	bool sortAscending = (GetSortItem()!= pNMListView->iSubItem) ? true : !GetSortAscending();
+void CHistoryListCtrl::OnLvnColumnClick( NMHDR* pNMHDR, LRESULT* pResult)
+{
+	NMLISTVIEW *pNMListView = (NMLISTVIEW *)pNMHDR;
+	bool sortAscending;
+	if (GetSortItem() != pNMListView->iSubItem)
+	{
+		switch (pNMListView->iSubItem)
+		{
+			case 7:
+			case 8:
+			case 9:
+				sortAscending = false;
+				break;
+			default:
+				sortAscending = true;
+				break;
+		}
+	}
+	else
+		sortAscending = !GetSortAscending();
 
 	// Sort table
-	UpdateSortHistory(pNMListView->iSubItem + (sortAscending ? 0:20), 20);
+	UpdateSortHistory(pNMListView->iSubItem + (sortAscending ? 0 : 20),20);
 	SetSortArrow(pNMListView->iSubItem, sortAscending);
-	SortItems(SortProc, pNMListView->iSubItem + (sortAscending ? 0:20));
+	SortItems(SortProc, pNMListView->iSubItem + (sortAscending ? 0 : 20));
 
 	*pResult = 0;
 }
@@ -592,39 +497,31 @@ int CHistoryListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 	/*const*/ CKnownFile* item2 = (CKnownFile*)lParam2;	
 
 	int iResult=0;
+	bool bSortAscending = lParamSort < 20;
+	int iColumn = bSortAscending ? lParamSort : lParamSort - 20;
 
 	try { //Fafner: possible exception in history - 070626
-		switch(lParamSort){
-			case 0: //filename asc
-				iResult= _tcsicmp(item1->GetFileName(),item2->GetFileName());
+		switch(iColumn){
+			case 0: //filename ascf
+				iResult = CompareLocaleStringNoCase(item1->GetFileName(), item2->GetFileName());
 				break;
-			case 20: //filename desc
-				iResult= _tcsicmp(item2->GetFileName(),item1->GetFileName());
-				break;
+
 			case 1: //filesize asc
-				iResult= item1->GetFileSize()==item2->GetFileSize()?0:(item1->GetFileSize()>item2->GetFileSize()?1:-1);
+				iResult = CompareUnsigned64(item1->GetFileSize(), item2->GetFileSize());
 				break;
-			case 21: //filesize desc
-				iResult= item1->GetFileSize()==item2->GetFileSize()?0:(item2->GetFileSize()>item1->GetFileSize()?1:-1);
-				break;
+
 			case 2: //filetype asc
 				iResult= item1->GetFileType().CompareNoCase(item2->GetFileType());
 				break;
-			case 22: //filetype desc
-				iResult= item2->GetFileType().CompareNoCase(item1->GetFileType());
-				break;
+
 			case 3: //file ID
 				iResult= memcmp(item1->GetFileHash(),item2->GetFileHash(),16);
 				break;
-			case 23:
-				iResult= memcmp(item2->GetFileHash(),item1->GetFileHash(),16);
-				break;
+
 			case 4: //date
 				iResult= CompareUnsigned(item1->GetUtcFileDate(),item2->GetUtcFileDate());
 				break;
-			case 24:
-				iResult= CompareUnsigned(item2->GetUtcFileDate(),item1->GetUtcFileDate());
-				break;
+
 			case 5: //Shared?
 				{
 					bool shared1, shared2;
@@ -633,69 +530,43 @@ int CHistoryListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 					iResult= shared1==shared2 ? 0 : (shared1 && !shared2 ? 1 : -1);
 				}
 				break;
-			case 25:
-				{
-					bool shared1, shared2;
-					shared1 = theApp.sharedfiles->IsFilePtrInList(item1);
-					shared2 = theApp.sharedfiles->IsFilePtrInList(item2);
-					iResult= shared1==shared2 ? 0 : (shared2 && !shared1 ? 1 : -1);
-				}
-				break;
+
 			case 6: //comment
 				iResult= _tcsicmp(item1->GetFileComment(),item2->GetFileComment());
 				break;
-			case 26:
-				iResult= _tcsicmp(item2->GetFileComment(),item1->GetFileComment());
-				break;
-			//EastShare START - Added by Pretender
+
+				//EastShare START - Added by Pretender
 			case 7: //all transferred asc
 				iResult=item1->statistic.GetAllTimeTransferred()==item2->statistic.GetAllTimeTransferred()?0:(item1->statistic.GetAllTimeTransferred()>item2->statistic.GetAllTimeTransferred()?1:-1);
-				break;
-			case 27: //all transferred desc
-				iResult=item2->statistic.GetAllTimeTransferred()==item1->statistic.GetAllTimeTransferred()?0:(item2->statistic.GetAllTimeTransferred()>item1->statistic.GetAllTimeTransferred()?1:-1);
 				break;
 
 			case 8: //acc requests asc
 				iResult=item1->statistic.GetAllTimeAccepts() - item2->statistic.GetAllTimeAccepts();
 				break;
-			case 28: //acc requests desc
-				iResult=item2->statistic.GetAllTimeAccepts() - item1->statistic.GetAllTimeAccepts();
-				break;
 			
 			case 9: //acc accepts asc
 				iResult=item1->statistic.GetAllTimeAccepts() - item2->statistic.GetAllTimeAccepts();
 				break;
-			case 29: //acc accepts desc
-				iResult=item2->statistic.GetAllTimeAccepts() - item1->statistic.GetAllTimeAccepts();
-				break;
 			//EastShare END
+
 			//MORPH START - SLUGFILLER: Spreadbars //Fafner: added to history - 080318
 			case 10: //spread asc
 			case 11:
 				iResult=CompareFloat(item1->statistic.GetSpreadSortValue(),item2->statistic.GetSpreadSortValue());
 				break;
-			case 30: //spread desc
-			case 31:
-				iResult=CompareFloat(item2->statistic.GetSpreadSortValue(),item1->statistic.GetSpreadSortValue());
-				break;
 
 			case 12: // VQB:  Simple UL asc
-			case 32: //VQB:  Simple UL desc
-				{
+			{
 					float x1 = ((float)item1->statistic.GetAllTimeTransferred())/((float)item1->GetFileSize());
 					float x2 = ((float)item2->statistic.GetAllTimeTransferred())/((float)item2->GetFileSize());
-					if (lParamSort == 12) iResult=CompareFloat(x1,x2); else iResult=CompareFloat(x2,x1);
+					iResult=CompareFloat(x1,x2);
 				break;
-				}
+			}
+
 			case 13: // SF:  Full Upload Count asc
 				iResult=CompareFloat(item1->statistic.GetFullSpreadCount(),item2->statistic.GetFullSpreadCount());
 				break;
-			case 33: // SF:  Full Upload Count desc
-				iResult=CompareFloat(item2->statistic.GetFullSpreadCount(),item1->statistic.GetFullSpreadCount());
-				break;
 			//MORPH END   - SLUGFILLER: Spreadbars
-			default: 
-				iResult= 0;
 		}
 	}
 	catch (...) {
@@ -704,6 +575,10 @@ int CHistoryListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 		theApp.knownfiles->bReloadHistory = true;
 		iResult = 0;
 	}
+
+	if (!bSortAscending)
+		iResult = -iResult;
+
 	// SLUGFILLER: multiSort remove - handled in parent class
 	/*
 	int dwNextSort;
@@ -919,6 +794,18 @@ BOOL CHistoryListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				ShowFileDialog(selectedList);
 				break;
 			}
+			case MP_COPYSELECTED:{
+				CString str;
+				while (!selectedList.IsEmpty()){
+					if (!str.IsEmpty())
+						str += _T("\r\n");
+					str += CreateED2kLink(selectedList.GetHead());
+					selectedList.RemoveHead();
+				}
+				theApp.CopyTextToClipboard(str);
+				break;
+			}
+			case MPG_DELETE:
 			case MP_REMOVESELECTED:
 				{
 					UINT i, uSelectedCount = GetSelectedCount();

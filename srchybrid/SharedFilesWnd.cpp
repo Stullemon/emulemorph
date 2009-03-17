@@ -44,15 +44,14 @@ IMPLEMENT_DYNAMIC(CSharedFilesWnd, CDialog)
 
 BEGIN_MESSAGE_MAP(CSharedFilesWnd, CResizableDialog)
 	ON_BN_CLICKED(IDC_RELOADSHAREDFILES, OnBnClickedReloadSharedFiles)
-	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_SFLIST, OnLvnItemActivateSharedFiles)
-	ON_NOTIFY(NM_CLICK, IDC_SFLIST, OnNMClickSharedFiles)
-	ON_WM_SYSCOLORCHANGE()
-	ON_WM_CTLCOLOR()
-	ON_STN_DBLCLK(IDC_FILES_ICO, OnStnDblClickFilesIco)
-	ON_NOTIFY(TVN_SELCHANGED, IDC_SHAREDDIRSTREE, OnTvnSelChangedSharedDirsTree)
-	ON_WM_SIZE()
 	ON_MESSAGE(UM_DELAYED_EVALUATE, OnChangeFilter)
+	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_SFLIST, OnLvnItemActivateSharedFiles)
+	ON_NOTIFY(NM_CLICK, IDC_SFLIST, OnNmClickSharedFiles)
+	ON_NOTIFY(TVN_SELCHANGED, IDC_SHAREDDIRSTREE, OnTvnSelChangedSharedDirsTree)
+	ON_STN_DBLCLK(IDC_FILES_ICO, OnStnDblClickFilesIco)
+	ON_WM_CTLCOLOR()
 	ON_WM_HELPINFO()
+	ON_WM_SYSCOLORCHANGE()
 	//MORPH START - Added, Downloaded History [Monki/Xman]
 #ifndef NO_HISTORY
 	ON_NOTIFY(LVN_ITEMACTIVATE, IDC_DOWNHISTORYLIST, OnLvnItemActivateHistorylist)
@@ -108,7 +107,7 @@ BOOL CSharedFilesWnd::OnInitDialog()
 	aIgnore.Add(8); // shared parts
 	aIgnore.Add(11); // shared ed2k/kad
 	m_ctlFilter.OnInit(&m_ctlSharedListHeader, &aIgnore);
-	
+
 	pop_bar.SetGradientColors(RGB(255,255,240),RGB(255,255,0));
 	pop_bar.SetTextColor(RGB(20,70,255));
 	pop_baraccept.SetGradientColors(RGB(255,255,240),RGB(255,255,0));
@@ -251,11 +250,11 @@ void CSharedFilesWnd::DoResize(int iDelta)
 	AddAnchor(m_ctrlStatisticsFrm, BOTTOM_LEFT, BOTTOM_RIGHT);
 	AddAnchor(IDC_CURSESSION_LBL, BOTTOM_LEFT);
 	AddAnchor(IDC_FSTATIC4, BOTTOM_LEFT);
-	AddAnchor(IDC_SREQUESTED,BOTTOM_LEFT);
-	AddAnchor(IDC_FSTATIC5,BOTTOM_LEFT);
-	AddAnchor(IDC_SACCEPTED,BOTTOM_LEFT);
-	AddAnchor(IDC_FSTATIC6,BOTTOM_LEFT);
-	AddAnchor(IDC_STRANSFERRED,BOTTOM_LEFT);
+	AddAnchor(IDC_SREQUESTED, BOTTOM_LEFT);
+	AddAnchor(IDC_FSTATIC5, BOTTOM_LEFT);
+	AddAnchor(IDC_SACCEPTED, BOTTOM_LEFT);
+	AddAnchor(IDC_FSTATIC6, BOTTOM_LEFT);
+	AddAnchor(IDC_STRANSFERRED, BOTTOM_LEFT);
 	AddAnchor(m_ctlSharedDirTree, TOP_LEFT, BOTTOM_LEFT);
 	AddAnchor(pop_bar, BOTTOM_LEFT, BOTTOM_RIGHT);
 	AddAnchor(pop_baraccept, BOTTOM_LEFT, BOTTOM_RIGHT);
@@ -272,10 +271,10 @@ void CSharedFilesWnd::DoResize(int iDelta)
 }
 
 
-void CSharedFilesWnd::Reload()
+void CSharedFilesWnd::Reload(bool bForceTreeReload)
 {	
 	sharedfilesctrl.SetDirectoryFilter(NULL, false);
-	m_ctlSharedDirTree.Reload();
+	m_ctlSharedDirTree.Reload(bForceTreeReload); // force a reload of the tree to update the 'accessible' state of each directory
 	sharedfilesctrl.SetDirectoryFilter(m_ctlSharedDirTree.GetSelectedFilter(), false);
 	theApp.sharedfiles->Reload();
 
@@ -290,7 +289,15 @@ void CSharedFilesWnd::OnStnDblClickFilesIco()
 void CSharedFilesWnd::OnBnClickedReloadSharedFiles()
 {
 	CWaitCursor curWait;
-	Reload();
+#ifdef _DEBUG
+	if (GetAsyncKeyState(VK_CONTROL) < 0) {
+		theApp.sharedfiles->RebuildMetaData();
+		sharedfilesctrl.Invalidate();
+		sharedfilesctrl.UpdateWindow();
+		return;
+	}
+#endif
+	Reload(true);
 }
 
 void CSharedFilesWnd::OnLvnItemActivateSharedFiles(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
@@ -320,6 +327,8 @@ void CSharedFilesWnd::ShowSelectedFilesSummary(bool bHistory /*=false*/)
 	while (pos)
 	{
 		int iItem = sharedfilesctrl.GetNextSelectedItem(pos);
+		if (!((CObject*)sharedfilesctrl.GetItemData(iItem))->IsKindOf(RUNTIME_CLASS(CKnownFile)))
+			continue;
 		const CKnownFile* pFile = (CKnownFile*)sharedfilesctrl.GetItemData(iItem);
 #else
 	POSITION pos;
@@ -335,10 +344,14 @@ void CSharedFilesWnd::ShowSelectedFilesSummary(bool bHistory /*=false*/)
 		const CKnownFile* pFile;
 		if(bHistory){
 			iItem = historylistctrl.GetNextSelectedItem(pos);
+			if (!((CObject*)historylistctrl.GetItemData(iItem))->IsKindOf(RUNTIME_CLASS(CKnownFile)))
+				continue;
 			pFile = (CKnownFile*)historylistctrl.GetItemData(iItem);
 		}
 		else{
 			iItem = sharedfilesctrl.GetNextSelectedItem(pos);
+			if (!((CObject*)sharedfilesctrl.GetItemData(iItem))->IsKindOf(RUNTIME_CLASS(CKnownFile)))
+				continue;
 			pFile = (CKnownFile*)sharedfilesctrl.GetItemData(iItem);
 		}
 #endif
@@ -407,7 +420,7 @@ void CSharedFilesWnd::ShowSelectedFilesSummary(bool bHistory /*=false*/)
 	}
 }
 
-void CSharedFilesWnd::OnNMClickSharedFiles(NMHDR *pNMHDR, LRESULT *pResult)
+void CSharedFilesWnd::OnNmClickSharedFiles(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	OnLvnItemActivateSharedFiles(pNMHDR, pResult);
 	*pResult = 0;
@@ -491,6 +504,7 @@ void CSharedFilesWnd::Localize()
 #endif
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	m_ctlSharedDirTree.Localize();
+	m_ctlFilter.ShowColumnText(true);
 	sharedfilesctrl.SetDirectoryFilter(NULL,true);
 
 	//MORPH START - Added, Downloaded History [Monki/Xman]
@@ -550,14 +564,14 @@ LRESULT CSharedFilesWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lPara
 {
 	switch (message)
 	{
-	case WM_PAINT:
-		if (m_wndSplitter)
-		{
+		case WM_PAINT:
+			if (m_wndSplitter)
+			{
 				CRect rcWnd;
 				GetWindowRect(rcWnd);
 				if (rcWnd.Width() > 0)
-			{
-				CRect rcSpl;
+				{
+					CRect rcSpl;
 					m_ctlSharedDirTree.GetWindowRect(rcSpl);
 					ScreenToClient(rcSpl);
 					rcSpl.left = rcSpl.right + SPLITTER_MARGIN;
@@ -568,40 +582,29 @@ LRESULT CSharedFilesWnd::DefWindowProc(UINT message, WPARAM wParam, LPARAM lPara
 					ScreenToClient(rcFilter);
 					rcSpl.top = rcFilter.top;
 					m_wndSplitter.MoveWindow(rcSpl, TRUE);
+				}
 			}
-		}
-		break;
-
-	case WM_NOTIFY:
-		if (wParam == IDC_SPLITTER_SHAREDFILES)
-		{ 
-			SPC_NMHDR* pHdr = (SPC_NMHDR*)lParam;
-			DoResize(pHdr->delta);
-		}
-		break;
-
-		case WM_WINDOWPOSCHANGED: {
-			CRect rcWnd;
-			GetWindowRect(rcWnd);
-			if (m_wndSplitter && rcWnd.Width() > 0)
-				Invalidate();
 			break;
-		}
-	case WM_SIZE:
-		if (m_wndSplitter)
-		{
+
+		case WM_NOTIFY:
+			if (wParam == IDC_SPLITTER_SHAREDFILES)
+			{ 
+				SPC_NMHDR* pHdr = (SPC_NMHDR*)lParam;
+				DoResize(pHdr->delta);
+			}
+			break;
+
+		case WM_SIZE:
+			if (m_wndSplitter)
+			{
 				CRect rcWnd;
 				GetWindowRect(rcWnd);
 				ScreenToClient(rcWnd);
 				m_wndSplitter.SetRange(rcWnd.left + SPLITTER_RANGE_MIN, rcWnd.left + SPLITTER_RANGE_MAX);
-		}
-		break;
+			}
+			break;
 	}
 	return CResizableDialog::DefWindowProc(message, wParam, lParam);
-}
-
-void CSharedFilesWnd::OnSize(UINT nType, int cx, int cy){
-	CResizableDialog::OnSize(nType, cx, cy);
 }
 
 LRESULT CSharedFilesWnd::OnChangeFilter(WPARAM wParam, LPARAM lParam)
@@ -653,6 +656,12 @@ HBRUSH CSharedFilesWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		return hbr;
 	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
 }
+
+void CSharedFilesWnd::SetToolTipsDelay(DWORD dwDelay)
+{
+	sharedfilesctrl.SetToolTipsDelay(dwDelay);
+}
+
 //MORPH START - Added, Downloaded History [Monki/Xman]
 #ifndef NO_HISTORY
 void CSharedFilesWnd::OnNMClickHistorylist(NMHDR *pNMHDR, LRESULT *pResult){

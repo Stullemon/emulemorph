@@ -23,6 +23,7 @@ public:
 protected:
 	CDirectoryTreeCtrl m_ShareSelector;
 	CListCtrl m_ctlUncPaths;
+	HICON m_icoBrowse;
 
 	void LoadSettings(void);
 	void FillUncList(void);
@@ -41,6 +42,7 @@ protected:
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnBnClickedSeltempdiradd();
+	afx_msg void OnDestroy();
 };
 // MOROPH START sharesubdir
 class CAddSharedDirDialog : public CDialog

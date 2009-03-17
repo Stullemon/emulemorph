@@ -41,7 +41,7 @@ enum ECols
 IMPLEMENT_DYNAMIC(CKadContactListCtrl, CMuleListCtrl)
 
 BEGIN_MESSAGE_MAP(CKadContactListCtrl, CMuleListCtrl)
-	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnClick)
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnClick)
 	ON_WM_DESTROY()
 	ON_WM_SYSCOLORCHANGE()
 END_MESSAGE_MAP()
@@ -49,7 +49,7 @@ END_MESSAGE_MAP()
 CKadContactListCtrl::CKadContactListCtrl()
 {
 	SetGeneralPurposeFind(true);
-	SetName(_T("ONContactListCtrl"));
+	SetSkinKey(L"KadContactsLv");
 }
 
 CKadContactListCtrl::~CKadContactListCtrl()
@@ -58,11 +58,12 @@ CKadContactListCtrl::~CKadContactListCtrl()
 
 void CKadContactListCtrl::Init()
 {
+	SetPrefsKey(_T("ONContactListCtrl"));
 	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
-	InsertColumn(colID,GetResString(IDS_ID),LVCFMT_LEFT,100);
-	InsertColumn(colType,GetResString(IDS_TYPE) ,LVCFMT_LEFT,50);
-	InsertColumn(colDistance,GetResString(IDS_KADDISTANCE),LVCFMT_LEFT,50);
+	InsertColumn(colID,		  GetResString(IDS_ID),				LVCFMT_LEFT, 16 + DFLT_HASH_COL_WIDTH);
+	InsertColumn(colType,	  GetResString(IDS_TYPE) ,			LVCFMT_LEFT,  50);
+	InsertColumn(colDistance, GetResString(IDS_KADDISTANCE),	LVCFMT_LEFT, 600);
 
 	SetAllIcons();
 	Localize();
@@ -89,8 +90,7 @@ void CKadContactListCtrl::OnSysColorChange()
 void CKadContactListCtrl::SetAllIcons()
 {
 	CImageList iml;
-	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
-	iml.SetBkColor(CLR_NONE);
+	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
 	iml.Add(CTempIconLoader(_T("Contact0")));
 	iml.Add(CTempIconLoader(_T("Contact1")));
 	iml.Add(CTempIconLoader(_T("Contact2")));
@@ -110,43 +110,36 @@ void CKadContactListCtrl::Localize()
 	hdi.mask = HDI_TEXT;
 	CString strRes;
 
-	for (int icol=0;icol< pHeaderCtrl->GetItemCount() ;icol++) 
+	for (int icol = 0; icol < pHeaderCtrl->GetItemCount(); icol++) 
 	{
 		switch (icol) 
 		{
 			case colID: strRes = GetResString(IDS_ID); break;
 			case colType: strRes = GetResString(IDS_TYPE); break;
 			case colDistance: strRes = GetResString(IDS_KADDISTANCE); break;
+			default: strRes.Empty(); break;
 		}
-	
 		hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 		pHeaderCtrl->SetItem(icol, &hdi);
 	}
-
-	int iItems = GetItemCount();
-	for (int i = 0; i < iItems; i++)
-		UpdateContact(i, (Kademlia::CContact*)GetItemData(i), true);
 }
 	
-void CKadContactListCtrl::UpdateContact(int iItem, const Kademlia::CContact* contact, bool bLocalize)
+void CKadContactListCtrl::UpdateContact(int iItem, const Kademlia::CContact *contact)
 {
 	CString id;
-	if (!bLocalize) // update the following fields only if really needed (it's quite expensive to always update them)
-	{
-		contact->GetClientID(&id);
-		SetItemText(iItem,colID,id);
+	contact->GetClientID(&id);
+	SetItemText(iItem, colID, id);
 
-		id.Format(_T("%i(%u)"),contact->GetType(), contact->GetVersion());
-		SetItemText(iItem,colType,id);
+	id.Format(_T("%i(%u)"), contact->GetType(), contact->GetVersion());
+	SetItemText(iItem, colType, id);
 
-		contact->GetDistance(&id);
-		SetItemText(iItem,colDistance,id);
+	contact->GetDistance(&id);
+	SetItemText(iItem, colDistance, id);
 
-		uint32 nImageShown = contact->GetType() > 4 ? 4 : contact->GetType();
-		if (nImageShown < 3 && !contact->IsIpVerified())
-			nImageShown = 5; // if we have an active contact, which is however not IP verified (and therefore not used), show this icon instead
-		SetItem(iItem,0,LVIF_IMAGE,0,nImageShown,0,0,0,0);
-	}
+	UINT nImageShown = contact->GetType() > 4 ? 4 : contact->GetType();
+	if (nImageShown < 3 && !contact->IsIpVerified())
+		nImageShown = 5; // if we have an active contact, which is however not IP verified (and therefore not used), show this icon instead
+	SetItem(iItem, 0, LVIF_IMAGE, 0, nImageShown, 0, 0, 0, 0);
 }
 
 void CKadContactListCtrl::UpdateKadContactCount()
@@ -156,13 +149,13 @@ void CKadContactListCtrl::UpdateKadContactCount()
 	theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
 }
 
-bool CKadContactListCtrl::ContactAdd(const Kademlia::CContact* contact)
+bool CKadContactListCtrl::ContactAdd(const Kademlia::CContact *contact)
 {
 	bool bResult = false;
 	try
 	{
 		ASSERT( contact != NULL );
-		int iItem = InsertItem(LVIF_TEXT|LVIF_PARAM,GetItemCount(),NULL,0,0,0,(LPARAM)contact);
+		int iItem = InsertItem(LVIF_TEXT | LVIF_PARAM, GetItemCount(), NULL, 0, 0, 0, (LPARAM)contact);
 		if (iItem >= 0)
 		{
 			bResult = true;
@@ -170,10 +163,10 @@ bool CKadContactListCtrl::ContactAdd(const Kademlia::CContact* contact)
 	//		ContactRef(contact);
 			// If it still doesn't work under Win98, uncomment the '!afxData.bWin95' term
 			/* no win95 vs2008
-			if (!aafxIsWin95 && iItem >= 0)
+			if (!afxIsWin95() && iItem >= 0)
 			*/
 			if (iItem >= 0)
-            //end no win98
+			//end no win98
 				UpdateContact(iItem, contact);
 			UpdateKadContactCount();
 		}
@@ -182,7 +175,7 @@ bool CKadContactListCtrl::ContactAdd(const Kademlia::CContact* contact)
 	return bResult;
 }
 
-void CKadContactListCtrl::ContactRem(const Kademlia::CContact* contact)
+void CKadContactListCtrl::ContactRem(const Kademlia::CContact *contact)
 {
 	try
 	{
@@ -200,7 +193,7 @@ void CKadContactListCtrl::ContactRem(const Kademlia::CContact* contact)
 	catch(...){ASSERT(0);}
 }
 
-void CKadContactListCtrl::ContactRef(const Kademlia::CContact* contact)
+void CKadContactListCtrl::ContactRef(const Kademlia::CContact *contact)
 {
 	try
 	{
@@ -221,9 +214,9 @@ BOOL CKadContactListCtrl::OnCommand(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	return TRUE;
 }
 
-void CKadContactListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
+void CKadContactListCtrl::OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	NM_LISTVIEW* pNMListView = (NM_LISTVIEW*)pNMHDR;
+	NMLISTVIEW *pNMListView = (NMLISTVIEW *)pNMHDR;
 
 	// Determine ascending based on whether already sorted on this column
 	int iSortItem = GetSortItem();
@@ -243,16 +236,15 @@ void CKadContactListCtrl::OnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
 
 int CKadContactListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	Kademlia::CContact* item1 = (Kademlia::CContact*)lParam1;
-	Kademlia::CContact* item2 = (Kademlia::CContact*)lParam2; 
-	if((item1 == NULL) || (item2 == NULL))
+	const Kademlia::CContact *item1 = (Kademlia::CContact *)lParam1;
+	const Kademlia::CContact *item2 = (Kademlia::CContact *)lParam2; 
+	if (item1 == NULL || item2 == NULL)
 		return 0;
 
 	int iResult;
-	switch(LOWORD(lParamSort))
+	switch (LOWORD(lParamSort))
 	{
-		case colID:
-		{
+		case colID: {
 			Kademlia::CUInt128 i1;
 			Kademlia::CUInt128 i2;
 			item1->GetClientID(&i1);
@@ -260,19 +252,21 @@ int CKadContactListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamS
 			iResult = i1.CompareTo(i2);
 			break;
 		}
+
 		case colType:
 			iResult = item1->GetType() - item2->GetType();
 			if (iResult == 0)
 				iResult = item1->GetVersion() - item2->GetVersion();
 			break;
-		case colDistance:
-		{
+
+		case colDistance: {
 			Kademlia::CUInt128 distance1, distance2;
 			item1->GetDistance(&distance1);
 			item2->GetDistance(&distance2);
 			iResult = distance1.CompareTo(distance2);
 			break;
 		}
+
 		default:
 			return 0;
 	}

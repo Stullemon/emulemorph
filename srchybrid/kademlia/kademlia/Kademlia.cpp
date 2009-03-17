@@ -46,6 +46,7 @@ there client on the eMule forum..
 #include "../../StringConversion.h"
 #include "../utils/KadUDPKey.h"
 #include "../utils/KadClientSearcher.h"
+#include "../kademlia/tag.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -62,6 +63,7 @@ time_t		CKademlia::m_tNextSelfLookup;
 time_t		CKademlia::m_tStatusUpdate;
 time_t		CKademlia::m_tBigTimer;
 time_t		CKademlia::m_tNextFirewallCheck;
+time_t		CKademlia::m_tNextUPnPCheck;
 time_t		CKademlia::m_tNextFindBuddy;
 time_t		CKademlia::m_tBootstrap;
 time_t		CKademlia::m_tConsolidate;
@@ -108,6 +110,7 @@ void CKademlia::Start(CPrefs *pPrefs)
 		m_tBigTimer = time(NULL);
 		// First Firewall check is done on connect, init next check.
 		m_tNextFirewallCheck = time(NULL) + (HR2S(1));
+		m_tNextUPnPCheck = m_tNextFirewallCheck - MIN2S(1); 
 		// Find a buddy after the first 5mins of starting the client.
 		// We wait just in case it takes a bit for the client to determine firewall status..
 		m_tNextFindBuddy = time(NULL) + (MIN2S(5));
@@ -202,6 +205,14 @@ void CKademlia::Process()
 	}
 	if( m_tNextFirewallCheck <= tNow)
 		RecheckFirewalled();
+	if (m_tNextUPnPCheck != 0 && m_tNextUPnPCheck <= tNow)
+	{
+#ifdef USE_OFFICIAL_UPNP
+		theApp.emuledlg->RefreshUPnP();
+#endif
+		m_tNextUPnPCheck = 0; // will be reset on firewallcheck
+	}
+
 	if (m_tNextSelfLookup <= tNow)
 	{
 		CSearchManager::FindNode(m_pInstance->m_pPrefs->GetKadID(), true);
@@ -212,7 +223,7 @@ void CKademlia::Process()
 		m_pInstance->m_pPrefs->SetFindBuddy();
 		m_tNextFindBuddy = MIN2S(20) + tNow;
 	}
-	if (m_tExternPortLookup <= tNow && CUDPFirewallTester::IsFWCheckUDPRunning() && GetPrefs()->GetExternalKadPort() == 0){
+	if (m_tExternPortLookup <= tNow && CUDPFirewallTester::IsFWCheckUDPRunning() && GetPrefs()->FindExternKadPort(false)){
 		// if our UDP firewallcheck is running and we don't know our external port, we send a request every 15 seconds
 		CContact* pContact = GetRoutingZone()->GetRandomContact(3, KADEMLIA_VERSION6_49aBETA);
 		if (pContact != NULL){
@@ -332,7 +343,7 @@ uint32 CKademlia::GetKademliaUsers(bool bNewMethod)
 		if (bNewMethod)
 			return CalculateKadUsersNew();
 		else
-		return m_pInstance->m_pPrefs->GetKademliaUsers();
+			return m_pInstance->m_pPrefs->GetKademliaUsers();
 	}
 	return 0;
 }
@@ -397,7 +408,7 @@ void CKademlia::Bootstrap(LPCTSTR szHost, uint16 uPort, bool bKad2)
 	if( m_pInstance && m_pInstance->m_pUDPListener && !IsConnected() && time(NULL) - m_tBootstrap > 10 ){
 		m_tBootstrap = time(NULL);
 		m_pInstance->m_pUDPListener->Bootstrap( szHost, uPort, bKad2 );
-}
+	}
 }
 
 void CKademlia::Bootstrap(uint32 uIP, uint16 uPort, bool bKad2)
@@ -405,7 +416,7 @@ void CKademlia::Bootstrap(uint32 uIP, uint16 uPort, bool bKad2)
 	if( m_pInstance && m_pInstance->m_pUDPListener && !IsConnected() && time(NULL) - m_tBootstrap > 10 ){
 		m_tBootstrap = time(NULL);
 		m_pInstance->m_pUDPListener->Bootstrap( uIP, uPort, bKad2 );
-}
+	}
 }
 
 void CKademlia::RecheckFirewalled()
@@ -424,6 +435,7 @@ void CKademlia::RecheckFirewalled()
 		// Delay the next buddy search to at least 5 minutes after our firewallcheck so we are sure to be still firewalled
 		m_tNextFindBuddy = (m_tNextFindBuddy < MIN2S(5) + tNow) ?  (MIN2S(5) + tNow) : m_tNextFindBuddy;
 		m_tNextFirewallCheck = HR2S(1) + tNow;
+		m_tNextUPnPCheck = m_tNextFirewallCheck - MIN2S(1);
 	}
 }
 
@@ -523,12 +535,12 @@ void KadGetKeywordHash(const CStringA& rstrKeywordA, Kademlia::CUInt128* pKadID)
 	pKadID->SetValueBE(md4.GetHash());
 }
 
-CStringA KadGetKeywordBytes(const CStringW& rstrKeywordW)
+CStringA KadGetKeywordBytes(const Kademlia::CKadTagValueString& rstrKeywordW)
 {
 	return CStringA(wc2utf8(rstrKeywordW));
 }
 
-void KadGetKeywordHash(const CStringW& rstrKeywordW, Kademlia::CUInt128* pKadID)
+void KadGetKeywordHash(const Kademlia::CKadTagValueString& rstrKeywordW, Kademlia::CUInt128* pKadID)
 {
 	KadGetKeywordHash(KadGetKeywordBytes(rstrKeywordW), pKadID);
 }

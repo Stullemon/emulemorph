@@ -58,8 +58,6 @@ CIrcChannelTabCtrl::CIrcChannelTabCtrl()
 	m_pChanList = NULL;
 	m_pParent = NULL;
 	m_bCloseable = true;
-	memset(&m_iiCloseButton, 0, sizeof m_iiCloseButton);
-	m_ptCtxMenu.SetPoint(-1, -1);
 }
 
 CIrcChannelTabCtrl::~CIrcChannelTabCtrl()

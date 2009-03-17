@@ -47,7 +47,6 @@ void CServerConnect::TryAnotherConnectionRequest()
 {
 	if (connectionattemps.GetCount() < (thePrefs.IsSafeServerConnectEnabled() ? 1 : 2))
 	{
-
 		CServer* next_server = theApp.serverlist->GetNextServer(m_bTryObfuscated);
 		if (next_server == NULL)
 		{
@@ -162,7 +161,7 @@ void CServerConnect::ConnectToServer(CServer* server, bool multiconnect, bool bN
 	singleconnecting = !multiconnect;
 	theApp.emuledlg->ShowConnectionState();
 
-	CServerSocket* newsocket = new CServerSocket(this);
+	CServerSocket* newsocket = new CServerSocket(this, !multiconnect);
 	m_lstOpenSockets.AddTail((void*&)newsocket);
 	newsocket->Create(0, SOCK_STREAM, FD_READ | FD_WRITE | FD_CLOSE | FD_CONNECT, thePrefs.GetBindAddrA());
 	newsocket->ConnectTo(server, bNoCrypt);
@@ -233,7 +232,7 @@ void CServerConnect::ConnectionEstablished(CServerSocket* sender)
 		uint32 dwCryptFlags = 0;
 		if (thePrefs.IsClientCryptLayerSupported())
 			dwCryptFlags |= SRVCAP_SUPPORTCRYPT;
-		if (thePrefs.IsClientCryptLayerRequested() )  
+		if (thePrefs.IsClientCryptLayerRequested())
 			dwCryptFlags |= SRVCAP_REQUESTCRYPT;
 		if (thePrefs.IsClientCryptLayerRequired())
 			dwCryptFlags |= SRVCAP_REQUIRECRYPT;

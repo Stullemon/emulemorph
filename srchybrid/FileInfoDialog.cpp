@@ -98,16 +98,16 @@ public:
 	{
 		m_hWndOwner = hWnd;
 		for (int i = 0; i < paFiles->GetSize(); i++)
-			m_aFiles.Add(STATIC_DOWNCAST(CKnownFile, (*paFiles)[i]));
+			m_aFiles.Add(STATIC_DOWNCAST(CShareableFile, (*paFiles)[i]));
 		m_hFont = hFont;
 	}
 
 private:
-	bool GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool bSingleFile);
+	bool GetMediaInfo(HWND hWndOwner, const CShareableFile* pFile, SMediaInfo* mi, bool bSingleFile);
 	void WarnAboutWrongFileExtension(SMediaInfo* mi, LPCTSTR pszFileName, LPCTSTR pszExtensions);
 
 	HWND m_hWndOwner;
-	CSimpleArray<const CKnownFile*> m_aFiles;
+	CSimpleArray<const CShareableFile*> m_aFiles;
 	HFONT m_hFont;
 };
 
@@ -151,8 +151,42 @@ public:
 		{
 			m_bInitialized = TRUE;
 
-			// morph use prefs  strPath = theApp.GetProfileString(_T("eMule"), _T("MediaInfo_MediaInfoDllPath"), _T("MEDIAINFO.DLL"));
-			m_hLib = LoadLibrary(CPreferences::sMediaInfo_MediaInfoDllPath); // morph, use advanced prefs. 
+			// morph use prefs
+			/*
+			CString strPath = theApp.GetProfileString(_T("eMule"), _T("MediaInfo_MediaInfoDllPath"), _T("MEDIAINFO.DLL"));
+			*/
+			CString strPath = CPreferences::sMediaInfo_MediaInfoDllPath;
+			// morph use prefs
+			if (strPath == _T("<noload>"))
+				return false;
+			m_hLib = LoadLibrary(strPath);
+			if (m_hLib == NULL)
+			{
+				CRegKey key;
+				if (key.Open(HKEY_CURRENT_USER, _T("Software\\MediaInfo"), KEY_READ) == ERROR_SUCCESS)
+				{
+					TCHAR szPath[MAX_PATH];
+					ULONG ulChars = _countof(szPath);
+					if (key.QueryStringValue(_T("Path"), szPath, &ulChars) == ERROR_SUCCESS)
+					{
+						LPTSTR pszResult = PathCombine(strPath.GetBuffer(MAX_PATH), szPath, _T("MEDIAINFO.DLL"));
+						strPath.ReleaseBuffer();
+						if (pszResult)
+							m_hLib = LoadLibrary(strPath);
+					}
+				}
+			}
+			if (m_hLib == NULL)
+			{
+				CString strProgramFiles = ShellGetFolderPath(CSIDL_PROGRAM_FILES);
+				if (!strProgramFiles.IsEmpty())
+				{
+					LPTSTR pszResult = PathCombine(strPath.GetBuffer(MAX_PATH), strProgramFiles, _T("MediaInfo\\MEDIAINFO.DLL"));
+					strPath.ReleaseBuffer();
+					if (pszResult)
+						m_hLib = LoadLibrary(strPath);
+				}
+			}
 			if (m_hLib != NULL)
 			{
 				ULONGLONG ullVersion = GetModuleVersion(m_hLib);
@@ -240,10 +274,8 @@ public:
 
 	void* Open(LPCTSTR File)
 	{
-		if (m_pfnMediaInfo4_Open) {
-			USES_CONVERSION;
-			return (*m_pfnMediaInfo4_Open)(T2A(File));
-		}
+		if (m_pfnMediaInfo4_Open)
+			return (*m_pfnMediaInfo4_Open)(CT2A(File));
 		else if (m_pfnMediaInfo5_Open)
 			return (*m_pfnMediaInfo5_Open)(File);
 		else if (m_pfnMediaInfo_New) {
@@ -267,10 +299,8 @@ public:
 
 	CString Get(void* Handle, stream_t_C StreamKind, int StreamNumber, LPCTSTR Parameter, info_t_C KindOfInfo, info_t_C KindOfSearch)
 	{
-		if (m_pfnMediaInfo4_Get) {
-			USES_CONVERSION;
-			return CString((*m_pfnMediaInfo4_Get)(Handle, StreamKind, StreamNumber, T2A(Parameter), KindOfInfo, KindOfSearch));
-		}
+		if (m_pfnMediaInfo4_Get)
+			return CString((*m_pfnMediaInfo4_Get)(Handle, StreamKind, StreamNumber, CT2A(Parameter), KindOfInfo, KindOfSearch));
 		else if (m_pfnMediaInfo_Get) {
 			CString strNewParameter(Parameter);
 			if (m_ullVersion >= MAKEDLLVERULL(0, 7, 1, 0)) {
@@ -369,9 +399,39 @@ BOOL CFileInfoDialog::OnInitDialog()
 	ReplaceRichEditCtrl(GetDlgItem(IDC_FULL_FILE_INFO), this, GetDlgItem(IDC_FD_XI1)->GetFont());
 	CResizablePage::OnInitDialog();
 	InitWindowStyles(this);
+
+	// General Group
+	AddAnchor(IDC_GENERAL, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_FILESIZE, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_LENGTH, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_FORMAT, TOP_LEFT, TOP_RIGHT);
+
+	// Video Group
+	AddAnchor(IDC_FD_XI3, TOP_LEFT, TOP_CENTER);
+	AddAnchor(IDC_VCODEC, TOP_LEFT, TOP_CENTER);
+	AddAnchor(IDC_VBITRATE, TOP_LEFT, TOP_CENTER);
+	AddAnchor(IDC_VWIDTH, TOP_LEFT, TOP_CENTER);
+	AddAnchor(IDC_VASPECT, TOP_LEFT, TOP_CENTER);
+	AddAnchor(IDC_VFPS, TOP_LEFT, TOP_CENTER);
+
+	// Audio Group - Labels
+	AddAnchor(IDC_FD_XI6, TOP_CENTER, TOP_CENTER);
+	AddAnchor(IDC_FD_XI8, TOP_CENTER, TOP_CENTER);
+	AddAnchor(IDC_FD_XI10, TOP_CENTER, TOP_CENTER);
+	AddAnchor(IDC_FD_XI12, TOP_CENTER, TOP_CENTER);
+	AddAnchor(IDC_STATIC_LANGUAGE, TOP_CENTER, TOP_CENTER);
+
+	// Audio Group - Frame and Values
+	AddAnchor(IDC_FD_XI4, TOP_CENTER, TOP_RIGHT);
+	AddAnchor(IDC_ACODEC, TOP_CENTER, TOP_RIGHT);
+	AddAnchor(IDC_ABITRATE, TOP_CENTER, TOP_RIGHT);
+	AddAnchor(IDC_ACHANNEL, TOP_CENTER, TOP_RIGHT);
+	AddAnchor(IDC_ASAMPLERATE, TOP_CENTER, TOP_RIGHT);
+	AddAnchor(IDC_ALANGUAGE, TOP_CENTER, TOP_RIGHT);
+
 	AddAnchor(IDC_FULL_FILE_INFO, TOP_LEFT, BOTTOM_RIGHT);
    /* morph vs2008 no win98
-	m_fi.LimitText(afxIsWin95 ? 0xFFFF : 0x7FFFFFFF);
+	m_fi.LimitText(afxIsWin95() ? 0xFFFF : 0x7FFFFFFF);
     */
 		m_fi.LimitText(0x7FFFFFFF);
     // end morph
@@ -461,7 +521,7 @@ int CGetMediaInfoThread::Run()
 		CRichEditStream re;
 		re.Attach(hwndRE);
 		/* MORPH no win95
-		re.LimitText(afxIsWin95 ? 0xFFFF : 0x7FFFFFFF);
+		re.LimitText(afxIsWin95() ? 0xFFFF : 0x7FFFFFFF);
 		*/
 		re.LimitText( 0x7FFFFFFF);
 		// MORPH END
@@ -866,14 +926,14 @@ wchar_t *ID3_GetStringW(const ID3_Frame *frame, ID3_FieldID fldName, size_t nInd
 	return NULL;
 }
 
-bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, SMediaInfo* mi, bool bSingleFile)
+bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFile, SMediaInfo* mi, bool bSingleFile)
 {
 	if (!pFile)
 		return false;
 
 	//MORPH START - Added, Downloaded History [Monki/Xman]
 #ifndef NO_HISTORY
-	if(!pFile->IsPartFile() && !theApp.sharedfiles->IsFilePtrInList(pFile)){
+	if(!pFile->IsKindOf(RUNTIME_CLASS(CKnownFile)) || !pFile->IsPartFile() && !theApp.sharedfiles->IsFilePtrInList(((CKnownFile*)pFile))){
 		return false;
 	}
 #endif
@@ -907,11 +967,6 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 		//
 		//	- Most (if not all) other code will also not work without the beginning of the file available.
 		if (!((CPartFile*)pFile)->IsComplete(0, 16*1024, true))
-			return bFoundHeader || !mi->strMimeType.IsEmpty();
-	}
-	else
-	{
-		if (pFile->GetFileSize() < (uint64)16*1024)
 			return bFoundHeader || !mi->strMimeType.IsEmpty();
 	}
 
@@ -972,6 +1027,36 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 		return false;
 
 	////////////////////////////////////////////////////////////////////////////
+	// Check for WM file
+	//
+#ifdef HAVE_WMSDK_H
+	bool bIsWM = false;
+	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_WM"), 1))
+	{
+		try
+		{
+			if (GetWMHeaders(pFile->GetFilePath(), mi, bIsWM, true))
+			{
+				if (bIsWM && (   _tcscmp(szExt, _T(".asf")) != 0 
+							  && _tcscmp(szExt, _T(".wm")) != 0 
+							  && _tcscmp(szExt, _T(".wma")) != 0 
+							  && _tcscmp(szExt, _T(".wmv")) != 0 
+							  && _tcscmp(szExt, _T(".dvr-ms")) != 0))
+					WarnAboutWrongFileExtension(mi, pFile->GetFileName(), _T("asf wm wma wmv dvr-ms"));
+				return true;
+			}
+		}
+		catch(...)
+		{
+			ASSERT(0);
+		}
+	}
+
+	if (!IsWindow(hWndOwner))
+		return false;
+#endif//HAVE_WMSDK_H
+
+	////////////////////////////////////////////////////////////////////////////
 	// Check for MPEG Audio file
 	//
 	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_ID3LIB"), 1) &&
@@ -1008,15 +1093,15 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				{
 				case MPEGVERSION_2_5:
 					mi->strAudioFormat = _T("MPEG-2.5,");
-					mi->audio.wFormatTag = 0x0055;
+					mi->audio.wFormatTag = WAVE_FORMAT_MPEGLAYER3;
 					break;
 				case MPEGVERSION_2:
 					mi->strAudioFormat = _T("MPEG-2,");
-					mi->audio.wFormatTag = 0x0055;
+					mi->audio.wFormatTag = WAVE_FORMAT_MPEGLAYER3;
 					break;
 				case MPEGVERSION_1:
 					mi->strAudioFormat = _T("MPEG-1,");
-					mi->audio.wFormatTag = 0x0055;
+					mi->audio.wFormatTag = WAVE_FORMAT_MPEGLAYER3;
 					break;
 				default:
 					break;
@@ -1516,6 +1601,8 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 						if (strComments.IsEmpty())
 							strComments = theMediaInfoDLL.Get(Handle, Stream_General, 0, _T("Comment"), Info_Text, Info_Name);
 						CString strDate = theMediaInfoDLL.Get(Handle, Stream_General, 0, _T("Date"), Info_Text, Info_Name);
+						if (strDate.IsEmpty())
+							strDate = theMediaInfoDLL.Get(Handle, Stream_General, 0, _T("Encoded_Date"), Info_Text, Info_Name);
 						struct tm tmUtc = {0};
 						if (_stscanf(strDate, _T("UTC %u-%u-%u %u:%u:%u"), &tmUtc.tm_year, &tmUtc.tm_mon, &tmUtc.tm_mday, &tmUtc.tm_hour, &tmUtc.tm_min, &tmUtc.tm_sec) == 6)
 						{
@@ -1538,6 +1625,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 									strDate = CTime(tUtc).Format(_T("%c"));
 							}
 						}
+
 						if (!strTitle.IsEmpty() || !strAuthor.IsEmpty() || !strCopyright.IsEmpty() || !strComments.IsEmpty() || !strDate.IsEmpty())
 						{
 							if (!mi->strInfo.IsEmpty())
@@ -1924,8 +2012,9 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 		//
 		// Avoid processing of some file types which are known to crash due to bugged DirectShow filters.
 #ifdef HAVE_QEDIT_H
-		if (thePrefs.GetInspectAllFileTypes() 
-			|| (_tcscmp(szExt, _T(".ogm"))!=0 && _tcscmp(szExt, _T(".ogg"))!=0 && _tcscmp(szExt, _T(".mkv"))!=0))
+		if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_MediaDet"), 1)
+			&& (   thePrefs.GetInspectAllFileTypes() 
+			    || (_tcscmp(szExt, _T(".ogm"))!=0 && _tcscmp(szExt, _T(".ogg"))!=0 && _tcscmp(szExt, _T(".mkv"))!=0)))
 		{
 			try
 			{
@@ -1933,8 +2022,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 				HRESULT hr = pMediaDet.CoCreateInstance(__uuidof(MediaDet));
 				if (SUCCEEDED(hr))
 				{
-					USES_CONVERSION;
-					if (SUCCEEDED(hr = pMediaDet->put_Filename(CComBSTR(T2CW(pFile->GetFilePath())))))
+					if (SUCCEEDED(hr = pMediaDet->put_Filename(CComBSTR(pFile->GetFilePath()))))
 					{
 						long lStreams;
 						if (SUCCEEDED(hr = pMediaDet->get_OutputStreams(&lStreams)))
@@ -1978,7 +2066,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 													}
 													else
 													{
-														mi->strInfo << _T("   ") << GetResString(IDS_CODEC) << _T(":\t") << (LPCTSTR)GetVideoFormatName(pVIH->bmiHeader.biCompression) << _T("\n");
+														mi->strInfo << _T("   ") << GetResString(IDS_CODEC) << _T(":\t") << GetVideoFormatName(pVIH->bmiHeader.biCompression) << _T("\n");
 														mi->strInfo << _T("   ") << GetResString(IDS_WIDTH) << _T(" x ") << GetResString(IDS_HEIGHT) << _T(":\t") << abs(pVIH->bmiHeader.biWidth) << _T(" x ") << abs(pVIH->bmiHeader.biHeight) << _T("\n");
 														// do not use that 'dwBitRate', whatever this number is, it's not
 														// the bitrate of the *encoded* video stream. seems to be the bitrate
@@ -2052,11 +2140,11 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 													if (mi->iAudioStreams == 1)
 													{
 														memcpy(&mi->audio, wfx, sizeof mi->audio);
-														mi->strAudioFormat = GetWaveFormatTagName(wfx->wFormatTag);
+														mi->strAudioFormat = GetAudioFormatName(wfx->wFormatTag);
 													}
 													else
 													{
-														mi->strInfo << _T("   ") << GetResString(IDS_CODEC) << _T(":\t") << GetWaveFormatTagName(wfx->wFormatTag) << _T("\n");
+														mi->strInfo << _T("   ") << GetResString(IDS_CODEC) << _T(":\t") << GetAudioFormatName(wfx->wFormatTag) << _T("\n");
 
 														if (wfx->nAvgBytesPerSec)
 														{
@@ -2162,9 +2250,9 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CKnownFile* pFile, 
 
 	if (!bFoundHeader && bGiveMediaInfoLibHint)
 	{
-		TCHAR szBuff[_MAX_PATH];
-		DWORD dwRet = ::GetModuleFileName(theApp.m_hInstance, szBuff, _MAX_PATH);
-		if (dwRet == 0 || dwRet == _MAX_PATH)
+		TCHAR szBuff[MAX_PATH];
+		DWORD dwModPathLen = ::GetModuleFileName(theApp.m_hInstance, szBuff, _countof(szBuff));
+		if (dwModPathLen == 0 || dwModPathLen == _countof(szBuff))
 			szBuff[0] = _T('\0');
 		CString strInstFolder(szBuff);
 		PathRemoveFileSpec(strInstFolder.GetBuffer(strInstFolder.GetLength()));

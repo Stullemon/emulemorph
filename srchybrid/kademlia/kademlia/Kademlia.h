@@ -87,6 +87,7 @@ namespace Kademlia
 			static time_t m_tNextSearchJumpStart;
 			static time_t m_tNextSelfLookup;
 			static time_t m_tNextFirewallCheck;
+			static time_t m_tNextUPnPCheck;
 			static time_t m_tNextFindBuddy;
 			static time_t m_tStatusUpdate;
 			static time_t m_tBigTimer;

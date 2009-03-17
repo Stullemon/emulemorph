@@ -11,10 +11,11 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-extern CStringArray _astrParserErrors;
+#define YY_	_T
+
+extern CStringArray g_astrParserErrors;
 
 void ParsedSearchExpression(const CSearchExpr* pexpr);
-int yyerror(const char* errstr);
 int yyerror(LPCTSTR errstr);
 int yyerrorf(LPCTSTR errstr, ...);
 
@@ -37,7 +38,7 @@ int yyerrorf(LPCTSTR errstr, ...);
 
 %token TOK_STRING TOK_NUMBER TOK_SIZE TOK_TYPE TOK_EXT TOK_SOURCES TOK_COMPLETE TOK_BITRATE TOK_LENGTH TOK_CODEC TOK_RATING TOK_TITLE TOK_ALBUM TOK_ARTIST TOK_TYPEVAL
 %token TOK_AND TOK_OR TOK_NOT
-%token TOK_OPR_EQ TOK_OPR_LT TOK_OPR_LE TOK_OPR_GT TOK_OPR_GE TOK_OPR_NE TOK_OPR_NE
+%token TOK_OPR_EQ TOK_OPR_LT TOK_OPR_LE TOK_OPR_GT TOK_OPR_GE TOK_OPR_NE
 %token TOK_ED2K_LINK
 %token TOK_EOF
 
@@ -331,7 +332,7 @@ int_opr			: TOK_OPR_EQ
 
 %%
 
-int yyerror(const char* errstr)
+int yyerror(LPCTSTR errstr)
 {
 	// Errors created by yacc generated code
 	//yyerror ("syntax error: cannot back up");
@@ -339,51 +340,32 @@ int yyerror(const char* errstr)
 	//yyerror ("syntax error");
 	//yyerror ("parser stack overflow");
 
-	if (strcmp(errstr, "syntax error") == 0) {
-		// If there is already a error in the list, don't add the "syntax error" string.
-		// This is needed to not 'overwrite' any errors which were placed by 'lex' there,
-		// because we will read only the last error eventually.
-		if (_astrParserErrors.GetCount() > 0)
-			return EXIT_FAILURE;
-	}
-	else {
-		if (_astrParserErrors.GetCount() > 0 && _astrParserErrors[_astrParserErrors.GetCount() - 1] != _T("syntax error"))
-			return EXIT_FAILURE;
-	}
-
-	USES_CONVERSION;
-	_astrParserErrors.Add(A2CT(errstr));
-	return EXIT_FAILURE;
-}
-
-int yyerror(LPCTSTR errstr)
-{
 	if (_tcscmp(errstr, _T("syntax error")) == 0) {
-		// If there is already a error in the list, don't add the "syntax error" string.
+		// If there is already an error in the list, don't add the "syntax error" string.
 		// This is needed to not 'overwrite' any errors which were placed by 'lex' there,
 		// because we will read only the last error eventually.
-		if (_astrParserErrors.GetCount() > 0)
+		if (g_astrParserErrors.GetCount() > 0)
 			return EXIT_FAILURE;
 	}
 	else {
-		if (_astrParserErrors.GetCount() > 0 && _astrParserErrors[_astrParserErrors.GetCount() - 1] != _T("syntax error"))
+		if (g_astrParserErrors.GetCount() > 0 && g_astrParserErrors[g_astrParserErrors.GetCount() - 1] != _T("syntax error"))
 			return EXIT_FAILURE;
 	}
-	_astrParserErrors.Add(errstr);
+	g_astrParserErrors.Add(errstr);
 	return EXIT_FAILURE;
 }
 
 int yyerrorf(LPCTSTR errstr, ...)
 {
-	// If there is already a error in the list, don't add the "syntax error" string.
+	// If there is already an error in the list, don't add the "syntax error" string.
 	// This is needed to not 'overwrite' any errors which were placed by 'lex' there,
 	// because we will read only the last error eventually.
 	if (_tcscmp(errstr, _T("syntax error")) == 0) {
-		if (_astrParserErrors.GetCount() > 0)
+		if (g_astrParserErrors.GetCount() > 0)
 			return EXIT_FAILURE;
 	}
 	else {
-		if (_astrParserErrors.GetCount() > 0 && _astrParserErrors[_astrParserErrors.GetCount() - 1] != _T("syntax error"))
+		if (g_astrParserErrors.GetCount() > 0 && g_astrParserErrors[g_astrParserErrors.GetCount() - 1] != _T("syntax error"))
 			return EXIT_FAILURE;
 	}
 
@@ -391,7 +373,7 @@ int yyerrorf(LPCTSTR errstr, ...)
 	va_start(argp, errstr);
 	CString strError;
 	strError.FormatV(errstr, argp);
-	_astrParserErrors.Add(strError);
+	g_astrParserErrors.Add(strError);
 	va_end(argp);
 	return EXIT_FAILURE;
 }

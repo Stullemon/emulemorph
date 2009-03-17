@@ -46,8 +46,6 @@ protected:
 
 	uint32	m_timer;
 	int		m_aiColWidths[2];
-	int		m_sortindex;
-	bool	m_sortorder;
 
 	void Localize();
 	void RefreshData();
@@ -65,13 +63,13 @@ protected:
 	static int CALLBACK CompareListNameItems(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnBnClickedButtonStrip();
-	afx_msg void TakeOver();
-	afx_msg void OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMDblclkList(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMRclickList(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnTimer(UINT nIDEvent);
-	afx_msg void OnDestroy();
 	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
+	afx_msg void OnBnClickedButtonStrip();
+	afx_msg void OnDestroy();
 	afx_msg void OnEnChangeFilename();
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmDblClkList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmRClickList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnTimer(UINT nIDEvent);
+	afx_msg void TakeOver();
 };

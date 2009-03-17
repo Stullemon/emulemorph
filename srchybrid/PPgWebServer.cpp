@@ -53,7 +53,9 @@ BEGIN_MESSAGE_MAP(CPPgWebServer, CPropertyPage)
 	ON_BN_CLICKED(IDC_TMPLBROWSE, OnBnClickedTmplbrowse)
 	ON_BN_CLICKED(IDC_WS_GZIP, OnDataChange)
 	ON_BN_CLICKED(IDC_WS_ALLOWHILEVFUNC, OnDataChange)
+	ON_BN_CLICKED(IDC_WSUPNP, OnDataChange)
 	ON_WM_HELPINFO()
+	ON_WM_DESTROY()
 	// MORPH start tabbed option [leuk_he]
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_WEBSERVER1, OnTcnSelchangeTab)
 	// MORPH end tabbed option [leuk_he]
@@ -68,6 +70,7 @@ CPPgWebServer::CPPgWebServer()
 // MORPH END leuk_he tooltipped
 {
 	bCreated = false;
+	m_icoBrowse = NULL;
 	// MORPH start tabbed option [leuk_he]
 	m_imageList.DeleteImageList();
 	m_imageList.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 14+1, 0);
@@ -91,6 +94,9 @@ BOOL CPPgWebServer::OnInitDialog()
 {
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
+
+	AddBuddyButton(GetDlgItem(IDC_TMPLPATH)->m_hWnd, ::GetDlgItem(m_hWnd, IDC_TMPLBROWSE));
+	InitAttachedBrowseButton(::GetDlgItem(m_hWnd, IDC_TMPLBROWSE), m_icoBrowse);
 
 	((CEdit*)GetDlgItem(IDC_WSPASS))->SetLimitText(12);
 	((CEdit*)GetDlgItem(IDC_WSPORT))->SetLimitText(6);
@@ -159,6 +165,16 @@ void CPPgWebServer::LoadSettings(void)
 	CheckDlgButton(IDC_WS_GZIP,(thePrefs.GetWebUseGzip())?1:0 );
 	CheckDlgButton(IDC_WS_ALLOWHILEVFUNC,(thePrefs.GetWebAdminAllowedHiLevFunc())?1:0 );
 	
+	//MORPH START - UPnP
+#ifdef USE_OFFICIAL_UPNP
+	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPEnabled() && thePrefs.GetWSIsEnabled());
+	CheckDlgButton(IDC_WSUPNP, (thePrefs.IsUPnPEnabled() && thePrefs.m_bWebUseUPnP) ? TRUE : FALSE);
+#else
+	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPNat() && thePrefs.GetWSIsEnabled());
+	CheckDlgButton(IDC_WSUPNP, (thePrefs.IsUPnPNat() && thePrefs.GetUPnPNatWeb()) ? TRUE : FALSE);
+#endif
+	//MORPH END   - UPnP
+	
 	OnEnChangeMMEnabled();
 
 	SetModified(FALSE);	// FoRcHa
@@ -223,6 +239,26 @@ BOOL CPPgWebServer::OnApply()
 		if(sBuf != HIDDEN_PASSWORD)
 			thePrefs.SetMMPass(sBuf);
 
+	//MORPH START - UPnP
+#ifdef USE_OFFICIAL_UPNP
+		if (IsDlgButtonChecked(IDC_WSUPNP))
+		{
+			ASSERT( thePrefs.IsUPnPEnabled() );
+			if (!thePrefs.m_bWebUseUPnP && thePrefs.GetWSIsEnabled() && theApp.m_pUPnPFinder != NULL) // add the port to existing mapping without having eMule restarting (if all conditions are met)
+				theApp.m_pUPnPFinder->GetImplementation()->LateEnableWebServerPort(thePrefs.GetWSPort());
+			thePrefs.m_bWebUseUPnP = true;
+		}
+		else
+			thePrefs.m_bWebUseUPnP = false;
+#else
+		if ((UINT)thePrefs.GetUPnPNatWeb() != IsDlgButtonChecked(IDC_WSUPNP))
+		{
+			theApp.m_UPnP_IGDControlPoint->SetUPnPNat(thePrefs.IsUPnPNat()); // and start/stop nat. 
+			thePrefs.SetUPnPNatWeb(IsDlgButtonChecked(IDC_WSUPNP)!=0);
+		}
+#endif
+	//MORPH END   - UPnP
+
 		theApp.emuledlg->serverwnd->UpdateMyInfo();
 		SetModified(FALSE);
 		SetTmplButtonState();
@@ -241,6 +277,7 @@ void CPPgWebServer::Localize(void)
 		GetDlgItem(IDC_WSRELOADTMPL)->SetWindowText(GetResString(IDS_SF_RELOAD));
 		GetDlgItem(IDC_WSENABLED)->SetWindowText(GetResString(IDS_ENABLED));
 		SetDlgItemText(IDC_WS_GZIP,GetResString(IDS_WEB_GZIP_COMPRESSION));
+		SetDlgItemText(IDC_WSUPNP, GetResString(IDS_WEBUPNPINCLUDE));
 
 		GetDlgItem(IDC_WSPASS_LBL2)->SetWindowText(GetResString(IDS_WS_PASS));
 		GetDlgItem(IDC_WSENABLEDLOW)->SetWindowText(GetResString(IDS_ENABLED));
@@ -291,8 +328,14 @@ void CPPgWebServer::OnEnChangeWSEnabled()
 	GetDlgItem(IDC_WS_GZIP)->EnableWindow(bIsWIEnabled);
 	GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(bIsWIEnabled);
 	GetDlgItem(IDC_WSTIMEOUT)->EnableWindow(bIsWIEnabled);
-
 	GetDlgItem(IDC_WSPASSLOW)->EnableWindow(bIsWIEnabled && IsDlgButtonChecked(IDC_WSENABLEDLOW));
+	//MORPH START - UPnP
+#ifdef USE_OFFICIAL_UPNP
+	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPEnabled() && bIsWIEnabled);
+#else
+	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPNat() && bIsWIEnabled);
+#endif
+	//MORPH END   - UPnP
 	
 	//GetDlgItem(IDC_WSRELOADTMPL)->EnableWindow(bIsWIEnabled);
 	SetTmplButtonState();
@@ -353,6 +396,16 @@ BOOL CPPgWebServer::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
+}
+
+void CPPgWebServer::OnDestroy()
+{
+	CPropertyPage::OnDestroy();
+	if (m_icoBrowse)
+	{
+		VERIFY( DestroyIcon(m_icoBrowse) );
+		m_icoBrowse = NULL;
+	}
 }
 
 //>>> [ionix] - iONiX::Advanced WebInterface Account Management

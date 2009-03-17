@@ -49,7 +49,7 @@ public:
 	CtrlItem_Struct* parent;
 	DWORD            dwUpdated;
 	CBitmap          status;
-	DWORD            dwUpdatedchunk;
+	DWORD            dwUpdatedchunk; //MORPH
 	CBitmap          statuschunk;	//MORPH - Downloading Chunk Detail Display
 };
 
@@ -112,6 +112,7 @@ public:
 	int		GetCompleteDownloads(int cat,int &total);
 	void	UpdateCurrentCategoryView();
 	void	UpdateCurrentCategoryView(CPartFile* thisfile);
+	CImageList *CreateDragImage(int iItem, LPPOINT lpPoint);
 
 protected:
 	CImageList  m_ImageList;
@@ -121,7 +122,12 @@ protected:
 
 	CTitleMenu	m_PrioMenu;
 	CTitleMenu	m_FileMenu;
+	//MORPH - Added icons
+	/*
+	CMenu		m_SourcesMenu;
+	*/
 	CTitleMenu	m_SourcesMenu;
+	//MORPH - ADDED icons
 	//MORPH - Removed by SiRoB, Remain time and size Columns have been splited
 	/*
 	bool		m_bRemainSort;
@@ -133,7 +139,8 @@ protected:
 	typedef std::pair<void*, CtrlItem_Struct*> ListItemsPair;
 	typedef std::multimap<void*, CtrlItem_Struct*> ListItems;
     ListItems	m_ListItems;
-	CFont		m_fontBold;
+	CFont		m_fontBold; // may contain a locally created bold font
+	CFont*		m_pFontBold;// points to the bold font which is to be used (may be the locally created or the default bold font)
 	CFont		m_fontSmaller;//MORPH - Draw Display Chunk Detail
 	CFont		m_fontBoldSmaller;//MORPH - Added by SiRoB, Draw Client Percentage
 	CToolTipCtrlX* m_tooltip;
@@ -141,15 +148,17 @@ protected:
 	void ShowFileDialog(UINT uInvokePage);
 	void ShowClientDialog(CUpDownClient* pClient);
 	void SetAllIcons();
-	void DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem);
-	void DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, CtrlItem_Struct *lpCtrlItem);
+	void DrawFileItem(CDC *dc, int nColumn, LPCRECT lpRect, UINT uDrawTextAlignment, CtrlItem_Struct *pCtrlItem);
+	void DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, UINT uDrawTextAlignment, CtrlItem_Struct *pCtrlItem);
 	int GetFilesCountInCurCat();
+	void GetFileItemDisplayText(CPartFile *lpPartFile, int iSubItem, LPTSTR pszText, int cchTextMax);
+	void GetSourceItemDisplayText(const CtrlItem_Struct *pCtrlItem, int iSubItem, LPTSTR pszText, int cchTextMax);
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
     static int Compare(const CPartFile* file1, const CPartFile* file2, LPARAM lParamSort);
-    //MORPH START - Keep A4AF Infos
+	//MORPH START - Keep A4AF Infos
 	/*
-	static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort);
+    static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort);
 	*/
 	static int Compare(const CUpDownClient* client1, const CUpDownClient* client2, LPARAM lParamSort, const CPartFile* file);
 	//MORPH END   - A4AF Infos
@@ -158,12 +167,12 @@ protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnSysColorChange();
-	afx_msg void OnItemActivate(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnListModified(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMDblclkDownloadlist(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnItemActivate(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmDblClk(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSysColorChange();
 };

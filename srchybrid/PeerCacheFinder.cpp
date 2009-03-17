@@ -36,7 +36,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -44,7 +44,7 @@ static char THIS_FILE[]=__FILE__;
 #define RETRYDAYS		2
 #define SIGNATURELENGTH 256
 
-static char _acDNSBuffer[MAXGETHOSTSTRUCT];
+static char s_acDNSBuffer[MAXGETHOSTSTRUCT];
 
 static const uint16 anPeerCachPorts[3] = {4662, 1214, 80};
 
@@ -229,7 +229,7 @@ LRESULT CPeerCacheFinder::OnPeerCacheCheckResponse(WPARAM /*wParam*/, LPARAM lPa
 			int iBufLen = WSAGETASYNCBUFLEN(lParam);
 			if (iBufLen >= sizeof(HOSTENT))
 			{
-				LPHOSTENT pHost = (LPHOSTENT)_acDNSBuffer;
+				LPHOSTENT pHost = (LPHOSTENT)s_acDNSBuffer;
 				m_strMyHostname = pHost->h_name;
 				if (!m_strMyHostname.IsEmpty()){
 					DEBUG_ONLY(AddDebugLogLine(false, _T("PeerCache: Found my Hostname: %s, continue search"), m_strMyHostname));
@@ -248,7 +248,7 @@ LRESULT CPeerCacheFinder::OnPeerCacheCheckResponse(WPARAM /*wParam*/, LPARAM lPa
 			int iBufLen = WSAGETASYNCBUFLEN(lParam);
 			if (iBufLen >= sizeof(HOSTENT))
 			{
-				LPHOSTENT pHost = (LPHOSTENT)_acDNSBuffer;
+				LPHOSTENT pHost = (LPHOSTENT)s_acDNSBuffer;
 				if (pHost->h_length == 4 && pHost->h_addr_list && pHost->h_addr_list[0])
 				{
 					m_dwPCIP = ((LPIN_ADDR)(pHost->h_addr_list[0]))->s_addr;
@@ -268,7 +268,7 @@ LRESULT CPeerCacheFinder::OnPeerCacheCheckResponse(WPARAM /*wParam*/, LPARAM lPa
 }
 
 void CPeerCacheFinder::DoLookUp(CStringA strHostname){
-	if (WSAAsyncGetHostByName(theApp.emuledlg->m_hWnd, UM_PEERCHACHE_RESPONSE, strHostname, _acDNSBuffer, sizeof(_acDNSBuffer)) == 0){
+	if (WSAAsyncGetHostByName(theApp.emuledlg->m_hWnd, UM_PEERCHACHE_RESPONSE, strHostname, s_acDNSBuffer, sizeof(s_acDNSBuffer)) == 0){
 		DEBUG_ONLY(AddDebugLogLine(false, _T("DNS Lookup for PC, state %i, failed (DoLookUP) - PC not found yet"), m_PCLUState));
 	}
 }
@@ -335,9 +335,9 @@ CString ReverseDnsLookup(DWORD dwIP)
 			nDnsState = (*pfnDnsQuery)(strDnsQuery, DNS_TYPE_PTR, DNS_QUERY_BYPASS_CACHE, pDnsServers, &pDnsRecords, NULL);
 			if (nDnsState == 0)
 			{
-				if (AtlIsValidAddress(pDnsRecords, sizeof(*pDnsRecords) - sizeof(pDnsRecords->Data) + sizeof(pDnsRecords->Data.PTR), FALSE))
+				if (!IsBadReadPtr(pDnsRecords, sizeof(*pDnsRecords) - sizeof(pDnsRecords->Data) + sizeof(pDnsRecords->Data.PTR)))
 				{
-					if (AtlIsValidAddress(pDnsRecords->Data.PTR.pNameHost, sizeof(TCHAR), FALSE))
+					if (!IsBadReadPtr(pDnsRecords->Data.PTR.pNameHost, sizeof(TCHAR)))
 						strHostName = pDnsRecords->Data.PTR.pNameHost;
 					(*pfnDnsRecordListFree)(pDnsRecords, DnsFreeRecordListDeep);
 				}
@@ -713,7 +713,7 @@ BOOL CPCReverseDnsThread::InitInstance()
 		return FALSE;
 	// SLUGFILLER: SafeHash
 
-	memset(_acDNSBuffer, 0, sizeof _acDNSBuffer);
+	memset(s_acDNSBuffer, 0, sizeof s_acDNSBuffer);
 	CString strHostname = ReverseDnsLookup(m_dwIP);
 	UINT uBufLen = 0;
 	UINT uError = WSAEINVAL;
@@ -724,9 +724,9 @@ BOOL CPCReverseDnsThread::InitInstance()
 			+ sizeof(char*)		// h_aliases list + NUL entry
 			+ sizeof(DWORD)*2		// h_addr_list + NUL entry
 			+ strHostnameA.GetLength() + 1;
-		if (uBufLen <= sizeof(_acDNSBuffer))
+		if (uBufLen <= sizeof(s_acDNSBuffer))
 		{
-			LPHOSTENT pHost = (LPHOSTENT)_acDNSBuffer;
+			LPHOSTENT pHost = (LPHOSTENT)s_acDNSBuffer;
 			char* p = (char*)(pHost + 1);
 
 			pHost->h_aliases = (char**)p;
@@ -745,7 +745,7 @@ BOOL CPCReverseDnsThread::InitInstance()
 			strcpy(pHost->h_name, strHostnameA);
 			p += strHostnameA.GetLength() + 1;
 
-			ASSERT( (UINT)(p - _acDNSBuffer) == uBufLen );
+			ASSERT( (UINT)(p - s_acDNSBuffer) == uBufLen );
 			uError = 0;
 		}
 		else
@@ -759,7 +759,7 @@ BOOL CPCReverseDnsThread::InitInstance()
 		// FIXME: Unable to resolve my own host - will always get the Windows Computer/Domainname. Dunno how to avoid this
 		// cheap walk arround below by using another IP
 		IPHost.s_addr = ntohl(ntohl(m_dwIP)+1);
-		if (WSAAsyncGetHostByAddr(theApp.emuledlg->m_hWnd, UM_PEERCHACHE_RESPONSE, (const char*) &IPHost, sizeof(struct in_addr), AF_INET, _acDNSBuffer, sizeof(_acDNSBuffer)) == 0){
+		if (WSAAsyncGetHostByAddr(theApp.emuledlg->m_hWnd, UM_PEERCHACHE_RESPONSE, (const char*) &IPHost, sizeof(struct in_addr), AF_INET, s_acDNSBuffer, sizeof(s_acDNSBuffer)) == 0){
 			if (thePrefs.GetVerbose())
 				DEBUG_ONLY(theApp.QueueDebugLogLine(false, _T("DNS Reverse Lookup for own IP failed")));
 		}	

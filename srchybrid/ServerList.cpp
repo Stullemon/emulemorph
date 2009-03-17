@@ -43,7 +43,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -70,11 +70,11 @@ CServerList::~CServerList()
 void CServerList::AutoUpdate()
 {
 	if (thePrefs.addresses_list.IsEmpty()){
-		AfxMessageBox(GetResString(IDS_ERR_EMPTYADRESSESDAT),MB_ICONASTERISK);
+		AfxMessageBox(GetResString(IDS_ERR_EMPTYADRESSESDAT), MB_ICONASTERISK);
 		return;
 	}
 
-	bool bDownloaded=false;
+	bool bDownloaded = false;
 	CString servermetdownload;
 	CString servermetbackup;
 	CString servermet;
@@ -95,16 +95,16 @@ void CServerList::AutoUpdate()
 		dlgDownload.m_sURLToDownload = strURLToDownload;
 		dlgDownload.m_sFileToDownloadInto = servermetdownload;
 		if (dlgDownload.DoModal() == IDOK)
-			bDownloaded=true;
+			bDownloaded = true;
 		else
 			LogError(LOG_STATUSBAR, GetResString(IDS_ERR_FAILEDDOWNLOADMET), strURLToDownload);
 	}
 
-	if (bDownloaded){
+	if (bDownloaded) {
 		(void)_trename(servermet, servermetdownload);
 		(void)_trename(servermetbackup, servermet);
 	}
-	else{
+	else {
 		(void)_tremove(servermet);
 		(void)_trename(servermetbackup, servermet);
 	}
@@ -124,7 +124,7 @@ bool CServerList::Init()
 	{
 		strPath.Format(_T("%sserver_met.download"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 		bool bRes2 = AddServerMetToList(strPath, true);
-		if( !bRes && bRes2 )
+		if (!bRes && bRes2)
 			bRes = true;
 	}
 
@@ -133,22 +133,27 @@ bool CServerList::Init()
 	AddServersFromTextFile(strPath);
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
 	if (thePrefs.IsAutoUPdateIPFilterEnabled())
-	theApp.ipfilter->UpdateIPFilterURL();
+		//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+		/*
+		theApp.ipfilter->UpdateIPFilterURL();
+		*/
+		theApp.emuledlg->CheckIPFilter();
+		//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	if (thePrefs.IsUpdateFakeStartupEnabled())
-	theApp.FakeCheck->DownloadFakeList();
+		theApp.FakeCheck->DownloadFakeList();
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
     
     //Commander - Added: IP2Country auto-updating - Start
 	if (thePrefs.IsAutoUPdateIP2CountryEnabled())
-	theApp.ip2country->UpdateIP2CountryURL();
+		theApp.ip2country->UpdateIP2CountryURL();
 	//Commander - Added: IP2Country auto-updating - End
 
-	theApp.serverlist->GiveServersForTraceRoute();
-
-	return bRes;
+    theApp.serverlist->GiveServersForTraceRoute();
+    
+    return bRes;
 }
 
 bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge) 
@@ -161,7 +166,7 @@ bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge)
 
 	CSafeBufferedFile servermet;
 	CFileException fexp;
-	if (!servermet.Open(strFile,CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
+	if (!servermet.Open(strFile ,CFile::modeRead|CFile::osSequentialScan|CFile::typeBinary|CFile::shareDenyWrite, &fexp)){
 		if (!bMerge){
 			CString strError(GetResString(IDS_ERR_LOADSERVERMET));
 			TCHAR szError[MAX_CFEXP_ERRORMSG];
@@ -178,7 +183,7 @@ bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge)
 		version = servermet.ReadUInt8();
 		if (version != 0xE0 && version != MET_HEADER){
 			servermet.Close();
-			LogError(LOG_STATUSBAR,GetResString(IDS_ERR_BADSERVERMETVERSION),version);
+			LogError(LOG_STATUSBAR,GetResString(IDS_ERR_BADSERVERMETVERSION), version);
 			return false;
 		}
 		theApp.emuledlg->serverwnd->serverlistctrl.Hide();
@@ -190,10 +195,10 @@ bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge)
 		for (UINT j = 0; j < fservercount; j++)
 		{
 			// get server
-			servermet.Read(&sbuffer,sizeof(ServerMet_Struct));
+			servermet.Read(&sbuffer, sizeof(ServerMet_Struct));
 			CServer* newserver = new CServer(&sbuffer);
 
-			//add tags
+			// add tags
 			for (UINT i = 0; i < sbuffer.tagcount; i++)
 				newserver->AddTagFromFile(&servermet);
 
@@ -213,8 +218,8 @@ bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge)
 				CServer* update = theApp.serverlist->GetServerByAddress(newserver->GetAddress(), newserver->GetPort());
 				if (update)
 				{
-					update->SetListName( newserver->GetListName());
-					update->SetDescription( newserver->GetDescription());
+					update->SetListName(newserver->GetListName());
+					update->SetDescription(newserver->GetDescription());
 					theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(update);
 				}
 				delete newserver;
@@ -224,9 +229,9 @@ bool CServerList::AddServerMetToList(const CString& strFile, bool bMerge)
 		}
 
 		if (!bMerge)
-			AddLogLine(true,GetResString(IDS_SERVERSFOUND),fservercount);
+			AddLogLine(true,GetResString(IDS_SERVERSFOUND), fservercount);
 		else
-			AddLogLine(true,GetResString(IDS_SERVERSADDED), iAddCount, fservercount-iAddCount);
+			AddLogLine(true,GetResString(IDS_SERVERSADDED), iAddCount, fservercount - iAddCount);
 		servermet.Close();
 	}
 	catch(CFileException* error){
@@ -249,7 +254,7 @@ bool CServerList::AddServer(const CServer* pServer, bool bAddTail)
 {
 	if (!IsGoodServerIP(pServer)){ // check for 0-IP, localhost and optionally for LAN addresses
 		if (thePrefs.GetLogFilteredIPs())
-			AddDebugLogLine(false, _T("Filtered server \"%s\" (IP=%s) - Invalid IP or LAN address."), pServer->GetListName(), ipstr(pServer->GetIP()));
+			AddDebugLogLine(false, _T("IPFilter(AddServer): Filtered server \"%s\" (IP=%s) - Invalid IP or LAN address."), pServer->GetListName(), ipstr(pServer->GetIP()));
 		return false;
 	}
 
@@ -262,7 +267,7 @@ bool CServerList::AddServer(const CServer* pServer, bool bAddTail)
 		//	return false;
 		if (theApp.ipfilter->IsFiltered(pServer->GetIP())){
 			if (thePrefs.GetLogFilteredIPs())
-				AddDebugLogLine(false, _T("Filtered server \"%s\" (IP=%s) - IP filter (%s)"), pServer->GetListName(), ipstr(pServer->GetIP()), theApp.ipfilter->GetLastHit());
+				AddDebugLogLine(false, _T("IPFilter(AddServer): Filtered server \"%s\" (IP=%s) - IP filter (%s)"), pServer->GetListName(), ipstr(pServer->GetIP()), theApp.ipfilter->GetLastHit());
 			return false;
 		}
 	}
@@ -305,7 +310,7 @@ void CServerList::ServerStats()
     // MORPH END obfuscated server require
 	{
 		CServer* ping_server = GetNextStatServer();
-		if( !ping_server )
+		if (!ping_server)
 			return;
 
 		uint32 tNow = (uint32)time(NULL);
@@ -313,7 +318,7 @@ void CServerList::ServerStats()
         while (ping_server->GetLastPingedTime() != 0 && (tNow - ping_server->GetLastPingedTime()) < UDPSERVSTATREASKTIME)
 		{
 			ping_server = GetNextStatServer();
-			if( ping_server == test )
+			if (ping_server == test)
 				return;
 		}
 		// IP-filter: We do not need to IP-filter any servers here, even dynIP-servers are not
@@ -329,9 +334,12 @@ void CServerList::ServerStats()
 		}
 		srand(tNow);
 		ping_server->SetRealLastPingedTime(tNow); // this is not used to calcualte the next ping, but only to ensure a minimum delay for premature pings
-		// MORPH START lh require obfuscated server connection  , added )||(theApp.IsWaitingForCryptPingConnect()
+		// MORPH START lh require obfuscated server connection
+		/*
+		if (!ping_server->GetCryptPingReplyPending() && (tNow - ping_server->GetLastPingedTime()) >= UDPSERVSTATREASKTIME && theApp.GetPublicIP() != 0 && thePrefs.IsServerCryptLayerUDPEnabled()){
+		*/
 		if (!ping_server->GetCryptPingReplyPending() && (tNow - ping_server->GetLastPingedTime()) >= UDPSERVSTATREASKTIME && ((theApp.GetPublicIP() != 0)||(theApp.IsWaitingForCryptPingConnect())) && thePrefs.IsServerCryptLayerUDPEnabled()){
-			// MORPH END lh require obfuscated server connection 
+		// MORPH END lh require obfuscated server connection 
 			// we try a obfsucation ping first and wait 20 seconds for an answer
 			// if it doesn'T get responsed, we don't count it as error but continue with a normal ping
 			ping_server->SetCryptPingReplyPending(true);
@@ -368,7 +376,7 @@ void CServerList::ServerStats()
 			ping_server->SetChallenge(uChallenge);
 			PokeUInt32(packet->pBuffer, uChallenge);
 			ping_server->SetLastPinged(GetTickCount());
-			ping_server->SetLastPingedTime(tNow - (rand()%HR2S(1)));
+			ping_server->SetLastPingedTime(tNow - (rand() % HR2S(1)));
 			ping_server->AddFailedCount();
 			theApp.emuledlg->serverwnd->serverlistctrl.RefreshServer(ping_server);
 			if (thePrefs.GetDebugServerUDPLevel() > 0)
@@ -390,7 +398,7 @@ bool CServerList::IsGoodServerIP(const CServer* pServer) const
 
 void CServerList::RemoveServer(const CServer* pServer)
 {
-	for(POSITION pos = list.GetHeadPosition(); pos != NULL; )
+	for (POSITION pos = list.GetHeadPosition(); pos != NULL; )
 	{
 		POSITION pos2 = pos;
 		const CServer* test_server = list.GetNext(pos);
@@ -496,41 +504,41 @@ void CServerList::GetUserFileStatus(uint32& user, uint32& file) const
 
 void CServerList::MoveServerDown(const CServer* pServer)
 {
-   POSITION pos1, pos2;
+	POSITION pos1, pos2;
 	int i = 0;
-   for( pos1 = list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
-	   list.GetNext(pos1);
-	   CServer* cur_server = list.GetAt(pos2);
+	for (pos1 = list.GetHeadPosition(); (pos2 = pos1) != NULL; ) {
+		list.GetNext(pos1);
+		CServer* cur_server = list.GetAt(pos2);
 		if (cur_server == pServer) {
-		   list.AddTail(cur_server);
-		   list.RemoveAt(pos2);
-		   return;
-	   }
-	   i++;
-	   if (i == list.GetCount())
-		   break;
-   }
+			list.AddTail(cur_server);
+			list.RemoveAt(pos2);
+			return;
+		}
+		i++;
+		if (i == list.GetCount())
+			break;
+	}
 }
 
 void CServerList::Sort()
 {
-   POSITION pos1, pos2;
+	POSITION pos1, pos2;
 	int i = 0;
-   for( pos1 = list.GetHeadPosition(); ( pos2 = pos1 ) != NULL; ){
-	   list.GetNext(pos1);
-	   CServer* cur_server = list.GetAt(pos2);
-	   if (cur_server->GetPreference()== SRV_PR_HIGH){
-		   list.AddHead(cur_server);
-		   list.RemoveAt(pos2);
-	   }
-	   else if (cur_server->GetPreference() == SRV_PR_LOW){
-		   list.AddTail(cur_server);
-		   list.RemoveAt(pos2);
-	   }
-	   i++;
-	   if (i == list.GetCount())
-		   break;
-   }
+	for (pos1 = list.GetHeadPosition(); (pos2 = pos1) != NULL; ) {
+		list.GetNext(pos1);
+		CServer* cur_server = list.GetAt(pos2);
+		if (cur_server->GetPreference() == SRV_PR_HIGH) {
+			list.AddHead(cur_server);
+			list.RemoveAt(pos2);
+		}
+		else if (cur_server->GetPreference() == SRV_PR_LOW) {
+			list.AddTail(cur_server);
+			list.RemoveAt(pos2);
+		}
+		i++;
+		if (i == list.GetCount())
+			break;
+	}
 }
 
 //EastShare Start - PreferShareAll by AndCycle
@@ -619,7 +627,7 @@ CServer* CServerList::GetNextSearchServer()
 		POSITION posIndex = list.FindIndex(searchserverpos);
 		if (posIndex == NULL) {	// check if search position is still valid (could be corrupted by server delete operation)
 			posIndex = list.GetHeadPosition();
-			searchserverpos=0;
+			searchserverpos = 0;
 		}
 		nextserver = list.GetAt(posIndex);
 		searchserverpos++;
@@ -638,7 +646,7 @@ CServer* CServerList::GetNextStatServer()
 		POSITION posIndex = list.FindIndex(statserverpos);
 		if (posIndex == NULL) {	// check if search position is still valid (could be corrupted by server delete operation)
 			posIndex = list.GetHeadPosition();
-			statserverpos=0;
+			statserverpos = 0;
 		}
 		nextserver = list.GetAt(posIndex);
 		statserverpos++;
@@ -669,7 +677,7 @@ CServer* CServerList::GetServerByAddress(LPCTSTR address, uint16 port) const
 {
 	for (POSITION pos = list.GetHeadPosition();pos != 0;){
         CServer* s = list.GetNext(pos);
-        if (( port == s->GetPort() || port==0) && !_tcscmp(s->GetAddress(),address)) 
+        if ((port == s->GetPort() || port == 0) && !_tcscmp(s->GetAddress(), address))
 			return s; 
 	}
 	return NULL;
@@ -680,7 +688,7 @@ CServer* CServerList::GetServerByIP(uint32 nIP) const
 	for (POSITION pos = list.GetHeadPosition();pos != 0;){
         CServer* s = list.GetNext(pos);
 		if (s->GetIP() == nIP)
-			return s; 
+			return s;
 	}
 	return NULL;
 }
@@ -701,7 +709,7 @@ CServer* CServerList::GetServerByIPUDP(uint32 nIP, uint16 nUDPPort, bool bObfusc
         CServer* s = list.GetNext(pos);
 		if (s->GetIP() == nIP && (s->GetPort() == nUDPPort-4 ||
 			(bObfuscationPorts && (s->GetObfuscationPortUDP() == nUDPPort) || (s->GetPort() == nUDPPort - 12))))
-			return s; 
+			return s;
 	}
 	return NULL;
 }
@@ -745,37 +753,31 @@ bool CServerList::SaveServermetToFile()
 			*/
 			servermet.WriteUInt16(nextserver->GetConnPort());
 			//Morph End - added by AndCycle, aux Ports, by lugdunummaster
-
+			
 			UINT uTagCount = 0;
 			ULONG uTagCountFilePos = (ULONG)servermet.GetPosition();
 			servermet.WriteUInt32(uTagCount);
 
 			if (!nextserver->GetListName().IsEmpty()){
-				if (WriteOptED2KUTF8Tag(&servermet, nextserver->GetListName(), ST_SERVERNAME))
-					uTagCount++;
-				CTag servername( ST_SERVERNAME, nextserver->GetListName() );
-				servername.WriteTagToFile(&servermet);
+				CTag servername(ST_SERVERNAME, nextserver->GetListName());
+				servername.WriteTagToFile(&servermet, utf8strOptBOM);
 				uTagCount++;
 			}
 			
 			if (!nextserver->GetDynIP().IsEmpty()){
-				if (WriteOptED2KUTF8Tag(&servermet, nextserver->GetDynIP(), ST_DYNIP))
-					uTagCount++;
-				CTag serverdynip( ST_DYNIP, nextserver->GetDynIP() );
-				serverdynip.WriteTagToFile(&servermet);
+				CTag serverdynip(ST_DYNIP, nextserver->GetDynIP());
+				serverdynip.WriteTagToFile(&servermet, utf8strOptBOM);
 				uTagCount++;
 			}
 			
 			if (!nextserver->GetDescription().IsEmpty()){
-				if (WriteOptED2KUTF8Tag(&servermet, nextserver->GetDescription(), ST_DESCRIPTION))
-					uTagCount++;
-				CTag serverdesc( ST_DESCRIPTION, nextserver->GetDescription() );
-				serverdesc.WriteTagToFile(&servermet);
+				CTag serverdesc(ST_DESCRIPTION, nextserver->GetDescription());
+				serverdesc.WriteTagToFile(&servermet, utf8strOptBOM);
 				uTagCount++;
 			}
 			
 			if (nextserver->GetFailedCount()){
-				CTag serverfail(ST_FAIL, nextserver->GetFailedCount() );
+				CTag serverfail(ST_FAIL, nextserver->GetFailedCount());
 				serverfail.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
@@ -787,16 +789,17 @@ bool CServerList::SaveServermetToFile()
 			}
 			
 			if (nextserver->GetUsers()){
-				CTag serveruser("users", nextserver->GetUsers() );
+				CTag serveruser("users", nextserver->GetUsers());
 				serveruser.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
 			
 			if (nextserver->GetFiles()){
-				CTag serverfiles("files", nextserver->GetFiles() );
+				CTag serverfiles("files", nextserver->GetFiles());
 				serverfiles.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
+
 			//Morph Start - added by AndCycle, aux Ports, by lugdunummaster
 			if (nextserver->GetPort() != nextserver->GetConnPort()) {
 				TCHAR temp[64] ;
@@ -806,32 +809,33 @@ bool CServerList::SaveServermetToFile()
 				uTagCount++;
 			}
 			//Morph End - added by AndCycle, aux Ports, by lugdunummaster
+			
 			if (nextserver->GetPing()){
-				CTag serverping(ST_PING, nextserver->GetPing() );
+				CTag serverping(ST_PING, nextserver->GetPing());
 				serverping.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
 			
 			if (nextserver->GetLastPingedTime()){
-				CTag serverlastp(ST_LASTPING, nextserver->GetLastPingedTime() );
+				CTag serverlastp(ST_LASTPING, nextserver->GetLastPingedTime());
 				serverlastp.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
 			
 			if (nextserver->GetMaxUsers()){
-				CTag servermaxusers(ST_MAXUSERS, nextserver->GetMaxUsers() );
+				CTag servermaxusers(ST_MAXUSERS, nextserver->GetMaxUsers());
 				servermaxusers.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
 			
 			if (nextserver->GetSoftFiles()){
-				CTag softfiles(ST_SOFTFILES, nextserver->GetSoftFiles() );
+				CTag softfiles(ST_SOFTFILES, nextserver->GetSoftFiles());
 				softfiles.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
 			
 			if (nextserver->GetHardFiles()){
-				CTag hardfiles(ST_HARDFILES, nextserver->GetHardFiles() );
+				CTag hardfiles(ST_HARDFILES, nextserver->GetHardFiles());
 				hardfiles.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
@@ -839,13 +843,13 @@ bool CServerList::SaveServermetToFile()
 			if (!nextserver->GetVersion().IsEmpty()){
 				// as long as we don't receive an integer version tag from the local server (TCP) we store it as string
 				CTag version(ST_VERSION, nextserver->GetVersion());
-				version.WriteTagToFile(&servermet);
+				version.WriteTagToFile(&servermet, utf8strOptBOM);
 				uTagCount++;
 			}
 			
 			if (nextserver->GetUDPFlags()){
-			CTag tagUDPFlags(ST_UDPFLAGS, nextserver->GetUDPFlags() );
-			tagUDPFlags.WriteTagToFile(&servermet);
+				CTag tagUDPFlags(ST_UDPFLAGS, nextserver->GetUDPFlags());
+				tagUDPFlags.WriteTagToFile(&servermet);
 				uTagCount++;
 			}
 			
@@ -943,7 +947,7 @@ void CServerList::AddServersFromTextFile(const CString& strFilename)
 			if (pos == -1){
 				pos = strLine.Find(_T(','));
 				if (pos == -1) 
-				continue;
+					continue;
 			}
 			CString strHost = strLine.Left(pos);
 			strLine = strLine.Mid(pos+1);
@@ -961,11 +965,11 @@ void CServerList::AddServersFromTextFile(const CString& strFilename)
 			{
 				CString strPriority = strLine.Left(pos);
 				priority = _tstoi(strPriority);
-					if (priority < 0 || priority > 2)
-						priority = SRV_PR_HIGH;
+				if (priority < 0 || priority > 2)
+					priority = SRV_PR_HIGH;
 				strLine = strLine.Mid(pos+1);
 			}
-	
+		
 			// fetch name
 			CString strName = strLine;
 			strName.Remove(_T('\r'));

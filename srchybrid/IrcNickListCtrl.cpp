@@ -31,21 +31,24 @@ static char THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNAMIC(CIrcNickListCtrl, CMuleListCtrl)
 
 BEGIN_MESSAGE_MAP(CIrcNickListCtrl, CMuleListCtrl)
-	ON_WM_CONTEXTMENU()
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnClick)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblClk)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNmDblClk)
+	ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
 CIrcNickListCtrl::CIrcNickListCtrl()
 {
-	SetName(_T("IrcNickListCtrl"));
 	m_pParent = NULL;
+	SetSkinKey(L"IRCNicksLv");
 }
 
 void CIrcNickListCtrl::Init()
 {
+	SetPrefsKey(_T("IrcNickListCtrl"));
 	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
+
 	InsertColumn(0, GetResString(IDS_IRC_NICK), LVCFMT_LEFT, 90);
+
 	LoadSettings();
 	SetSortArrow();
 	SortItems(&SortProc, GetSortItem() + (GetSortAscending() ? 0 : 10));
@@ -55,27 +58,29 @@ int CIrcNickListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 {
 	const Nick* pItem1 = (Nick*)lParam1;
 	const Nick* pItem2 = (Nick*)lParam2;
-	switch (lParamSort)
+	int iColumn = lParamSort >= 10 ? lParamSort - 10 : lParamSort;
+	int iResult = 0;
+	switch (iColumn)
 	{
 		case 0:
 			if (pItem1->m_iLevel == pItem2->m_iLevel)
-				return pItem1->m_sNick.CompareNoCase(pItem2->m_sNick);
-			if (pItem1->m_iLevel == -1)
-				return 1;
-			if (pItem2->m_iLevel == -1)
-				return -1;
-			return pItem1->m_iLevel - pItem2->m_iLevel;
-		case 10:
-			if (pItem1->m_iLevel == pItem2->m_iLevel)
-				return pItem2->m_sNick.CompareNoCase(pItem1->m_sNick);
-			if (pItem1->m_iLevel == -1)
-				return 1;
-			if (pItem2->m_iLevel == -1)
-				return -1;
-			return pItem1->m_iLevel - pItem2->m_iLevel;
+				iResult = pItem1->m_sNick.CompareNoCase(pItem2->m_sNick);
+			else
+			{
+				if (pItem1->m_iLevel == -1)
+					return 1;
+				if (pItem2->m_iLevel == -1)
+					return -1;
+				return pItem1->m_iLevel - pItem2->m_iLevel;
+			}
+			break;
+
 		default:
 			return 0;
 	}
+	if (lParamSort >= 10)
+		iResult = -iResult;
+	return iResult;
 }
 
 void CIrcNickListCtrl::OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult)
@@ -123,7 +128,7 @@ void CIrcNickListCtrl::OpenPrivateChannel(const Nick *pNick)
 	m_pParent->AddInfoMessage(pNick->m_sNick, GetResString(IDS_IRC_PRIVATECHANSTART), true);
 }
 
-void CIrcNickListCtrl::OnNMDblClk(NMHDR*, LRESULT* pResult)
+void CIrcNickListCtrl::OnNmDblClk(NMHDR*, LRESULT* pResult)
 {
 	//We double clicked a nick.. Try to open private channel
 	int iNickItem = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);

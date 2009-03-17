@@ -47,7 +47,7 @@ uint8 CUDPFirewallTester::m_byFWChecksFinishedUDP = 0;
 uint32 CUDPFirewallTester::m_dwTestStart = 0;
 uint32 CUDPFirewallTester::m_dwLastSucceededTime = 0;
 CList<CContact> CUDPFirewallTester::m_liPossibleTestClients;
-CList<UsedClient_Struct, UsedClient_Struct&> CUDPFirewallTester::m_liUsedTestClients;
+CList<UsedClient_Struct> CUDPFirewallTester::m_liUsedTestClients;
 
 bool CUDPFirewallTester::IsFirewalledUDP(bool bLastStateIfTesting)
 { 
@@ -137,7 +137,7 @@ void CUDPFirewallTester::SetUDPFWCheckResult(bool bSucceeded, bool bTestCancelle
 				CKademlia::GetPrefs()->SetUseExternKadPort(false);
 				DebugLog(_T("New KAD Firewallstate (UDP): Open, using intern port"));
 			}
-			else if (nIncomingPort == CKademlia::GetPrefs()->GetExternalKadPort()){
+			else if (nIncomingPort == CKademlia::GetPrefs()->GetExternalKadPort() && nIncomingPort != 0){
 				CKademlia::GetPrefs()->SetUseExternKadPort(true);
 				DebugLog(_T("New KAD Firewallstate (UDP): Open, using extern port"));
 			}
@@ -175,7 +175,7 @@ void CUDPFirewallTester::ReCheckFirewallUDP(bool bSetUnverified){
 	m_bIsFWVerifiedUDP = (m_bIsFWVerifiedUDP && !bSetUnverified);
 	CSearchManager::FindNodeFWCheckUDP(); // start a lookup for a random node to find suitable IPs
 	m_bNodeSearchStarted = true;
-	CKademlia::GetPrefs()->SetExternKadPort(0);
+	CKademlia::GetPrefs()->FindExternKadPort(true);
 }
 
 void CUDPFirewallTester::Connected(){
@@ -218,7 +218,7 @@ void CUDPFirewallTester::AddPossibleTestContact(const CUInt128 &uClientID, uint3
 
 void CUDPFirewallTester::QueryNextClient(){ // try the next available client for the firewallcheck
 	
-	if (!IsFWCheckUDPRunning() || !GetUDPCheckClientsNeeded() || CKademlia::GetPrefs()->GetExternalKadPort() == 0)
+	if (!IsFWCheckUDPRunning() || !GetUDPCheckClientsNeeded() || CKademlia::GetPrefs()->FindExternKadPort(false))
 		return; // check if more tests are needed and wait till we know our extern port
 
 	if (!CKademlia::IsRunning() || CKademlia::GetRoutingZone() == NULL){

@@ -34,15 +34,15 @@ static char THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNAMIC(CFileDetailDialogName, CResizablePage)
 
 BEGIN_MESSAGE_MAP(CFileDetailDialogName, CResizablePage)
-	ON_WM_TIMER()
-	ON_WM_DESTROY()
 	ON_BN_CLICKED(IDC_BUTTONSTRIP, OnBnClickedButtonStrip)
 	ON_BN_CLICKED(IDC_TAKEOVER, TakeOver)	
-	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LISTCTRLFILENAMES, OnLvnColumnclick)
-	ON_NOTIFY(NM_DBLCLK, IDC_LISTCTRLFILENAMES, OnNMDblclkList)
-	ON_NOTIFY(NM_RCLICK, IDC_LISTCTRLFILENAMES, OnNMRclickList)
-	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
 	ON_EN_CHANGE(IDC_FILENAME, OnEnChangeFilename)
+	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
+	ON_NOTIFY(LVN_COLUMNCLICK, IDC_LISTCTRLFILENAMES, OnLvnColumnClick)
+	ON_NOTIFY(NM_DBLCLK, IDC_LISTCTRLFILENAMES, OnNmDblClkList)
+	ON_NOTIFY(NM_RCLICK, IDC_LISTCTRLFILENAMES, OnNmRClickList)
+	ON_WM_DESTROY()
+	ON_WM_TIMER()
 END_MESSAGE_MAP()
 
 CFileDetailDialogName::CFileDetailDialogName()
@@ -56,8 +56,6 @@ CFileDetailDialogName::CFileDetailDialogName()
 	m_timer = 0;
 	memset(m_aiColWidths, 0, sizeof m_aiColWidths);
 	m_bAppliedSystemImageList = false;
-	m_sortorder = 0;
-	m_sortindex = 1;
 	m_bSelf = false;
 }
 
@@ -87,15 +85,15 @@ BOOL CFileDetailDialogName::OnInitDialog()
 	AddAnchor(IDC_BUTTONSTRIP, BOTTOM_RIGHT);
 	AddAnchor(IDC_FILENAME, BOTTOM_LEFT, BOTTOM_RIGHT);
 
-	m_listFileNames.SetName(_T("FileDetailDlgName"));
+	m_listFileNames.SetPrefsKey(_T("FileDetailDlgName"));
 	m_listFileNames.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
-	m_listFileNames.InsertColumn(0, GetResString(IDS_DL_FILENAME), LVCFMT_LEFT, 380);
-	m_listFileNames.InsertColumn(1, GetResString(IDS_DL_SOURCES), LVCFMT_LEFT, 80);
+	m_listFileNames.InsertColumn(0, GetResString(IDS_DL_FILENAME), LVCFMT_LEFT, /*DFLT_FILENAME_COL_WIDTH*/450);
+	m_listFileNames.InsertColumn(1, GetResString(IDS_DL_SOURCES),  LVCFMT_LEFT,  60);
 	ASSERT( (m_listFileNames.GetStyle() & LVS_SHAREIMAGELISTS) != 0 );
 	m_listFileNames.LoadSettings();
 
 	m_listFileNames.SetSortArrow();
-	m_listFileNames.SortItems(&CompareListNameItems, m_listFileNames.GetSortItem() + ( (m_listFileNames.GetSortAscending()) ? 0:10) );
+	m_listFileNames.SortItems(&CompareListNameItems, m_listFileNames.GetSortItem() + (m_listFileNames.GetSortAscending() ? 0 : 10));
 
 	Localize();
 
@@ -219,7 +217,7 @@ void CFileDetailDialogName::FillSourcenameList()
 		}
 	}
 
-	m_listFileNames.SortItems(&CompareListNameItems, m_sortindex + ( (m_sortorder) ? 0:10) );
+	m_listFileNames.SortItems(&CompareListNameItems, m_listFileNames.GetSortItem() + (m_listFileNames.GetSortAscending() ? 0 : 10));
 }
 
 void CFileDetailDialogName::TakeOver()
@@ -243,46 +241,63 @@ void CFileDetailDialogName::OnBnClickedButtonStrip()
 	GetDlgItem(IDC_FILENAME)->SetWindowText(CleanupFilename(filename));
 }
 
-void CFileDetailDialogName::OnLvnColumnclick(NMHDR *pNMHDR, LRESULT *pResult)
+void CFileDetailDialogName::OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult)
 {
-	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-
-	if (m_sortindex != pNMLV->iSubItem)
-		m_sortorder = 1;
+	NMLISTVIEW *pNMListView = (NMLISTVIEW *)pNMHDR;
+	bool sortAscending;
+	if (m_listFileNames.GetSortItem() != pNMListView->iSubItem)
+	{
+		switch (pNMListView->iSubItem)
+		{
+			case 1: // Count
+				sortAscending = false;
+				break;
+			default:
+				sortAscending = true;
+				break;
+		}
+	}
 	else
-		m_sortorder = !m_sortorder;
-	m_sortindex = pNMLV->iSubItem;
+		sortAscending = !m_listFileNames.GetSortAscending();
 
-	m_listFileNames.SetSortArrow(m_sortindex, m_sortorder);
-	m_listFileNames.SortItems(&CompareListNameItems, m_sortindex + (m_sortorder ? 0 : 10));
+	m_listFileNames.SetSortArrow(pNMListView->iSubItem, sortAscending);
+	m_listFileNames.SortItems(&CompareListNameItems, pNMListView->iSubItem + (sortAscending ? 0 : 10));
 
 	*pResult = 0;
 }
 
 int CALLBACK CFileDetailDialogName::CompareListNameItems(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
-	FCtrlItem_Struct* item1=(FCtrlItem_Struct*) lParam1;
-	FCtrlItem_Struct* item2=(FCtrlItem_Struct*) lParam2;
-	switch (lParamSort){
+	const FCtrlItem_Struct *item1 = (FCtrlItem_Struct *)lParam1;
+	const FCtrlItem_Struct *item2 = (FCtrlItem_Struct *)lParam2;
+
+	int iResult = 0;
+	switch (lParamSort)
+	{
 		case 0:
-			return CompareLocaleStringNoCase(item1->filename, item2->filename);
 		case 10:
-			return CompareLocaleStringNoCase(item2->filename, item1->filename);
+			iResult = CompareLocaleStringNoCase(item1->filename, item2->filename);
+			break;
+
 		case 1:
-			return (item1->count - item2->count);
 		case 11:
-			return (item2->count - item1->count);
+			iResult = CompareUnsigned(item1->count, item2->count);
+			break;
 	}
-	return 0;
+
+	if (lParamSort >= 10)
+		iResult = -iResult;
+
+	return iResult;
 } 
 
-void CFileDetailDialogName::OnNMDblclkList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CFileDetailDialogName::OnNmDblClkList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	TakeOver();
 	*pResult = 0;
 }
 
-void CFileDetailDialogName::OnNMRclickList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CFileDetailDialogName::OnNmRClickList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	UINT flag = MF_STRING;
 	if (m_listFileNames.GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED) == -1)

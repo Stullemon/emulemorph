@@ -8,7 +8,7 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.9 $
+* $Revision: 1.10 $
 * $Modtime:$
 * $Author: stulleamgym $
 *
@@ -273,10 +273,10 @@ CPropPageFrame* CTreePropSheet::CreatePageFrame()
 
 void CTreePropSheet::MoveChildWindows(int nDx, int nDy)
 {
-	CWnd	*pWnd = GetWindow(GW_CHILD);
+	CWnd* pWnd = GetWindow(GW_CHILD);
 	while (pWnd)
 	{
-		CRect	rect;
+		CRect rect;
 		pWnd->GetWindowRect(rect);
 		ScreenToClient(rect);
 		rect.OffsetRect(nDx, nDy);
@@ -357,11 +357,12 @@ void CTreePropSheet::RefillPageTree()
 			return;
 
 		pTabCtrl->GetItem(nPage, &ti);
+		ti.pszText[ti.cchTextMax - 1] = _T('\0');
 		strPagePath.ReleaseBuffer();
 
 		// Create an item in the tree for the page
 		HTREEITEM	hItem = CreatePageTreeItem(ti.pszText);
-//		ASSERT(hItem);	tabbed options. 
+//		ASSERT(hItem);	//MORPH - tabbed options. 
 		if (hItem)
 		{
 			m_pwndPageTree->SetItemData(hItem, nPage);
@@ -401,8 +402,8 @@ HTREEITEM CTreePropSheet::CreatePageTreeItem(LPCTSTR lpszPath, HTREEITEM hParent
 	// If item with that text does not already exist, create a new one
 	// MORPH START tabbed options [leuk_he]
 	if (strTopMostItem != "Multi user" && strTopMostItem != "NT Service"  )   { // MORPH leuk_he:run as ntservice v1..
-    // MORPH END tabbed options [leuk_he]
-    if (!hItem)
+	// MORPH END tabbed options [leuk_he]
+	if (!hItem)
 	{
 		hItem = m_pwndPageTree->InsertItem(strTopMostItem, hParent);
 		m_pwndPageTree->SetItemData(hItem, (DWORD_PTR)-1);
@@ -412,7 +413,7 @@ HTREEITEM CTreePropSheet::CreatePageTreeItem(LPCTSTR lpszPath, HTREEITEM hParent
 	}
 	if (!hItem)
 	{
-		// ASSERT(FALSE); // tabbed  options
+		// ASSERT(FALSE); //MORPH tabbed  options
 		return NULL;
 	}
 	} // Morph tabbed options. 
@@ -743,10 +744,10 @@ BOOL CTreePropSheet::OnInitDialog()
 		{
 			IMAGEINFO	ii;
 			m_DefaultImages.GetImageInfo(0, &ii);
-			m_Images.Create(ii.rcImage.right-ii.rcImage.left, ii.rcImage.bottom-ii.rcImage.top, theApp.m_iDfltImageListColorFlags|ILC_MASK, 0, 1);
+			m_Images.Create(ii.rcImage.right - ii.rcImage.left, ii.rcImage.bottom - ii.rcImage.top, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
 		}
 		else
-			m_Images.Create(16, 16, theApp.m_iDfltImageListColorFlags|ILC_MASK, 0, 1);
+			m_Images.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
 	}
 
 	// perform default implementation
@@ -757,7 +758,7 @@ BOOL CTreePropSheet::OnInitDialog()
 		return bResult;
 
 	// Get tab control...
-	CTabCtrl	*pTab = GetTabControl();
+	CTabCtrl* pTab = GetTabControl();
 	if (!IsWindow(pTab->GetSafeHwnd()))
 	{
 		ASSERT(FALSE);
@@ -771,7 +772,7 @@ BOOL CTreePropSheet::OnInitDialog()
 	pTab->EnableWindow(FALSE);
 
 	// Place another (empty) tab ctrl, to get a frame instead
-	CRect	rectFrame;
+	CRect rectFrame;
 	pTab->GetWindowRect(rectFrame);
 	ScreenToClient(rectFrame);
 
@@ -785,12 +786,12 @@ BOOL CTreePropSheet::OnInitDialog()
 	m_pFrame->ShowCaption(m_bPageCaption);
 
 	// Lets make place for the tree ctrl
-	const int	nTreeWidth = m_nPageTreeWidth;
-	const int	nTreeSpace = 5;
+	const int nTreeWidth = m_nPageTreeWidth;
+	const int nTreeSpace = 5;
 
-	CRect	rectSheet;
+	CRect rectSheet;
 	GetWindowRect(rectSheet);
-	rectSheet.right+= nTreeWidth;
+	rectSheet.right += nTreeWidth;
 	SetWindowPos(NULL, 0, 0, rectSheet.Width(), rectSheet.Height(), SWP_NOZORDER | SWP_NOMOVE);
 	CenterWindow();
 
@@ -876,7 +877,7 @@ BOOL CTreePropSheet::OnInitDialog()
 			rectTree, this, s_unPageTreeId);
 	}
 	#endif
-	
+
 	// This treeview control was created dynamically, thus it does not derive the font
 	// settings from the parent dialog. Need to set the font explicitly so that it fits
 	// to the font which is used for the property pages.
@@ -1028,15 +1029,28 @@ void CTreePropSheet::OnPageTreeSelChanged(NMHDR* /*pNotifyStruct*/, LRESULT* plR
 LRESULT CTreePropSheet::OnIsDialogMessage(WPARAM wParam, LPARAM lParam)
 {
 	MSG	*pMsg = reinterpret_cast<MSG*>(lParam);
-	if (pMsg->message==WM_KEYDOWN && pMsg->wParam==VK_TAB && GetKeyState(VK_CONTROL)&0x8000)
+	if (pMsg->message == WM_KEYDOWN && (GetKeyState(VK_CONTROL) & 0x8000))
 	{
-		if (GetKeyState(VK_SHIFT)&0x8000)
-			ActivatePreviousPage();
-		else
-			ActivateNextPage();
-		return TRUE;
+		// Handle default Windows Common Controls short cuts
+		if (pMsg->wParam == VK_TAB)
+		{
+			if (GetKeyState(VK_SHIFT) & 0x8000)
+				ActivatePreviousPage();			// Ctrl+Shift+Tab
+			else
+				ActivateNextPage();				// Ctrl+Tab
+			return TRUE;
+		}
+		else if (pMsg->wParam == VK_PRIOR)
+		{
+			ActivatePreviousPage();				// Ctrl+PageUp
+			return TRUE;
+		}
+		else if (pMsg->wParam == VK_NEXT)
+		{
+			ActivateNextPage();					// Ctrl+PageDown
+			return TRUE;
+		}
 	}
-
 
 	return CPropertySheet::DefWindowProc(PSM_ISDIALOGMESSAGE, wParam, lParam);
 }

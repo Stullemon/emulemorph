@@ -136,7 +136,6 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalOptions="..\..\masmx86\gvmat32.obj ..\..\masmx86\inffas32.obj /NODEFAULTLIB "
 				OutputFile="..\..\..\Release/zlib.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -228,13 +227,67 @@
 				RelativePath="..\..\..\deflate.c">
 			</File>
 			<File
+				RelativePath="..\..\masmx86\gvmat32.asm">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Assembling..."
+						CommandLine="ml.exe /nologo /c /Cx /coff /Zi /safeseh /Fo $(IntDir)\ &quot;$(InputPath)&quot;
+"
+						Outputs="$(IntDir)\$(InputName).obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Assembling..."
+						CommandLine="ml.exe /nologo /c /Cx /coff /Zi /safeseh /Fo $(IntDir)\ &quot;$(InputPath)&quot;
+"
+						Outputs="$(IntDir)\$(InputName).obj"/>
+				</FileConfiguration>
+			</File>
+			<File
 				RelativePath="..\..\masmx86\gvmat32c.c">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="."/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						AdditionalIncludeDirectories="."/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\gzio.c">
 			</File>
 			<File
 				RelativePath="..\..\..\infback.c">
+			</File>
+			<File
+				RelativePath="..\..\masmx86\inffas32.asm">
+				<FileConfiguration
+					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Assembling..."
+						CommandLine="ml.exe /nologo /c /Cx /coff /Zi /safeseh /Fo $(IntDir)\ &quot;$(InputPath)&quot;
+"
+						Outputs="$(IntDir)\$(InputName).obj"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Release|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						Description="Assembling..."
+						CommandLine="ml.exe /nologo /c /Cx /coff /Zi /safeseh /Fo $(IntDir)\ &quot;$(InputPath)&quot;
+"
+						Outputs="$(IntDir)\$(InputName).obj"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\..\..\inffast.c">

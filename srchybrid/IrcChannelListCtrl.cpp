@@ -44,15 +44,16 @@ struct ChannelName
 IMPLEMENT_DYNAMIC(CIrcChannelListCtrl, CMuleListCtrl)
 
 BEGIN_MESSAGE_MAP(CIrcChannelListCtrl, CMuleListCtrl)
-	ON_WM_CONTEXTMENU()
 	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnClick)
-	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNMDblClk)
+	ON_NOTIFY_REFLECT(LVN_GETDISPINFO, OnLvnGetDispInfo)
+	ON_NOTIFY_REFLECT(NM_DBLCLK, OnNmDblClk)
+	ON_WM_CONTEXTMENU()
 END_MESSAGE_MAP()
 
 CIrcChannelListCtrl::CIrcChannelListCtrl()
 {
 	m_pParent = NULL;
-	SetName(_T("IrcChannelListCtrl"));
+	SetSkinKey(L"IRCChannelsLv");
 }
 
 CIrcChannelListCtrl::~CIrcChannelListCtrl()
@@ -60,106 +61,18 @@ CIrcChannelListCtrl::~CIrcChannelListCtrl()
 	ResetServerChannelList(true);
 }
 
-int CIrcChannelListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+void CIrcChannelListCtrl::Init()
 {
-	const ChannelName* pItem1 = (ChannelName*)lParam1;
-	const ChannelName* pItem2 = (ChannelName*)lParam2;
-	switch (lParamSort)
-	{
-		case 0:
-			return pItem1->m_sName.CompareNoCase(pItem2->m_sName);
-		case 10:
-			return pItem2->m_sName.CompareNoCase(pItem1->m_sName);
-		case 1:
-			return CompareUnsigned(pItem1->m_uUsers, pItem2->m_uUsers);
-		case 11:
-			return CompareUnsigned(pItem2->m_uUsers, pItem1->m_uUsers);
-		case 2:
-			return pItem1->m_sDesc.CompareNoCase(pItem2->m_sDesc);
-		case 12:
-			return pItem2->m_sDesc.CompareNoCase(pItem1->m_sDesc);
-		default:
-			return 0;
-	}
-}
+	SetPrefsKey(_T("IrcChannelListCtrl"));
+	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
-void CIrcChannelListCtrl::OnLvnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
-{
-	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+	InsertColumn(0, GetResString(IDS_IRC_NAME),		LVCFMT_LEFT,  200);
+	InsertColumn(1, GetResString(IDS_UUSERS),		LVCFMT_RIGHT,  50);
+	InsertColumn(2, GetResString(IDS_DESCRIPTION),	LVCFMT_LEFT,  350);
 
-	bool bSortAscending = (GetSortItem() != pNMLV->iSubItem) ? true : !GetSortAscending();
-	SetSortArrow(pNMLV->iSubItem, bSortAscending);
-	SortItems(&SortProc, pNMLV->iSubItem + (bSortAscending ? 0 : 10));
-
-	*pResult = 0;
-}
-
-void CIrcChannelListCtrl::OnContextMenu(CWnd*, CPoint point)
-{
-	int iCurSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
-	CTitleMenu menuChannel;
-	menuChannel.CreatePopupMenu();
-	menuChannel.AddMenuTitle(GetResString(IDS_IRC_CHANNEL));
-	menuChannel.AppendMenu(MF_STRING, Irc_Join, GetResString(IDS_IRC_JOIN));
-	if (iCurSel == -1)
-		menuChannel.EnableMenuItem(Irc_Join, MF_GRAYED);
-	GetPopupMenuPos(*this, point);
-	menuChannel.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
-	VERIFY( menuChannel.DestroyMenu() );
-}
-
-void CIrcChannelListCtrl::OnNMDblClk(NMHDR*, LRESULT* pResult)
-{
-	JoinChannels();
-	*pResult = 0;
-}
-
-void CIrcChannelListCtrl::ResetServerChannelList(bool bShutDown)
-{
-	POSITION pos = m_lstChannelNames.GetHeadPosition();
-	while (pos)
-		delete m_lstChannelNames.GetNext(pos);
-	m_lstChannelNames.RemoveAll();
-	if (!bShutDown)
-		DeleteAllItems();
-}
-
-bool CIrcChannelListCtrl::AddChannelToList(const CString& sName, const CString& sUsers, const CString& sDesc)
-{
-	UINT uUsers = _tstoi(sUsers);
-	if (thePrefs.GetIRCUseChannelFilter())
-	{
-		if (uUsers < thePrefs.GetIRCChannelUserFilter())
-			return false;
-		// was already filters with "/LIST" command
-		//if (!thePrefs.GetIRCChannelFilter().IsEmpty())
-		//{
-		//	if (stristr(sName, thePrefs.GetIRCChannelFilter()) == NULL)
-		//		return false;
-		//}
-	}
-
-	ChannelName* pChannel = new ChannelName(sName, uUsers, m_pParent->StripMessageOfFontCodes(sDesc));
-	m_lstChannelNames.AddTail(pChannel);
-	int iItem = InsertItem(LVIF_TEXT | LVIF_PARAM, GetItemCount(), pChannel->m_sName, 0, 0, 0, (LPARAM)pChannel);
-	if (iItem < 0)
-		return false;
-	SetItemText(iItem, 1, 0);
-	SetItemText(iItem, 2, 0);
-	return true;
-}
-
-void CIrcChannelListCtrl::JoinChannels()
-{
-	if (!m_pParent->IsConnected())
-		return;
-	POSITION pos = GetFirstSelectedItemPosition();
-	while (pos != NULL)
-	{
-		int iIndex = GetNextSelectedItem(pos);
-		if (iIndex >= 0)
-			m_pParent->m_pIrcMain->SendString(_T("JOIN ") + GetItemText(iIndex, 0));
-	}
+	LoadSettings();
+	SetSortArrow();
+	SortItems(&SortProc, GetSortItem() + (GetSortAscending() ? 0 : 10));
 }
 
 void CIrcChannelListCtrl::Localize()
@@ -182,15 +95,111 @@ void CIrcChannelListCtrl::Localize()
 	pHeaderCtrl->SetItem(2, &hdi);
 }
 
-void CIrcChannelListCtrl::Init()
+void CIrcChannelListCtrl::GetItemDisplayText(const ChannelName *pChannel, int iSubItem, LPTSTR pszText, int cchTextMax)
 {
-	InsertColumn(0, GetResString(IDS_IRC_NAME), LVCFMT_LEFT, 203);
-	InsertColumn(1, GetResString(IDS_UUSERS), LVCFMT_LEFT, 50);
-	InsertColumn(2, GetResString(IDS_DESCRIPTION), LVCFMT_LEFT, 350);
+	if (pszText == NULL || cchTextMax <= 0) {
+		ASSERT(0);
+		return;
+	}
+	pszText[0] = _T('\0');
+	switch (iSubItem)
+	{
+		case 0:
+			_tcsncpy(pszText, pChannel->m_sName, cchTextMax);
+			break;
 
-	LoadSettings();
-	SetSortArrow();
-	SortItems(&SortProc, GetSortItem() + (GetSortAscending() ? 0 : 10));
+		case 1:
+			_sntprintf(pszText, cchTextMax, _T("%u"), pChannel->m_uUsers);
+			break;
+
+		case 2:
+			_tcsncpy(pszText, pChannel->m_sDesc, cchTextMax);
+			break;
+	}
+	pszText[cchTextMax - 1] = _T('\0');
+}
+
+void CIrcChannelListCtrl::OnLvnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	if (theApp.emuledlg->IsRunning()) {
+		// Although we have an owner drawn listview control we store the text for the primary item in the listview, to be
+		// capable of quick searching those items via the keyboard. Because our listview items may change their contents,
+		// we do this via a text callback function. The listview control will send us the LVN_DISPINFO notification if
+		// it needs to know the contents of the primary item.
+		//
+		// But, the listview control sends this notification all the time, even if we do not search for an item. At least
+		// this notification is only sent for the visible items and not for all items in the list. Though, because this
+		// function is invoked *very* often, do *NOT* put any time consuming code in here.
+		//
+		// Vista: That callback is used to get the strings for the label tips for the sub(!) items.
+		//
+		NMLVDISPINFO *pDispInfo = reinterpret_cast<NMLVDISPINFO*>(pNMHDR);
+		if (pDispInfo->item.mask & LVIF_TEXT) {
+			const ChannelName *pChannel = (ChannelName *)pDispInfo->item.lParam;
+			if (pChannel != NULL)
+				GetItemDisplayText(pChannel, pDispInfo->item.iSubItem, pDispInfo->item.pszText, pDispInfo->item.cchTextMax);
+		}
+	}
+	*pResult = 0;
+}
+
+void CIrcChannelListCtrl::OnLvnColumnClick(NMHDR* pNMHDR, LRESULT* pResult)
+{
+	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
+
+	bool bSortAscending = (GetSortItem() != pNMLV->iSubItem) ? true : !GetSortAscending();
+	SetSortArrow(pNMLV->iSubItem, bSortAscending);
+	SortItems(&SortProc, pNMLV->iSubItem + (bSortAscending ? 0 : 10));
+
+	*pResult = 0;
+}
+
+int CIrcChannelListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
+{
+	const ChannelName* pItem1 = (ChannelName*)lParam1;
+	const ChannelName* pItem2 = (ChannelName*)lParam2;
+	int iColumn = lParamSort >= 10 ? lParamSort - 10 : lParamSort;
+	int iResult = 0;
+	switch (iColumn)
+	{
+		case 0:
+			iResult = pItem1->m_sName.CompareNoCase(pItem2->m_sName);
+			break;
+		
+		case 1:
+			iResult = CompareUnsigned(pItem1->m_uUsers, pItem2->m_uUsers);
+			break;
+		
+		case 2:
+			iResult = pItem1->m_sDesc.CompareNoCase(pItem2->m_sDesc);
+			break;
+
+		default:
+			return 0;
+	}
+	if (lParamSort >= 10)
+		iResult = -iResult;
+	return iResult;
+}
+
+void CIrcChannelListCtrl::OnNmDblClk(NMHDR*, LRESULT* pResult)
+{
+	JoinChannels();
+	*pResult = 0;
+}
+
+void CIrcChannelListCtrl::OnContextMenu(CWnd*, CPoint point)
+{
+	int iCurSel = GetNextItem(-1, LVIS_SELECTED | LVIS_FOCUSED);
+	CTitleMenu menuChannel;
+	menuChannel.CreatePopupMenu();
+	menuChannel.AddMenuTitle(GetResString(IDS_IRC_CHANNEL));
+	menuChannel.AppendMenu(MF_STRING, Irc_Join, GetResString(IDS_IRC_JOIN));
+	if (iCurSel == -1)
+		menuChannel.EnableMenuItem(Irc_Join, MF_GRAYED);
+	GetPopupMenuPos(*this, point);
+	menuChannel.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+	VERIFY( menuChannel.DestroyMenu() );
 }
 
 BOOL CIrcChannelListCtrl::OnCommand(WPARAM wParam, LPARAM)
@@ -205,86 +214,50 @@ BOOL CIrcChannelListCtrl::OnCommand(WPARAM wParam, LPARAM)
 	return TRUE;
 }
 
-void CIrcChannelListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
+bool CIrcChannelListCtrl::AddChannelToList(const CString& sName, const CString& sUsers, const CString& sDesc)
 {
-	if (!theApp.emuledlg->IsRunning())
-		return;
-	if (!lpDrawItemStruct->itemData)
-		return;
-	CDC* odc = CDC::FromHandle(lpDrawItemStruct->hDC);
-	BOOL bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
-	if (lpDrawItemStruct->itemState & ODS_SELECTED) {
-		if (bCtrlFocused)
-			odc->SetBkColor(m_crHighlight);
-		else
-			odc->SetBkColor(m_crNoHighlight);
-	}
-	else
-		odc->SetBkColor(GetBkColor());
-	const ChannelName* pChannel = (ChannelName*)lpDrawItemStruct->itemData;
-	CMemDC dc(odc, &lpDrawItemStruct->rcItem);
-	CFont* pOldFont = dc.SelectObject(GetFont());
-	CRect cur_rec(lpDrawItemStruct->rcItem);
-	COLORREF crOldTextColor = dc.SetTextColor(m_crWindowText);
-
-	int iOldBkMode;
-	if (m_crWindowTextBk == CLR_NONE) {
-		DefWindowProc(WM_ERASEBKGND, (WPARAM)(HDC)dc, 0);
-		iOldBkMode = dc.SetBkMode(TRANSPARENT);
-	}
-	else
-		iOldBkMode = OPAQUE;
-
-	CString strBuff;
-	CHeaderCtrl *pHeaderCtrl = GetHeaderCtrl();
-	int iCount = pHeaderCtrl->GetItemCount();
-	cur_rec.right = cur_rec.left - 8;
-	cur_rec.left += 4;
-
-	for (int iCurrent = 0; iCurrent < iCount; iCurrent++)
+	UINT uUsers = _tstoi(sUsers);
+	if (thePrefs.GetIRCUseChannelFilter())
 	{
-		int iColumn = pHeaderCtrl->OrderToIndex(iCurrent);
-		if (!IsColumnHidden(iColumn))
-		{
-			int cx = GetColumnWidth(iColumn);
-			cur_rec.right += cx;
-			switch (iColumn)
-			{
-				case 0:
-					strBuff = pChannel->m_sName;
-					break;
-
-				case 1:
-					strBuff.Format(_T("%u"), pChannel->m_uUsers);
-					break;
-
-				case 2:
-					strBuff = pChannel->m_sDesc;
-					break;
-			}
-			dc->DrawText(strBuff, strBuff.GetLength(), &cur_rec, DT_LEFT);
-			cur_rec.left += cx;
-		}
+		if (uUsers < thePrefs.GetIRCChannelUserFilter())
+			return false;
+		// was already filtered with "/LIST" command
+		//if (!thePrefs.GetIRCChannelFilter().IsEmpty())
+		//{
+		//	if (stristr(sName, thePrefs.GetIRCChannelFilter()) == NULL)
+		//		return false;
+		//}
 	}
 
-	//draw rectangle around selected item(s)
-	if (lpDrawItemStruct->itemState & ODS_SELECTED)
+	ChannelName* pChannel = new ChannelName(sName, uUsers, m_pParent->StripMessageOfFontCodes(sDesc));
+	m_lstChannelNames.AddTail(pChannel);
+	int iItem = InsertItem(LVIF_TEXT | LVIF_PARAM, GetItemCount(), LPSTR_TEXTCALLBACK, 0, 0, 0, (LPARAM)pChannel);
+	if (iItem < 0)
+		return false;
+	SetItemText(iItem, 1, LPSTR_TEXTCALLBACK);
+	SetItemText(iItem, 2, LPSTR_TEXTCALLBACK);
+	return true;
+}
+
+void CIrcChannelListCtrl::ResetServerChannelList(bool bShutDown)
+{
+	POSITION pos = m_lstChannelNames.GetHeadPosition();
+	while (pos)
+		delete m_lstChannelNames.GetNext(pos);
+	m_lstChannelNames.RemoveAll();
+	if (!bShutDown)
+		DeleteAllItems();
+}
+
+void CIrcChannelListCtrl::JoinChannels()
+{
+	if (!m_pParent->IsConnected())
+		return;
+	POSITION pos = GetFirstSelectedItemPosition();
+	while (pos != NULL)
 	{
-		RECT outline_rec = lpDrawItemStruct->rcItem;
-		outline_rec.top--;
-		outline_rec.bottom++;
-		dc->FrameRect(&outline_rec, &CBrush(GetBkColor()));
-		outline_rec.top++;
-		outline_rec.bottom--;
-		outline_rec.left++;
-		outline_rec.right--;
-		if (bCtrlFocused)
-			dc->FrameRect(&outline_rec, &CBrush(m_crFocusLine));
-		else
-			dc->FrameRect(&outline_rec, &CBrush(m_crNoFocusLine));
+		int iIndex = GetNextSelectedItem(pos);
+		if (iIndex >= 0)
+			m_pParent->m_pIrcMain->SendString(_T("JOIN ") + GetItemText(iIndex, 0));
 	}
-	if (m_crWindowTextBk == CLR_NONE)
-		dc.SetBkMode(iOldBkMode);
-	dc.SelectObject(pOldFont);
-	dc.SetTextColor(crOldTextColor);
 }

@@ -43,8 +43,6 @@ CSecRunAsUser::~CSecRunAsUser(void)
 }
 
 eResult CSecRunAsUser::PrepareUser(){
-
-	USES_CONVERSION;
 	CoInitialize(NULL);
 	bool bResult = false;
 	if (!LoadAPI())
@@ -139,7 +137,7 @@ eResult CSecRunAsUser::PrepareUser(){
 bool CSecRunAsUser::CreateEmuleUser(IADsContainerPtr pUsers){
 
 	IDispatchPtr pDisp=NULL;
-	if ( !SUCCEEDED(pUsers->Create(L"user",CString(EMULEACCOUNT).AllocSysString() ,&pDisp )) )
+	if ( !SUCCEEDED(pUsers->Create(CComBSTR(L"user"),CString(EMULEACCOUNTW).AllocSysString() ,&pDisp )) )
 		return false;
 
 	IADsUserPtr pUser;
@@ -206,7 +204,6 @@ bool CSecRunAsUser::SetDirectoryPermissions(){
 }
 
 bool CSecRunAsUser::SetObjectPermission(CString strDirFile, DWORD lGrantedAccess){
-	USES_CONVERSION;
 	if (!m_hADVAPI32_DLL){
 		ASSERT ( false );
 		return false;
@@ -225,7 +222,7 @@ bool CSecRunAsUser::SetObjectPermission(CString strDirFile, DWORD lGrantedAccess
 		// get user sid
 		DWORD cbDomain = 0;
 		DWORD cbUserSID = 0;
-		fAPISuccess = LookupAccountName(NULL, EMULEACCOUNT, pUserSID, &cbUserSID, szDomain, &cbDomain, &snuType);
+		fAPISuccess = LookupAccountName(NULL, EMULEACCOUNTW, pUserSID, &cbUserSID, szDomain, &cbDomain, &snuType);
 		if ( (!fAPISuccess) && GetLastError() != ERROR_INSUFFICIENT_BUFFER)
 			throw CString(_T("Run as unpriveleged user: Error: LookupAccountName() failed,"));
 
@@ -237,12 +234,12 @@ bool CSecRunAsUser::SetObjectPermission(CString strDirFile, DWORD lGrantedAccess
 		if (!szDomain)
 			throw CString(_T("Run as unpriveleged user: Error: Allocating memory failed,"));
 
-		fAPISuccess = LookupAccountName(NULL, EMULEACCOUNT, pUserSID, &cbUserSID, szDomain, &cbDomain, &snuType);
+		fAPISuccess = LookupAccountName(NULL, EMULEACCOUNTW, pUserSID, &cbUserSID, szDomain, &cbDomain, &snuType);
 
 		if (!fAPISuccess)
 			throw CString(_T("Run as unpriveleged user: Error: LookupAccountName()2 failed"));
 
-		if (CStringW(T2W(szDomain)) != m_strDomain)
+		if (CStringW(szDomain) != m_strDomain)
 			throw CString(_T("Run as unpriveleged user: Logical Error: Domainname mismatch"));
 
 		// get old ACL
@@ -337,19 +334,21 @@ bool CSecRunAsUser::SetObjectPermission(CString strDirFile, DWORD lGrantedAccess
 }
 
 eResult CSecRunAsUser::RestartAsUser(){
-	USES_CONVERSION;
 
 	if (m_bRunningRestricted || m_bRunningAsEmule)
 		return RES_OK;
 	if (!LoadAPI())
 		return RES_FAILED;
 
+	TCHAR szAppPath[MAX_PATH];
+	DWORD dwModPathLen = GetModuleFileName(NULL, szAppPath, _countof(szAppPath));
+	if (dwModPathLen == 0 || dwModPathLen == _countof(szAppPath))
+		return RES_FAILED;
+
 	ASSERT ( !m_strPassword.IsEmpty() );
 	BOOL bResult;
 	try{
 		PROCESS_INFORMATION ProcessInfo = {0};
-		TCHAR szAppPath[MAX_PATH];
-		GetModuleFileName(NULL, szAppPath, MAX_PATH);
 		CString strAppName;
 		strAppName.Format(_T("\"%s\""),szAppPath);
 		
@@ -363,7 +362,7 @@ eResult CSecRunAsUser::RestartAsUser(){
 		::CloseHandle(theApp.m_hMutexOneInstance);
 		
 		bResult = CreateProcessWithLogonW(EMULEACCOUNTW, m_strDomain, m_strPassword,
-			LOGON_WITH_PROFILE, NULL, (LPWSTR)T2CW(strAppName), 0, NULL, NULL, &StartInf, &ProcessInfo);
+			LOGON_WITH_PROFILE, NULL, const_cast<LPWSTR>((LPCWSTR)strAppName), 0, NULL, NULL, &StartInf, &ProcessInfo);
 		CloseHandle(ProcessInfo.hProcess);
 		CloseHandle(ProcessInfo.hThread);
 
@@ -384,9 +383,8 @@ eResult CSecRunAsUser::RestartAsUser(){
 }
 
 CStringW CSecRunAsUser::GetCurrentUserW(){
-	USES_CONVERSION;
 	if ( m_strCurrentUser.IsEmpty() )
-		return T2W(_T("Unknown"));
+		return L"Unknown";
 	else
 		return m_strCurrentUser;
 }
@@ -489,6 +487,8 @@ eResult CSecRunAsUser::RestartAsRestricted(){
 			}
 			throw(CString(_T("Failed to retrieve UserSID from AccessToken")));
 		}
+		if (pstructUserToken == NULL)
+			throw(CString(_T("Failed to retrieve UserSID from AccessToken")));
 
 		// disabling our primary token would make sense from an Security POV, but this would cause file acces conflicts
 		// in the default settings (since we cannot access files we created ourself if they don't have the write flag for the group "users")
@@ -502,7 +502,9 @@ eResult CSecRunAsUser::RestartAsRestricted(){
 		// do the starting job
 		PROCESS_INFORMATION ProcessInfo = {0};
 		TCHAR szAppPath[MAX_PATH];
-		GetModuleFileName(NULL, szAppPath, MAX_PATH);
+		DWORD dwModPathLen = GetModuleFileName(NULL, szAppPath, _countof(szAppPath));
+		if (dwModPathLen == 0 || dwModPathLen == _countof(szAppPath))
+			throw CString(_T("Failed to get module file path"));
 		CString strAppName;
 		strAppName.Format(_T("\"%s\""),szAppPath);
 		
@@ -555,7 +557,7 @@ eResult CSecRunAsUser::RestartSecure(){
 	if (!thePrefs.IsPreferingRestrictedOverUser()){
 		res = PrepareUser();;
 		if (res == RES_OK){
-			theApp.QueueLogLine(false, GetResString(IDS_RAU_RUNNING), EMULEACCOUNT);
+			theApp.QueueLogLine(false, GetResString(IDS_RAU_RUNNING), EMULEACCOUNTW);
 			return RES_OK;
 		}
 		else if (res == RES_OK_NEED_RESTART){

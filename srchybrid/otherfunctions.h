@@ -23,6 +23,7 @@ class CUpDownClient;
 class CAICHHash;
 class CPartFile;
 class CSafeMemFile;
+class CShareableFile;
 
 enum EFileType { 
 		FILETYPE_UNKNOWN,
@@ -141,14 +142,14 @@ int __cdecl CompareCStringPtrLocaleStringNoCase(const void* p1, const void* p2);
 void Sort(CStringArray& astr, int (__cdecl *pfnCompare)(const void*, const void*) = CompareCStringPtrLocaleStringNoCase);
 int __cdecl CompareCStringPtrPtrLocaleString(const void* p1, const void* p2);
 int __cdecl CompareCStringPtrPtrLocaleStringNoCase(const void* p1, const void* p2);
-void Sort(CSimpleArray<const CString*>& apstr, int (__cdecl *pfnCompare)(const void*, const void*) = CompareCStringPtrPtrLocaleStringNoCase);
-void StripTrailingCollon(CString& rstr);
-bool IsUnicodeFile(LPCTSTR pszFilePath);
-UINT64	GetFreeTempSpace(int tempdirindex);
-int		GetPathDriveNumber(CString path);
-EFileType	GetFileTypeEx(CKnownFile* kfile, bool checkextention=true, bool checkfileheader=true, bool nocached=false);
-CString		GetFiletypeName(EFileType ftype);
-int			IsExtentionTypeof(EFileType type, CString ext);
+void		Sort(CSimpleArray<const CString*>& apstr, int (__cdecl *pfnCompare)(const void*, const void*) = CompareCStringPtrPtrLocaleStringNoCase);
+void		StripTrailingCollon(CString& rstr);
+bool		IsUnicodeFile(LPCTSTR pszFilePath);
+UINT64		GetFreeTempSpace(int tempdirindex);
+int			GetPathDriveNumber(CString path);
+EFileType	GetFileTypeEx(CShareableFile* kfile, bool checkextention=true, bool checkfileheader=true, bool nocached=false);
+CString		GetFileTypeName(EFileType ftype);
+int			IsExtensionTypeOf(EFileType type, CString ext);
 uint32		LevenshteinDistance(const CString& str1, const CString& str2);
 bool		_tmakepathlimit(TCHAR *path, const TCHAR *drive, const TCHAR *dir, const TCHAR *fname, const TCHAR *ext);
 
@@ -156,10 +157,15 @@ bool		_tmakepathlimit(TCHAR *path, const TCHAR *drive, const TCHAR *dir, const T
 // GUI helpers
 //
 void InstallSkin(LPCTSTR pszSkinPackage);
+bool CheckFileOpen(LPCTSTR pszFilePath, LPCTSTR pszFileTitle = NULL);
 void ShellOpenFile(CString name);
 void ShellOpenFile(CString name, LPCTSTR pszVerb);
+bool ShellDeleteFile(LPCTSTR pszFilePath);
+CString ShellGetFolderPath(int iCSIDL);
 bool SelectDir(HWND hWnd, LPTSTR pszPath, LPCTSTR pszTitle = NULL, LPCTSTR pszDlgTitle = NULL);
 BOOL DialogBrowseFile(CString& rstrPath, LPCTSTR pszFilters, LPCTSTR pszDefaultFileName = NULL, DWORD dwFlags = 0,bool openfilestyle=true);
+void AddBuddyButton(HWND hwndEdit, HWND hwndButton);
+bool InitAttachedBrowseButton(HWND hwndButton, HICON &ricoBrowse);
 void GetPopupMenuPos(CListCtrl& lv, CPoint& point);
 void GetPopupMenuPos(CTreeCtrl& tv, CPoint& point);
 void InitWindowStyles(CWnd* pWnd);
@@ -228,7 +234,6 @@ void DebugHttpHeaders(const CStringAArray& astrHeaders);
 ///////////////////////////////////////////////////////////////////////////////
 // Win32 specifics
 //
-bool HaveEd2kRegAccess();
 bool DoRegFixElevated();
 bool Ask4RegFix(bool checkOnly, bool dontAsk = false, bool bAutoTakeCollections = false); // Barry - Allow forced update without prompt
 void BackupReg(void); // Barry - Store previous values
@@ -241,23 +246,24 @@ ULONGLONG GetModuleVersion(HMODULE hModule);
 
 int GetMaxWindowsTCPConnections();
 
-#define _WINVER_NT4_	0x0004
-#define _WINVER_95_		0x0004
-#define _WINVER_98_		0x0A04
-#define _WINVER_ME_		0x5A04
-#define _WINVER_2K_		0x0005
-#define _WINVER_XP_		0x0105
-#define _WINVER_2003_	0x0205
-#define _WINVER_VISTA_	0x0006
-WORD DetectWinVersion();
+#define _WINVER_95_		0x0400	// 4.0
+#define _WINVER_NT4_	0x0401	// 4.1 (baked version)
+#define _WINVER_98_		0x040A	// 4.10
+#define _WINVER_ME_		0x045A	// 4.90
+#define _WINVER_2K_		0x0500	// 5.0
+#define _WINVER_XP_		0x0501	// 5.1
+#define _WINVER_2003_	0x0502	// 5.2
+#define _WINVER_VISTA_	0x0600	// 6.0
+
+WORD		DetectWinVersion();
 int			IsRunningXPSP2();
 int			IsRunningXPSP2OrHigher();
-uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory);
-ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath);
-int GetAppImageListColorFlag();
+uint64		GetFreeDiskSpaceX(LPCTSTR pDirectory);
+ULONGLONG	GetDiskFileSize(LPCTSTR pszFilePath);
+int			GetAppImageListColorFlag();
 int			GetDesktopColorDepth();
 bool		IsFileOnFATVolume(LPCTSTR pszFilePath);
-
+void		ClearVolumeInfoCache(int iDrive = -1);
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -319,6 +325,17 @@ __inline int CompareUnsigned(uint32 uSize1, uint32 uSize2)
 	return 0;
 }
 
+__inline int CompareUnsignedUndefinedAtBottom(uint32 uSize1, uint32 uSize2, bool bSortAscending)
+{
+	if (uSize1 == 0 && uSize2 == 0)
+		return 0;
+	if (uSize1 == 0)
+		return bSortAscending ? 1 : -1;
+	if (uSize2 == 0)
+		return bSortAscending ? -1 : 1;
+	return CompareUnsigned(uSize1, uSize2);
+}
+
 __inline int CompareUnsigned64(uint64 uSize1, uint64 uSize2)
 {
 	if (uSize1 < uSize2)
@@ -348,6 +365,16 @@ __inline int CompareOptLocaleStringNoCase(LPCTSTR psz1, LPCTSTR psz2)
 	return 0;
 }
 
+__inline int CompareOptLocaleStringNoCaseUndefinedAtBottom(const CString &str1, const CString &str2, bool bSortAscending)
+{
+	if (str1.IsEmpty() && str2.IsEmpty())
+		return 0;
+	if (str1.IsEmpty())
+		return bSortAscending ? 1 : -1;
+	if (str2.IsEmpty())
+		return bSortAscending ? -1 : 1;
+	return CompareOptLocaleStringNoCase(str1, str2);
+}
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -386,6 +413,7 @@ __inline bool IsLowID(uint32 id){
 	return (id < 16777216);
 }
 CString ipstr(uint32 nIP);
+CString ipstr_rev(uint32 nIP); //MORPH - Added by Stulle, IP Filter White List [Stulle]
 CString ipstr(uint32 nIP, uint16 nPort);
 CString ipstr(LPCTSTR pszAddress, uint16 nPort);
 CStringA ipstrA(uint32 nIP);

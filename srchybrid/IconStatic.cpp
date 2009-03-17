@@ -55,7 +55,7 @@ void CIconStatic::SetIcon(LPCTSTR pszIconID)
 	m_strIconID = pszIconID;
 
 	// If this function is called for the first time and we did not yet call 'SetWindowText', we take
-	// take the window label which is already specified for the window (the label which comes from the resource)
+	// the window label which is already specified for the window (the label which comes from the resource)
 	CString strText;
 	CStatic::GetWindowText(strText);
 	CStatic::SetWindowText(_T(""));
@@ -93,7 +93,7 @@ void CIconStatic::SetIcon(LPCTSTR pszIconID)
 	// the dialog window.
 	HBRUSH hbr = (HBRUSH)GetParent()->SendMessage(WM_CTLCOLORSTATIC, (WPARAM)MemDC.m_hDC, (LPARAM)m_hWnd);
 	FillRect(MemDC, &rCaption, hbr);
-	
+
 	if (!m_strIconID.IsEmpty())
 		VERIFY( DrawState( MemDC.m_hDC, NULL, NULL, (LPARAM)(HICON)CTempIconLoader(m_strIconID, 16, 16), NULL, 3, 0, 16, 16, DST_ICON | DSS_NORMAL) );
 
@@ -130,9 +130,7 @@ void CIconStatic::SetIcon(LPCTSTR pszIconID)
 	if(g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed())
     {
 		HTHEME hTheme = g_xpStyle.OpenThemeData(NULL, L"BUTTON"); 
-		USES_CONVERSION;
-		LPCWSTR oleText = T2CW(m_strText); 
-		g_xpStyle.DrawThemeText(hTheme, MemDC.m_hDC, BP_GROUPBOX, GBS_NORMAL, oleText, ocslen (oleText), 
+		g_xpStyle.DrawThemeText(hTheme, MemDC.m_hDC, BP_GROUPBOX, GBS_NORMAL, m_strText, m_strText.GetLength(), 
 			DT_WORDBREAK | DT_CENTER | DT_WORD_ELLIPSIS, NULL, &rCaption); 
 		g_xpStyle.CloseThemeData(hTheme);
 	}
@@ -152,10 +150,6 @@ void CIconStatic::SetIcon(LPCTSTR pszIconID)
 	m_wndPicture.SetWindowPos(NULL, rRect.left+8, rRect.top, rCaption.Width()+22, rCaption.Height(), SWP_SHOWWINDOW);
 	m_wndPicture.SetBitmap(m_MemBMP);
 
-	CWnd *pParent = GetParent();
-	if (pParent == NULL)
-		pParent = GetDesktopWindow();
-	
 	CRect r;
 	GetWindowRect(r);
 	r.bottom = r.top + 20;

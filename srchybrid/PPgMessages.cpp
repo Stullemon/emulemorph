@@ -233,6 +233,7 @@ BOOL CPPgMessages::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 	OnHelp();
 	return TRUE;
 }
+
 void CPPgMessages::OnSpamFilterChange()
 {
 	if (IsDlgButtonChecked(IDC_ADVSPAMFILTER) == 0){

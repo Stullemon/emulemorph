@@ -58,7 +58,7 @@ bool CKnownFile::SR13_ImportParts(){
 	CAddFileThread* addfilethread = (CAddFileThread*) AfxBeginThread(RUNTIME_CLASS(CAddFileThread), THREAD_PRIORITY_LOWEST, 0, CREATE_SUSPENDED);
 	if (addfilethread){
 		partfile->SetFileOpProgress(0);
-        addfilethread->SetValues(theApp.sharedfiles, partfile->GetPath(), partfile->m_hpartfile.GetFileName(), partfile);
+        addfilethread->SetValues(theApp.sharedfiles, partfile->GetPath(), partfile->m_hpartfile.GetFileName(), _T(""), partfile);
 		if (addfilethread->SetPartToImport(pathName))
 			partfile->SetFileOp(PFOP_SR13_IMPORTPARTS);
 		else

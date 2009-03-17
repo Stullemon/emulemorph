@@ -78,8 +78,6 @@ BOOL CPPgProxy::OnInitDialog()
 
 BOOL CPPgProxy::OnApply()
 {
-	USES_CONVERSION;
-
 	proxy.UseProxy = (IsDlgButtonChecked(IDC_ENABLEPROXY) != 0);
 	proxy.EnablePassword = ((CButton*)GetDlgItem(IDC_ENABLEAUTH))->GetCheck() != 0;
 	proxy.type = (uint16)((CComboBox*)GetDlgItem(IDC_PROXYTYPE))->GetCurSel();
@@ -113,7 +111,7 @@ BOOL CPPgProxy::OnApply()
 	if (GetDlgItem(IDC_USERNAME_A)->GetWindowTextLength()) { 
 		CString strUser;
 		GetDlgItem(IDC_USERNAME_A)->GetWindowText(strUser);
-		proxy.user = T2CA(strUser);
+		proxy.user = CStringA(strUser);
 	}
 	else {
 		proxy.user.Empty();
@@ -123,7 +121,7 @@ BOOL CPPgProxy::OnApply()
 	if (GetDlgItem(IDC_PASSWORD)->GetWindowTextLength()) { 
 		CString strPasswd;
 		GetDlgItem(IDC_PASSWORD)->GetWindowText(strPasswd);
-		proxy.password = T2CA(strPasswd);
+		proxy.password = CStringA(strPasswd);
 	}
 	else {
 		proxy.password.Empty();
@@ -173,7 +171,6 @@ void CPPgProxy::OnCbnSelChangeProxyType()
 
 void CPPgProxy::LoadSettings()
 {
-	USES_CONVERSION;
 	((CButton*)GetDlgItem(IDC_ENABLEPROXY))->SetCheck(proxy.UseProxy);
 	((CButton*)GetDlgItem(IDC_ENABLEAUTH))->SetCheck(proxy.EnablePassword);
 	((CComboBox*)GetDlgItem(IDC_PROXYTYPE))->SetCurSel(proxy.type);
@@ -181,8 +178,8 @@ void CPPgProxy::LoadSettings()
 	CString buffer;
 	buffer.Format(_T("%u"), proxy.port);
 	GetDlgItem(IDC_PROXYPORT)->SetWindowText(buffer);
-	GetDlgItem(IDC_USERNAME_A)->SetWindowText(A2T(proxy.user));
-	GetDlgItem(IDC_PASSWORD)->SetWindowText(A2T(proxy.password));
+	SetWindowTextA(*GetDlgItem(IDC_USERNAME_A), proxy.user);
+	SetWindowTextA(*GetDlgItem(IDC_PASSWORD), proxy.password);
 	OnBnClickedEnableProxy();
 }
 

@@ -1,7 +1,5 @@
-//--- xrmb:downloadclientslist ---
-
 //this file is part of eMule
-//Copyright (C)2002 Merkur ( merkur-@users.sourceforge.net / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -16,13 +14,11 @@
 //You should have received a copy of the GNU General Public License
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 #pragma once
 #include "MuleListCtrl.h"
 #include "ListCtrlItemWalk.h"
 
 class CUpDownClient;
-class CPartFile;
 
 class CDownloadClientsCtrl : public CMuleListCtrl, public CListCtrlItemWalk
 {
@@ -30,15 +26,11 @@ class CDownloadClientsCtrl : public CMuleListCtrl, public CListCtrlItemWalk
 
 public:
 	CDownloadClientsCtrl();
-	virtual ~CDownloadClientsCtrl();
-
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	void	Init();
-	void	AddClient(CUpDownClient* client);
-	void	RemoveClient(CUpDownClient* client);
-	void	RefreshClient(CUpDownClient* client);
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
+	void	AddClient(const CUpDownClient *client);
+	void	RemoveClient(const CUpDownClient *client);
+	void	RefreshClient(const CUpDownClient *client);
 	void	Hide() { ShowWindow(SW_HIDE); }
 	void	Show() { ShowWindow(SW_SHOW); }
 	void	Localize();
@@ -46,17 +38,19 @@ public:
 
 protected:
 	CImageList  m_ImageList;
-	CImageList  m_overlayimages;
+	CImageList  m_overlayimages; //MORPH
 	
 	void SetAllIcons();
+	void GetItemDisplayText(const CUpDownClient *client, int iSubItem, LPTSTR pszText, int cchTextMax);
+	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnContextMenu(CWnd *pWnd, CPoint point);
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmDblClk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
-	afx_msg void OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnNMDblclkDownloadClientlist(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnGetDispInfo(NMHDR* pNMHDR, LRESULT* pResult);
-	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
-	static int Compare(CUpDownClient* client1, CUpDownClient* client2, CPartFile* file1, CPartFile* file2, LPARAM lParamSort, int sortMod);
 };

@@ -194,7 +194,7 @@ CString OptUtf8ToStr(const CStringW& rwstr)
 	CStringA astr;
 	for (int i = 0; i < rwstr.GetLength(); i++)
 	{
-		if (rwstr[i] > 0xFF)
+		if (rwstr[i] >= 0x100)
 		{
 			// this is no UTF8 string (it's already an Unicode string)...
 			return rwstr;			// just return the string

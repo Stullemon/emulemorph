@@ -3,6 +3,7 @@
 #include "resource.h"
 
 class CIni;
+class CMemDC;
 
 ///////////////////////////////////////////////////////////////////////////////
 // CMuleListCtrl
@@ -38,6 +39,25 @@ private:
 };
 //MORPH END   - UpdateItemThread
 
+#define MLC_DT_TEXT (DT_LEFT | DT_VCENTER | DT_SINGLELINE | DT_NOPREFIX | DT_END_ELLIPSIS)
+
+#define DFLT_FILENAME_COL_WIDTH		260
+#define DFLT_FILETYPE_COL_WIDTH		 60 
+#define	DFLT_CLIENTNAME_COL_WIDTH	150
+#define	DFLT_CLIENTSOFT_COL_WIDTH	100
+#define	DFLT_SIZE_COL_WIDTH			 65
+#define	DFLT_HASH_COL_WIDTH			220
+#define	DFLT_DATARATE_COL_WIDTH		 65
+#define	DFLT_PRIORITY_COL_WIDTH		 60
+#define	DFLT_PARTSTATUS_COL_WIDTH	170
+#define	DFLT_ARTIST_COL_WIDTH		100
+#define	DFLT_ALBUM_COL_WIDTH		100
+#define	DFLT_TITLE_COL_WIDTH		100
+#define	DFLT_LENGTH_COL_WIDTH		 50
+#define	DFLT_BITRATE_COL_WIDTH		 65
+#define	DFLT_CODEC_COL_WIDTH		 50
+#define	DFLT_FOLDER_COL_WIDTH		260
+
 class CMuleListCtrl : public CListCtrl
 {
 	DECLARE_DYNAMIC(CMuleListCtrl)
@@ -49,15 +69,13 @@ public:
 	// Default sort proc, this does nothing
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
-	// Sets the list name, used for hide/show menu
-	void SetName(LPCTSTR lpszName);
+	// Sets the list name, used for settings in "preferences.ini"
+	void SetPrefsKey(LPCTSTR lpszName);
 
 	// Save to preferences
-	//void SaveSettings(CPreferences::Table tID);
 	void SaveSettings();
 
 	// Load from preferences
-	//void LoadSettings(CPreferences::Table tID);
 	void LoadSettings();
 
 	DWORD SetExtendedStyle(DWORD dwNewStyle);
@@ -69,31 +87,58 @@ public:
 	void ShowColumn(int iColumn);
 
 	// Check to see if the column is hidden
-	BOOL IsColumnHidden(int iColumn) const {
-		if(iColumn < 1 || iColumn >= m_iColumnsTracked)
+	bool IsColumnHidden(int iColumn) const {
+		if (iColumn < 1 || iColumn >= m_iColumnsTracked)
 			return false;
-
 		return m_aColumns[iColumn].bHidden;
 	}
 
 	// Get the correct column width even if column is hidden
 	int GetColumnWidth(int iColumn) const {
-		if(iColumn < 0 || iColumn >= m_iColumnsTracked)
+		if (iColumn < 0 || iColumn >= m_iColumnsTracked)
 			return 0;
-		
-		if(m_aColumns[iColumn].bHidden)
+		if (m_aColumns[iColumn].bHidden)
 			return m_aColumns[iColumn].iWidth;
 		else
 			return CListCtrl::GetColumnWidth(iColumn);
 	}
 
+	// Get the column width and the alignment flags for 'DrawText'
+	int GetColumnWidth(int iColumn, UINT &uDrawTextAlignment) const {
+		if (iColumn < 0 || iColumn >= m_iColumnsTracked) {
+			uDrawTextAlignment = DT_LEFT;
+			return 0;
+		}
+		ASSERT( !m_aColumns[iColumn].bHidden );
+		LVCOLUMN lvcol;
+		lvcol.mask = LVCF_FMT | LVCF_WIDTH;
+		if (!CListCtrl::GetColumn(iColumn, &lvcol)) {
+			uDrawTextAlignment = DT_LEFT;
+			return 0;
+		}
+		switch (lvcol.fmt & LVCFMT_JUSTIFYMASK) {
+			default:
+			case LVCFMT_LEFT:
+				uDrawTextAlignment = DT_LEFT;
+				break;
+			case LVCFMT_RIGHT:
+				uDrawTextAlignment = DT_RIGHT;
+				break;
+			case LVCFMT_CENTER:
+				uDrawTextAlignment = DT_CENTER;
+				break;
+		}
+		return lvcol.cx;
+	}
+
 	// Call SetRedraw to allow changes to be redrawn or to prevent changes from being redrawn.
 	void SetRedraw(BOOL bRedraw = TRUE) {
-		if(bRedraw) {
-			if(m_iRedrawCount > 0 && --m_iRedrawCount == 0)
+		if (bRedraw) {
+			if (m_iRedrawCount > 0 && --m_iRedrawCount == 0)
 				CListCtrl::SetRedraw(TRUE);
-		} else {
-			if(m_iRedrawCount++ == 0)
+		}
+		else {
+			if (m_iRedrawCount++ == 0)
 				CListCtrl::SetRedraw(FALSE);
 		}
 	}
@@ -118,29 +163,29 @@ public:
 	// Retrieves the number of items in the control.
 	int GetItemCount() const { return m_Params.GetCount(); };
 
-	enum ArrowType { arrowDown = IDB_DOWN, arrowUp = IDB_UP,
-		arrowDoubleDown = IDB_DOWN2X, arrowDoubleUp = IDB_UP2X };
+	enum ArrowType { 
+		arrowDown		= IDB_DOWN, 
+		arrowUp			= IDB_UP,
+		arrowDoubleDown = IDB_DOWN2X, 
+		arrowDoubleUp	= IDB_UP2X
+	};
 
 	int	GetSortType(ArrowType at);
-	ArrowType	GetArrowType(int iat);
+	ArrowType GetArrowType(int iat);
 	int GetSortItem() const { return m_iCurrentSortItem; }
 	bool GetSortAscending() const { return m_atSortArrow == arrowUp || m_atSortArrow == arrowDoubleUp; }
 	bool GetSortSecondValue() const { return m_atSortArrow == arrowDoubleDown || m_atSortArrow == arrowDoubleUp; }
 	// Places a sort arrow in a column
 	void SetSortArrow(int iColumn, ArrowType atType);
-	void SetSortArrow()		{SetSortArrow(m_iCurrentSortItem, m_atSortArrow); }
+	void SetSortArrow() { SetSortArrow(m_iCurrentSortItem, m_atSortArrow); }
 	void SetSortArrow(int iColumn, bool bAscending) { SetSortArrow(iColumn, bAscending ? arrowUp : arrowDown); }
-
-	HIMAGELIST ApplyImageList(HIMAGELIST himl);
+	int GetNextSortOrder(int dwCurrentSortOrder) const;
+	void UpdateSortHistory(int dwNewOrder, int dwInverseValue = 100);
 
 	// General purpose listview find dialog+functions (optional)
 	void	SetGeneralPurposeFind(bool bEnable, bool bCanSearchInAllColumns = true) { m_bGeneralPurposeFind = bEnable; m_bCanSearchInAllColumns = bCanSearchInAllColumns; }
 	void	DoFind(int iStartItem, int iDirection /*1=down, 0 = up*/, BOOL bShowError);
 	void	DoFindNext(BOOL bShowError);
-
-	void	AutoSelectItem();
-	int		GetNextSortOrder(int dwCurrentSortOrder) const;
-	void	UpdateSortHistory(int dwNewOrder, int dwInverseValue = 100);
 
 	enum EUpdateMode {
 		lazy,
@@ -148,6 +193,18 @@ public:
 		none
 	};
 	enum EUpdateMode SetUpdateMode(enum EUpdateMode eMode);
+	void SetAutoSizeWidth(int iAutoSizeWidth);
+
+	int InsertColumn(int nCol, LPCTSTR lpszColumnHeading, int nFormat = LVCFMT_LEFT, int nWidth = -1, int nSubItem = -1, bool bHiddenByDefault = false);
+
+	HIMAGELIST ApplyImageList(HIMAGELIST himl);
+	void AutoSelectItem();
+	void SetSkinKey(LPCTSTR pszKey) {
+		m_strSkinKey = pszKey;
+	}
+	const CString &GetSkinKey() const {
+		return m_strSkinKey;
+	}
 
 protected:
 	virtual void PreSubclassWindow();
@@ -163,16 +220,23 @@ protected:
 	afx_msg void OnSysColorChange();
 	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
 
-	// Checks the item to see if it is in order
-	int          UpdateLocation(int iItem);
-	// Moves the item in list and returns the new index
-	int          MoveItem(int iOldIndex, int iNewIndex);
-	// Update the colors
-	void         SetColors(LPCTSTR pszLvKey = NULL);
+	int UpdateLocation(int iItem);
+	int MoveItem(int iOldIndex, int iNewIndex);
+	void SetColors();
+	void DrawFocusRect(CDC *pDC, const CRect &rcItem, BOOL bItemFocused, BOOL bCtrlFocused, BOOL bItemSelected);
+	void InitItemMemDC(CMemDC *dc, LPDRAWITEMSTRUCT lpDrawItemStruct, BOOL &bCtrlFocused);
+
+	static __inline bool HaveIntersection(const CRect &rc1, const CRect &rc2) {
+        return (rc1.left   < rc2.right  &&
+                rc1.right  > rc2.left   &&
+                rc1.top    < rc2.bottom &&
+                rc1.bottom > rc2.top);
+	}
 
 	CString         m_Name;
 	PFNLVCOMPARE    m_SortProc;
 	DWORD           m_dwParamSort;
+	CString			m_strSkinKey;
 	COLORREF        m_crWindow;
 	COLORREF        m_crWindowText;
 	COLORREF        m_crWindowTextBk;
@@ -189,6 +253,11 @@ protected:
 	UINT			m_uIDAccel;
 	HACCEL			m_hAccel;
 	enum EUpdateMode m_eUpdateMode;
+	int				m_iAutoSizeWidth;
+	static const int sm_iIconOffset;
+	static const int sm_iLabelOffset;
+	static const int sm_iSubItemInset;
+
 
 	// General purpose listview find dialog+functions (optional)
 	bool m_bGeneralPurposeFind;
@@ -201,6 +270,7 @@ protected:
 	void OnFindNext();
 	void OnFindPrev();
 	CUpdateItemThread* m_updatethread; //MORPH - UpdateItemThread
+
 private:
 	static int	IndexToOrder(CHeaderCtrl* pHeader, int iIndex);
 
@@ -225,7 +295,7 @@ private:
 	ArrowType m_atSortArrow;
 
 	int m_iRedrawCount;
-	CList<DWORD_PTR> m_Params;
+	CList<DWORD_PTR, DWORD_PTR> m_Params;
 
 	DWORD_PTR GetParamAt(POSITION pos, int iPos) {
 		LPARAM lParam = m_Params.GetAt(pos);
@@ -233,6 +303,9 @@ private:
 			m_Params.SetAt(pos, lParam = CListCtrl::GetItemData(iPos));
 		return lParam;
 	}
+
+	CList<int> m_liDefaultHiddenColumns;
+
 	// SLUGFILLER: multiSort
 	int MultiSortProc(LPARAM lParam1, LPARAM lParam2) {
 		for (POSITION pos = m_liSortHistory.GetHeadPosition(); pos != NULL; ) {
@@ -250,7 +323,6 @@ private:
 		return ((CMuleListCtrl*)lParamSort)->MultiSortProc(lParam1, lParam2);
 	}
 	// SLUGFILLER: multiSort
-
 };
 
 void GetContextMenuPosition(CListCtrl& lv, CPoint& point);

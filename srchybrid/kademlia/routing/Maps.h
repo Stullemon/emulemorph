@@ -41,12 +41,13 @@ namespace Kademlia
 	class CKadTag;
 	class CRoutingZone;
 	class CEntry;
+	class CKadTagValueString;
 	typedef std::map<CUInt128, CContact*> ContactMap;
 	typedef std::list<CContact*> ContactList;
 	typedef CTypedPtrList<CPtrList, CContact*> _ContactList;
 	typedef std::list<CUInt128> UIntList;
 	typedef std::list<CKadTag*> TagList;
-	typedef std::list<CStringW> WordList;
+	typedef std::list<CKadTagValueString> WordList;
 	typedef std::map<CUInt128, CSearch*> SearchMap;
 	typedef std::map<CRoutingZone*, CRoutingZone*> EventMap;
 	typedef CTypedPtrList<CPtrList, Kademlia::CEntry*> CKadEntryPtrList;

@@ -33,6 +33,11 @@ there client on the eMule forum..
 #include "../../opcodes.h"
 #include "../../otherfunctions.h"
 
+// forward declarations
+namespace Kademlia { class CKadTagValueString; }
+void KadTagStrMakeLower(Kademlia::CKadTagValueString &rstr);
+int KadTagStrCompareNoCase(LPCWSTR dst, LPCWSTR src);
+
 namespace Kademlia
 {
 	class CKadTagNameString : protected CStringA
@@ -54,14 +59,14 @@ namespace Kademlia
 			// string compare is performed.
 			int Compare(LPCSTR psz) const throw()
 			{
-				ATLASSERT( AtlIsValidString(psz) );
+				ATLASSERT( AfxIsValidString(psz) );
 				// Do a binary string compare. (independant from any codepage and/or LC_CTYPE setting.)
 				return strcmp(GetString(), psz);
 			}
 
 			int CompareNoCase(LPCSTR psz) const throw()
 			{
-				ATLASSERT( AtlIsValidString(psz) );
+				ATLASSERT( AfxIsValidString(psz) );
 
 				// Version #1
 				// Do a case-insensitive ASCII string compare.
@@ -105,13 +110,57 @@ namespace Kademlia
 	};
 
 
-	//class CKadTagValueString : protected CStringW
-	//{
-	//public:
-	//	CKadTagValueString(){}
-	//};
+	class CKadTagValueString : public CStringW
+	{
+		public:
+			CKadTagValueString()
+			{}
 
-#define CKadTagValueString CStringW
+			CKadTagValueString(const CStringW &rstr)
+				: CStringW(rstr)
+			{}
+
+			CKadTagValueString(const wchar_t *psz)
+				: CStringW(psz)
+			{}
+
+			CKadTagValueString(const wchar_t *psz, int iLen)
+				: CStringW(psz, iLen)
+			{}
+
+			int CompareNoCase(LPCWSTR src) const throw()
+			{
+				return KadTagStrCompareNoCase(GetString(), src);
+			}
+
+			int Collate(PCXSTR psz) const throw()
+			{
+				// One *MUST NOT* call this function (see comments in 'KadTagStrMakeLower')
+				ASSERT(0);
+				return __super::Collate(psz);
+			}
+
+			int CollateNoCase(PCXSTR psz) const throw()
+			{
+				// One *MUST NOT* call this function (see comments in 'KadTagStrMakeLower')
+				ASSERT(0);
+				return __super::CollateNoCase(psz);
+			}
+
+			CKadTagValueString& MakeLower()
+			{
+				KadTagStrMakeLower(*this);
+				return *this;
+			}
+
+			CKadTagValueString& MakeUpper()
+			{
+				// One *MUST NOT* call this function (see comments in 'KadTagStrMakeLower')
+				ASSERT(0);
+				__super::MakeUpper();
+				return *this;
+			}
+	};
 
 
 	class CKadTag
@@ -473,5 +522,3 @@ namespace Kademlia
 			BYTE* m_value;
 	};
 }
-
-void KadTagStrMakeLower(CKadTagValueString& rstr);

@@ -337,7 +337,7 @@ HRESULT CMainFrameDropTarget::PasteHTML(PASTEURLDATA* pPaste)
 					hrPasteResult = E_OUTOFMEMORY;
 
 				// Destroy the array *and* all of the data (BSTRs!)
-				if (SafeArrayAccessData(psfHtmlLines, (void**)pva) == S_OK)
+				if (SafeArrayAccessData(psfHtmlLines, (void**)&pva) == S_OK)
 				{
 					// 'Remove' the BSTR which was specified before, to *NOT* have it deleted by 'SafeArrayDestroy'
 					pva->vt = VT_NULL;
@@ -368,8 +368,7 @@ HRESULT CMainFrameDropTarget::PasteHTML(COleDataObject& data)
 			LPCSTR pszHTML = strchr(pszClipboard, '<');
 			if (pszHTML != NULL)
 			{
-				USES_CONVERSION;
-				CComBSTR bstrHTMLText(A2W(pszHTML));
+				CComBSTR bstrHTMLText((LPCOLESTR)CA2W(pszHTML));
 				PASTEURLDATA Paste(bstrHTMLText);
 				hrPasteResult = PasteHTML(&Paste);
 			}
@@ -428,15 +427,14 @@ HRESULT CMainFrameDropTarget::AddUrlFileContents(LPCTSTR pszFileName)
 			CComPtr<IPersistFile> pIFile;
 			if (SUCCEEDED(hrResult = pIUrl.QueryInterface(&pIFile)))
 			{
-				USES_CONVERSION;
-				if (SUCCEEDED(hrResult = pIFile->Load(CComBSTR(T2CW(pszFileName)), STGM_READ | STGM_SHARE_DENY_WRITE)))
+				if (SUCCEEDED(hrResult = pIFile->Load(CComBSTR(pszFileName), STGM_READ | STGM_SHARE_DENY_WRITE)))
 				{
 					LPWSTR pwszUrl;
 					if ((hrResult = pIUrl->GetURL(&pwszUrl)) == S_OK)
 					{
 						if (pwszUrl != NULL && pwszUrl[0] != L'\0' && IsUrlSchemeSupportedW(pwszUrl))
 						{
-							theApp.emuledlg->ProcessED2KLink(W2T(pwszUrl));
+							theApp.emuledlg->ProcessED2KLink(pwszUrl);
 							hrResult = S_OK;
 						}
 						::CoTaskMemFree(pwszUrl);

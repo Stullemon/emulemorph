@@ -28,6 +28,7 @@ public:
 	void SetCol1DrawTextFlags(DWORD dwFlags);
 	void SetCol2DrawTextFlags(DWORD dwFlags);
 	void SetFileIconToolTip(bool bEnable)		{m_bShowFileIcon = bEnable;}
+	BOOL SubclassWindow(HWND hWnd);
 
 protected:
 	bool m_bCol1Bold;
@@ -43,10 +44,12 @@ protected:
 	CFont m_fontNormal;
 
 	void ResetSystemMetrics();
+	void CustomPaint(LPNMTTCUSTOMDRAW);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMThemeChanged(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmCustomDraw(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmThemeChanged(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg BOOL OnTTShow(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
 	afx_msg void OnWindowPosChanging(WINDOWPOS* lpwndpos);

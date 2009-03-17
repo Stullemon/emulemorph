@@ -2,7 +2,6 @@
 // Microsoft Visual C++ generated include file.
 // Used by emule.rc
 //
-#define IDR_MANIFEST                    1
 #define IDNO2                           8
 #define IDNOMINIMIZE                    8
 #define IDYES2                          9
@@ -763,7 +762,6 @@
 #define IDS_USECREDITSYSTEM             833
 #define IDS_FIRSTAUTODOWN               834
 #define IDS_FIRSTAUTOUP                 835
-#define IDS_FIRSTFULLCHUNK              836
 #define IDS_AUTOMATIC                   836
 #define IDS_FIRSTSAFECON                837
 #define IDS_FIRSTAUTOCON                838
@@ -1483,7 +1481,6 @@
 #define IDS_UPNP_NOSERVICE              1525
 #define IDS_DELAYEDBYUPNP               1526
 #define IDS_DELAYEDBYUPNP2              1527
-#define IDS_UPnP                        1528
 #define IDS_UPNP                        1528
 #define IDS_UPNPCLOSEONEXIT             1529
 #define IDS_UPNPSKIPWANIP               1530
@@ -1492,7 +1489,6 @@
 #define IDS_SHAREEMULEMULTI             1533
 #define IDS_SHAREEMULEPUBLIC            1534
 #define IDS_SHAREEMULEOLD               1535
-#define IDS_SHAREMULEEWARNING           1536
 #define IDS_SHAREEMULEWARNING           1536
 #define IDS_SPAM                        1537
 #define IDS_MARKSPAM                    1538
@@ -1520,6 +1516,16 @@
 #define IDS_BETANAG                     1560
 #define IDS_CONFIRMNODESDOWNLOAD        1561
 #define IDS_NOTCONNECTEDANY             1562
+#define IDS_ERR_SHARED_DIR              1563
+#define IDS_FILE_WARNING_DRM            1564
+#define IDS_CHECK_FILE_OPEN             1565
+#define IDS_BOOTABLE                    1566
+#define IDS_UNSUPPORTEDIMAGE            1567
+#define IDS_UNSHARE                     1568
+#define IDS_WEBUPNPINCLUDE              1569
+#define IDS_ADDEDON                     1570
+#define IDS_FOLLOWLINKS                 1571
+#define IDS_RESOLVELINKS                1571
 #define IDC_ANIMATE1                    2000
 #define IDC_STATUS                      2001
 #define IDC_FILESTATUS                  2002
@@ -1591,7 +1597,6 @@
 #define IDC_SHOWCATINFO                 2110
 #define IDC_ADVSPAMFILTER               2112
 #define IDC_CB_TBN_ONNEWDOWNLOAD        2113
-#define IDC_ADVSPAMFILTER2              2113
 #define IDC_MSHOWSMILEYS                2113
 #define IDC_NETWORK_KADEMLIA            2114
 #define IDC_USECAPTCHAS                 2114
@@ -2012,6 +2017,7 @@
 #define IDC_REPAINT                     2669
 #define IDC_WSENABLED                   2671
 #define IDC_ENABLE                      2672
+#define IDC_WSUPNP                      2672
 #define IDC_WS_GZIP                     2673
 #define IDC_MSGONLYFRIENDS              2674
 #define IDC_WS_ALLOWHILEVFUNC           2674
@@ -2140,7 +2146,6 @@
 #define IDC_SAVE                        2811
 #define IDC_TOTAL_IPS_LABEL             2812
 #define IDC_TOTAL_IPS                   2813
-#define IDC_COPY                        2814
 #define IDC_APPEND                      2815
 #define IDC_FORMAT                      2816
 #define IDC_STATICIPLABEL               2818
@@ -2191,7 +2196,6 @@
 #define IDC_CLIENTDETAIL_KAD            2876
 #define IDC_LD_LINKEDI                  2877
 #define IDC_CLIENTDETAIL_KADCON         2878
-#define IDC_SEARCH_UNICODE              2879
 #define IDC_AUTOSTART                   2880
 #define IDC_STARTWIN                    2882
 #define IDC_RSRC                        2883
@@ -2291,7 +2295,11 @@
 #define IDC_AFKADIDLABEL                2993
 #define IDC_SHAREDFILES_FILTER          2994
 #define IDC_EDITCOMMENTFILTER           2995
-#define IDC_WIZZARDOBFUSCATION          2996
+#define IDC_WIZZARDOBFUSCATION          12996
+#define IDC_SPIN1                       12997
+#define IDC_TOOLTIPDELAY_SPIN           12997
+#define IDC_CHECK_FILE_OPEN             12998
+#define IDA_ENTER                       32771
 #define IDC_STATIC_PORT                 2996
 #define IDC_STATIC_CONTROLS             2997
 #define IDC_STATIC_NRBLOCKS             2998
@@ -3032,8 +3040,8 @@
 #define IDS_UPDATEFAKELISTWEEK_TIP      10077
 #define IDS_UPDATEIPFILTERWEEK_TIP      10078
 #define IDS_SCHEDTEXT                   10079
-#define IDC_AUTOBACKUP                  12998
-#define IDC_AUTOBACKUP2                 12999
+#define IDC_AUTOBACKUP                  10080
+#define IDC_AUTOBACKUP2                 10081
 #define IDS_SR13_IMPORTPARTS_ERR_ALREADYCOMPLETE 13000
 #define IDS_SR13_IMPORTPARTS_ERR_HASHSETINCOMPLETE 13001
 #define IDS_SR13_IMPORTPARTS_ERR_CANTOPENFILE 13002
@@ -3644,7 +3652,6 @@
 #define IDC_MORPHWIZ_NEXT               30806
 #define IDC_MORPHWIZ_NET1               30807
 #define IDC_MORPHWIZ_IMPORT             30808
-#define IDA_ENTER                       30809
 #define IDS_ADVADMIN_GROUP              30900
 #define IDS_ADVADMIN_ACC                30901
 #define IDS_ADVADMIN_DELETE             30902
@@ -3763,6 +3770,15 @@
 #define IDS_TAB_WEB_SERVER              31304
 #define IDS_TAB_MULTI_USER              31305
 #define IDS_TAB_NT_SERVICE              31306
+#define IDS_PURGE_DONT                  31307
+#define IDS_PURGE_PARTIALLY             31308
+#define IDS_PURGE_COMPLETLY             31309
+#define IDS_REMOVE_AICH_IMMEDIATLY      31310
+#define IDS_IPFILTERWHITELOADED         31311 //MORPH - Added by Stulle, IP Filter White List [Stulle]
+//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+#define IDS_AUTOIPFILTERFAILED          31312
+#define IDS_DL_NONE                     31313
+//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 
 // Next default values for new objects
 // 

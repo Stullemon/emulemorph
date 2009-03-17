@@ -39,7 +39,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 #ifdef _DEBUG
@@ -82,7 +82,7 @@ CStatisticsDlg::~CStatisticsDlg()
 
 #ifdef _DEBUG
 	POSITION pos = blockFiles.GetStartPosition();
-	while (pos != NULL)
+	while (pos != NULL) 
 	{
 		const unsigned char* fileName;
 		HTREEITEM* pTag;
@@ -171,7 +171,7 @@ BOOL CStatisticsDlg::OnInitDialog()
 	GetDlgItem(IDC_SCOPE_D)->DestroyWindow();
 	ScreenToClient(rcDown);
 	m_DownloadOMeter.Create(WS_VISIBLE | WS_CHILD, rcDown, this, IDC_SCOPE_D);
-	SetARange(true,thePrefs.GetMaxGraphDownloadRate());
+	SetARange(true, thePrefs.GetMaxGraphDownloadRate());
 	m_DownloadOMeter.SetYUnits(GetResString(IDS_KBYTESPERSEC));
 	
 	// Setup upload-scope
@@ -218,8 +218,8 @@ BOOL CStatisticsDlg::OnInitDialog()
 	ScreenToClient(rect) ;
 	m_Statistics.Create(WS_VISIBLE | WS_CHILD, rect, this, IDC_STATSSCOPE);
 	// MORPH END   - statistic fix [bluesonicboy]
-	m_Statistics.SetRanges(0, thePrefs.GetStatsMax()) ;
-	m_Statistics.autofitYscale=false;
+	m_Statistics.SetRanges(0, thePrefs.GetStatsMax());
+	m_Statistics.autofitYscale = false;
 	// Set the trend ratio of the Active Connections trend in the Connection Statistics scope.
 	m_Statistics.SetTrendRatio(0, thePrefs.GetStatsConnectionsGraphRatio());
 
@@ -270,9 +270,8 @@ BOOL CStatisticsDlg::OnInitDialog()
 	rcSpl.bottom = rcW.bottom - 5;
 	*/
 	rcSpl.left=rcTree.right+1; rcSpl.right=rcSpl.left+4; rcSpl.top=rcW.top+2; rcSpl.bottom=rcW.bottom-5;
-	m_wndSplitterstat.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT);
 	// MORPH END   - statistic fix [bluesonicboy]
-
+	m_wndSplitterstat.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT);
 	int PosStatVinitX = rcSpl.left;
 	int PosStatVnewX = thePrefs.GetSplitterbarPositionStat()*rcW.Width()/100;
 	int maxX = rcW.right-13;
@@ -282,19 +281,19 @@ BOOL CStatisticsDlg::OnInitDialog()
 	else if (thePrefs.GetSplitterbarPositionStat() < 10)
 		PosStatVnewX = minX;
 	rcSpl.left = PosStatVnewX;
-	rcSpl.right = PosStatVnewX+4;
+	rcSpl.right = PosStatVnewX + 4;
 	m_wndSplitterstat.MoveWindow(rcSpl);
 
 	//HR splitter
-	rcSpl.left=rcDown.left;
-	rcSpl.right=rcDown.right;
+	rcSpl.left = rcDown.left;
+	rcSpl.right = rcDown.right;
 	// MORPH START - statistic fix [bluesonicboy]
 	/*	
 	rcSpl.top = rcDown.bottom;
 	*/
 	rcSpl.top=rcDown.bottom+1;
 	// MORPH END   - statistic fix [bluesonicboy]
-	rcSpl.bottom=rcSpl.top+4; 
+	rcSpl.bottom = rcSpl.top + 4;
 	m_wndSplitterstat_HR.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT_HR);
 
 	// MORPH START - statistic fix [bluesonicboy]
@@ -325,15 +324,15 @@ BOOL CStatisticsDlg::OnInitDialog()
 	// MORPH END   - statistic fix [bluesonicboy]
 
 	//HL splitter
-	rcSpl.left=rcUp.left;
-	rcSpl.right=rcUp.right;
+	rcSpl.left = rcUp.left;
+	rcSpl.right = rcUp.right;
 	// MORPH START - statistic fix [bluesonicboy]
 	/*	
 	rcSpl.top = rcUp.bottom;
 	*/
 	rcSpl.top=rcUp.bottom+1;
 	// MORPH END   - statistic fix [bluesonicboy]
-	rcSpl.bottom=rcSpl.top+4;
+	rcSpl.bottom = rcSpl.top + 4;
 	m_wndSplitterstat_HL.Create(WS_CHILD | WS_VISIBLE, rcSpl, this, IDC_SPLITTER_STAT_HL);
 
 	// MORPH START - statistic fix [bluesonicboy]
@@ -377,13 +376,13 @@ BOOL CStatisticsDlg::OnInitDialog()
 	
 	m_TimeToolTips = new CToolTipCtrl();
 	m_TimeToolTips->Create(this);
-	m_TimeToolTips->AddTool(GetDlgItem(IDC_SCOPE_D),	_T(""),NULL,0);
-	m_TimeToolTips->AddTool(GetDlgItem(IDC_SCOPE_U),	_T(""),NULL,0);
-	m_TimeToolTips->AddTool(GetDlgItem(IDC_STATSSCOPE),	_T(""),NULL, 0);
+	m_TimeToolTips->AddTool(GetDlgItem(IDC_SCOPE_D), _T(""), NULL, 0);
+	m_TimeToolTips->AddTool(GetDlgItem(IDC_SCOPE_U), _T(""), NULL, 0);
+	m_TimeToolTips->AddTool(GetDlgItem(IDC_STATSSCOPE),	_T(""), NULL, 0);
 	// Any Autopop-Time which is specified higher than ~30 sec. will get reset to 5 sec.
 	m_TimeToolTips->SetDelayTime(TTDT_AUTOPOP, 30000);
-	m_TimeToolTips->SetDelayTime(TTDT_INITIAL,	30000);
-	m_TimeToolTips->SetDelayTime(TTDT_RESHOW,	30000);
+	m_TimeToolTips->SetDelayTime(TTDT_INITIAL, 30000);
+	m_TimeToolTips->SetDelayTime(TTDT_RESHOW,  30000);
 	EnableToolTips(TRUE);
 
 	return true;
@@ -539,49 +538,49 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 {
 	switch (message) 
 	{
-	case WM_PAINT:
-		if (m_wndSplitterstat) 
-		{
-			CRect rctree,rcSpl,rcW;
-			GetWindowRect(rcW);
-			ScreenToClient(rcW);
-
-			GetDlgItem(IDC_STATTREE)->GetWindowRect(rctree);
-			ScreenToClient(rctree);
-  
-			if (rcW.Width()>0) 
+		case WM_PAINT:
+			if (m_wndSplitterstat) 
 			{
-				// MORPH START - statistic fix [bluesonicboy]
-				/*
-					rcSpl.left = rctree.right;
-				rcSpl.right=rcSpl.left+4;
-				rcSpl.top=rcW.top+2;
-					rcSpl.bottom = rcW.bottom - 5;
-				*/
-				rcSpl.left=rctree.right+1;
-				rcSpl.right=rcSpl.left+4;
-				rcSpl.top=rcW.top+2;
-				rcSpl.bottom=rcW.bottom-6;
-				// MORPH END   - statistic fix [bluesonicboy]
+				CRect rctree,rcSpl,rcW;
+				GetWindowRect(rcW);
+				ScreenToClient(rcW);
 
-				m_wndSplitterstat.MoveWindow(rcSpl,true);
+				GetDlgItem(IDC_STATTREE)->GetWindowRect(rctree);
+				ScreenToClient(rctree);
+				
+				if (rcW.Width()>0) 
+				{
+					// MORPH START - statistic fix [bluesonicboy]
+					/*
+					rcSpl.left = rctree.right;
+					rcSpl.right = rcSpl.left + 4;
+					rcSpl.top = rcW.top + 2;
+					rcSpl.bottom = rcW.bottom - 5;
+					*/
+					rcSpl.left=rctree.right+1;
+					rcSpl.right=rcSpl.left+4;
+					rcSpl.top=rcW.top+2;
+					rcSpl.bottom=rcW.bottom-6;
+					// MORPH END   - statistic fix [bluesonicboy]
+
+					m_wndSplitterstat.MoveWindow(rcSpl,true);
+				}
 			}
-		}
 			if (m_wndSplitterstat_HL) 
 			{
-			CRect rcUp,rcSpl,rcW;
-			CWnd* pWnd;
+				CRect rcUp,rcSpl,rcW;
+				CWnd* pWnd;
 
-			GetWindowRect(rcW);
-			ScreenToClient(rcW);
+				GetWindowRect(rcW);
+				ScreenToClient(rcW);
 
-			pWnd = &m_UploadOMeter;
-			pWnd->GetWindowRect(rcUp);
+				pWnd = &m_UploadOMeter;
+				pWnd->GetWindowRect(rcUp);
 
-			ScreenToClient(rcUp);
-  
-			if (rcW.Height()>0) 
-			{
+				ScreenToClient(rcUp);
+
+				if (rcW.Height()>0) 
+				{
 					// MORPH START - statistic fix [bluesonicboy]
 					/*
 					rcSpl.left = rcUp.left;
@@ -595,23 +594,23 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 					rcSpl.bottom=rcUp.bottom+5;
 					// MORPH END   - statistic fix [bluesonicboy]
 
-				m_wndSplitterstat_HL.MoveWindow(rcSpl,true);
+					m_wndSplitterstat_HL.MoveWindow(rcSpl,true);
+				}
 			}
-		}
 			if (m_wndSplitterstat_HR) 
 			{
-			CRect rcDown,rcSpl,rcW;
-			CWnd* pWnd;
+				CRect rcDown,rcSpl,rcW;
+				CWnd* pWnd;
 
-			GetWindowRect(rcW);
-			ScreenToClient(rcW);
+				GetWindowRect(rcW);
+				ScreenToClient(rcW);
 
-			pWnd = &m_DownloadOMeter;
-			pWnd->GetWindowRect(rcDown);
-			ScreenToClient(rcDown);
-  
-			if (rcW.Height()>0) 
-			{
+				pWnd = &m_DownloadOMeter;
+				pWnd->GetWindowRect(rcDown);
+				ScreenToClient(rcDown);
+
+				if (rcW.Height()>0) 
+				{
 					// MORPH START - statistic fix [bluesonicboy]
 					/*
 					rcSpl.left = rcDown.left;
@@ -625,38 +624,38 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 					rcSpl.bottom=rcDown.bottom+5;
 					// MORPH END   - statistic fix [bluesonicboy]
 
-				m_wndSplitterstat_HR.MoveWindow(rcSpl,true);
+					m_wndSplitterstat_HR.MoveWindow(rcSpl,true);
+				}
 			}
-		}
-	break;
-	case WM_NOTIFY:
-		if (wParam == IDC_SPLITTER_STAT)
-		{ 
-			SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
-			DoResize_V(pHdr->delta);
-		}
-		else if (wParam == IDC_SPLITTER_STAT_HL)
-		{ 
-			SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
-			DoResize_HL(pHdr->delta);
-		}
-		else if (wParam == IDC_SPLITTER_STAT_HR)
-		{ 
-			SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
-			DoResize_HR(pHdr->delta);
-		}
-		break;
-	case WM_WINDOWPOSCHANGED : 
-		{
-			CRect rcW;
-			GetWindowRect(rcW);
-			ScreenToClient(rcW);
-			if (m_wndSplitterstat && rcW.Width()>0) Invalidate();
-			if (m_wndSplitterstat_HL && rcW.Height()>0) Invalidate();
-			if (m_wndSplitterstat_HR && rcW.Height()>0) Invalidate();
 			break;
-		}
-	case WM_SIZE:
+		case WM_NOTIFY:
+			if (wParam == IDC_SPLITTER_STAT)
+			{ 
+				SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
+				DoResize_V(pHdr->delta);
+			}
+			else if (wParam == IDC_SPLITTER_STAT_HL)
+			{ 
+				SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
+				DoResize_HL(pHdr->delta);
+			}
+			else if (wParam == IDC_SPLITTER_STAT_HR)
+			{ 
+				SPC_NMHDR* pHdr = (SPC_NMHDR*) lParam;
+				DoResize_HR(pHdr->delta);
+			}
+			break;
+
+		case WM_WINDOWPOSCHANGED:
+			if (m_wndSplitterstat)
+				m_wndSplitterstat.Invalidate();
+			if (m_wndSplitterstat_HL)
+				m_wndSplitterstat_HL.Invalidate();
+			if (m_wndSplitterstat_HR)
+				m_wndSplitterstat_HR.Invalidate();
+			break;
+
+		case WM_SIZE:
 		{
 			//set range
 			if (m_wndSplitterstat)
@@ -682,7 +681,7 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 					*/
 					rcSpl.left=splitposstat; rcSpl.right=rcSpl.left+4; rcSpl.top=rcW.top+2; rcSpl.bottom=rcW.bottom-5;
 					// MORPH END   - statistic fix [bluesonicboy]
-    				m_wndSplitterstat.MoveWindow(rcSpl,true);
+	   				m_wndSplitterstat.MoveWindow(rcSpl,true);
 					m_wndSplitterstat.SetRange(rcW.left+11, rcW.right-11);
 				}
 			}
@@ -740,10 +739,10 @@ LRESULT CStatisticsDlg::DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam
 					m_wndSplitterstat_HL.SetRange(splitposstat_HR+14, rcW.bottom-7);
 				}
 			}
-		break;
+			break;
 		}
-}
-return CResizableDialog::DefWindowProc(message, wParam, lParam);
+	}
+	return CResizableDialog::DefWindowProc(message, wParam, lParam);
 }
 
 void CStatisticsDlg::RepaintMeters() 

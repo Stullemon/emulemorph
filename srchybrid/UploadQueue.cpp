@@ -53,12 +53,12 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
-static uint32 counter, sec,statsave;
-static UINT _uSaveStatistics = 0;
+static uint32 counter, sec, statsave;
+static UINT s_uSaveStatistics = 0;
 // -khaos--+++> Added iupdateconnstats...
 static uint32 igraph, istats, iupdateconnstats;
 // <-----khaos-
@@ -85,7 +85,7 @@ CUploadQueue::CUploadQueue()
 	//Removed By SiRoB, Not used due to zz Upload System
 	/*
 	m_dwRemovedClientByScore = ::GetTickCount();
-	m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
+    m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = 0;
     m_MaxActiveClients = 0;
     m_MaxActiveClientsShortTime = 0;
 	*/
@@ -99,7 +99,7 @@ CUploadQueue::CUploadQueue()
 
 	//MORPH START - Removed By SiRoB, not needed call UpdateDatarate only once in the process
 	/*
-	m_lastCalculatedDataRateTick = 0;
+    m_lastCalculatedDataRateTick = 0;
 	*/
 	//MORPH END   - Removed By SiRoB, not needed call UpdateDatarate only once in the process
 
@@ -107,14 +107,14 @@ CUploadQueue::CUploadQueue()
 	avarage_tick_listLastRemovedTimestamp = avarage_dr_USS_listLastRemovedTimestamp = GetTickCount();
 	//MORPH END   - Added by SiRoB, Better Upload rate calcul
 
-	m_avarage_dr_sum = 0;
+    m_avarage_dr_sum = 0;
     friendDatarate = 0;
 	m_avarage_dr_USS_sum = 0; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
 	m_avarage_overhead_dr_sum = 0; //MORPH - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 	m_avarage_friend_dr_sum = 0; //MORPH - Added by SiRoB, Upload Friend from uploadbandwidththrottler
 	m_avarage_powershare_dr_sum = 0; //MORPH - Added by SiRoB, Upload powershare from uploadbandwidththrottler
 
-	m_dwLastResortedUploadSlots = 0;
+    m_dwLastResortedUploadSlots = 0;
 	//MORPH START - Added by SiRoB, ZZUL_20040904
 	m_dwLastCheckedForHighPrioClient = 0;
 
@@ -834,7 +834,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 			DebugSend("OP__AcceptUploadReq", newclient);
 		Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
 		theStats.AddUpDataOverheadFileRequest(packet->size);
-		newclient->socket->SendPacket(packet,true);
+		newclient->SendPacket(packet, true);
 		newclient->SetUploadState(US_UPLOADING);
 	}
 	newclient->SetUpStartTime();
@@ -1428,7 +1428,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				DebugSend("OP__AcceptUploadReq", client);
 			Packet* packet = new Packet(OP_ACCEPTUPLOADREQ,0);
 			theStats.AddUpDataOverheadFileRequest(packet->size);
-			client->socket->SendPacket(packet,true);
+			client->SendPacket(packet, true);
 			return;
 		}
     
@@ -1966,7 +1966,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 
 			statsave++;
 			// *** 60 seconds *********************************************
-			if (statsave>=60) {
+			if (statsave >= 60) {
 				statsave=0;
 
 				if (thePrefs.GetWSIsEnabled())
@@ -1978,10 +1978,10 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 					theApp.ResetStandByIdleTimer(); // Reset Windows idle standby timer if necessary
 			}
 
-			_uSaveStatistics++;
-			if (_uSaveStatistics >= thePrefs.GetStatsSaveInterval())
+			s_uSaveStatistics++;
+			if (s_uSaveStatistics >= thePrefs.GetStatsSaveInterval())
 			{
-				_uSaveStatistics = 0;
+				s_uSaveStatistics = 0;
 				thePrefs.SaveStats();
 			}
 		}

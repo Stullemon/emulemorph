@@ -632,6 +632,7 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport)
 			lvc.cchTextMax = _countof(szItem);
 			if (lv.GetColumn(iCol, &lvc) && lvc.cx > 0)
 			{
+				szItem[_countof(szItem) - 1] = _T('\0');
 				int iLen = _tcslen(lvc.pszText);
 				if (iLen > paiColWidths[iCol])
 					paiColWidths[iCol] = iLen;
@@ -646,6 +647,7 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport)
 					lvi.cchTextMax = _countof(szItem);
 					if (lv.GetItem(&lvi))
 					{
+						szItem[_countof(szItem) - 1] = _T('\0');
 						int iLen = _tcslen(lvi.pszText);
 						if (iLen > paiColWidths[iCol])
 							paiColWidths[iCol] = iLen;
@@ -665,6 +667,7 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport)
 				lvc.cchTextMax = _countof(szItem);
 				if (lv.GetColumn(iCol, &lvc))
 				{
+					szItem[_countof(szItem) - 1] = _T('\0');
 					TCHAR szFmtItem[_countof(szItem)+32];
 					_sntprintf(szFmtItem, _countof(szFmtItem), _T("%-*s"), paiColWidths[iCol] + 2, szItem);
 					szFmtItem[_countof(szFmtItem) - 1] = _T('\0');
@@ -696,6 +699,7 @@ void CreateItemReport(CListCtrl& lv, CString& rstrReport)
 					lvi.cchTextMax = _countof(szItem);
 					if (lv.GetItem(&lvi))
 					{
+						szItem[_countof(szItem) - 1] = _T('\0');
 						TCHAR szFmtItem[_countof(szItem)+32];
 						_sntprintf(szFmtItem, _countof(szFmtItem), _T("%-*s"), paiColWidths[iCol] + 2, szItem);
 						szFmtItem[_countof(szFmtItem) - 1] = _T('\0');

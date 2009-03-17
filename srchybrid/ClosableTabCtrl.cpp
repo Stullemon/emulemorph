@@ -222,6 +222,7 @@ void CClosableTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 	tci.dwStateMask = TCIS_HIGHLIGHTED;
 	if (!GetItem(nTabIndex, &tci))
 		return;
+	szLabel[_countof(szLabel) - 1] = _T('\0');
 	//TRACE("CClosableTabCtrl::DrawItem: item=%u, state=%08x, color=%08x, rc=%3d,%3d,%3dx%3d\n", nTabIndex, tci.dwState, GetTextColor(lpDIS->hDC), lpDIS->rcItem.left, lpDIS->rcItem.top, lpDIS->rcItem.right - lpDIS->rcItem.left, lpDIS->rcItem.bottom - lpDIS->rcItem.top);
 
 	CDC* pDC = CDC::FromHandle(lpDIS->hDC);
@@ -334,7 +335,7 @@ void CClosableTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 	int iOldBkMode = pDC->SetBkMode(TRANSPARENT);
 
 	// Draw image on left side
-	CImageList* piml = GetImageList();
+	CImageList *piml = GetImageList();
 	if (tci.iImage >= 0 && piml && piml->m_hImageList)
 	{
 		IMAGEINFO ii;

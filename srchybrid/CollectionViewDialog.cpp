@@ -45,9 +45,9 @@ enum ECols
 IMPLEMENT_DYNAMIC(CCollectionViewDialog, CDialog)
 
 BEGIN_MESSAGE_MAP(CCollectionViewDialog, CResizableDialog)
-	ON_NOTIFY(NM_DBLCLK, IDC_COLLECTIONVEWLIST, OnNMDblClkCollectionList)
-	ON_BN_CLICKED(IDC_VIEWCOLLECTIONDL, OnBnClickedViewCollection)
 	ON_BN_CLICKED(IDC_VCOLL_CLOSE, OnBnClickedOk)
+	ON_BN_CLICKED(IDC_VIEWCOLLECTIONDL, OnBnClickedViewCollection)
+	ON_NOTIFY(NM_DBLCLK, IDC_COLLECTIONVEWLIST, OnNmDblClkCollectionList)
 END_MESSAGE_MAP()
 
 CCollectionViewDialog::CCollectionViewDialog(CWnd* pParent /*=NULL*/)
@@ -105,7 +105,7 @@ BOOL CCollectionViewDialog::OnInitDialog(void)
 
 	SetWindowText(GetResString(IDS_VIEWCOLLECTION) + _T(": ") + m_pCollection->m_sCollectionName);
 
-	m_CollectionViewListIcon.SetIcon(m_icoColl = theApp.LoadIcon(_T("COLLECTION")));
+	m_CollectionViewListIcon.SetIcon(m_icoColl = theApp.LoadIcon(_T("AABCollectionFileType")));
 	m_CollectionDownload.SetWindowText(GetResString(IDS_DOWNLOAD));
 	m_CollectionExit.SetWindowText(GetResString(IDS_CW_CLOSE));
 	SetDlgItemText(IDC_COLLECTIONVIEWAUTHORLABEL, GetResString(IDS_AUTHOR) + _T(":"));
@@ -157,7 +157,7 @@ BOOL CCollectionViewDialog::OnInitDialog(void)
 	return TRUE;
 }
 
-void CCollectionViewDialog::OnNMDblClkCollectionList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CCollectionViewDialog::OnNmDblClkCollectionList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	DownloadSelected();
 	*pResult = 0;

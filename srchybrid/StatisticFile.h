@@ -77,12 +77,12 @@ public:
 	CKnownFile* fileParent;
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
 	double	GetEqualChanceValue();
-	CString	GetEqualChanceValueString(bool detail = true);
-	time_t	GetSessionShareTime()		{ return time(NULL) - m_dwSessionShareTime; }
+	CString	GetEqualChanceValueString(bool detail = true) const;
+	time_t	GetSessionShareTime() const	{ return time(NULL) - m_dwSessionShareTime; }
 	void	SetSessionShareTime()		{ m_dwSessionShareTime = time(NULL); }
 	//Morph End - Added by AndCycle, Equal Chance For Each File
 	//EastShare	Start - FairPlay by AndCycle
-	bool	GetFairPlay();
+	bool	GetFairPlay() const;
 	//EastShare	End   - FairPlay by AndCycle
 private:
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars

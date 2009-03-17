@@ -14,6 +14,14 @@
 #include "OtherFunctions.h"
 #include "MenuCmds.h"
 
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
+static BOOL (WINAPI *s_pfnTransparentBlt)(HDC, int, int, int, int, HDC, int, int, int, int, UINT) = NULL;
+
 #if 0
 // define this to use that source file as template
 #define	TEMPLATE	template <class BASE>
@@ -125,16 +133,16 @@ TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnInit()
 	// - Never use the 'TransparentBlt' function under Win9x (read SDK)
 	// - Load the 'MSIMG32.DLL' only, if it's really needed.
     /* MORPH win95 is not supported, vs2008 does not support .win95	
-	if (!afxIsWin95() && bBmpResult && !_TransparentBlt)
+	if (!afxIsWin95() && bBmpResult && !s_pfnTransparentBlt)
 	*/
-	if (bBmpResult && !_TransparentBlt)
+	if (bBmpResult && !s_pfnTransparentBlt)
 	// MORPH END
 	{
 		HMODULE hMsImg32 = LoadLibrary(_T("MSIMG32.DLL"));
 		if (hMsImg32)
 		{
-			(FARPROC &)_TransparentBlt = GetProcAddress(hMsImg32, "TransparentBlt");
-			if (!_TransparentBlt)
+			(FARPROC &)s_pfnTransparentBlt = GetProcAddress(hMsImg32, "TransparentBlt");
+			if (!s_pfnTransparentBlt)
 				FreeLibrary(hMsImg32);
 		}
 	}
@@ -424,14 +432,14 @@ TEMPLATE void CDialogMinTrayBtn<BASE>::MinTrayBtnDraw()
 		if (!m_bMinTrayBtnActive)
 			iState += 4; // inactive state TRAYBS_Ixxx
 
-		if (m_bmMinTrayBtnBitmap.m_hObject && _TransparentBlt)
+		if (m_bmMinTrayBtnBitmap.m_hObject && s_pfnTransparentBlt)
 		{
 			// known theme (bitmap)
 			CBitmap *pBmpOld;
 			CDC dcMem;
 			if (dcMem.CreateCompatibleDC(pDC) && (pBmpOld = dcMem.SelectObject(&m_bmMinTrayBtnBitmap)) != NULL)
 			{
-				_TransparentBlt(pDC->m_hDC, btn.left, btn.top, btn.Width(), btn.Height(), dcMem.m_hDC, 0, BMP_TRAYBTN_HEIGHT * (iState - 1), BMP_TRAYBTN_WIDTH, BMP_TRAYBTN_HEIGHT, BMP_TRAYBTN_TRANSCOLOR);
+				s_pfnTransparentBlt(pDC->m_hDC, btn.left, btn.top, btn.Width(), btn.Height(), dcMem.m_hDC, 0, BMP_TRAYBTN_HEIGHT * (iState - 1), BMP_TRAYBTN_WIDTH, BMP_TRAYBTN_HEIGHT, BMP_TRAYBTN_TRANSCOLOR);
 				dcMem.SelectObject(pBmpOld);
 			}
 		}
@@ -503,7 +511,7 @@ TEMPLATE INT CDialogMinTrayBtn<BASE>::GetVisualStylesXPColor() const
 
 	WCHAR szwThemeFile[MAX_PATH];
 	WCHAR szwThemeColor[256];
-	if (g_xpStyle.GetCurrentThemeName(szwThemeFile, MAX_PATH, szwThemeColor, 256, NULL, 0) != S_OK)
+	if (g_xpStyle.GetCurrentThemeName(szwThemeFile, MAX_PATH, szwThemeColor, _countof(szwThemeColor), NULL, 0) != S_OK)
 		return -1;
 	WCHAR* p;
 	if ((p = wcsrchr(szwThemeFile, _T('\\'))) == NULL)

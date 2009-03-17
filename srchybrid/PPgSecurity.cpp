@@ -64,7 +64,7 @@ BEGIN_MESSAGE_MAP(CPPgSecurity, CPropertyPage)
 	ON_BN_CLICKED(IDC_ONLYOBFUSCATED, OnSettingsChange)
 	ON_BN_CLICKED(IDC_DISABLEOBFUSCATION, OnObfuscatedDisabledChange)
 	ON_BN_CLICKED(IDC_SEARCHSPAMFILTER, OnSettingsChange)
-	
+	ON_BN_CLICKED(IDC_CHECK_FILE_OPEN, OnSettingsChange)
 END_MESSAGE_MAP()
 
 CPPgSecurity::CPPgSecurity()
@@ -93,27 +93,16 @@ void CPPgSecurity::LoadSettings(void)
 	
 	strBuffer.Format(_T("%i"),thePrefs.filterlevel);
 	GetDlgItem(IDC_FILTERLEVEL)->SetWindowText(strBuffer);
+	CheckDlgButton(IDC_FILTERSERVERBYIPFILTER, thePrefs.filterserverbyip);
 
-	if(thePrefs.filterserverbyip)
-		CheckDlgButton(IDC_FILTERSERVERBYIPFILTER,1);
-	else
-		CheckDlgButton(IDC_FILTERSERVERBYIPFILTER,0);
-
-	if(thePrefs.m_bUseSecureIdent)
-		CheckDlgButton(IDC_USESECIDENT,1);
-	else
-		CheckDlgButton(IDC_USESECIDENT,0);
+	CheckDlgButton(IDC_USESECIDENT, thePrefs.m_bUseSecureIdent);
 
 	if ((thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_ || thePrefs.GetWindowsVersion() == _WINVER_2003_)
 		&& thePrefs.m_nCurrentUserDirMode == 2)
 		GetDlgItem(IDC_RUNASUSER)->EnableWindow(TRUE);
 	else
 		GetDlgItem(IDC_RUNASUSER)->EnableWindow(FALSE);
-
-	if(thePrefs.IsRunAsUserEnabled())
-		CheckDlgButton(IDC_RUNASUSER,1);
-	else
-		CheckDlgButton(IDC_RUNASUSER,0);
+	CheckDlgButton(IDC_RUNASUSER, thePrefs.IsRunAsUserEnabled());
 
 	if (!thePrefs.IsClientCryptLayerSupported()){
 		CheckDlgButton(IDC_DISABLEOBFUSCATION,1);
@@ -135,15 +124,9 @@ void CPPgSecurity::LoadSettings(void)
 		GetDlgItem(IDC_ONLYOBFUSCATED)->EnableWindow(FALSE);
 	}
 
-	if (thePrefs.IsClientCryptLayerRequired())
-		CheckDlgButton(IDC_ONLYOBFUSCATED,1);
-	else
-		CheckDlgButton(IDC_ONLYOBFUSCATED,0);
-
-	if (thePrefs.IsSearchSpamFilterEnabled())
-		CheckDlgButton(IDC_SEARCHSPAMFILTER,1);
-	else
-		CheckDlgButton(IDC_SEARCHSPAMFILTER,0);
+	CheckDlgButton(IDC_ONLYOBFUSCATED, thePrefs.IsClientCryptLayerRequired());
+	CheckDlgButton(IDC_SEARCHSPAMFILTER, thePrefs.IsSearchSpamFilterEnabled());
+	CheckDlgButton(IDC_CHECK_FILE_OPEN, thePrefs.GetCheckFileOpen());
 
 	ASSERT( vsfaEverybody == 0 );
 	ASSERT( vsfaFriends == 1 );
@@ -156,7 +139,7 @@ BOOL CPPgSecurity::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
 	//MORPH START - Added by SiRoB, Allways use securedid
-	GetDlgItem(IDC_USESECIDENT)->EnableWindow(0);
+	GetDlgItem(IDC_USESECIDENT)->EnableWindow(FALSE);
 	//MORPH END   - Added by SiRoB, Allways use securedid
 	LoadSettings();
 	InitTooltips();  //MORPH leuk_he tooltipped;
@@ -201,14 +184,13 @@ BOOL CPPgSecurity::OnApply()
 	if (bIPFilterSettingsChanged)
 		theApp.emuledlg->serverwnd->serverlistctrl.RemoveAllFilteredServers();
 
-	thePrefs.filterserverbyip = IsDlgButtonChecked(IDC_FILTERSERVERBYIPFILTER)!=0;
 	thePrefs.m_bUseSecureIdent = IsDlgButtonChecked(IDC_USESECIDENT)!=0;
 	thePrefs.m_bRunAsUser = IsDlgButtonChecked(IDC_RUNASUSER)!=0;
 
 	thePrefs.m_bCryptLayerRequested = IsDlgButtonChecked(IDC_ENABLEOBFUSCATION) != 0;
 	thePrefs.m_bCryptLayerRequired = IsDlgButtonChecked(IDC_ONLYOBFUSCATED) != 0;
 	thePrefs.m_bCryptLayerSupported = IsDlgButtonChecked(IDC_DISABLEOBFUSCATION) == 0;
-
+	thePrefs.m_bCheckFileOpen = IsDlgButtonChecked(IDC_CHECK_FILE_OPEN) != 0;
 	thePrefs.m_bEnableSearchResultFilter = IsDlgButtonChecked(IDC_SEARCHSPAMFILTER) != 0;
 
 
@@ -251,8 +233,8 @@ void CPPgSecurity::Localize(void)
 		GetDlgItem(IDC_ONLYOBFUSCATED)->SetWindowText(GetResString(IDS_ONLYOBFUSCATED));
 		GetDlgItem(IDC_ENABLEOBFUSCATION)->SetWindowText(GetResString(IDS_ENABLEOBFUSCATION));
 		GetDlgItem(IDC_SEC_OBFUSCATIONBOX)->SetWindowText(GetResString(IDS_PROTOCOLOBFUSCATION));
-
 		GetDlgItem(IDC_SEARCHSPAMFILTER)->SetWindowText(GetResString(IDS_SEARCHSPAMFILTER));
+		GetDlgItem(IDC_CHECK_FILE_OPEN)->SetWindowText(GetResString(IDS_CHECK_FILE_OPEN));
 
         // MORPH START leuk_he tooltipped
 		SetTool(IDC_FILTERLEVEL,IDC_STATIC_FILTERLEVE_TIP);
@@ -269,7 +251,6 @@ void CPPgSecurity::Localize(void)
 		SetTool(IDC_ONLYOBFUSCATED,IDC_ONLYOBFUSCATED_TIP)   ;
 		SetTool(IDC_ENABLEOBFUSCATION,IDC_ENABLEOBFUSCATION_TIP) ;
         SetTool(IDC_DISABLEOBFUSCATION,IDC_DISABLEOBFUSCATION_TIP);
-       
 		// MORPH END leuk_he tooltipped
 	}
 }
@@ -299,6 +280,14 @@ void CPPgSecurity::OnLoadIPFFromURL()
 		if (m_pacIPFilterURL && m_pacIPFilterURL->IsBound())
 			m_pacIPFilterURL->AddItem(url, 0);
 
+		// ==> Advanced Updates [MorphXT/Stulle] - Stulle
+		if(thePrefs.IsIPFilterViaDynDNS(url))
+		{
+			theApp.emuledlg->CheckIPFilter();
+			return;
+		}
+		// <== Advanced Updates [MorphXT/Stulle] - Stulle
+
 		CString strTempFilePath;
 		_tmakepathlimit(strTempFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T("tmp"));
 		strTempFilePath.ReleaseBuffer();
@@ -327,9 +316,11 @@ void CPPgSecurity::OnLoadIPFFromURL()
 		{
 			bIsArchiveFile = true;
 
-			CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
+			CZIPFile::File* zfile = zip.GetFile(_T("ipfilter.dat"));
 			if (zfile == NULL)
-				zfile = zip.GetFile(_T("ipfilter.dat"));
+				zfile = zip.GetFile(_T("guarding.p2p"));
+			if (zfile == NULL)
+				zfile = zip.GetFile(_T("guardian.p2p"));
 			if (zfile)
 			{
 				CString strTempUnzipFilePath;
@@ -373,7 +364,9 @@ void CPPgSecurity::OnLoadIPFFromURL()
 			{
 				CString strFile;
 				if (rar.GetNextFile(strFile)
-					&& (strFile.CompareNoCase(_T("ipfilter.dat")) == 0 || strFile.CompareNoCase(_T("guarding.p2p")) == 0))
+					&& (   strFile.CompareNoCase(_T("ipfilter.dat")) == 0 
+					    || strFile.CompareNoCase(_T("guarding.p2p")) == 0
+						|| strFile.CompareNoCase(_T("guardian.p2p")) == 0))
 				{
 					CString strTempUnzipFilePath;
 					_tmakepathlimit(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
@@ -557,6 +550,7 @@ BOOL CPPgSecurity::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 	}
+
     //MORPH START leuk_he tooltipped
 	/*
 	return CPropertyPage::PreTranslateMessage(pMsg);

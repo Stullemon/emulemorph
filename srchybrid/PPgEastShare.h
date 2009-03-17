@@ -78,8 +78,14 @@ protected:
 
 	// EastShare START - Added by TAHO, .met control
 	HTREEITEM m_htiMetControl;
+	int m_iPurgeMode;
+	HTREEITEM m_htiDontPurge;
+	HTREEITEM m_htiPartiallyPurge;
+	HTREEITEM m_htiCompletelyPurge;
 	int m_iKnownMetDays;
 	HTREEITEM m_htiKnownMet;
+	bool m_bRemoveAichImmediatly;
+	HTREEITEM m_htiRemoveAichImmediatly;
 	// EastShare END - Added by TAHO, .met control
 
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;

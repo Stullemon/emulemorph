@@ -23,12 +23,12 @@ class CServerSocket : public CEMSocket
 {
 	friend class CServerConnect;
 public:
-	CServerSocket(CServerConnect* in_serverconnect);
+	CServerSocket(CServerConnect* in_serverconnect, bool bManualSingleConnect);
 	~CServerSocket();
 
 	void ConnectTo(CServer* server, bool bNoCrypt = false);
 	int GetConnectionState() const { return connectionstate; } 
-	DWORD	GetLastTransmission() const { return m_dwLastTransmission; }
+	DWORD GetLastTransmission() const { return m_dwLastTransmission; }
 	virtual void SendPacket(Packet* packet, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0, bool bForceImmediateSend = false);
 
 protected:
@@ -37,17 +37,18 @@ protected:
 	virtual void OnReceive(int nErrorCode);
 	virtual void OnError(int nErrorCode);
 	virtual BOOL OnHostNameResolved(const SOCKADDR_IN *pSockAddr);
-	bool	PacketReceived(Packet* packet);
+	bool PacketReceived(Packet* packet);
 	void ProcessPacketError(UINT size, UINT opcode, LPCTSTR pszError);
 
 private:
-	bool	ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode);
+	bool ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode);
 	void SetConnectionState(int newstate);
 
 	CServerConnect*	serverconnect;
 	int connectionstate;
 	CServer* cur_server; // holds a copy of a CServer from the CServerList
-	bool	m_bIsDeleting;	// true: socket is already in deletion phase, don't destroy it in ::StopConnectionTry
-	DWORD	m_dwLastTransmission;
+	bool m_bIsDeleting;	// true: socket is already in deletion phase, don't destroy it in ::StopConnectionTry
+	DWORD m_dwLastTransmission;
 	bool m_bStartNewMessageLog;
+	bool m_bManualSingleConnect;
 };

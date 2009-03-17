@@ -60,6 +60,9 @@ enum EUserWndMessages
 	UM_MVERSIONCHECK_RESPONSE,
 	//MORPH END   - Added by SiRoB, Version check
 	//MORPH START leuk_he run as a ntservice v1
-	UM_SERVERSTATUS
+	UM_SERVERSTATUS,
 	//MORPH START leuk_he run as a ntservice v1
+	//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	UM_IPFFILTERAUTOVERCHECK_RESPONSE
+	//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 };

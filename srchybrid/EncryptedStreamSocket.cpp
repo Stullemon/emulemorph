@@ -84,13 +84,18 @@ Basic Obfuscated Handshake Protocol Client <-> Server:
 #include "opcodes.h"
 #include "clientlist.h"
 #include "sockets.h"
-
 // cryptoPP used for DH integer calculations
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #pragma warning(disable:4100) // unreferenced formal parameter
 #include <cryptopp/osrng.h>
 #pragma warning(default:4100) // unreferenced formal parameter
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
 
 
 #define	MAGICVALUE_REQUESTER	34							// modification of the requester-send and server-receive key

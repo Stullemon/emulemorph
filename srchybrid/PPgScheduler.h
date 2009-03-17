@@ -46,7 +46,7 @@ protected:
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnNMDblclkList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnBnClickedAdd();
   /* MORPH START leuk_he: Remove 2nd apply in scheduler
 	afx_msg void OnBnClickedApply();
@@ -55,11 +55,11 @@ protected:
 	afx_msg void OnSettingsChangeTime(NMHDR *, LRESULT *) {SetModified();}
   // MORPH END leuk_he: Remove 2nd apply in scheduler
 	afx_msg void OnBnClickedRemove();
-	afx_msg void OnSettingsChange() {SetModified();}
-	afx_msg void OnEnableChange();
 	afx_msg void OnDisableTime2();
-	afx_msg void OnNMDblclkActionlist(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMRclickActionlist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnEnableChange();
 	afx_msg void OnHelp();
-	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	afx_msg void OnNmClickList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmDblClkActionlist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmRClickActionlist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSettingsChange() {SetModified();}
 };

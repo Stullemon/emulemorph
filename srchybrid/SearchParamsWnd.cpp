@@ -81,7 +81,6 @@ CSearchParamsWnd::CSearchParamsWnd()
 	m_rcStart.SetRectEmpty();
 	m_rcMore.SetRectEmpty();
 	m_rcCancel.SetRectEmpty();
-	m_rcUnicode.SetRectEmpty();
 }
 
 CSearchParamsWnd::~CSearchParamsWnd()
@@ -107,7 +106,6 @@ void CSearchParamsWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_STARTS, m_ctlStart);
 	DDX_Control(pDX, IDC_CANCELS, m_ctlCancel);
 	DDX_Control(pDX, IDC_MORE, m_ctlMore);
-	DDX_Control(pDX, IDC_SEARCH_UNICODE, m_ctlUnicode);
 }
 
 LRESULT CSearchParamsWnd::OnInitDialog(WPARAM /*wParam*/, LPARAM /*lParam*/)
@@ -132,9 +130,6 @@ LRESULT CSearchParamsWnd::OnInitDialog(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 	m_ctlName.GetWindowRect(&m_rcName);
 	ScreenToClient(&m_rcName);
-
-	m_ctlUnicode.GetWindowRect(&m_rcUnicode);
-	ScreenToClient(&m_rcUnicode);
 
 	GetDlgItem(IDC_DD)->GetWindowRect(&m_rcDropDownArrow);
 	ScreenToClient(&m_rcDropDownArrow);
@@ -183,24 +178,24 @@ LRESULT CSearchParamsWnd::OnInitDialog(WPARAM /*wParam*/, LPARAM /*lParam*/)
 
 	m_ctlName.LimitText(MAX_SEARCH_EXPRESSION_LEN); // max. length of search expression
 	
+	m_ctlMethod.ModifyStyle(0, WS_CLIPCHILDREN); // Reduce flickering during resize
 	InitMethodsCtrl();
 	if (m_ctlMethod.SetCurSel(thePrefs.GetSearchMethod()) == CB_ERR)
 		m_ctlMethod.SetCurSel(SearchTypeEd2kServer);
 
+	m_ctlFileType.ModifyStyle(0, WS_CLIPCHILDREN); // Reduce flickering during resize
 	m_ctlFileType.GetComboBoxCtrl()->ModifyStyle(0, CBS_SORT);
 	InitFileTypesCtrl();
-	if (!m_ctlFileType.SelectString(GetResString(IDS_SEARCH_ANY)))
+	// Win98: "CComboBoxEx2::SelectString" fails under Win98!
+	//if (!m_ctlFileType.SelectString(GetResString(IDS_SEARCH_ANY)))
+	//	m_ctlFileType.SetCurSel(0);
+	if (!m_ctlFileType.SelectItemDataStringA(ED2KFTSTR_ANY))
 		m_ctlFileType.SetCurSel(0);
 
-	CImageList ilDummyImageList; //dummy list for getting the proper height of listview entries
-	ilDummyImageList.Create(1, theApp.GetSmallSytemIconSize().cy, theApp.m_iDfltImageListColorFlags|ILC_MASK, 1, 1); 
-	m_ctlOpts.SetImageList(&ilDummyImageList, LVSIL_SMALL);
-	ASSERT( (m_ctlOpts.GetStyle() & LVS_SHAREIMAGELISTS) == 0 );
-	ilDummyImageList.Detach();
-
+	m_ctlOpts.ModifyStyle(0, WS_CLIPCHILDREN); // Does not help, control keeps flickering like mad
 	m_ctlOpts.SetExtendedStyle(LVS_EX_GRIDLINES | LVS_EX_LABELTIP);
-	m_ctlOpts.InsertColumn(0, GetResString(IDS_PARAMETER) );
-	m_ctlOpts.InsertColumn(1, GetResString(IDS_VALUE) );
+	m_ctlOpts.InsertColumn(0, GetResString(IDS_PARAMETER));
+	m_ctlOpts.InsertColumn(1, GetResString(IDS_VALUE));
 
 	m_ctlOpts.InsertItem(orMinSize, GetResString(IDS_SEARCHMINSIZE));
 	m_ctlOpts.InsertItem(orMaxSize, GetResString(IDS_SEARCHMAXSIZE));
@@ -342,27 +337,72 @@ void CSearchParamsWnd::OnSize(UINT nType, int cx, int cy)
 		GetClientRect(&rcClient);
 		CalcInsideRect(rcClient, TRUE);
 
-		GetDlgItem(IDC_MSTATIC3)->MoveWindow(rcClient.left + m_rcNameLbl.left, rcClient.top + m_rcNameLbl.top, m_rcNameLbl.Width(), m_rcNameLbl.Height());
-		m_ctlName.MoveWindow(rcClient.left + m_rcName.left, rcClient.top + m_rcName.top, m_rcName.Width(), m_rcName.Height());
-		m_ctlUnicode.MoveWindow(rcClient.left + m_rcUnicode.left, rcClient.top + m_rcUnicode.top, m_rcUnicode.Width(), m_rcUnicode.Height());
-		GetDlgItem(IDC_DD)->MoveWindow(rcClient.left + m_rcDropDownArrow.left, rcClient.top + m_rcDropDownArrow.top, m_rcDropDownArrow.Width(), m_rcDropDownArrow.Height());
-		GetDlgItem(IDC_MSTATIC7)->MoveWindow(rcClient.left + m_rcFileTypeLbl.left, rcClient.top + m_rcFileTypeLbl.top, m_rcFileTypeLbl.Width(), m_rcFileTypeLbl.Height());
-		m_ctlFileType.MoveWindow(rcClient.left + m_rcFileType.left, rcClient.top + m_rcFileType.top, m_rcFileType.Width(), m_rcFileType.Height());
-		GetDlgItem(IDC_SEARCH_RESET)->MoveWindow(rcClient.left + m_rcReset.left, rcClient.top + m_rcReset.top, m_rcReset.Width(), m_rcReset.Height());
-		GetDlgItem(IDC_METH)->MoveWindow(rcClient.left + m_rcMethodLbl.left, rcClient.top + m_rcMethodLbl.top, m_rcMethodLbl.Width(), m_rcMethodLbl.Height());
-		m_ctlMethod.MoveWindow(rcClient.left + m_rcMethod.left, rcClient.top + m_rcMethod.top, m_rcMethod.Width(), m_rcMethod.Height());
-		m_ctlStart.MoveWindow(rcClient.left + m_rcStart.left, rcClient.top + m_rcStart.top, m_rcStart.Width(), m_rcStart.Height());
-		m_ctlMore.MoveWindow(rcClient.left + m_rcMore.left, rcClient.top + m_rcMore.top, m_rcMore.Width(), m_rcMore.Height());
-		m_ctlCancel.MoveWindow(rcClient.left + m_rcCancel.left, rcClient.top + m_rcCancel.top, m_rcCancel.Width(), m_rcCancel.Height());
+		// resizing the name field instead the filter fields makes sense, because the filter input mostly stays small while a bigger
+		// name filed allows longer search queries without scrolling.
+		// however it doesn't looks nice at all, because of the asymmetry which is created by not resizing the method selectors
+		// but resizing them wouldn't make any sense at all, so we need to find a better build up at some point, but for now
+		// stay with the old method which is not perfect but looks fair enough
+		/*
+		HDWP hdwp = BeginDeferWindowPos(12);
+		if (hdwp)
+		{
+			UINT uFlags = SWP_NOZORDER | SWP_NOACTIVATE;
+			int iWidthOpts = (rcClient.Width() * 35) / 100;
+			if (iWidthOpts < m_rcOpts.Width())
+				iWidthOpts = m_rcOpts.Width();
+			int iXPosOpts = rcClient.right - iWidthOpts;
+			ASSERT( m_rcStart.Width() == m_rcMore.Width() && m_rcStart.Width() == m_rcCancel.Width() );
+			int iXPosButtons = iXPosOpts - m_rcStart.Width() - 2;
+			int iXPosDDArrow = iXPosButtons - 2 - m_rcDropDownArrow.Width();
+			int iWidthName = iXPosDDArrow - (rcClient.left + m_rcName.left);
+
+			hdwp = DeferWindowPos(hdwp, *GetDlgItem(IDC_MSTATIC3), NULL, rcClient.left + m_rcNameLbl.left, rcClient.top + m_rcNameLbl.top, m_rcNameLbl.Width(), m_rcNameLbl.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlName, NULL, rcClient.left + m_rcName.left, rcClient.top + m_rcName.top, iWidthName, m_rcName.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, *GetDlgItem(IDC_DD), NULL, iXPosDDArrow, rcClient.top + m_rcDropDownArrow.top, m_rcDropDownArrow.Width(), m_rcDropDownArrow.Height(), uFlags);
+
+			hdwp = DeferWindowPos(hdwp, *GetDlgItem(IDC_MSTATIC7), NULL, rcClient.left + m_rcFileTypeLbl.left, rcClient.top + m_rcFileTypeLbl.top, m_rcFileTypeLbl.Width(), m_rcFileTypeLbl.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlFileType, NULL, rcClient.left + m_rcFileType.left, rcClient.top + m_rcFileType.top, m_rcFileType.Width(), m_rcFileType.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, *GetDlgItem(IDC_SEARCH_RESET), NULL, rcClient.left + m_rcReset.left, rcClient.top + m_rcReset.top, m_rcReset.Width(), m_rcReset.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, *GetDlgItem(IDC_METH), NULL, rcClient.left + m_rcMethodLbl.left, rcClient.top + m_rcMethodLbl.top, m_rcMethodLbl.Width(), m_rcMethodLbl.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlMethod, NULL, rcClient.left + m_rcMethod.left, rcClient.top + m_rcMethod.top, m_rcMethod.Width(), m_rcMethod.Height(), uFlags);
+
+			hdwp = DeferWindowPos(hdwp, m_ctlStart, NULL, iXPosButtons, rcClient.top + m_rcStart.top, m_rcStart.Width(), m_rcStart.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlMore, NULL, iXPosButtons, rcClient.top + m_rcMore.top, m_rcMore.Width(), m_rcMore.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlCancel, NULL, iXPosButtons, rcClient.top + m_rcCancel.top, m_rcCancel.Width(), m_rcCancel.Height(), uFlags);
+
+   			hdwp = DeferWindowPos(hdwp, m_ctlOpts, NULL, iXPosOpts, rcClient.top + m_rcOpts.top, iWidthOpts, m_rcOpts.Height(), uFlags);
+			VERIFY( EndDeferWindowPos(hdwp) );
+		}
+		*/
 
 		int iWidthOpts = rcClient.right - (rcClient.left + m_rcOpts.left);
-		m_ctlOpts.MoveWindow(rcClient.left + m_rcOpts.left, rcClient.top + m_rcOpts.top, iWidthOpts, m_rcOpts.Height());
+		HDWP hdwp = BeginDeferWindowPos(12);
+		if (hdwp)
+		{
+			UINT uFlags = SWP_NOZORDER | SWP_NOACTIVATE;
+			hdwp = DeferWindowPos(hdwp, *GetDlgItem(IDC_MSTATIC3), NULL, rcClient.left + m_rcNameLbl.left, rcClient.top + m_rcNameLbl.top, m_rcNameLbl.Width(), m_rcNameLbl.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlName, NULL, rcClient.left + m_rcName.left, rcClient.top + m_rcName.top, m_rcName.Width(), m_rcName.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, *GetDlgItem(IDC_DD), NULL, rcClient.left + m_rcDropDownArrow.left, rcClient.top + m_rcDropDownArrow.top, m_rcDropDownArrow.Width(), m_rcDropDownArrow.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, *GetDlgItem(IDC_MSTATIC7), NULL, rcClient.left + m_rcFileTypeLbl.left, rcClient.top + m_rcFileTypeLbl.top, m_rcFileTypeLbl.Width(), m_rcFileTypeLbl.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlFileType, NULL, rcClient.left + m_rcFileType.left, rcClient.top + m_rcFileType.top, m_rcFileType.Width(), m_rcFileType.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, *GetDlgItem(IDC_SEARCH_RESET), NULL, rcClient.left + m_rcReset.left, rcClient.top + m_rcReset.top, m_rcReset.Width(), m_rcReset.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, *GetDlgItem(IDC_METH), NULL, rcClient.left + m_rcMethodLbl.left, rcClient.top + m_rcMethodLbl.top, m_rcMethodLbl.Width(), m_rcMethodLbl.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlMethod, NULL, rcClient.left + m_rcMethod.left, rcClient.top + m_rcMethod.top, m_rcMethod.Width(), m_rcMethod.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlStart, NULL, rcClient.left + m_rcStart.left, rcClient.top + m_rcStart.top, m_rcStart.Width(), m_rcStart.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlMore, NULL, rcClient.left + m_rcMore.left, rcClient.top + m_rcMore.top, m_rcMore.Width(), m_rcMore.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlCancel, NULL, rcClient.left + m_rcCancel.left, rcClient.top + m_rcCancel.top, m_rcCancel.Width(), m_rcCancel.Height(), uFlags);
+			hdwp = DeferWindowPos(hdwp, m_ctlOpts, NULL, rcClient.left + m_rcOpts.left, rcClient.top + m_rcOpts.top, iWidthOpts, m_rcOpts.Height(), uFlags);
+			VERIFY( EndDeferWindowPos(hdwp) );
+		}
+
 		m_ctlOpts.ModifyStyle(0, LVS_NOCOLUMNHEADER);
 		CRect rcOptsClnt;
 		m_ctlOpts.GetClientRect(&rcOptsClnt);
 		m_ctlOpts.SetColumnWidth(0, LVSCW_AUTOSIZE);
 		// (**1) Adjust for Windows Classic Theme and Flat Style control
-		m_ctlOpts.SetColumnWidth(1, rcOptsClnt.Width() - m_ctlOpts.GetColumnWidth(0) - 2/*(**1)*/);
+		int iCol2Width = rcOptsClnt.Width() - m_ctlOpts.GetColumnWidth(0) - 2/*(**1)*/;
+		if (m_ctlOpts.GetColumnWidth(1) != iCol2Width)
+			m_ctlOpts.SetColumnWidth(1, iCol2Width);
 	}
 	else if (cx < MIN_HORZ_WIDTH)
 	{
@@ -388,12 +428,6 @@ void CSearchParamsWnd::OnSize(UINT nType, int cx, int cy)
 		m_ctlName.MoveWindow(rcClient.left, y, iNameWidth, rcName.Height());
 		GetDlgItem(IDC_DD)->MoveWindow(rcClient.left + iNameWidth + 4, y, rcDropDownArrow.Width(), rcDropDownArrow.Height());
 		y += rcName.Height() + 2;
-
-		CRect rcUnicode;
-		m_ctlUnicode.GetWindowRect(&rcUnicode);
-		ScreenToClient(&rcUnicode);
-		m_ctlUnicode.MoveWindow(rcClient.left, y, rcClient.Width(), rcUnicode.Height());
-		y += rcUnicode.Height() + 8;
 
 		CRect rcFileTypeLbl;
 		GetDlgItem(IDC_MSTATIC7)->GetWindowRect(&rcFileTypeLbl);
@@ -478,28 +512,26 @@ void CSearchParamsWnd::UpdateControls()
 void CSearchParamsWnd::SetAllIcons()
 {
 	CImageList iml;
-	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
-	iml.SetBkColor(CLR_NONE);
-	iml.Add(CTempIconLoader(_T("KadServer"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchMethod_SERVER"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchMethod_GLOBAL"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchMethod_KADEMLIA"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchMethod_FILEDONKEY"), 16, 16));
+	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
+	iml.Add(CTempIconLoader(_T("SearchMethod_KadServer")));
+	iml.Add(CTempIconLoader(_T("SearchMethod_SERVER")));
+	iml.Add(CTempIconLoader(_T("SearchMethod_GLOBAL")));
+	iml.Add(CTempIconLoader(_T("SearchMethod_KADEMLIA")));
+	iml.Add(CTempIconLoader(_T("SearchMethod_FILEDONKEY")));
 	m_ctlMethod.SetImageList(&iml);
 	m_imlSearchMethods.DeleteImageList();
 	m_imlSearchMethods.Attach(iml.Detach());
 
-	iml.Create(16,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
-	iml.SetBkColor(CLR_NONE);
-	iml.Add(CTempIconLoader(_T("SearchFileType_Any"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchFileType_Archive"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchFileType_Audio"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchFileType_CDImage"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchFileType_Picture"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchFileType_Program"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchFileType_Video"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchFileType_Document"), 16, 16));
-	iml.Add(CTempIconLoader(_T("SearchFileType_EmuleCollection"), 16, 16));
+	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
+	iml.Add(CTempIconLoader(_T("SearchFileType_Any")));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Archive")));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Audio")));
+	iml.Add(CTempIconLoader(_T("SearchFileType_CDImage")));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Picture")));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Program")));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Video")));
+	iml.Add(CTempIconLoader(_T("SearchFileType_Document")));
+	iml.Add(CTempIconLoader(_T("AABCollectionFileType")));
 	m_ctlFileType.SetImageList(&iml);
 	m_imlFileType.DeleteImageList();
 	m_imlFileType.Attach(iml.Detach());
@@ -569,7 +601,7 @@ void CSearchParamsWnd::InitFileTypesCtrl()
 
 	// create temp. list of new entries (language dependent)
 	std::list<SFileTypeCbEntry> lstFileTypeCbEntries;
-	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_ANY), "", 0));
+	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_ANY), ED2KFTSTR_ANY, 0));
 	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_ARC), ED2KFTSTR_ARCHIVE, 1));
 	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_AUDIO), ED2KFTSTR_AUDIO, 2));
 	lstFileTypeCbEntries.push_back(SFileTypeCbEntry(GetResString(IDS_SEARCH_CDIMG), ED2KFTSTR_CDIMAGE, 3));
@@ -596,7 +628,10 @@ void CSearchParamsWnd::InitFileTypesCtrl()
 	// restore previous selected entry by value (language independent)
 	if (!m_ctlFileType.SelectItemDataStringA(strCurSelFileType))
 	{
-		if (!m_ctlFileType.SelectString(GetResString(IDS_SEARCH_ANY)))
+		// Win98: "CComboBoxEx2::SelectString" fails under Win98!
+		//if (!m_ctlFileType.SelectString(GetResString(IDS_SEARCH_ANY)))
+		//	m_ctlFileType.SetCurSel(0);
+		if (!m_ctlFileType.SelectItemDataStringA(ED2KFTSTR_ANY))
 			m_ctlFileType.SetCurSel(0);
 	}
 }
@@ -609,7 +644,6 @@ void CSearchParamsWnd::Localize()
 	GetDlgItem(IDC_MSTATIC7)->SetWindowText(GetResString(IDS_TYPE));
 	GetDlgItem(IDC_SEARCH_RESET)->SetWindowText(GetResString(IDS_PW_RESET));
 	GetDlgItem(IDC_METH)->SetWindowText(GetResString(IDS_METHOD));
-	GetDlgItem(IDC_SEARCH_UNICODE)->SetWindowText(GetResString(IDS_SEARCH_UNICODE));
 
 	m_ctlStart.SetWindowText(GetResString(IDS_SW_START));
 	m_ctlCancel.SetWindowText(GetResString(IDS_CANCEL));
@@ -769,37 +803,16 @@ void CSearchParamsWnd::SaveSettings()
 void CSearchParamsWnd::OnEnChangeName()
 {
 	m_ctlStart.EnableWindow(m_ctlName.GetWindowTextLength() > 0);
-	UpdateUnicodeCtrl();
-}
-
-void CSearchParamsWnd::UpdateUnicodeCtrl()
-{
-	bool bUnicodeIsDisabled = m_ctlUnicode.IsWindowEnabled() && m_ctlUnicode.GetCheck() == 0;
-	bool bOfferUnicode = false;
-	if ((ESearchType)m_ctlMethod.GetCurSel() != SearchTypeFileDonkey)
-	{
-		CString strExpr;
-		m_ctlName.GetWindowText(strExpr);
-		CStringW wstrExpr(strExpr);
-		for (int i = 0; i < wstrExpr.GetLength(); i++)
-		{
-			if (wstrExpr[i] >= 0x80)
-			{
-				bOfferUnicode = true;
-				break;
-			}
-		}
-	}
-	m_ctlUnicode.EnableWindow(bOfferUnicode);
-	if (!bUnicodeIsDisabled)
-		m_ctlUnicode.SetCheck(bOfferUnicode);
 }
 
 void CSearchParamsWnd::OnBnClickedSearchReset()
 {
 	m_ctlName.SetWindowText(_T(""));
 
-	if (!m_ctlFileType.SelectString(GetResString(IDS_SEARCH_ANY)))
+	// Win98: "CComboBoxEx2::SelectString" fails under Win98!
+	//if (!m_ctlFileType.SelectString(GetResString(IDS_SEARCH_ANY)))
+	//	m_ctlFileType.SetCurSel(0);
+	if (!m_ctlFileType.SelectItemDataStringA(ED2KFTSTR_ANY))
 		m_ctlFileType.SetCurSel(0);
 
 	for (int i = 0; i < m_ctlOpts.GetItemCount(); i++)
@@ -826,11 +839,6 @@ void CSearchParamsWnd::SetParameters(const SSearchParams* pParams)
 	if (!pParams->bClientSharedFiles)
 	{
 		m_ctlName.SetWindowText(pParams->strExpression);
-		if (m_ctlUnicode.IsWindowEnabled())
-			m_ctlUnicode.SetCheck(pParams->bUnicode);
-		else
-			m_ctlUnicode.SetCheck(0);
-
 		m_ctlFileType.SelectItemDataStringA(pParams->strFileType);
 
 		m_ctlOpts.SetItemText(orMinSize, 1, pParams->strMinSize);
@@ -959,16 +967,6 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 	if (!IsValidEd2kString(strExpression)){
 		AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + GetResString(IDS_SEARCH_INVALIDCHAR), MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
 		return NULL;
-	}
-
-	bool bUnicode = m_ctlUnicode.IsWindowEnabled() && m_ctlUnicode.GetCheck();
-	if (!bUnicode)
-	{
-		CStringA strACP(strExpression);
-		if (!IsValidEd2kStringA(strACP)){
-			AfxMessageBox(GetResString(IDS_SEARCH_EXPRERROR) + _T("\n\n") + GetResString(IDS_SEARCH_INVALIDCHAR), MB_ICONWARNING | MB_HELP, eMule_FAQ_Search - HID_BASE_PROMPT);
-			return NULL;
-		}
 	}
 
 	CStringA strFileType;
@@ -1131,7 +1129,6 @@ SSearchParams* CSearchParamsWnd::GetParameters()
 		pParams->strArtist = m_ctlOpts.GetItemText(orArtist, 1);
 		pParams->strArtist.Trim();
 	}
-	pParams->bUnicode = bUnicode;
 
 	return pParams;
 }

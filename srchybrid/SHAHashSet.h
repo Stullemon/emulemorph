@@ -90,6 +90,7 @@ class CUpDownClient;
 class CAICHHash 
 {
 public:
+
 	~CAICHHash()									{;}
 	CAICHHash()										{ ZeroMemory(m_abyBuffer, HASHSIZE); }
 	CAICHHash(CFileDataIO* file)					{ Read(file); }
@@ -103,10 +104,18 @@ public:
 	void		Read(uchar* data)					{ memcpy(m_abyBuffer, data, HASHSIZE); }
 	CString		GetString() const;
 	uchar*		GetRawHash()						{ return m_abyBuffer; }
+	const uchar* GetRawHashC() const				{ return m_abyBuffer; }
 
 	static int	GetHashSize()						{ return HASHSIZE;}
 private:
 	uchar m_abyBuffer[HASHSIZE];
+};
+
+template<> inline UINT AFXAPI HashKey(const CAICHHash& key){
+   uint32 hash = 1;
+   for (int i = 0;i != HASHSIZE;i++)
+	   hash += (key.GetRawHashC()[i]+1)*((i*i)+1);
+   return hash;
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -133,6 +142,8 @@ public:
 	bool			ReCalculateHash(CAICHHashAlgo* hashalg, bool bDontReplace );
 	bool			VerifyHashTree(CAICHHashAlgo* hashalg, bool bDeleteBadTrees);
 	CAICHHashTree*	FindHash(uint64 nStartPos, uint64 nSize)					{uint8 buffer = 0; return FindHash(nStartPos, nSize, &buffer);}
+	uint64			GetBaseSize() const;		
+	void			SetBaseSize(uint64 uValue);
 
 protected:
 	CAICHHashTree*	FindHash(uint64 nStartPos, uint64 nSize, uint8* nLevel);
@@ -141,15 +152,21 @@ protected:
 	bool			WriteLowestLevelHashs(CFileDataIO* fileDataOut, uint32 wHashIdent, bool bNoIdent, bool b32BitIdent) const;
 	bool			LoadLowestLevelHashs(CFileDataIO* fileInput);
 	bool			SetHash(CFileDataIO* fileInput, uint32 wHashIdent, sint8 nLevel = (-1), bool bAllowOverwrite = true);
+	bool			ReduceToBaseSize(uint64 nBaseSize);
+	
 	CAICHHashTree*	m_pLeftTree;
 	CAICHHashTree*	m_pRightTree;
 
 public:
 	CAICHHash		m_Hash;
-	uint64			m_nDataSize;		// size of data which is covered by this hash
-	uint64			m_nBaseSize;		// blocksize on which the lowest hash is based on
+	uint64			m_nDataSize;		// size of data which is covered by this hash	
 	bool			m_bIsLeftBranch;	// left or right branch of the tree
 	bool			m_bHashValid;		// the hash is valid and not empty
+
+private:
+	// BaseSize: to save ressources we use a bool to store the basesize as currently only two values are used
+	// keep the original number based calculations and checks in the code through, so it can easily be adjusted in case we want to use hashsets with different basesizes
+	bool			m_bBaseSize;		// blocksize on which the lowest hash is based on
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
@@ -192,6 +209,7 @@ public:
 	void			SetOwner(CKnownFile* val)					{m_pOwner = val;}
 	
 	void			FreeHashSet();
+	void			ReduceToPartHashs();
 	void			SetFileSize(EMFileSize nSize);
 	
 	CAICHHash&		GetMasterHash()						{return m_pHashTree.m_Hash;} 

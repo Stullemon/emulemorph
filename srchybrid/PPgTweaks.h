@@ -71,6 +71,7 @@ protected:
 	int m_iExtractMetaData;
 	int m_iShareeMule;
 	bool bShowedWarning;
+	bool m_bResolveShellLinks;
 	// MORPH START leuk_he Advanced official preferences.
 	bool bMiniMuleAutoClose;
 	int iMiniMuleTransparency;
@@ -239,6 +240,7 @@ protected:
 	HTREEITEM m_htiShareeMulePublicUser;
 	HTREEITEM m_htiShareeMuleOldStyle;
 	//HTREEITEM m_htiExtractMetaDataMediaDet;
+	HTREEITEM m_htiResolveShellLinks;
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();

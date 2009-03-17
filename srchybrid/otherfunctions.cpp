@@ -18,7 +18,14 @@
 #include <sys/stat.h>
 #include <share.h>
 #include <io.h>
+#include <fcntl.h>
+#if _MSC_VER>=1400
+#pragma warning(disable:6385 6011)
+#endif
 #include <atlrx.h>
+#if _MSC_VER>=1400
+#pragma warning(default:6385 6011)
+#endif
 #include "emule.h"
 #include "OtherFunctions.h"
 #include "DownloadQueue.h"
@@ -39,16 +46,18 @@
 #include "shahashset.h"
 #include "collection.h"
 #include "SafeFile.h"
-#include "FileFormat.h"
 #include "Kademlia/Kademlia/kademlia.h"
 #include "kademlia/kademlia/UDPFirewallTester.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
+
+extern bool GetDRM(LPCTSTR pszFilePath);
 
 CWebServices theWebServices;
 
@@ -182,13 +191,13 @@ CString CastItoIShort(double count, bool isK, uint32 decimal){
 	if (count < 1000.0)
 		output.Format(_T("%.0f"), count);
 	else if (count < 1000000.0)
-		output.Format(_T("%.*f%s"), decimal, count/1000.0, GetResString(IDS_KILO));
+		output.Format(_T("%.*f %s"), decimal, count/1000.0, GetResString(IDS_KILO));
 	else if (count < 1000000000.0)
-		output.Format(_T("%.*f%s"), decimal, count/1000000.0, GetResString(IDS_MEGA));
+		output.Format(_T("%.*f %s"), decimal, count/1000000.0, GetResString(IDS_MEGA));
 	else if (count < 1000000000000.0)
-		output.Format(_T("%.*f%s"), decimal, count/1000000000.0, GetResString(IDS_GIGA));
+		output.Format(_T("%.*f %s"), decimal, count/1000000000.0, GetResString(IDS_GIGA));
 	else if (count < 1000000000000000.0)
-		output.Format(_T("%.*f%s"), decimal, count/1000000000000.0, GetResString(IDS_TERRA));
+		output.Format(_T("%.*f %s"), decimal, count/1000000000000.0, GetResString(IDS_TERRA));
 	return output;
 }
 
@@ -201,9 +210,9 @@ CString CastSecondsToHM(time_t tSeconds)
 	UINT count = tSeconds;
 	if (count < 60)
 		buffer.Format(_T("%u %s"), count, GetResString(IDS_SECS));
-	else if (count < 3600) 
+	else if (count < 3600)
 		buffer.Format(_T("%u:%02u %s"), count/60, count - (count/60)*60, GetResString(IDS_MINS));
-	else if (count < 86400) 
+	else if (count < 86400)
 		buffer.Format(_T("%u:%02u %s"), count/3600, (count - (count/3600)*3600)/60, GetResString(IDS_HOURS));
 	else {
 		UINT cntDays = count/86400;
@@ -222,9 +231,9 @@ CString CastSecondsToLngHM(time_t tSeconds)
 	UINT count = tSeconds;
 	if (count < 60)
 		buffer.Format(_T("%u %s"), count, GetResString(IDS_LONGSECS));
-	else if (count < 3600) 
+	else if (count < 3600)
 		buffer.Format(_T("%u:%02u %s"), count/60, count - (count/60)*60, GetResString(IDS_LONGMINS));
-	else if (count < 86400) 
+	else if (count < 86400)
 		buffer.Format(_T("%u:%02u %s"), count/3600, (count - (count/3600)*3600)/60, GetResString(IDS_LONGHRS));
 	else {
 		UINT cntDays = count/86400;
@@ -237,15 +246,106 @@ CString CastSecondsToLngHM(time_t tSeconds)
 	return buffer;
 } 
 
+bool CheckFileOpen(LPCTSTR pszFilePath, LPCTSTR pszFileTitle)
+{
+	if (thePrefs.GetCheckFileOpen() && !PathIsURL(pszFilePath) && GetDRM(pszFilePath))
+	{
+		CString strWarning;
+		strWarning.Format(GetResString(IDS_FILE_WARNING_DRM), pszFileTitle != NULL ? pszFileTitle : pszFilePath);
+		int iAnswer = AfxMessageBox(strWarning, MB_YESNO | MB_ICONEXCLAMATION | MB_DEFBUTTON2);
+		if (iAnswer != IDYES)
+			return false;
+	}
+	return true;
+}
+
 void ShellOpenFile(CString name)
 {
-    ShellExecute(NULL, _T("open"), name, NULL, NULL, SW_SHOW);
+    ShellOpenFile(name, _T("open"));
 }
 
 void ShellOpenFile(CString name, LPCTSTR pszVerb)
 {
-    ShellExecute(NULL, pszVerb, name, NULL, NULL, SW_SHOW); 
-} 
+	if ((pszVerb == NULL || pszVerb[0] == _T('\0') || _tcsicmp(pszVerb, _T("open"))) && !CheckFileOpen(name, NULL))
+		return;
+    ShellExecute(NULL, pszVerb, name, NULL, NULL, SW_SHOW);
+}
+
+bool ShellDeleteFile(LPCTSTR pszFilePath)
+{
+	if (!PathFileExists(pszFilePath))
+		return true;
+	if (!thePrefs.GetRemoveToBin())
+		return (DeleteFile(pszFilePath) != FALSE);
+
+	TCHAR todel[MAX_PATH + 1];
+	memset(todel, 0, sizeof todel);
+	_tcsncpy(todel, pszFilePath, _countof(todel) - 2);
+
+	SHFILEOPSTRUCT fp = {0};
+	fp.wFunc = FO_DELETE;
+	fp.hwnd = theApp.emuledlg->m_hWnd;
+	fp.pFrom = todel;
+	fp.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT | FOF_NORECURSION;
+	bool bResult = false;
+	__try {
+		// Win98/MSLU: This seems to crash always in UNICOWS.DLL !?
+		bResult = (SHFileOperation(&fp) == 0);
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER) {
+		bResult = (DeleteFile(pszFilePath) != FALSE);
+	}
+	return bResult;
+}
+
+CString ShellGetFolderPath(int iCSIDL)
+{
+	CString strFolderPath;
+
+	// Try the Unicode version from "shell32" *and* examine the function result - just the presence of that
+	// function does not mean that it returns the requested path.
+	//
+	// Win98: 'SHGetFolderPathW' is available in 'shell32.dll', but it does not support all of the CSIDL values.
+	HRESULT (WINAPI *pfnSHGetFolderPathW)(HWND, int, HANDLE, DWORD, LPWSTR);
+	(FARPROC&)pfnSHGetFolderPathW = GetProcAddress(GetModuleHandle(_T("shell32")), "SHGetFolderPathW");
+	if (pfnSHGetFolderPathW)
+	{
+		WCHAR wszPath[MAX_PATH];
+		if ((*pfnSHGetFolderPathW)(NULL, iCSIDL, NULL, SHGFP_TYPE_CURRENT, wszPath) == S_OK)
+			strFolderPath = wszPath;
+	}
+
+	if (strFolderPath.IsEmpty())
+	{
+		HMODULE hLibShFolder = LoadLibrary(_T("shfolder.dll"));
+		if (hLibShFolder)
+		{
+			HRESULT (WINAPI *pfnSHGetFolderPathW)(HWND, int, HANDLE, DWORD, LPWSTR);
+			(FARPROC&)pfnSHGetFolderPathW = GetProcAddress(hLibShFolder, "SHGetFolderPathW");
+			if (pfnSHGetFolderPathW)
+			{
+				WCHAR wszPath[MAX_PATH];
+				if ((*pfnSHGetFolderPathW)(NULL, iCSIDL, NULL, SHGFP_TYPE_CURRENT, wszPath) == S_OK)
+					strFolderPath = wszPath;
+			}
+
+			if (strFolderPath.IsEmpty())
+			{
+				HRESULT (WINAPI *pfnSHGetFolderPathA)(HWND, int, HANDLE, DWORD, LPSTR);
+				(FARPROC&)pfnSHGetFolderPathA = GetProcAddress(hLibShFolder, "SHGetFolderPathA");
+				if (pfnSHGetFolderPathA)
+				{
+					CHAR aszPath[MAX_PATH];
+					if ((*pfnSHGetFolderPathA)(NULL, iCSIDL, NULL, SHGFP_TYPE_CURRENT, aszPath) == S_OK)
+						strFolderPath = CString(aszPath);
+				}
+			}
+			FreeLibrary(hLibShFolder);
+		}
+	}
+
+	return strFolderPath;
+}
 
 namespace {
 	bool IsHexDigit(int c) {
@@ -346,7 +446,7 @@ CString EncodeURLQueryParam(const CString& sInT)
 
     CString sOut;
     LPTSTR pOutBuf = sOut.GetBuffer(sIn.GetLength() * 3);
-    if(pOutBuf)
+    if (pOutBuf)
     {
 		// do encoding
 		while (*pInBuf)
@@ -382,14 +482,6 @@ CString RemoveAmbersand(const CString& rstr)
 	return str;
 }
 
-bool HaveEd2kRegAccess()
-{
-	CRegKey regkey;
-	DWORD dwRegResult = regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\ed2k\\shell\\open\\command"));
-	regkey.Close();
-	return (dwRegResult == ERROR_SUCCESS);
-}
-
 bool Ask4RegFix(bool checkOnly, bool dontAsk, bool bAutoTakeCollections)
 {
 	// Barry - Make backup first
@@ -399,122 +491,144 @@ bool Ask4RegFix(bool checkOnly, bool dontAsk, bool bAutoTakeCollections)
 	bool bGlobalSet = false;
 	CRegKey regkey;
 	LONG result;
-		TCHAR rbuffer[500];
-		ULONG maxsize = _countof(rbuffer);
-		TCHAR modbuffer[490];
-	
-		::GetModuleFileName(NULL, modbuffer, _countof(modbuffer));
-		CString strCanonFileName = modbuffer;
-		strCanonFileName.Replace(_T("%"), _T("%%"));
-		TCHAR regbuffer[520];
-		_sntprintf(regbuffer, _countof(regbuffer), _T("\"%s\" \"%%1\""), strCanonFileName);
+	TCHAR modbuffer[MAX_PATH];
+	DWORD dwModPathLen = ::GetModuleFileName(NULL, modbuffer, _countof(modbuffer));
+	if (dwModPathLen == 0 || dwModPathLen == _countof(modbuffer))
+		return false;
+	CString strCanonFileName = modbuffer;
+	strCanonFileName.Replace(_T("%"), _T("%%"));
+	CString regbuffer;
+	regbuffer.Format(_T("\"%s\" \"%%1\""), strCanonFileName);
 
-	// first check if the ed2k links are set globally (i.e. by the installer)
+	// first check if the registry keys are already set (either by installer in HKLM or by user in HKCU)
 	result = regkey.Open(HKEY_CLASSES_ROOT, _T("ed2k\\shell\\open\\command"), KEY_READ);
 	if (result == ERROR_SUCCESS)
-		{
+	{
+		TCHAR rbuffer[MAX_PATH + 100];
+		ULONG maxsize = _countof(rbuffer);
 		regkey.QueryStringValue(NULL, rbuffer, &maxsize);
-		regbuffer[_countof(regbuffer) - 1] = _T('\0');
+		rbuffer[_countof(rbuffer) - 1] = _T('\0');
 		if (maxsize != 0 && _tcsicmp(rbuffer, regbuffer) == 0)
 			bGlobalSet = true; // yup, globally we have an entrie for this mule
 		regkey.Close();
 	}
 
-	if (!bGlobalSet){
+	if (!bGlobalSet)
+	{
 		// we actually need to change the registry and write an entry for HKCU
-			if (checkOnly)
-				return true;
-		if (regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\ed2k\\shell\\open\\command")) == ERROR_SUCCESS){
+		if (checkOnly)
+			return true;
+		HKEY hkeyCR = thePrefs.GetWindowsVersion() < _WINVER_2K_ ? HKEY_LOCAL_MACHINE : HKEY_CURRENT_USER;
+		if (regkey.Create(hkeyCR, _T("Software\\Classes\\ed2k\\shell\\open\\command")) == ERROR_SUCCESS)
+		{
 			if (dontAsk || (AfxMessageBox(GetResString(IDS_ASSIGNED2K), MB_ICONQUESTION|MB_YESNO) == IDYES))
 			{
-				regkey.SetStringValue(NULL, regbuffer);	
-				
-				regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\ed2k\\DefaultIcon"));
-				regkey.SetStringValue(NULL, modbuffer);
+				VERIFY( regkey.SetStringValue(NULL, regbuffer) == ERROR_SUCCESS );
 
-				regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\ed2k"));
-				regkey.SetStringValue(NULL, _T("URL: ed2k Protocol"));
-				regkey.SetStringValue(_T("URL Protocol"), _T(""));
+				VERIFY( regkey.Create(hkeyCR, _T("Software\\Classes\\ed2k\\DefaultIcon")) == ERROR_SUCCESS );
+				VERIFY( regkey.SetStringValue(NULL, modbuffer) == ERROR_SUCCESS );
 
-				regkey.Open(HKEY_CURRENT_USER, _T("Software\\Classes\\ed2k\\shell\\open"));
+				VERIFY( regkey.Create(hkeyCR, _T("Software\\Classes\\ed2k")) == ERROR_SUCCESS );
+				VERIFY( regkey.SetStringValue(NULL, _T("URL: ed2k Protocol")) == ERROR_SUCCESS );
+				VERIFY( regkey.SetStringValue(_T("URL Protocol"), _T("")) == ERROR_SUCCESS );
+
+				VERIFY( regkey.Open(hkeyCR, _T("Software\\Classes\\ed2k\\shell\\open")) == ERROR_SUCCESS );
 				regkey.RecurseDeleteKey(_T("ddexec"));
 				regkey.RecurseDeleteKey(_T("ddeexec"));
 			}
 			regkey.Close();
 		}
 		else
-			ASSERT( false );
-		}
+			ASSERT(0);
+	}
 	else if (checkOnly)
 		return bAutoTakeCollections && DoCollectionRegFix(true);
 	else if (bAutoTakeCollections)
-			DoCollectionRegFix(false);
+		DoCollectionRegFix(false);
 
 	return false;
 }
 
 bool DoRegFixElevated()
 {
-	TCHAR tchFile[490];
-	::GetModuleFileName(0,tchFile, 490);
+	TCHAR tchFile[MAX_PATH];
+	DWORD dwModPathLen = ::GetModuleFileName(NULL, tchFile, _countof(tchFile));
+	if (dwModPathLen == 0 || dwModPathLen == _countof(tchFile))
+		return false;
 	SHELLEXECUTEINFO shex;
 	memset( &shex, 0, sizeof( shex) );
-	shex.cbSize        = sizeof( SHELLEXECUTEINFO );
-	shex.fMask        = 0;
-	shex.lpVerb        = _T("runas");
-	shex.lpFile        = tchFile;
-	shex.lpParameters    = _T("/handleed2klinks");
-	shex.nShow        = SW_NORMAL;
+	shex.cbSize = sizeof( SHELLEXECUTEINFO );
+	shex.fMask = 0;
+	shex.lpVerb = _T("runas");
+	shex.lpFile = tchFile;
+	shex.lpParameters = _T("/handleed2klinks");
+	shex.nShow = SW_NORMAL;
 	return ::ShellExecuteEx(&shex) == TRUE;
 }
 
 void BackupReg(void)
 {
+	// TODO: This function needs to be changed in at least 2 regards
+	//	1)	It must follow the rules: reading from HKCR and writing into HKCU. What we are currently doing
+	//		is not consistent with the other registry function which are dealing with the same keys.
+	//
+	//	2)	It behavious quite(!) differently under Win98 due to an obvious change in the Windows API.
+	//		WinXP: Reading an non existant value returns 'key not found' error.
+	//		Win98: Reading an non existant value returns an empty string (which gets saved and restored by our code).
+	//		This means that saving/restoring existant registry keys works completely different in Win98/XP.
+	//		Actually it works correctly under Win98 and is broken in WinXP+. Though, did someone notice it all ?
+
+	HKEY hkeyCR = thePrefs.GetWindowsVersion() < _WINVER_2K_ ? HKEY_LOCAL_MACHINE : HKEY_CURRENT_USER;
 	// Look for pre-existing old ed2k links
 	CRegKey regkey;
-	if (regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\ed2k\\shell\\open\\command")) == ERROR_SUCCESS)
+	if (regkey.Create(hkeyCR, _T("Software\\Classes\\ed2k\\shell\\open\\command")) == ERROR_SUCCESS)
 	{
-		TCHAR rbuffer[500];
+		TCHAR rbuffer[MAX_PATH + 100];
 		ULONG maxsize = _countof(rbuffer);
-		// Is it ok to write new values
-		if ((regkey.QueryStringValue(_T("OldDefault"), rbuffer, &maxsize) != ERROR_SUCCESS) || (maxsize == 0))
+		if (regkey.QueryStringValue(_T("OldDefault"), rbuffer, &maxsize) != ERROR_SUCCESS || maxsize == 0)
 		{
 			maxsize = _countof(rbuffer);
-			if ( regkey.QueryStringValue(NULL, rbuffer, &maxsize) == ERROR_SUCCESS )
-				regkey.SetStringValue(_T("OldDefault"), rbuffer);
+			if (regkey.QueryStringValue(NULL, rbuffer, &maxsize) == ERROR_SUCCESS)
+				VERIFY( regkey.SetStringValue(_T("OldDefault"), rbuffer) == ERROR_SUCCESS );
 
-			regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\ed2k\\DefaultIcon"));
+			VERIFY( regkey.Create(hkeyCR, _T("Software\\Classes\\ed2k\\DefaultIcon")) == ERROR_SUCCESS );
 			maxsize = _countof(rbuffer);
 			if (regkey.QueryStringValue(NULL, rbuffer, &maxsize) == ERROR_SUCCESS)
-				regkey.SetStringValue(_T("OldIcon"), rbuffer);
+				VERIFY( regkey.SetStringValue(_T("OldIcon"), rbuffer) == ERROR_SUCCESS );
 		}
 		regkey.Close();
 	}
+	else
+		ASSERT(0);
 }
 
 // Barry - Restore previous values
 void RevertReg(void)
 {
+	HKEY hkeyCR = thePrefs.GetWindowsVersion() < _WINVER_2K_ ? HKEY_LOCAL_MACHINE : HKEY_CURRENT_USER;
 	// restore previous ed2k links before being assigned to emule
 	CRegKey regkey;
-	if (regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\ed2k\\shell\\open\\command")) == ERROR_SUCCESS)
+	if (regkey.Create(hkeyCR, _T("Software\\Classes\\ed2k\\shell\\open\\command")) == ERROR_SUCCESS)
 	{
-		TCHAR rbuffer[500];
+		TCHAR rbuffer[MAX_PATH + 100];
 		ULONG maxsize = _countof(rbuffer);
 		if (regkey.QueryStringValue(_T("OldDefault"), rbuffer, &maxsize) == ERROR_SUCCESS)
 		{
-			regkey.SetStringValue(NULL, rbuffer);
-			regkey.DeleteValue(_T("OldDefault"));
-			regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\ed2k\\DefaultIcon"));
+			VERIFY( regkey.SetStringValue(NULL, rbuffer) == ERROR_SUCCESS );
+			VERIFY( regkey.DeleteValue(_T("OldDefault")) == ERROR_SUCCESS );
+
+			VERIFY( regkey.Create(hkeyCR, _T("Software\\Classes\\ed2k\\DefaultIcon")) == ERROR_SUCCESS );
 			maxsize = _countof(rbuffer);
 			if (regkey.QueryStringValue(_T("OldIcon"), rbuffer, &maxsize) == ERROR_SUCCESS)
 			{
-				regkey.SetStringValue(NULL, rbuffer);
-				regkey.DeleteValue(_T("OldIcon"));
+				VERIFY( regkey.SetStringValue(NULL, rbuffer) == ERROR_SUCCESS );
+				VERIFY( regkey.DeleteValue(_T("OldIcon")) == ERROR_SUCCESS );
 			}
 		}
 		regkey.Close();
 	}
+	else
+		ASSERT(0);
 }
 
 int GetMaxWindowsTCPConnections() {
@@ -579,41 +693,38 @@ WORD DetectWinVersion()
 	OSVERSIONINFOEX osvi;
 	ZeroMemory(&osvi, sizeof(OSVERSIONINFOEX));
 	osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
-	if(!GetVersionEx((OSVERSIONINFO*)&osvi))
+	if (!GetVersionEx((OSVERSIONINFO*)&osvi))
 	{
 		osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-		if(!GetVersionEx((OSVERSIONINFO*)&osvi)) 
-		return FALSE;
+		if (!GetVersionEx((OSVERSIONINFO*)&osvi))
+			return FALSE;
 	}
 
-	switch(osvi.dwPlatformId)
+	switch (osvi.dwPlatformId)
 	{
 		case VER_PLATFORM_WIN32_NT:
-			if(osvi.dwMajorVersion <= 4)
+			if (osvi.dwMajorVersion <= 4)
 				return _WINVER_NT4_;
-			if(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0)
+			if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 0)
 				return _WINVER_2K_;
-			if(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1)
+			if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 1)
 				return _WINVER_XP_;
-			if(osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2)
+			if (osvi.dwMajorVersion == 5 && osvi.dwMinorVersion == 2)
 				return _WINVER_2003_;
-			if(osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0)
+			if (osvi.dwMajorVersion == 6 && osvi.dwMinorVersion == 0)
 				return _WINVER_VISTA_;
 			return _WINVER_VISTA_; // never return Win95 if we get the info about a NT system
-      
+
 		case VER_PLATFORM_WIN32_WINDOWS:
-			if(osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0)
-				return _WINVER_95_; 
-			if(osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10)
-				return _WINVER_98_; 
-			if(osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 90)
-				return _WINVER_ME_; 
-			break;
-		
-		default:
+			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 0)
+				return _WINVER_95_;
+			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 10)
+				return _WINVER_98_;
+			if (osvi.dwMajorVersion == 4 && osvi.dwMinorVersion == 90)
+				return _WINVER_ME_;
 			break;
 	}
-	
+
 	return _WINVER_95_;		// there should'nt be anything lower than this
 }
 
@@ -634,11 +745,12 @@ int IsRunningXPSP2(){
 	}
 	return 0;
 }
+
 int IsRunningXPSP2OrHigher(){
 	switch(thePrefs.GetWindowsVersion()){
 		case _WINVER_95_:
 		case _WINVER_98_:
-		//case _WINVER_NT4_:
+		case _WINVER_NT4_:
 		case _WINVER_2K_:
 		case _WINVER_ME_:
 			return 0;
@@ -652,7 +764,7 @@ int IsRunningXPSP2OrHigher(){
 }
 
 uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
-{	
+{
 	extern bool g_bUnicoWS;
 	static BOOL _bInitialized = FALSE;
 	static BOOL (WINAPI *_pfnGetDiskFreeSpaceEx)(LPCTSTR, PULARGE_INTEGER, PULARGE_INTEGER, PULARGE_INTEGER) = NULL;
@@ -663,11 +775,11 @@ uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
 		_bInitialized = TRUE;
 		if (g_bUnicoWS)
 		{
-			(FARPROC&)_pfnGetDiskFreeSpaceExA = GetProcAddress(GetModuleHandle(_T("kernel32.dll")), "GetDiskFreeSpaceExA");
+			(FARPROC&)_pfnGetDiskFreeSpaceExA = GetProcAddress(GetModuleHandle(_T("kernel32")), "GetDiskFreeSpaceExA");
 		}
 		else
 		{
-			(FARPROC&)_pfnGetDiskFreeSpaceEx = GetProcAddress(GetModuleHandle(_T("kernel32.dll")), _TWINAPI("GetDiskFreeSpaceEx"));
+			(FARPROC&)_pfnGetDiskFreeSpaceEx = GetProcAddress(GetModuleHandle(_T("kernel32")), _TWINAPI("GetDiskFreeSpaceEx"));
 		}
 	}
 
@@ -675,7 +787,6 @@ uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
 	{
 		ULARGE_INTEGER nFreeDiskSpace;
 		ULARGE_INTEGER dummy;
-//		nFreeDiskSpace.QuadPart=0;
 		if ( (*_pfnGetDiskFreeSpaceEx)(pDirectory, &nFreeDiskSpace, &dummy, &dummy)==TRUE)
 			return nFreeDiskSpace.QuadPart;
 		else
@@ -683,29 +794,34 @@ uint64 GetFreeDiskSpaceX(LPCTSTR pDirectory)
 	}
 	else if (_pfnGetDiskFreeSpaceExA)
 	{
-		USES_CONVERSION;
 		ULARGE_INTEGER nFreeDiskSpace;
-//		nFreeDiskSpace.QuadPart=0;
 		ULARGE_INTEGER dummy;
-		if ( (*_pfnGetDiskFreeSpaceExA)(T2CA(pDirectory), &nFreeDiskSpace, &dummy, &dummy)==TRUE)
+		if ( (*_pfnGetDiskFreeSpaceExA)(CT2CA(pDirectory), &nFreeDiskSpace, &dummy, &dummy)==TRUE)
 			return nFreeDiskSpace.QuadPart;
 		else
 			return 0;
 	}
 	else 
 	{
-		TCHAR cDrive[16];
+		TCHAR cDrive[MAX_PATH];
 		const TCHAR *p = _tcschr(pDirectory, _T('\\'));
-		if(p)
+		if (p)
 		{
-			memcpy(cDrive, pDirectory, (p-pDirectory)*sizeof(TCHAR));
-			cDrive[p-pDirectory] = _T('\0');
+			size_t uChars = p - pDirectory;
+			if (uChars >= _countof(cDrive))
+				return 0;
+			memcpy(cDrive, pDirectory, uChars * sizeof(TCHAR));
+			cDrive[uChars] = _T('\0');
 		}
 		else
+		{
+			if (_tcslen(pDirectory) >= _countof(cDrive))
+				return 0;
 			_tcscpy(cDrive, pDirectory);
+		}
 		DWORD dwSectPerClust, dwBytesPerSect, dwFreeClusters, dwDummy;
 		if (GetDiskFreeSpace(cDrive, &dwSectPerClust, &dwBytesPerSect, &dwFreeClusters, &dwDummy))
-			return (dwFreeClusters * dwSectPerClust * dwBytesPerSect);
+			return (ULONGLONG)dwFreeClusters * (ULONGLONG)dwSectPerClust * (ULONGLONG)dwBytesPerSect;
 		else
 			return 0;
 	}
@@ -877,7 +993,8 @@ uint32 DecodeBase32(LPCTSTR pszInput, uchar* paucOutput, uint32 nBufferLen)
 	return nDecodeLen;
 }
 
-uint32 DecodeBase32(LPCTSTR pszInput, CAICHHash& Hash){
+uint32 DecodeBase32(LPCTSTR pszInput, CAICHHash& Hash)
+{
 	return DecodeBase32(pszInput, Hash.GetRawHash(), Hash.GetHashSize());
 }
 
@@ -916,7 +1033,7 @@ int CWebServices::ReadAllServices()
 			// ignore comments & too short lines
 			if (sbuffer.GetAt(0) == _T('#') || sbuffer.GetAt(0) == _T('/') || sbuffer.GetLength() < 5)
 				continue;
-				
+
 			int iPos = sbuffer.Find(_T(','));
 			if (iPos > 0)
 			{
@@ -1356,171 +1473,206 @@ struct SED2KFileType
 {
 	LPCTSTR pszExt;
 	EED2KFileType iFileType;
-} _aED2KFileTypes[] = 
+} g_aED2KFileTypes[] = 
 {
-    { _T(".669"),   ED2KFT_AUDIO },
-    { _T(".aac"),   ED2KFT_AUDIO },
-    { _T(".aif"),   ED2KFT_AUDIO },
-    { _T(".aiff"),  ED2KFT_AUDIO },
-    { _T(".amf"),   ED2KFT_AUDIO },
-    { _T(".ams"),   ED2KFT_AUDIO },
-    { _T(".ape"),   ED2KFT_AUDIO },
-    { _T(".au"),    ED2KFT_AUDIO },
-    { _T(".dbm"),   ED2KFT_AUDIO },
-    { _T(".dmf"),   ED2KFT_AUDIO },
-    { _T(".dsm"),   ED2KFT_AUDIO },
-    { _T(".far"),   ED2KFT_AUDIO },
-    { _T(".flac"),  ED2KFT_AUDIO },
-    { _T(".it"),    ED2KFT_AUDIO },
-    { _T(".m4a"),   ED2KFT_AUDIO },
-    { _T(".mdl"),   ED2KFT_AUDIO },
-    { _T(".med"),   ED2KFT_AUDIO },
-    { _T(".mid"),   ED2KFT_AUDIO },
-    { _T(".midi"),  ED2KFT_AUDIO },
-    { _T(".mka"),   ED2KFT_AUDIO },
-    { _T(".mod"),   ED2KFT_AUDIO },
-    { _T(".mol"),   ED2KFT_AUDIO },
-    { _T(".mp1"),   ED2KFT_AUDIO },
-    { _T(".mp2"),   ED2KFT_AUDIO },
-    { _T(".mp3"),   ED2KFT_AUDIO },
-    { _T(".mpa"),   ED2KFT_AUDIO },
-    { _T(".mpc"),   ED2KFT_AUDIO },
-    { _T(".mpp"),   ED2KFT_AUDIO },
-    { _T(".mtm"),   ED2KFT_AUDIO },
-    { _T(".nst"),   ED2KFT_AUDIO },
-    { _T(".ogg"),   ED2KFT_AUDIO },
-    { _T(".okt"),   ED2KFT_AUDIO },
-    { _T(".psm"),   ED2KFT_AUDIO },
-    { _T(".ptm"),   ED2KFT_AUDIO },
-    { _T(".ra"),    ED2KFT_AUDIO },
-    { _T(".rmi"),   ED2KFT_AUDIO },
-    { _T(".s3m"),   ED2KFT_AUDIO },
-    { _T(".stm"),   ED2KFT_AUDIO },
-    { _T(".ult"),   ED2KFT_AUDIO },
-    { _T(".umx"),   ED2KFT_AUDIO },
-    { _T(".wav"),   ED2KFT_AUDIO },
-    { _T(".wma"),   ED2KFT_AUDIO },
-    { _T(".wow"),   ED2KFT_AUDIO },
-    { _T(".xm"),    ED2KFT_AUDIO },
+    { _T(".aac"),   ED2KFT_AUDIO },     // Advanced Audio Coding File
+    { _T(".ac3"),   ED2KFT_AUDIO },     // Audio Codec 3 File
+    { _T(".aif"),   ED2KFT_AUDIO },     // Audio Interchange File Format
+    { _T(".aifc"),  ED2KFT_AUDIO },     // Audio Interchange File Format
+    { _T(".aiff"),  ED2KFT_AUDIO },     // Audio Interchange File Format
+    { _T(".amr"),   ED2KFT_AUDIO },     // Adaptive Multi-Rate Codec File
+    { _T(".ape"),   ED2KFT_AUDIO },     // Monkey's Audio Lossless Audio File
+    { _T(".au"),    ED2KFT_AUDIO },     // Audio File (Sun, Unix)
+    { _T(".aud"),   ED2KFT_AUDIO },     // General Audio File
+    { _T(".audio"), ED2KFT_AUDIO },     // General Audio File
+    { _T(".cda"),   ED2KFT_AUDIO },     // CD Audio Track
+    { _T(".dmf"),   ED2KFT_AUDIO },     // Delusion Digital Music File
+    { _T(".dsm"),   ED2KFT_AUDIO },     // Digital Sound Module
+    { _T(".dts"),   ED2KFT_AUDIO },     // DTS Encoded Audio File
+    { _T(".far"),   ED2KFT_AUDIO },     // Farandole Composer Module
+    { _T(".flac"),  ED2KFT_AUDIO },     // Free Lossless Audio Codec File
+    { _T(".it"),    ED2KFT_AUDIO },     // Impulse Tracker Module
+    { _T(".m1a"),   ED2KFT_AUDIO },     // MPEG-1 Audio File
+    { _T(".m2a"),   ED2KFT_AUDIO },     // MPEG-2 Audio File
+    { _T(".m4a"),   ED2KFT_AUDIO },     // MPEG-4 Audio File
+    { _T(".mdl"),   ED2KFT_AUDIO },     // DigiTrakker Module
+    { _T(".med"),   ED2KFT_AUDIO },     // Amiga MED Sound File
+    { _T(".mid"),   ED2KFT_AUDIO },     // MIDI File
+    { _T(".midi"),  ED2KFT_AUDIO },     // MIDI File
+    { _T(".mka"),   ED2KFT_AUDIO },     // Matroska Audio File
+    { _T(".mod"),   ED2KFT_AUDIO },     // Amiga Music Module File
+    { _T(".mp1"),   ED2KFT_AUDIO },     // MPEG-1 Audio File
+    { _T(".mp2"),   ED2KFT_AUDIO },     // MPEG-2 Audio File
+    { _T(".mp3"),   ED2KFT_AUDIO },     // MPEG-3 Audio File
+    { _T(".mpa"),   ED2KFT_AUDIO },     // MPEG Audio File
+    { _T(".mpc"),   ED2KFT_AUDIO },     // Musepack Compressed Audio File
+    { _T(".mtm"),   ED2KFT_AUDIO },     // MultiTracker Module
+    { _T(".ogg"),   ED2KFT_AUDIO },     // Ogg Vorbis Compressed Audio File
+    { _T(".psm"),   ED2KFT_AUDIO },     // Protracker Studio Module
+    { _T(".ptm"),   ED2KFT_AUDIO },     // PolyTracker Module
+    { _T(".ra"),    ED2KFT_AUDIO },     // Real Audio File
+    { _T(".rmi"),   ED2KFT_AUDIO },     // MIDI File
+    { _T(".s3m"),   ED2KFT_AUDIO },     // Scream Tracker 3 Module
+    { _T(".snd"),   ED2KFT_AUDIO },     // Audio File (Sun, Unix)
+    { _T(".stm"),   ED2KFT_AUDIO },     // Scream Tracker 2 Module
+    { _T(".umx"),   ED2KFT_AUDIO },     // Unreal Music Package
+    { _T(".wav"),   ED2KFT_AUDIO },     // WAVE Audio File
+    { _T(".wma"),   ED2KFT_AUDIO },     // Windows Media Audio File
+    { _T(".xm"),    ED2KFT_AUDIO },     // Fasttracker 2 Extended Module
 
-    { _T(".3g2"),   ED2KFT_VIDEO },
-    { _T(".3gp"),   ED2KFT_VIDEO },
-    { _T(".3gp2"),  ED2KFT_VIDEO },
-    { _T(".3gpp"),  ED2KFT_VIDEO },
-    { _T(".asf"),   ED2KFT_VIDEO },
-    { _T(".avi"),   ED2KFT_VIDEO },
-    { _T(".divx"),  ED2KFT_VIDEO },
-    { _T(".m1v"),   ED2KFT_VIDEO },
-    { _T(".m2v"),   ED2KFT_VIDEO },
-    { _T(".m4v"),   ED2KFT_VIDEO },
-    { _T(".mkv"),   ED2KFT_VIDEO },
-    { _T(".mov"),   ED2KFT_VIDEO },
-    { _T(".mp1v"),  ED2KFT_VIDEO },
-    { _T(".mp2v"),  ED2KFT_VIDEO },
-    { _T(".mp4"),   ED2KFT_VIDEO },
-    { _T(".mpe"),   ED2KFT_VIDEO },
-    { _T(".mpeg"),  ED2KFT_VIDEO },
-    { _T(".mpg"),   ED2KFT_VIDEO },
-    { _T(".mps"),   ED2KFT_VIDEO },
-    { _T(".mpv"),   ED2KFT_VIDEO },
-    { _T(".mpv1"),  ED2KFT_VIDEO },
-    { _T(".mpv2"),  ED2KFT_VIDEO },
-    { _T(".ogm"),   ED2KFT_VIDEO },
-    { _T(".qt"),    ED2KFT_VIDEO },
-    { _T(".ram"),   ED2KFT_VIDEO },
-    { _T(".rm"),    ED2KFT_VIDEO },
-    { _T(".rmvb"),  ED2KFT_VIDEO },
-    { _T(".rv"),    ED2KFT_VIDEO },
-    { _T(".rv9"),   ED2KFT_VIDEO },
-    { _T(".swf"),   ED2KFT_VIDEO },
-    { _T(".ts"),    ED2KFT_VIDEO },
-    { _T(".vivo"),  ED2KFT_VIDEO },
-    { _T(".vob"),   ED2KFT_VIDEO },
-    { _T(".wmv"),   ED2KFT_VIDEO },
-    { _T(".xvid"),  ED2KFT_VIDEO },
+    { _T(".3g2"),   ED2KFT_VIDEO },     // 3GPP Multimedia File
+    { _T(".3gp"),   ED2KFT_VIDEO },     // 3GPP Multimedia File
+    { _T(".3gp2"),  ED2KFT_VIDEO },     // 3GPP Multimedia File
+    { _T(".3gpp"),  ED2KFT_VIDEO },     // 3GPP Multimedia File
+    { _T(".amv"),   ED2KFT_VIDEO },     // Anime Music Video File
+    { _T(".asf"),   ED2KFT_VIDEO },     // Advanced Systems Format File
+    { _T(".avi"),   ED2KFT_VIDEO },     // Audio Video Interleave File
+    { _T(".bik"),   ED2KFT_VIDEO },     // BINK Video File
+    { _T(".divx"),  ED2KFT_VIDEO },     // DivX-Encoded Movie File
+    { _T(".dvr-ms"),ED2KFT_VIDEO },     // Microsoft Digital Video Recording
+    { _T(".flc"),   ED2KFT_VIDEO },     // FLIC Video File
+    { _T(".fli"),   ED2KFT_VIDEO },     // FLIC Video File
+    { _T(".flic"),  ED2KFT_VIDEO },     // FLIC Video File
+    { _T(".flv"),   ED2KFT_VIDEO },     // Flash Video File
+    { _T(".hdmov"), ED2KFT_VIDEO },     // High-Definition QuickTime Movie
+    { _T(".ifo"),   ED2KFT_VIDEO },     // DVD-Video Disc Information File
+    { _T(".m1v"),   ED2KFT_VIDEO },     // MPEG-1 Video File
+    { _T(".m2t"),   ED2KFT_VIDEO },     // MPEG-2 Video Transport Stream
+    { _T(".m2ts"),  ED2KFT_VIDEO },     // MPEG-2 Video Transport Stream
+    { _T(".m2v"),   ED2KFT_VIDEO },     // MPEG-2 Video File
+    { _T(".m4b"),   ED2KFT_VIDEO },     // MPEG-4 Video File
+    { _T(".m4v"),   ED2KFT_VIDEO },     // MPEG-4 Video File
+    { _T(".mkv"),   ED2KFT_VIDEO },     // Matroska Video File
+    { _T(".mov"),   ED2KFT_VIDEO },     // QuickTime Movie File
+    { _T(".movie"), ED2KFT_VIDEO },     // QuickTime Movie File
+    { _T(".mp1v"),  ED2KFT_VIDEO },     // MPEG-1 Video File        
+    { _T(".mp2v"),  ED2KFT_VIDEO },     // MPEG-2 Video File
+    { _T(".mp4"),   ED2KFT_VIDEO },     // MPEG-4 Video File
+    { _T(".mpe"),   ED2KFT_VIDEO },     // MPEG Video File
+    { _T(".mpeg"),  ED2KFT_VIDEO },     // MPEG Video File
+    { _T(".mpg"),   ED2KFT_VIDEO },     // MPEG Video File
+    { _T(".mpv"),   ED2KFT_VIDEO },     // MPEG Video File
+    { _T(".mpv1"),  ED2KFT_VIDEO },     // MPEG-1 Video File
+    { _T(".mpv2"),  ED2KFT_VIDEO },     // MPEG-2 Video File
+    { _T(".ogm"),   ED2KFT_VIDEO },     // Ogg Media File
+    { _T(".pva"),   ED2KFT_VIDEO },     // MPEG Video File
+    { _T(".qt"),    ED2KFT_VIDEO },     // QuickTime Movie
+    { _T(".ram"),   ED2KFT_VIDEO },     // Real Audio Media
+    { _T(".ratdvd"),ED2KFT_VIDEO },     // RatDVD Disk Image
+    { _T(".rm"),    ED2KFT_VIDEO },     // Real Media File
+    { _T(".rmm"),   ED2KFT_VIDEO },     // Real Media File
+    { _T(".rmvb"),  ED2KFT_VIDEO },     // Real Video Variable Bit Rate File
+    { _T(".rv"),    ED2KFT_VIDEO },     // Real Video File
+    { _T(".smil"),  ED2KFT_VIDEO },     // SMIL Presentation File
+    { _T(".smk"),   ED2KFT_VIDEO },     // Smacker Compressed Movie File
+    { _T(".swf"),   ED2KFT_VIDEO },     // Macromedia Flash Movie
+    { _T(".tp"),    ED2KFT_VIDEO },     // Video Transport Stream File
+    { _T(".ts"),    ED2KFT_VIDEO },     // Video Transport Stream File
+    { _T(".vid"),   ED2KFT_VIDEO },     // General Video File
+    { _T(".video"), ED2KFT_VIDEO },     // General Video File
+    { _T(".vob"),   ED2KFT_VIDEO },     // DVD Video Object File
+    { _T(".vp6"),   ED2KFT_VIDEO },     // TrueMotion VP6 Video File
+    { _T(".wm"),    ED2KFT_VIDEO },     // Windows Media Video File
+    { _T(".wmv"),   ED2KFT_VIDEO },     // Windows Media Video File
+    { _T(".xvid"),  ED2KFT_VIDEO },     // Xvid-Encoded Video File
 
-    { _T(".bmp"),   ED2KFT_IMAGE },
-    { _T(".dcx"),   ED2KFT_IMAGE },
-    { _T(".emf"),   ED2KFT_IMAGE },
-    { _T(".gif"),   ED2KFT_IMAGE },
-    { _T(".ico"),   ED2KFT_IMAGE },
-    { _T(".jpeg"),  ED2KFT_IMAGE },
-    { _T(".jpg"),   ED2KFT_IMAGE },
-    { _T(".pct"),   ED2KFT_IMAGE },
-    { _T(".pcx"),   ED2KFT_IMAGE },
-    { _T(".pic"),   ED2KFT_IMAGE },
-    { _T(".pict"),  ED2KFT_IMAGE },
-    { _T(".png"),   ED2KFT_IMAGE },
-    { _T(".psd"),   ED2KFT_IMAGE },
-    { _T(".psp"),   ED2KFT_IMAGE },
-    { _T(".tga"),   ED2KFT_IMAGE },
-    { _T(".tif"),   ED2KFT_IMAGE },
-    { _T(".tiff"),  ED2KFT_IMAGE },
-    { _T(".wmf"),   ED2KFT_IMAGE },
-    { _T(".xif"),   ED2KFT_IMAGE },
+    { _T(".bmp"),   ED2KFT_IMAGE },     // Bitmap Image File
+    { _T(".emf"),   ED2KFT_IMAGE },     // Enhanced Windows Metafile
+    { _T(".gif"),   ED2KFT_IMAGE },     // Graphical Interchange Format File
+    { _T(".ico"),   ED2KFT_IMAGE },     // Icon File
+    { _T(".jfif"),  ED2KFT_IMAGE },     // JPEG File Interchange Format
+    { _T(".jpe"),   ED2KFT_IMAGE },     // JPEG Image File
+    { _T(".jpeg"),  ED2KFT_IMAGE },     // JPEG Image File
+    { _T(".jpg"),   ED2KFT_IMAGE },     // JPEG Image File
+    { _T(".pct"),   ED2KFT_IMAGE },     // PICT Picture File
+    { _T(".pcx"),   ED2KFT_IMAGE },     // Paintbrush Bitmap Image File
+    { _T(".pic"),   ED2KFT_IMAGE },     // PICT Picture File
+    { _T(".pict"),  ED2KFT_IMAGE },     // PICT Picture File
+    { _T(".png"),   ED2KFT_IMAGE },     // Portable Network Graphic
+    { _T(".psd"),   ED2KFT_IMAGE },     // Photoshop Document
+    { _T(".psp"),   ED2KFT_IMAGE },     // Paint Shop Pro Image File
+    { _T(".tga"),   ED2KFT_IMAGE },     // Targa Graphic
+    { _T(".tif"),   ED2KFT_IMAGE },     // Tagged Image File
+    { _T(".tiff"),  ED2KFT_IMAGE },     // Tagged Image File
+    { _T(".wmf"),   ED2KFT_IMAGE },     // Windows Metafile
+    { _T(".wmp"),   ED2KFT_IMAGE },     // Windows Media Photo File
+    { _T(".xif"),   ED2KFT_IMAGE },     // ScanSoft Pagis Extended Image Format File
 
-    { _T(".7z"),	ED2KFT_ARCHIVE },
-    { _T(".ace"),   ED2KFT_ARCHIVE },
-	{ _T(".alz"),   ED2KFT_ARCHIVE },
-    { _T(".arj"),   ED2KFT_ARCHIVE },
-    { _T(".bz2"),   ED2KFT_ARCHIVE },
-    { _T(".cab"),   ED2KFT_ARCHIVE },
-    { _T(".cbz"),   ED2KFT_ARCHIVE },
-    { _T(".cbr"),   ED2KFT_ARCHIVE },
-    { _T(".gz"),    ED2KFT_ARCHIVE },
-    { _T(".hqx"),   ED2KFT_ARCHIVE },
-    { _T(".lha"),   ED2KFT_ARCHIVE },
-    { _T(".lzh"),   ED2KFT_ARCHIVE },
-    { _T(".msi"),   ED2KFT_ARCHIVE },
-    { _T(".rar"),   ED2KFT_ARCHIVE },
-    { _T(".sea"),   ED2KFT_ARCHIVE },
-    { _T(".sit"),   ED2KFT_ARCHIVE },
-    { _T(".tar"),   ED2KFT_ARCHIVE },
-    { _T(".tgz"),   ED2KFT_ARCHIVE },
-    { _T(".uc2"),   ED2KFT_ARCHIVE },
-    { _T(".z"),		ED2KFT_ARCHIVE },
-    { _T(".zip"),   ED2KFT_ARCHIVE },
+    { _T(".7z"),    ED2KFT_ARCHIVE },   // 7-Zip Compressed File
+    { _T(".ace"),   ED2KFT_ARCHIVE },   // WinAce Compressed File
+    { _T(".alz"),   ED2KFT_ARCHIVE },   // ALZip Archive
+    { _T(".arc"),   ED2KFT_ARCHIVE },   // Compressed File Archive
+    { _T(".arj"),   ED2KFT_ARCHIVE },   // ARJ Compressed File Archive
+    { _T(".bz2"),   ED2KFT_ARCHIVE },   // Bzip Compressed File
+    { _T(".cab"),   ED2KFT_ARCHIVE },   // Cabinet File
+    { _T(".cbr"),   ED2KFT_ARCHIVE },   // Comic Book RAR Archive
+    { _T(".cbz"),   ED2KFT_ARCHIVE },   // Comic Book ZIP Archive
+    { _T(".gz"),    ED2KFT_ARCHIVE },   // Gnu Zipped File
+    { _T(".hqx"),   ED2KFT_ARCHIVE },	// BinHex 4.0 Encoded File
+    { _T(".lha"),   ED2KFT_ARCHIVE },   // LHARC Compressed Archive
+    { _T(".lzh"),   ED2KFT_ARCHIVE },   // LZH Compressed File
+    { _T(".msi"),   ED2KFT_ARCHIVE },   // Microsoft Installer File
+    { _T(".pak"),   ED2KFT_ARCHIVE },   // PAK (Packed) File
+    { _T(".par"),   ED2KFT_ARCHIVE },   // Parchive Index File
+    { _T(".par2"),  ED2KFT_ARCHIVE },   // Parchive 2 Index File
+    { _T(".rar"),   ED2KFT_ARCHIVE },   // WinRAR Compressed Archive
+    { _T(".sit"),   ED2KFT_ARCHIVE },   // Stuffit Archive
+    { _T(".sitx"),  ED2KFT_ARCHIVE },   // Stuffit X Archive
+    { _T(".tar"),   ED2KFT_ARCHIVE },   // Consolidated Unix File Archive
+    { _T(".tbz2"),  ED2KFT_ARCHIVE },   // Tar BZip 2 Compressed File
+    { _T(".tgz"),   ED2KFT_ARCHIVE },   // Gzipped Tar File
+    { _T(".xpi"),   ED2KFT_ARCHIVE },   // Mozilla Installer Package
+    { _T(".z"),     ED2KFT_ARCHIVE },   // Unix Compressed File
+    { _T(".zip"),   ED2KFT_ARCHIVE },   // Zipped File
 
-    { _T(".bat"),   ED2KFT_PROGRAM },
-    { _T(".cmd"),   ED2KFT_PROGRAM },
-    { _T(".com"),   ED2KFT_PROGRAM },
-    { _T(".exe"),   ED2KFT_PROGRAM },
+    { _T(".bat"),   ED2KFT_PROGRAM },	// Batch File
+    { _T(".cmd"),   ED2KFT_PROGRAM },	// Command File
+    { _T(".com"),   ED2KFT_PROGRAM },	// COM File
+    { _T(".exe"),   ED2KFT_PROGRAM },	// Executable File
+    { _T(".hta"),   ED2KFT_PROGRAM },	// HTML Application
+    { _T(".js"),    ED2KFT_PROGRAM },	// Java Script
+    { _T(".jse"),   ED2KFT_PROGRAM },	// Encoded  Java Script
+    { _T(".msc"),   ED2KFT_PROGRAM },	// Microsoft Common Console File
+    { _T(".vbe"),   ED2KFT_PROGRAM },	// Encoded Visual Basic Script File
+    { _T(".vbs"),   ED2KFT_PROGRAM },	// Visual Basic Script File
+    { _T(".wsf"),   ED2KFT_PROGRAM },	// Windows Script File
+    { _T(".wsh"),   ED2KFT_PROGRAM },	// Windows Scripting Host File
 
-    { _T(".bin"),   ED2KFT_CDIMAGE },
-    { _T(".bwa"),   ED2KFT_CDIMAGE },
-    { _T(".bwi"),   ED2KFT_CDIMAGE },
-    { _T(".bws"),   ED2KFT_CDIMAGE },
-    { _T(".bwt"),   ED2KFT_CDIMAGE },
-    { _T(".ccd"),   ED2KFT_CDIMAGE },
-    { _T(".cue"),   ED2KFT_CDIMAGE },
-    { _T(".dmg"),   ED2KFT_CDIMAGE },
-    { _T(".dmz"),   ED2KFT_CDIMAGE },
-    { _T(".img"),   ED2KFT_CDIMAGE },
-    { _T(".iso"),   ED2KFT_CDIMAGE },
-    { _T(".mdf"),   ED2KFT_CDIMAGE },
-    { _T(".mds"),   ED2KFT_CDIMAGE },
-    { _T(".nrg"),   ED2KFT_CDIMAGE },
-    { _T(".sub"),   ED2KFT_CDIMAGE },
-    { _T(".toast"), ED2KFT_CDIMAGE },
+    { _T(".bin"),   ED2KFT_CDIMAGE },   // CD Image
+    { _T(".bwa"),   ED2KFT_CDIMAGE },   // BlindWrite Disk Information File
+    { _T(".bwi"),   ED2KFT_CDIMAGE },   // BlindWrite CD/DVD Disc Image
+    { _T(".bws"),   ED2KFT_CDIMAGE },   // BlindWrite Sub Code File
+    { _T(".bwt"),   ED2KFT_CDIMAGE },   // BlindWrite 4 Disk Image
+    { _T(".ccd"),   ED2KFT_CDIMAGE },   // CloneCD Disk Image
+    { _T(".cue"),   ED2KFT_CDIMAGE },   // Cue Sheet File
+    { _T(".dmg"),   ED2KFT_CDIMAGE },   // Mac OS X Disk Image
+    { _T(".img"),   ED2KFT_CDIMAGE },   // Disk Image Data File
+    { _T(".iso"),   ED2KFT_CDIMAGE },   // Disc Image File
+    { _T(".mdf"),   ED2KFT_CDIMAGE },   // Media Disc Image File
+    { _T(".mds"),   ED2KFT_CDIMAGE },   // Media Descriptor File
+    { _T(".nrg"),   ED2KFT_CDIMAGE },   // Nero CD/DVD Image File
+    { _T(".sub"),   ED2KFT_CDIMAGE },   // Subtitle File
+    { _T(".toast"), ED2KFT_CDIMAGE },   // Toast Disc Image
 
-    { _T(".chm"),   ED2KFT_DOCUMENT },
-    { _T(".css"),   ED2KFT_DOCUMENT },
-    { _T(".diz"),   ED2KFT_DOCUMENT },
-    { _T(".doc"),   ED2KFT_DOCUMENT },
-    { _T(".dot"),   ED2KFT_DOCUMENT },
-    { _T(".hlp"),   ED2KFT_DOCUMENT },
-    { _T(".htm"),   ED2KFT_DOCUMENT },
-    { _T(".html"),  ED2KFT_DOCUMENT },
-    { _T(".nfo"),   ED2KFT_DOCUMENT },
-    { _T(".pdf"),   ED2KFT_DOCUMENT },
-    { _T(".pps"),   ED2KFT_DOCUMENT },
-    { _T(".ppt"),   ED2KFT_DOCUMENT },
-    { _T(".ps"),    ED2KFT_DOCUMENT },
-    { _T(".rtf"),   ED2KFT_DOCUMENT },
-    { _T(".txt"),   ED2KFT_DOCUMENT },
-    { _T(".wri"),   ED2KFT_DOCUMENT },
-    { _T(".xls"),   ED2KFT_DOCUMENT },
-	{ _T(".xml"),   ED2KFT_DOCUMENT },
+    { _T(".chm"),   ED2KFT_DOCUMENT },  // Compiled HTML Help File
+    { _T(".css"),   ED2KFT_DOCUMENT },  // Cascading Style Sheet
+    { _T(".diz"),   ED2KFT_DOCUMENT },  // Description in Zip File
+    { _T(".doc"),   ED2KFT_DOCUMENT },  // Document File
+    { _T(".dot"),   ED2KFT_DOCUMENT },  // Document Template File
+    { _T(".hlp"),   ED2KFT_DOCUMENT },  // Help File
+    { _T(".htm"),   ED2KFT_DOCUMENT },  // HTML File
+    { _T(".html"),  ED2KFT_DOCUMENT },  // HTML File
+    { _T(".nfo"),   ED2KFT_DOCUMENT },  // Warez Information File
+    { _T(".pdf"),   ED2KFT_DOCUMENT },  // Portable Document Format File
+    { _T(".pps"),   ED2KFT_DOCUMENT },  // PowerPoint Slide Show
+    { _T(".ppt"),   ED2KFT_DOCUMENT },  // PowerPoint Presentation
+    { _T(".ps"),    ED2KFT_DOCUMENT },  // PostScript File
+    { _T(".rtf"),   ED2KFT_DOCUMENT },  // Rich Text Format File
+    { _T(".text"),  ED2KFT_DOCUMENT },  // General Text File
+    { _T(".txt"),   ED2KFT_DOCUMENT },  // Text File
+    { _T(".wri"),   ED2KFT_DOCUMENT },  // Windows Write Document
+    { _T(".xls"),   ED2KFT_DOCUMENT },  // Microsoft Excel Spreadsheet
+    { _T(".xml"),   ED2KFT_DOCUMENT },  // XML File
 
 	{ _T(".emulecollection"), ED2KFT_EMULECOLLECTION }
 };
@@ -1541,7 +1693,7 @@ EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName)
 	SED2KFileType ft;
 	ft.pszExt = strExt;
 	ft.iFileType = ED2KFT_ANY;
-	const SED2KFileType* pFound = (SED2KFileType*)bsearch(&ft, _aED2KFileTypes, _countof(_aED2KFileTypes), sizeof _aED2KFileTypes[0], CompareE2DKFileType);
+	const SED2KFileType* pFound = (SED2KFileType*)bsearch(&ft, g_aED2KFileTypes, _countof(g_aED2KFileTypes), sizeof g_aED2KFileTypes[0], CompareE2DKFileType);
 	if (pFound != NULL)
 		return pFound->iFileType;
 	return ED2KFT_ANY;
@@ -1550,15 +1702,15 @@ EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName)
 // Retuns the ed2k file type string ID which is to be used for publishing+searching
 LPCSTR GetED2KFileTypeSearchTerm(EED2KFileType iFileID)
 {
-	if (iFileID == ED2KFT_AUDIO)		return ED2KFTSTR_AUDIO;
-	if (iFileID == ED2KFT_VIDEO)		return ED2KFTSTR_VIDEO;
-	if (iFileID == ED2KFT_IMAGE)		return ED2KFTSTR_IMAGE;
+	if (iFileID == ED2KFT_AUDIO)			return ED2KFTSTR_AUDIO;
+	if (iFileID == ED2KFT_VIDEO)			return ED2KFTSTR_VIDEO;
+	if (iFileID == ED2KFT_IMAGE)			return ED2KFTSTR_IMAGE;
 	if (iFileID == ED2KFT_PROGRAM)			return ED2KFTSTR_PROGRAM;
-	if (iFileID == ED2KFT_DOCUMENT)		return ED2KFTSTR_DOCUMENT;
+	if (iFileID == ED2KFT_DOCUMENT)			return ED2KFTSTR_DOCUMENT;
 	// NOTE: Archives and CD-Images are published+searched with file type "Pro"
 	// NOTE: If this gets changed, the function 'GetED2KFileTypeSearchID' also needs to get updated!
-	if (iFileID == ED2KFT_ARCHIVE)		return ED2KFTSTR_PROGRAM;
-	if (iFileID == ED2KFT_CDIMAGE)		return ED2KFTSTR_PROGRAM;
+	if (iFileID == ED2KFT_ARCHIVE)			return ED2KFTSTR_PROGRAM;
+	if (iFileID == ED2KFT_CDIMAGE)			return ED2KFTSTR_PROGRAM;
 	if (iFileID == ED2KFT_EMULECOLLECTION)	return ED2KFTSTR_EMULECOLLECTION;
 	return NULL;
 }
@@ -1583,15 +1735,15 @@ CString GetFileTypeByName(LPCTSTR pszFileName)
 {
 	EED2KFileType iFileType = GetED2KFileTypeID(pszFileName);
 	switch (iFileType) {
-		case ED2KFT_AUDIO:		return _T(ED2KFTSTR_AUDIO);
-		case ED2KFT_VIDEO:		return _T(ED2KFTSTR_VIDEO);
-		case ED2KFT_IMAGE:		return _T(ED2KFTSTR_IMAGE);
-		case ED2KFT_DOCUMENT:	return _T(ED2KFTSTR_DOCUMENT);
-		case ED2KFT_PROGRAM:	return _T(ED2KFTSTR_PROGRAM);
-		case ED2KFT_ARCHIVE:	return _T(ED2KFTSTR_ARCHIVE);
-		case ED2KFT_CDIMAGE:	return _T(ED2KFTSTR_CDIMAGE);
-		case ED2KFT_EMULECOLLECTION:	return _T(ED2KFTSTR_EMULECOLLECTION);
-		default:				return _T("");
+		case ED2KFT_AUDIO:			return _T(ED2KFTSTR_AUDIO);
+		case ED2KFT_VIDEO:			return _T(ED2KFTSTR_VIDEO);
+		case ED2KFT_IMAGE:			return _T(ED2KFTSTR_IMAGE);
+		case ED2KFT_DOCUMENT:		return _T(ED2KFTSTR_DOCUMENT);
+		case ED2KFT_PROGRAM:		return _T(ED2KFTSTR_PROGRAM);
+		case ED2KFT_ARCHIVE:		return _T(ED2KFTSTR_ARCHIVE);
+		case ED2KFT_CDIMAGE:		return _T(ED2KFTSTR_CDIMAGE);
+		case ED2KFT_EMULECOLLECTION:return _T(ED2KFTSTR_EMULECOLLECTION);
+		default:					return _T("");
 	}
 }
 
@@ -1616,18 +1768,29 @@ CString GetFileTypeDisplayStrFromED2KFileType(LPCTSTR pszED2KFileType)
 class CED2KFileTypes{
 public:
 	CED2KFileTypes(){
-		qsort(_aED2KFileTypes, _countof(_aED2KFileTypes), sizeof _aED2KFileTypes[0], CompareE2DKFileType);
+		qsort(g_aED2KFileTypes, _countof(g_aED2KFileTypes), sizeof g_aED2KFileTypes[0], CompareE2DKFileType);
 #ifdef _DEBUG
 		// check for duplicate entries
-		LPCTSTR pszLast = _aED2KFileTypes[0].pszExt;
-		for (int i = 1; i < _countof(_aED2KFileTypes); i++){
-			ASSERT( _tcscmp(pszLast, _aED2KFileTypes[i].pszExt) != 0 );
-			pszLast = _aED2KFileTypes[i].pszExt;
+		LPCTSTR pszLast = g_aED2KFileTypes[0].pszExt;
+		for (int i = 1; i < _countof(g_aED2KFileTypes); i++){
+			ASSERT( _tcscmp(pszLast, g_aED2KFileTypes[i].pszExt) != 0 );
+			pszLast = g_aED2KFileTypes[i].pszExt;
 		}
 #endif
 	}
 };
 CED2KFileTypes theED2KFileTypes; // get the list sorted *before* any code is accessing it
+
+const BYTE *FindPattern(const BYTE *pucBuff, int iBuffSize, const BYTE *pucPattern, int iPatternSize)
+{
+	int iSearchRange = iBuffSize - iPatternSize;
+	while (iSearchRange-- >= 0) {
+		if (memcmp(pucBuff, pucPattern, iPatternSize) == 0)
+			return pucBuff;
+		pucBuff++;
+	}
+	return NULL;
+}
 
 TCHAR *stristr(const TCHAR *str1, const TCHAR *str2)
 {
@@ -1989,7 +2152,7 @@ typedef struct tagTHREADNAME_INFO
 		do // the VS debugger truncates the string to 31 characters anyway!
 		{
 			lenBuf += 128;
-			delete [] buffer;
+			delete[] buffer;
 			buffer = new char[lenBuf];
 			lenResult = _vsnprintf(buffer, lenBuf, szThreadName, args);
 		} while (lenResult == -1);
@@ -2079,7 +2242,7 @@ bool IsLANIP(uint32 nIP){
 	if (nFirst==0 || nFirst==10)
 		return true;
 
-	return false;
+	return false; 
 }
 
 bool IsGoodIPPort(uint32 nIP, uint16 nPort)
@@ -2562,16 +2725,15 @@ ULONGLONG GetDiskFileSize(LPCTSTR pszFilePath)
 
 	if (!_bInitialized){
 		_bInitialized = TRUE;
-		(FARPROC&)_pfnGetCompressedFileSize = GetProcAddress(GetModuleHandle(_T("kernel32.dll")), _TWINAPI("GetCompressedFileSize"));
+		(FARPROC&)_pfnGetCompressedFileSize = GetProcAddress(GetModuleHandle(_T("kernel32")), _TWINAPI("GetCompressedFileSize"));
 	}
 
 	// If the file is not compressed nor sparse, 'GetCompressedFileSize' returns the 'normal' file size.
 	if (_pfnGetCompressedFileSize)
 	{
 		ULONGLONG ullCompFileSize;
-		LPDWORD pdwCompFileSize = (LPDWORD)&ullCompFileSize;
-		pdwCompFileSize[0] = (*_pfnGetCompressedFileSize)(pszFilePath, &pdwCompFileSize[1]);
-		if (pdwCompFileSize[0] != INVALID_FILE_SIZE || GetLastError() == NO_ERROR)
+		((LPDWORD)&ullCompFileSize)[0] = (*_pfnGetCompressedFileSize)(pszFilePath, &((LPDWORD)&ullCompFileSize)[1]);
+		if (((LPDWORD)&ullCompFileSize)[0] != INVALID_FILE_SIZE || GetLastError() == NO_ERROR)
 			return ullCompFileSize;
 	}
 
@@ -2733,6 +2895,16 @@ CString ipstr(uint32 nIP)
 	return strIP;
 }
 
+//MORPH START - Added by Stulle, IP Filter White List [Stulle]
+CString ipstr_rev(uint32 nIP)
+{
+	const BYTE* pucIP = (BYTE*)&nIP;
+	CString strIP;
+	strIP.ReleaseBuffer(_stprintf(strIP.GetBuffer(3+1+3+1+3+1+3), _T("%u.%u.%u.%u"), pucIP[3], pucIP[2], pucIP[1], pucIP[0]));
+	return strIP;
+}
+//MORPH END   - Added by Stulle, IP Filter White List [Stulle]
+
 CString ipstr(uint32 nIP, uint16 nPort)
 {
 	// following gives the same string as 'inet_ntoa(*(in_addr*)&nIP)' but is not restricted to ASCII strings
@@ -2772,24 +2944,82 @@ bool IsDaylightSavingTimeActive(LONG& rlDaylightBias)
 	return true;
 }
 
+class CVolumeInfo
+{
+public:
+	static bool IsNTFSVolume(LPCTSTR pszVolume)
+	{
+		return (_tcscmp(GetVolumeInfo(pszVolume), _T("NTFS")) == 0);
+	}
+
+	static bool IsFATVolume(LPCTSTR pszVolume)
+	{
+		return (_tcsnicmp(GetVolumeInfo(pszVolume), _T("FAT"), 3) == 0);
+	}
+
+	static const CString& GetVolumeInfo(LPCTSTR pszVolume)
+	{
+		CString strVolumeId(pszVolume);
+		ASSERT( strVolumeId.GetLength() > 0 && strVolumeId[strVolumeId.GetLength() - 1] == _T('\\') );
+		strVolumeId.MakeLower();
+		CMapStringToString::CPair *pPair = m_mapVolumeInfo.PLookup(strVolumeId);
+		if (pPair != NULL)
+			return pPair->value;
+
+		// 'GetVolumeInformation' may cause a noticable delay - depending on the type of volume 
+		// which is queried. As we are using that function for almost every file (for compensating
+		// the NTFS file time issues), we need to cash this information.
+		//
+		// The cash gets cleared when the user manually hits the 'Reload' button in the 'Shared
+		// Files' window and when Windows broadcasts a message about that a volume was mounted/unmounted.
+		//
+		DWORD dwMaximumComponentLength = 0;
+		DWORD dwFileSystemFlags = 0;
+		TCHAR szFileSystemNameBuffer[MAX_PATH + 1];
+		if (!GetVolumeInformation(pszVolume, NULL, 0, NULL, &dwMaximumComponentLength, &dwFileSystemFlags, szFileSystemNameBuffer, _countof(szFileSystemNameBuffer)))
+			szFileSystemNameBuffer[0] = _T('\0');
+		return m_mapVolumeInfo[strVolumeId] = szFileSystemNameBuffer;
+	}
+
+	static void ClearCache(int iDrive)
+	{
+		if (iDrive == -1)
+			m_mapVolumeInfo.RemoveAll();
+		else
+		{
+			TCHAR szRoot[MAX_PATH];
+			szRoot[0] = _T('\0');
+			PathBuildRoot(szRoot, iDrive);
+			if (szRoot[0] != _T('\0'))
+			{
+				CString strVolumeId(szRoot);
+				ASSERT( strVolumeId.GetLength() > 0 && strVolumeId[strVolumeId.GetLength() - 1] == _T('\\') );
+				strVolumeId.MakeLower();
+				m_mapVolumeInfo.RemoveKey(strVolumeId);
+			}
+		}
+	}
+
+protected:
+	static CMapStringToString m_mapVolumeInfo;
+};
+
+static CVolumeInfo g_VolumeInfo;
+CMapStringToString CVolumeInfo::m_mapVolumeInfo;
+
 bool IsNTFSVolume(LPCTSTR pszVolume)
 {
-	DWORD dwMaximumComponentLength = 0;
-	DWORD dwFileSystemFlags = 0;
-	TCHAR szFileSystemNameBuffer[128];
-	if (!GetVolumeInformation(pszVolume, NULL, 0, NULL, &dwMaximumComponentLength, &dwFileSystemFlags, szFileSystemNameBuffer, 128))
-		return false;
-	return (_tcscmp(szFileSystemNameBuffer, _T("NTFS")) == 0);
+	return g_VolumeInfo.IsNTFSVolume(pszVolume);
 }
 
 bool IsFATVolume(LPCTSTR pszVolume)
 {
-	DWORD dwMaximumComponentLength = 0;
-	DWORD dwFileSystemFlags = 0;
-	TCHAR szFileSystemNameBuffer[128];
-	if (!GetVolumeInformation(pszVolume, NULL, 0, NULL, &dwMaximumComponentLength, &dwFileSystemFlags, szFileSystemNameBuffer, 128))
-		return false;
-	return (_tcsnicmp(szFileSystemNameBuffer, _T("FAT"), 3) == 0);
+	return g_VolumeInfo.IsFATVolume(pszVolume);
+}
+
+void ClearVolumeInfoCache(int iDrive)
+{
+	g_VolumeInfo.ClearCache(iDrive);
 }
 
 bool IsFileOnNTFSVolume(LPCTSTR pszFilePath)
@@ -2799,8 +3029,11 @@ bool IsFileOnNTFSVolume(LPCTSTR pszFilePath)
 	strRootPath.ReleaseBuffer();
 	if (!bResult)
 		return false;
-	PathAddBackslash(strRootPath.GetBuffer());
-	strRootPath.ReleaseBuffer();
+	// Need to add a trailing backslash in case of a network share
+	if (!strRootPath.IsEmpty() && strRootPath[strRootPath.GetLength() - 1] != _T('\\')) {
+		PathAddBackslash(strRootPath.GetBuffer(strRootPath.GetLength() + 1));
+		strRootPath.ReleaseBuffer();
+	}
 	return IsNTFSVolume(strRootPath);
 }
 
@@ -2811,8 +3044,11 @@ bool IsFileOnFATVolume(LPCTSTR pszFilePath)
 	strRootPath.ReleaseBuffer();
 	if (!bResult)
 		return false;
-	PathAddBackslash(strRootPath.GetBuffer());
-	strRootPath.ReleaseBuffer();
+	// Need to add a trailing backslash in case of a network share
+	if (!strRootPath.IsEmpty() && strRootPath[strRootPath.GetLength() - 1] != _T('\\')) {
+		PathAddBackslash(strRootPath.GetBuffer(strRootPath.GetLength() + 1));
+		strRootPath.ReleaseBuffer();
+	}
 	return IsFATVolume(strRootPath);
 }
 
@@ -2977,71 +3213,71 @@ void InstallSkin(LPCTSTR pszSkinPackage)
 
 	if (_tcscmp(szExt, _T(".zip")) == 0)
 	{
-	CZIPFile zip;
-	if (zip.Open(pszSkinPackage))
-	{
-		// Search the "*.eMuleSkin.ini" file..
-		CZIPFile::File* zfIniFile = NULL;
-		for (int i = 0; i < zip.GetCount(); i++)
+		CZIPFile zip;
+		if (zip.Open(pszSkinPackage))
 		{
-			CZIPFile::File* zf = zip.GetFile(i);
-				if (zf && zf->m_sName.Right(_countof(_szSkinSuffix)-1).CompareNoCase(_szSkinSuffix) == 0)
-			{
-				zfIniFile = zf;
-				break;
-			}
-		}
-
-		if (zfIniFile)
-		{
+			// Search the "*.eMuleSkin.ini" file..
+			CZIPFile::File* zfIniFile = NULL;
 			for (int i = 0; i < zip.GetCount(); i++)
 			{
 				CZIPFile::File* zf = zip.GetFile(i);
-				if (zf)
+				if (zf && zf->m_sName.Right(_countof(_szSkinSuffix)-1).CompareNoCase(_szSkinSuffix) == 0)
 				{
-					if (zf->m_sName.IsEmpty())
-						continue;
-					if (zf->m_sName[0] == _T('\\') || zf->m_sName[0] == _T('/'))
-						continue;
-					if (zf->m_sName.Find(_T(':')) != -1)
-						continue;
-					if (zf->m_sName.Find(_T("..\\")) != -1 || zf->m_sName.Find(_T("../")) != -1)
-						continue;
-					if (zf->m_sName[zf->m_sName.GetLength()-1] == _T('/'))
+					zfIniFile = zf;
+					break;
+				}
+			}
+
+			if (zfIniFile)
+			{
+				for (int i = 0; i < zip.GetCount(); i++)
+				{
+					CZIPFile::File* zf = zip.GetFile(i);
+					if (zf)
 					{
-						CString strDstDirPath;
+						if (zf->m_sName.IsEmpty())
+							continue;
+						if (zf->m_sName[0] == _T('\\') || zf->m_sName[0] == _T('/'))
+							continue;
+						if (zf->m_sName.Find(_T(':')) != -1)
+							continue;
+						if (zf->m_sName.Find(_T("..\\")) != -1 || zf->m_sName.Find(_T("../")) != -1)
+							continue;
+						if (zf->m_sName[zf->m_sName.GetLength()-1] == _T('/'))
+						{
+							CString strDstDirPath;
 							PathCanonicalize(strDstDirPath.GetBuffer(MAX_PATH), thePrefs.GetMuleDirectory(EMULE_SKINDIR) + _T('\\') + zf->m_sName.Left(zf->m_sName.GetLength()-1));
-						strDstDirPath.ReleaseBuffer();
-						if (!CreateDirectory(strDstDirPath, NULL)){
-							DWORD dwError = GetLastError();
-							CString strError;
-							strError.Format(GetResString(IDS_INSTALL_SKIN_DIR_ERROR), strDstDirPath, GetErrorMessage(dwError));
+							strDstDirPath.ReleaseBuffer();
+							if (!CreateDirectory(strDstDirPath, NULL)){
+								DWORD dwError = GetLastError();
+								CString strError;
+								strError.Format(GetResString(IDS_INSTALL_SKIN_DIR_ERROR), strDstDirPath, GetErrorMessage(dwError));
 								AfxMessageBox(strError, MB_ICONERROR);
-							break;
+								break;
+							}
 						}
-					}
-					else
-					{
-						CString strDstFilePath;
+						else
+						{
+							CString strDstFilePath;
 							PathCanonicalize(strDstFilePath.GetBuffer(MAX_PATH), thePrefs.GetMuleDirectory(EMULE_SKINDIR) + _T('\\') + zf->m_sName);
-						strDstFilePath.ReleaseBuffer();
-						SetLastError(0);
-						if (!zf->Extract(strDstFilePath)){
-							DWORD dwError = GetLastError();
-							CString strError;
-							strError.Format(GetResString(IDS_INSTALL_SKIN_FILE_ERROR), zf->m_sName, strDstFilePath, GetErrorMessage(dwError));
+							strDstFilePath.ReleaseBuffer();
+							SetLastError(0);
+							if (!zf->Extract(strDstFilePath)){
+								DWORD dwError = GetLastError();
+								CString strError;
+								strError.Format(GetResString(IDS_INSTALL_SKIN_FILE_ERROR), zf->m_sName, strDstFilePath, GetErrorMessage(dwError));
 								AfxMessageBox(strError, MB_ICONERROR);
-							break;
+								break;
+							}
 						}
 					}
 				}
 			}
-		}
-		else{
+			else {
 				AfxMessageBox(GetResString(IDS_INSTALL_SKIN_PKG_ERROR), MB_ICONERROR);
+			}
+			zip.Close();
 		}
-		zip.Close();
-	}
 		else {
 			AfxMessageBox(GetResString(IDS_INSTALL_SKIN_PKG_ERROR), MB_ICONERROR);
 		}
@@ -3181,10 +3417,9 @@ void AddAutoStart()
 	RemAutoStart();
 	CString strKeyName;
 	strKeyName = _T("eMuleAutoStart");
-    TCHAR sExeFilePath[490];
-	DWORD length;
-	length = ::GetModuleFileName(NULL, sExeFilePath, 490);
-	if(!length)
+    TCHAR sExeFilePath[MAX_PATH];
+	DWORD dwModPathLen = ::GetModuleFileName(NULL, sExeFilePath, _countof(sExeFilePath));
+	if (dwModPathLen == 0 || dwModPathLen == _countof(sExeFilePath))
 		return;
 	CString sFullExeCommand;
 	sFullExeCommand.Format(_T("%s -AutoStart"), sExeFilePath);
@@ -3326,8 +3561,9 @@ ULONGLONG GetModuleVersion(LPCTSTR pszFilePath)
 
 ULONGLONG GetModuleVersion(HMODULE hModule)
 {
-	TCHAR szFilePath[MAX_PATH] = {0};
-	if (GetModuleFileName(hModule, szFilePath, _countof(szFilePath)) == 0 || szFilePath[0] == _T('\0'))
+	TCHAR szFilePath[MAX_PATH];
+	DWORD dwModPathLen = GetModuleFileName(hModule, szFilePath, _countof(szFilePath));
+	if (dwModPathLen == 0 || dwModPathLen == _countof(szFilePath))
 		return 0;
 	return GetModuleVersion(szFilePath);
 }
@@ -3377,50 +3613,54 @@ bool DoCollectionRegFix(bool checkOnly)
 	bool bGlobalSet = false;
 	CRegKey regkey;
 	LONG result;
-		TCHAR rbuffer[500];
-		ULONG maxsize = _countof(rbuffer);
-		TCHAR modbuffer[490];
-	
-		::GetModuleFileName(NULL, modbuffer, _countof(modbuffer));
-		CString strCanonFileName = modbuffer;
-		strCanonFileName.Replace(_T("%"), _T("%%"));
-		TCHAR regbuffer[520];
-		_sntprintf(regbuffer, _countof(regbuffer), _T("\"%s\" \"%%1\""), strCanonFileName);
+	TCHAR modbuffer[MAX_PATH];
+	DWORD dwModPathLen = ::GetModuleFileName(NULL, modbuffer, _countof(modbuffer));
+	if (dwModPathLen == 0 || dwModPathLen == _countof(modbuffer))
+		return false;
+	CString strCanonFileName = modbuffer;
+	strCanonFileName.Replace(_T("%"), _T("%%"));
+	CString regbuffer;
+	regbuffer.Format(_T("\"%s\" \"%%1\""), strCanonFileName);
 
-	// first check if the ed2k links are set globally (i.e. by the installer)
+	// first check if the registry keys are already set (either by installer in HKLM or by user in HKCU)
 	result = regkey.Open(HKEY_CLASSES_ROOT, _T("eMule\\shell\\open\\command"), KEY_READ);
 	if (result == ERROR_SUCCESS)
-		{
+	{
+		TCHAR rbuffer[MAX_PATH + 100];
+		ULONG maxsize = _countof(rbuffer);
 		regkey.QueryStringValue(NULL, rbuffer, &maxsize);
-		regbuffer[_countof(regbuffer) - 1] = _T('\0');
+		rbuffer[_countof(rbuffer) - 1] = _T('\0');
 		if (maxsize != 0 && _tcsicmp(rbuffer, regbuffer) == 0)
 			bGlobalSet = true; // yup, globally we have an entry for this mule
 		regkey.Close();
 	}
 
-	if (!bGlobalSet){
+	if (!bGlobalSet)
+	{
 		// we actually need to change the registry and write an entry for HKCU
-			if (checkOnly)
-				return true;
-		if (regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\eMule\\shell\\open\\command")) == ERROR_SUCCESS){
-			regkey.SetStringValue(NULL, regbuffer);
-				
-			regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\eMule\\DefaultIcon"));
-			regkey.SetStringValue(NULL, CString(modbuffer) + CString(_T(",1")));
+		if (checkOnly)
+			return true;
+		HKEY hkeyCR = thePrefs.GetWindowsVersion() < _WINVER_2K_ ? HKEY_LOCAL_MACHINE : HKEY_CURRENT_USER;
+		if (regkey.Create(hkeyCR, _T("Software\\Classes\\eMule\\shell\\open\\command")) == ERROR_SUCCESS)
+		{
+			VERIFY( regkey.SetStringValue(NULL, regbuffer) == ERROR_SUCCESS );
 
-			regkey.Create(HKEY_CURRENT_USER, _T("Software\\Classes\\eMule"));
-			regkey.SetStringValue(NULL, _T("eMule Collection File"));
+			VERIFY( regkey.Create(hkeyCR, _T("Software\\Classes\\eMule\\DefaultIcon")) == ERROR_SUCCESS );
+			VERIFY( regkey.SetStringValue(NULL, CString(modbuffer) + _T(",1")) == ERROR_SUCCESS );
 
-			regkey.Open(HKEY_CURRENT_USER, _T("Software\\Classes\\eMule\\shell\\open"));
+			VERIFY( regkey.Create(hkeyCR, _T("Software\\Classes\\eMule")) == ERROR_SUCCESS );
+			VERIFY( regkey.SetStringValue(NULL, _T("eMule Collection File")) == ERROR_SUCCESS );
+
+			VERIFY( regkey.Open(hkeyCR, _T("Software\\Classes\\eMule\\shell\\open")) == ERROR_SUCCESS );
 			regkey.RecurseDeleteKey(_T("ddexec"));
 			regkey.RecurseDeleteKey(_T("ddeexec"));
 
-			regkey.Create(HKEY_CURRENT_USER, CString(_T("Software\\Classes\\")) + COLLECTION_FILEEXTENSION);
-			regkey.SetStringValue(NULL, _T("eMule"));
-			regkey.Close();
+			VERIFY( regkey.Create(hkeyCR, _T("Software\\Classes\\") COLLECTION_FILEEXTENSION) == ERROR_SUCCESS );
+			VERIFY( regkey.SetStringValue(NULL, _T("eMule")) == ERROR_SUCCESS );
+			VERIFY( regkey.Close() == ERROR_SUCCESS );
 		}
 		else
-			ASSERT( false );
+			ASSERT(0);
 	}
 	return false;
 }
@@ -3507,90 +3747,156 @@ void RC4Crypt(const uchar* pachIn, uchar* pachOut, uint32 nLen, RC4_Key_Struct* 
 	key->byY = byY;
 }
 
-EFileType GetFileTypeEx(CKnownFile* kfile, bool checkextention, bool checkfileheader, bool nocached) {
 
-	if (!nocached && kfile->GetVerifiedFileType()!=FILETYPE_UNKNOWN)
+struct SFileExts {
+	EFileType ftype;
+	LPCTSTR label;
+	LPCTSTR extlist;
+};
+
+static const SFileExts s_fileexts[] =
+{
+	{ARCHIVE_ZIP,			_T("ZIP"),			_T("|ZIP|JAR|CBZ|") },
+	{ARCHIVE_RAR,			_T("RAR"),			_T("|RAR|CBR|") },
+	{ARCHIVE_ACE,			_T("ACE"),			_T("|ACE|") },
+	{AUDIO_MPEG,			_T("MPEG Audio"),	_T("|MP2|MP3|") },
+	{IMAGE_ISO,				_T("ISO/NRG"),		_T("|ISO|NRG|") },
+	{VIDEO_MPG,				_T("MPEG Video"),	_T("|MPG|MPEG|") },
+	{VIDEO_AVI,				_T("AVI"),			_T("|AVI|DIVX|") },
+	{WM,					_T("Microsoft Media Audio/Video"), _T("|ASF|WMV|WMA|") },
+	{PIC_JPG,				_T("JPEG"),			_T("|JPG|JPEG|") },
+	{PIC_PNG,				_T("PNG"),			_T("|PNG|") },
+	{PIC_GIF,				_T("GIF"),			_T("|GIF|") },
+	{DOCUMENT_PDF,			_T("PDF"),			_T("|PDF|") },
+	{FILETYPE_EXECUTABLE,	_T("WIN/DOS EXE"),	_T("|EXE|COM|DLL|SYS|CPL|FON|OCX|SCR|VBX|") },
+	{FILETYPE_UNKNOWN,		_T(""),	 			_T("") }
+};
+
+#define HEADERCHECKSIZE 16
+
+const unsigned char FILEHEADER_AVI_ID[]	= { 0x52, 0x49, 0x46, 0x46 };
+const unsigned char FILEHEADER_RAR[]	= { 0x52, 0x61, 0x72, 0x21 };
+const unsigned char FILEHEADER_ZIP[]	= { 0x50, 0x4b, 0x03, 0x04 };
+const unsigned char FILEHEADER_ACE_ID[]	= { 0x2A, 0x2A, 0x41, 0x43, 0x45, 0x2A, 0x2A };
+const unsigned char FILEHEADER_MP3_ID[]	= { 0x49, 0x44, 0x33, 0x03 };
+const unsigned char FILEHEADER_MP3_ID2[]= { 0xFE, 0xFB };
+const unsigned char FILEHEADER_MPG_ID[]	= { 0x00, 0x00, 0x01, 0xba };
+const unsigned char FILEHEADER_ISO_ID[]	= { 0x01, 0x43, 0x44, 0x30, 0x30, 0x31 };
+const unsigned char FILEHEADER_WM_ID[]	= { 0x30, 0x26, 0xb2, 0x75, 0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9, 0x00, 0xaa, 0x00, 0x62, 0xce, 0x6c };
+const unsigned char FILEHEADER_PNG_ID[]	= { 0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a };
+const unsigned char FILEHEADER_JPG_ID[]	= { 0xff, 0xd8, 0xff };
+const unsigned char FILEHEADER_GIF_ID[]	= { 0x47, 0x49, 0x46, 0x38 };
+const unsigned char FILEHEADER_PDF_ID[]	= { 0x25, 0x50, 0x44, 0x46 };
+const unsigned char FILEHEADER_EXECUTABLE_ID[]={0x4d, 0x5a };
+
+bool GetDRM(LPCTSTR pszFilePath)
+{
+	int fd = _topen(pszFilePath, O_RDONLY | O_BINARY);
+	if (fd != -1)
+	{
+		BYTE aucBuff[16384];
+		int iRead = _read(fd, aucBuff, sizeof aucBuff);
+		_close(fd);
+		fd = -1;
+
+		if (iRead > sizeof(FILEHEADER_WM_ID) && memcmp(aucBuff, FILEHEADER_WM_ID, sizeof(FILEHEADER_WM_ID)) == 0)
+		{
+			iRead -= sizeof(FILEHEADER_WM_ID);
+			if (iRead > 0)
+			{
+				static const WCHAR s_wszWrmHdr[] = L"<WRMHEADER";
+				if (FindPattern(aucBuff + sizeof(FILEHEADER_WM_ID), iRead, (const BYTE *)s_wszWrmHdr, sizeof(s_wszWrmHdr) - sizeof(s_wszWrmHdr[0])))
+					return true;
+			}
+		}
+	}
+	return false;
+}
+
+EFileType GetFileTypeEx(CShareableFile* kfile, bool checkextention, bool checkfileheader, bool nocached)
+{
+	if (!nocached && kfile->GetVerifiedFileType() != FILETYPE_UNKNOWN)
 		return kfile->GetVerifiedFileType();
 
 	// check file header first
-	EFileType res=FILETYPE_UNKNOWN;
+	EFileType res = FILETYPE_UNKNOWN;
+	CPartFile* pfile = (CPartFile*)kfile;
 
-	CPartFile* pfile=(CPartFile*)kfile;
-
-	bool test4iso=(kfile->IsPartFile()==false || ( (uint64)pfile->GetFileSize()>0x8000+HEADERCHECKSIZE &&
-		pfile->IsComplete(0x8000,0x8000+HEADERCHECKSIZE,true) )
-		);
-	if (checkfileheader && (!kfile->IsPartFile() || pfile->IsComplete(0,HEADERCHECKSIZE,true) || test4iso	)	){
-
-		unsigned char* headerbuf=headerbuf=(unsigned char*)calloc(HEADERCHECKSIZE,1);
-		if (headerbuf==NULL)
-			return FILETYPE_UNKNOWN;	// :-o
+	bool test4iso = (    !kfile->IsPartFile()
+		              || ((uint64)pfile->GetFileSize() > 0x8000 + HEADERCHECKSIZE && pfile->IsComplete(0x8000, 0x8000 + HEADERCHECKSIZE, true)));
+	if (checkfileheader && (!kfile->IsPartFile() || pfile->IsComplete(0, HEADERCHECKSIZE, true) || test4iso))
+	{
+		unsigned char *headerbuf = headerbuf = (unsigned char *)calloc(HEADERCHECKSIZE, 1);
+		if (headerbuf == NULL)
+			return FILETYPE_UNKNOWN;
 
 		try {
-
 			CFile inFile;
+			if (inFile.Open(kfile->GetFilePath(), CFile::modeRead | CFile::shareDenyNone))
+			{
+				if (!kfile->IsPartFile() || pfile->IsComplete(0, HEADERCHECKSIZE, true))
+				{
+					int read = inFile.Read(headerbuf, HEADERCHECKSIZE);
+					if (read == HEADERCHECKSIZE)
+					{
+						if (memcmp(headerbuf, FILEHEADER_ZIP, sizeof(FILEHEADER_ZIP)) == 0)
+							res = ARCHIVE_ZIP;
+						else if (memcmp(headerbuf, FILEHEADER_RAR, sizeof(FILEHEADER_RAR)) == 0)
+							res = ARCHIVE_RAR;
+						else if (memcmp(headerbuf + 7, FILEHEADER_ACE_ID, sizeof(FILEHEADER_ACE_ID)) == 0)
+							res = ARCHIVE_ACE;
+						else if (memcmp(headerbuf, FILEHEADER_WM_ID, sizeof(FILEHEADER_WM_ID)) == 0)
+							res = WM;
+						else if (   memcmp(headerbuf, FILEHEADER_AVI_ID, sizeof(FILEHEADER_AVI_ID)) == 0 
+							     && strncmp((const char *)headerbuf + 8, "AVI", 3) == 0)
+							res = VIDEO_AVI;
+						else if (   memcmp(headerbuf, FILEHEADER_MP3_ID, sizeof(FILEHEADER_MP3_ID)) == 0
+							     || memcmp(headerbuf, FILEHEADER_MP3_ID2, sizeof(FILEHEADER_MP3_ID2)) == 0)
+							res = AUDIO_MPEG;
+						else if (memcmp(headerbuf, FILEHEADER_MPG_ID, sizeof(FILEHEADER_MPG_ID)) == 0)
+							res = VIDEO_MPG;
+						else if (memcmp(headerbuf, FILEHEADER_PDF_ID, sizeof(FILEHEADER_PDF_ID)) == 0)
+							res = DOCUMENT_PDF;
+						else if (memcmp(headerbuf, FILEHEADER_PNG_ID, sizeof(FILEHEADER_PNG_ID)) == 0)
+							res = PIC_PNG;
+						else if (   memcmp(headerbuf, FILEHEADER_JPG_ID, sizeof(FILEHEADER_JPG_ID)) == 0
+							     &&	(headerbuf[3] == 0xe1 || headerbuf[3] == 0xe0))
+							res = PIC_JPG;
+						else if (   memcmp(headerbuf, FILEHEADER_GIF_ID, sizeof(FILEHEADER_GIF_ID)) == 0
+								 &&	headerbuf[5] == 0x61 && (headerbuf[4] == 0x37 || headerbuf[4] == 0x39))
+							res = PIC_GIF;
+						else if (memcmp(headerbuf, FILEHEADER_EXECUTABLE_ID, sizeof(FILEHEADER_EXECUTABLE_ID)) == 0)
+						{
+							res = FILETYPE_EXECUTABLE;
 
-			if (inFile.Open(pfile->GetFilePath(), CFile::modeRead | CFile::shareDenyNone)){
-
-				if (kfile->IsPartFile()==false || pfile->IsComplete(0,HEADERCHECKSIZE,true)) {
-
-					int read=inFile.Read(headerbuf,HEADERCHECKSIZE);
-
-					if (read==HEADERCHECKSIZE){
-
-						if (memcmp(headerbuf,FILEHEADER_ZIP ,	sizeof(FILEHEADER_ZIP ))==0)
-							res=ARCHIVE_ZIP;
-						else if (memcmp(headerbuf,FILEHEADER_RAR, sizeof(FILEHEADER_RAR))==0)
-							res=ARCHIVE_RAR;
-						else if (memcmp(headerbuf+7,FILEHEADER_ACE_ID, sizeof(FILEHEADER_ACE_ID))==0)
-							res=ARCHIVE_ACE;
-						else if (memcmp(headerbuf,FILEHEADER_WM_ID, sizeof(FILEHEADER_WM_ID))==0)
-							res=WM;
-						else if (memcmp(headerbuf,FILEHEADER_AVI_ID, sizeof(FILEHEADER_AVI_ID))==0 &&
-							strncmp((const char*)headerbuf+8,"AVI",3)==0	)
-							res=VIDEO_AVI;
-						else if (memcmp(headerbuf,FILEHEADER_MP3_ID, sizeof(FILEHEADER_MP3_ID))==0 ||
-							memcmp(headerbuf,FILEHEADER_MP3_ID2, sizeof(FILEHEADER_MP3_ID2))==0		)
-							res=AUDIO_MPEG;
-						else if (memcmp(headerbuf,FILEHEADER_MPG_ID, sizeof(FILEHEADER_MPG_ID))==0)
-							res=VIDEO_MPG;
-						else if (memcmp(headerbuf,FILEHEADER_PDF_ID, sizeof(FILEHEADER_PDF_ID))==0)
-							res=DOCUMENT_PDF;
-						else if (memcmp(headerbuf,FILEHEADER_PNG_ID, sizeof(FILEHEADER_PNG_ID))==0)
-							res=PIC_PNG;
-						else if (memcmp(headerbuf,FILEHEADER_JPG_ID, sizeof(FILEHEADER_JPG_ID))==0 &&
-							( headerbuf[3]==0xe1 || headerbuf[3]==0xe0 ) )
-							res=PIC_JPG;
-						else if (memcmp(headerbuf,FILEHEADER_GIF_ID, sizeof(FILEHEADER_GIF_ID))==0 &&
-							headerbuf[5]==0x61 && (headerbuf[4]==0x37 || headerbuf[4]==0x39 ) )
-							res=PIC_JPG;
-						else if (memcmp(headerbuf,FILEHEADER_EXECUTABLE_ID, sizeof(FILEHEADER_EXECUTABLE_ID))==0 )
-							res=FILETYPE_EXECUTABLE;
-						else if (((headerbuf[0] & 0xFF) == 0xFF) && ((headerbuf[1] & 0xE0) == 0xE0)) {
-							res=AUDIO_MPEG;
+							// This could be a self extracting RAR archive. If the ED2K name of the file
+							// has the RAR extension we treat this 'EXE' file like an 'unverified' RAR file.
+							LPCTSTR pszExt = PathFindExtension(kfile->GetFileName());
+							if (pszExt != NULL && _tcsicmp(pszExt, _T(".rar")) == 0)
+								res = FILETYPE_UNKNOWN;
 						}
+						else if ((headerbuf[0] & 0xFF) == 0xFF && (headerbuf[1] & 0xE0) == 0xE0)
+							res = AUDIO_MPEG;
 					}
 				}
-
-				if (res==FILETYPE_UNKNOWN && test4iso) {
-					inFile.Seek(0x8000 , CFile::begin);
-
-					int read=inFile.Read(headerbuf,HEADERCHECKSIZE);
-
-					if (read==HEADERCHECKSIZE) {
-						if (memcmp(headerbuf,FILEHEADER_ISO_ID, sizeof(FILEHEADER_ISO_ID))==0)
-							res=IMAGE_ISO;
+				if (res == FILETYPE_UNKNOWN && test4iso)
+				{
+					inFile.Seek(0x8000, CFile::begin);
+					int read = inFile.Read(headerbuf, HEADERCHECKSIZE);
+					if (read == HEADERCHECKSIZE)
+					{
+						if (memcmp(headerbuf, FILEHEADER_ISO_ID, sizeof(FILEHEADER_ISO_ID)) == 0)
+							res = IMAGE_ISO;
 					}
 				}
 				inFile.Close();
 			}
-
 		} catch(...) {
 			ASSERT(0);
 		}
 		free(headerbuf);
-		
-		if (res!=FILETYPE_UNKNOWN) {
+
+		if (res != FILETYPE_UNKNOWN) {
 			kfile->SetVerifiedFileType(res);
 			return res;
 		}
@@ -3599,23 +3905,18 @@ EFileType GetFileTypeEx(CKnownFile* kfile, bool checkextention, bool checkfilehe
 	if (!checkextention)
 		return res;
 
-
 	CString extLC;
-	int posD=kfile->GetFileName().ReverseFind(_T('.'));
-	if (posD>=0)
-		extLC=kfile->GetFileName().Mid(posD+1).MakeUpper();
+	int posD = kfile->GetFileName().ReverseFind(_T('.'));
+	if (posD >= 0)
+		extLC = kfile->GetFileName().Mid(posD + 1).MakeUpper();
 	
-
-	SFileExts* ext = _fileexts;
-	if (ext){
-		while (ext->ftype!=FILETYPE_UNKNOWN) {
-
-			CString testext=ext->extlist;
-			if (testext.Find( _T('|') + extLC + _T('|') )!=-1)
-				return ext->ftype;
-
-			ext++;
-		}
+	const SFileExts *ext = s_fileexts;
+	while (ext->ftype != FILETYPE_UNKNOWN)
+	{
+		CString testext = ext->extlist;
+		if (testext.Find(_T('|') + extLC + _T('|')) != -1)
+			return ext->ftype;
+		ext++;
 	}
 
 	// rar multivolume old naming
@@ -3628,41 +3929,35 @@ EFileType GetFileTypeEx(CKnownFile* kfile, bool checkextention, bool checkfilehe
 	return FILETYPE_UNKNOWN;
 }
 
-CString GetFiletypeName(EFileType ftype) {
-	
-	SFileExts* ext = _fileexts;
-	if (ext){
-		while (ext->ftype!=FILETYPE_UNKNOWN) {
-
-			if (ftype==ext->ftype)
-				return ext->label;
-
-			ext++;
-		}
+CString GetFileTypeName(EFileType ftype)
+{
+	const SFileExts *ext = s_fileexts;
+	while (ext->ftype != FILETYPE_UNKNOWN)
+	{
+		if (ftype == ext->ftype)
+			return ext->label;
+		ext++;
 	}
-
 	return _T("?");
 }
 
-int IsExtentionTypeof(EFileType ftype, CString fext) {
-	
-	fext=_T('|') + fext + _T('|') ;
+int IsExtensionTypeOf(EFileType ftype, CString fext)
+{
+	fext = _T('|') + fext + _T('|');
 
-	SFileExts* ext = _fileexts;
-	if (ext){
-		while (ext->ftype!=FILETYPE_UNKNOWN) {
-			CString testext=ext->extlist;
-			if (ftype==ext->ftype && testext.Find( fext )!=-1)	// type matches acceptable extention
-				return true;
+	const SFileExts *ext = s_fileexts;
+	while (ext->ftype != FILETYPE_UNKNOWN)
+	{
+		CString testext = ext->extlist;
+		if (ftype == ext->ftype && testext.Find(fext) != -1)	// type matches acceptable extention
+			return 1;
 
-			if (ftype!=ext->ftype && testext.Find( fext )!=-1)	// not just unknown ext, but from a different type!
-				return -1;
-
-			ext++;
-		}
+		if (ftype != ext->ftype && testext.Find(fext) != -1)	// not just unknown ext, but from a different type!
+			return -1;
+		ext++;
 	}
 
-	return false;
+	return 0;
 }
 
 uint32 LevenshteinDistance(const CString& str1, const CString& str2)

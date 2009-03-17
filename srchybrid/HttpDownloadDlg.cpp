@@ -19,7 +19,6 @@ All rights reserved.
 #include "stdafx.h"
 #include "emule.h"
 #include "HttpDownloadDlg.h"
-#include "Preferences.h" // morph 
 #include "OtherFunctions.h"
 #include "Log.h"
 
@@ -121,7 +120,7 @@ static int check_header(z_stream *stream, HINTERNET m_hHttpFile) {
 #define ENCODING_QUERY {                                                    \
   /*check for gzip or x-gzip stream*/                                       \
   TCHAR szContentEncoding[32];                                              \
-  DWORD dwEncodeStringSize = 32;                                            \
+  DWORD dwEncodeStringSize = _countof(szContentEncoding);                   \
   if(::HttpQueryInfo(m_hHttpFile, HTTP_QUERY_CONTENT_ENCODING,              \
        szContentEncoding, &dwEncodeStringSize, NULL)) {                     \
     if(szContentEncoding[0] == 'x' && szContentEncoding[1] == '-')          \
@@ -410,7 +409,7 @@ void CHttpDownloadDlg::SetStatus(CString strFmt, LPCTSTR lpsz1)
 void CHttpDownloadDlg::SetTransferRate(double KbPerSecond)
 {
 	CString sRate;
-	sRate.Format( _T("%s"), CastItoXBytes(KbPerSecond, true, true));
+	sRate.Format(_T("%s"), CastItoXBytes(KbPerSecond, true, true));
 	m_ctrlTransferRate.SetWindowText(sRate);
 }
 
@@ -453,14 +452,7 @@ void CHttpDownloadDlg::DownloadThread()
 	ENCODING_INIT;
 	//Create the Internet session handle
 	ASSERT(m_hInternetSession == NULL);
-	// MORPH START, send user agent as firefox if obfuscated....
-    m_hInternetSession = ::InternetOpen(
-  	   thePrefs.IsClientCryptLayerRequested()?_T("Mozilla/5.0 (Windows; U; Windows NT 5.1; it; rv:1.8.0.7) Gecko/20060909 Firefox/1.5.0.7"):AfxGetAppName(),
-       INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	/*	original 
 	m_hInternetSession = ::InternetOpen(AfxGetAppName(), INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	*/
-	// MORPH END , send user agent as firefox if obfuscated....
 	if (m_hInternetSession == NULL)
 	{
 		TRACE(_T("Failed in call to InternetOpen, Error:%d\n"), ::GetLastError());
@@ -542,6 +534,9 @@ void CHttpDownloadDlg::DownloadThread()
 	//fill in what encoding we support
 	HttpAddRequestHeaders(m_hHttpFile, ACCEPT_ENCODING_HEADER, (DWORD)-1L, HTTP_ADDREQ_FLAG_ADD);
 
+	// some sites give unacceptable low download speed if they don't see a well known user agent in the headers...
+	HttpAddRequestHeaders(m_hHttpFile, _T("User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0; SLCC1)\r\n"), (DWORD)-1L, HTTP_ADDREQ_FLAG_ADD);
+
 //label used to jump to if we need to resend the request
 resend:
 
@@ -556,7 +551,7 @@ resend:
 
 	//Check the HTTP status code
 	TCHAR szStatusCode[32];
-	DWORD dwInfoSize = 32;
+	DWORD dwInfoSize = _countof(szStatusCode);
 	if (!HttpQueryInfo(m_hHttpFile, HTTP_QUERY_STATUS_CODE, szStatusCode, &dwInfoSize, NULL))
 	{
 		TRACE(_T("Failed in call to HttpQueryInfo for HTTP query status code, Error:%d\n"), ::GetLastError());
@@ -596,7 +591,7 @@ resend:
 	//Check to see if any encodings are supported
 	//  ENCODING_QUERY;
 	TCHAR szContentEncoding[32];
-	DWORD dwEncodeStringSize = 32;
+	DWORD dwEncodeStringSize = _countof(szContentEncoding);
 	if(::HttpQueryInfo(m_hHttpFile, HTTP_QUERY_CONTENT_ENCODING, szContentEncoding, &dwEncodeStringSize, NULL))
 	{
 		if(!_tcsicmp(szContentEncoding, _T("gzip")) || !_tcsicmp(szContentEncoding, _T("x-gzip")))
@@ -627,7 +622,7 @@ resend:
 
 	// Get the length of the file.
 	TCHAR szContentLength[32];
-	dwInfoSize = 32;
+	dwInfoSize = _countof(szContentLength);
 	DWORD dwFileSize = 0;
 	BOOL bGotFileSize = FALSE;
 	if (::HttpQueryInfo(m_hHttpFile, HTTP_QUERY_CONTENT_LENGTH, szContentLength, &dwInfoSize, NULL))
@@ -757,34 +752,49 @@ void CALLBACK CHttpDownloadDlg::_OnStatusCallBack(HINTERNET hInternet, DWORD dwC
 	pDlg->OnStatusCallBack(hInternet, dwInternetStatus, lpvStatusInformation, dwStatusInformationLength);
 }
 
-CString CHttpDownloadDlg::GetStatusInfo(LPVOID lpvStatusInformation)
+CString CHttpDownloadDlg::GetStatusInfo(LPVOID lpvStatusInformation, DWORD dwStatusInformationLength)
 {
-	if (sm_ullWinInetVer < MAKEDLLVERULL(7,0,0,0))
-		return CString((LPCTSTR)lpvStatusInformation);	// IE6
-	return CString((LPCSTR)lpvStatusInformation);		// IE7+
+	CString strStatus;
+	// Try to figure out if it is ANSI or Unicode. IE is playing a strange game with that data...
+	// In some cases the strings are even encoded as Unicode *with* a trailing NUL-byte, which
+	// means that the nr. of bytes in the Unicode string is odd! Thus, the Windows API function
+	// 'IsTextUnicode' must not be invoked with 'IS_TEXT_UNICODE_ODD_LENGTH', otherwise it will
+	// again give false results.
+	//
+	// INTERNET_STATUS_RESOLVING_NAME		Unicode: server name
+	// INTERNET_STATUS_NAME_RESOLVED		ANSI: IP address
+	// INTERNET_STATUS_CONNECTING_TO_SERVER	ANSI: IP address
+	// INTERNET_STATUS_CONNECTED_TO_SERVER	ANSI: IP address
+	//
+	INT uFlags = IS_TEXT_UNICODE_UNICODE_MASK;
+	if (IsTextUnicode(lpvStatusInformation, dwStatusInformationLength, &uFlags))
+		strStatus = CString((LPCWSTR)lpvStatusInformation);
+	else
+		strStatus = CString((LPCSTR)lpvStatusInformation);
+	return strStatus;
 }
 
 void CHttpDownloadDlg::OnStatusCallBack(HINTERNET /*hInternet*/, DWORD dwInternetStatus, 
-                                         LPVOID lpvStatusInformation, DWORD /*dwStatusInformationLength*/)
+                                        LPVOID lpvStatusInformation, DWORD dwStatusInformationLength)
 {
 	switch (dwInternetStatus)
 	{
 		case INTERNET_STATUS_RESOLVING_NAME:
-			SetStatus(GetResString(IDS_HTTPDOWNLOAD_RESOLVING_NAME), GetStatusInfo(lpvStatusInformation));
+			SetStatus(GetResString(IDS_HTTPDOWNLOAD_RESOLVING_NAME), GetStatusInfo(lpvStatusInformation, dwStatusInformationLength));
 			break;
 		case INTERNET_STATUS_NAME_RESOLVED:
-			SetStatus(GetResString(IDS_HTTPDOWNLOAD_RESOLVED_NAME),	GetStatusInfo(lpvStatusInformation));
+			SetStatus(GetResString(IDS_HTTPDOWNLOAD_RESOLVED_NAME),	GetStatusInfo(lpvStatusInformation, dwStatusInformationLength));
 			break;
 		case INTERNET_STATUS_CONNECTING_TO_SERVER:
-			SetStatus(GetResString(IDS_HTTPDOWNLOAD_CONNECTING), GetStatusInfo(lpvStatusInformation));
+			SetStatus(GetResString(IDS_HTTPDOWNLOAD_CONNECTING), GetStatusInfo(lpvStatusInformation, dwStatusInformationLength));
 			break;
 		case INTERNET_STATUS_CONNECTED_TO_SERVER:
-			SetStatus(GetResString(IDS_HTTPDOWNLOAD_CONNECTED), GetStatusInfo(lpvStatusInformation));
+			SetStatus(GetResString(IDS_HTTPDOWNLOAD_CONNECTED), GetStatusInfo(lpvStatusInformation, dwStatusInformationLength));
 			break;
 		case INTERNET_STATUS_REDIRECT:
-			SetStatus(GetResString(IDS_HTTPDOWNLOAD_REDIRECTING), GetStatusInfo(lpvStatusInformation));
+			SetStatus(GetResString(IDS_HTTPDOWNLOAD_REDIRECTING), GetStatusInfo(lpvStatusInformation, dwStatusInformationLength));
 			break;
-		}
+	}
 }
 
 void CHttpDownloadDlg::OnDestroy() 

@@ -64,9 +64,6 @@ to tim.kosse@gmx.de
 #include "stdafx.h"
 #include "DebugHelpers.h"
 #include "AsyncSocketEx.h"
-#include "wtypes.h"
-#include "oleauto.h"
-#include "atlconv.h"
 
 #ifndef NOLAYERS
 #include "AsyncSocketExLayer.h"

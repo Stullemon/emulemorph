@@ -37,7 +37,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 IMPLEMENT_DYNAMIC(CStatisticsTree, CTreeCtrl)
@@ -294,10 +294,12 @@ CString CStatisticsTree::GetItemText(HTREEITEM theItem)
 	item.mask = TVIF_TEXT | TVIF_HANDLE;
 	item.hItem = theItem;
 	item.pszText = szText;
-	item.cchTextMax = 1024;
+	item.cchTextMax = _countof(szText);
 
-	if (GetItem(&item))
-		return CString(item.pszText);
+	if (GetItem(&item)) {
+		szText[_countof(szText) - 1] = _T('\0');
+		return szText;
+	}
 
 	return _T("");
 }
@@ -521,7 +523,7 @@ CString CStatisticsTree::GetHTMLForExport(HTREEITEM theItem, int theItemLevel, b
 
 	strBuffer.Empty();
 
-	if (firstItem)	hCurrent = GetRootItem();
+	if (firstItem) hCurrent = GetRootItem();
 	else hCurrent = theItem;
 
 	while (hCurrent != NULL)
@@ -574,7 +576,7 @@ CString CStatisticsTree::GetHTMLForExport(HTREEITEM theItem, int theItemLevel, b
 		else
 			strItem += GetItemText(hCurrent);
 
-		if (theItemLevel==0) strBuffer .Append(_T("\n"));
+		if (theItemLevel==0) strBuffer.Append(_T("\n"));
 		strBuffer += strItem + _T("<br />");
 
 		if (ItemHasChildren(hCurrent))
@@ -604,7 +606,7 @@ void CStatisticsTree::ExportHTML()
 	if (dwCurDirLen == 0 || dwCurDirLen >= _countof(szCurDir))
 		szCurDir[0] = _T('\0');
 
-	CFileDialog saveAsDlg (false, _T("html"), _T("eMule Statistics.html"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, _T("HTML Files (*.html)|*.html|All Files (*.*)|*.*||"), this, 0);
+	CFileDialog saveAsDlg(false, _T("html"), _T("eMule Statistics.html"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, _T("HTML Files (*.html)|*.html|All Files (*.*)|*.*||"), this, 0);
 	if (saveAsDlg.DoModal() == IDOK)
 	{
 		CString		strHTML;

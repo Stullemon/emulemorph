@@ -33,6 +33,7 @@ public:
 	virtual ~CSharedFilesWnd();
 
 	void Localize();
+	void SetToolTipsDelay(DWORD dwDelay);
 	//MORPH START - Changed, Downloaded History [Monki/Xman]
 #ifdef NO_HISTORY
 	void ShowSelectedFilesSummary();
@@ -40,14 +41,17 @@ public:
 	void ShowSelectedFilesSummary(bool bHistory =false);
 #endif
 	//MORPH END   - Changed, Downloaded History [Monki/Xman]
-	void Reload();
+	void Reload(bool bForceTreeReload = false);
 	uint32	GetFilterColumn() const				{ return m_nFilterColumn; }
+	void OnVolumesChanged()						{ m_ctlSharedDirTree.OnVolumesChanged(); }
+	void OnSingleFileShareStatusChanged()		{ m_ctlSharedDirTree.FileSystemTreeUpdateBoldState(NULL); }
 
 // Dialog Data
 	enum { IDD = IDD_FILES };
 
 	CSharedFilesCtrl sharedfilesctrl;
 	CStringArray m_astrFilter;
+	CSharedDirsTreeCtrl m_ctlSharedDirTree;
 
 private:
 	CProgressCtrlX pop_bar;
@@ -55,7 +59,6 @@ private:
 	CProgressCtrlX pop_bartrans;
 	CFont bold;
 	CIconStatic m_ctrlStatisticsFrm;
-	CSharedDirsTreeCtrl m_ctlSharedDirTree;
 	HICON icon_files;
 	CSplitterControl m_wndSplitter;
 	CEditDelayed	m_ctlFilter;
@@ -72,16 +75,15 @@ protected:
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnBnClickedReloadSharedFiles();
-	afx_msg void OnLvnItemActivateSharedFiles(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMClickSharedFiles(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnSysColorChange();
-	afx_msg void OnStnDblClickFilesIco();
-	afx_msg void OnTvnSelChangedSharedDirsTree(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg LRESULT OnChangeFilter(WPARAM wParam, LPARAM lParam);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg LRESULT OnChangeFilter(WPARAM wParam, LPARAM lParam);
+	afx_msg void OnBnClickedReloadSharedFiles();
+	afx_msg void OnLvnItemActivateSharedFiles(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmClickSharedFiles(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnStnDblClickFilesIco();
+	afx_msg void OnSysColorChange();
+	afx_msg void OnTvnSelChangedSharedDirsTree(NMHDR *pNMHDR, LRESULT *pResult);
 	//MORPH START - Added, Downloaded History [Monki/Xman]
 #ifndef NO_HISTORY
 	afx_msg void OnShowWindow( BOOL bShow,UINT nStatus  );

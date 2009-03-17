@@ -65,7 +65,7 @@ struct Requested_File_Struct{
 };
 #pragma pack()
 
-struct PartFileStamp {
+struct PartFileStamp{
 	CPartFile*	file;
 	DWORD		timestamp;
 };
@@ -112,10 +112,10 @@ public:
 	CUpDownClient(CPartFile* in_reqfile, uint16 in_port, uint32 in_userid, uint32 in_serverup, uint16 in_serverport, bool ed2kID = false);
 	virtual ~CUpDownClient();
 
-	void StartDownload();
-	virtual void CheckDownloadTimeout();
-	virtual void SendCancelTransfer(Packet* packet = NULL);
-	virtual bool	IsEd2kClient() const { return true; }
+	void			StartDownload();
+	virtual void	CheckDownloadTimeout();
+	virtual void	SendCancelTransfer(Packet* packet = NULL);
+	virtual bool	IsEd2kClient() const							{ return true; }
 	virtual bool	Disconnected(LPCTSTR pszReason, bool bFromSocket = false);
 	virtual bool	TryToConnect(bool bIgnoreMaxCon = false, bool bNoCallbacks = false, CRuntimeClass* pClassSocket = NULL);
 	virtual void	Connect();
@@ -130,12 +130,12 @@ public:
 	void			SetUserName(LPCTSTR pszNewName);
 	uint32			GetIP() const									{ return m_dwUserIP; }
 	void			SetIP( uint32 val ) //Only use this when you know the real IP or when your clearing it.
-					{
-						m_dwUserIP = val;
-						m_nConnectIP = val;
-					}
+						{
+							m_dwUserIP = val;
+							m_nConnectIP = val;
+						}
 	__inline bool	HasLowID() const								{ return (m_nUserIDHybrid < 16777216); }
-	uint32			GetConnectIP() const				{return m_nConnectIP;}
+	uint32			GetConnectIP() const							{ return m_nConnectIP; }
 	uint16			GetUserPort() const								{ return m_nUserPort; }
 	void			SetUserPort(uint16 val)							{ m_nUserPort = val; }
 	UINT			GetTransferredUp() const						{ return m_nTransferredUp; }
@@ -168,7 +168,7 @@ public:
 	bool			ExtProtocolAvailable() const					{ return m_bEmuleProtocol; }
 	bool			SupportMultiPacket() const						{ return m_bMultiPacket; }
 	bool			SupportExtMultiPacket() const					{ return m_fExtMultiPacket; }
-	bool			SupportPeerCache() const { return m_fPeerCache; }
+	bool			SupportPeerCache() const						{ return m_fPeerCache; }
 	bool			SupportsLargeFiles() const						{ return m_fSupportsLargeFiles; }
 	bool			IsEmuleClient() const							{ return m_byEmuleVersion!=0; }
 	uint8			GetSourceExchange1Version() const				{ return m_bySourceExchange1Ver; }
@@ -231,6 +231,7 @@ public:
 	bool			AllowIncomeingBuddyPingPong()					{ return m_dwLastBuddyPingPongTime < (::GetTickCount()-(3*60*1000)); }
 	void			SetLastBuddyPingPongTime()						{ m_dwLastBuddyPingPongTime = (::GetTickCount()+(10*60*1000)); }
 	void			ProcessFirewallCheckUDPRequest(CSafeMemFile* data);
+	void			SendSharedDirectories();
 
 	//MORPH START - Added by IceCream, Anti-leecher feature
 	bool			IsLeecher()	const				{return m_bLeecher;}
@@ -260,7 +261,8 @@ public:
 	void			ProcessPreviewAnswer(const uchar* pachPacket, UINT nSize);
 	bool			GetPreviewSupport() const						{ return m_fSupportsPreview && GetViewSharedFilesSupport(); }
 	bool			GetViewSharedFilesSupport() const				{ return m_fNoViewSharedFiles==0; }
-	bool			SafeSendPacket(Packet* packet);
+	bool			SafeConnectAndSendPacket(Packet* packet);
+	bool			SendPacket(Packet* packet, bool bDeletePacket, bool bVerifyConnection = false);
 	void			CheckForGPLEvilDoer();
 	// Encryption / Obfuscation / Connectoptions
 	bool			SupportsCryptLayer() const						{ return m_fSupportsCryptLayer; }
@@ -450,7 +452,7 @@ public:
 	
 	//MORPH START - Downloading Chunk Detail Display
 	void			DrawStatusBarChunk(CDC* dc, LPCRECT rect,const CPartFile* file, bool  bFlat) const;
-	UINT			GetCurrentDownloadingChunk() { return (m_nLastBlockOffset!=(uint64)-1)?(UINT)(m_nLastBlockOffset/PARTSIZE):(UINT)-1;}
+	UINT			GetCurrentDownloadingChunk() const { return (m_nLastBlockOffset!=(uint64)-1)?(UINT)(m_nLastBlockOffset/PARTSIZE):(UINT)-1;}
 	//MORPH END   - Downloading Chunk Detail Display
 	
 	bool			AskForDownload();

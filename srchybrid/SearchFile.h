@@ -34,7 +34,7 @@ public:
 	CSearchFile(const CSearchFile* copyfrom);
 	virtual ~CSearchFile();
 
-	bool	IsKademlia() const { return m_bKademlia; }
+	bool	IsKademlia() const				{ return m_bKademlia; }
 	bool	IsServerUDPAnswer() const		{ return m_bServerUDPAnswer; }
 	uint32	AddSources(uint32 count);
 	uint32	GetSourceCount() const;
@@ -115,7 +115,7 @@ public:
 // vs2008 end
 	void AddClient(const SClient& client) { m_aClients.Add(client); }
 
-	const CSimpleArray<SClient,CSClientEqualHelper>& GetClients() const { return m_aClients; }
+	const CSimpleArray<SClient,CSClientEqualHelper>& GetClients() const { return m_aClients; } //Morph
 
 	struct SServer {
 		SServer() {
@@ -202,10 +202,10 @@ private:
 	LPTSTR m_pszIsFake; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 
 	// GUI helpers
-	bool		 m_bPreviewPossible;
-	bool		 m_list_bExpanded;
+	bool		m_bPreviewPossible;
+	bool		m_list_bExpanded;
 	UINT		m_list_childcount;
-	CSearchFile* m_list_parent;
+	CSearchFile*m_list_parent;
 	EKnownType	m_eKnown;
 };
 

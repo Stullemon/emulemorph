@@ -86,10 +86,9 @@ void CTextToSpeech::ReleaseTTS()
 bool CTextToSpeech::Speak(LPCTSTR pwsz)
 {
 	bool bResult = false;
-	USES_CONVERSION;
 	if (m_pISpVoice)
 	{
-		if (SUCCEEDED(m_pISpVoice->Speak(T2CW(pwsz), SPF_ASYNC | SPF_IS_NOT_XML, NULL)))
+		if (SUCCEEDED(m_pISpVoice->Speak(pwsz, SPF_ASYNC | SPF_IS_NOT_XML, NULL)))
 			bResult = true;
 	}
 	return bResult;

@@ -113,7 +113,7 @@ enum EArchiveCols
 	ARCHPREV_COL_CMT
 };
 
-static LCX_COLUMN_INIT _aColumns[] =
+static LCX_COLUMN_INIT s_aColumns[] =
 {
 	{ ARCHPREV_COL_NAME, _T("Name"),  IDS_DL_FILENAME,  LVCFMT_LEFT,  -1, 0, ASCENDING, NONE, _T("LONG FILENAME.DAT") },
 	{ ARCHPREV_COL_SIZE, _T("Size"),  IDS_DL_SIZE,      LVCFMT_RIGHT, -1, 1, ASCENDING, NONE, _T("9999 MByte") },
@@ -169,6 +169,9 @@ BOOL CArchivePreviewDlg::OnInitDialog()
 	CResizablePage::OnInitDialog();
 	InitWindowStyles(this);
 
+	m_StoredColWidth2=0;
+	m_StoredColWidth5=0;
+
 	AddAnchor(IDC_READARCH, BOTTOM_LEFT);
 	AddAnchor(IDC_RESTOREARCH, BOTTOM_LEFT);
 	AddAnchor(IDC_FILELIST, TOP_LEFT, BOTTOM_RIGHT);
@@ -190,12 +193,13 @@ BOOL CArchivePreviewDlg::OnInitDialog()
 	ASSERT( m_ContentList.GetStyle() & LVS_SORTASCENDING );
 	ASSERT( m_ContentList.GetStyle() & LVS_SHAREIMAGELISTS );
 	m_ContentList.SendMessage(LVM_SETIMAGELIST, LVSIL_SMALL, (LPARAM)theApp.GetSystemImageList());
-	m_ContentList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_INFOTIP);
+	m_ContentList.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP | LVS_EX_GRIDLINES);
 	m_ContentList.EnableHdrCtrlSortBitmaps();
-	m_ContentList.ReadColumnStats(_countof(_aColumns), _aColumns);
-	m_ContentList.CreateColumns(_countof(_aColumns), _aColumns);
-	m_ContentList.InitColumnOrders(_countof(_aColumns), _aColumns);
-	m_ContentList.UpdateSortColumn(_countof(_aColumns), _aColumns);
+	
+	m_ContentList.ReadColumnStats(_countof(s_aColumns), s_aColumns);
+	m_ContentList.CreateColumns(_countof(s_aColumns), s_aColumns);
+	m_ContentList.InitColumnOrders(_countof(s_aColumns), s_aColumns);
+	m_ContentList.UpdateSortColumn(_countof(s_aColumns), s_aColumns);
 
 	CResizablePage::UpdateData(FALSE);
 	Localize();
@@ -209,7 +213,12 @@ BOOL CArchivePreviewDlg::OnInitDialog()
 
 void CArchivePreviewDlg::OnDestroy()
 {
-	m_ContentList.WriteColumnStats(_countof(_aColumns), _aColumns);
+	if (m_ContentList.GetColumnWidth(2)==0)
+		m_ContentList.SetColumnWidth(2, m_StoredColWidth2);
+	if (m_ContentList.GetColumnWidth(5)==0)
+		m_ContentList.SetColumnWidth(5, m_StoredColWidth5);
+
+	m_ContentList.WriteColumnStats(_countof(s_aColumns), s_aColumns);
 
 	// stop running scanner-thread if present
 	if (m_activeTParams != NULL) {
@@ -288,7 +297,7 @@ void CArchivePreviewDlg::OnBnClickedRead()
 }
 
 void CArchivePreviewDlg::OnBnClickedCreateRestored() {
-	if ( ((CKnownFile*)STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[0])->IsPartFile()==false))
+	if ( ((CShareableFile*)STATIC_DOWNCAST(CShareableFile, (*m_paFiles)[0])->IsPartFile()==false))
 		return;
 
 	CPartFile* file=STATIC_DOWNCAST(CPartFile, (*m_paFiles)[0]);
@@ -459,6 +468,137 @@ int CArchivePreviewDlg::ShowAceResults(int succ, archiveScannerThreadParams_s* t
 }
 
 /*****************************************
+				I S O
+ *****************************************/
+int CArchivePreviewDlg::ShowISOResults(int succ, archiveScannerThreadParams_s* tp) {
+
+	if (succ==0) {
+		SetDlgItemText(IDC_INFO_STATUS, GetResString(IDS_UNSUPPORTEDIMAGE));
+		delete tp->ai->ISOdir;
+		return -1;
+	}
+
+	// file content into list
+	SetDlgItemText(IDC_INFO_STATUS, GetResString(IDS_ARCPARSED) + _T(" ") +
+		(tp->ai->ISOdir->IsEmpty()?GetResString(IDS_ARCPREV_INSUFFDATA):
+		(tp->file->IsPartFile()?GetResString(IDS_ARCPREV_LISTMAYBEINCOMPL):_T("")))		);
+
+	DWORD filecount = 0;
+
+	CString temp;
+
+	m_ContentList.SetRedraw(FALSE);
+
+	ISO_FileFolderEntry* file = NULL;
+	POSITION pos = tp->ai->ISOdir->GetHeadPosition();
+	while (pos != NULL)
+	{
+		file = tp->ai->ISOdir->GetNext(pos);
+
+		bool bCompleteEntry = !tp->file->IsPartFile() || STATIC_DOWNCAST(CPartFile, tp->file)->IsComplete(
+			LODWORD(file->sector1OfExtension) * tp->ai->isoInfos.secSize,
+			(LODWORD(file->sector1OfExtension) * tp->ai->isoInfos.secSize) + file->dataSize,
+			true);
+
+		temp = CString(file->name);
+		// remove seperator extentions
+		int sep = temp.ReverseFind(';');
+		if (sep>=0)
+			temp.Delete(sep, temp.GetLength()-sep);
+
+		int iSystemImage = theApp.GetFileTypeSystemImageIdx(temp, temp.GetLength());
+		int iItem = m_ContentList.InsertItem(LVIF_TEXT | LVIF_PARAM | (iSystemImage > 0 ? LVIF_IMAGE : 0),
+										 INT_MAX, temp, 0, 0, iSystemImage, 
+										 !bCompleteEntry ? 0x00000001 : 0x00000000);
+
+
+		// attribs
+		temp.Empty();
+
+		//is directory ?
+		if (file->fileFlags & ISO_DIRECTORY) {
+			temp+=_T('D');
+		} else {
+			filecount++;
+
+			// size
+			UINT32 size= LODWORD(file->dataSize);
+			temp.Format(_T("%s"), CastItoXBytes(size));
+			m_ContentList.SetItemText(iItem,1,temp);
+			temp.Empty();
+		}
+
+		// file attribs
+		if (file->fileFlags & ISO_HIDDEN)
+		{
+			if (!temp.IsEmpty()) temp+=_T(',');
+			temp+=_T('H');
+		}
+		if (file->fileFlags & ISO_READONLY)
+		{
+			if (!temp.IsEmpty()) temp+=_T(',');
+			temp+=_T('R');
+		}
+			
+		if (!bCompleteEntry) 
+		{
+			// packed data not yet downloaded
+			if (!temp.IsEmpty()) temp+=_T(',');
+			temp+=_T('M');
+		}
+
+		m_ContentList.SetItemText(iItem, 3, temp);
+
+		// date time
+		CTime lm=CTime(
+			1900+ file->dateTime.year,
+			file->dateTime.month,
+			file->dateTime.day,
+			file->dateTime.hour,
+			file->dateTime.minute,
+			file->dateTime.second
+			);
+		m_ContentList.SetItemText(iItem, 4, lm.Format(thePrefs.GetDateTimeFormat4Log())+ _T(" GMT") );
+
+		// cleanup
+		delete file;
+	}
+	m_ContentList.SetRedraw(TRUE);
+	temp.Format(_T("%s: %u"), GetResString(IDS_FILES), filecount );
+	SetDlgItemText( IDC_INFO_FILECOUNT, temp);
+
+	temp.Empty();
+	if (tp->ai->isoInfos.bBootable)
+		temp = GetResString(IDS_BOOTABLE);
+
+	if (tp->ai->isoInfos.type & ISOtype_9660)
+	{
+		if (!temp.IsEmpty())
+			temp.Append(_T(","));
+		temp.Append(_T("ISO9660"));
+	}
+	if (tp->ai->isoInfos.type & ISOtype_joliet)
+	{
+		if (!temp.IsEmpty())
+			temp.Append(_T(","));
+		temp.Append(_T("Joliet"));
+	}
+	if (tp->ai->isoInfos.type & ISOtype_UDF_nsr02 || tp->ai->isoInfos.type & ISOtype_UDF_nsr03)
+	{
+		if (!temp.IsEmpty())
+			temp.Append(_T(","));
+		temp.Append(_T("UDF (") + GetResString(IDS_UNSUPPORTEDIMAGE) + _T(")"));
+	}
+
+
+	SetDlgItemText(IDC_INFO_ATTR, temp);
+
+	delete tp->ai->ISOdir;
+
+	return 0;
+}
+
+/*****************************************
 				R A R
  *****************************************/
 int CArchivePreviewDlg::ShowRarResults(int succ, archiveScannerThreadParams_s* tp) {
@@ -490,6 +630,10 @@ int CArchivePreviewDlg::ShowRarResults(int succ, archiveScannerThreadParams_s* t
 		int iItem;
 		int uSubId = 1;
 		RAR_BlockFile *block;
+
+		// This file could be a self extracting RAR archive. Now that we eventually have read something
+		// RAR-like from that file, we can set the 'verified' file type.
+		tp->file->SetVerifiedFileType(ARCHIVE_RAR);
 
 		m_ContentList.SetRedraw(FALSE);
 		POSITION pos = tp->ai->RARdir->GetHeadPosition();
@@ -848,7 +992,7 @@ void CArchivePreviewDlg::UpdateArchiveDisplay(bool doscan) {
 	m_ContentList.DeleteAllItems();
 	m_ContentList.UpdateWindow();
 
-	CKnownFile* file=STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[0]);
+	CShareableFile* file=STATIC_DOWNCAST(CShareableFile, (*m_paFiles)[0]);
 
 	GetDlgItem(IDC_RESTOREARCH)->EnableWindow( file->IsPartFile()  && 
 		(((CPartFile*)file)->IsArchive(true)) && 
@@ -870,6 +1014,9 @@ void CArchivePreviewDlg::UpdateArchiveDisplay(bool doscan) {
 			break;
 		case ARCHIVE_ACE:
 			SetDlgItemText(IDC_INFO_TYPE, _T("ACE"));
+			break;
+		case IMAGE_ISO:
+			SetDlgItemText(IDC_INFO_TYPE, _T("ISO"));
 			break;
 		default:
 			SetDlgItemText(IDC_INFO_TYPE, GetResString(IDS_ARCPREV_UNKNOWNFORMAT));
@@ -914,6 +1061,9 @@ void CArchivePreviewDlg::UpdateArchiveDisplay(bool doscan) {
 		case ARCHIVE_ACE:
 			ai->ACEdir = new CTypedPtrList<CPtrList, ACE_BlockFile*>;
 			break;
+		case IMAGE_ISO:
+			ai->ISOdir = new CTypedPtrList<CPtrList, ISO_FileFolderEntry*>;
+			break;
 	}
 
 	// prepare threadparams
@@ -956,6 +1106,9 @@ UINT AFX_CDECL CArchivePreviewDlg::RunArchiveScanner(LPVOID pParam) {
 			case ARCHIVE_ACE:
 				ret=CArchiveRecovery::recoverAce(&inFile, NULL, tp, tp->filled);
 				break;
+			case IMAGE_ISO:
+				ret=CArchiveRecovery::recoverISO(&inFile, NULL, tp, tp->filled);
+				break;
 		}
 
 		inFile.Close();
@@ -982,6 +1135,29 @@ LRESULT CArchivePreviewDlg::ShowScanResults(WPARAM wParam, LPARAM lParam)
 			SetDlgItemText(IDC_INFO_STATUS, GetResString(IDS_IMP_ERR_IO));
 		}
 		else if (tp->m_bIsValid) {
+
+			// hide two unused columns for ISO and unhide for other types
+			if (tp->type!=IMAGE_ISO)
+			{
+				if (m_ContentList.GetColumnWidth(2)==0)
+					m_ContentList.SetColumnWidth(2, m_StoredColWidth2);
+				if (m_ContentList.GetColumnWidth(5)==0)
+					m_ContentList.SetColumnWidth(5, m_StoredColWidth5);
+			} 
+				else
+			{
+				int w = m_ContentList.GetColumnWidth(2);
+				if (w>0)
+					m_StoredColWidth2 = w;
+				w = m_ContentList.GetColumnWidth(5);
+				if (w>0)
+					m_StoredColWidth5 = w;
+
+				m_ContentList.SetColumnWidth(2, 0);
+				m_ContentList.SetColumnWidth(5, 0);
+			}
+
+
 			switch (tp->type) {
 				case ARCHIVE_ZIP:
 					ShowZipResults(ret, tp);
@@ -991,6 +1167,9 @@ LRESULT CArchivePreviewDlg::ShowScanResults(WPARAM wParam, LPARAM lParam)
 					break;
 				case ARCHIVE_ACE:
 					ShowAceResults(ret, tp);
+					break;
+				case IMAGE_ISO:
+					ShowISOResults(ret,tp);
 					break;
 			}
 		}

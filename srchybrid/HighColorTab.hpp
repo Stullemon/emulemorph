@@ -14,6 +14,10 @@
 
 #include <memory>
 
+#if _MSC_VER>=1400
+#pragma warning(disable:4350) // behavior change: 'std::auto_ptr<_Ty>::auto_ptr(std::auto_ptr_ref<_Ty>) throw()' called instead of 'std::auto_ptr<_Ty>::auto_ptr(std::auto_ptr<_Ty> &) throw()'
+#endif
+
 namespace HighColorTab
 {
   /*! \brief Policy class for creating image list. 
@@ -39,7 +43,7 @@ namespace HighColorTab
         return std::auto_ptr<CImageList>();
       }
 
-      if( 0 == apILNew->Create( 16, 16, theApp.m_iDfltImageListColorFlags|ILC_MASK, 0, 1 ) )
+      if( 0 == apILNew->Create( 16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1 ) )
       {
         // ASSERT: The image list (Win32) creation failed.
         ASSERT( FALSE );
@@ -135,3 +139,7 @@ namespace HighColorTab
     return UpdateImageListFull<TSheet, HighColorTab::CHighColorListCreator>( rSheet );
   };
 };
+
+#if _MSC_VER>=1400
+#pragma warning(default:4350)
+#endif

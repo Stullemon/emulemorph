@@ -17,9 +17,9 @@
 #pragma once
 
 // MOD Note: Do not change this part - Merkur
-#define	EMULE_PROTOCOL			0x01
+#define	EMULE_PROTOCOL					0x01
 // MOD Note: end
-#define	EDONKEYVERSION			0x3C
+#define	EDONKEYVERSION					0x3C
 #define KADEMLIA_VERSION1_46c			0x01 /*45b - 46c*/
 #define KADEMLIA_VERSION2_47a			0x02 /*47a*/
 #define KADEMLIA_VERSION3_47b			0x03 /*47b*/
@@ -28,8 +28,8 @@
 #define KADEMLIA_VERSION7_49a			0x07 // -0.49a needs to support OP_KAD_FWTCPCHECK_ACK, KADEMLIA_FIREWALLED2_REQ
 #define KADEMLIA_VERSION8_49b			0x08 // TAG_KADMISCOPTIONS, KADEMLIA2_HELLO_RES_ACK
 #define KADEMLIA_VERSION				0x08 // Change CT_EMULE_MISCOPTIONS2 if Kadversion becomes >= 15
-#define PREFFILE_VERSION		0x14	//<<-- last change: reduced .dat, by using .ini
-#define PARTFILE_VERSION		0xe0
+#define PREFFILE_VERSION				0x14	//<<-- last change: reduced .dat, by using .ini
+#define PARTFILE_VERSION				0xe0
 #define PARTFILE_SPLITTEDVERSION		0xe1
 #define PARTFILE_VERSION_LARGEFILE		0xe2
 #define SOURCEEXCHANGE2_VERSION			4		// replaces the version sent in MISC_OPTIONS flag fro SX1
@@ -39,8 +39,10 @@
 #define CREDITFILE_VERSION_30_SUQWTv2	0x80	// Moonlight: SUQWT CreditStruct v2.
 #define CREDITFILE_VERSION_30_SUQWTv1	0x13	// Moonlight: SUQWT CreditStruct v1.
 #define CREDITFILE_VERSION_30			0x12
-//#define CREDITFILE_VERSION		0x12//original commented out
-#define CREDITFILE_VERSION_29			0x11
+/* //original commented out
+#define CREDITFILE_VERSION		0x12
+*/
+#define CREDITFILE_VERSION_29	0x11
 #define CREDITFILE_VERSION				CREDITFILE_VERSION_30_SUQWTv2	// Define the current version number.
 //Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 #define COMPILE_DATE			__DATE__
@@ -62,8 +64,8 @@
 
 // MOD Note: Do not change this part - Merkur
 #define UDPSEARCHSPEED			SEC2MS(1)	//1 sec - if this value is too low you will miss sources
-#define MAX_RESULTS				100		// max global search results
-#define	MAX_MORE_SEARCH_REQ		5		// this gives a max. total search results of (1+5)*201 = 1206 or (1+5)*300 = 1800
+#define MAX_RESULTS				100			// max global search results
+#define	MAX_MORE_SEARCH_REQ		5			// this gives a max. total search results of (1+5)*201 = 1206 or (1+5)*300 = 1800
 #define MAX_CLIENTCONNECTIONTRY	2
 #define CONNECTION_TIMEOUT		SEC2MS(40)	//40 secs - set his lower if you want less connections at once, set it higher if you have enough sockets (edonkey has its own timout too, so a very high value won't effect this)
 #define	FILEREASKTIME			MIN2MS(29)	//29 mins
@@ -95,16 +97,16 @@
 #define UDPSERVERSTATTIME		SEC2MS(5)	//5 secs
 #define UDPSERVSTATREASKTIME	HR2S(4.5)	//4.5 hours (A random time of up to one hour is reduced during runtime after each ping)
 #define UDPSERVSTATMINREASKTIME	MIN2S(20)	//minimum time between two pings even when trying to force a premature ping for a new UDP key
-#define	UDPSERVERPORT			4665	//default udp port
+#define	UDPSERVERPORT			4665		//default udp port
 #define UDPMAXQUEUETIME			SEC2MS(30)	//30 Seconds
-#define RSAKEYSIZE				384		//384 bits
+#define RSAKEYSIZE				384			//384 bits
 #define	MAX_SOURCES_FILE_SOFT	750
 #define	MAX_SOURCES_FILE_UDP	50
 #define SESSIONMAXTRANS			PARTSIZE // "Try to send complete chunks" always sends this amount of data
 #define SESSIONMAXTIME			HR2MS(1)	//1 hour
-#define	MAXFILECOMMENTLEN		50
+#define	MAXFILECOMMENTLEN		128
 #define	PARTSIZE				9728000ui64
-#define	MAX_EMULE_FILE_SIZE	0x4000000000ui64 // = 2^38 = 256GB
+#define	MAX_EMULE_FILE_SIZE		0x4000000000ui64 // = 2^38 = 256GB
 #define OLD_MAX_EMULE_FILE_SIZE	4290048000ui64	// (4294967295/PARTSIZE)*PARTSIZE = ~4GB
 // MOD Note: end
 
@@ -128,7 +130,7 @@
 #define	MIN_REQUESTTIME			MIN2MS(10) 
 #define	MAX_PURGEQUEUETIME		HR2MS(1) 
 #define PURGESOURCESWAPSTOP		MIN2MS(15)	// (15 mins), how long forbid swapping a source to a certain file (NNP,...)
-#define CONNECTION_LATENCY		22050	// latency for responces
+#define CONNECTION_LATENCY		22050		// latency for responces
 #define MINWAIT_BEFORE_DLDISPLAY_WINDOWUPDATE   1000
 #define MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE   1000
 #define CLIENTBANTIME			HR2MS(2)	// 2h
@@ -139,9 +141,10 @@
 #define CLIENTLIST_CLEANUP_TIME	MIN2MS(34)	// 34 min
 #define MAXPRIORITYCOLL_SIZE	10*1024		// max file size for collection file which are allowed to bypass the queue
 #define SEARCH_SPAM_THRESHOLD	60
+#define OLDFILES_PARTIALLYPURGE DAY2S(31)	// time after which some data about a know file in the known.met and known2.met is deleted
 
 // you shouldn't change anything here if you are not really sure, or emule will probaly not work
-#define	MAXFRAGSIZE				1300
+#define UDP_KAD_MAXFRAGMENT		1420		// based on a 1500 ethernet MTU, use a conservative value to leave enough room for IP/UDP headers, tunnel headers, Kad headers(16) and misconfigs 
 #define EMBLOCKSIZE				184320
 #define OP_EDONKEYHEADER		0xE3
 #define OP_KADEMLIAHEADER		0xE4
@@ -158,10 +161,10 @@
 #define UNLIMITED				0xFFFF
 
 //Proxytypes deadlake
-#define PROXYTYPE_NOPROXY 0
-#define PROXYTYPE_SOCKS4 1
-#define PROXYTYPE_SOCKS4A 2
-#define PROXYTYPE_SOCKS5 3
+#define PROXYTYPE_NOPROXY	0
+#define PROXYTYPE_SOCKS4	1
+#define PROXYTYPE_SOCKS4A	2
+#define PROXYTYPE_SOCKS5	3
 #define PROXYTYPE_HTTP10	4
 #define PROXYTYPE_HTTP11	5
 
@@ -249,6 +252,7 @@
 // this 'identifier' is used for referencing shared part (incomplete) files with the OP_ASKSHAREDDIRS and related opcodes
 // it was introduced with eDonkeyHybrid and is considered as part of the protocol.
 #define OP_INCOMPLETE_SHARED_FILES "!Incomplete Files"
+#define OP_OTHER_SHARED_FILES	   "!Other" // files which are not within a shared directory (single shared files)
 
 // eDonkeyHybrid truncates every received client message to 200 bytes, although it allows to send messages of any(?) size.
 #define	MAX_CLIENT_MSG_LEN		450		// using 200 is just too short
@@ -290,7 +294,7 @@
 #define OP_COMPRESSEDPART_I64	0xA1	// <HASH 16><von 8><size 4><Daten len:size>
 #define OP_SENDINGPART_I64		0xA2	// <HASH 16><von 8><bis 8><Daten len:(von-bis)>
 #define	OP_REQUESTPARTS_I64		0xA3	// <HASH 16><von[3] 8*3><bis[3] 8*3>
-#define OP_MULTIPACKET_EXT		0xA4		
+#define OP_MULTIPACKET_EXT		0xA4
 #define OP_CHATCAPTCHAREQ		0xA5	// <tags 1>[tags]<Captcha BITMAP>
 #define OP_CHATCAPTCHARES		0xA6	// <status 1>
 #define OP_FWCHECKUDPREQ		0xA7	// <Inter_Port 2><Extern_Port 2><KadUDPKey 4> *Support required for Kadversion >= 6
@@ -304,7 +308,7 @@
 #define OP_REASKCALLBACKUDP		0x94
 #define OP_DIRECTCALLBACKREQ	0x95	// <TCPPort 2><Userhash 16><ConnectionOptions 1>
 #define OP_PORTTEST				0xFE	// Connection Test
-	
+
 // server.met
 #define ST_SERVERNAME			0x01	// <string>
 #define ST_DESCRIPTION			0x0B	// <string>
@@ -329,25 +333,25 @@
 #define	ST_UDPPORTOBFUSCATION	0x98	// <uint16>
 
 //file tags
-#define FT_FILENAME				 0x01	// <string>
+#define  FT_FILENAME			 0x01	// <string>
 #define TAG_FILENAME			"\x01"	// <string>
 #define  FT_FILESIZE			 0x02	// <uint32> (or <uint64> when supported)
 #define TAG_FILESIZE			"\x02"	// <uint32>
 #define  FT_FILESIZE_HI			 0x3A	// <uint32>
 #define TAG_FILESIZE_HI			"\x3A"	// <uint32>
-#define FT_FILETYPE				 0x03	// <string>
+#define  FT_FILETYPE			 0x03	// <string>
 #define TAG_FILETYPE			"\x03"	// <string>
-#define FT_FILEFORMAT			 0x04	// <string>
+#define  FT_FILEFORMAT			 0x04	// <string>
 #define TAG_FILEFORMAT			"\x04"	// <string>
-#define FT_LASTSEENCOMPLETE		 0x05	// <uint32>
+#define  FT_LASTSEENCOMPLETE	 0x05	// <uint32>
 #define TAG_COLLECTION			"\x05"
 #define	TAG_PART_PATH			"\x06"	// <string>
 #define	TAG_PART_HASH			"\x07"
 #define  FT_TRANSFERRED			 0x08	// <uint32>
 #define	TAG_TRANSFERRED			"\x08"	// <uint32>
-#define FT_GAPSTART				 0x09	// <uint32>
+#define  FT_GAPSTART			 0x09	// <uint32>
 #define	TAG_GAPSTART			"\x09"	// <uint32>
-#define FT_GAPEND				 0x0A	// <uint32>
+#define  FT_GAPEND				 0x0A	// <uint32>
 #define	TAG_GAPEND				"\x0A"	// <uint32>
 #define  FT_DESCRIPTION			 0x0B	// <string>
 #define	TAG_DESCRIPTION			"\x0B"	// <string>
@@ -357,43 +361,44 @@
 #define TAG_PORT				"\x0F"
 #define TAG_IP_ADDRESS			"\x10"
 #define TAG_VERSION				"\x11"	// <string>
-#define FT_PARTFILENAME			 0x12	// <string>
+#define  FT_PARTFILENAME		 0x12	// <string>
 #define TAG_PARTFILENAME		"\x12"	// <string>
 //#define FT_PRIORITY			 0x13	// Not used anymore
 #define TAG_PRIORITY			"\x13"	// <uint32>
-#define FT_STATUS				 0x14	// <uint32>
+#define  FT_STATUS				 0x14	// <uint32>
 #define TAG_STATUS				"\x14"	// <uint32>
-#define FT_SOURCES				 0x15	// <uint32>
+#define  FT_SOURCES				 0x15	// <uint32>
 #define TAG_SOURCES				"\x15"	// <uint32>
-#define FT_PERMISSIONS			 0x16	// <uint32>
+#define  FT_PERMISSIONS			 0x16	// <uint32>
 #define TAG_PERMISSIONS			"\x16"
 //#define FT_ULPRIORITY			 0x17	// Not used anymore
 #define TAG_PARTS				"\x17"
-#define FT_DLPRIORITY			 0x18	// Was 13
-#define FT_ULPRIORITY			 0x19	// Was 17
+#define  FT_DLPRIORITY			 0x18	// Was 13
+#define  FT_ULPRIORITY			 0x19	// Was 17
 #define	 FT_COMPRESSION			 0x1A
 #define	 FT_CORRUPTED			 0x1B
-#define FT_KADLASTPUBLISHKEY	 0x20	// <uint32>
-#define FT_KADLASTPUBLISHSRC	 0x21	// <uint32>
-#define	FT_FLAGS				 0x22	// <uint32>
-#define	FT_DL_ACTIVE_TIME		 0x23	// <uint32>
-#define	FT_CORRUPTEDPARTS		 0x24	// <string>
-#define FT_DL_PREVIEW            0x25
+#define  FT_KADLASTPUBLISHKEY	 0x20	// <uint32>
+#define  FT_KADLASTPUBLISHSRC	 0x21	// <uint32>
+#define	 FT_FLAGS				 0x22	// <uint32>
+#define	 FT_DL_ACTIVE_TIME		 0x23	// <uint32>
+#define	 FT_CORRUPTEDPARTS		 0x24	// <string>
+#define  FT_DL_PREVIEW			 0x25
 #define  FT_KADLASTPUBLISHNOTES	 0x26	// <uint32> 
-#define FT_AICH_HASH			 0x27
+#define  FT_AICH_HASH			 0x27
 #define  FT_FILEHASH			 0x28
-#define	FT_COMPLETE_SOURCES		 0x30	// nr. of sources which share a complete version of the associated file (supported by eserver 16.46+)
+#define	 FT_COMPLETE_SOURCES	 0x30	// nr. of sources which share a complete version of the associated file (supported by eserver 16.46+)
 #define TAG_COMPLETE_SOURCES	"\x30"
 #define  FT_COLLECTIONAUTHOR	 0x31
 #define  FT_COLLECTIONAUTHORKEY  0x32
 #define  FT_PUBLISHINFO			 0x33	// <uint32>
 #define TAG_PUBLISHINFO			"\x33"	// <uint32>
+#define  FT_LASTSHARED			 0x34	// <uint32>
 // statistic
 #define  FT_ATTRANSFERRED		 0x50	// <uint32>
-#define FT_ATREQUESTED			 0x51	// <uint32>
-#define FT_ATACCEPTED			 0x52	// <uint32>
-#define FT_CATEGORY				 0x53	// <uint32>
-#define	FT_ATTRANSFERREDHI		 0x54	// <uint32>
+#define  FT_ATREQUESTED			 0x51	// <uint32>
+#define  FT_ATACCEPTED			 0x52	// <uint32>
+#define  FT_CATEGORY			 0x53	// <uint32>
+#define	 FT_ATTRANSFERREDHI		 0x54	// <uint32>
 #define	 FT_MAXSOURCES			 0x55	// <uint32>
 // khaos::categorymod+
 #define FT_CATRESUMEORDER		0x7F
@@ -497,6 +502,7 @@
 #define TAGTYPE_STR22			0x26	// accepted by eMule 0.42f (02-Mai-2004) in receiving code only because of a flaw, those tags are handled correctly, but should not be handled at all
 
 
+#define	ED2KFTSTR_ANY			""		// Baked(!!) do not send in ED2K/Kad
 #define	ED2KFTSTR_AUDIO			"Audio"	// value for eD2K tag FT_FILETYPE
 #define	ED2KFTSTR_VIDEO			"Video"	// value for eD2K tag FT_FILETYPE
 #define	ED2KFTSTR_IMAGE			"Image"	// value for eD2K tag FT_FILETYPE
@@ -602,59 +608,59 @@
 #define	PCTAG_FILEID			0x06
 
 // KADEMLIA (opcodes) (udp)
-#define KADEMLIA_BOOTSTRAP_REQ	0x00	// <PEER (sender) [25]>
+#define KADEMLIA_BOOTSTRAP_REQ			0x00	// <PEER (sender) [25]>
 #define KADEMLIA2_BOOTSTRAP_REQ			0x01	//
 
-#define KADEMLIA_BOOTSTRAP_RES	0x08	// <CNT [2]> <PEER [25]>*(CNT)
+#define KADEMLIA_BOOTSTRAP_RES			0x08	// <CNT [2]> <PEER [25]>*(CNT)
 #define KADEMLIA2_BOOTSTRAP_RES			0x09	//
 
-#define KADEMLIA_HELLO_REQ	 	0x10	// <PEER (sender) [25]>
+#define KADEMLIA_HELLO_REQ	 			0x10	// <PEER (sender) [25]>
 #define KADEMLIA2_HELLO_REQ				0x11	//
 
-#define KADEMLIA_HELLO_RES     	0x18	// <PEER (receiver) [25]>
+#define KADEMLIA_HELLO_RES     			0x18	// <PEER (receiver) [25]>
 #define KADEMLIA2_HELLO_RES				0x19	//
 
-#define KADEMLIA_REQ		   	0x20	// <TYPE [1]> <HASH (target) [16]> <HASH (receiver) 16>
+#define KADEMLIA_REQ		   			0x20	// <TYPE [1]> <HASH (target) [16]> <HASH (receiver) 16>
 #define KADEMLIA2_REQ					0x21	//
 
 #define KADEMLIA2_HELLO_RES_ACK			0x22	// <NodeID><uint8 tags>
 
-#define KADEMLIA_RES			0x28	// <HASH (target) [16]> <CNT> <PEER [25]>*(CNT)
+#define KADEMLIA_RES					0x28	// <HASH (target) [16]> <CNT> <PEER [25]>*(CNT)
 #define KADEMLIA2_RES					0x29	//
 
-#define KADEMLIA_SEARCH_REQ		0x30	// <HASH (key) [16]> <ext 0/1 [1]> <SEARCH_TREE>[ext]
-//#define UNUSED				0x31	// Old Opcode, don't use.
+#define KADEMLIA_SEARCH_REQ				0x30	// <HASH (key) [16]> <ext 0/1 [1]> <SEARCH_TREE>[ext]
+//#define UNUSED						0x31	// Old Opcode, don't use.
 #define KADEMLIA_SEARCH_NOTES_REQ		0x32	// <HASH (key) [16]>
 #define KADEMLIA2_SEARCH_KEY_REQ		0x33	//
 #define KADEMLIA2_SEARCH_SOURCE_REQ		0x34	//
 #define KADEMLIA2_SEARCH_NOTES_REQ		0x35	//
 
-#define KADEMLIA_SEARCH_RES		0x38	// <HASH (key) [16]> <CNT1 [2]> (<HASH (answer) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
-//#define UNUSED				0x39	// Old Opcode, don't use.
+#define KADEMLIA_SEARCH_RES				0x38	// <HASH (key) [16]> <CNT1 [2]> (<HASH (answer) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
+//#define UNUSED						0x39	// Old Opcode, don't use.
 #define KADEMLIA_SEARCH_NOTES_RES		0x3A	// <HASH (key) [16]> <CNT1 [2]> (<HASH (answer) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
 #define KADEMLIA2_SEARCH_RES			0x3B	//
 
-#define KADEMLIA_PUBLISH_REQ	0x40	// <HASH (key) [16]> <CNT1 [2]> (<HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
-//#define UNUSED				0x41	// Old Opcode, don't use.
+#define KADEMLIA_PUBLISH_REQ			0x40	// <HASH (key) [16]> <CNT1 [2]> (<HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
+//#define UNUSED						0x41	// Old Opcode, don't use.
 #define KADEMLIA_PUBLISH_NOTES_REQ		0x42	// <HASH (key) [16]> <HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
 #define	KADEMLIA2_PUBLISH_KEY_REQ		0x43	//
 #define	KADEMLIA2_PUBLISH_SOURCE_REQ	0x44	//
 #define KADEMLIA2_PUBLISH_NOTES_REQ		0x45	//
 
-#define KADEMLIA_PUBLISH_RES	0x48	// <HASH (key) [16]>
-//#define UNUSED				0x49	// Old Opcode, don't use.
+#define KADEMLIA_PUBLISH_RES			0x48	// <HASH (key) [16]>
+//#define UNUSED						0x49	// Old Opcode, don't use.
 #define KADEMLIA_PUBLISH_NOTES_RES		0x4A	// <HASH (key) [16]>
 #define	KADEMLIA2_PUBLISH_RES			0x4B	//
 #define	KADEMLIA2_PUBLISH_RES_ACK		0x4C	// null
 
-#define KADEMLIA_FIREWALLED_REQ	0x50	// <TCPPORT (sender) [2]>
-#define KADEMLIA_FINDBUDDY_REQ	0x51	// <TCPPORT (sender) [2]>
-#define KADEMLIA_CALLBACK_REQ	0x52	// <TCPPORT (sender) [2]>
+#define KADEMLIA_FIREWALLED_REQ			0x50	// <TCPPORT (sender) [2]>
+#define KADEMLIA_FINDBUDDY_REQ			0x51	// <TCPPORT (sender) [2]>
+#define KADEMLIA_CALLBACK_REQ			0x52	// <TCPPORT (sender) [2]>
 #define KADEMLIA_FIREWALLED2_REQ		0x53	// <TCPPORT (sender) [2]><userhash><connectoptions 1>
 
-#define KADEMLIA_FIREWALLED_RES	0x58	// <IP (sender) [4]>
+#define KADEMLIA_FIREWALLED_RES			0x58	// <IP (sender) [4]>
 #define KADEMLIA_FIREWALLED_ACK_RES		0x59	// (null)
-#define KADEMLIA_FINDBUDDY_RES	0x5A	// <TCPPORT (sender) [2]>
+#define KADEMLIA_FINDBUDDY_RES			0x5A	// <TCPPORT (sender) [2]>
 
 #define KADEMLIA2_PING					0x60	// (null)
 #define KADEMLIA2_PONG					0x61	// (null)
@@ -662,9 +668,9 @@
 #define KADEMLIA2_FIREWALLUDP			0x62	// <errorcode [1]><UDPPort_Used [2]>
 
 // KADEMLIA (parameter)
-#define KADEMLIA_FIND_VALUE		0x02
-#define KADEMLIA_STORE			0x04
-#define KADEMLIA_FIND_NODE		0x0B
+#define KADEMLIA_FIND_VALUE				0x02
+#define KADEMLIA_STORE					0x04
+#define KADEMLIA_FIND_NODE				0x0B
 
 // searchspam.met Tags
 #define SP_FILEFULLNAME					0x01

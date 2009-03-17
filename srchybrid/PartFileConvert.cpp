@@ -27,6 +27,7 @@
 #include "emuledlg.h"
 #include "Log.h"
 #include "opcodes.h"
+#include "MuleListCtrl.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -86,7 +87,7 @@ int CPartFileConvert::ScanFolderToAdd(CString folder,bool deletesource) {
         bWorking = finder.FindNextFile();
 		CString test=finder.GetFilePath();
 		if (finder.IsDirectory() && finder.GetFileName().Left(1)!=_T("."))
-			ScanFolderToAdd(finder.GetFilePath(),deletesource);
+			count += ScanFolderToAdd(finder.GetFilePath(),deletesource);
 	}
 
 	return count;
@@ -183,14 +184,24 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 	UpdateGUI(4,GetResString(IDS_IMP_STEPBASICINF));
 
 	CPartFile* file=new CPartFile();
-	pfconverting->partmettype=file->LoadPartFile(folder,partfile,true);
-
-	switch (pfconverting->partmettype) {
-		case PMT_UNKNOWN:
-		case PMT_BADFORMAT:
-			delete file;
-			return CONV_BADFORMAT;
-			break;
+	EPartFileFormat eFormat = PMT_UNKNOWN;
+		
+	if (file->LoadPartFile(folder, partfile, &eFormat) == PLR_CHECKSUCCESS)
+	{
+		pfconverting->partmettype = (uint8)eFormat;
+		switch (pfconverting->partmettype)
+		{
+			case PMT_UNKNOWN:
+			case PMT_BADFORMAT:
+				delete file;
+				return CONV_BADFORMAT;
+				break;
+		}
+	}
+	else
+	{
+		delete file;
+		return CONV_BADFORMAT;
 	}
 
 	CString oldfile=folder+_T("\\")+partfile.Left(partfile.GetLength()- ((pfconverting->partmettype==PMT_SHAREAZA)?3:4) );
@@ -365,7 +376,8 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 		delete file->gaplist.GetAt(file->gaplist.GetHeadPosition());
 		file->gaplist.RemoveAt(file->gaplist.GetHeadPosition());
 	}
-	if (!file->LoadPartFile(file->GetTempPath(),file->GetPartMetFileName(),false)) {
+
+	if (file->LoadPartFile(file->GetTempPath(), file->GetPartMetFileName()) != PLR_LOADSUCCESS) {
 		//delete file;
 		file->DeleteFile();
 		return CONV_BADFORMAT;
@@ -476,10 +488,11 @@ void CPartFileConvert::Localize() {
 
 	for (int i=0;i<4;i++)
 		m_convertgui->joblist.DeleteColumn(0);
-	m_convertgui->joblist.InsertColumn(0, GetResString(IDS_DL_FILENAME) ,LVCFMT_LEFT,350,0);
-	m_convertgui->joblist.InsertColumn(1,GetResString(IDS_STATUS),LVCFMT_LEFT,110,1);
-	m_convertgui->joblist.InsertColumn(2,GetResString(IDS_DL_SIZE),LVCFMT_LEFT,150,2);
-	m_convertgui->joblist.InsertColumn(3,GetResString(IDS_FILEHASH),LVCFMT_LEFT,150,3);
+
+	m_convertgui->joblist.InsertColumn(0, GetResString(IDS_DL_FILENAME),	LVCFMT_LEFT, DFLT_FILENAME_COL_WIDTH);
+	m_convertgui->joblist.InsertColumn(1, GetResString(IDS_STATUS),			LVCFMT_LEFT, 110);
+	m_convertgui->joblist.InsertColumn(2, GetResString(IDS_DL_SIZE),		LVCFMT_LEFT, DFLT_SIZE_COL_WIDTH);
+	m_convertgui->joblist.InsertColumn(3, GetResString(IDS_FILEHASH),		LVCFMT_LEFT, DFLT_HASH_COL_WIDTH);
 
 	// set gui labels
 	m_convertgui->SetDlgItemText(IDC_ADDITEM,GetResString(IDS_IMP_ADDBTN));

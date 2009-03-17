@@ -244,7 +244,7 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, archiveScan
 					ASSERT(0); // FIXME
 					return false;
 				}
-				aitp->ai->bZipCentralDir=true;
+				aitp->ai->bZipCentralDir = true;
 				return true;
 			}
 
@@ -1628,7 +1628,213 @@ void CArchiveRecovery::writeAceBlock(CFile *input, CFile *output, ACE_BlockFile 
 	}
 }
 
+// ############### ISO handling #############
+// ISO, reads a directory entries of a directory at the given sector (startSec)
 
+void CArchiveRecovery::ISOReadDirectory(archiveScannerThreadParams_s* aitp, UINT32 startSec, CFile* isoInput, CString currentDirName)
+{
+	// read directory entries
+	int iSecsOfDirectoy = -1;
+	UINT32 blocksize;
+
+	if (!IsFilled( startSec * aitp->ai->isoInfos.secSize, (startSec * aitp->ai->isoInfos.secSize) + aitp->ai->isoInfos.secSize,
+		aitp->filled))
+		return;
+
+	isoInput->Seek(startSec * aitp->ai->isoInfos.secSize, FILE_BEGIN);
+
+	while (aitp->m_bIsValid)
+	{
+		ISO_FileFolderEntry *file = new ISO_FileFolderEntry;
+		
+		blocksize = isoInput->Read(file, sizeof(ISO_FileFolderEntry)-sizeof(file->name) );
+
+		if (file->lenRecord==0) {
+			delete file;
+
+			// do we continue at next sector?
+			if (iSecsOfDirectoy-- > 1) {
+				startSec++;
+				if (!IsFilled( startSec * aitp->ai->isoInfos.secSize, (startSec * aitp->ai->isoInfos.secSize) + aitp->ai->isoInfos.secSize,
+					aitp->filled))
+						break;
+
+				isoInput->Seek(startSec * aitp->ai->isoInfos.secSize, FILE_BEGIN);
+				continue;
+			} else
+				break; // folder end
+		}
+
+		file->name = (TCHAR*)calloc(	file->nameLen+2, sizeof(TCHAR*));
+
+		blocksize += isoInput->Read(file->name, file->nameLen );
+		
+		if (file->nameLen % 2 ==0 )
+			blocksize++;
+
+		UINT32 skip=LODWORD(file->lenRecord) - blocksize;
+		UINT64 pos2 = isoInput->Seek(skip, FILE_CURRENT);		// skip padding 
+		if (pos2 % 2 ){
+			isoInput->Seek(1, FILE_CURRENT);					// skip padding 
+			pos2++;
+		}
+
+		// set progressbar
+		if (aitp)
+			ProcessProgress(aitp, pos2);
+		
+		// selfdir, parentdir ( "." && ".." ) handling
+		if ((file->fileFlags & ISO_DIRECTORY) && file->nameLen==1 && (file->name[0]==0x00 || file->name[0]==0x01 ) )
+		{
+			// get size of directory and calculate how many sectors are spanned
+			if (file->name[0]==0x00)
+				iSecsOfDirectoy = (int)(file->dataSize / aitp->ai->isoInfos.secSize);
+			delete file;
+			continue;
+		}
+
+		if (aitp->ai->isoInfos.iJolietUnicode){
+			for (unsigned int i = 0; i < file->nameLen/sizeof(uint16); i++)
+				file->name[i] = _byteswap_ushort(file->name[i]);
+		}
+
+		// make filename Cstring from ascii or unicode
+		CString filename;
+		if (aitp->ai->isoInfos.iJolietUnicode==0)
+			filename = CString((char*)file->name);
+		else
+			filename = CString(file->name);
+
+		if (file->fileFlags & ISO_DIRECTORY)
+		{
+			// store dir entry
+			CString pathNew;
+			pathNew = currentDirName + filename + _T("\\");
+			free(file->name);
+			file->name = _tcsdup(pathNew);
+			aitp->ai->ISOdir->AddTail(file);
+
+			// read subdirectory recursively
+			LONGLONG curpos = isoInput->GetPosition();
+			ISOReadDirectory(aitp, LODWORD(file->sector1OfExtension), isoInput, pathNew);
+			isoInput->Seek(curpos,FILE_BEGIN);
+		}
+			else 
+		{
+			// store file entry
+			CString fullpath;
+			fullpath = currentDirName + filename;
+			free(file->name);
+			file->name = _tcsdup(fullpath);
+			aitp->ai->ISOdir->AddTail(file);
+		}
+	}
+}
+
+bool CArchiveRecovery::recoverISO(CFile *isoInput, CFile *isoOutput, archiveScannerThreadParams_s* aitp, 
+								  CTypedPtrList<CPtrList, Gap_Struct*> *filled)
+{
+	if (isoOutput)
+		return false;
+
+	aitp->ai->isoInfos.secSize = sizeof(ISO_PVD_s);
+
+	// do we have the primary volume descriptor ?
+	if (!IsFilled(16*aitp->ai->isoInfos.secSize, 17*aitp->ai->isoInfos.secSize, filled))
+		return false;
+
+	ISO_PVD_s pvd, svd, tempSec;
+
+	// skip to PVD
+	UINT32 nextstart = 16 * aitp->ai->isoInfos.secSize;
+	isoInput->Seek(nextstart, FILE_BEGIN);
+
+	pvd.descr_type=0xff;
+	svd.descr_type=0xff;
+	aitp->ai->isoInfos.type = ISOtype_unknown;
+
+	int iUdfDetectState=0;
+	// read PVD
+	do 
+	{
+		isoInput->Read(&tempSec, aitp->ai->isoInfos.secSize);
+		nextstart+=aitp->ai->isoInfos.secSize;
+
+		if (tempSec.descr_type==0xff || (tempSec.descr_type==0 && tempSec.descr_ver==0)) // Volume Descriptor Set Terminator (VDST) 
+			break;
+
+		if (tempSec.descr_type==0x01 && pvd.descr_type==0xff) {
+			memcpy(&pvd, &tempSec, aitp->ai->isoInfos.secSize);
+			aitp->ai->isoInfos.type |= ISOtype_9660;
+		}
+		
+		if (tempSec.descr_type==0x02) {
+			memcpy(&svd, &tempSec, aitp->ai->isoInfos.secSize);
+			if (svd.escSeq[0]==0x25 && svd.escSeq[1]==0x2f)
+			{
+				aitp->ai->isoInfos.type |= ISOtype_joliet;
+
+				if (svd.escSeq[2]==0x40)
+					aitp->ai->isoInfos.iJolietUnicode = 1;
+				else if (svd.escSeq[2]==0x43)
+					aitp->ai->isoInfos.iJolietUnicode = 2;
+				else if (svd.escSeq[2]==0x45)
+					aitp->ai->isoInfos.iJolietUnicode = 3;
+			}
+		}
+
+		if (tempSec.descr_type==0x00) {
+			BootDescr* bDesc = (BootDescr*)&tempSec;
+			if ( memcmp((const char*)bDesc->sysid, sElToritoID, strlen(sElToritoID))==0)
+				aitp->ai->isoInfos.bBootable = true;	// anything else?
+		}
+
+		// check for udf 
+		if (tempSec.descr_type==0x00 && tempSec.descr_ver==0x01 ) {
+
+			if (memcmp(&tempSec.magic, sig_udf_bea, 5)==0 && iUdfDetectState==0)
+				iUdfDetectState=1;// detected Beginning Extended Area Descriptor (BEA)
+			
+			else if (memcmp(&tempSec.magic, sig_udf_nsr2, 5)==0 && iUdfDetectState==1) // Volume Sequence Descriptor (VSD) 2
+				iUdfDetectState=2;
+			
+			else if (memcmp(&tempSec.magic, sig_udf_nsr3, 5)==0 && iUdfDetectState==1) // Volume Sequence Descriptor (VSD) 3
+				iUdfDetectState=3;
+			
+			else if (memcmp(&tempSec.magic, sig_tea, 5)==0 && (iUdfDetectState==2 || iUdfDetectState==3))
+				iUdfDetectState+=2;	// remember Terminating Extended Area Descriptor (TEA) received
+		}
+
+	} while ( IsFilled(nextstart, nextstart + aitp->ai->isoInfos.secSize, filled ));
+
+	if (iUdfDetectState==4)
+		aitp->ai->isoInfos.type |= ISOtype_UDF_nsr02;
+	else if (iUdfDetectState==5)
+		aitp->ai->isoInfos.type |= ISOtype_UDF_nsr03;
+
+	if (aitp->ai->isoInfos.type == 0)
+		return false;
+
+	if (iUdfDetectState==4 || iUdfDetectState==5)
+	{
+		// TODO: UDF handling  (http://www.osta.org/specs/)
+		return false;	// no known udf version
+	} 
+		else 
+	{
+		// ISO9660/Joliet handling
+
+		// read root directory of iso and recursive
+		ISO_FileFolderEntry rootdir;
+		memcpy(&rootdir, svd.descr_type!=0xff?svd.rootdir:pvd.rootdir, 33);
+
+		ISOReadDirectory(aitp, LODWORD(rootdir.sector1OfExtension), isoInput, _T("") );
+	}
+
+	return true;
+}
+
+// ########## end of ISO handling #############
 
 
 uint16 CArchiveRecovery::readUInt16(CFile *input)
@@ -1704,3 +1910,4 @@ void CArchiveRecovery::ProcessProgress(archiveScannerThreadParams_s* aitp, UINT6
 	
 	SendMessage(aitp->progressHwnd, PBM_SETPOS, nNewProgress, 0);
 }
+

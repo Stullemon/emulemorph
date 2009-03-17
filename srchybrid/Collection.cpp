@@ -427,7 +427,7 @@ void CCollection::WriteToFileAddShared(CryptoPP::RSASSA_PKCS1v15_SHA_Signer* pSi
 		}
 	}
 
-	theApp.sharedfiles->AddFileFromNewlyCreatedCollection(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR), sFileName);
+	theApp.sharedfiles->AddFileFromNewlyCreatedCollection(sFilePath);
 }
 
 bool CCollection::HasCollectionExtention(const CString& sFileName)

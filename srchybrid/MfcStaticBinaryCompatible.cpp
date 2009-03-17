@@ -53,13 +53,29 @@
 #pragma warning(disable:4061) // enumerate in switch of enum is not explicitly handled by a case label
 #pragma warning(disable:4062) // enumerate in switch of enum is not handled
 #pragma warning(disable:4191) // 'type cast' : unsafe conversion from <this> to <that>
+#if _MSC_VER<1400
 #pragma warning(disable:4217) // <func>: member template functions cannot be used for copy-assignment or copy-construction
+#endif
 #pragma warning(disable:4263) // <func> member function does not override any base class virtual member function
 #pragma warning(disable:4264) // <func>: no override available for virtual member function from base <class>; function is hidden
 #pragma warning(disable:4265) // <class>: class has virtual functions, but destructor is not virtual
+#if _MSC_VER>=1400
+#pragma warning(disable:4266) // no override available for virtual member function from base <class>; function is hidden
+#endif
+#if _MSC_VER>=1500
+#pragma warning(disable:4302) // 'type cast' : truncation from 'HIMAGELIST' to 'WCHAR'
+#endif
+#if _MSC_VER<1400
 #pragma warning(disable:4529) // forming a pointer-to-member requires explicit use of the address-of operator ('&') and a qualified name
+#endif
+#if _MSC_VER>=1400
+#pragma warning(disable:4365) // conversion from 'int' to 'UINT', signed/unsigned mismatch
+#endif
 #pragma warning(disable:4548) // expression before comma has no effect; expected expression with side-effect
 #pragma warning(disable:4555) // expression has no effect; expected expression with side-effect
+#if _MSC_VER>=1400
+#pragma warning(disable:4571) // Informational: catch(...) semantics changed since Visual C++ 7.1; structured exceptions (SEH) are no longer caught
+#endif
 #pragma warning(disable:4619) // #pragma warning : there is no warning number <n>
 #pragma warning(disable:4625) // <class> : copy constructor could not be generated because a base class copy constructor is inaccessible
 #pragma warning(disable:4626) // <class> : assignment operator could not be generated because a base class copy constructor is inaccessible

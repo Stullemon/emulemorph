@@ -24,6 +24,7 @@
 #include "Packets.h"
 #include "KnownFile.h"
 #include "UserMsgs.h"
+#include "MediaInfo.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -42,7 +43,7 @@ enum EMetaDataCols
 	META_DATA_COL_VALUE
 };
 
-static LCX_COLUMN_INIT _aColumns[] =
+static LCX_COLUMN_INIT s_aColumns[] =
 {
 	{ META_DATA_COL_NAME,	_T("Name"),		IDS_SW_NAME,	LVCFMT_LEFT,	-1, 0, ASCENDING,  NONE, _T("Temporary file MMMMM") },
 	{ META_DATA_COL_TYPE,	_T("Type"),		IDS_TYPE,		LVCFMT_LEFT,	-1, 1, ASCENDING,  NONE, _T("Integer") },
@@ -56,11 +57,11 @@ static LCX_COLUMN_INIT _aColumns[] =
 IMPLEMENT_DYNAMIC(CMetaDataDlg, CResizablePage)
 
 BEGIN_MESSAGE_MAP(CMetaDataDlg, CResizablePage)
-	ON_NOTIFY(LVN_KEYDOWN, IDC_TAGS, OnLvnKeydownTags)
 	ON_COMMAND(MP_COPYSELECTED, OnCopyTags)
 	ON_COMMAND(MP_SELECTALL, OnSelectAllTags)
-	ON_WM_DESTROY()
 	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
+	ON_NOTIFY(LVN_KEYDOWN, IDC_TAGS, OnLvnKeydownTags)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 CMetaDataDlg::CMetaDataDlg()
@@ -104,9 +105,9 @@ BOOL CMetaDataDlg::OnInitDialog()
 	
 	GetDlgItem(IDC_TOTAL_TAGS)->SetWindowText(GetResString(IDS_METATAGS));
 
-	m_tags.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_INFOTIP);
-	m_tags.ReadColumnStats(ARRSIZE(_aColumns), _aColumns);
-	m_tags.CreateColumns(ARRSIZE(_aColumns), _aColumns);
+	m_tags.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP | LVS_EX_GRIDLINES);
+	m_tags.ReadColumnStats(ARRSIZE(s_aColumns), s_aColumns);
+	m_tags.CreateColumns(ARRSIZE(s_aColumns), s_aColumns);
 
 	m_pMenuTags = new CMenu();
 	if (m_pMenuTags->CreatePopupMenu())
@@ -223,7 +224,11 @@ CString GetValue(const CTag* pTag)
 {
 	CString strValue;
 	if (pTag->IsStr())
+	{
 		strValue = pTag->GetStr();
+		if (pTag->GetNameID() == FT_MEDIA_CODEC)
+			strValue = GetCodecDisplayName(strValue);
+	}
 	else if (pTag->IsInt())
 	{
 		if (pTag->GetNameID() == FT_MEDIA_LENGTH || pTag->GetNameID() == FT_LASTSEENCOMPLETE)
@@ -250,7 +255,11 @@ CString GetValue(const Kademlia::CKadTag* pTag) // FIXME LARGE FILES
 {
 	CString strValue;
 	if (pTag->IsStr())
+	{
 		strValue = pTag->GetStr();
+		if (pTag->m_name.Compare(TAG_MEDIA_CODEC) == 0)
+			strValue = GetCodecDisplayName(strValue);
+	}
 	else if (pTag->IsInt())
 	{
 		if (pTag->m_name.Compare(TAG_MEDIA_LENGTH) == 0)
@@ -304,28 +313,33 @@ void CMetaDataDlg::RefreshData()
 	int iMetaTags = 0;
 	if (m_paFiles->GetSize() >= 1)
 	{
-		LVITEM lvi;
-		lvi.mask = LVIF_TEXT;
-		lvi.iItem = INT_MAX;
-		lvi.iSubItem = META_DATA_COL_NAME;
-		CString strBuff = GetResString(IDS_FD_HASH);
-		StripTrailingCollon(strBuff);
-		lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
-		int iItem = m_tags.InsertItem(&lvi);
-		if (iItem >= 0)
+		CString strBuff;
+		if (!STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[0])->HasNullHash())
 		{
+			LVITEM lvi;
 			lvi.mask = LVIF_TEXT;
-			lvi.iItem = iItem;
-
-			strBuff.Empty(); // intentionally left blank as it's not a real meta tag
+			lvi.iItem = INT_MAX;
+			lvi.iSubItem = META_DATA_COL_NAME;
+			strBuff = GetResString(IDS_FD_HASH);
+			StripTrailingCollon(strBuff);
 			lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
-			lvi.iSubItem = META_DATA_COL_TYPE;
-			m_tags.SetItem(&lvi);
+			int iItem = m_tags.InsertItem(&lvi);
+			if (iItem >= 0)
+			{
+				lvi.mask = LVIF_TEXT;
+				lvi.iItem = iItem;
 
-			strBuff = md4str(STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[0])->GetFileHash());
-			lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
-			lvi.iSubItem = META_DATA_COL_VALUE;
-			m_tags.SetItem(&lvi);
+				strBuff.Empty(); // intentionally left blank as it's not a real meta tag
+				lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
+				lvi.iSubItem = META_DATA_COL_TYPE;
+				m_tags.SetItem(&lvi);
+
+
+				strBuff = md4str(STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[0])->GetFileHash());
+				lvi.pszText = const_cast<LPTSTR>((LPCTSTR)strBuff);
+				lvi.iSubItem = META_DATA_COL_VALUE;
+				m_tags.SetItem(&lvi);
+			}
 		}
 
 		const CArray<CTag*,CTag*>& aTags = STATIC_DOWNCAST(CAbstractFile, (*m_paFiles)[0])->GetTags();
@@ -442,6 +456,6 @@ void CMetaDataDlg::OnLvnKeydownTags(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CMetaDataDlg::OnDestroy()
 {
-	m_tags.WriteColumnStats(ARRSIZE(_aColumns), _aColumns);
+	m_tags.WriteColumnStats(ARRSIZE(s_aColumns), s_aColumns);
 	CResizablePage::OnDestroy();
 }

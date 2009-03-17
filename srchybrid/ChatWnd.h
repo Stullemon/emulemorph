@@ -71,17 +71,17 @@ protected:
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
-	afx_msg void OnSysColorChange();
-	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
-	afx_msg void OnLvnItemActivateFriendList(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnNMClickFriendList(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnStnDblClickFriendIcon();
-	afx_msg void OnBnClickedSmiley();
+	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg LRESULT OnCloseTab(WPARAM wparam, LPARAM lparam);
 	afx_msg void OnBnClickedClose();
 	afx_msg void OnBnClickedSend();
-	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnBnClickedSmiley();
+	afx_msg void OnLvnItemActivateFriendList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmClickFriendList(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnStnDblClickFriendIcon();
+	afx_msg void OnSysColorChange();
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 public:
 	bool	UpdateEmfriendsMetFromURL(const CString& strURL);

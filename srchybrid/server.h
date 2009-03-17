@@ -35,7 +35,7 @@ struct ServerMet_Struct {
 
 
 // Server TCP flags
-#define	SRV_TCPFLG_COMPRESSION	0x00000001
+#define	SRV_TCPFLG_COMPRESSION		0x00000001
 #define	SRV_TCPFLG_NEWTAGS			0x00000008
 #define	SRV_TCPFLG_UNICODE			0x00000010
 #define SRV_TCPFLG_RELATEDSEARCH	0x00000040
@@ -85,6 +85,7 @@ public:
 	uint16	GetConnPort() const						{return port;}
 	void    SetPort(uint16 val)						{ realport = val;}
 	//Morph End - added by AndCycle, aux Ports, by lugdunummaster
+
 	uint32	GetFiles() const						{return files;}
 	void	SetFileCount(uint32 in_files)			{files = in_files;}
 
@@ -103,7 +104,7 @@ public:
 	uint32	GetFailedCount() const					{return failedcount;}
 	void	SetFailedCount(uint32 nCount)			{failedcount = nCount;}
 	void	AddFailedCount()						{failedcount++;} 
-	void	ResetFailedCount()						{failedcount = 0;} 
+	void	ResetFailedCount()						{failedcount = 0;}
 
 	uint32	GetLastPingedTime() const				{return lastpingedtime;}
 	void	SetLastPingedTime(uint32 in_lastpingedtime)	{lastpingedtime = in_lastpingedtime;}
@@ -118,7 +119,7 @@ public:
 	void	SetLastDescPingedCount(bool reset);
 
 	bool	IsStaticMember() const					{return staticservermember;}
-	void	SetIsStaticMember(bool in)				{staticservermember=in;}
+	void	SetIsStaticMember(bool in)				{staticservermember = in;}
 
 	uint32	GetChallenge() const					{return challenge;}
 	void	SetChallenge(uint32 in_challenge)		{challenge = in_challenge;}

@@ -1,19 +1,56 @@
 --------------------------------------
-Changelog for eMule 0.49b MorphXT v11.x
+Changelog for eMule 0.49c MorphXT v11.x
 --------------------------------------
 XX-XX-2009
 
+Merged to 0.49c [Stulle]
 ADD: Autojoin to #emule-morph in IRC [Stulle]
 ADD: Service description (Service needs to be reinstalled) [Stulle]
+ADD: High definition vista icon [Stulle]
+ADD: Microsoft Windows Media Format 9 SDK for MS VS2003 build [Stulle]
+ADD: Microsoft Windows Media Format 11 SDK for MS VS2005 build [Stulle]
+ADD: Microsoft Speach SDK for all builds [Stulle]
+ADD: Purge known.met settings (not at all, partially/ official, completely/ old Morph) [Stulle]
+Add: Option to remove AICH hashes immediatly [Stulle]
+ADD: Update Downloaded History List automatically to reflect changes in Shared Files List [Stulle]
+ADD: Delete files on hitting the del key in Downloaded History List [Stulle]
+ADD: Copy Ed2k links into clipboard using Ctrl+C in Downloaded History List [Stulle]
+ADD: Sort for "calculated CRC32" column in Shared Files List [Stulle]
+ADD: Progress Hash [O2]
+ADD: IP Filter White list [Stulle]
+ADD: New default IPFilter (Maintained by Ozzy) [Stulle]
+	+ uses DynDNS to check version, mirrored at SourceForge, unrar.dll required!
+ADD: RAR File download decompress for auto update [official]
 CHANGE: Display NNS in UploadListCtrl [Diabolo111]
 CHANGE: Updated German language file [Morella/Myth88]
 CHANGE: Updated French language file [Nicolas_FR]
 CHANGE: Cleaned up Static IP Filter code [Stulle]
 	+ only ipfilter.dat layout allowed!
+CHANGE: Switch category column and download started column (group cat related) [Stulle]
+CHANGE: Keep old default sorting behaviour for DownloadList (only names ascending) [Stulle]
+CHANGE: Default Fakes link to http://emulepawcio.sourceforge.net/fakes.zip [Stulle/Rick164]
+CHANGE: Default purge time for known.met is set to 31 days like in official instead of old 150 days [Stulle]
+CHANGE: Rewrite of Downloaded History List according to new List code layout from official [Stulle]
+CHANGE: Accept more file names for contents of downloaded ipfilter archives [official]
+CHANGE: Send ICS info even if the file is not extremely rare (as pointed out by WiZaRd) [Stulle]
+CHANGE: Made ICS mode local variable to save some bytes in RAM usage (as pointed out by WiZaRd) [Stulle]
 FIX: Corrupted userhash ban [taz]
 FIX: Double increase for badrequests [taz]
 FIX: Incorrect and redundent operation for Double backup [AndCycle]
 FIX: Display FairPlay in lists only if requested file is complete [gomez82]
+FIX: Improper localization of altered category column in DownloadList [Stulle]
+FIX: Failing support of emulepawcio ipfilter.zip format [D10Tmain]
+FIX: Memleak fix, memset fix and fix for keep A4AF code [WiZaRd]
+
+Note: Additional options stored in Known.met will be purged like some official stuff is.
+Note: Due to change in column orders we recommend a clean install. You may experience strange looks otherwise.
+Note: Microsoft DirectX 9 SDK for MS VS2005 build has already been added in an earlier version.
+Note: See How-To-Compile_VS05.txt in source package for guide on how to get the sources to compile.
+Note: New IPFilter will only be set when resetting the url or making a clean install.
+
+IP Filter White List:
++ IPs on this list will not be banned
++ use ipfilter_white.dat to add IPs to the White List
 
 
 --------------------------------------

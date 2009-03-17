@@ -60,6 +60,7 @@ namespace Kademlia
 		void PushToBottom(CContact* pContact); // puts an existing contact from X to the end of the list
 		CContact* GetRandomContact(uint32 nMaxType, uint32 nMinKadVersion);
 		void SetAllContactsVerified();
+		static bool CheckGlobalIPLimits(uint32 uIP, uint16 uPort, bool bLog);
 
 		bool m_bDontDeleteContacts;
 

@@ -139,8 +139,8 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
 	virtual LRESULT DefWindowProc(UINT message, WPARAM wParam, LPARAM lParam);
-	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam); //MORPH
+
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedAddserver();
 	afx_msg void OnBnClickedUpdateServerMetFromUrl();
@@ -153,8 +153,7 @@ protected:
 	afx_msg void OnSvrTextChange();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnStnDblclickServlstIco();
-afx_msg void OnSplitterMoved(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnWindowPosChanged(WINDOWPOS* lpwndpos);
+	afx_msg void OnSplitterMoved(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
-	afx_msg void OnBnClickedFeedchange();
+	afx_msg void OnBnClickedFeedchange(); //MORPH
 };

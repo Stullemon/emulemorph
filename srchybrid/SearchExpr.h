@@ -138,5 +138,5 @@ public:
 		m_aExpr.Append(pExpr->m_aExpr);
 	}
 
-	CArray<CSearchAttr, CSearchAttr> m_aExpr;
+	CArray<CSearchAttr> m_aExpr;
 };

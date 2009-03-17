@@ -112,6 +112,7 @@ CPPgTweaks::CPPgTweaks()
 	m_iExtractMetaData = 0;
 	m_bAutoArchDisable=true;
 	m_iShareeMule = 0;
+	m_bResolveShellLinks = false;
 
 	bShowedWarning = false;
 	m_bInitializedTreeOpts = false;
@@ -174,6 +175,7 @@ CPPgTweaks::CPPgTweaks()
 	m_htiShareeMuleMultiUser = NULL;
 	m_htiShareeMulePublicUser = NULL;
 	m_htiShareeMuleOldStyle = NULL;
+	m_htiResolveShellLinks = NULL;
 
 	// emulEspaña. Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	m_bLogUPnP = false;
@@ -337,6 +339,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiExtractMetaDataNever = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_NEVER), m_htiExtractMetaData, m_iExtractMetaData == 0);
 		m_htiExtractMetaDataID3Lib = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_META_DATA_ID3LIB), m_htiExtractMetaData, m_iExtractMetaData == 1);
 		//m_htiExtractMetaDataMediaDet = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_META_DATA_MEDIADET), m_htiExtractMetaData, m_iExtractMetaData == 2);
+		m_htiResolveShellLinks = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_RESOLVELINKS), TVI_ROOT, m_bResolveShellLinks);
 
 		/////////////////////////////////////////////////////////////////////////////
 		// Logging group
@@ -517,7 +520,6 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	// Miscellaneous group
 	//
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAutoTakeEd2kLinks, m_bAutoTakeEd2kLinks);
-    m_ctrlTreeOptions.SetCheckBoxEnable(m_htiAutoTakeEd2kLinks, HaveEd2kRegAccess());
 	//MORPH - Removed by SiRoB, Hot fix to show correct disabled checkbox
 	/*
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCreditSystem, m_bCreditSystem);
@@ -546,6 +548,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxFloat(pDX, m_fMinFreeDiskSpaceMB, 0.0, UINT_MAX / (1024*1024));
 	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiCommit, m_iCommitFiles);
 	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiExtractMetaData, m_iExtractMetaData);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiResolveShellLinks, m_bResolveShellLinks);
 
 	/////////////////////////////////////////////////////////////////////////////
 	// Logging group
@@ -668,8 +671,6 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	//
 	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiShareeMule, m_iShareeMule);
 	m_ctrlTreeOptions.SetRadioButtonEnable(m_htiShareeMulePublicUser, thePrefs.GetWindowsVersion() == _WINVER_VISTA_);
-	m_ctrlTreeOptions.SetRadioButtonEnable(m_htiShareeMuleMultiUser, thePrefs.GetWindowsVersion() != _WINVER_95_ 
-		&&thePrefs.GetWindowsVersion() != _WINVER_NT4_);
 }
 
 BOOL CPPgTweaks::OnInitDialog()
@@ -677,7 +678,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_iMaxConnPerFive = thePrefs.GetMaxConperFive();
 	m_iMaxHalfOpen = thePrefs.GetMaxHalfConnections();
 	m_bConditionalTCPAccept = thePrefs.GetConditionalTCPAccept();
-	m_bAutoTakeEd2kLinks = HaveEd2kRegAccess() ? thePrefs.AutoTakeED2KLinks() : 0;
+	m_bAutoTakeEd2kLinks = thePrefs.AutoTakeED2KLinks();
 	if (thePrefs.GetEnableVerboseOptions())
 	{
 		m_bVerbose = thePrefs.m_bVerbose;
@@ -716,6 +717,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bSparsePartFiles = thePrefs.GetSparsePartFiles();
 	m_bFullAlloc= thePrefs.m_bAllocFull;
 	m_bCheckDiskspace = thePrefs.checkDiskspace;
+	m_bResolveShellLinks = thePrefs.GetResolveSharedShellLinks();
 	m_fMinFreeDiskSpaceMB = (float)(thePrefs.m_uMinFreeDiskSpace / (1024.0 * 1024.0));
 	m_sYourHostname = thePrefs.GetYourHostname();
 	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
@@ -842,7 +844,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.SetMaxHalfConnections(m_iMaxHalfOpen ? m_iMaxHalfOpen : DFLT_MAXHALFOPEN);
 	thePrefs.m_bConditionalTCPAccept = m_bConditionalTCPAccept;
 
-	if (HaveEd2kRegAccess() && thePrefs.AutoTakeED2KLinks() != m_bAutoTakeEd2kLinks)
+	if (thePrefs.AutoTakeED2KLinks() != m_bAutoTakeEd2kLinks)
 	{
 		thePrefs.autotakeed2klinks = m_bAutoTakeEd2kLinks;
 		if (thePrefs.AutoTakeED2KLinks())
@@ -928,6 +930,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bSparsePartFiles = m_bSparsePartFiles;
 	thePrefs.m_bAllocFull= m_bFullAlloc;
 	thePrefs.checkDiskspace = m_bCheckDiskspace;
+	thePrefs.m_bResolveSharedShellLinks = m_bResolveShellLinks;
 	thePrefs.m_uMinFreeDiskSpace = (UINT)(m_fMinFreeDiskSpaceMB * (1024 * 1024));
 	if (thePrefs.GetYourHostname() != m_sYourHostname) {
 		thePrefs.SetYourHostname(m_sYourHostname);
@@ -1117,7 +1120,7 @@ void CPPgTweaks::Localize(void)
 		if (m_htiShareeMuleMultiUser) m_ctrlTreeOptions.SetItemText(m_htiShareeMuleMultiUser, GetResString(IDS_SHAREEMULEMULTI));
 		if (m_htiShareeMulePublicUser) m_ctrlTreeOptions.SetItemText(m_htiShareeMulePublicUser, GetResString(IDS_SHAREEMULEPUBLIC));
 		if (m_htiShareeMuleOldStyle) m_ctrlTreeOptions.SetItemText(m_htiShareeMuleOldStyle, GetResString(IDS_SHAREEMULEOLD));
-
+		if (m_htiResolveShellLinks) m_ctrlTreeOptions.SetItemText(m_htiResolveShellLinks, GetResString(IDS_RESOLVELINKS));
 
         CString temp;
 		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize, false, false));
@@ -1277,6 +1280,7 @@ void CPPgTweaks::OnDestroy()
 	m_htiShareeMulePublicUser = NULL;
 	m_htiShareeMuleOldStyle = NULL;
 	//m_htiExtractMetaDataMediaDet = NULL;
+	m_htiResolveShellLinks = NULL;
     
     CPropertyPage::OnDestroy();
 }

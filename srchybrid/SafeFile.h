@@ -24,9 +24,11 @@ namespace Kademlia{
 
 enum EUtf8Str
 {
-	utf8strNone,
-	utf8strOptBOM,
-	utf8strRaw
+	utf8strNone,		// convert Unicode string to locale dependent MBCS
+	utf8strOptBOM,		// convert Unicode string to BOM'd UTF-8 string (non ASCII data in string)
+						// --or--
+						// convert Unicode string to locale dependent MBCS (only ASCII data in string)
+	utf8strRaw			// convert Unicode string to UTF-8 (without any header)
 };
 
 
@@ -58,9 +60,9 @@ public:
 	virtual void WriteUInt64(uint64 nVal);
 	virtual void WriteUInt128(const Kademlia::CUInt128 *pVal);
 	virtual void WriteHash16(const uchar* pVal);
-	virtual void WriteString(const CString& rstr, EUtf8Str eEncode = utf8strNone);
+	virtual void WriteString(const CString& rstr, EUtf8Str eEncode);
 	virtual void WriteString(LPCSTR psz);
-	virtual void WriteLongString(const CString& rstr, EUtf8Str eEncode = utf8strNone);
+	virtual void WriteLongString(const CString& rstr, EUtf8Str eEncode);
 	virtual void WriteLongString(LPCSTR psz);
 };
 

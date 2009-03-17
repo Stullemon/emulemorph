@@ -30,9 +30,11 @@ there client on the eMule forum..
 
 #pragma once
 #include "../routing/Maps.h"
+#include "../kademlia/Tag.h"
 
 class CKnownFile;
 class CSafeMemFile;
+struct SSearchTerm;
 
 namespace Kademlia
 {
@@ -54,8 +56,8 @@ namespace Kademlia
 			uint32		GetNodeLoad() const;
 			uint32		GetNodeLoadResonse() const;
 			uint32		GetNodeLoadTotal() const;
-			const		CString& GetFileName() const;
-			void		SetFileName(const CString& sFileName);
+			const		CKadTagValueString& GetGUIName() const;
+			void		SetGUIName(const CKadTagValueString& sGUIName);
 			void		SetSearchTermData( uint32 uSearchTermDataSize, LPBYTE pucSearchTermsData );
 
 			void		AddFileID(const CUInt128& uID);
@@ -95,6 +97,7 @@ namespace Kademlia
 			void SendFindValue(CContact* pContact);
 			void PrepareToStop();
 			void StorePacket();
+			uint8 GetRequestContactCount() const;
 
 			bool m_bStoping;
 			time_t m_tCreated;
@@ -108,10 +111,11 @@ namespace Kademlia
 			uint32 m_uSearchID;
 			uint32 m_uSearchTermsDataSize;
 			LPBYTE m_pucSearchTermsData;
+			SSearchTerm* m_pSearchTerm; // cached from m_pucSearchTermsData, used for verifying results lateron
 			CKadClientSearcher* pNodeSpecialSearchRequester; // used to callback on result for NODESPECIAL searches
 			CUInt128 m_uTarget;
 			WordList m_listWords;
-			CString m_sFileName;
+			CKadTagValueString m_sGUIName;
 			UIntList m_listFileIDs;
 			ContactMap m_mapPossible;
 			ContactMap m_mapTried;
@@ -122,6 +126,6 @@ namespace Kademlia
 			CUInt128 m_uClosestDistantFound; // not used for the search itself, but for statistical data collecting
 	};
 }
-void KadGetKeywordHash(const CStringW& rstrKeywordW, Kademlia::CUInt128* puKadID);
+void KadGetKeywordHash(const Kademlia::CKadTagValueString& rstrKeywordW, Kademlia::CUInt128* puKadID);
 void KadGetKeywordHash(const CStringA& rstrKeywordA, Kademlia::CUInt128* puKadID);
-CStringA KadGetKeywordBytes(const CStringW& rstrKeywordW);
+CStringA KadGetKeywordBytes(const Kademlia::CKadTagValueString& rstrKeywordW);

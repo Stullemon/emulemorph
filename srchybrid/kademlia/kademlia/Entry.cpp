@@ -113,15 +113,15 @@ bool CEntry::GetIntTagValue(CKadTagNameString strTagName, uint64& rValue, bool b
 	return false;
 }
 
-CStringW CEntry::GetStrTagValue(CKadTagNameString strTagName) const
+CKadTagValueString CEntry::GetStrTagValue(CKadTagNameString strTagName) const
 {
 	for (TagList::const_iterator itTagList = m_listTag.begin(); itTagList != m_listTag.end(); itTagList++)
 	{
 		CKadTag* pTag = *itTagList;
-		if (!pTag->m_name.Compare(strTagName)&& pTag->IsStr())
+		if (!pTag->m_name.Compare(strTagName) && pTag->IsStr())
 			return pTag->GetStr();
 	}
-	return _T("");
+	return L"";
 }
 
 void CEntry::SetFileName(CKadTagValueString strName){
@@ -179,9 +179,10 @@ void CEntry::WriteTagListInc(CDataIO* pData, uint32 nIncreaseTagNumber){
 	ASSERT( uCount <= 0xFF );
 	pData->WriteByte((uint8)uCount);
 
-	if (!GetCommonFileName().IsEmpty()){
+	CKadTagValueString strCommonFileName(GetCommonFileName());
+	if (!strCommonFileName.IsEmpty()){
 		ASSERT( uCount > m_listTag.size() );
-		CKadTagStr tag(TAG_FILENAME, GetCommonFileName());
+		CKadTagStr tag(TAG_FILENAME, strCommonFileName);
 		pData->WriteTag(&tag);
 	}
 	if (m_uSize != 0){
@@ -216,6 +217,14 @@ CKeyEntry::~CKeyEntry()
 	}
 }
 
+bool CKeyEntry::StartSearchTermsMatch(const SSearchTerm* pSearchTerm)
+{
+	m_strSearchTermCacheCommonFileNameLowerCase = GetCommonFileNameLowerCase();
+	bool bResult = SearchTermsMatch(pSearchTerm);
+	m_strSearchTermCacheCommonFileNameLowerCase.Empty();
+	return bResult;
+}
+
 bool CKeyEntry::SearchTermsMatch(const SSearchTerm* pSearchTerm) const
 {
 	// boolean operators
@@ -237,11 +246,10 @@ bool CKeyEntry::SearchTermsMatch(const SSearchTerm* pSearchTerm) const
 		// if there are more than one search strings specified (e.g. "aaa bbb ccc") the entire string is handled
 		// like "aaa AND bbb AND ccc". search all strings from the string search term in the tokenized list of
 		// the file name. all strings of string search term have to be found (AND)
-		CKadTagValueString strCommonFileNameLower(GetCommonFileNameLowerCase());
 		for (int iSearchTerm = 0; iSearchTerm < iStrSearchTerms; iSearchTerm++)
 		{
 			// this will not give the same results as when tokenizing the filename string, but it is 20 times faster.
-			if (wcsstr(strCommonFileNameLower, pSearchTerm->m_pastr->GetAt(iSearchTerm)) == NULL)
+			if (wcsstr(m_strSearchTermCacheCommonFileNameLowerCase, pSearchTerm->m_pastr->GetAt(iSearchTerm)) == NULL)
 				return false;
 		}
 		return true;
@@ -255,11 +263,10 @@ bool CKeyEntry::SearchTermsMatch(const SSearchTerm* pSearchTerm) const
 			{
 				// 21-Sep-2006 []: Special handling for TAG_FILEFORMAT which is already part
 				// of the filename and thus does not need to get published nor stored explicitly,
-				CKadTagValueString strCommonFileName(GetCommonFileName());
-				int iExt = strCommonFileName.ReverseFind(_T('.'));
+				int iExt = m_strSearchTermCacheCommonFileNameLowerCase.ReverseFind(_T('.'));
 				if (iExt != -1)
 				{
-					if (_wcsicmp((LPCWSTR)strCommonFileName + iExt + 1, pSearchTerm->m_pTag->GetStr()) == 0)
+					if (KadTagStrCompareNoCase((LPCWSTR)m_strSearchTermCacheCommonFileNameLowerCase + iExt + 1, pSearchTerm->m_pTag->GetStr()) == 0)
 						return true;
 				}
 			}
@@ -269,7 +276,7 @@ bool CKeyEntry::SearchTermsMatch(const SSearchTerm* pSearchTerm) const
 				{
 					const CKadTag* pTag = *itTagList;
 					if (pTag->IsStr() && pSearchTerm->m_pTag->m_name.Compare(pTag->m_name) == 0)
-						return pTag->GetStr().CompareNoCase(pSearchTerm->m_pTag->GetStr()) == 0;
+						return KadTagStrCompareNoCase(pTag->GetStr(), pSearchTerm->m_pTag->GetStr()) == 0;
 				}
 			}
 		}
@@ -424,7 +431,7 @@ void CKeyEntry::MergeIPsAndFilenames(CKeyEntry* pFromEntry){
 		ASSERT( pFromEntry == NULL );
 		// if called with NULL, this is a complete new entry and we need to initalize our lists
 		if (m_pliPublishingIPs == NULL)
-			m_pliPublishingIPs = new CList<structPublishingIP, structPublishingIP&>();
+			m_pliPublishingIPs = new CList<structPublishingIP>();
 		// update the global track map below
 	}
 	else{
@@ -461,7 +468,7 @@ void CKeyEntry::MergeIPsAndFilenames(CKeyEntry* pFromEntry){
 		bool bDuplicate = false;
 		for (POSITION pos = pFromEntry->m_listFileNames.GetHeadPosition(); pos != NULL; pFromEntry->m_listFileNames.GetNext(pos)){
 			structFileNameEntry structNameToCopy = pFromEntry->m_listFileNames.GetAt(pos);
-			if (structCurrentName.m_fileName.CompareNoCase(structNameToCopy.m_fileName) == 0){
+			if (KadTagStrCompareNoCase(structCurrentName.m_fileName, structNameToCopy.m_fileName) == 0){
 				// the filename of our new entry matches with our old, increase the popularity index for the old one
 				bDuplicate = true;
 				if (!bFastRefresh)
@@ -595,7 +602,7 @@ void CKeyEntry::ReadPublishTrackingDataFromFile(CDataIO* pData){
 	}
 
 	ASSERT( m_pliPublishingIPs == NULL );
-	m_pliPublishingIPs = new CList<structPublishingIP, structPublishingIP&>();
+	m_pliPublishingIPs = new CList<structPublishingIP>();
 	uint32 nIPCount = pData->ReadUInt32();
 	uint32 nDbgLastTime = 0;
 	for (uint32 i = 0; i < nIPCount; i++){

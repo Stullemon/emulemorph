@@ -62,7 +62,7 @@ class CIP2Country; //EastShare - added by AndCycle, IP to Country
 class CPPgBackup; //EastShare - Added by Pretender, TBH-AutoBackup
 
 enum AppState{
-	APP_STATE_RUNNING=0,
+	APP_STATE_RUNNING = 0,
    	APP_STATE_SHUTTINGDOWN,
 	APP_STATE_DONE
 };
@@ -73,10 +73,10 @@ public:
 	CemuleApp(LPCTSTR lpszAppName = NULL);
 
 	// ZZ:UploadSpeedSense -->
-	UploadBandwidthThrottler* uploadBandwidthThrottler; 
-	LastCommonRouteFinder*    lastCommonRouteFinder; 
+    UploadBandwidthThrottler* uploadBandwidthThrottler;
+    LastCommonRouteFinder* lastCommonRouteFinder;
 	// ZZ:UploadSpeedSense <--
-	CemuleDlg*		emuledlg;
+	CemuleDlg*			emuledlg;
 	CClientList*		clientlist;
 	CKnownFileList*		knownfiles;
 	CServerConnect*		serverconnect;
@@ -96,7 +96,7 @@ public:
 	CPeerCacheFinder*	m_pPeerCache;
 	CFirewallOpener*	m_pFirewallOpener;
 #ifdef USE_OFFICIAL_UPNP
-	CUPnPImplWrapper*		m_pUPnPFinder;
+	CUPnPImplWrapper*	m_pUPnPFinder;
 #endif
 
 	CFakecheck*			FakeCheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
@@ -123,7 +123,12 @@ public:
 	UINT				m_uCurVersionShort;
 	UINT				m_uCurVersionCheck;
 	ULONGLONG			m_ullComCtrlVer;
-	volatile AppState	m_app_state; // defines application state for shutdown 
+	//MORPH
+	/*
+	AppState			m_app_state; // defines application state for shutdown 
+	*/
+	volatile AppState		m_app_state; // defines application state for shutdown 
+	//MORPH END
 	CMutex				hashing_mut;
 	CReadWriteLock		m_threadlock;	// SLUGFILLER: SafeHash - This will ensure eMule goes last
 	CString*			pstrPendingLink;
@@ -147,7 +152,7 @@ public:
 	virtual BOOL InitInstance();
 	virtual int ExitInstance();
 	virtual BOOL IsIdleMessage(MSG *pMsg);
-	virtual BOOL OnIdle(LONG lCount);
+	virtual BOOL OnIdle(LONG lCount); // MORPH
 
 	// ed2k link functions
 	void		AddEd2kLinksToDownload(CString strLinks, int cat, bool fromclipboard=false);
@@ -205,6 +210,7 @@ public:
 	void		DisableRTLWindowsLayout();
 	void		UpdateDesktopColorDepth();
 	void		UpdateLargeIconSize();
+	bool		IsXPThemeActive() const;
 	bool		IsVistaThemeActive() const;
 
 	bool		GetLangHelpFilePath(CString& strResult);
@@ -257,6 +263,7 @@ protected:
 	uint32 m_dwPublicIP;
 	bool m_bAutoStart;
 	WSADATA				m_wsaData; //MORPH - Added by SiRoB, eWombat [WINSOCK2]
+
 private:
     UINT     m_wTimerRes;
 

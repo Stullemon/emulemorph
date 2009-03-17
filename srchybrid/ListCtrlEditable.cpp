@@ -26,16 +26,16 @@ typedef struct tagNMLVSCROLL
 #define LV_EDIT_CTRL_ID		1001
 
 BEGIN_MESSAGE_MAP(CEditableListCtrl, CListCtrl)
-	ON_WM_VSCROLL()
-	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnColumnclick)
-	ON_WM_HSCROLL()
-	ON_WM_DESTROY()
 	ON_EN_KILLFOCUS(LV_EDIT_CTRL_ID, OnEnKillFocus)
+	ON_NOTIFY_REFLECT(LVN_BEGINSCROLL, OnLvnBeginScroll)
+	ON_NOTIFY_REFLECT(LVN_COLUMNCLICK, OnLvnColumnClick)
+	ON_NOTIFY_REFLECT(LVN_ENDSCROLL, OnLvnEndScroll)
+	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnNmCustomDraw)
+	ON_WM_DESTROY()
+	ON_WM_HSCROLL()
 	ON_WM_LBUTTONDOWN()
 	ON_WM_SETFOCUS()
-	ON_NOTIFY_REFLECT(NM_CUSTOMDRAW, OnNMCustomDraw)
-	ON_NOTIFY_REFLECT(LVN_ENDSCROLL, OnLvnEndScroll)
-	ON_NOTIFY_REFLECT(LVN_BEGINSCROLL, OnLvnBeginScroll)
+	ON_WM_VSCROLL()
 END_MESSAGE_MAP()
 
 CEditableListCtrl::CEditableListCtrl()
@@ -258,14 +258,15 @@ void CEditableListCtrl::ShowEditCtrl()
 		m_pctrlEdit->SetWindowPos(NULL, rect.left, rect.top, rect.Width(), rect.Height(), SWP_SHOWWINDOW);
 	}
 
-	TCHAR szItem[256] = {0};
+	TCHAR szItem[256];
 	LVITEM item;
 	item.mask = LVIF_TEXT;
 	item.iItem = m_iRow;
 	item.iSubItem = m_iCol;
-	item.cchTextMax = ARRSIZE(szItem);
+	item.cchTextMax = _countof(szItem);
 	item.pszText = szItem;
 	GetItem(&item);
+	szItem[_countof(szItem) - 1] = _T('\0');
 	m_pctrlEdit->SetWindowText(szItem);
 	m_pctrlEdit->SetSel(0, -1);
 	if (m_pctrlComboBox)
@@ -308,7 +309,7 @@ void CEditableListCtrl::ShowComboBoxCtrl()
 	m_pctrlComboBox->SetFocus();
 }
 
-void CEditableListCtrl::OnColumnclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CEditableListCtrl::OnLvnColumnClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	if (m_pctrlEdit && m_pctrlEdit->IsWindowVisible())
 		m_pctrlEdit->ShowWindow(SW_HIDE);
@@ -438,7 +439,7 @@ void CEditableListCtrl::OnDestroy()
 	CListCtrl::OnDestroy();
 }
 
-void CEditableListCtrl::OnNMCustomDraw(NMHDR *pNMHDR, LRESULT *pResult)
+void CEditableListCtrl::OnNmCustomDraw(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLVCUSTOMDRAW pNMCD = reinterpret_cast<LPNMLVCUSTOMDRAW>(pNMHDR);
 

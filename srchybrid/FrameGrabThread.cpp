@@ -91,10 +91,17 @@ BOOL CFrameGrabThread::Run(){
 	// SLUGFILLER: SafeHash
 	imgResults = new CxImage*[nFramesToGrab];
 	FrameGrabResult_Struct* result = new FrameGrabResult_Struct;
+	CoInitialize(NULL);
 	result->nImagesGrabbed = (uint8)GrabFrames();
+	CoUninitialize();
 	result->imgResults = imgResults;
 	result->pSender = pSender;
-	VERIFY( PostMessage(theApp.emuledlg->m_hWnd,TM_FRAMEGRABFINISHED, (WPARAM)pOwner,(LPARAM)result) );
+	if (!PostMessage(theApp.emuledlg->m_hWnd,TM_FRAMEGRABFINISHED, (WPARAM)pOwner,(LPARAM)result)) {
+		for (int i = 0; i < result->nImagesGrabbed; i++)
+			delete result->imgResults[i];
+		delete[] result->imgResults;
+		delete result;
+	}
 	return 0;
 }
 
@@ -105,7 +112,6 @@ UINT CFrameGrabThread::GrabFrames(){
 	try{
 		HRESULT hr;
 		CComPtr<IMediaDet> pDet;
-		CoInitialize(NULL);
 		hr = pDet.CoCreateInstance(__uuidof(MediaDet));
 		if (!SUCCEEDED(hr))
 			return 0;
@@ -212,12 +218,14 @@ UINT CFrameGrabThread::GrabFrames(){
 					
 					// decrease bpp if needed
 					if (bReduceColor){
-						CQuantizer q(256,8);
-						q.ProcessImage(imgResult->GetDIB());
 						RGBQUAD* ppal=(RGBQUAD*)malloc(256*sizeof(RGBQUAD));
-						q.SetColorTable(ppal);
-						imgResult->DecreaseBpp(8, true, ppal);
-						free(ppal);
+						if (ppal) {
+							CQuantizer q(256,8);
+							q.ProcessImage(imgResult->GetDIB());
+							q.SetColorTable(ppal);
+							imgResult->DecreaseBpp(8, true, ppal);
+							free(ppal);
+						}
 					}
 					
 					//CString TestName;

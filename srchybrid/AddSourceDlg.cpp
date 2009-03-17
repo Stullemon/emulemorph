@@ -141,8 +141,7 @@ void CAddSourceDlg::OnBnClickedButton1()
 			}
 
 			uint32 ip;
-			USES_CONVERSION;
-			if ((ip = inet_addr(T2CA(sip))) == INADDR_NONE && _tcscmp(sip, _T("255.255.255.255")) != 0)
+			if ((ip = inet_addr(CT2CA(sip))) == INADDR_NONE && _tcscmp(sip, _T("255.255.255.255")) != 0)
 				ip = 0;
 			if (IsGoodIPPort(ip, port))
 			{
@@ -178,7 +177,7 @@ void CAddSourceDlg::OnBnClickedButton1()
 				Url.dwUrlPathLength = ARRSIZE(szUrlPath);
 				Url.lpszExtraInfo = szExtraInfo;
 				Url.dwExtraInfoLength = ARRSIZE(szExtraInfo);
-				if (InternetCrackUrl(strURL, 0, 0, &Url) && Url.dwHostNameLength > 0)
+				if (InternetCrackUrl(strURL, 0, 0, &Url) && Url.dwHostNameLength > 0 && Url.dwHostNameLength < INTERNET_MAX_HOST_NAME_LENGTH)
 				{
 					SUnresolvedHostname* hostname = new SUnresolvedHostname;
 					hostname->strURL = strURL;

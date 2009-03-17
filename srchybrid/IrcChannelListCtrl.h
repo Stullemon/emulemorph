@@ -38,12 +38,13 @@ protected:
 	CIrcWnd* m_pParent;
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+	void GetItemDisplayText(const ChannelName *pChannel, int iSubItem, LPTSTR pszText, int cchTextMax);
 
 	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam );
-	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void OnNMDblClk(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmDblClk(NMHDR *pNMHDR, LRESULT *pResult);
 };

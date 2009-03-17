@@ -87,11 +87,12 @@ BOOL CListViewSearchDlg::OnInitDialog()
 		TCHAR szColTitle[256];
 		LVCOLUMN lvc;
 		lvc.mask = LVCF_TEXT;
-		lvc.cchTextMax = sizeof(szColTitle)/sizeof(szColTitle[0]);
+		lvc.cchTextMax = _countof(szColTitle);
 		lvc.pszText = szColTitle;
 		int iCol = 0;
 		while (m_pListView->GetColumn(iCol++, &lvc))
 		{
+			szColTitle[_countof(szColTitle) - 1] = _T('\0');
 			m_ctlSearchCol.AddString(lvc.pszText);
 			if (!m_bCanSearchInAllColumns)
 				break;

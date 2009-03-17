@@ -85,7 +85,17 @@ CPPgEastShare::CPPgEastShare()
 
 	//EastShare START - Added by TAHO, .met control
 	m_htiMetControl = NULL;
+	m_htiDontPurge = NULL;
+	m_htiPartiallyPurge = NULL;
+	m_htiCompletelyPurge = NULL;
+	if(thePrefs.DoPartiallyPurgeOldKnownFiles())
+		m_iPurgeMode = 1;
+	else if(thePrefs.DoCompletlyPurgeOldKnownFiles())
+		m_iPurgeMode = 2;
+	else
+		m_iPurgeMode = 0;
 	m_htiKnownMet = NULL;
+	m_htiRemoveAichImmediatly = NULL;
 	//EastShare END - Added by TAHO, .met control
 }
 
@@ -153,8 +163,12 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 		
 		// EastShare START - Added by TAHO, .met control // Modified by Pretender
 		m_htiMetControl = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_MET_FILE_CONTROL), iImgMETC, TVI_ROOT);
+		m_htiDontPurge = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_PURGE_DONT), m_htiMetControl, m_iPurgeMode == 0);
+		m_htiPartiallyPurge = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_PURGE_PARTIALLY), m_htiMetControl, m_iPurgeMode == 1);
+		m_htiCompletelyPurge = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_PURGE_COMPLETLY), m_htiMetControl, m_iPurgeMode == 2);
 		m_htiKnownMet = m_ctrlTreeOptions.InsertItem(GetResString(IDS_EXPIRED_KNOWN), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiMetControl);
 		m_ctrlTreeOptions.AddEditBox(m_htiKnownMet, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiRemoveAichImmediatly = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_REMOVE_AICH_IMMEDIATLY), m_htiMetControl, m_bRemoveAichImmediatly);
 		// EastShare END - Added by TAHO, .met control
 
 		// EastShare START - Added by Pretender
@@ -181,7 +195,9 @@ void CPPgEastShare::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiFairPlay, m_bFairPlay); //EastShare	- FairPlay by AndCycle
 
 	// EastShare START - Added by TAHO, .met flies Control
+	DDX_TreeRadio(pDX, IDC_EASTSHARE_OPTS, m_htiMetControl, m_iPurgeMode);
 	DDX_TreeEdit(pDX, IDC_EASTSHARE_OPTS, m_htiKnownMet, m_iKnownMetDays);
+	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiRemoveAichImmediatly, m_bRemoveAichImmediatly);
 	// EastShare END - Added by TAHO, .met flies Control
 	
 	DDX_TreeCheck(pDX, IDC_EASTSHARE_OPTS, m_htiEnablePreferShareAll, m_bEnablePreferShareAll);//EastShare - PreferShareAll by AndCycle
@@ -213,7 +229,10 @@ BOOL CPPgEastShare::OnInitDialog()
 	m_bFollowTheMajority = thePrefs.IsFollowTheMajorityEnabled(); // EastShare       - FollowTheMajority by AndCycle
 	m_bFairPlay = thePrefs.GetFairPlay() > 0 ; //EastShare	- FairPlay by AndCycle
 
-	m_iKnownMetDays = thePrefs.GetKnownMetDays(); //EastShare - Added by TAHO , .met file control
+	//EastShare START - Added by TAHO , .met file control
+	m_iKnownMetDays = thePrefs.GetKnownMetDays();
+	m_bRemoveAichImmediatly = thePrefs.DoRemoveAichImmediatly();
+	//EastShare END   - Added by TAHO , .met file control
 	
 	CPropertyPage::OnInitDialog();
 	InitTooltips(&m_ctrlTreeOptions);// MORPH leuk_he tooltipped.
@@ -287,7 +306,30 @@ BOOL CPPgEastShare::OnApply()
 	thePrefs.m_bFollowTheMajority = m_bFollowTheMajority; // EastShare       - FollowTheMajority by AndCycle
 	thePrefs.m_iFairPlay = m_bFairPlay ? 1 : 0; //EastShare	- FairPlay by AndCycle
 
-	thePrefs.SetKnownMetDays( m_iKnownMetDays); //EastShare - Added by TAHO , .met file control
+	//EastShare START - Added by TAHO , .met file control
+	switch(m_iPurgeMode)
+	{
+	case 1: // partial purge
+		{
+			thePrefs.m_bPartiallyPurgeOldKnownFiles = true;
+			thePrefs.m_bCompletlyPurgeOldKnownFiles = false;
+		} break;
+	case 2: // complete purge
+		{
+			thePrefs.m_bPartiallyPurgeOldKnownFiles = false;
+			thePrefs.m_bCompletlyPurgeOldKnownFiles = true;
+		} break;
+	default:
+		ASSERT( false ); //wth?! anyway, we proceed to don't purge
+	case 0: // don't purge
+		{
+			thePrefs.m_bPartiallyPurgeOldKnownFiles = false;
+			thePrefs.m_bCompletlyPurgeOldKnownFiles = false;
+		} break;
+	}
+	thePrefs.SetKnownMetDays(m_iKnownMetDays);
+	thePrefs.m_bRemoveAichImmediatly = m_bRemoveAichImmediatly;
+	//EastShare END   - Added by TAHO , .met file control
 
 	SetModified(FALSE);
 
@@ -319,6 +361,7 @@ void CPPgEastShare::Localize(void)
 
 		//EastShare START - Added By TAHO, .met file control // Modified by Pretender
 		if (m_htiKnownMet) m_ctrlTreeOptions.SetEditLabel(m_htiKnownMet, (GetResString(IDS_EXPIRED_KNOWN)));
+		if (m_htiRemoveAichImmediatly) m_ctrlTreeOptions.SetItemText(m_htiRemoveAichImmediatly, GetResString(IDS_REMOVE_AICH_IMMEDIATLY));
 		//EastShare END - Added By TAHO, .met file control
 		
 		// MORPH START - leuk_he tooltipped
@@ -388,7 +431,11 @@ void CPPgEastShare::OnDestroy()
 
 	//EastShare START - Added by TAHO, .met control
 	m_htiMetControl = NULL;
+	m_htiDontPurge = NULL;
+	m_htiPartiallyPurge = NULL;
+	m_htiCompletelyPurge = NULL;
 	m_htiKnownMet = NULL;
+	m_htiRemoveAichImmediatly = NULL;
 	//EastShare END - Added by TAHO, .met control
 	
 	CPropertyPage::OnDestroy();

@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2005 Merkur ( devs@emule-project.net / http://www.emule-project.net )
+//Copyright (C)2002-2008 Merkur ( devs@emule-project.net / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -20,18 +20,19 @@
 
 enum ESpecialDirectoryItems{
 	SDI_NO = 0,
-	SDI_ALL,
-	SDI_INCOMING,
-	SDI_TEMP,
-	SDI_DIRECTORY,
-	SDI_CATINCOMING,
+	SDI_ALL,				// "All Shared Files" node
+	SDI_INCOMING,			// "Incoming Files" node
+	SDI_TEMP,				// "Incomplete Files" node
+	SDI_DIRECTORY,			// "Shared Directories" node
+	SDI_CATINCOMING,		// Category subnode in the "Incoming Files" node
 	SDI_ED2KFILETYPE, //MORPH - Added, SharedView Ed2kType [Avi3k]
 	SDI_UNSHAREDDIRECTORY,
-	SDI_FILESYSTEMPARENT
+	SDI_FILESYSTEMPARENT	// "All Directories" (the file system)
 };
 
 class CSharedFilesCtrl;
 class CKnownFile;
+class CShareableFile;
 
 //**********************************************************************************
 // CDirectoryItem
@@ -69,16 +70,22 @@ public:
 	void			Localize();
 	void			EditSharedDirectories(const CDirectoryItem* pDir, bool bAdd, bool bSubDirectories);
 	void			Reload(bool bFore = false);
+	void			OnVolumesChanged();
+	void			FileSystemTreeUpdateBoldState(const CDirectoryItem* pDir = NULL);
+	bool			ShowFileSystemDirectory(const CString& strDir);
+	bool			ShowSharedDirectory(const CString& strDir);
+	void			ShowAllSharedFiles();
 
 	CDirectoryItem*		pHistory; //MORPH - Added, Downloaded History [Monki/Xman]
 
 protected:
 	virtual BOOL	OnCommand(WPARAM wParam, LPARAM lParam);
 	void			CreateMenues();
-	void			ShowFileDialog(CTypedPtrList<CPtrList, CKnownFile*>& aFiles, UINT uPshInvokePage = 0);
+	void			ShowFileDialog(CTypedPtrList<CPtrList, CShareableFile*>& aFiles, UINT uPshInvokePage = 0);
 	void			DeleteChildItems(CDirectoryItem* pParent);
 	void			AddSharedDirectory(CString strDir, bool bSubDirectories);
 	void			RemoveSharedDirectory(CString strDir, bool bSubDirectories);
+	void			RemoveAllSharedDirectories();
 	int				AddSystemIcon(HICON hIcon, int nSystemListPos);
 	void			FetchSharedDirsList();
 
@@ -89,7 +96,7 @@ protected:
 	afx_msg	void	OnLButtonUp(UINT nFlags, CPoint point );
 	afx_msg void	OnTvnItemexpanding(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void	OnTvnGetdispinfo(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void	OnLvnBegindrag(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg void	OnTvnBeginDrag(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void	OnMouseMove(UINT nFlags, CPoint point);
 	afx_msg void	OnCancelMode();
 	afx_msg LRESULT OnFoundNetworkDrive(WPARAM wParam,LPARAM lParam);	// SLUGFILLER: shareSubdir - Multi-threading
@@ -105,6 +112,7 @@ protected:
 	CStringList			m_strliSharedDirsSubdir;	// SLUGFILLER: shareSubdir - second list
 	CStringList			m_strliCatIncomingDirs;
 	CImageList			m_imlTree;
+	bool				m_bFileSystemRootDirty;
 
 private:
 	void	InitalizeStandardItems();
@@ -112,19 +120,18 @@ private:
 	void	FileSystemTreeCreateTree();
 	void	FileSystemTreeAddChildItem(CDirectoryItem* pRoot, CString strText, bool bTopLevel);
 	bool	FileSystemTreeHasSubdirectories(CString strDir);
-	bool	FileSystemTreeHasSharedSubdirectory(CString strDir);
+	bool	FileSystemTreeHasSharedSubdirectory(CString strDir, bool bOrFiles);
 	void	FileSystemTreeAddSubdirectories(CDirectoryItem* pRoot);
   /* old code sharesubdir
 	bool	FileSystemTreeIsShared(CString strDir);
   */
-	bool	FileSystemTreeIsShared(CString strDir, bool bCheckParent = false, bool bCheckIncoming = false,bool bOnlySubdir = false);	// SLUGFILLER: shareSubdir - allow checking indirect share
-	void	FileSystemTreeUpdateBoldState(const CDirectoryItem* pDir = NULL);
-	void	FileSystemTreeUpdateShareState(const CDirectoryItem* pDir = NULL);
-	void	FileSystemTreeSetShareState(const CDirectoryItem* pDir, bool bShared, bool bSubDirectories);
+	bool	FileSystemTreeIsShared(CString strDir, bool bCheckParent = false, bool bCheckIncoming = false,bool bOnlySubdir = false, bool bOnlyNormalShared = false);	// SLUGFILLER: shareSubdir - allow checking indirect share
 
+	void	FileSystemTreeUpdateShareState(const CDirectoryItem* pDir = NULL);
+	void	FileSystemTreeSetShareState(const CDirectoryItem* pDir, bool bSubDirectories);
 	void	FilterTreeAddSharedDirectory(CDirectoryItem* pDir, bool bRefresh);
-	void	FilterTreeAddSubDirectories(CDirectoryItem* pDirectory, CStringList& liDirs, int nLevel = 0);
-	bool	FilterTreeIsSubDirectory(CString strDir, CString strRoot, CStringList& liDirs);
+	void	FilterTreeAddSubDirectories(CDirectoryItem* pDirectory, const CStringList& liDirs, int nLevel, bool &rbShowWarning, bool bParentAccessible);
+	bool	FilterTreeIsSubDirectory(CString strDir, CString strRoot, const CStringList& liDirs);
 	void	FilterTreeReloadTree();
 
 

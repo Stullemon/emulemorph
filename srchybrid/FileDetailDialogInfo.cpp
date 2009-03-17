@@ -229,28 +229,31 @@ void CFileDetailDialogInfo::RefreshData()
 		
 		EFileType bycontent=GetFileTypeEx((CKnownFile*)file, false, true);
 		if (bycontent!=FILETYPE_UNKNOWN ) {
-			str=GetFiletypeName(bycontent) + _T("  (");
+			str = GetFileTypeName(bycontent) + _T("  (");
 			str.Append( GetResString(IDS_VERIFIED) + _T(')') );
 
-			int extLevel=IsExtentionTypeof(bycontent, ext);
+			int extLevel = IsExtensionTypeOf(bycontent, ext);
 			if (extLevel==-1) {
 				showwarning=true;
 				str.Append(_T(" - "));
 				str.Append(GetResString(IDS_INVALIDFILEEXT) + _T(": "));
 				str.Append(ext);
-			} else if (extLevel==0) {
+			}
+			else if (extLevel == 0) {
 				str.Append(_T(" - "));
 				str.Append(GetResString(IDS_UNKNOWNFILEEXT) + _T(": "));
 				str.Append(ext);
 			}
-		} else {
+		}
+		else {
 			// not verified
 			if (pos!=-1) {
 				str=file->GetFileName().Mid(pos+1);
 				str.MakeUpper();
 				str.Append(_T("  (") );
 				str.Append( GetResString(IDS_UNVERIFIED) +_T(')') );
-			} else
+			}
+			else
 				str=GetResString(IDS_UNKNOWN);
 		}
 		m_bShowFileTypeWarning = showwarning;

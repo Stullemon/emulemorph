@@ -111,7 +111,6 @@
 #include "safefile.h"
 #include "./kademlia/kademlia/prefs.h"
 #include "./kademlia/kademlia/kademlia.h"
-
 // random generator
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
@@ -122,6 +121,13 @@
 #pragma warning(default:4100) // unreferenced formal parameter
 #pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(default:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 
 #define CRYPT_HEADER_WITHOUTPADDING		    8
 #define	MAGICVALUE_UDP						91
@@ -306,6 +312,7 @@ int CEncryptedDatagramSocket::EncryptSendClient(uchar** ppbyBuf, int nBufLen, co
 		}
 		else {
 			ASSERT( false );
+			delete[] pachCryptedBuffer;
 			return nBufLen;
 		}
 	}

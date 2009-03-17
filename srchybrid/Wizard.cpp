@@ -41,7 +41,7 @@ BEGIN_MESSAGE_MAP(CConnectionWizardDlg, CDialog)
 	ON_BN_CLICKED(IDC_WIZ_LOWDOWN_RADIO, OnBnClickedWizLowdownloadRadio)
 	ON_BN_CLICKED(IDC_WIZ_MEDIUMDOWN_RADIO, OnBnClickedWizMediumdownloadRadio)
 	ON_BN_CLICKED(IDC_WIZ_HIGHDOWN_RADIO, OnBnClickedWizHighdownloadRadio)
-	ON_NOTIFY(NM_CLICK, IDC_PROVIDERS, OnNMClickProviders)
+	ON_NOTIFY(NM_CLICK, IDC_PROVIDERS, OnNmClickProviders)
 END_MESSAGE_MAP()
 
 CConnectionWizardDlg::CConnectionWizardDlg(CWnd* pParent /*=NULL*/)
@@ -301,8 +301,8 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 	SetDlgItemInt(IDC_WIZ_TRUEUPLOAD_BOX, 0, FALSE);
 
 	m_provider.InsertColumn(0, GetResString(IDS_PW_CONNECTION), LVCFMT_LEFT, 150);
-	m_provider.InsertColumn(1, GetResString(IDS_WIZ_DOWN), LVCFMT_LEFT, 85);
-	m_provider.InsertColumn(2, GetResString(IDS_WIZ_UP), LVCFMT_LEFT, 85);
+	m_provider.InsertColumn(1, GetResString(IDS_WIZ_DOWN),		LVCFMT_LEFT,  85);
+	m_provider.InsertColumn(2, GetResString(IDS_WIZ_UP),		LVCFMT_LEFT,  85);
 	m_provider.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
      
 	// MORPH START: leuk_he: swith 1 and 0 since morph works much better with limits set correct
@@ -335,11 +335,11 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 
 	Localize();
 
-	OnNMClickProviders(NULL, NULL)   ; // MORPH
+	OnNmClickProviders(NULL, NULL)   ; // MORPH
 	return TRUE;
 }
 
-void CConnectionWizardDlg::OnNMClickProviders(NMHDR* /*pNMHDR*/, LRESULT* /* pResult */ ) // morph prevent compile warning
+void CConnectionWizardDlg::OnNmClickProviders(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 {
 	SetCustomItemsActivation();
 

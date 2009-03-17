@@ -78,10 +78,10 @@ CPPgEmulespana::CPPgEmulespana()
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	m_htiUPnPGroup = NULL;
 //	m_htiUPnP = NULL;
-	m_htiUPnPWeb = NULL;
+//	m_htiUPnPWeb = NULL;
 	//m_htiUPnPTryRandom = NULL;
 //	m_bUPnP = false;
-	m_bUPnPWeb = false;
+//	m_bUPnPWeb = false;
 	// MORPH START leuk_he upnp bindaddr    	
     m_dwUpnpBindAddr = 0; 
     m_htiUpnpBinaddr = NULL;
@@ -219,7 +219,7 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		}
 		m_htiUPnPGroup = m_ctrlTreeOptions.InsertGroup(_T("Universal Plug & Play (UPnP)"), iImgUPnP,  TVI_ROOT); // leuk_he item ->group
 //		m_htiUPnP = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLE), m_htiUPnPGroup, m_bUPnP);
-  		m_htiUPnPWeb = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLEWEB), m_htiUPnPGroup, m_bUPnPWeb);
+//  		m_htiUPnPWeb = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNP_ENABLEWEB), m_htiUPnPGroup, m_bUPnPWeb);
 		// MORPH START leuk_he upnp bindaddr
          m_htiUpnpBinaddr =	 m_ctrlTreeOptions.InsertItem(GetResString(IDS_UPNPBINDADDR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiUPnPGroup);
 		 m_ctrlTreeOptions.AddIPAddress(m_htiUpnpBinaddr , RUNTIME_CLASS(CTreeOptionsIPAddressCtrl));
@@ -295,13 +295,13 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	//DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnP, m_bUPnP);
 	//DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPTryRandom, m_bUPnPTryRandom);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPWeb, m_bUPnPWeb);
+//	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPWeb, m_bUPnPWeb);
 	// MORPH start leuke_he upnp bindaddr
 	DDX_TreeIPAddress(pDX, IDC_EXT_OPTS,m_htiUpnpBinaddr  , m_dwUpnpBindAddr);
   	// MORPH end leuke_he upnp bindaddr
 		DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiUPnPPort, m_iUPnPPort);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPClearOnClose, m_bUPnPClearOnClose);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPWeb, m_bUPnPWeb);
+//	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPWeb, m_bUPnPWeb);
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDetectuPnP, m_iDetectuPnP);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUPnPForceUpdate, m_bUPnPForceUpdate);
 
@@ -454,7 +454,7 @@ void CPPgEmulespana::Localize()
 		// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 		if (m_htiUPnPGroup) m_ctrlTreeOptions.SetItemText(m_htiUPnPGroup, GetResString(IDS_UPNP));
 		if (m_htiUPnP) m_ctrlTreeOptions.SetItemText(m_htiUPnP, GetResString(IDS_UPNP_ENABLE));
-		if (m_htiUPnPWeb) m_ctrlTreeOptions.SetItemText(m_htiUPnPWeb, GetResString(IDS_UPNP_ENABLEWEB));
+//		if (m_htiUPnPWeb) m_ctrlTreeOptions.SetItemText(m_htiUPnPWeb, GetResString(IDS_UPNP_ENABLEWEB));
          //MORPH START leuk_he upnp bindaddr
 		if (m_htiUpnpBinaddr) m_ctrlTreeOptions.SetEditLabel(m_htiUpnpBinaddr, GetResString(IDS_UPNPBINDADDR));
 		//MORPH END leuk_he upnp bindaddr
@@ -470,7 +470,7 @@ void CPPgEmulespana::Localize()
         SetTool(m_htiICFSupportServerUDP,ADDMPATIP);
         SetTool(m_htiUPnPGroup ,UPNP_GROUP_TIP);
         //SetTool(m_htiUPnP,IDS_UPNP_ENABLE_TIP);
-        SetTool(m_htiUPnPWeb,IDS_UPNP_ENABLEWEB_TIP);
+//        SetTool(m_htiUPnPWeb,IDS_UPNP_ENABLEWEB_TIP);
         SetTool(m_htiUpnpBinaddr,IDS_UPNPBINDADDR_TIP);
         SetTool(m_htiWapRoot,WAP_TIP);
         SetTool(m_htiWapEnable ,ENABLEWAP_TIP);
@@ -643,7 +643,7 @@ void CPPgEmulespana::OnDestroy()
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	m_htiUPnPGroup = NULL;
 	m_htiUPnP = NULL;
-	m_htiUPnPWeb = NULL;
+//	m_htiUPnPWeb = NULL;
 	//m_htiUPnPTryRandom = NULL;
 	// End MoNKi
 
@@ -715,12 +715,12 @@ BOOL CPPgEmulespana::OnApply()
 		thePrefs.SetUPnPNatWeb(m_bUPnPWeb);
 	}
 	*/
-    if ((BOOL)thePrefs.GetUPnPNatWeb() != m_bUPnPWeb)
+/*    if ((BOOL)thePrefs.GetUPnPNatWeb() != m_bUPnPWeb)
 	{
 		theApp.m_UPnP_IGDControlPoint->SetUPnPNat(thePrefs.IsUPnPNat()); // and start/stop nat. 
 		thePrefs.SetUPnPNatWeb(m_bUPnPWeb);
 	}
-	// MORPH START leuk_he upnp bindaddr
+*/	// MORPH START leuk_he upnp bindaddr
 	thePrefs.SetUpnpBindAddr(m_dwUpnpBindAddr);// Note: read code in thePrefs..
 	// MORPH END  leuk_he upnp bindaddr
 	if (m_iUPnPPort>-1  && m_iUPnPPort < 65535)
@@ -853,7 +853,7 @@ BOOL CPPgEmulespana::OnInitDialog()
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 //	m_bUPnP = thePrefs.IsUPnPEnabled();
-	m_bUPnPWeb = thePrefs.GetUPnPNatWeb();
+//	m_bUPnPWeb = thePrefs.GetUPnPNatWeb();
 	// End MoNKi
     // MORPH START leuk_he upnp bindaddr
 	m_dwUpnpBindAddr=thePrefs.GetUpnpBindAddr();

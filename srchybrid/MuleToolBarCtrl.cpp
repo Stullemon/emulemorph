@@ -43,14 +43,14 @@ static char THIS_FILE[] = __FILE__;
 
 #define	EMULTB_BASEEXT		_T("eMuleToolbar.kad02")
 
-static const LPCTSTR _apszTBFiles[] = 
+static const LPCTSTR s_apszTBFiles[] = 
 {
 	_T("*.") EMULTB_BASEEXT _T(".bmp"),
 	_T("*.") EMULTB_BASEEXT _T(".gif"),
 	_T("*.") EMULTB_BASEEXT _T(".png")
 };
 
-static const LPCTSTR _apszSkinFiles[] = 
+static const LPCTSTR s_apszSkinFiles[] = 
 {
 	_T("*.") EMULSKIN_BASEEXT _T(".ini"),
 };
@@ -64,7 +64,7 @@ IMPLEMENT_DYNAMIC(CMuleToolbarCtrl, CToolBarCtrl)
  
 BEGIN_MESSAGE_MAP(CMuleToolbarCtrl, CToolBarCtrl)
 	ON_WM_SIZE()
-	ON_NOTIFY_REFLECT(NM_RCLICK, OnNMRclick)
+	ON_NOTIFY_REFLECT(NM_RCLICK, OnNmRClick)
 	ON_NOTIFY_REFLECT(TBN_QUERYDELETE, OnTbnQueryDelete)
 	ON_NOTIFY_REFLECT(TBN_QUERYINSERT, OnTbnQueryInsert)
 	ON_NOTIFY_REFLECT(TBN_GETBUTTONINFO, OnTbnGetButtonInfo)
@@ -341,14 +341,21 @@ void CMuleToolbarCtrl::SetAllButtonsWidth()
 		{
 			if (iCalcSize < 56)
 				iCalcSize = 56;
-			else if (iCalcSize > 70)
-				iCalcSize = 70;
+			else if (iCalcSize > 72)
+				iCalcSize = 72;
 		}
 		SetButtonWidth(iCalcSize, iCalcSize);
 	}
 	else
 	{
-		const int iSmallIconsButtonHeight = GetSystemMetrics(SM_CYSCREEN) <= 600 ? 16 : 28;
+		int iSmallIconsButtonHeight;
+		if (theApp.m_ullComCtrlVer < MAKEDLLVERULL(6, 0, 0, 0)) {
+			// Win98,WinME,Win2000: Comtrl32 prior to 6.0 cannot make a toolbar smaller than 22 pixels
+			// in height and if it gets larger than 22 pixels the icons do not get centered vertically.
+			iSmallIconsButtonHeight = 22;
+		}
+		else
+			iSmallIconsButtonHeight = GetSystemMetrics(SM_CYSCREEN) <= 600 ? 16 : 28;
 
 		if (m_eLabelType == NoLabels)
 		{
@@ -382,7 +389,7 @@ void CMuleToolbarCtrl::SetAllButtonsWidth()
 	}
 }
 
-void CMuleToolbarCtrl::OnNMRclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CMuleToolbarCtrl::OnNmRClick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	if (GetKeyState(VK_CONTROL) & 0x8000)
 	{
@@ -420,10 +427,10 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	if (!thePrefs.GetMuleDirectory(EMULE_TOOLBARDIR).IsEmpty())
 	{
 		CStringArray astrToolbarFiles;
-		for (int f = 0; f < _countof(_apszTBFiles); f++)
+		for (int f = 0; f < _countof(s_apszTBFiles); f++)
 		{
 			WIN32_FIND_DATA FileData;
-			HANDLE hSearch = FindFirstFile(thePrefs.GetMuleDirectory(EMULE_TOOLBARDIR) + CString(_T("\\")) + _apszTBFiles[f], &FileData);
+			HANDLE hSearch = FindFirstFile(thePrefs.GetMuleDirectory(EMULE_TOOLBARDIR) + CString(_T("\\")) + s_apszTBFiles[f], &FileData);
 			if (hSearch != INVALID_HANDLE_VALUE)
 			{
 				do {
@@ -492,10 +499,10 @@ void CMuleToolbarCtrl::OnNMRclick(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	if (!thePrefs.GetMuleDirectory(EMULE_SKINDIR, false).IsEmpty())
 	{
 		CStringArray astrSkinFiles;
-		for (int f = 0; f < _countof(_apszSkinFiles); f++)
+		for (int f = 0; f < _countof(s_apszSkinFiles); f++)
 		{
 			WIN32_FIND_DATA FileData;
-			HANDLE hSearch = FindFirstFile(thePrefs.GetMuleDirectory(EMULE_SKINDIR, false) + CString(_T("\\")) + _apszSkinFiles[f], &FileData);
+			HANDLE hSearch = FindFirstFile(thePrefs.GetMuleDirectory(EMULE_SKINDIR, false) + CString(_T("\\")) + s_apszSkinFiles[f], &FileData);
 			if (hSearch != INVALID_HANDLE_VALUE)
 			{
 				do {
@@ -710,16 +717,16 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			// we could also load "*.jpg" here, but because of the typical non solid background of JPGs this
 			// doesn't make sense here.
 			CString strFilter=GetResString(IDS_LOADFILTER_EMTOOLBAR)+ _T(" (");
-			for (int f = 0; f < _countof(_apszTBFiles); f++){
+			for (int f = 0; f < _countof(s_apszTBFiles); f++){
 				if (f > 0)
 					strFilter += _T(';');
-				strFilter += _apszTBFiles[f];
+				strFilter += s_apszTBFiles[f];
 			}
 			strFilter += _T(")|");
-			for (int f = 0; f < _countof(_apszTBFiles); f++){
+			for (int f = 0; f < _countof(s_apszTBFiles); f++){
 				if (f > 0)
 					strFilter += _T(';');
-				strFilter += _apszTBFiles[f];
+				strFilter += s_apszTBFiles[f];
 			}
 			strFilter += _T("||");
 			CFileDialog dialog(TRUE, EMULTB_BASEEXT _T(".bmp"), NULL, OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST, strFilter, NULL, 0);
@@ -775,16 +782,16 @@ BOOL CMuleToolbarCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		case MP_SELECT_SKIN_FILE:
 		{
 			CString strFilter=GetResString(IDS_LOADFILTER_EMSKINFILES) + _T(" (");
-			for (int f = 0; f < _countof(_apszSkinFiles); f++){
+			for (int f = 0; f < _countof(s_apszSkinFiles); f++){
 				if (f > 0)
 					strFilter += _T(';');
-				strFilter += _apszSkinFiles[f];
+				strFilter += s_apszSkinFiles[f];
 			}
 			strFilter += _T(")|");
-			for (int f = 0; f < _countof(_apszSkinFiles); f++){
+			for (int f = 0; f < _countof(s_apszSkinFiles); f++){
 				if (f > 0)
 					strFilter += _T(';');
-				strFilter += _apszSkinFiles[f];
+				strFilter += s_apszSkinFiles[f];
 			}
 			strFilter += _T("||");
 			CFileDialog dialog(TRUE, EMULSKIN_BASEEXT _T(".ini"), NULL, OFN_HIDEREADONLY | OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST, strFilter, NULL, 0);
@@ -1135,6 +1142,7 @@ void CMuleToolbarCtrl::Dump()
 		tbi.cchText = _countof(szLabel);
 		tbi.pszText = szLabel;
 		GetButtonInfo(i, &tbi);
+		szLabel[_countof(szLabel) - 1] = _T('\0');
 		TRACE(" %2d ", tbi.cx);
 	}
 	TRACE("\n");

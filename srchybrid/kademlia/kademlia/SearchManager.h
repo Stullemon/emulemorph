@@ -32,9 +32,9 @@ there client on the eMule forum..
 #include "../routing/Maps.h"
 
 #define INV_KAD_KEYWORD_CHARS	" ()[]{}<>,._-!?:;\\/"
-extern LPCSTR _aszInvKadKeywordCharsA;
-extern LPCTSTR _aszInvKadKeywordChars;
-extern LPCWSTR _awszInvKadKeywordChars;
+extern LPCSTR g_aszInvKadKeywordCharsA;
+extern LPCTSTR g_aszInvKadKeywordChars;
+extern LPCWSTR g_awszInvKadKeywordChars;
 
 namespace Kademlia
 {
@@ -54,7 +54,7 @@ namespace Kademlia
 			// Will return unique search id, returns zero if already searching for this file.
 			static CSearch* PrepareLookup(uint32 uType, bool bStart, const CUInt128 &uID);
 			// Will return unique search id, returns zero if already searching for this keyword.
-			static CSearch* PrepareFindKeywords(bool bUnicode, LPCTSTR szKeyword, UINT uSearchTermsSize, LPBYTE pucSearchTermsData);
+			static CSearch* PrepareFindKeywords(LPCTSTR szKeyword, UINT uSearchTermsSize, LPBYTE pucSearchTermsData);
 			static bool StartSearch(CSearch* pSearch);
 			static void ProcessResponse(const CUInt128 &uTarget, uint32 uFromIP, uint16 uFromPort, ContactList *plistResults);
 			static void ProcessResult(const CUInt128 &uTarget, const CUInt128 &uAnswer, TagList *plistInfo);

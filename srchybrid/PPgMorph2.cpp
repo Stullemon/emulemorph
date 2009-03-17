@@ -137,11 +137,30 @@ void CPPgMorph2::LoadSettings(void)
 	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(sTime);
 	//Commander - Added: IP2Country Auto-updating - End
 
+	//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	/*
 	//Commander - Added: IP2Country Auto-updating - Start
 	sTime[0] = _T('\0');
 	SysTimeToStr(thePrefs.GetIPfilterVersion(), sTime);
 	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(sTime);
 	//Commander - Added: IP2Country Auto-updating - End
+	*/
+	if(thePrefs.IsIPFilterViaDynDNS())
+	{
+		CString strBuffer=NULL;
+		if(PathFileExists(theApp.ipfilter->GetDefaultFilePath()))
+			strBuffer.Format(_T("v%u"), thePrefs.GetIPFilterVersionNum());
+		else
+			strBuffer=GetResString(IDS_DL_NONE);
+		GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
+	}
+	else
+	{
+		sTime[0] = _T('\0');
+		SysTimeToStr(thePrefs.GetIPfilterVersion(), sTime);
+		GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(sTime);
+	}
+	//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 }
 
 BOOL CPPgMorph2::OnApply()
@@ -196,6 +215,24 @@ void CPPgMorph2::Localize(void)
 		GetDlgItem(IDC_URL_FOR_UPDATING2)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING));
 		GetDlgItem(IDC_RESETIPFURL)->SetWindowText(GetResString(IDS_RESET));
 		GetDlgItem(IDC_AUTOUPIPFILTERWEEK)->SetWindowText(GetResString(IDS_AUTOUPIPFILTERWEEK));
+		//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+		TCHAR sTime[30];
+		if(thePrefs.IsIPFilterViaDynDNS())
+		{
+			CString strBuffer=NULL;
+			if(PathFileExists(theApp.ipfilter->GetDefaultFilePath()))
+				strBuffer.Format(_T("v%u"), thePrefs.GetIPFilterVersionNum());
+			else
+				strBuffer=GetResString(IDS_DL_NONE);
+			GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
+		}
+		else
+		{
+			sTime[0] = _T('\0');
+			SysTimeToStr(thePrefs.GetIPfilterVersion(), sTime);
+			GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(sTime);
+		}
+		//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 		//MORPH END   - Added by Yun.SF3: Ipfilter.dat update
 
 		//MORPH START - Added by Commander: IP2Country update
@@ -242,7 +279,7 @@ void CPPgMorph2::OnBnClickedUpdatefakes()
 
 void CPPgMorph2::OnBnClickedResetfakes()
 {
-	CString strBuffer = _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip");
+	CString strBuffer = _T("http://emulepawcio.sourceforge.net/fakes.zip");
 	GetDlgItem(IDC_UPDATE_URL_FAKELIST)->SetWindowText(strBuffer);
 	memset(thePrefs.GetFakesDatVersion(), 0, sizeof(SYSTEMTIME));
 	GetDlgItem(IDC_FAKELIST_VERSION)->SetWindowText(_T(""));
@@ -252,20 +289,50 @@ void CPPgMorph2::OnBnClickedResetfakes()
 void CPPgMorph2::OnBnClickedUpdateipfurl()
 {
 	OnApply();
+	//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	/*
 	theApp.ipfilter->UpdateIPFilterURL();
 	TCHAR sBuffer[30];
 	sBuffer[0] = _T('\0'); 
 	SysTimeToStr(thePrefs.GetIPfilterVersion(), sBuffer);
 	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(sBuffer);
+	*/
+	theApp.emuledlg->CheckIPFilter();
+	if(thePrefs.IsIPFilterViaDynDNS())
+	{
+		CString strBuffer=NULL;
+		if(PathFileExists(theApp.ipfilter->GetDefaultFilePath()))
+			strBuffer.Format(_T("v%u"), thePrefs.GetIPFilterVersionNum());
+		else
+			strBuffer=GetResString(IDS_DL_NONE);
+		GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
+	}
+	else
+	{
+		TCHAR sTime[30];
+		sTime[0] = _T('\0');
+		SysTimeToStr(thePrefs.GetIPfilterVersion(), sTime);
+		GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(sTime);
+	}
+	//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 }
 //MORPH END added by Yun.SF3: Ipfilter.dat update
 
 void CPPgMorph2::OnBnClickedResetipfurl()
 {
-	CString strBuffer = _T("http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip");
+	CString strBuffer = _T("http://downloads.sourceforge.net/scarangel/ipfilter.rar");
 	GetDlgItem(IDC_UPDATE_URL_IPFILTER)->SetWindowText(strBuffer);
-	memset(thePrefs.GetIPfilterVersion(), 0, sizeof(SYSTEMTIME));
+	//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	/*
 	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(_T(""));
+	*/
+	thePrefs.m_uIPFilterVersionNum = 0;
+	if(PathFileExists(theApp.ipfilter->GetDefaultFilePath()))
+		strBuffer = _T("v0");
+	else
+		strBuffer = GetResString(IDS_DL_NONE);
+	GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
+	//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 }
 
 //Commander - Added: IP2Country Auto-updating - Start

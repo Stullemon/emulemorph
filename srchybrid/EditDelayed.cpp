@@ -174,7 +174,6 @@ void CEditDelayed::OnInit(CHeaderCtrl* pColumnHeader, CArray<int, int>* paIgnore
 
 	CImageList* pImageList = new CImageList();
 	pImageList->Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
-	pImageList->SetBkColor(CLR_NONE);
 	if (pColumnHeader != NULL)
 		pImageList->Add(CTempIconLoader(_T("SEARCHEDIT")));
 	else
@@ -184,7 +183,6 @@ void CEditDelayed::OnInit(CHeaderCtrl* pColumnHeader, CArray<int, int>* paIgnore
 	
 	pImageList = new CImageList();
 	pImageList->Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1);
-	pImageList->SetBkColor(CLR_NONE);
 	pImageList->Add(CTempIconLoader(_T("FILTERCLEAR1")));
 	pImageList->Add(CTempIconLoader(_T("FILTERCLEAR2")));
 	m_iwReset.SetImageList(pImageList);
@@ -234,6 +232,7 @@ void CEditDelayed::OnLButtonDown(UINT nFlags, CPoint point)
 			for (int i = 0; i < nCount ;i++) {
 				nIdx = m_pctrlColumnHeader->OrderToIndex(i);
 				m_pctrlColumnHeader->GetItem(nIdx, &hdi);
+				szBuffer[_countof(szBuffer) - 1] = _T('\0');
 				bool bIgnored = false;
 				for (int i = 0; i < m_aIgnoredColums.GetCount(); i++){
 					if (m_aIgnoredColums[i] == nIdx){
@@ -315,10 +314,8 @@ void CEditDelayed::ShowColumnText(bool bShow)
 {
 	if (bShow)
 	{
-		if (GetWindowTextLength() != 0 && !m_bShowsColumnText) {
-			ASSERT(0);
+		if (GetWindowTextLength() != 0 && !m_bShowsColumnText)
 			return;
-		}
 
 		m_bShowsColumnText = true;
 		if (m_pctrlColumnHeader != NULL)
@@ -329,7 +326,10 @@ void CEditDelayed::ShowColumnText(bool bShow)
 			hdi.pszText = szBuffer;
 			hdi.cchTextMax = _countof(szBuffer);
 			if (m_pctrlColumnHeader->GetItem(m_nCurrentColumnIdx, &hdi))
+			{
+				szBuffer[_countof(szBuffer) - 1] = _T('\0');
 				SetWindowText(hdi.pszText);
+			}
 		}
 		else
 			SetWindowText(m_strAlternateText);

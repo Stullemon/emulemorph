@@ -31,7 +31,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -133,42 +133,44 @@ BOOL CED2kLinkDlg::OnSetActive()
 	if (m_bDataChanged)
 	{
 		//hashsetlink - check if at least one file has a hasset
-		BOOL bShow = FALSE;
+		BOOL bShowHashset = FALSE;
+		BOOL bShowAICH = FALSE;
+		BOOL bShowHTML = FALSE;
 		for (int i = 0; i != m_paFiles->GetSize(); i++){
-			const CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
-			if (!(file->GetHashCount() > 0 && file->GetHashCount() == file->GetED2KPartCount())){	// SLUGFILLER: SafeHash - use GetED2KPartCount
+			if (!(*m_paFiles)[i]->IsKindOf(RUNTIME_CLASS(CKnownFile)))
 				continue;
-			}
-			bShow = TRUE;
-			break;
-		}
-		GetDlgItem(IDC_LD_HASHSETCHE)->EnableWindow(bShow);
-		if (!bShow)
-			((CButton*)GetDlgItem(IDC_LD_HASHSETCHE))->SetCheck(BST_UNCHECKED);
-
-		//aich hash - check if at least one file has a valid hash
-		bShow = FALSE;
-		for (int i = 0; i != m_paFiles->GetSize(); i++){
+			bShowHTML = TRUE;
 			const CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
+			if (file->GetHashCount() > 0 && file->GetHashCount() == file->GetED2KPartCount()) // SLUGFILLER: SafeHash - use GetED2KPartCount
+			{
+				bShowHashset = TRUE;
+			}
 			if (file->GetAICHHashset()->HasValidMasterHash() 
 				&& (file->GetAICHHashset()->GetStatus() == AICH_VERIFIED || file->GetAICHHashset()->GetStatus() == AICH_HASHSETCOMPLETE))
 			{	
-				bShow = TRUE;
-				break;
+				bShowAICH = TRUE;
 			}
+			if (bShowHashset && bShowAICH)
+				break;
 		}
-		GetDlgItem(IDC_LD_EMULEHASHCHE)->EnableWindow(bShow);
-		if (!bShow)
+		GetDlgItem(IDC_LD_HASHSETCHE)->EnableWindow(bShowHashset);
+		if (!bShowHashset)
+			((CButton*)GetDlgItem(IDC_LD_HASHSETCHE))->SetCheck(BST_UNCHECKED);
+
+		GetDlgItem(IDC_LD_EMULEHASHCHE)->EnableWindow(bShowAICH);
+		if (!bShowAICH)
 			((CButton*)GetDlgItem(IDC_LD_EMULEHASHCHE))->SetCheck(BST_UNCHECKED);
 		else
 			((CButton*)GetDlgItem(IDC_LD_EMULEHASHCHE))->SetCheck(BST_CHECKED);
+
+		GetDlgItem(IDC_LD_HTMLCHE)->EnableWindow(bShowHTML);
 
 		UpdateLink();
 		m_bDataChanged = false;
 	}
 
-	return TRUE; 
-} 
+	return TRUE;
+}
 
 LRESULT CED2kLinkDlg::OnDataChanged(WPARAM, LPARAM)
 {
@@ -217,13 +219,17 @@ void CED2kLinkDlg::UpdateLink()
 	const bool bPHPBB = ((CButton*)GetDlgItem(IDC_LD_PHPBBCHE))->GetCheck() == BST_CHECKED && !bHTML;
 	//EastShare End - added by AndCycle, phpBB URL-Tags style link
 
-	for (int i = 0; i != m_paFiles->GetSize(); i++){
+	for (int i = 0; i != m_paFiles->GetSize(); i++)
+	{
+		if (!(*m_paFiles)[i]->IsKindOf(RUNTIME_CLASS(CKnownFile)))
+			continue;
+
 		if (!strLinks.IsEmpty())
 			strLinks += _T("\r\n\r\n");
 
 		if (bHTML)
 			strLinks += _T("<a href=\"");
-
+	
 		const CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
 		//EastShare Start - added by AndCycle, phpBB URL-Tags style link
 		if (bPHPBB) {

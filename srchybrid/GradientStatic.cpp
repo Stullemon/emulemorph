@@ -154,7 +154,7 @@ void CGradientStatic::DrawHorizontalText(CRect *pRect)
 
 	m_Mem.dc.SetTextColor(m_crTextColor);
 	m_Mem.dc.SetBkMode(TRANSPARENT);
-	m_Mem.dc.DrawText(strText, pRect, DT_LEFT|DT_SINGLELINE|DT_VCENTER|DT_END_ELLIPSIS);
+	m_Mem.dc.DrawText(strText, pRect, DT_VCENTER | DT_SINGLELINE | DT_END_ELLIPSIS);
 	if (pOldFont)
 		m_Mem.dc.SelectObject(pOldFont);
 }

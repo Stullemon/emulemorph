@@ -63,7 +63,7 @@ public:
 	void	Localize();
 	void	ShowResults(uint32 nResultsID);
 	void	ClearResultViewState(uint32 nResultsID);
-	void	NoTabs()	{ m_nResultsID = 0; }
+	void	NoTabs() { m_nResultsID = 0; }
 	void	UpdateSearch(CSearchFile* toupdate);
 	EFileSizeFormat GetFileSizeFormat() const { return m_eFileSizeFormat; }
 	void	SetFileSizeFormat(EFileSizeFormat eFormat);
@@ -85,6 +85,7 @@ protected:
 	CMap<int,int, CSortSelectionState*, CSortSelectionState*> 	m_mapSortSelectionStates;
 
 	COLORREF GetSearchItemColor(/*const*/ CSearchFile* src);
+	bool IsComplete(const CSearchFile *pFile, UINT uSources) const;
 	CString GetCompleteSourcesDisplayString(const CSearchFile* pFile, UINT uSources, bool* pbComplete = NULL) const;
 	void	ExpandCollapseItem(int iItem, int iAction);
 	void	HideSources(CSearchFile* toCollapse);
@@ -95,8 +96,8 @@ protected:
 	void	GetItemDisplayText(const CSearchFile* src, int iSubItem, LPTSTR pszText, int cchTextMax) const;
 	bool	IsFilteredItem(const CSearchFile* pSearchFile) const;
 
-	void	DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
-	void	DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, /*const*/ CSearchFile* src);
+	void	DrawSourceParent(CDC *dc, int nColumn, LPRECT lpRect, UINT uDrawTextAlignment, const CSearchFile *src);
+	void	DrawSourceChild(CDC *dc, int nColumn, LPRECT lpRect, UINT uDrawTextAlignment, const CSearchFile *src);
 
 	static int Compare(const CSearchFile* item1, const CSearchFile* item2, LPARAM lParamSort, bool bSortMod);
 	static int CompareChild(const CSearchFile* file1, const CSearchFile* file2, LPARAM lParamSort);
@@ -106,15 +107,15 @@ protected:
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnSysColorChange();
-	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/);
-	afx_msg void OnLvnDeleteAllItems(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnClick(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnDblClick(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
-	afx_msg void OnLvnKeyDown(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnLvnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnDestroy();
+	afx_msg void OnKeyDown(UINT nChar, UINT nRepCnt, UINT nFlags);
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnDeleteAllItems(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnKeyDown(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmDblClk(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSysColorChange();
 };

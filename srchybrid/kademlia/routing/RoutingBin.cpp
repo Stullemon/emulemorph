@@ -53,6 +53,9 @@ using namespace Kademlia;
 CMap<uint32, uint32, uint32, uint32> CRoutingBin::s_mapGlobalContactIPs;
 CMap<uint32, uint32, uint32, uint32> CRoutingBin::s_mapGlobalContactSubnets;
 
+#define MAX_CONTACTS_SUBNET			10
+#define MAX_CONTACTS_IP				1
+
 CRoutingBin::CRoutingBin()
 {
 	// Init delete contact flag.
@@ -70,7 +73,7 @@ CRoutingBin::~CRoutingBin()
 			AdjustGlobalTracking((*itContactList)->GetIPAddress(), false);
 			if (!m_bDontDeleteContacts)
 			{
-					delete *itContactList;
+				delete *itContactList;
 			}
 		}
 		// Remove all contact entries.
@@ -99,27 +102,13 @@ bool CRoutingBin::AddContact(CContact *pContact)
 	// Several checks to make sure that we don't store multiple contacts from the same IP or too many contacts from the same subnet
 	// This is supposed to add a bit of protection against several attacks and raise the ressource needs (IPs) for a successful contact on the attacker side 
 	// Such IPs are not banned from Kad, they still can index, search, etc so multiple KAD clients behind one IP still work
-	
-	// no more than 1 KadID per IP
-	uint32 nSameIPCount = 0;
-	s_mapGlobalContactIPs.Lookup(pContact->GetIPAddress(), nSameIPCount);
-	if (nSameIPCount >= 1){
-		if (::thePrefs.GetLogFilteredIPs())
-			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s:%u) - too many contacts with the same IP (global)") , ipstr(ntohl(pContact->GetIPAddress())), pContact->GetUDPPort());
-		return false;	
-	}	
+	if (!CheckGlobalIPLimits(pContact->GetIPAddress(), pContact->GetUDPPort(), true))
+		return false;
+
 	// no more than 2 IPs from the same /24 netmask in one bin, except if its a LANIP (if we don't accept LANIPs they already have been filtered before)
 	if (cSameSubnets >= 2 && !::IsLANIP(ntohl(pContact->GetIPAddress()))){
 		if (::thePrefs.GetLogFilteredIPs())
 			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s:%u) - too many contacts with the same subnet in RoutingBin") , ipstr(ntohl(pContact->GetIPAddress())), pContact->GetUDPPort());
-		return false;	
-	}
-	//  no more than 10 IPs from the same /24 netmask global, except if its a LANIP (if we don't accept LANIPs they already have been filtered before)
-	uint32 nSameSubnetGlobalCount = 0;
-	s_mapGlobalContactSubnets.Lookup(pContact->GetIPAddress() & 0xFFFFFF00, nSameSubnetGlobalCount);
-	if (nSameSubnetGlobalCount >= 10 && !::IsLANIP(ntohl(pContact->GetIPAddress()))){
-		if (::thePrefs.GetLogFilteredIPs())
-			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s:%u) - too many contacts with the same Subnet (global)") , ipstr(ntohl(pContact->GetIPAddress())), pContact->GetUDPPort());
 		return false;	
 	}		
 
@@ -173,7 +162,7 @@ CContact* CRoutingBin::GetContact(uint32 uIP, uint16 nPort, bool bTCPPort){
 		CContact* pContact = *itContactList;
 		if ((uIP == pContact->GetIPAddress()) 
 			&& ((!bTCPPort && nPort == pContact->GetUDPPort()) || (bTCPPort && nPort == pContact->GetTCPPort()) || nPort == 0))
-{
+		{
 			return pContact;
 		}
 	}
@@ -282,7 +271,7 @@ void CRoutingBin::AdjustGlobalTracking(uint32 uIP, bool bIncrease){
 	uint32 nSameIPCount = 0;
 	s_mapGlobalContactIPs.Lookup(uIP, nSameIPCount);
 	if (bIncrease){
-		if (nSameIPCount >= 1){
+		if (nSameIPCount >= MAX_CONTACTS_IP){
 			ASSERT( false );
 			DebugLogError(_T("RoutingBin Global IP Tracking inconsitency on increase (%s)"), ipstr(ntohl(uIP)));
 		}
@@ -305,7 +294,7 @@ void CRoutingBin::AdjustGlobalTracking(uint32 uIP, bool bIncrease){
 	uint32 nSameSubnetCount = 0;
 	s_mapGlobalContactSubnets.Lookup(uIP & 0xFFFFFF00, nSameSubnetCount);
 	if (bIncrease){
-		if (nSameSubnetCount >= 10 && !::IsLANIP(ntohl(uIP))){
+		if (nSameSubnetCount >= MAX_CONTACTS_SUBNET && !::IsLANIP(ntohl(uIP))){
 			ASSERT( false );
 			DebugLogError(_T("RoutingBin Global Subnet Tracking inconsitency on increase (%s)"), ipstr(ntohl(uIP)));
 		}
@@ -339,7 +328,7 @@ bool CRoutingBin::ChangeContactIPAddress(CContact* pContact, uint32 uNewIP)
 	// no more than 1 KadID per IP
 	uint32 nSameIPCount = 0;
 	s_mapGlobalContactIPs.Lookup(uNewIP, nSameIPCount);
-	if (nSameIPCount >= 1){
+	if (nSameIPCount >= MAX_CONTACTS_IP){
 		if (::thePrefs.GetLogFilteredIPs())
 			AddDebugLogLine(false, _T("Rejected kad contact ip change on update (old IP=%s, requested IP=%s) - too many contacts with the same IP (global)") , ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(uNewIP)));
 		return false;
@@ -349,7 +338,7 @@ bool CRoutingBin::ChangeContactIPAddress(CContact* pContact, uint32 uNewIP)
 		//  no more than 10 IPs from the same /24 netmask global, except if its a LANIP (if we don't accept LANIPs they already have been filtered before)
 		uint32 nSameSubnetGlobalCount = 0;
 		s_mapGlobalContactSubnets.Lookup(uNewIP & 0xFFFFFF00, nSameSubnetGlobalCount);
-		if (nSameSubnetGlobalCount >= 10 && !::IsLANIP(ntohl(uNewIP))){
+		if (nSameSubnetGlobalCount >= MAX_CONTACTS_SUBNET && !::IsLANIP(ntohl(uNewIP))){
 			if (::thePrefs.GetLogFilteredIPs())
 				AddDebugLogLine(false, _T("Rejected kad contact ip change on update (old IP=%s, requested IP=%s) - too many contacts with the same Subnet (global)") , ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(uNewIP)));
 			return false;	
@@ -416,4 +405,24 @@ void CRoutingBin::SetAllContactsVerified()
 	{
 		(*itContactList)->SetIpVerified(true);
 	}
+}
+bool CRoutingBin::CheckGlobalIPLimits(uint32 uIP, uint16 uPort, bool bLog)
+{
+	// no more than 1 KadID per IP
+	uint32 nSameIPCount = 0;
+	s_mapGlobalContactIPs.Lookup(uIP, nSameIPCount);
+	if (nSameIPCount >= MAX_CONTACTS_IP){
+		if (bLog && ::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s:%u) - too many contacts with the same IP (global)") , ipstr(ntohl(uIP)), uPort);
+		return false;	
+	}	
+	//  no more than 10 IPs from the same /24 netmask global, except if its a LANIP (if we don't accept LANIPs they already have been filtered before)
+	uint32 nSameSubnetGlobalCount = 0;
+	s_mapGlobalContactSubnets.Lookup(uIP & 0xFFFFFF00, nSameSubnetGlobalCount);
+	if (nSameSubnetGlobalCount >= MAX_CONTACTS_SUBNET && !::IsLANIP(ntohl(uIP))){
+		if (bLog && ::thePrefs.GetLogFilteredIPs())
+			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s:%u) - too many contacts with the same Subnet (global)"), ipstr(ntohl(uIP)), uPort);
+		return false;	
+	}
+	return true;
 }

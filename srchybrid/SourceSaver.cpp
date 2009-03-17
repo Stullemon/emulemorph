@@ -89,7 +89,6 @@ void CSourceSaver::DeleteFile(CPartFile* file)
 
 void CSourceSaver::LoadSourcesFromFile(CPartFile* , SourceList* sources, LPCTSTR slsfile)
 {
-	USES_CONVERSION;
 	CString strLine;
 	CStdioFile f;
 	if (!f.Open(slsfile, CFile::modeRead | CFile::typeText))
@@ -102,8 +101,7 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* , SourceList* sources, LPCTSTR
 			continue;
 		CString strIP = strLine.Left(pos);
 		strLine = strLine.Mid(pos+1);
-		USES_CONVERSION;
-		uint32 dwID = inet_addr(T2CA(strIP));
+		uint32 dwID = inet_addr(CT2CA(strIP));
 		if (dwID == INADDR_NONE) 
 			continue;
 		pos = strLine.Find(',');
@@ -132,7 +130,7 @@ void CSourceSaver::LoadSourcesFromFile(CPartFile* , SourceList* sources, LPCTSTR
 			continue;
 		CString strserverip = strLine.Left(pos);
 		strLine = strLine.Mid(pos+1);
-		uint32 dwserverip = inet_addr(T2CA(strserverip));
+		uint32 dwserverip = inet_addr(CT2CA(strserverip));
 		if (dwserverip == INADDR_NONE) 
 			continue;
 		pos = strLine.Find(';');

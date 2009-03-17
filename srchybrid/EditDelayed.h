@@ -48,6 +48,7 @@ public:
 	CEditDelayed();
 
 	void	OnInit(CHeaderCtrl* pColumnHeader, CArray<int, int>* paIgnoredColums = NULL);
+	void	ShowColumnText(bool bShow);
 
 	 // when not using pColumnHeader this text will be shown when the control is empty and has no focus
 	void	SetAlternateText(const CString& rstrText)	{ m_strAlternateText = rstrText; }
@@ -70,7 +71,6 @@ protected:
 
 	void	DoDelayedEvalute(bool bForce = false);
 	void	SetEditRect(bool bUpdateResetButtonPos, bool bUpdateColumnButton = false);
-	void	ShowColumnText(bool bShow);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnSetFocus(CWnd* pOldWnd);

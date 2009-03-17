@@ -41,6 +41,6 @@ protected:
 	void SetAllIcons();
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
-	afx_msg void OnNMRclick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmRClick(NMHDR *pNMHDR, LRESULT *pResult);
 };

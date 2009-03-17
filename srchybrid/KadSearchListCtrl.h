@@ -47,7 +47,7 @@ protected:
 	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmDblClk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
-	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 };

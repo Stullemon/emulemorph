@@ -35,7 +35,6 @@ struct SSearchParams
 		ulMinBitrate = 0;
 		ulMinLength = 0;
 		bMatchKeywords = false;
-		bUnicode = true;
 	}
 
 	SSearchParams(CFileDataIO& rFile)
@@ -53,7 +52,6 @@ struct SSearchParams
 		ulMinBitrate = 0;
 		ulMinLength = 0;
 		bMatchKeywords = false;
-		bUnicode = true;
 	}
 	DWORD dwSearchID;
 	bool bClientSharedFiles;
@@ -78,7 +76,6 @@ struct SSearchParams
 	CString strArtist;
 	CString strSpecialTitle;
 	bool bMatchKeywords;
-	bool bUnicode;
 
 	void StorePartially(CFileDataIO& rFile) const
 	{

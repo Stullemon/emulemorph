@@ -146,9 +146,9 @@ void CBarShader::FillRange(uint64 start, uint64 end, COLORREF color) {
 	//Fafner: note: see also similar code in CStatisticFile::AddBlockTransferred
 	//Fafner: note: also look for the keywords 'spreadbarinfo', 'barshaderinfo'
 #if _MSC_VER < 1400
-	for (POSITION pos = m_Spans.FindFirstKeyAfter(start+1); pos != endpos && pos != NULL; ) {
+	for (POSITION pos = m_Spans.FindFirstKeyAfter(start+1); pos != NULL && pos != endpos; ) {
 #else
-	for (POSITION pos = m_Spans.FindFirstKeyAfter(start); pos != endpos && pos != NULL; ) {
+	for (POSITION pos = m_Spans.FindFirstKeyAfter(start); pos != NULL && pos != endpos; ) {
 #endif
 		POSITION pos1 = pos;
 		m_Spans.GetNext(pos);

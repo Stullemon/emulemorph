@@ -301,6 +301,7 @@ BOOL TabControl::ReorderTab(unsigned int nSrcTab, unsigned int nDstTab)
 	item.pszText = sBuffer;
 	item.cchTextMax = _countof(sBuffer);
 	BOOL bOK = GetItem(nSrcTab, &item);
+	sBuffer[_countof(sBuffer) - 1] = _T('\0');
 	ASSERT( bOK );
 
 	bOK = DeleteItem(nSrcTab);
@@ -376,23 +377,24 @@ BOOL TabControl::DragDetectPlus(CWnd* Handle, CPoint p)
 
 void TabControl::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 {
-     CRect rect(lpDIS->rcItem);
+	CRect rect(lpDIS->rcItem);
 	int nTabIndex = lpDIS->itemID;
 	if (nTabIndex < 0)
 		return;
-     
+
 	TCHAR szLabel[256];
 	TC_ITEM tci;
-     tci.mask = TCIF_TEXT | TCIF_PARAM;
+	tci.mask = TCIF_TEXT | TCIF_PARAM;
 	tci.pszText = szLabel;
 	tci.cchTextMax = _countof(szLabel);
 	if (!GetItem(nTabIndex, &tci))
 		return;
-     
+	szLabel[_countof(szLabel) - 1] = _T('\0');
+
 	CDC* pDC = CDC::FromHandle(lpDIS->hDC);
 	if (!pDC)
 		return;
-	 
+
 	CRect rcFullItem(lpDIS->rcItem);
 	bool bSelected = (lpDIS->itemState & ODS_SELECTED) != 0;
 
@@ -448,9 +450,9 @@ void TabControl::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 				    // First item
 				    if (nTabIndex == GetItemCount() - 1)
 					    iPartId = TABP_TABITEMBOTHEDGE; // First & Last item
-		 else
+				    else
 					    iPartId = TABP_TABITEMLEFTEDGE;
-	 }
+			    }
 			    else if (nTabIndex == GetItemCount() - 1) {
 				    // Last item
 				    iPartId = TABP_TABITEMRIGHTEDGE;

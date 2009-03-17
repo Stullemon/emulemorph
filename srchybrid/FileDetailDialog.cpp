@@ -37,12 +37,13 @@ bool NeedArchiveInfoPage(const CSimpleArray<CObject*>* paItems)
 {
 	if (paItems->GetSize() == 1)
 	{
-		CKnownFile *pFile = STATIC_DOWNCAST(CKnownFile, (*paItems)[0]);
+		CShareableFile *pFile = STATIC_DOWNCAST(CShareableFile, (*paItems)[0]);
 		EFileType eFileType = GetFileTypeEx(pFile);
 		switch (eFileType) {
 			case ARCHIVE_ZIP:
 			case ARCHIVE_RAR:
 			case ARCHIVE_ACE:
+			case IMAGE_ISO:
 				return true;
 		}
 	}
@@ -172,6 +173,7 @@ CFileDetailDialog::CFileDetailDialog(const CSimpleArray<CPartFile*>* paFiles, UI
 	m_wndArchiveInfo.m_psp.dwFlags |= PSP_USEICONID;
 	m_wndArchiveInfo.m_psp.pszIcon = _T("ARCHIVE_PREVIEW");
 	m_wndArchiveInfo.SetFiles(&m_aItems);
+
 	m_wndMediaInfo.m_psp.dwFlags &= ~PSP_HASHELP;
 	m_wndMediaInfo.m_psp.dwFlags |= PSP_USEICONID;
 	m_wndMediaInfo.m_psp.pszIcon = _T("MEDIAINFO");

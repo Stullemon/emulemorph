@@ -349,7 +349,7 @@ CUpDownClient* CClientList::FindClientByUserHash(const uchar* clienthash, uint32
 		CUpDownClient* cur_client = list.GetNext(pos);
 		if (!md4cmp(cur_client->GetUserHash() ,clienthash)){
 			if ((dwIP == 0 || dwIP == cur_client->GetIP()) && (nTCPPort == 0 || nTCPPort == cur_client->GetUserPort())) 
-			return cur_client;
+				return cur_client;
 			else
 				pFound = pFound != NULL ? pFound : cur_client;
 		}
@@ -518,7 +518,9 @@ void CClientList::TrackBadRequest(const CUpDownClient* upcClient, int nIncreaseC
 		CDeletedClient* ccToAdd = new CDeletedClient(upcClient);
 		ccToAdd->m_cBadRequest = nIncreaseCounter;
 		// morph some extra verbose tracking, read http://forum.emule-project.net/index.php?showtopic=136682
-		DebugLogError( _T("Client: %s (%s), Increased set badrequestcounter to %d"), upcClient->GetUserName(), ipstr(upcClient->GetConnectIP()),pResult->m_cBadRequest);
+		// nIncreaseCounter equals ccToAdd->m_cBadRequest here so i will rather use the first
+		// anyway, pResult->m_cBadRequest is utterly wrong because pResult is a NULL-pointer here
+		DebugLogError( _T("Client: %s (%s), Increased set badrequestcounter to %d"), upcClient->GetUserName(), ipstr(upcClient->GetConnectIP()),nIncreaseCounter);
 		m_trackedClientsList.SetAt(upcClient->GetIP(), ccToAdd);
 	}
 }
@@ -637,15 +639,17 @@ void CClientList::Process()
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugSend("OP_KAD_FWTCPCHECK_ACK", cur_client);
 					Packet* pPacket = new Packet(OP_KAD_FWTCPCHECK_ACK, 0, OP_EMULEPROT);
-					cur_client->SafeSendPacket(pPacket);
+					if (!cur_client->SafeConnectAndSendPacket(pPacket))
+						cur_client = NULL;
 				}
 				else {
-				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-					DebugSend("KADEMLIA_FIREWALLED_ACK_RES", cur_client->GetIP(), cur_client->GetKadPort());
+					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+						DebugSend("KADEMLIA_FIREWALLED_ACK_RES", cur_client->GetIP(), cur_client->GetKadPort());
 					Kademlia::CKademlia::GetUDPListener()->SendNullPacket(KADEMLIA_FIREWALLED_ACK_RES, ntohl(cur_client->GetIP()), cur_client->GetKadPort(), 0, NULL);
 				}
 				//We are done with this client. Set Kad status to KS_NONE and it will be removed in the next cycle.
-				cur_client->SetKadState(KS_NONE);
+				if (cur_client != NULL)
+					cur_client->SetKadState(KS_NONE);
 				break;
 
 			case KS_INCOMING_BUDDY:
@@ -707,7 +711,7 @@ void CClientList::Process()
 						DebugSend("OP__BuddyPing", cur_client);
 					Packet* buddyPing = new Packet(OP_BUDDYPING, 0, OP_EMULEPROT);
 					theStats.AddUpDataOverheadOther(buddyPing->size);
-					cur_client->SafeSendPacket(buddyPing);
+					VERIFY( cur_client->SendPacket(buddyPing, true, true) );
 					cur_client->SetLastBuddyPingPongTime();
 				}
 				break;
@@ -836,8 +840,7 @@ bool CClientList::RequestTCP(Kademlia::CContact* contact, uint8 byConnectOptions
 	else
 		bNewClient = false;
 	//MORPH END   - Added by SiRoB, Fix adding multiple clientKnown with same ip port
-	
-	
+
 	//Add client to the lists to be processed.
 	pNewClient->SetKadPort(contact->GetUDPPort());
 	pNewClient->SetKadState(KS_QUEUED_FWCHECK);

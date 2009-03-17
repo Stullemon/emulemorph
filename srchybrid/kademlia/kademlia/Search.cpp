@@ -75,7 +75,7 @@ CSearch::CSearch()
 	m_uTotalRequestAnswers = 0;
 	m_uKadPacketSent = 0;
 	m_uSearchID = (uint32)-1;
-	(void)m_sFileName;
+	(void)m_sGUIName;
 	m_bStoping = false;
 	m_uTotalLoad = 0;
 	m_uTotalLoadResponses = 0;
@@ -85,6 +85,7 @@ CSearch::CSearch()
 	m_uSearchTermsDataSize = 0;
 	pNodeSpecialSearchRequester = NULL;
 	m_uClosestDistantFound = 0;
+	m_pSearchTerm = NULL;
 }
 
 CSearch::~CSearch()
@@ -157,6 +158,9 @@ CSearch::~CSearch()
 	}
 	if(m_pucSearchTermsData)
 		delete[] m_pucSearchTermsData;
+
+	delete m_pSearchTerm;
+	m_pSearchTerm = NULL;
 }
 
 void CSearch::Go()
@@ -297,12 +301,19 @@ void CSearch::JumpStart()
 
 void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *plistResults)
 {
-	if(plistResults)
-		m_uLastResponse = time(NULL);
-
 	// Remember the contacts to be deleted when finished
 	for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
 		m_listDelete.push_back(*itContactList);
+
+	// Make sure the node is not sending more results than we requested, which is not only a protocol vialoation
+	// but most likely a malicous answer
+	if (plistResults->size() > GetRequestContactCount())
+	{
+		DebugLogWarning(_T("Node %s sent more contacts than requested on a routing query, ignoring response"), ipstr(ntohl(uFromIP)));
+		return;
+	}
+
+	m_uLastResponse = time(NULL);
 
 	if (m_uType == NODEFWCHECKUDP){
 		m_uAnswers++;
@@ -341,6 +352,9 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 				m_mapResponded[uFromDistance] = pFromContact;
 
 				std::map<uint32, uint32> mapReceivedIPs;
+				std::map<uint32, uint32> mapReceivedSubnets;
+				mapReceivedIPs[uFromIP] = 1; // A node is not allowd to answer with contacts to itself
+				mapReceivedSubnets[uFromIP & 0xFFFFFF00] = 1;
 				// Loop through their responses
 				for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
 				{
@@ -356,6 +370,7 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 						continue;
 					if (m_mapTried.count(uDistance) > 0)
 						continue;
+					
 					// we only accept unique IPs in the answer, having multiple IDs pointing to one IP in the routing tables
 					// is no longer allowed since 0.49a anyway
 					if (mapReceivedIPs.count(pContact->GetIPAddress()) > 0){
@@ -365,6 +380,25 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 					}
 					else
 						mapReceivedIPs[pContact->GetIPAddress()] = 1;
+
+					// and no more than 2 IPs from the same /28 subnet
+					if (mapReceivedSubnets.count(pContact->GetIPAddress() & 0xFFFFFF00) > 0 && !::IsLANIP(ntohl(pContact->GetIPAddress())))
+					{
+						ASSERT( mapReceivedSubnets.find(pContact->GetIPAddress() & 0xFFFFFF00) != mapReceivedSubnets.end() );
+						int nSubNetCount = mapReceivedSubnets.find(pContact->GetIPAddress() & 0xFFFFFF00)->second;
+						if (nSubNetCount >= 2)
+						{
+							DebugLogWarning(_T("More than 2 KadIDs pointing to same Subnet (%s) in KADEMLIA(2)_RES answer - ignored, sent by %s")
+								, ipstr(ntohl(pContact->GetIPAddress() & 0xFFFFFF00)), ipstr(ntohl(pFromContact->GetIPAddress())));
+							continue;
+						}
+						else
+							mapReceivedSubnets[pContact->GetIPAddress() & 0xFFFFFF00] = nSubNetCount + 1;
+
+					}
+					else
+						mapReceivedSubnets[pContact->GetIPAddress() & 0xFFFFFF00] = 1;
+
 					// Add to possible
 					m_mapPossible[uDistance] = pContact;
 
@@ -611,7 +645,7 @@ void CSearch::StorePacket()
 				if (pFile)
 				{
 					// We set this mostly for GUI resonse.
-					m_sFileName = pFile->GetFileName();
+					m_sGUIName = pFile->GetFileName();
 
 					// Get our clientID for the packet.
 					CUInt128 uID(CKademlia::GetPrefs()->GetClientHash());
@@ -957,7 +991,7 @@ void CSearch::ProcessResultFile(const CUInt128 &uAnswer, TagList *plistInfo)
 	uint16 uUDPPort = 0;
 	uint32 uBuddyIP = 0;
 	uint16 uBuddyPort = 0;
-	//    uint32 uClientID = 0;
+	//uint32 uClientID = 0;
 	CUInt128 uBuddy;
 	uint8 byCryptOptions = 0; // 0 = not supported
 
@@ -976,13 +1010,13 @@ void CSearch::ProcessResultFile(const CUInt128 &uAnswer, TagList *plistInfo)
 			uBuddyIP = (uint32)pTag->GetInt();
 		else if (!pTag->m_name.Compare(TAG_SERVERPORT))
 			uBuddyPort = (uint16)pTag->GetInt();
-		//        else if (!pTag->m_name.Compare(TAG_CLIENTLOWID))
-		//            uClientID = pTag->GetInt();
+		//else if (!pTag->m_name.Compare(TAG_CLIENTLOWID))
+		//  uClientID = pTag->GetInt();
 		else if (!pTag->m_name.Compare(TAG_BUDDYHASH))
 		{
 			uchar ucharBuddyHash[16];
 			if (pTag->IsStr() && strmd4(pTag->GetStr(), ucharBuddyHash))
-			md4cpy(uBuddy.GetDataPtr(), ucharBuddyHash);
+				md4cpy(uBuddy.GetDataPtr(), ucharBuddyHash);
 			else
 				TRACE("+++ Invalid TAG_BUDDYHASH tag\n");
 		}
@@ -1032,19 +1066,13 @@ void CSearch::ProcessResultNotes(const CUInt128 &uAnswer, TagList *plistInfo)
 			pEntry->m_uTCPPort = (uint16)pTag->GetInt();
 			delete pTag;
 		}
-		else if (!pTag->m_name.Compare(TAG_FILENAME))
+		else if (!pTag->m_name.Compare(TAG_FILENAME) || !pTag->m_name.Compare(TAG_DESCRIPTION))
 		{
-			pEntry->SetFileName(pTag->GetStr());
-			delete pTag;
-		}
-		else if (!pTag->m_name.Compare(TAG_DESCRIPTION))
-		{
-			pEntry->AddTag(pTag);
-
-			// Test if comment sould be filtered
+			// Run the filter against the comment as well as against the filename since both values could be misused
 			if (!thePrefs.GetCommentFilter().IsEmpty())
 			{
 				CString strCommentLower(pTag->GetStr());
+				// Verified Locale Dependency: Locale dependent string conversion (OK)
 				strCommentLower.MakeLower();
 
 				int iPos = 0;
@@ -1059,6 +1087,22 @@ void CSearch::ProcessResultNotes(const CUInt128 &uAnswer, TagList *plistInfo)
 					}
 					strFilter = thePrefs.GetCommentFilter().Tokenize(_T("|"), iPos);
 				}
+			}
+			if (!pTag->m_name.Compare(TAG_FILENAME))
+			{
+				pEntry->SetFileName(pTag->GetStr());
+				delete pTag;
+			}
+			else
+			{
+				ASSERT( !pTag->m_name.Compare(TAG_DESCRIPTION) );
+				if (pTag->GetStr().GetLength() > MAXFILECOMMENTLEN)
+				{
+					CKadTagStr* pReplace = new CKadTagStr(pTag->m_name, pTag->GetStr().Left(MAXFILECOMMENTLEN));
+					delete pTag;
+					pTag = pReplace;
+				}
+				pEntry->AddTag(pTag);
 			}
 		}
 		else if (!pTag->m_name.Compare(TAG_FILERATING))
@@ -1119,15 +1163,15 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 {
 	// Process a keyword that we received.
 	// Set of data we can use for a keyword result
-	CString sName;
+	CKadTagValueString sName;
 	uint64 uSize = 0;
-	CString sType;
-	CString sFormat;
-	CString sArtist;
-	CString sAlbum;
-	CString sTitle;
+	CKadTagValueString sType;
+	CKadTagValueString sFormat;
+	CKadTagValueString sArtist;
+	CKadTagValueString sAlbum;
+	CKadTagValueString sTitle;
 	uint32 uLength = 0;
-	CString sCodec;
+	CKadTagValueString sCodec;
 	uint32 uBitrate = 0;
 	uint32 uAvailability = 0;
 	uint32 uPublishInfo = 0;
@@ -1143,7 +1187,7 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 		{
 			// Set flag based on last tag we saw.
 			sName = pTag->GetStr();
-			if( sName != _T("") )
+			if( sName != L"" )
 				bFileName = true;
 			else
 				bFileName = false;
@@ -1189,12 +1233,12 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 			// we don't keep this as tag, but as a member property of the searchfile, as we only need its informations
 			// in the search list and don't want to carry the tag over when downloading the file (and maybe even wrongly publishing it)
 			uPublishInfo = (uint32)pTag->GetInt();
-#ifdef _DEBUG
+/*#ifdef _DEBUG
 			uint32 byDifferentNames = (uPublishInfo & 0xFF000000) >> 24;
 			uint32 byPublishersKnown = (uPublishInfo & 0x00FF0000) >> 16;
 			uint32 wTrustValue = uPublishInfo & 0x0000FFFF;
 			DebugLog(_T("Received PublishInfoTag: %u different names, %u Publishers, %.2f Trustvalue"), byDifferentNames, byPublishersKnown, (float)wTrustValue / 100.0f);  
-#endif
+#endif*/
 		}
 		delete pTag;
 	}
@@ -1207,14 +1251,14 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 	// Check that this result matches original criteria
 	WordList listTestWords;
 	CSearchManager::GetWords(sName, &listTestWords);
-	CStringW keyword;
+	CKadTagValueString keyword;
 	for (WordList::const_iterator itWordListWords = m_listWords.begin(); itWordListWords != m_listWords.end(); ++itWordListWords)
 	{
 		keyword = *itWordListWords;
 		bool bInterested = false;
 		for (WordList::const_iterator itWordListTestWords = listTestWords.begin(); itWordListTestWords != listTestWords.end(); ++itWordListTestWords)
 		{
-			if (!keyword.CompareNoCase(*itWordListTestWords))
+			if (!KadTagStrCompareNoCase(keyword, *itWordListTestWords))
 			{
 				bInterested = true;
 				break;
@@ -1224,13 +1268,21 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 			return;
 	}
 
+	if (m_pSearchTerm == NULL && m_pucSearchTermsData != NULL && m_uSearchTermsDataSize != 0)
+	{
+		// we create this to pass on to the searchlist, which will check it against the result to filter bad ones
+		CSafeMemFile tmpFile(m_pucSearchTermsData, m_uSearchTermsDataSize);
+		m_pSearchTerm = CKademliaUDPListener::CreateSearchExpressionTree(tmpFile, 0);
+		ASSERT( m_pSearchTerm != NULL );
+	}
+
 	// Inc the number of answers.
 	m_uAnswers++;
 	// Update the search in the GUI
 	theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 	// Send we keyword to searchlist to be processed.
 	// This method is still legacy from the multithreaded Kad, maybe this can be changed for better handling.
-	theApp.searchlist->KademliaSearchKeyword(m_uSearchID, &uAnswer, sName, uSize, sType, uPublishInfo, 8,
+	theApp.searchlist->KademliaSearchKeyword(m_uSearchID, &uAnswer, sName, uSize, sType, uPublishInfo, m_pSearchTerm, 8,
 		    2, TAG_FILEFORMAT, (LPCTSTR)sFormat,
 		    2, TAG_MEDIA_ARTIST, (LPCTSTR)sArtist,
 		    2, TAG_MEDIA_ALBUM, (LPCTSTR)sAlbum,
@@ -1251,30 +1303,11 @@ void CSearch::SendFindValue(CContact* pContact)
 			return;
 		CSafeMemFile fileIO(33);
 		// The number of returned contacts is based on the type of search.
-		switch(m_uType)
-		{
-			case NODE:
-			case NODECOMPLETE:
-			case NODESPECIAL:
-			case NODEFWCHECKUDP:
-				fileIO.WriteUInt8(KADEMLIA_FIND_NODE);
-				break;
-			case FILE:
-			case KEYWORD:
-			case FINDSOURCE:
-			case NOTES:
-				fileIO.WriteUInt8(KADEMLIA_FIND_VALUE);
-				break;
-			case FINDBUDDY:
-			case STOREFILE:
-			case STOREKEYWORD:
-			case STORENOTES:
-				fileIO.WriteUInt8(KADEMLIA_STORE);
-				break;
-			default:
-				AddDebugLogLine(false, _T("Invalid search type. (CSearch::SendFindValue)"));
-				return;
-		}
+		uint8 byContactCount = GetRequestContactCount();
+		if (byContactCount > 0)
+			fileIO.WriteUInt8(byContactCount);
+		else
+			return;
 		// Put the target we want into the packet.
 		fileIO.WriteUInt128(&m_uTarget);
 		// Add the ID of the contact we are contacting for sanity checks on the other end.
@@ -1399,11 +1432,11 @@ static int GetMetaDataWords(CStringArray& rastrWords, const CString& rstrData)
 	// Create a list of the 'words' found in 'data'. This is similar but though not equal
 	// to the 'CSearchManager::GetWords' function which needs to follow some other rules.
 	int iPos = 0;
-	CString strWord = rstrData.Tokenize(_aszInvKadKeywordChars, iPos);
+	CString strWord = rstrData.Tokenize(g_aszInvKadKeywordChars, iPos);
 	while (!strWord.IsEmpty())
 	{
 		rastrWords.Add(strWord);
-		strWord = rstrData.Tokenize(_aszInvKadKeywordChars, iPos);
+		strWord = rstrData.Tokenize(g_aszInvKadKeywordChars, iPos);
 	}
 	return (int) rastrWords.GetSize(); // MOPRH
 }
@@ -1417,12 +1450,13 @@ static bool IsRedundantMetaData(const CStringArray& rastrFileNameWords, const CS
 	int iMetaDataWords = 0;
 	int iFoundInFileName = 0;
 	int iPos = 0;
-	CString strMetaDataWord(rstrMetaData.Tokenize(_aszInvKadKeywordChars, iPos));
+	CString strMetaDataWord(rstrMetaData.Tokenize(g_aszInvKadKeywordChars, iPos));
 	while (!strMetaDataWord.IsEmpty())
 	{
 		iMetaDataWords++;
 		for (int i = 0; i < rastrFileNameWords.GetSize(); i++)
 		{
+			// Verified Locale Dependency: Locale dependent string comparison (OK)
 			if (rastrFileNameWords.GetAt(i).CompareNoCase(strMetaDataWord) == 0)
 			{
 				iFoundInFileName++;
@@ -1431,7 +1465,7 @@ static bool IsRedundantMetaData(const CStringArray& rastrFileNameWords, const CS
 		}
 		if (iFoundInFileName < iMetaDataWords)
 			return false;
-		strMetaDataWord = rstrMetaData.Tokenize(_aszInvKadKeywordChars, iPos);
+		strMetaDataWord = rstrMetaData.Tokenize(g_aszInvKadKeywordChars, iPos);
 	}
 
 	if (iMetaDataWords == 0)
@@ -1495,12 +1529,12 @@ void CSearch::PreparePacketForTags(CByteIO *byIO, CKnownFile *pFile)
 				}
 				_aMetaTags[] =
 				{
-				    { FT_MEDIA_ARTIST,  2 },
-				    { FT_MEDIA_ALBUM,   2 },
-				    { FT_MEDIA_TITLE,   2 },
-				    { FT_MEDIA_LENGTH,  3 },
-				    { FT_MEDIA_BITRATE, 3 },
-				    { FT_MEDIA_CODEC,   2 }
+				    { FT_MEDIA_ARTIST,  TAGTYPE_STRING },
+				    { FT_MEDIA_ALBUM,   TAGTYPE_STRING },
+				    { FT_MEDIA_TITLE,   TAGTYPE_STRING },
+				    { FT_MEDIA_LENGTH,  TAGTYPE_UINT32 },
+				    { FT_MEDIA_BITRATE, TAGTYPE_UINT32 },
+				    { FT_MEDIA_CODEC,   TAGTYPE_STRING }
 				};
 				CStringArray astrFileNameWords;
 				for (int iIndex = 0; iIndex < ARRSIZE(_aMetaTags); iIndex++)
@@ -1601,13 +1635,13 @@ uint32 CSearch::GetRequestAnswer() const
 	return m_uTotalRequestAnswers;
 }
 
-const CString& CSearch::GetFileName() const
+const CKadTagValueString& CSearch::GetGUIName() const
 {
-	return m_sFileName;
+	return m_sGUIName;
 }
-void CSearch::SetFileName(const CString& sFileName)
+void CSearch::SetGUIName(const CKadTagValueString& sGUIName)
 {
-	m_sFileName = sFileName;
+	m_sGUIName = sGUIName;
 }
 CUInt128 CSearch::GetTarget() const
 {
@@ -1637,4 +1671,34 @@ void CSearch::SetSearchTermData( uint32 uSearchTermDataSize, LPBYTE pucSearchTer
 	m_uSearchTermsDataSize = uSearchTermDataSize;
 	m_pucSearchTermsData = new BYTE[uSearchTermDataSize];
 	memcpy(m_pucSearchTermsData, pucSearchTermsData, uSearchTermDataSize);
+}
+
+uint8 CSearch::GetRequestContactCount() const
+{
+	// Returns the amount of contacts we request on routing queries based on the search type
+		switch(m_uType)
+		{
+			case NODE:
+			case NODECOMPLETE:
+			case NODESPECIAL:
+			case NODEFWCHECKUDP:
+				return KADEMLIA_FIND_NODE;
+				break;
+			case FILE:
+			case KEYWORD:
+			case FINDSOURCE:
+			case NOTES:
+				return KADEMLIA_FIND_VALUE;
+				break;
+			case FINDBUDDY:
+			case STOREFILE:
+			case STOREKEYWORD:
+			case STORENOTES:
+				return KADEMLIA_STORE;
+				break;
+			default:
+				DebugLogError(false, _T("Invalid search type. (CSearch::GetRequestContactCount())"));
+				ASSERT( false );
+				return 0;
+		}
 }

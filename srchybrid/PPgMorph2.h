@@ -1,4 +1,7 @@
 #pragma once
+#include "PPGtooltipped.h" //MORPH leuk_he addded tooltipped
+
+void SysTimeToStr(LPSYSTEMTIME st, LPTSTR str); //MORPH - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 
 // CPPgMorph dialog
 // MORPH START leuk_he tooltipped

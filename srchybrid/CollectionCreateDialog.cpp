@@ -60,15 +60,15 @@ enum ECols
 IMPLEMENT_DYNAMIC(CCollectionCreateDialog, CDialog)
 
 BEGIN_MESSAGE_MAP(CCollectionCreateDialog, CResizableDialog)
-	ON_BN_CLICKED(IDC_COLLECTIONREMOVE, OnBnClickedCollectionRemove)
-	ON_BN_CLICKED(IDC_COLLECTIONADD, OnBnClickedCollectionAdd)
-	ON_BN_CLICKED(IDC_CCOLL_SAVE, OnBnClickedOk)
 	ON_BN_CLICKED(IDC_CCOLL_CANCEL, OnCancel)
-	ON_BN_CLICKED(IDC_COLLECTIONVIEWSHAREBUTTON, OnBnClickedCollectionViewShared)
-	ON_NOTIFY(NM_DBLCLK, IDC_COLLECTIONAVAILLIST, OnNMDblClkCollectionAvailList)
-	ON_NOTIFY(NM_DBLCLK, IDC_COLLECTIONLISTCTRL, OnNMDblclkCollectionList)
-	ON_EN_KILLFOCUS(IDC_COLLECTIONNAMEEDIT, OnEnKillFocusCollectionName)
+	ON_BN_CLICKED(IDC_CCOLL_SAVE, OnBnClickedOk)
+	ON_BN_CLICKED(IDC_COLLECTIONADD, OnBnClickedCollectionAdd)
 	ON_BN_CLICKED(IDC_COLLECTIONCREATEFORMAT, OnBnClickedCollectionFormat)
+	ON_BN_CLICKED(IDC_COLLECTIONREMOVE, OnBnClickedCollectionRemove)
+	ON_BN_CLICKED(IDC_COLLECTIONVIEWSHAREBUTTON, OnBnClickedCollectionViewShared)
+	ON_EN_KILLFOCUS(IDC_COLLECTIONNAMEEDIT, OnEnKillFocusCollectionName)
+	ON_NOTIFY(NM_DBLCLK, IDC_COLLECTIONAVAILLIST, OnNmDblClkCollectionAvailList)
+	ON_NOTIFY(NM_DBLCLK, IDC_COLLECTIONLISTCTRL, OnNmDblClkCollectionList)
 END_MESSAGE_MAP()
 
 CCollectionCreateDialog::CCollectionCreateDialog(CWnd* pParent /*=NULL*/)
@@ -135,7 +135,7 @@ BOOL CCollectionCreateDialog::OnInitDialog(void)
 		ASSERT(0);
 		return TRUE;
 	}
-	SetIcon(m_icoWnd = theApp.LoadIcon(_T("Collection")), FALSE);
+	SetIcon(m_icoWnd = theApp.LoadIcon(_T("AABCollectionFileType")), FALSE);
 	if (m_bCreatemode)
 		SetWindowText(GetResString(IDS_CREATECOLLECTION));
 	else
@@ -146,7 +146,7 @@ BOOL CCollectionCreateDialog::OnInitDialog(void)
 
 	m_AddCollectionButton.SetIcon(m_icoForward = theApp.LoadIcon(_T("FORWARD")));
 	m_RemoveCollectionButton.SetIcon(m_icoBack = theApp.LoadIcon(_T("BACK")));
-	m_CollectionListIcon.SetIcon(m_icoColl = theApp.LoadIcon(_T("COLLECTION")));
+	m_CollectionListIcon.SetIcon(m_icoColl = theApp.LoadIcon(_T("AABCollectionFileType")));
 	m_CollectionSourceListIcon.SetIcon(m_icoFiles = theApp.LoadIcon(_T("SharedFilesList")));
 
 	m_SaveButton.SetWindowText(GetResString(IDS_SAVE));
@@ -334,24 +334,7 @@ void CCollectionCreateDialog::OnBnClickedOk()
 			if (AfxMessageBox(GetResString(IDS_COLL_REPLACEEXISTING), MB_ICONWARNING | MB_ICONQUESTION | MB_DEFBUTTON2 | MB_YESNO) == IDNO)
 				return;
 
-			BOOL bDeleteSuccessful = FALSE;
-			if (!thePrefs.GetRemoveToBin())
-			{
-				bDeleteSuccessful = DeleteFile(sFilePath);
-			}
-			else
-			{
-				TCHAR todel[MAX_PATH+1];
-				memset(todel, 0, sizeof todel);
-				_tcsncpy(todel, sFilePath, ARRSIZE(todel)-2);
-
-				SHFILEOPSTRUCT fp = {0};
-				fp.wFunc = FO_DELETE;
-				fp.hwnd = theApp.emuledlg->m_hWnd;
-				fp.pFrom = todel;
-				fp.fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT;// | FOF_NOERRORUI
-				bDeleteSuccessful = (SHFileOperation(&fp) == 0);
-			}
+			bool bDeleteSuccessful = ShellDeleteFile(sFilePath);
 			if (bDeleteSuccessful)
 			{
 				CKnownFile* pKnownFile = theApp.knownfiles->FindKnownFileByPath(sFilePath);
@@ -405,13 +388,13 @@ void CCollectionCreateDialog::OnBnClickedCollectionViewShared()
 	m_CollectionViewShareButton.SetWindowText(strTitle);
 }
 
-void CCollectionCreateDialog::OnNMDblClkCollectionAvailList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CCollectionCreateDialog::OnNmDblClkCollectionAvailList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	AddSelectedFiles();
 	*pResult = 0;
 }
 
-void CCollectionCreateDialog::OnNMDblclkCollectionList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
+void CCollectionCreateDialog::OnNmDblClkCollectionList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 {
 	RemoveSelectedFiles();
 	*pResult = 0;

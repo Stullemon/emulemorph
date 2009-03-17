@@ -310,7 +310,6 @@ void CWapServer::ProcessURL(WapThreadData Data)
 	CoInitialize(NULL);
 
 	try{
-		USES_CONVERSION;
 		CString Out = _T("");
 		CString OutE = _T("");	// List Entry Templates
 		CString OutE2 = _T("");
@@ -360,7 +359,7 @@ void CWapServer::ProcessURL(WapThreadData Data)
 			}
 
 			if (login) {
-				uint32 ipn=inet_addr(T2CA(ip)) ;
+				uint32 ipn=inet_addr(CT2CA(ip)) ;
 				for(int i = 0; i < pThis->m_Params.badlogins.GetSize();)
 				{
 					if (ipn == pThis->m_Params.badlogins[i].datalen) {
@@ -474,7 +473,7 @@ void CWapServer::ProcessURL(WapThreadData Data)
 		}
 		else 
 		{
-			uint32 ip= inet_addr(T2CA(ipstr( Data.inadr )));
+			uint32 ip= inet_addr(CT2CA(ipstr( Data.inadr )));
 			uint32 faults=0;
 
 			// check for bans
@@ -502,7 +501,7 @@ void CWapServer::ProcessURL(WapThreadData Data)
 		
 		Out.Replace(_T("[CharSet]"), _GetWebCharSet());
 		// send answer ...
-		Data.pSocket->SendContent(T2CA(WMLInit), Out);
+		Data.pSocket->SendContent(CT2CA(WMLInit), Out);
 	}
 	catch(...){
 		TRACE(_T("*** Unknown exception in CWapServer::ProcessURL\n"));
@@ -3956,8 +3955,7 @@ void CWapServer::SendScriptFile(WapThreadData Data){
 		Out +=_T("<wml><card><p>");
 		Out +=_T("Error: This browser do not support WMLScript");
 		Out +=_T("</p></card></wml>");
-		USES_CONVERSION;
-		Data.pSocket->SendContent(T2CA(WMLInit), Out);
+		Data.pSocket->SendContent(CT2CA(WMLInit), Out);
 		return;
 	}
 
@@ -4016,7 +4014,6 @@ bool CWapServer::BrowserAccept(WapThreadData Data, CString sAccept){
 }
 
 void CWapServer::SendImageFile(WapThreadData Data, CString filename){
-	USES_CONVERSION;
 	CWapServer *pThis = (CWapServer *)Data.pThis;
 	if (pThis == NULL) return;
 
@@ -4070,16 +4067,16 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 
 				sizeWBMP=PathFileExists(wbmpFile);
 				if(bufferPNG && bufferGIF && (sizePNG<=sizeGIF) && (sizePNG<=sizeWBMP)){
-					Data.pSocket->SendContent(T2CA(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n") + moreContentType), bufferPNG, sizePNG);
+					Data.pSocket->SendContent(CT2CA(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n") + moreContentType), bufferPNG, sizePNG);
 				}
 				else if(bufferPNG && bufferGIF && (sizeGIF<=sizePNG) && (sizeGIF<=sizeWBMP)){
-					Data.pSocket->SendContent(T2CA(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n") + moreContentType), bufferGIF, sizeGIF);
+					Data.pSocket->SendContent(CT2CA(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n") + moreContentType), bufferGIF, sizeGIF);
 				}
 				else if(bufferPNG && (sizePNG<=sizeWBMP)){
-					Data.pSocket->SendContent(T2CA(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n") + moreContentType), bufferPNG, sizePNG);
+					Data.pSocket->SendContent(CT2CA(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/png\r\n") + moreContentType), bufferPNG, sizePNG);
 				}
 				else if(bufferGIF && (sizeGIF<=sizeWBMP)){
-					Data.pSocket->SendContent(T2CA(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n") + moreContentType), bufferGIF, sizeGIF);
+					Data.pSocket->SendContent(CT2CA(_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/gif\r\n") + moreContentType), bufferGIF, sizeGIF);
 				}
 				else {
 					SendFile(Data,wbmpFile,_T("Server: eMule\r\nCache-Control: public\r\nContent-Type: image/vnd.wap.wbmp\r\n") + moreContentType);
@@ -4325,8 +4322,7 @@ bool CWapServer::SendFile(WapThreadData Data, LPCTSTR szfileName, CString conten
 		char* buffer=new char[(UINT)(file.GetLength())];
 		int size=file.Read(buffer,(UINT)(file.GetLength()));
 		file.Close();
-		USES_CONVERSION;
-		Data.pSocket->SendContent(T2CA(contentType), buffer, size);
+		Data.pSocket->SendContent(CT2CA(contentType), buffer, size);
 		delete[] buffer;
 		return true;
 	}

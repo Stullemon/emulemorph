@@ -26,6 +26,7 @@
 #include "Preferences.h"
 #include "HelpIDs.h"
 #include "UserMsgs.h"
+#include "opcodes.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -44,16 +45,16 @@ BEGIN_MESSAGE_MAP(CPPgDirectories, CPropertyPage)
 	ON_BN_CLICKED(IDC_UNCADD,	OnBnClickedAddUNC)
 	ON_BN_CLICKED(IDC_UNCREM,	OnBnClickedRemUNC)
 	ON_WM_HELPINFO()
-	ON_WM_DESTROY() // morph gdi leak
 	ON_BN_CLICKED(IDC_SELTEMPDIRADD, OnBnClickedSeltempdiradd)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 CPPgDirectories::CPPgDirectories()
 	: CPPgtooltipped (CPPgDirectories::IDD) //leuk_he  tooltipped 
 		//: CPropertyPage(CPPgServer::IDD) leuk_he  tooltipped 
 {
+	m_icoBrowse = NULL;
 }
-
 
 CPPgDirectories::~CPPgDirectories()
 {
@@ -71,17 +72,19 @@ BOOL CPPgDirectories::OnInitDialog()
 	CWaitCursor curWait; // initialization of that dialog may take a while..
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
-	// SLUGFILLER START: shareSubdir remove - removed double init
-	/*
-	m_ShareSelector.Init();	
-   SLUGFILLER END: shareSubdir  */
 
-	((CEdit*)GetDlgItem(IDC_INCFILES))->SetLimitText(509);
-	((CEdit*)GetDlgItem(IDC_TEMPFILES))->SetLimitText(509);
+	((CEdit*)GetDlgItem(IDC_INCFILES))->SetLimitText(MAX_PATH);
+
+	AddBuddyButton(GetDlgItem(IDC_INCFILES)->m_hWnd, ::GetDlgItem(m_hWnd, IDC_SELINCDIR));
+	InitAttachedBrowseButton(::GetDlgItem(m_hWnd, IDC_SELINCDIR), m_icoBrowse);
+	
+	AddBuddyButton(GetDlgItem(IDC_TEMPFILES)->m_hWnd, ::GetDlgItem(m_hWnd, IDC_SELTEMPDIR));
+	InitAttachedBrowseButton(::GetDlgItem(m_hWnd, IDC_SELTEMPDIR), m_icoBrowse);
+
 /* old version: on column
-	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCFOLDERS), LVCFMT_LEFT, 280, -1); 
+	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCFOLDERS), LVCFMT_LEFT, 280); 
 */
-	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCLIST_INACTIVE  ), LVCFMT_LEFT, 270, -1);  // sharesubdir ==> this can be better
+	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCLIST_INACTIVE  ), LVCFMT_LEFT, 270);  // sharesubdir ==> this can be better
 	m_ctlUncPaths.InsertColumn(1,GetResString(IDS_SUBDIRS), LVCFMT_LEFT); // sharesubdir + column for inactive shares
 	m_ctlUncPaths.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
@@ -105,8 +108,8 @@ void CPPgDirectories::LoadSettings(void)
 		if (i+1<thePrefs.tempdir.GetCount())
 			tempfolders.Append(_T("|") );
 	}
-
 	GetDlgItem(IDC_TEMPFILES)->SetWindowText(tempfolders);
+
 /* sharesubdir
 	m_ShareSelector.SetSharedDirectories(&thePrefs.shareddir_list);
 */
@@ -176,31 +179,24 @@ BOOL CPPgDirectories::OnApply()
 		while (!bEnd)
 		{
 			bEnd = !ff.FindNextFile();
-			if (ff.IsDirectory() || ff.IsDots() || ff.IsSystem() || ff.IsTemporary() || ff.GetLength()==0)
+			if (ff.IsDirectory() || ff.IsDots() || ff.IsSystem() || ff.IsTemporary() || ff.GetLength()==0 || ff.GetLength()>MAX_EMULE_FILE_SIZE)
 				continue;
 
-			// ignore real(!) LNK files
+			// ignore real LNK files
 			TCHAR szExt[_MAX_EXT];
 			_tsplitpath(ff.GetFileName(), NULL, NULL, NULL, szExt);
 			if (_tcsicmp(szExt, _T(".lnk")) == 0){
 				SHFILEINFO info;
 				if (SHGetFileInfo(ff.GetFilePath(), 0, &info, sizeof(info), SHGFI_ATTRIBUTES) && (info.dwAttributes & SFGAO_LINK)){
-					CComPtr<IShellLink> pShellLink;
-					if (SUCCEEDED(pShellLink.CoCreateInstance(CLSID_ShellLink))){
-						CComQIPtr<IPersistFile> pPersistFile = pShellLink;
-						if (pPersistFile){
-							USES_CONVERSION;
-							if (SUCCEEDED(pPersistFile->Load(T2COLE(ff.GetFilePath()), STGM_READ))){
-								TCHAR szResolvedPath[MAX_PATH];
-								if (pShellLink->GetPath(szResolvedPath, ARRSIZE(szResolvedPath), NULL, 0) == NOERROR){
-									TRACE(_T("%hs: Did not share file \"%s\" - not supported file type\n"), __FUNCTION__, ff.GetFilePath());
+					if (!thePrefs.GetResolveSharedShellLinks())
 									continue;
 								}
 							}
-						}
-					}
-				}
-			}
+
+			// ignore real THUMBS.DB files -- seems that lot of ppl have 'thumbs.db' files without the 'System' file attribute
+			if (ff.GetFileName().CompareNoCase(_T("thumbs.db")) == 0)
+				continue;
+
 			bExistingFile = true;
 			break;
 		}
@@ -386,8 +382,6 @@ void CPPgDirectories::Localize(void)
 
 		GetDlgItem(IDC_INCOMING_FRM)->SetWindowText(GetResString(IDS_PW_INCOMING));
 		GetDlgItem(IDC_TEMP_FRM)->SetWindowText(GetResString(IDS_PW_TEMP));
-		GetDlgItem(IDC_SELINCDIR)->SetWindowText(GetResString(IDS_PW_BROWSE));
-		GetDlgItem(IDC_SELTEMPDIR)->SetWindowText(GetResString(IDS_PW_BROWSE));
 		GetDlgItem(IDC_SHARED_FRM)->SetWindowText(GetResString(IDS_PW_SHARED));
 		// leuk_he tooltipped start
 		SetTool(  IDC_INCFILES,  IDS_INCFILES_TIP);
@@ -433,7 +427,7 @@ void CPPgDirectories::FillUncList(void)
 
 }
 
-
+//sharesubdir
 IMPLEMENT_DYNAMIC(CAddSharedDirDialog, CDialog)
 
 CAddSharedDirDialog::CAddSharedDirDialog(LPTSTR sUnc,bool bSubdir,CWnd* pParent /*=NULL*/)
@@ -496,6 +490,7 @@ void CPPgDirectories::OnBnClickedAddUNC()
 	CString unc=AddSharedDirDialog.GetUNC();
 	bool   bsharesubdir=AddSharedDirDialog.GetSubDir();
   // MORPH END SHARESUBDIR
+
 	if (unc.Right(1) == _T("\\"))
 		unc.Delete(unc.GetLength()-1, 1);
 
@@ -564,5 +559,21 @@ void CPPgDirectories::OnBnClickedSeltempdiradd()
 		paths.Append(_T("|"));
 		paths.Append(buffer);
 		SetDlgItemText(IDC_TEMPFILES, paths);
+	}
+}
+
+void CPPgDirectories::OnDestroy()
+{
+	//tooltipped
+	/*
+	CPropertyPage::OnDestroy();
+	*/
+	// Stullemon - is this right? it should be 'coz we derive from CPPgtooltipped
+	CPPgtooltipped::OnDestroy();
+	//tooltipped
+	if (m_icoBrowse)
+	{
+		VERIFY( DestroyIcon(m_icoBrowse) );
+		m_icoBrowse = NULL;
 	}
 }

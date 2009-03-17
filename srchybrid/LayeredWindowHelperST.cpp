@@ -10,15 +10,11 @@ static char THIS_FILE[] = __FILE__;
 
 CLayeredWindowHelperST::CLayeredWindowHelperST()
 {
-	// Load DLL.
-	m_hDll = ::LoadLibrary(_T("USER32.dll"));
+	m_hDll = GetModuleHandle(_T("user32"));
 }
 
 CLayeredWindowHelperST::~CLayeredWindowHelperST()
 {
-	// Unload DLL (if any)
-	if (m_hDll)	::FreeLibrary(m_hDll);
-	m_hDll = NULL;
 }
 
 // This function adds the WS_EX_LAYERED style to the specified window.

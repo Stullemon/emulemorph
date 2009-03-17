@@ -24,6 +24,7 @@
 #include "HelpIDs.h"
 #include "TextToSpeech.h"
 #include "TaskbarNotifier.h"
+#include ".\ppgnotify.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -53,12 +54,14 @@ BEGIN_MESSAGE_MAP(CPPgNotify, CPropertyPage)
 	ON_EN_CHANGE(IDC_EDIT_SENDER, OnSettingsChange)
 	ON_EN_CHANGE(IDC_EDIT_RECEIVER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_CB_ENABLENOTIFICATIONS, OnBnClickedCbEnablenotifications)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 CPPgNotify::CPPgNotify()
 	: CPropertyPage(CPPgNotify::IDD)
 {
 	m_bEnableEMail = true;
+	m_icoBrowse = NULL;
 }
 
 CPPgNotify::~CPPgNotify()
@@ -78,6 +81,9 @@ BOOL CPPgNotify::OnInitDialog()
 
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
+
+	AddBuddyButton(GetDlgItem(IDC_EDIT_TBN_WAVFILE)->m_hWnd, ::GetDlgItem(m_hWnd, IDC_BTN_BROWSE_WAV));
+	InitAttachedBrowseButton(::GetDlgItem(m_hWnd, IDC_BTN_BROWSE_WAV), m_icoBrowse);
 
 	int iBtnID;
 	if (thePrefs.notifierSoundType == ntfstSoundFile)
@@ -158,7 +164,6 @@ void CPPgNotify::Localize(void)
 		SetWindowText(GetResString(IDS_PW_EKDEV_OPTIONS));
 		GetDlgItem(IDC_CB_TBN_USESOUND)->SetWindowText(GetResString(IDS_PW_TBN_USESOUND));
 		GetDlgItem(IDC_CB_TBN_NOSOUND)->SetWindowText(GetResString(IDS_NOSOUND));
-		GetDlgItem(IDC_BTN_BROWSE_WAV)->SetWindowText(GetResString(IDS_PW_BROWSE));
 		GetDlgItem(IDC_CB_TBN_ONLOG)->SetWindowText(GetResString(IDS_PW_TBN_ONLOG));
 		GetDlgItem(IDC_CB_TBN_ONCHAT)->SetWindowText(GetResString(IDS_PW_TBN_ONCHAT));
 		GetDlgItem(IDC_CB_TBN_POP_ALWAYS)->SetWindowText(GetResString(IDS_PW_TBN_POP_ALWAYS));
@@ -298,4 +303,14 @@ void CPPgNotify::OnBnClickedCbEnablenotifications()
 {
 	UpdateControls();
 	SetModified();
+}
+
+void CPPgNotify::OnDestroy()
+{
+	CPropertyPage::OnDestroy();
+	if (m_icoBrowse)
+	{
+		VERIFY( DestroyIcon(m_icoBrowse) );
+		m_icoBrowse = NULL;
+	}
 }

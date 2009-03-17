@@ -19,20 +19,23 @@
 #include "opcodes.h"
 
 /*
-					   CPartFile
-					 /
-		  CKnownFile
-		/
+										CPartFile
+										/
+							CKnownFile
+							/
+			CShareableFile
+			/
 CAbstractFile - CCollectionFile
-		\
-		  CSearchFile
+			\
+			CSearchFile
 */
 
 namespace Kademlia
 {
 	class CUInt128;
 	class CEntry;
-	typedef std::list<CStringW> WordList;
+	class CKadTagValueString;
+	typedef std::list<CKadTagValueString> WordList;
 };
 
 class CTag;

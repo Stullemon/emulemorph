@@ -69,6 +69,7 @@ void CButtonsTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 	tci.cchTextMax = _countof(szLabel);
 	if (!GetItem(nTabIndex, &tci))
 		return;
+	szLabel[_countof(szLabel) - 1] = _T('\0');
 
 	CDC* pDC = CDC::FromHandle(lpDIS->hDC);
 	if (!pDC)

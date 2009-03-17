@@ -92,7 +92,6 @@ void CPPgIRC::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_MISC_IRC, m_ctrlTreeOptions);
 	if (!m_bInitializedTreeOpts)
 	{
-		m_htiSoundEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_SOUNDEVENTS), TVI_ROOT, m_bSoundEvents);
 		m_htiHelpChannel = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_HELPCHANNEL), TVI_ROOT, m_bHelpChannel);
 		m_htiChannelsOnConnect = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_LOADCHANNELLISTONCON), TVI_ROOT, m_bChannelsOnConnect);
 		m_htiTimeStamp = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_ADDTIMESTAMP), TVI_ROOT, m_bTimeStamp);
@@ -108,6 +107,7 @@ void CPPgIRC::DoDataExchange(CDataExchange* pDX)
 		m_htiAcceptLinks = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_ACCEPTLINKS), TVI_ROOT, m_bAcceptLinks);
 		m_htiAcceptLinksFriends = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_ACCEPTLINKSFRIENDS), TVI_ROOT, m_bIRCAcceptLinksFriendsOnly);
 		m_htiSmileys = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SHOWSMILEYS), TVI_ROOT, m_bIRCEnableSmileys);
+		m_htiSoundEvents = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_IRC_SOUNDEVENTS), TVI_ROOT, m_bSoundEvents);
 
 		m_ctrlTreeOptions.Expand(m_htiInfoMessage, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiEmuleProto, TVE_EXPAND);

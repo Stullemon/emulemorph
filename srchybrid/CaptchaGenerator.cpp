@@ -16,9 +16,16 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 #include "StdAfx.h"
-#include ".\captchagenerator.h"
+#include "CaptchaGenerator.h"
 #include "CxImage/xImage.h"
 #include "OtherFunctions.h"
+
+#ifdef _DEBUG
+#define new DEBUG_NEW
+#undef THIS_FILE
+static char THIS_FILE[] = __FILE__;
+#endif
+
 
 #define LETTERSIZE  32
 #define CROWDEDSIZE 18

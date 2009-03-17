@@ -94,6 +94,7 @@ BOOL CComboBoxEx2::PreTranslateMessage(MSG* pMsg)
 	return CComboBoxEx::PreTranslateMessage(pMsg);
 }
 
+// Win98: This function does not work under Win98 ?
 BOOL CComboBoxEx2::SelectString(LPCTSTR pszText)
 {
 	// CComboBox::SelectString seems also not to work

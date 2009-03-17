@@ -43,10 +43,10 @@ protected:
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	HTREEITEM	m_htiUPnPGroup;
 	HTREEITEM	m_htiUPnP;
-	HTREEITEM	m_htiUPnPWeb;
+//	HTREEITEM	m_htiUPnPWeb;
 	//HTREEITEM	m_htiUPnPTryRandom;
 	//bool		m_bUPnP;
-	bool		m_bUPnPWeb;
+//	bool		m_bUPnPWeb;
 	
 	int m_iUPnPPort;
 	bool m_bUPnPClearOnClose;

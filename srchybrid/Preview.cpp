@@ -90,7 +90,7 @@ BOOL CPreviewThread::Run()
 			destFile.Write(abyBuffer,nRead);
 		}
 		srcFile.Seek(-(LONGLONG)(PARTSIZE*2), CFile::end);
-		uint32 nToGo =PARTSIZE*2;
+		uint32 nToGo = PARTSIZE*2;
 		if (bFullSized)
 			destFile.Seek(-(LONGLONG)(PARTSIZE*2), CFile::end);
 		do{
@@ -327,15 +327,14 @@ void CPreviewApps::RunApp(CPartFile* file, UINT uMenuID)
 
 void ExecutePartFile(CPartFile* file, LPCTSTR pszCommand, LPCTSTR pszCommandArgs)
 {
-	CString strPartFilePath = file->GetFullName();
+	if (!CheckFileOpen(file->GetFilePath(), file->GetFileName()))
+		return;
 
-	// strip available ".met" extension to get the part file name.
-	if (strPartFilePath.GetLength()>4 && strPartFilePath.Right(4)==_T(".met"))
-		strPartFilePath.Delete(strPartFilePath.GetLength()-4,4);
+	CString strQuotedPartFilePath(file->GetFilePath());
 
 	// if the path contains spaces, quote the entire path
-	if (strPartFilePath.Find(_T(' ')) != -1)
-		strPartFilePath = _T('\"') + strPartFilePath + _T('\"');
+	if (strQuotedPartFilePath.Find(_T(' ')) != -1)
+		strQuotedPartFilePath = _T('\"') + strQuotedPartFilePath + _T('\"');
 
 	// get directory of video player application
 	CString strCommandDir = pszCommand;
@@ -350,7 +349,7 @@ void ExecutePartFile(CPartFile* file, LPCTSTR pszCommand, LPCTSTR pszCommandArgs
 	CString strArgs = pszCommandArgs;
 	if (!strArgs.IsEmpty())
 		strArgs += _T(' ');
-	strArgs += strPartFilePath;
+	strArgs += strQuotedPartFilePath;
 
 	file->FlushBuffer(true);
 
@@ -359,11 +358,23 @@ void ExecutePartFile(CPartFile* file, LPCTSTR pszCommand, LPCTSTR pszCommandArgs
 	ExpandEnvironmentStrings(strArgs);
 	ExpandEnvironmentStrings(strCommandDir);
 
+	LPCTSTR pszVerb = _T("open");
+
+	// Backward compatibility with old 'preview' command (when no preview application is specified):
+	//	"ShellExecute(NULL, NULL, strPartFilePath, NULL, NULL, SW_SHOWNORMAL);"
+	if (strCommand.IsEmpty())
+	{
+		strCommand = strArgs;
+		strArgs.Empty();
+		strCommandDir.Empty();
+		pszVerb = NULL;
+	}
+
 	TRACE(_T("Starting preview application:\n"));
 	TRACE(_T("  Command =%s\n"), strCommand);
 	TRACE(_T("  Args    =%s\n"), strArgs);
 	TRACE(_T("  Dir     =%s\n"), strCommandDir);
-	DWORD_PTR dwError = (DWORD_PTR)ShellExecute(NULL, _T("open"), strCommand, strArgs, strCommandDir, SW_SHOWNORMAL);
+	DWORD_PTR dwError = (DWORD_PTR)ShellExecute(NULL, pszVerb, strCommand, strArgs.IsEmpty() ? NULL : strArgs, strCommandDir.IsEmpty() ? NULL : strCommandDir, SW_SHOWNORMAL);
 	if (dwError <= 32)
 	{
 		//

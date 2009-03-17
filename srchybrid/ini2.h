@@ -32,29 +32,22 @@
 class CIni  
 {
 public:
-
-#ifdef __NEVER_DEFINED__
-   // MAKRO: SerGet(bGet,value,#value)
-   int SER_GET(bool bGet,int value);
-   // MAKRO: SerGet(bGet,value,n,#value)
-   int SER_ARR(bGet,int* value,int n);
-#endif
    // If the IniFilename contains no path,
    // the module-directory will be add to the FileName,
    // to avoid storing in the windows-directory
    // bModulPath=true: ModulDir, bModulPath=false: CurrentDir
-	static void AddModulPath(CString& strFileName, bool bModulPath = true);
+	static void AddModulPath(CString& rstrFileName, bool bModulPath = true);
 	static CString GetDefaultSection();
 	static CString GetDefaultIniFile(bool bModulPath = true);
 
 	CIni();
-	CIni(CIni const& Ini);
-	CIni(CString const& strFileName);
-	CIni(CString const& strFileName, CString const& strSection);
+	CIni(CIni const& rIni);
+	CIni(CString const& rstrFileName);
+	CIni(CString const& rstrFileName, CString const& rstrSection);
 	virtual ~CIni();
 
-	void SetFileName(const CString& strFileName);
-	void SetSection(const CString& strSection);
+	void SetFileName(const CString& rstrFileName);
+	void SetSection(const CString& rstrSection);
 	const CString& GetFileName() const;
 	const CString& GetSection() const;
 
@@ -72,8 +65,8 @@ public:
 	COLORREF	GetColRef(LPCTSTR lpszEntry,	COLORREF	crDefault = RGB(128,128,128),	LPCTSTR lpszSection = NULL);
 	bool		GetBinary(LPCTSTR lpszEntry,	BYTE** ppData, UINT* pBytes,				LPCTSTR lpszSection = NULL);
 
-	void		WriteString(LPCTSTR strEntry,	LPCTSTR		s,								LPCTSTR lpszSection = NULL);
-	void		WriteStringUTF8(LPCTSTR strEntry,LPCTSTR    s,								LPCTSTR lpszSection = NULL);
+	void		WriteString(LPCTSTR lpszEntry,	LPCTSTR		s,								LPCTSTR lpszSection = NULL);
+	void		WriteStringUTF8(LPCTSTR lpszEntry,LPCTSTR   s,								LPCTSTR lpszSection = NULL);
 	void		WriteDouble(LPCTSTR lpszEntry,	double		f,								LPCTSTR lpszSection = NULL);
 	void		WriteFloat(LPCTSTR lpszEntry,	float		f,								LPCTSTR lpszSection = NULL);
 	void		WriteInt(LPCTSTR lpszEntry,		int			n,								LPCTSTR lpszSection = NULL);
@@ -85,7 +78,7 @@ public:
 	void		WriteColRef(LPCTSTR lpszEntry,	COLORREF	cr,								LPCTSTR lpszSection = NULL);
 	bool		WriteBinary(LPCTSTR lpszEntry,	LPBYTE pData, UINT nBytes,					LPCTSTR lpszSection = NULL);
 
-	void		SerGetString(	bool bGet, CString&		s,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	LPCTSTR strDefault = NULL);
+	void		SerGetString(	bool bGet, CString&		s,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	LPCTSTR lpszDefault = NULL);
 	void		SerGetDouble(	bool bGet, double&		f,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	double fDefault = 0.0);
 	void		SerGetFloat(	bool bGet, float&		f,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	float fDefault = 0.0);
 	void		SerGetInt(		bool bGet, int&			n,	LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	int nDefault = 0);
@@ -102,12 +95,9 @@ public:
 	void		SerGet(	bool bGet, short&	 n,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	int nDefault = 0);
 	void		SerGet(	bool bGet, DWORD&	 n,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	DWORD nDefault = 0);
 	void		SerGet(	bool bGet, WORD&	 n,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	DWORD nDefault = 0);
-//	void		SerGet(	bool bGet, bool&	 b,	 LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	bool bDefault = false);
 	void		SerGet(	bool bGet, CPoint&	 pt, LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	CPoint ptDefault = CPoint(0,0));
 	void		SerGet(	bool bGet, CRect&	 rc, LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	CRect rectDefault = CRect(0,0,0,0));
-//	void		SerGet(	bool bGet, COLORREF& cr, LPCTSTR lpszEntry,	LPCTSTR lpszSection = NULL,	COLORREF crDefault = RGB(128,128,128));
    
-//ARRAYs
 	void		SerGet(	bool bGet, CString*	s,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, LPCTSTR lpszDefault = NULL);
 	void		SerGet(	bool bGet, double*	f,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, double fDefault = 0.0);
 	void		SerGet(	bool bGet, float*	f,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, float fDefault = 0.0F);
@@ -119,10 +109,8 @@ public:
 	void		SerGet(	bool bGet, CPoint*	pt,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, CPoint ptDefault = CPoint(0,0));
 	void		SerGet(	bool bGet, CRect*	rc,	int nCount, LPCTSTR lpszEntry, LPCTSTR lpszSection = NULL, CRect rectDefault = CRect(0,0,0,0));
 
-	int			Parse(const CString&, int nOffset, CString &strOut);
-	void		DeleteKey(LPCTSTR pszKey);
-   //MAKRO :
-   //SERGET(bGet,value) SerGet(bGet,value,#value)
+	int			Parse(const CString&, int nOffset, CString &rstrOut);
+	void		DeleteKey(LPCTSTR lpszKey);
 
 private:
 	void Init(LPCTSTR lpszIniFile, LPCTSTR lpszSection = NULL);
@@ -135,10 +123,7 @@ private:
 	TCHAR	m_chBuffer[MAX_INI_BUFFER];
 	CString m_strFileName;
 	CString m_strSection;
-//////////////////////////////////////////////////////////////////////
-// statische Methoden
-//////////////////////////////////////////////////////////////////////
-public:
-	static CString	Read( LPCTSTR strFileName, LPCTSTR strSection, LPCTSTR strEntry, LPCTSTR strDefault);
-	static void		Write(LPCTSTR strFileName, LPCTSTR strSection, LPCTSTR strEntry, LPCTSTR strValue);
+
+	static CString	Read( LPCTSTR lpszFileName, LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszDefault);
+	static void		Write(LPCTSTR lpszFileName, LPCTSTR lpszSection, LPCTSTR lpszEntry, LPCTSTR lpszValue);
 };

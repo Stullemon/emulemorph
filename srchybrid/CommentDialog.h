@@ -32,12 +32,14 @@ protected:
 	bool m_bMergedComment;
 	bool m_bSelf;
 	uint32 m_timer;
+	bool m_bEnabled;
 
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnSetActive();
 	virtual BOOL OnApply();
 	void RefreshData(bool deleteOld = true);
+	void EnableDialog(bool bEnabled);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedSearchKad(); 

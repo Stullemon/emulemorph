@@ -38,8 +38,7 @@ bool CGZIPFile::Open(LPCTSTR pszFilePath)
 	ASSERT( m_gzFile == 0 );
 	Close();
 
-	USES_CONVERSION;
-	m_gzFile = gzopen(T2CA(pszFilePath), "rb");
+	m_gzFile = gzopen(CT2CA(pszFilePath), "rb");
 	if (m_gzFile)
 	{
 		// Use gzip-uncompress only for real gzip-compressed files and do not let handle it also uncompressed files.

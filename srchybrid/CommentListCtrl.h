@@ -39,12 +39,12 @@ protected:
 	struct SComment
 	{
 		SComment(const void* pClientCookie, int iRating, const CString& strComment, 
-			     const CString& strFileName, const CString& strUserName, int iOrigin, 
+			     const CString& strFileName, const CString& strUserName, int iOrigin,
 				 const CString& strClientSoftware,  //Commander - Added: ClientSoftware Column
 				 const CString& strClientCountry) //Commander - Added: ClientCountry Column
 			: m_pClientCookie(pClientCookie), m_iRating(iRating), 
 			  m_strComment(strComment), m_strFileName(strFileName), 
-			  m_strUserName(strUserName), m_iOrigin(iOrigin) ,
+			  m_strUserName(strUserName), m_iOrigin(iOrigin),
 			  m_strClientSoft(strClientSoftware),  //Commander - Added: ClientSoftware Column
 			  m_strClientCountry(strClientCountry) //Commander - Added: ClientCountry Column
 		{ }
@@ -66,6 +66,6 @@ protected:
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void OnLvnDeleteItem(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnDeleteItem(NMHDR *pNMHDR, LRESULT *pResult);
 };

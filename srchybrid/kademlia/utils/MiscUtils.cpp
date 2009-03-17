@@ -87,7 +87,7 @@ void CMiscUtils::DebugHexDump(const byte *pbyData, uint32 uLenData)
 	}
 	catch (...)
 	{
-		AddDebugLogLine(false, _T("Exception in CMiscUtils::debugHexDump\n"));
+		AddDebugLogLine(false, _T("Exception in CMiscUtils::debugHexDump"));
 	}
 #else
 	UNREFERENCED_PARAMETER(pbyData);

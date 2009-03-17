@@ -24,7 +24,6 @@ VS_VERSION_INFO VERSIONINFO
 #else
 	FILEFLAGS		0x0L // final version
 #endif
-
 	FILEOS			VOS__WINDOWS32
 	FILETYPE		VFT_APP
 	FILESUBTYPE		0x0L // not used
@@ -35,20 +34,12 @@ BEGIN
         BEGIN
             VALUE "CompanyName", "http://emulemorph.sourceforge.net"
             VALUE "FileDescription", "eMule"
-#ifdef _UNICODE
             VALUE "FileVersion", SZ_VERSION_NAME " Unicode"
-#else
-            VALUE "FileVersion", SZ_VERSION_NAME
-#endif
             VALUE "InternalName", "emule.exe"
-            VALUE "LegalCopyright", "Copyright © 2002-2008 Merkur - read license.txt for more infos"
+            VALUE "LegalCopyright", "Copyright © 2002-2009 Merkur - Read license.txt for more infos."
             VALUE "OriginalFilename", "emule.exe"
             VALUE "ProductName", "eMule"
-#ifdef _UNICODE
             VALUE "ProductVersion", SZ_VERSION_NAME " Unicode"
-#else
-            VALUE "ProductVersion", SZ_VERSION_NAME
-#endif
         END
     END
     BLOCK "VarFileInfo"

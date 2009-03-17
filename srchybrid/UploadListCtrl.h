@@ -30,32 +30,33 @@ public:
 	virtual ~CUploadListCtrl();
 
 	void	Init();
-	void	AddClient(const CUpDownClient* client);
-	void	RemoveClient(const CUpDownClient* client);
-	void	RefreshClient(const CUpDownClient* client);
-	void	Hide() {ShowWindow(SW_HIDE);}
-	void	Visable() {ShowWindow(SW_SHOW);}
+	void	AddClient(const CUpDownClient *client);
+	void	RemoveClient(const CUpDownClient *client);
+	void	RefreshClient(const CUpDownClient *client);
+	void	Hide() { ShowWindow(SW_HIDE); }
+	void	Show() { ShowWindow(SW_SHOW); }
 	void	Localize();
 	void	ShowSelectedUserDetails();
 
 protected:
-	CImageList imagelist;
+	CImageList m_ImageList;
 	// Mighty Knife: Community visualization
 	CImageList m_overlayimages;
 	// [end] Mighty Knife
-	CToolTipCtrlX* m_tooltip;
+	CToolTipCtrlX *m_tooltip;
 
 	void SetAllIcons();
+	void GetItemDisplayText(const CUpDownClient *client, int iSubItem, LPTSTR pszText, int cchTextMax);
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnSysColorChange();
-	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmDblClk(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSysColorChange();
 };

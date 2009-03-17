@@ -31,7 +31,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -62,7 +62,7 @@ void CAICHHash::Write(CFileDataIO* file) const{
 
 CAICHHashTree::CAICHHashTree(uint64 nDataSize, bool bLeftBranch, uint64 nBaseSize){
 	m_nDataSize = nDataSize;
-	m_nBaseSize = nBaseSize;
+	SetBaseSize(nBaseSize);
 	m_bIsLeftBranch = bLeftBranch;
 	m_pLeftTree = NULL;
 	m_pRightTree = NULL;
@@ -72,6 +72,21 @@ CAICHHashTree::CAICHHashTree(uint64 nDataSize, bool bLeftBranch, uint64 nBaseSiz
 CAICHHashTree::~CAICHHashTree(){
 	delete m_pLeftTree;
 	delete m_pRightTree;
+}
+
+void CAICHHashTree::SetBaseSize(uint64 uValue) {
+	// BaseSize: to save ressources we use a bool to store the basesize as currently only two values are used
+	// keep the original number based calculations and checks in the code through, so it can easily be adjusted in case we want to use a hashset with different basesizes
+	if (uValue != PARTSIZE && uValue != EMBLOCKSIZE){
+		ASSERT( false );
+		theApp.QueueDebugLogLine(true, _T("CAICHHashTree::SetBaseSize() Bug!"));
+	}
+	m_bBaseSize = (uValue >= PARTSIZE) ? true : false;
+}
+
+uint64	CAICHHashTree::GetBaseSize() const
+{ 
+	return m_bBaseSize ? PARTSIZE : EMBLOCKSIZE; 
 }
 
 // recursive
@@ -94,14 +109,14 @@ CAICHHashTree* CAICHHashTree::FindHash(uint64 nStartPos, uint64 nSize, uint8* nL
 		// this is the searched hash
 		return this;
 	}
-	else if (m_nDataSize <= m_nBaseSize){ // sanity
+	else if (m_nDataSize <= GetBaseSize()){ // sanity
 		// this is already the last level, cant go deeper
 		ASSERT( false );
 		return NULL;
 	}
 	else{
-		uint64 nBlocks = m_nDataSize / m_nBaseSize + ((m_nDataSize % m_nBaseSize != 0 )? 1:0); 
-		uint64 nLeft = ( ((m_bIsLeftBranch) ? nBlocks+1:nBlocks) / 2)* m_nBaseSize;
+		uint64 nBlocks = m_nDataSize / GetBaseSize() + ((m_nDataSize % GetBaseSize() != 0 )? 1:0); 
+		uint64 nLeft = ( ((m_bIsLeftBranch) ? nBlocks+1:nBlocks) / 2)* GetBaseSize();
 		uint64 nRight = m_nDataSize - nLeft;
 		if (nStartPos < nLeft){
 			if (nStartPos + nSize > nLeft){ // sanity
@@ -229,7 +244,7 @@ void CAICHHashTree::SetBlockHash(uint64 nSize, uint64 nStartPos, CAICHHashAlgo* 
 	}
 	
 	//sanity
-	if (pToInsert->m_nBaseSize != EMBLOCKSIZE || pToInsert->m_nDataSize != nSize){
+	if (pToInsert->GetBaseSize() != EMBLOCKSIZE || pToInsert->m_nDataSize != nSize){
 		ASSERT ( false );
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
 		if(thePrefs.GetLogICHEvents()) //JP log ICH events
@@ -258,7 +273,7 @@ bool CAICHHashTree::CreatePartRecoveryData(uint64 nStartPos, uint64 nSize, CFile
 		// hashident for this level will be adjsuted by WriteLowestLevelHash
 		return WriteLowestLevelHashs(fileDataOut, wHashIdent, false, b32BitIdent);
 	}
-	else if (m_nDataSize <= m_nBaseSize){ // sanity
+	else if (m_nDataSize <= GetBaseSize()){ // sanity
 		// this is already the last level, cant go deeper
 		ASSERT( false );
 		return false;
@@ -267,8 +282,8 @@ bool CAICHHashTree::CreatePartRecoveryData(uint64 nStartPos, uint64 nSize, CFile
 		wHashIdent <<= 1;
 		wHashIdent |= (m_bIsLeftBranch) ? 1: 0;
 		
-		uint64 nBlocks = m_nDataSize / m_nBaseSize + ((m_nDataSize % m_nBaseSize != 0 )? 1:0); 
-		uint64 nLeft = ( ((m_bIsLeftBranch) ? nBlocks+1:nBlocks) / 2)* m_nBaseSize;
+		uint64 nBlocks = m_nDataSize / GetBaseSize() + ((m_nDataSize % GetBaseSize() != 0 )? 1:0); 
+		uint64 nLeft = ( ((m_bIsLeftBranch) ? nBlocks+1:nBlocks) / 2)* GetBaseSize();
 		uint64 nRight = m_nDataSize - nLeft;
 		if (m_pLeftTree == NULL || m_pRightTree == NULL){
 			ASSERT( false );
@@ -313,7 +328,7 @@ bool CAICHHashTree::WriteLowestLevelHashs(CFileDataIO* fileDataOut, uint32 wHash
 	wHashIdent <<= 1;
 	wHashIdent |= (m_bIsLeftBranch) ? 1: 0;
 	if (m_pLeftTree == NULL && m_pRightTree == NULL){
-		if (m_nDataSize <= m_nBaseSize && m_bHashValid ){
+		if (m_nDataSize <= GetBaseSize() && m_bHashValid ){
 			if (!bNoIdent && !b32BitIdent){
 				ASSERT( wHashIdent <= 0xFFFF );
 				fileDataOut->WriteUInt16((uint16)wHashIdent);
@@ -341,7 +356,7 @@ bool CAICHHashTree::WriteLowestLevelHashs(CFileDataIO* fileDataOut, uint32 wHash
 
 // recover all low level hashs from given data. hashs are assumed to be ordered in left to right - no identifier used
 bool CAICHHashTree::LoadLowestLevelHashs(CFileDataIO* fileInput){
-	if (m_nDataSize <= m_nBaseSize){ // sanity
+	if (m_nDataSize <= GetBaseSize()){ // sanity
 		// lowest level, read hash
 		m_Hash.Read(fileInput);
 		//theApp.AddDebugLogLine(false,m_Hash.GetString());
@@ -349,8 +364,8 @@ bool CAICHHashTree::LoadLowestLevelHashs(CFileDataIO* fileInput){
 		return true;
 	}
 	else{
-		uint64 nBlocks = m_nDataSize / m_nBaseSize + ((m_nDataSize % m_nBaseSize != 0 )? 1:0); 
-		uint64 nLeft = ( ((m_bIsLeftBranch) ? nBlocks+1:nBlocks) / 2)* m_nBaseSize;
+		uint64 nBlocks = m_nDataSize / GetBaseSize() + ((m_nDataSize % GetBaseSize() != 0 )? 1:0); 
+		uint64 nLeft = ( ((m_bIsLeftBranch) ? nBlocks+1:nBlocks) / 2)* GetBaseSize();
 		uint64 nRight = m_nDataSize - nLeft;
 		if (m_pLeftTree == NULL)
 			m_pLeftTree = new CAICHHashTree(nLeft, true, (nLeft <= PARTSIZE) ? EMBLOCKSIZE : PARTSIZE);
@@ -397,7 +412,7 @@ bool CAICHHashTree::SetHash(CFileDataIO* fileInput, uint32 wHashIdent, sint8 nLe
 		m_bHashValid = true; 
 		return true;
 	}
-	else if (m_nDataSize <= m_nBaseSize){ // sanity
+	else if (m_nDataSize <= GetBaseSize()){ // sanity
 		// this is already the last level, cant go deeper
 		ASSERT( false );
 		return false;
@@ -406,8 +421,8 @@ bool CAICHHashTree::SetHash(CFileDataIO* fileInput, uint32 wHashIdent, sint8 nLe
 		// adjust ident to point the path to the next node
 		wHashIdent <<= 1;
 		nLevel--;
-		uint64 nBlocks = m_nDataSize / m_nBaseSize + ((m_nDataSize % m_nBaseSize != 0 )? 1:0); 
-		uint64 nLeft = ( ((m_bIsLeftBranch) ? nBlocks+1:nBlocks) / 2)* m_nBaseSize;
+		uint64 nBlocks = m_nDataSize / GetBaseSize() + ((m_nDataSize % GetBaseSize() != 0 )? 1:0); 
+		uint64 nLeft = ( ((m_bIsLeftBranch) ? nBlocks+1:nBlocks) / 2)* GetBaseSize();
 		uint64 nRight = m_nDataSize - nLeft;
 		if ((wHashIdent & 0x80000000) > 0){
 			if (m_pLeftTree == NULL)
@@ -426,6 +441,30 @@ bool CAICHHashTree::SetHash(CFileDataIO* fileInput, uint32 wHashIdent, sint8 nLe
 			return m_pRightTree->SetHash(fileInput, wHashIdent, nLevel);
 		}
 	}
+}
+
+// removes all hashes from the hashset which have a smaller BaseSize (not DataSize) than the given one
+bool CAICHHashTree::ReduceToBaseSize(uint64 nBaseSize) {
+	bool bDeleted = false;
+	if (m_pLeftTree != NULL){
+		if (m_pLeftTree->GetBaseSize() < nBaseSize){
+			delete m_pLeftTree;
+			m_pLeftTree = NULL;
+			bDeleted = true;
+		}
+		else
+			bDeleted |= m_pLeftTree->ReduceToBaseSize(nBaseSize);
+	}
+	if (m_pRightTree != NULL){
+		if (m_pRightTree->GetBaseSize() < nBaseSize){
+			delete m_pRightTree;
+			m_pRightTree = NULL;
+			bDeleted = true;
+		}
+		else
+			bDeleted |= m_pRightTree->ReduceToBaseSize(nBaseSize);
+	}
+	return bDeleted;
 }
 
 
@@ -801,12 +840,18 @@ bool CAICHHashSet::LoadHashSet(){
 	return false;
 }
 
-// delete the hashset except the masterhash (we dont keep aich hashsets in memory to save ressources)
+// delete the hashset except the masterhash
 void CAICHHashSet::FreeHashSet(){
 	delete m_pHashTree.m_pLeftTree;
 	m_pHashTree.m_pLeftTree = NULL;
 	delete m_pHashTree.m_pRightTree;
 	m_pHashTree.m_pRightTree = NULL;
+}
+
+// delete the hashset up to blockhashs to save ressources
+void CAICHHashSet::ReduceToPartHashs(){
+	VERIFY( m_pHashTree.ReduceToBaseSize(PARTSIZE) );
+	ASSERT( VerifyHashTree(false) );
 }
 
 void CAICHHashSet::SetMasterHash(const CAICHHash& Hash, EAICHStatus eNewStatus){
@@ -835,7 +880,7 @@ bool CAICHHashSet::VerifyHashTree(bool bDeleteBadTrees){
 
 void CAICHHashSet::SetFileSize(EMFileSize nSize){
 	m_pHashTree.m_nDataSize = nSize;
-	m_pHashTree.m_nBaseSize = (nSize <= (uint64)PARTSIZE) ? EMBLOCKSIZE : PARTSIZE;	
+	m_pHashTree.SetBaseSize((nSize <= (uint64)PARTSIZE) ? EMBLOCKSIZE : PARTSIZE);	
 }
 
 void CAICHHashSet::UntrustedHashReceived(const CAICHHash& Hash, uint32 dwFromIP){

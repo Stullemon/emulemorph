@@ -15,31 +15,47 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define YY_NEVER_INTERACTIVE 1
+#define	ECHO					TRACE
+#define	YY_INPUT				ReadLexBuff
+#define	YY_FATAL_ERROR			FatalLexError
 
 extern int yyerror(LPCTSTR errstr);
 extern int yyerrorf(LPCTSTR errstr, ...);
-extern CStringA StrToUtf8(const CString& rstr);
-
-#define	ECHO				TRACE
-#define	YY_INPUT			ReadLexBuff
-#define	YY_FATAL_ERROR		FatalLexError
 
 static void ReadLexBuff(char* pcBuff, int& riResult, size_t uMaxSize);
 static void FatalLexError(yyconst char msg[]);
 int opt_strnicmp(const char* pszString, const char* pszMatch, size_t nMinMatch);
 
-static CStringA _strInputBuff;
-static LPCSTR _pszLexBuff;
-static bool _bKeepQuotedStrings;
+static CStringA s_strInputBuff;
+static LPCSTR s_pszLexBuff;
+static bool s_bKeepQuotedStrings;
 
 #pragma warning(disable:4127) // conditional expression is constant
 #pragma warning(disable:4242) // conversion from <type1> to <type1>, possible loss of data
 #pragma warning(disable:4244) // conversion from <type1> to <type2>, possible loss of data
+#pragma warning(disable:4505) // unreferenced local function has been removed
 %}
 
-%option noyywrap
+/* flex 2.5.35: There is a bug in the 'noyywrap' option which creates a wrong 'yywrap' macro.
+ *              Need to use an explicit 'yywrap' function to get the same functionality.
+ */
+/*%option noyywrap*/
+
+/* we are using the REJECT macro */
 %option reject
+
+/* do not create an interactive scanner */
+%option nointeractive
+
+/* do not create calls to 'isatty' to determine if the input file is 'interactive' */
+%option never-interactive
+
+/* generate an 8-bit scanner */
+%option 8bit
+
+/* suppress inclusion of the non-ANSI header file "unistd.h" */
+%option nounistd
+
 
 /* Reject some special characters for 'keywords'
  *
@@ -149,8 +165,7 @@ number			{num1}|{num2}
 					CString strError;
 					try
 					{
-						USES_CONVERSION;
-						CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(A2T(yytext));
+						CED2KLink* pLink = CED2KLink::CreateLinkFromUrl(CA2T(yytext));
 						if (pLink && pLink->GetKind() == CED2KLink::kFile)
 						{
 							CED2KFileLink* pFileLink = pLink->GetFileLink();
@@ -437,7 +452,7 @@ number			{num1}|{num2}
 					}
 					psz[i] = '\0';
 					
-					if (_bKeepQuotedStrings && YYSTATE != STRING) {
+					if (s_bKeepQuotedStrings && YYSTATE != STRING) {
 						CStringA quoted;
 						quoted = '\"';
 						quoted += psz;
@@ -463,21 +478,29 @@ number			{num1}|{num2}
 
 %%
 
+/* flex 2.5.35: There is a bug in the 'noyywrap' option which creates a wrong 'yywrap' macro.
+ *              Need to use an explicit 'yywrap' function to get the same functionality.
+ */
+int yywrap()
+{
+	return 1;
+}
+
 #pragma warning(default:4127) // conditional expression is constant
 #pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data
 
 static void ReadLexBuff(char* pcBuff, int& riResult, size_t uMaxSize)
 {
-	ASSERT( _pszLexBuff != NULL );
-	if (_pszLexBuff == NULL)
+	ASSERT( s_pszLexBuff != NULL );
+	if (s_pszLexBuff == NULL)
 		YY_FATAL_ERROR("Input in flex scanner failed");
 
 	ASSERT( sizeof(YY_CHAR) == sizeof(char) );
-	size_t uCharsInBuff = strlen(_pszLexBuff);
+	size_t uCharsInBuff = strlen(s_pszLexBuff);
 	size_t uCharsRead = min(uMaxSize, uCharsInBuff);
 	riResult = uCharsRead;
-	memcpy(pcBuff, _pszLexBuff, uCharsRead);
-	_pszLexBuff += uCharsRead;
+	memcpy(pcBuff, s_pszLexBuff, uCharsRead);
+	s_pszLexBuff += uCharsRead;
 }
 
 static void FatalLexError(yyconst char msg[])
@@ -485,42 +508,28 @@ static void FatalLexError(yyconst char msg[])
 #ifdef _CONSOLE
 	printf("Fatal error in flex scanner: %s\n", msg);
 #else
-	USES_CONVERSION;
-	AfxMessageBox(CString(_T("Fatal error in flex scanner: ")) + A2CT(msg), MB_ICONSTOP);
+	AfxMessageBox(CString(_T("Fatal error in flex scanner: ")) + CA2CT(msg), MB_ICONSTOP);
 #endif
 }
 
 void LexInit(LPCTSTR pszInput, bool bKeepQuotedStrings)
 {
-	_strInputBuff = StrToUtf8(pszInput);
-	_pszLexBuff = (LPCSTR)_strInputBuff;
-	_bKeepQuotedStrings = bKeepQuotedStrings;
+	s_strInputBuff = StrToUtf8(pszInput);
+	s_pszLexBuff = (LPCSTR)s_strInputBuff;
+	s_bKeepQuotedStrings = bKeepQuotedStrings;
 }
 
 void LexFree()
 {
+	yylex_destroy();
 	yytext = NULL;
 	yyleng = 0;
-	yyin = NULL;
-	yyout = NULL;
-	yy_delete_buffer(yy_current_buffer);
 	yy_hold_char = '\0';
 	yy_n_chars = 0;
-	yy_c_buf_p = NULL;
-	yy_init = 1;
-	yy_start = 0;
 	yy_did_buffer_switch_on_eof = 0;
-#ifndef REJECT
-	yy_last_accepting_state = 0;
-	yy_last_accepting_cpos = NULL;
-#endif
-#if YY_STACK_USED
-	yy_start_stack_ptr = 0;
-	yy_start_stack_depth = 0;
-	yy_start_stack = NULL;
-#endif
-	_strInputBuff.Empty();
-	_pszLexBuff = NULL;
+	yylineno = 1;
+	s_strInputBuff.Empty();
+	s_pszLexBuff = NULL;
 }
 
 int opt_strnicmp(const char* pszString, const char* pszMatch, size_t nMinMatch)

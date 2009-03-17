@@ -316,7 +316,12 @@ void CScheduler::ActivateSchedule(int index,bool makedefault) {
 				} break;
 			case ACTION_UPDIPCONF : {
 					AddLogLine (false,GetResString (IDS_SCHED_UPDATE_IPCONFIG_LOG));
+					//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+					/*
 					theApp.ipfilter->UpdateIPFilterURL();
+					*/
+					theApp.emuledlg->CheckIPFilter();
+					//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 				} break;
 			case ACTION_UPDFAKES : {
 					AddLogLine (false,GetResString (IDS_SCHED_UPDATE_FAKES_LOG));

@@ -210,7 +210,8 @@ void CStatisticFile::DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat) /*const*/
 float CStatisticFile::GetSpreadSortValue() /*const*/
 {
 	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
-	if (InChangedSpreadSortValue) return lastSpreadSortValue;
+	if (InChangedSpreadSortValue)
+		return lastSpreadSortValue;
 	InChangedSpreadSortValue=true;
 	//MORPH START - Added by SiRoB, Reduce SpreadBar CPU consumption
 	float avg, calc;
@@ -340,8 +341,8 @@ double CStatisticFile::GetEqualChanceValue()
 	return m_dLastEqualChanceSemiValue/GetSessionShareTime();
 }
 
-CString CStatisticFile::GetEqualChanceValueString(bool detail){
-
+CString CStatisticFile::GetEqualChanceValueString(bool detail) const
+{
 	CString tempString;
 
 	if(thePrefs.IsEqualChanceEnable())	{
@@ -365,7 +366,8 @@ CString CStatisticFile::GetEqualChanceValueString(bool detail){
 //Morph End - added by AndCycle, Equal Chance For Each File
 
 //EastShare	Start - FairPlay by AndCycle
-bool	CStatisticFile::GetFairPlay() {
+bool	CStatisticFile::GetFairPlay() const
+{
 	//should only judge simple UL or is there any better replacement?
 	//Stulle: rewrote the code to ensure bug free compiling
 	double dShareFactor = ((double)GetAllTimeTransferred())/((double)fileParent->GetFileSize());

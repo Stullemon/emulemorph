@@ -110,7 +110,8 @@ void CDirectoryTreeCtrl::ShareSubDirTree(HTREEITEM hItem, BOOL bRecurse)
 {
 	CWaitCursor curWait;
 	SetRedraw(FALSE);
-/* MORPH START sharesubdir 
+	//MORPH START sharesubdir 
+	/*
 	HTREEITEM hItemVisibleItem = GetFirstVisibleItem();
 	CheckChanged(hItem, !GetCheck(hItem));
 	if (bRecurse)
@@ -126,9 +127,9 @@ void CDirectoryTreeCtrl::ShareSubDirTree(HTREEITEM hItem, BOOL bRecurse)
 	}
 	if (hItemVisibleItem)
 		SelectSetFirstVisible(hItemVisibleItem);
-   removed code sharesubider*/
-    CheckChanged(hItem, !GetCheck(hItem), bRecurse==TRUE);	// SLUGFILLER: shareSubdir - Handled in a much cleaner fashion
-  //MORPH END sharesubdir 
+	*/
+	CheckChanged(hItem, !GetCheck(hItem), bRecurse==TRUE);	// SLUGFILLER: shareSubdir - Handled in a much cleaner fashion
+	//MORPH END sharesubdir 
 
 	SetRedraw(TRUE);
 	Invalidate();
@@ -140,10 +141,12 @@ void CDirectoryTreeCtrl::OnLButtonDown(UINT nFlags, CPoint point)
 	UINT uHitFlags; 
 	HTREEITEM hItem = HitTest(point, &uHitFlags); 
 	if (hItem && (uHitFlags & TVHT_ONITEMSTATEICON))
-    /*
+		//MORPH START sharesubdir 
+		/*
 		ShareSubDirTree(hItem, nFlags & MK_CONTROL);
-    */
-    ShareSubDirTree(hItem, (nFlags & MK_CONTROL) > 0 );	// sharesubdir fix   
+		*/
+		ShareSubDirTree(hItem, (nFlags & MK_CONTROL) > 0 );
+		//MORPH END sharesubdir 
 	CTreeCtrl::OnLButtonDown(nFlags, point); 
 }
 
@@ -197,7 +200,8 @@ void CDirectoryTreeCtrl::DisableChilds(HTREEITEM hItem, bool bDisable) {
 }
 // SLUGFILLER: shareSubdir
 
-/*  MORPH START SHARESUBDIR remove code
+//MORPH START SHARESUBDIR remove code
+/*
 void CDirectoryTreeCtrl::MarkChilds(HTREEITEM hChild,bool mark) { 
 	CheckChanged(hChild, mark); 
 	SetCheck(hChild,mark);  
@@ -211,7 +215,8 @@ void CDirectoryTreeCtrl::MarkChilds(HTREEITEM hChild,bool mark) {
 	} 
 	Expand(hChild, TVE_TOGGLE); // VQB - restore tree to initial disposition 
 }
- /*  MORPH End SHARESUBDIR remove code */
+*/
+//MORPH End SHARESUBDIR remove code
 
 void CDirectoryTreeCtrl::OnTvnGetdispinfo(NMHDR *pNMHDR, LRESULT *pResult)
 {
@@ -265,30 +270,25 @@ void CDirectoryTreeCtrl::Init(void)
 
 
 	TCHAR drivebuffer[500];
-	::GetLogicalDriveStrings(ARRSIZE(drivebuffer), drivebuffer); // e.g. "a:\ c:\ d:\"
+	DWORD dwRet = GetLogicalDriveStrings(_countof(drivebuffer) - 1, drivebuffer);
+	if (dwRet > 0 && dwRet < _countof(drivebuffer))
+	{
+		drivebuffer[_countof(drivebuffer) - 1] = _T('\0');
 
-	const TCHAR* pos = drivebuffer;
-	while(*pos != _T('\0')){
+		const TCHAR* pos = drivebuffer;
+		while(*pos != _T('\0')){
 
-		// Copy drive name
-		TCHAR drive[4];
-		_tcsncpy(drive, pos, ARRSIZE(drive));
-		drive[ARRSIZE(drive) - 1] = _T('\0');
+			// Copy drive name
+			TCHAR drive[4];
+			_tcsncpy(drive, pos, _countof(drive));
+			drive[_countof(drive) - 1] = _T('\0');
 
-		switch(drive[0]){
-		case _T('a'):
-		case _T('A'):
-		case _T('b'):
-		case _T('B'):
-			// Skip floppy disk
-			break;
-		default:
 			drive[2] = _T('\0');
-			AddChildItem(NULL, drive); // e.g. ("c:")
-		}
+			AddChildItem(NULL, drive); // e.g. "C:"
 
-		// Point to the next drive (4 chars interval)
-		pos = &pos[4];
+			// Point to the next drive
+			pos += _tcslen(pos) + 1;
+		}
 	}
 
 	// SLUGFILLER START: shareSubdir - local drives before network drives
@@ -315,7 +315,7 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 	if (hRoot != NULL && strPath.Right(1) != _T("\\"))
 		strPath += _T("\\");
 	CString strDir = strPath + strText;
-	TV_INSERTSTRUCT itInsert = {0};
+	TVINSERTSTRUCT itInsert = {0};
 	
 	// START: changed by FoRcHa /////
 	WORD wWinVer = thePrefs.GetWindowsVersion();
@@ -378,20 +378,21 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 			DestroyIcon(shFinfo.hIcon);
 			if (hRoot == NULL && shFinfo.szDisplayName[0] != _T('\0'))
 			{
-/* MORPH START SHARESUBDIR old ode
+				//MORPH START SHARESUBDIR old ode
+				/*
 				STreeItem* pti = new STreeItem;
 				pti->strPath = strText;
 				strText = shFinfo.szDisplayName;
 				itInsert.item.pszText = const_cast<LPTSTR>((LPCTSTR)strText);
 				itInsert.item.mask |= TVIF_PARAM;
 				itInsert.item.lParam = (LPARAM)pti;
- END code*/
-			// SLUGFILLER START: shareSubdir remove - lParam already present
-			strText = shFinfo.szDisplayName;
-			strText.Trim();	// SLUGFILLER: shareSubdir - clean up whitespaces
-			itInsert.item.pszText = strText.GetBuffer();
-			itInsert.item.cchTextMax = strText.GetLength();
-			// SLUGFILLER END: shareSubdir remove - lParam already present
+				*/
+				// SLUGFILLER START: shareSubdir remove - lParam already present
+				strText = shFinfo.szDisplayName;
+				strText.Trim();	// SLUGFILLER: shareSubdir - clean up whitespaces
+				itInsert.item.pszText = strText.GetBuffer();
+				itInsert.item.cchTextMax = strText.GetLength();
+				// SLUGFILLER END: shareSubdir remove - lParam already present
 			}
 		}
 
@@ -410,10 +411,11 @@ HTREEITEM CDirectoryTreeCtrl::AddChildItem(HTREEITEM hRoot, CString strText)
 	// END: added by FoRcHa //////////////
 
 	HTREEITEM hItem = InsertItem(&itInsert);
-/*  MORPH START SHARESUBDIR old code
+	//MORPH START SHARESUBDIR old code
+	/*
 	if (IsShared(strDir))
 		SetCheck(hItem);
-  end old code */
+	*/
 	// SLUGFILLER START: shareSubdir
 	if (IsDisabled(hItem))	// new mode to look out for
 		SetDisable(hItem, true);
@@ -470,6 +472,16 @@ bool CDirectoryTreeCtrl::HasSubdirectories(CString strDir)
 {
 	if (strDir.Right(1) != _T('\\'))
 		strDir += _T('\\');
+	// Never try to enumerate the files of a drive and thus physically access the drive, just
+	// for the information whether the drive has sub directories in the root folder. Depending
+	// on the physical drive type (floppy disk, CD-ROM drive, etc.) this creates an annoying
+	// physical access to that drive - which is to be avoided in each case. Even Windows
+	// Explorer shows all drives by default with a '+' sign (which means that the user has
+	// to explicitly open the drive to really get the content) - and that approach will be fine
+	// for eMule as well.
+	// Since the restriction for drives 'A:' and 'B:' was removed, this gets more important now.
+	if (PathIsRoot(strDir))
+		return true;
 	CFileFind finder;
 	BOOL bWorking = finder.FindFile(strDir+_T("*.*"));
 	while (bWorking)
@@ -488,26 +500,49 @@ bool CDirectoryTreeCtrl::HasSubdirectories(CString strDir)
 	return false;
 }
 
-/* MORPH START SHARESUBDIR old code
+//MORPH START SHARESUBDIR old code
+/*
 void CDirectoryTreeCtrl::GetSharedDirectories(CStringList* list)
- end old code */
+{
+	for (POSITION pos = m_lstShared.GetHeadPosition(); pos != NULL; )
+		list->AddTail(m_lstShared.GetNext(pos));
+}
+*/
 // SLUGFILLER: shareSubdir - two lists now
 void CDirectoryTreeCtrl::GetSharedDirectories(CStringList* list, CStringList* listsubdir)
 {
-	list->RemoveAll(); // ss
-	listsubdir->RemoveAll(); //ss
+	list->RemoveAll();
+	listsubdir->RemoveAll();
 	for (POSITION pos = m_lstShared.GetHeadPosition(); pos != NULL; )
 		list->AddTail(m_lstShared.GetNext(pos));
-	for (POSITION pos = m_lstSharedSubdir.GetHeadPosition(); pos != NULL; ) //ssd
-		listsubdir->AddTail(m_lstSharedSubdir.GetNext(pos)); //ssd
+	for (POSITION pos = m_lstSharedSubdir.GetHeadPosition(); pos != NULL; )
+		listsubdir->AddTail(m_lstSharedSubdir.GetNext(pos));
 }
-/* old code:
+//MORPH END SHARESUBDIR
+
+//MORPH START SHARESUBDIR old code
+/*
 void CDirectoryTreeCtrl::SetSharedDirectories(CStringList* list)
+{
+	m_lstShared.RemoveAll();
+
+	for (POSITION pos = list->GetHeadPosition(); pos != NULL; )
+	{
+		CString str = list->GetNext(pos);
+		if (str.Left(2)==_T("\\\\")) continue;
+		if (str.Right(1) != _T('\\'))
+			str += _T('\\');
+		m_lstShared.AddTail(str);
+	}
+	Init();
+}
+
 */
+// SLUGFILLER: shareSubdir
 void CDirectoryTreeCtrl::SetSharedDirectories(CStringList* list, CStringList* listsubdir) // ssd
 {
 	m_lstShared.RemoveAll();
-	m_lstSharedSubdir.RemoveAll(); // ssd
+	m_lstSharedSubdir.RemoveAll();
 
 	for (POSITION pos = list->GetHeadPosition(); pos != NULL; )
 	{
@@ -515,15 +550,15 @@ void CDirectoryTreeCtrl::SetSharedDirectories(CStringList* list, CStringList* li
 		if (str.Left(2)==_T("\\\\")) continue; //TODO CHECK MERGE leuk_he
 		if (str.Right(1) != _T('\\'))
 			str += _T('\\');
-  // sharedubdir 
+
 		if (!PathFileExists(str))	// only add directories which still exist
 			continue;
 		if (IsShared(str))
 			continue;
-   // Share subdir end
+
 		m_lstShared.AddTail(str);
 	}
-   // Sharesubdir start
+
 	DelShare(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR));
 	for (int ix=1;ix<thePrefs.GetCatCount();ix++)
 		DelShare(thePrefs.GetCatPath(ix));
@@ -539,7 +574,7 @@ void CDirectoryTreeCtrl::SetSharedDirectories(CStringList* list, CStringList* li
 		m_lstSharedSubdir.AddTail(str);
 		UnshareChildItems(str);
 	}
-  // sharesubdir end
+
 	Init();
 }
 // SLUGFILLER: shareSubdir
@@ -588,17 +623,13 @@ bool CDirectoryTreeCtrl::HasSharedSubdirectory(CString strDir)
 	// SLUGFILLER END: shareSubdir
 	return false;
 }
-/* old code:
-void CDirectoryTreeCtrl::CheckChanged(HTREEITEM hItem, bool bChecked)
-{
-	CString strDir = GetFullPath(hItem);
-	   end old code*/
 
-/* SLUGFILLER: shareSubdir - child disabling goes here
+//SLUGFILLER: shareSubdir - child disabling goes here
+/*
 void CDirectoryTreeCtrl::CheckChanged(HTREEITEM hItem, bool bChecked)
 {
 	CString strDir = GetFullPath(hItem);
- end old code */
+*/
 void CDirectoryTreeCtrl::CheckChanged(HTREEITEM hItem, bool bChecked, bool bWithSubdir)
 {
 	if (IsDisabled(hItem))	// fail-safe, no access
@@ -630,18 +661,20 @@ void CDirectoryTreeCtrl::CheckChanged(HTREEITEM hItem, bool bChecked, bool bWith
 			}
 		}
 	}
-  // SHARESUBDIR END
+// SHARESUBDIR END
 	if (bChecked)
-/* sharesubdir  old code
+		//MORPH START SHARESUBDIR old code
+		/*
 		AddShare(strDir);
-*/
-		AddShare(strDir, bWithSubdir); // sharesubdir
+		*/
+		AddShare(strDir, bWithSubdir);
+		//MORPH END SHARESUBDIR old code
 	else
 		DelShare(strDir);
 
 	UpdateParentItems(hItem);
 	GetParent()->SendMessage(WM_COMMAND, UM_ITEMSTATECHANGED, (long)m_hWnd);
-  // SHAREsubdir start
+	// SLUGFILLER START : shareSubdir 
 	if (bChecked && bWithSubdir)
 		UnshareChildItems(strDir);	// no double-sharing
 
@@ -652,14 +685,16 @@ void CDirectoryTreeCtrl::CheckChanged(HTREEITEM hItem, bool bChecked, bool bWith
 	{
 		DisableChilds(hChild, bChecked && bWithSubdir);
 		hChild = GetNextSiblingItem( hChild );
+	}
+	// SLUGFILLER END : shareSubdir 
 }
-}
-// SLUGFILLER END : shareSubdir 
 
-/* sharesubdir start old code 
+// SLUGFILLER START : shareSubdir - allow checking indirect share
+/*
 bool CDirectoryTreeCtrl::IsShared(CString strDir)
- end old code */
-bool CDirectoryTreeCtrl::IsShared(CString strDir, bool bCheckParent)	// SLUGFILLER: shareSubdir - allow checking indirect share
+*/
+bool CDirectoryTreeCtrl::IsShared(CString strDir, bool bCheckParent)
+// SLUGFILLER END : shareSubdir - allow checking indirect share
 {
 	if (strDir.Right(1) != _T('\\'))
 		strDir += _T('\\');
@@ -685,13 +720,22 @@ bool CDirectoryTreeCtrl::IsShared(CString strDir, bool bCheckParent)	// SLUGFILL
 	// SLUGFILLER: shareSubdir
 	return false;
 }
-/* Sharesubdir old code :
+
+// SLUGFILLER START : shareSubdir - this is where the split really takes place
+/*
 void CDirectoryTreeCtrl::AddShare(CString strDir)
 {
+	if (strDir.Right(1) != _T('\\'))
+		strDir += _T('\\');
+	
+	if (IsShared(strDir) || !strDir.CompareNoCase(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)))
+		return;
+
+	m_lstShared.AddTail(strDir);
+}
 */
-// SLUGFILLER: shareSubdir - this is where the split really takes place
-void CDirectoryTreeCtrl::AddShare(CString strDir, bool bWithSubdir) //ssd
-{ //ssd
+void CDirectoryTreeCtrl::AddShare(CString strDir, bool bWithSubdir)
+{
 	if (strDir.Right(1) != _T('\\'))
 		strDir += _T('\\');
 	
@@ -699,9 +743,9 @@ void CDirectoryTreeCtrl::AddShare(CString strDir, bool bWithSubdir) //ssd
 	if (IsShared(strDir, true))		// could be indirectly shared
 		return;
 
-	if (bWithSubdir) // ssd
-		m_lstSharedSubdir.AddTail(strDir); //ssd
-	else //ssd
+	if (bWithSubdir)
+		m_lstSharedSubdir.AddTail(strDir);
+	else
 	m_lstShared.AddTail(strDir);
 }
 // SLUGFILLER END : shareSubdir
@@ -744,7 +788,9 @@ bool CDirectoryTreeCtrl::IsDisabled(HTREEITEM hItem)
 	}
 	return false;
 }
- // sharesubdir continue
+// SLUGFILLER END: shareSubdir
+
+// SLUGFILLER START: shareSubdir - checkbox removing code
 void CDirectoryTreeCtrl::SetDisable(HTREEITEM hItem, bool bDisable)
 {
 	if (bDisable){
@@ -764,10 +810,12 @@ void CDirectoryTreeCtrl::SetDisable(HTREEITEM hItem, bool bDisable)
 
 void CDirectoryTreeCtrl::UpdateParentItems(HTREEITEM hChild)
 {
-  /*
+	// SLUGFILLER START : shareSubdir - start from the top
+	/*
 	HTREEITEM hSearch = GetParentItem(hChild);
-   */
-	HTREEITEM hSearch = hChild;	// SLUGFILLER: shareSubdir - start from the top
+	*/
+	HTREEITEM hSearch = hChild;
+	// SLUGFILLER END : shareSubdir - start from the top
 	while(hSearch != NULL)
 	{
 		if (HasSharedSubdirectory(GetFullPath(hSearch)))

@@ -36,9 +36,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-#define NICK_LV_PROFILE_NAME _T("IRCNicksLv")
-#define CHAN_LV_PROFILE_NAME _T("IRCChannelsLv")
-
 // Request from IRC-folks: don't use similar colors for Status and Info messages
 #define	STATUS_MSG_COLOR		RGB(0,128,0)		// dark green
 #define	INFO_MSG_COLOR			RGB(192,0,0)		// mid red
@@ -140,15 +137,6 @@ void CIrcWnd::Localize()
 BOOL CIrcWnd::OnInitDialog()
 {
 	CResizableDialog::OnInitDialog();
-#ifdef _DEBUG
-	CString sBuffer;
-	m_wndNicks.GetWindowText(sBuffer);
-	ASSERT( sBuffer == NICK_LV_PROFILE_NAME );
-
-	sBuffer.Empty();
-	m_wndChanList.GetWindowText(sBuffer);
-	ASSERT( sBuffer == CHAN_LV_PROFILE_NAME );
-#endif
 
 	m_bConnected = false;
 	m_bLoggedIn = false;
@@ -188,7 +176,8 @@ BOOL CIrcWnd::OnInitDialog()
 	AddAnchor(m_wndChanSel, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(m_wndSplitterHorz, TOP_LEFT, BOTTOM_LEFT);
 
-	m_wndFormat.ModifyStyle(0, TBSTYLE_TOOLTIPS);
+	// Vista: Remove the TBSTYLE_TRANSPARENT to avoid flickering (can be done only after the toolbar was initially created with TBSTYLE_TRANSPARENT !?)
+	m_wndFormat.ModifyStyle((theApp.m_ullComCtrlVer >= MAKEDLLVERULL(6, 16, 0, 0)) ? TBSTYLE_TRANSPARENT : 0, TBSTYLE_TOOLTIPS);
 	m_wndFormat.SetExtendedStyle(m_wndFormat.GetExtendedStyle() | TBSTYLE_EX_MIXEDBUTTONS);
 
 	TBBUTTON atb[5] = {0};
@@ -343,13 +332,6 @@ LRESULT CIrcWnd::DefWindowProc(UINT uMessage, WPARAM wParam, LPARAM lParam)
 			}
 			break;
 
-		case WM_WINDOWPOSCHANGED: {
-			CRect rcWnd;
-			GetWindowRect(rcWnd);
-			if (m_wndSplitterHorz && rcWnd.Width() > 0)
-				Invalidate();
-			break;
-		}
 		case WM_SIZE:
 			if (m_wndSplitterHorz)
 			{
@@ -787,7 +769,7 @@ static const struct
 	LPCTSTR pszScheme;
 	int iLen;
 }
-_apszSchemes[] =
+s_apszSchemes[] =
 {
     { _T("ed2k://"),  7 },
     { _T("http://"),  7 },
@@ -859,10 +841,10 @@ void CIrcWnd::AddColorLine(const CString& line, CHTRichEditCtrl &wnd, COLORREF c
 		// find any hyperlinks
 		if (index == linkfoundat) //only run the link finding code once it a line with no links
 		{
-			for (int iScheme = 0; iScheme < _countof(_apszSchemes); /**/)
+			for (int iScheme = 0; iScheme < _countof(s_apszSchemes); /**/)
 			{
 				CString strLeft = line.Right(line.GetLength() - index);//make a string of what we have left
-				int foundat = strLeft.Find(_apszSchemes[iScheme].pszScheme);//get position of link -1 == not found
+				int foundat = strLeft.Find(s_apszSchemes[iScheme].pszScheme);//get position of link -1 == not found
 				if (foundat == 0) //link starts at this character
 				{
 					if (!text.IsEmpty()) {

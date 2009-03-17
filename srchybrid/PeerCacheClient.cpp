@@ -35,7 +35,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 #define HTTP_STATUS_INV_RANGE	416
@@ -235,7 +235,7 @@ void CPeerCacheUpSocket::DetachFromClient()
 	{
         if (GetClient()->m_pPCUpSocket == this) {
 			GetClient()->m_pPCUpSocket = NULL;
-			theApp.uploadBandwidthThrottler->RemoveFromStandardList(this);
+            theApp.uploadBandwidthThrottler->RemoveFromStandardList(this);
         }
 	}
 }
@@ -571,7 +571,6 @@ void CUpDownClient::ProcessPeerCacheUpHttpResponse(const CStringAArray& astrHead
 
 bool CUpDownClient::SendHttpBlockRequests()
 {
-	USES_CONVERSION;
 	ASSERT( GetDownloadState() == DS_DOWNLOADING );
 	ASSERT( m_ePeerCacheDownState == PCDS_WAIT_CLIENT_REPLY || m_ePeerCacheDownState == PCDS_DOWNLOADING );
 
@@ -633,9 +632,9 @@ bool CUpDownClient::SendHttpBlockRequests()
 	strPCRequest.AppendFormat("Range: bytes=%I64u-%I64u\r\n", m_uReqStart, m_uReqEnd);
 	//MORPH START - Added by SiRoB, [-modname-]
 	/*
-	strPCRequest.AppendFormat("User-Agent: eMule/%s\r\n", T2CA(theApp.m_strCurVersionLong));
+	strPCRequest.AppendFormat("User-Agent: eMule/%ls\r\n", theApp.m_strCurVersionLong);
 	*/
-	strPCRequest.AppendFormat("User-Agent: eMule/%s %s\r\n", T2CA(theApp.m_strCurVersionLong), T2CA(theApp.m_strModVersion));
+	strPCRequest.AppendFormat("User-Agent: eMule/%ls %ls\r\n", theApp.m_strCurVersionLong, theApp.m_strModVersion);
 	//MORPH END   - Added by SiRoB, [-modname-]
 	strPCRequest.AppendFormat("X-Network: eDonkey,Kademlia\r\n");
 	strPCRequest.AppendFormat("\r\n");

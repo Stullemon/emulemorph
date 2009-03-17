@@ -122,6 +122,67 @@
 			<Tool
 				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
 		</Configuration>
+		<Configuration
+			Name="Beta|Win32"
+			OutputDirectory="$(ConfigurationName)"
+			IntermediateDirectory="$(ConfigurationName)"
+			ConfigurationType="4"
+			UseOfMFC="1"
+			ATLMinimizesCRunTimeLibraryUsage="FALSE"
+			WholeProgramOptimization="FALSE">
+			<Tool
+				Name="VCCLCompilerTool"
+				AdditionalOptions="/Zm400 /EHa"
+				Optimization="3"
+				GlobalOptimizations="TRUE"
+				InlineFunctionExpansion="2"
+				EnableIntrinsicFunctions="TRUE"
+				FavorSizeOrSpeed="1"
+				OmitFramePointers="TRUE"
+				EnableFiberSafeOptimizations="TRUE"
+				OptimizeForProcessor="2"
+				OptimizeForWindowsApplication="TRUE"
+				PreprocessorDefinitions="NDEBUG;_WINDOWS;USE_PRECOMPILED_HEADERS;WIN32"
+				StringPooling="TRUE"
+				ExceptionHandling="FALSE"
+				RuntimeLibrary="0"
+				EnableFunctionLevelLinking="TRUE"
+				UsePrecompiledHeader="3"
+				PrecompiledHeaderThrough="pch.h"
+				PrecompiledHeaderFile=".\Release/cryptlib.pch"
+				AssemblerListingLocation=".\Release/"
+				ObjectFile=".\Release/"
+				ProgramDataBaseFileName=".\Release/"
+				WarningLevel="3"
+				SuppressStartupBanner="TRUE"
+				DebugInformationFormat="0"/>
+			<Tool
+				Name="VCCustomBuildTool"/>
+			<Tool
+				Name="VCLibrarianTool"
+				OutputFile=".\Release\cryptlib.lib"
+				SuppressStartupBanner="TRUE"
+				IgnoreAllDefaultLibraries="TRUE"/>
+			<Tool
+				Name="VCMIDLTool"/>
+			<Tool
+				Name="VCPostBuildEventTool"/>
+			<Tool
+				Name="VCPreBuildEventTool"/>
+			<Tool
+				Name="VCPreLinkEventTool"/>
+			<Tool
+				Name="VCResourceCompilerTool"
+				Culture="1033"/>
+			<Tool
+				Name="VCWebServiceProxyGeneratorTool"/>
+			<Tool
+				Name="VCXMLDataGeneratorTool"/>
+			<Tool
+				Name="VCManagedWrapperGeneratorTool"/>
+			<Tool
+				Name="VCAuxiliaryManagedWrapperGeneratorTool"/>
+		</Configuration>
 	</Configurations>
 	<References>
 	</References>
@@ -145,6 +206,13 @@
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="adhoc.cpp.proto">
@@ -159,6 +227,15 @@ echo: &gt;&gt; adhoc.cpp.copied
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="if not exist adhoc.cpp copy &quot;$(InputPath)&quot; adhoc.cpp
+echo: &gt;&gt; adhoc.cpp.copied
+"
+						Outputs="adhoc.cpp.copied"/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
 					<Tool
 						Name="VCCustomBuildTool"
 						CommandLine="if not exist adhoc.cpp copy &quot;$(InputPath)&quot; adhoc.cpp
@@ -183,6 +260,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="algebra.cpp">
@@ -198,6 +282,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -217,6 +308,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="arc4.cpp">
@@ -232,6 +330,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -251,6 +356,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="base32.cpp">
@@ -266,6 +378,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -285,6 +404,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="basecode.cpp">
@@ -300,6 +426,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -319,6 +452,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="blowfish.cpp">
@@ -334,6 +474,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -353,6 +500,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="camellia.cpp">
@@ -368,6 +522,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -387,6 +548,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="casts.cpp">
@@ -402,6 +570,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -421,6 +596,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="channels.cpp">
@@ -436,6 +618,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -458,6 +647,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="cryptlib.cpp">
@@ -473,6 +669,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -492,6 +695,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="des.cpp">
@@ -507,6 +717,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -526,6 +743,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="dh.cpp">
@@ -543,6 +767,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="dh2.cpp">
@@ -558,6 +789,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -579,6 +817,14 @@ echo: &gt;&gt; adhoc.cpp.copied
 						PreprocessorDefinitions=""
 						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="dsa.cpp">
@@ -594,6 +840,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -613,6 +866,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="eccrypto.cpp">
@@ -628,6 +888,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -647,6 +914,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="elgamal.cpp">
@@ -662,6 +936,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -681,6 +962,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="esign.cpp">
@@ -696,6 +984,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -715,6 +1010,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="filters.cpp">
@@ -730,6 +1032,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -749,6 +1058,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="fipstest.cpp">
@@ -764,6 +1080,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -783,6 +1106,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="gf2_32.cpp">
@@ -798,6 +1128,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -817,6 +1154,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="gfpcrypt.cpp">
@@ -832,6 +1176,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -851,6 +1202,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="gzip.cpp">
@@ -866,6 +1224,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -885,6 +1250,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="hmac.cpp">
@@ -900,6 +1272,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -919,6 +1298,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="ida.cpp">
@@ -934,6 +1320,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -953,6 +1346,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="integer.cpp">
@@ -968,6 +1368,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -987,6 +1394,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="luc.cpp">
@@ -1002,6 +1416,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1021,6 +1442,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="marss.cpp">
@@ -1036,6 +1464,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1055,6 +1490,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="md4.cpp">
@@ -1070,6 +1512,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1089,6 +1538,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="misc.cpp">
@@ -1104,6 +1560,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1123,6 +1586,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="mqueue.cpp">
@@ -1138,6 +1608,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1157,6 +1634,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="nbtheory.cpp">
@@ -1172,6 +1656,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1191,6 +1682,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="oaep.cpp">
@@ -1206,6 +1704,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1225,6 +1730,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="panama.cpp">
@@ -1240,6 +1752,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1261,6 +1780,14 @@ echo: &gt;&gt; adhoc.cpp.copied
 						PreprocessorDefinitions=""
 						UsePrecompiledHeader="1"/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="1"/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="pkcspad.cpp">
@@ -1276,6 +1803,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1295,6 +1829,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="pssr.cpp">
@@ -1310,6 +1851,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1329,6 +1877,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="queue.cpp">
@@ -1344,6 +1899,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1363,6 +1925,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="randpool.cpp">
@@ -1378,6 +1947,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1397,6 +1973,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="rc5.cpp">
@@ -1412,6 +1995,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1431,6 +2021,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="rdtables.cpp">
@@ -1446,6 +2043,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1465,6 +2069,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="ripemd.cpp">
@@ -1480,6 +2091,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1499,6 +2117,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="rsa.cpp">
@@ -1514,6 +2139,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1533,6 +2165,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="safer.cpp">
@@ -1548,6 +2187,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1567,6 +2213,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="serpent.cpp">
@@ -1582,6 +2235,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1601,6 +2261,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="shacal2.cpp">
@@ -1616,6 +2283,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1635,6 +2309,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="sharkbox.cpp">
@@ -1650,6 +2331,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1669,6 +2357,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="skipjack.cpp">
@@ -1684,6 +2379,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1703,6 +2405,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="square.cpp">
@@ -1718,6 +2427,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1737,6 +2453,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="strciphr.cpp">
@@ -1752,6 +2475,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1771,6 +2501,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="tftables.cpp">
@@ -1786,6 +2523,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1805,6 +2549,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="tigertab.cpp">
@@ -1820,6 +2571,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1839,6 +2597,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="ttmac.cpp">
@@ -1854,6 +2619,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1873,6 +2645,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="wait.cpp">
@@ -1888,6 +2667,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1907,6 +2693,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="whrlpool.cpp">
@@ -1922,6 +2715,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1941,6 +2741,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="xtr.cpp">
@@ -1956,6 +2763,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -1975,6 +2789,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="zdeflate.cpp">
@@ -1990,6 +2811,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>
@@ -2009,6 +2837,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="0"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="zlib.cpp">
@@ -2024,6 +2859,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
+						PreprocessorDefinitions=""/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Beta|Win32">
+					<Tool
+						Name="VCCLCompilerTool"
+						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
 			</File>

@@ -18,7 +18,6 @@
 #include "MuleListCtrl.h"
 #include "kademlia/routing/contact.h"
 
-class CIni;
 class CKademliaWnd;
 
 class CKadContactListCtrl : public CMuleListCtrl
@@ -32,18 +31,17 @@ public:
 protected:
 	friend class CKademliaWnd;
 
-	bool ContactAdd(const Kademlia::CContact* contact);
-	void ContactRem(const Kademlia::CContact* contact);
-	void ContactRef(const Kademlia::CContact* contact);
+	bool ContactAdd(const Kademlia::CContact *contact);
+	void ContactRem(const Kademlia::CContact *contact);
+	void ContactRef(const Kademlia::CContact *contact);
 
 	void Init();
 	void Localize();
-	void Hide() {ShowWindow(SW_HIDE);}
-	void Visable() {ShowWindow(SW_SHOW);}
+	void Hide() { ShowWindow(SW_HIDE); }
+	void Visible() { ShowWindow(SW_SHOW); }
 	void SaveAllSettings();
 	void UpdateKadContactCount();
-
-	void UpdateContact(int iItem, const Kademlia::CContact* contact, bool bLocalize = false);
+	void UpdateContact(int iItem, const Kademlia::CContact *contact);
 	void SetAllIcons();
 
 	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
@@ -51,7 +49,7 @@ protected:
 	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmDblClk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
-	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 };

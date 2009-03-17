@@ -33,7 +33,8 @@ struct SIPFilter
 };
 
 #define	DFLT_IPFILTER_FILENAME	_T("ipfilter.dat")
-#define	DFLT_STATIC_IPFILTER_FILENAME	_T("ipfilter_static.dat") // Static IP Filter - Stulle
+#define	DFLT_STATIC_IPFILTER_FILENAME	_T("ipfilter_static.dat") //MORPH - Added by leuk_he, Static  IP Filter [Stulle]
+#define	DFLT_WHITE_IPFILTER_FILENAME	_T("ipfilter_white.dat") //MORPH - Added by Stulle, IP Filter White List [Stulle]
 
 // 'CArray' would give us more cach hits, but would also be slow in array element creation 
 // (because of the implicit ctor in 'SIPFilter'
@@ -63,7 +64,12 @@ public:
 	bool IsFiltered(uint32 IP, UINT level) /*const*/;
 	CString GetLastHit() const;
 	const CIPFilterArray& GetIPFilter() const;
+	//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	/*
 	void    UpdateIPFilterURL();//MORPH START added by Yun.SF3: Ipfilter.dat update
+	*/
+	void    UpdateIPFilterURL(uint32 uNewVersion = 0);
+	//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 private:
 	const SIPFilter* m_pLastHit;
 	CIPFilterArray m_iplist;
@@ -72,8 +78,18 @@ private:
 	bool ParseFilterLine1(const CStringA& rstrBuffer, uint32& ip1, uint32& ip2, UINT& level, CStringA& rstrDesc) const;
 	bool ParseFilterLine2(const CStringA& rstrBuffer, uint32& ip1, uint32& ip2, UINT& level, CStringA& rstrDesc) const;
 
-	// ==> Static IP Filter - Stulle
+	//MORPH START - Added by leuk_he, Static  IP Filter [Stulle]
 	void AddFromFile2(LPCTSTR pszFilePath);
 	CString GetDefaultStaticFilePath() const;
-	// <== Static IP Filter - Stulle
+	//MORPH END   - Added by leuk_he, Static  IP Filter [Stulle]
+
+	//MORPH START - Added by Stulle, IP Filter White List [Stulle]
+	void AddFromFileWhite(LPCTSTR pszFilePath);
+	CString GetDefaultWhiteFilePath() const;
+
+	void AddIPRangeWhite(uint32 start, uint32 end, UINT level, const CStringA& rstrDesc) {
+		m_iplist_White.Add(new SIPFilter(start, end, level, rstrDesc));
+	}
+	CIPFilterArray m_iplist_White;
+	//MORPH END   - Added by Stulle, IP Filter White List [Stulle]
 };

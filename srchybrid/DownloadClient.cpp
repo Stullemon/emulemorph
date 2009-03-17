@@ -44,7 +44,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 //	members of CUpDownClient
@@ -53,10 +53,10 @@ CBarShader CUpDownClient::s_StatusBar(16);
 //MORPH - Changed by SiRoB, Keep A4AF infos
 /*
 void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect, bool onlygreyrect, bool  bFlat) const
-{ 
 */
 void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, bool  bFlat) const
-{ 
+//MORPH - Changed by SiRoB, Keep A4AF infos
+{
 	if (g_bLowColorDesktop)
 		bFlat = true;
 
@@ -74,7 +74,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 	//MORPH START - Changed by SiRoB, Keep A4AF infos
 	/*
 	ASSERT(reqfile);
-	s_StatusBar.SetFileSize(reqfile->GetFileSize()); 
+	s_StatusBar.SetFileSize(reqfile->GetFileSize());
 	*/
 	ASSERT(file);
 	s_StatusBar.SetFileSize(file->GetFileSize()); 
@@ -84,6 +84,9 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 	s_StatusBar.Fill(crNeither);
 
 	//MORPH START - Changed by SiRoB, Keep A4AF infos
+	/*
+	if (!onlygreyrect && reqfile && m_abyPartStatus)
+	*/
 	uint8* thisAbyPartStatus;
 	if(m_PartStatus_list.Lookup(file,thisAbyPartStatus) && thisAbyPartStatus)
 	{
@@ -96,7 +99,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 		if (g_bLowColorDesktop) {
 			crBoth = RGB(0, 0, 0);
 			crClientOnly = RGB(0, 0, 255);
-			crPending = RGB(0, 191, 0);
+			crPending = RGB(0, 191, 0); // was RGB(0, 255, 0);
 			crNextPending = RGB(255, 255, 0);
 			crMeOnly = RGB(127,127,127); //MORPH - Added by IceCream--- xrmb:seeTheNeed ---
 			crClientPartial = RGB(255,191,0); // enkeyDev: ICS //Morph - added by AndCycle, ICS
@@ -117,7 +120,12 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 		}
 
 		char* pcNextPendingBlks = NULL;
+		//MORPH START - change
+		/*
+		if (m_nDownloadState == DS_DOWNLOADING){
+		*/
 		if (m_nDownloadState == DS_DOWNLOADING && file == reqfile){
+		//MORPH END   - change
 			pcNextPendingBlks = new char[m_nPartCount];
 			memset(pcNextPendingBlks, 'N', m_nPartCount); // do not use '_strnset' for uninitialized memory!
 			for (POSITION pos = m_PendingBlocks_list.GetHeadPosition(); pos != 0; ){
@@ -127,6 +135,23 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 			}
 		}
 
+		//MORPH START - change
+		/*
+		for (UINT i = 0; i < m_nPartCount; i++){
+			if (m_abyPartStatus[i]){
+				uint64 uEnd;
+				if ( PARTSIZE*(uint64)(i+1) > reqfile->GetFileSize())
+					uEnd = reqfile->GetFileSize();
+				else
+					uEnd = PARTSIZE*(uint64)(i+1);
+
+				if (reqfile->IsComplete(PARTSIZE*(uint64)i,PARTSIZE*(uint64)(i+1)-1, false))
+					s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crBoth);
+				else if (GetSessionDown() > 0 && m_nDownloadState == DS_DOWNLOADING && m_nLastBlockOffset >= PARTSIZE*(uint64)i && m_nLastBlockOffset < uEnd)
+					s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crPending);
+				else if (pcNextPendingBlks != NULL && pcNextPendingBlks[i] == 'Y')
+					s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crNextPending);
+		*/
 		for (uint16 i = 0; i < file->GetPartCount(); i++){
 			if (thisAbyPartStatus[i]&SC_AVAILABLE){
 				uint64 uEnd = PARTSIZE*(uint64)(i+1);
@@ -142,6 +167,7 @@ void CUpDownClient::DrawStatusBar(CDC* dc, LPCRECT rect,const CPartFile* file, b
 					else
 						s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crClientOnly);
 				}
+		//MORPH END   - change
 				else
 					s_StatusBar.FillRange(PARTSIZE*(uint64)i, uEnd, crClientOnly);
 			} 
@@ -561,8 +587,8 @@ void CUpDownClient::SendFileRequest()
 				DebugSend("OP__MultiPacket_Ext", this, reqfile->GetFileHash());
 		}
 		else{
-		if (thePrefs.GetDebugClientTCPLevel() > 0)
-			DebugSend("OP__MultiPacket", this, reqfile->GetFileHash());
+			if (thePrefs.GetDebugClientTCPLevel() > 0)
+				DebugSend("OP__MultiPacket", this, reqfile->GetFileHash());
 		}
 
 		// OP_REQUESTFILENAME + ExtInfo
@@ -603,7 +629,7 @@ void CUpDownClient::SendFileRequest()
 				dataFileReq.WriteUInt16(nOptions);
 			}
 			else{
-			dataFileReq.WriteUInt8(OP_REQUESTSOURCES);
+				dataFileReq.WriteUInt8(OP_REQUESTSOURCES);
 			}
 			reqfile->SetLastAnsweredTimeTimeout();
 			SetLastAskedForSources();
@@ -622,7 +648,7 @@ void CUpDownClient::SendFileRequest()
 		Packet* packet = new Packet(&dataFileReq, OP_EMULEPROT);
 		packet->opcode = bUseExtMultiPacket ? OP_MULTIPACKET_EXT : OP_MULTIPACKET;
 		theStats.AddUpDataOverheadFileRequest(packet->size);
-		socket->SendPacket(packet, true);
+		SendPacket(packet, true);
 	}
 	else
 	{
@@ -636,7 +662,7 @@ void CUpDownClient::SendFileRequest()
 		Packet* packet = new Packet(&dataFileReq);
 		packet->opcode = OP_REQUESTFILENAME;
 		theStats.AddUpDataOverheadFileRequest(packet->size);
-		socket->SendPacket(packet, true);
+		SendPacket(packet, true);
 	
 		// 26-Jul-2003: removed requesting the file status for files <= PARTSIZE for better compatibility with ed2k protocol (eDonkeyHybrid).
 		// if the remote client answers the OP_REQUESTFILENAME with OP_REQFILENAMEANSWER the file is shared by the remote client. if we
@@ -650,7 +676,7 @@ void CUpDownClient::SendFileRequest()
 		    packet = new Packet(&dataSetReqFileID);
 		    packet->opcode = OP_SETREQFILEID;
 		    theStats.AddUpDataOverheadFileRequest(packet->size);
-		    socket->SendPacket(packet, true);
+		   SendPacket(packet, true);
 		}
 	
 		if (IsEmuleClient())
@@ -680,11 +706,11 @@ void CUpDownClient::SendFileRequest()
 			}
 			else{
 				packet = new Packet(OP_REQUESTSOURCES,16,OP_EMULEPROT);
-			md4cpy(packet->pBuffer,reqfile->GetFileHash());
+				md4cpy(packet->pBuffer,reqfile->GetFileHash());
 			}
 
 			theStats.AddUpDataOverheadSourceExchange(packet->size);
-			socket->SendPacket(packet, true, true);
+			SendPacket(packet, true);
 			SetLastAskedForSources();
 			if (thePrefs.GetDebugSourceExchange())
 				AddDebugLogLine(false, _T("SXSend (%s): Client source request; %s, File=\"%s\""),SupportsSourceExchange2() ? _T("Version 2") : _T("Version 1"), DbgGetClientInfo(), reqfile->GetFileName());
@@ -697,7 +723,7 @@ void CUpDownClient::SendFileRequest()
 			Packet* packet = new Packet(OP_AICHFILEHASHREQ,16,OP_EMULEPROT);
 			md4cpy(packet->pBuffer,reqfile->GetFileHash());
 			theStats.AddUpDataOverheadFileRequest(packet->size);
-			socket->SendPacket(packet,true,true);
+			SendPacket(packet, true);
 		}
 	}
     SetLastAskedTime();
@@ -710,8 +736,8 @@ void CUpDownClient::SendStartupLoadReq()
 		ASSERT(0);
 		return;
 	}
-	SetDownloadState(DS_ONQUEUE);
-
+	m_fQueueRankPending = 1;
+	m_fUnaskQueueRankRecv = 0;
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		DebugSend("OP__StartupLoadReq", this);
 	CSafeMemFile dataStartupLoadReq(16);
@@ -719,9 +745,8 @@ void CUpDownClient::SendStartupLoadReq()
 	Packet* packet = new Packet(&dataStartupLoadReq);
 	packet->opcode = OP_STARTUPLOADREQ;
 	theStats.AddUpDataOverheadFileRequest(packet->size);
-	socket->SendPacket(packet, true, true);
-	m_fQueueRankPending = 1;
-	m_fUnaskQueueRankRecv = 0;
+	SetDownloadState(DS_ONQUEUE);
+	SendPacket(packet, true);
 }
 
 void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
@@ -749,10 +774,11 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		uint8* thisAbyPartStatus;
 		if(m_PartStatus_list.Lookup(reqfile, thisAbyPartStatus))
 		{
-			delete[] thisAbyPartStatus;
-			m_PartStatus_list.RemoveKey(reqfile);
+			//WiZaRd: NOTE! It is NOT necessary to delete ALL information right now... especially hiding information might prove useful again!
+			for(uint16 i = 0; i < m_nPartCount; ++i)
+				thisAbyPartStatus[i] &= ~SC_AVAILABLE; //clear "avail" flag
 		}
-		m_abyPartStatus = NULL;
+		// m_abyPartStatus = NULL;
 		//MORPH   END - Changed by SiRoB, Keep A4AF infos
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
@@ -765,7 +791,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		*/
 		memset(m_abyPartStatus,SC_AVAILABLE,m_nPartCount);
 		m_bCompleteSource = true;
-		
+
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 		{
 		    int iNeeded = 0;
@@ -776,11 +802,12 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 			}
 			char* psz = new char[m_nPartCount + 1];
 			for (i = 0; i < m_nPartCount; i++)
-				//MORPH - Changed by SiRoB, ICS merged into partstatus
+				//MORPH START - Changed by SiRoB, ICS merged into partstatus
 				/*
 				psz[i] = m_abyPartStatus[i] ? '#' : '.';
 				*/
 				psz[i] = (m_abyPartStatus[i]&SC_AVAILABLE) ? '#' : '.';
+				//MORPH END   - Changed by SiRoB, ICS merged into partstatus
 			psz[i] = '\0';
 			Debug(_T("  Parts=%u  %hs  Needed=%u\n"), m_nPartCount, psz, iNeeded);
 			delete[] psz;
@@ -797,7 +824,7 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 				Packet* packet = new Packet(OP_HASHSETREQUEST,16);
 				md4cpy(packet->pBuffer,reqfile->GetFileHash());
 				theStats.AddUpDataOverheadFileRequest(packet->size);
-				socket->SendPacket(packet,true,true);
+				SendPacket(packet, true);
 				SetDownloadState(DS_REQHASHSET);
 				m_fHashsetRequesting = 1;
 				reqfile->hashsetneeded = false;
@@ -831,8 +858,9 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	uint8* thisAbyPartStatus;
 	if(m_PartStatus_list.Lookup(reqfile, thisAbyPartStatus))
 	{
-		delete[] thisAbyPartStatus;
-		m_PartStatus_list.RemoveKey(reqfile);
+		//WiZaRd: NOTE! It is NOT necessary to delete ALL information right now... especially hiding information might prove useful again!
+		for(uint16 i = 0; i < m_nPartCount; ++i)
+			thisAbyPartStatus[i] &= ~SC_AVAILABLE; //clear "avail" flag
 	}
 	m_abyPartStatus = NULL;
 	//MORPH   END - Added by SiRoB, Keep A4AF infos
@@ -847,7 +875,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 		m_PartStatus_list.SetAt(reqfile, m_abyPartStatus);
 		//MORPH - Changed by SiRoB, ICS merged into partstatus
 		/*
-		memset(m_abyPartStatus,1,m_nPartCount);
+		memset(m_abyPartStatus, 1, m_nPartCount);
 		*/
 		memset(m_abyPartStatus,SC_AVAILABLE,m_nPartCount);
 		bPartsNeeded = true;
@@ -940,7 +968,7 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 				Packet* packet = new Packet(OP_HASHSETREQUEST,16);
 				md4cpy(packet->pBuffer,reqfile->GetFileHash());
 				theStats.AddUpDataOverheadFileRequest(packet->size);
-				socket->SendPacket(packet, true, true);
+				SendPacket(packet, true);
 				SetDownloadState(DS_REQHASHSET);
 				m_fHashsetRequesting = 1;
 				reqfile->hashsetneeded = false;
@@ -1097,15 +1125,23 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 		}
 
         if(nNewState == DS_DOWNLOADING && socket){
-			socket->SetTimeOut(CONNECTION_TIMEOUT*4);
+		    socket->SetTimeOut(CONNECTION_TIMEOUT*4);
         }
 
-		bool bFailedSession = true;
+		bool bFailedSession = true; // MORPH
 		if (m_nDownloadState == DS_DOWNLOADING ){
 			if(socket)
 				socket->SetTimeOut(CONNECTION_TIMEOUT);
 
-			 //MORPH START - Changed by SiRoB, don't overhide pszReason
+			//MORPH START - Changed by SiRoB, don't overhide pszReason
+			/*
+			if (thePrefs.GetLogUlDlEvents()) {
+				switch( nNewState )
+				{
+					case DS_NONEEDEDPARTS:
+						pszReason = _T("NNP. You don't need any parts from this client.");
+				}
+			*/
 			if (pszReason == NULL) {
 				if (thePrefs.GetLogUlDlEvents()) {
 					switch( nNewState )
@@ -1122,15 +1158,26 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 				}
 			} 
 			//MORPH END   - Changed by SiRoB, don't overhide pszReason
-            if(thePrefs.GetLogUlDlEvents())
-				AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Payload: %s, Transferred: %s, Req blocks not yet completed: %i."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionPayloadDown(), false, false), CastItoXBytes(GetSessionDown(), false, false), m_PendingBlocks_list.GetCount());
-			
+
+                if(thePrefs.GetLogUlDlEvents())
+                    AddDebugLogLine(DLP_VERYLOW, false, _T("Download session ended: %s User: %s in SetDownloadState(). New State: %i, Length: %s, Payload: %s, Transferred: %s, Req blocks not yet completed: %i."), pszReason, DbgGetClientInfo(), nNewState, CastSecondsToHM(GetDownTimeDifference(false)/1000), CastItoXBytes(GetSessionPayloadDown(), false, false), CastItoXBytes(GetSessionDown(), false, false), m_PendingBlocks_list.GetCount());
+			//MORPH START - Changed by SiRoB, don't overhide pszReason
+			/*
+			}
+			*/
+			//MORPH END   - Changed by SiRoB, don't overhide pszReason
+
 			ResetSessionDown();
 
 			// -khaos--+++> Extended Statistics (Successful/Failed Download Sessions)
 			if ( m_bTransferredDownMini && nNewState != DS_ERROR )
 				thePrefs.Add2DownSuccessfulSessions(); // Increment our counters for successful sessions (Cumulative AND Session)
-			else if (bFailedSession) //MORPH - Added by SiRoB, not a failed session
+			//MORPH - Added by SiRoB, not a failed session
+			/*
+			else
+			*/
+			else if (bFailedSession)
+			//MORPH - Added by SiRoB, not a failed session
 				thePrefs.Add2DownFailedSessions(); // Increment our counters failed sessions (Cumulative AND Session)
 			//wistily start
 			uint32 tempDownTimeDifference= GetDownTimeDifference();
@@ -1159,7 +1206,7 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 				m_abyPartStatus = NULL;
 				m_nPartCount = 0;
 			}
-			if (socket && nNewState != DS_ERROR)
+			if (socket && nNewState != DS_ERROR )
 				socket->DisableDownloadLimit();
 		}
 		m_nDownloadState = (_EDownloadState)nNewState;
@@ -1222,7 +1269,32 @@ uint64	CUpDownClient::GetRemainingAvailableData(const CPartFile* file) const{
 void CUpDownClient::CreateBlockRequests(int iMaxBlocks)
 {
 	ASSERT( iMaxBlocks >= 1 /*&& iMaxBlocks <= 3*/ );
-//MORPH START - Proper number of needed requested block
+	//MORPH START - Proper number of needed requested block
+	/*
+	if (m_DownloadBlocks_list.IsEmpty())
+	{
+		uint16 count;
+        if(iMaxBlocks > m_PendingBlocks_list.GetCount()) {
+            count = (uint16)(iMaxBlocks - m_PendingBlocks_list.GetCount());
+        } else {
+            count = 0;
+        }
+
+		Requested_Block_Struct** toadd = new Requested_Block_Struct*[count];
+		if (reqfile->GetNextRequestedBlock(this, toadd, &count)){
+			for (UINT i = 0; i < count; i++)
+				m_DownloadBlocks_list.AddTail(toadd[i]);
+		}
+		delete[] toadd;
+	}
+
+	while (m_PendingBlocks_list.GetCount() < iMaxBlocks && !m_DownloadBlocks_list.IsEmpty())
+	{
+		Pending_Block_Struct* pblock = new Pending_Block_Struct;
+		pblock->block = m_DownloadBlocks_list.RemoveHead();
+		m_PendingBlocks_list.AddTail(pblock);
+	}
+	*/
 	uint16 futurePossiblePendingBlock = (uint16)(m_PendingBlocks_list.GetCount()+m_DownloadBlocks_list.GetCount());
 	if (futurePossiblePendingBlock < iMaxBlocks)
 	{
@@ -1263,24 +1335,37 @@ void CUpDownClient::SendBlockRequests()
 		return;
 
     // prevent locking of too many blocks when we are on a slow (probably standby/trickle) slot
+	//MORPH START
+	/*
+    int blockCount = 3;
+    if(IsEmuleClient() && m_byCompatibleClient==0 && reqfile->GetFileSize()-reqfile->GetCompletedSize() <= (uint64)PARTSIZE*4) {
+	*/
 	int blockCount = GetDownloadDatarateAVG()/(3*EMBLOCKSIZE)+2;
-    //if(IsEmuleClient() && m_byCompatibleClient==0 && reqfile->GetFileSize()-reqfile->GetCompletedSize() <= (uint64)PARTSIZE*4) {
+	// MORPH END
         // if there's less than two chunks left, request fewer blocks for
         // slow downloads, so they don't lock blocks from faster clients.
         // Only trust eMule clients to be able to handle less blocks than three
+	//MORPH START
+	/*
+        if(GetDownloadDatarate() < 600 || GetSessionPayloadDown() < 40*1024) {
+            blockCount = 1;
+        } else if(GetDownloadDatarate() < 1200) {
+            blockCount = 2;
+        }
+    }
+	*/
         if(GetDownloadDatarate() < 1200  || GetSessionPayloadDown() < 40*1024) {
             blockCount = 1;
         }
-    //}
+	// MORPH END
 	CreateBlockRequests(blockCount);
-
 
 	if (m_PendingBlocks_list.IsEmpty()){
 		//MORPH START - SendCancelTransfer if we can't find an other file to download
 		/*
 		SendCancelTransfer();
 		SetDownloadState(DS_NONEEDEDPARTS);
-		SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true);
+        SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true);
 		*/
 		SetDownloadState(DS_NONEEDEDPARTS, _T("NNP. We can't ask more block request. Client don't have any block for us or file is already fully requested."));
 		if (!SwapToAnotherFile(_T("A4AF for NNP file. CUpDownClient::SendBlockRequests()"), true, false, false, NULL, true, true))
@@ -1288,17 +1373,20 @@ void CUpDownClient::SendBlockRequests()
 		//MORPH END   - SendCancelTransfer if we can't find an other file to download
 		return;
 	}
-	
+
 	bool bI64Offsets = false;
 	POSITION pos = m_PendingBlocks_list.GetHeadPosition();
 	//MORPH START - Changed by SiRoB, Official fix to prevent sending same requested block
 	/*
 	for (uint32 i = 0; i != 3; i++){
+		if (pos){
+			Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
 	*/
 	uint32 numberofblocktorequest = 0;
 	while (pos){
 		Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
 		if (pending->fQueued == 0) {
+	//MORPH END   - Changed by SiRoB, Official fix to prevent sending same requested block
 			ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
 			if (pending->block->StartOffset > 0xFFFFFFFF || pending->block->EndOffset >= 0xFFFFFFFF){
 				bI64Offsets = true;
@@ -1306,29 +1394,42 @@ void CUpDownClient::SendBlockRequests()
 					ASSERT( false );
 					SendCancelTransfer();
 					SetDownloadState(DS_ERROR);
+			//MORPH START - Changed by SiRoB, Official fix to prevent sending same requested block
+			/*
+				}
+				break;
+			}
+			*/
 					return;
-					}
-				//break;
-
+				}
 			}
 			++numberofblocktorequest;
+			//MORPH END   - Changed by SiRoB, Official fix to prevent sending same requested block
 		}
 	}
+
+	//MORPH START - Changed by SiRoB, Official fix to prevent sending same requested block
 	if (numberofblocktorequest == 0) //mean there is no request to do
 		return;
+	//MORPH END   - Changed by SiRoB, Official fix to prevent sending same requested block
 	Packet* packet;
+	//MORPH START
 	uint32 npacket = 0;
 	const UINT nbpackettosend = (numberofblocktorequest+2)/3;
+	//MORPH END
 	if (bI64Offsets){
+		//MORPH START
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];
 #endif
 		pos = m_PendingBlocks_list.GetHeadPosition();
 		while (npacket<nbpackettosend) {
+		//MORPH END
 		const int iPacketSize = 16+(3*8)+(3*8); // 64
 		packet = new Packet(OP_REQUESTPARTS_I64, iPacketSize, OP_EMULEPROT);
 		CSafeMemFile data((const BYTE*)packet->pBuffer, iPacketSize);
 		data.WriteHash16(reqfile->GetFileHash());
+		//MORPH START
 		/*
 		pos = m_PendingBlocks_list.GetHeadPosition();
 		for (uint32 i = 0; i != 3; i++){
@@ -1336,8 +1437,18 @@ void CUpDownClient::SendBlockRequests()
 		POSITION initialpos = pos;
 		uint32 i = 0;
 		while (i != 3){
+		//MORPH END
 			if (pos){
 				Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
+				//MORPH START
+				/*
+				ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
+				//ASSERT( pending->zStream == NULL );
+				//ASSERT( pending->totalUnzipped == 0 );
+				pending->fZStreamError = 0;
+				pending->fRecovered = 0;
+				data.WriteUInt64(pending->block->StartOffset);
+				*/
 				if (pending->fQueued == 0) {
 					ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
 					//ASSERT( pending->zStream == NULL );
@@ -1348,19 +1459,27 @@ void CUpDownClient::SendBlockRequests()
 					data.WriteUInt64(pending->block->StartOffset);
 					++i;
 				}
+				//MORPH END
 			}
-			else {
+			else
+			{ //MORPH
 				data.WriteUInt64(0);
+			//MORPH START
 				++i;
 			}
+			//MORPH END
 		}
-		pos = initialpos;
+		//MORPH START
 		/*
+		pos = m_PendingBlocks_list.GetHeadPosition();
 		for (uint32 i = 0; i != 3; i++){
 		*/
+		pos = initialpos;
 		i = 0;
 		while (i != 3){
+		//MORPH END
 			if (pos){
+				//MORPH START
 				/*
 				Requested_Block_Struct* block = m_PendingBlocks_list.GetNext(pos)->block;
 				*/
@@ -1368,6 +1487,7 @@ void CUpDownClient::SendBlockRequests()
 				if (pending->fQueued == 1) {
 					pending->fQueued = 2;
 					Requested_Block_Struct* block = pending->block;
+				//MORPH END
 					uint64 endpos = block->EndOffset+1;
 					data.WriteUInt64(endpos);
 					if (thePrefs.GetDebugClientTCPLevel() > 0){
@@ -1380,7 +1500,7 @@ void CUpDownClient::SendBlockRequests()
 						strInfo += _T('\n');
 						Debug(strInfo);
 					}
-					++i;
+					++i; //MORPH
 				}
 			}
 			else
@@ -1388,10 +1508,10 @@ void CUpDownClient::SendBlockRequests()
 				data.WriteUInt64(0);
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
 					Debug(_T("  Block request %u: <empty>\n"), i);
-				++i;
+				++i; //MORPH
 			}
-
 		}
+		//MORPH START
 			theStats.AddUpDataOverheadFileRequest(packet->size);
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 			apacket[npacket++] = packet;
@@ -1405,17 +1525,21 @@ void CUpDownClient::SendBlockRequests()
 		}
 		delete[] apacket;
 #endif
+		//MORPH END
 	}
 	else{
+		//MORPH START
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];
 #endif
 		pos = m_PendingBlocks_list.GetHeadPosition();
 		while (npacket<nbpackettosend) {
+		//MORPH END
 		const int iPacketSize = 16+(3*4)+(3*4); // 40
 		packet = new Packet(OP_REQUESTPARTS,iPacketSize);
 		CSafeMemFile data((const BYTE*)packet->pBuffer, iPacketSize);
 		data.WriteHash16(reqfile->GetFileHash());
+		//MORPH START
 		/*
 		pos = m_PendingBlocks_list.GetHeadPosition();
 		for (uint32 i = 0; i != 3; i++){
@@ -1423,8 +1547,18 @@ void CUpDownClient::SendBlockRequests()
 		POSITION initalpos = pos;
 		uint32 i = 0;
 		while (i != 3){
+		//MORPH END
 			if (pos){
 				Pending_Block_Struct* pending = m_PendingBlocks_list.GetNext(pos);
+				//MORPH START
+				/*
+				ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
+				//ASSERT( pending->zStream == NULL );
+				//ASSERT( pending->totalUnzipped == 0 );
+				pending->fZStreamError = 0;
+				pending->fRecovered = 0;
+				data.WriteUInt32((uint32)pending->block->StartOffset);
+				*/
 				if (pending->fQueued == 0) {
 					ASSERT( pending->block->StartOffset <= pending->block->EndOffset );
 					//ASSERT( pending->zStream == NULL );
@@ -1435,19 +1569,27 @@ void CUpDownClient::SendBlockRequests()
 					data.WriteUInt32((uint32)pending->block->StartOffset);
 					++i;
 				}
+				//MORPH END
 			}
-			else {
+			else
+			{ //MORPH
 				data.WriteUInt32(0);
+			//MORPH START
 				++i;
 			}
+			//MORPH END
 		}
-		pos = initalpos;
+		//MORPH START
 		/*
+		pos = m_PendingBlocks_list.GetHeadPosition();
 		for (uint32 i = 0; i != 3; i++){
 		*/
+		pos = initalpos;
 		i = 0;
 		while (i != 3){
+		//MORPH END
 			if (pos){
+				//MORPH START
 				/*
 				Requested_Block_Struct* block = m_PendingBlocks_list.GetNext(pos)->block;
 				*/
@@ -1455,6 +1597,7 @@ void CUpDownClient::SendBlockRequests()
 				if (pending->fQueued == 1) {
 					pending->fQueued = 2;
 					Requested_Block_Struct* block = pending->block;
+				//MORPH END
 					uint64 endpos = block->EndOffset+1;
 					data.WriteUInt32((uint32)endpos);
 					if (thePrefs.GetDebugClientTCPLevel() > 0){
@@ -1467,7 +1610,7 @@ void CUpDownClient::SendBlockRequests()
 						strInfo += _T('\n');
 						Debug(strInfo);
 					}
-					++i;
+					++i; //MORPH
 				}
 			}
 			else
@@ -1475,9 +1618,16 @@ void CUpDownClient::SendBlockRequests()
 				data.WriteUInt32(0);
 				if (thePrefs.GetDebugClientTCPLevel() > 0)
 					Debug(_T("  Block request %u: <empty>\n"), i);
-				++i;
+				++i; //MORPH
 			}
 		}
+//MORPH START
+/*
+	}
+
+	theStats.AddUpDataOverheadFileRequest(packet->size);
+	SendPacket(packet, true);
+*/
 			theStats.AddUpDataOverheadFileRequest(packet->size);
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 			apacket[npacket++] = packet;
@@ -1513,12 +1663,12 @@ void CUpDownClient::SendBlockRequests()
 void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool packed, bool bI64Offsets)
 {
 	if (!bI64Offsets) {
-	uint32 nDbgStartPos = *((uint32*)(packet+16));
-	if (thePrefs.GetDebugClientTCPLevel() > 1){
-		if (packed)
-			Debug(_T("  Start=%u  BlockSize=%u  Size=%u  %s\n"), nDbgStartPos, *((uint32*)(packet + 16+4)), size-24, DbgGetFileInfo(packet));
-		else
-			Debug(_T("  Start=%u  End=%u  Size=%u  %s\n"), nDbgStartPos, *((uint32*)(packet + 16+4)), *((uint32*)(packet + 16+4)) - nDbgStartPos, DbgGetFileInfo(packet));
+	    uint32 nDbgStartPos = *((uint32*)(packet+16));
+	    if (thePrefs.GetDebugClientTCPLevel() > 1){
+		    if (packed)
+			    Debug(_T("  Start=%u  BlockSize=%u  Size=%u  %s\n"), nDbgStartPos, *((uint32*)(packet + 16+4)), size-24, DbgGetFileInfo(packet));
+		    else
+			    Debug(_T("  Start=%u  End=%u  Size=%u  %s\n"), nDbgStartPos, *((uint32*)(packet + 16+4)), *((uint32*)(packet + 16+4)) - nDbgStartPos, DbgGetFileInfo(packet));
 	    }
 	}
 
@@ -1595,6 +1745,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 	*/
 	bool bpacketusefull = false;
 	//MORPH - Avoid Credit faker
+
 	// Move end back one, should be inclusive
 	nEndPos--;
 
@@ -1635,7 +1786,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
 					return;
 				}
-				bpacketusefull = true;
+				bpacketusefull = true; //MORPH
 				// Write to disk (will be buffered in part file class)
 				lenWritten = reqfile->WriteToBuffer(uTransferredFileDataSize, 
 													packet + nHeaderSize,
@@ -1706,6 +1857,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 					reqfile->RemoveBlockFromList(cur_block->block->StartOffset, cur_block->block->EndOffset);
 					*/
 					reqfile->RemoveBlockFromList(cur_block->block);
+
 					// If we had an zstream error, there is no chance that we could recover from it nor that we
 					// could use the current zstream (which is in error state) any longer.
 					if (cur_block->zStream){
@@ -1747,7 +1899,7 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 					}
 					delete cur_block;
 					m_PendingBlocks_list.RemoveAt(posLast);
-					
+
 					// Request next block
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugSend("More block requests", this);
@@ -1789,8 +1941,10 @@ void CUpDownClient::ProcessBlockPacket(const uchar *packet, uint32 size, bool pa
 			return;
 		}
 	}
+	//MORPH START
 	if (thePrefs.GetVerbose())
 		DebugLogError(LOG_MORPH, _T("PrcBlkPkt: Ignoring %u bytes of block starting at %I64u  because unasked for file \"%s\" - %s"), uTransferredFileDataSize, nStartPos, reqfile->GetFileName(), DbgGetClientInfo());
+	//MORPH END
 
 	TRACE("%s - Dropping packet\n", __FUNCTION__);
 }
@@ -1876,7 +2030,7 @@ int CUpDownClient::unzip(Pending_Block_Struct* block, const BYTE* zipped, uint32
 		    BYTE *temp = new BYTE[newLength];
 			ASSERT( zS->total_out - block->totalUnzipped <= newLength );
 		    memcpy(temp, (*unzipped), (zS->total_out - block->totalUnzipped));
-		    delete [] (*unzipped);
+		    delete[] (*unzipped);
 		    (*unzipped) = temp;
 		    (*lenUnzipped) = newLength;
     
@@ -1976,13 +2130,14 @@ uint32 CUpDownClient::CalculateDownloadRate(){
 	//MORPH START - UpdateItemThread
 	/*
 	m_cShowDR++;
-	if (m_cShowDR == 30) {
+	if (m_cShowDR == 30){
 		m_cShowDR = 0;
 		UpdateDisplayedInfo();
 	}
 	*/
 	UpdateDisplayedInfo();
 	//MORPH END    - UpdateItemThread
+
 	return m_nDownDatarate;
 }
 
@@ -2130,12 +2285,12 @@ void CUpDownClient::UDPReaskForDownload()
 			}
 			if (GetUDPVersion() > 2)
 				data.WriteUInt16(reqfile->m_nCompleteSourcesCount);
-				if (thePrefs.GetDebugClientUDPLevel() > 0)
-				    DebugSend("OP__ReaskFilePing", this, reqfile->GetFileHash());
-				Packet* response = new Packet(&data, OP_EMULEPROT);
-				response->opcode = OP_REASKFILEPING;
-				theStats.AddUpDataOverheadFileRequest(response->size);
-				theApp.downloadqueue->AddUDPFileReasks();
+			if (thePrefs.GetDebugClientUDPLevel() > 0)
+			    DebugSend("OP__ReaskFilePing", this, reqfile->GetFileHash());
+			Packet* response = new Packet(&data, OP_EMULEPROT);
+			response->opcode = OP_REASKFILEPING;
+			theStats.AddUpDataOverheadFileRequest(response->size);
+			theApp.downloadqueue->AddUDPFileReasks();
 			theApp.clientudp->SendPacket(response, GetIP(), GetUDPPort(), ShouldReceiveCryptUDPPackets(), GetUserHash(), false, 0);
 			m_nTotalUDPPackets++;
 		}
@@ -2599,12 +2754,13 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR re
 		//MORPH START - Changed by SiRoB, Keep A4AF infos
 		uint8* PartStatus;
 		if(m_PartStatus_list.Lookup(reqfile,PartStatus)){
-			delete[] PartStatus;
-			m_PartStatus_list.RemoveKey(reqfile);
+			//WiZaRd: NOTE! It is NOT necessary to delete ALL information right now... especially hiding information might prove useful again!
+			for(uint16 i = 0; i < m_nPartCount; ++i)
+				PartStatus[i] &= ~SC_AVAILABLE; //clear "avail" flag
 		}
 		m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
 		//MORPH END   - Changed by SiRoB, Keep A4AF infos
-	}
+    }
 
 	SetDownloadState(DS_NONE);
 	CPartFile* pOldRequestFile = reqfile;
@@ -2765,8 +2921,9 @@ void CUpDownClient::SetRequestFile(CPartFile* pReqFile)
 		uint8* PartStatus;
 		if (pReqFile == NULL) {
 			if(m_PartStatus_list.Lookup(reqfile,PartStatus)){
-				delete[] PartStatus;
-				m_PartStatus_list.RemoveKey(reqfile);
+				//WiZaRd: NOTE! It is NOT necessary to delete ALL information right now... especially hiding information might prove useful again!
+				for(uint16 i = 0; i < m_nPartCount; ++i)
+					PartStatus[i] &= ~SC_AVAILABLE; //clear "avail" flag
 			}
 			m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
 		} else {
@@ -2864,10 +3021,13 @@ void CUpDownClient::CheckQueueRankFlood()
 	{
 		if (GetDownloadState() != DS_DOWNLOADING)
 		{
-			if (m_fUnaskQueueRankRecv < 3) {// NOTE: Do not increase this nr. without increasing the bits for 'm_fUnaskQueueRankRecv'
-                m_fUnaskQueueRankRecv++;
+			if (m_fUnaskQueueRankRecv < 3) // NOTE: Do not increase this nr. without increasing the bits for 'm_fUnaskQueueRankRecv'
+			{ //MORPH
+				m_fUnaskQueueRankRecv++;
+			//MORPH START
 				AddDebugLogLine(false, _T("Clients: %s (%s),m_fUnaskQueueRankRecv =%d (3+badrequest=ban) "), GetUserName(), ipstr(GetConnectIP()),m_fUnaskQueueRankRecv); //morph extra logging
 			}
+			//MORPH END
 			if (m_fUnaskQueueRankRecv == 3)
 			{
 				if (theApp.clientlist->GetBadRequests(this) < 2)
@@ -2895,12 +3055,12 @@ uint32 CUpDownClient::GetLastAskedTime(const CPartFile* partFile) const
 	}
 
 	DWORD lastChangedTick;
-	return m_fileReaskTimes.Lookup(file, lastChangedTick)?lastChangedTick:0;
+	return m_fileReaskTimes.Lookup(file, lastChangedTick)? lastChangedTick : 0;
 }
 
 void CUpDownClient::SetReqFileAICHHash(CAICHHash* val)
 {
-	if(m_pReqFileAICHHash != NULL && m_pReqFileAICHHash != val)
+	if (m_pReqFileAICHHash != NULL && m_pReqFileAICHHash != val)
 		delete m_pReqFileAICHHash;
 	m_pReqFileAICHHash = val;
 }
@@ -2921,7 +3081,7 @@ void CUpDownClient::SendAICHRequest(CPartFile* pForFile, uint16 nPart)
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		DebugSend("OP__AichRequest", this, (uchar*)packet->pBuffer);
 	theStats.AddUpDataOverheadFileRequest(packet->size);
-	SafeSendPacket(packet);
+	SafeConnectAndSendPacket(packet);
 }
 
 void CUpDownClient::ProcessAICHAnswer(const uchar* packet, UINT size)
@@ -3001,7 +3161,7 @@ void CUpDownClient::ProcessAICHRequest(const uchar* packet, UINT size)
 					DebugSend("OP__AichAnswer", this, pKnownFile->GetFileHash());
 				Packet* packAnswer = new Packet(&fileResponse, OP_EMULEPROT, OP_AICHANSWER);
 				theStats.AddUpDataOverheadFileRequest(packAnswer->size);
-				SafeSendPacket(packAnswer);
+				SafeConnectAndSendPacket(packAnswer);
 				return;
 			}
 			else
@@ -3026,7 +3186,7 @@ void CUpDownClient::ProcessAICHRequest(const uchar* packet, UINT size)
 	Packet* packAnswer = new Packet(OP_AICHANSWER, 16, OP_EMULEPROT);
 	md4cpy(packAnswer->pBuffer, abyHash);
 	theStats.AddUpDataOverheadFileRequest(packAnswer->size);
-	SafeSendPacket(packAnswer);
+	SafeConnectAndSendPacket(packAnswer);
 }
 
 void CUpDownClient::ProcessAICHFileHash(CSafeMemFile* data, CPartFile* file)

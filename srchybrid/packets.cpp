@@ -161,7 +161,7 @@ Packet::~Packet(){
 	if (completebuffer)
 		delete[] completebuffer;
 	else
-		delete [] pBuffer;
+		delete[] pBuffer;
 	delete[] tempbuffer;
 }
 
@@ -352,7 +352,7 @@ CTag::CTag(LPCSTR pszName, uint64 uVal, bool bInt64)
 		m_uType = TAGTYPE_UINT64;
 	}
 	else{
-	m_uType = TAGTYPE_UINT32;
+		m_uType = TAGTYPE_UINT32;
 	}
 	m_uVal = uVal;
 	m_uName = 0;
@@ -368,7 +368,7 @@ CTag::CTag(uint8 uName, uint64 uVal, bool bInt64)
 		m_uType = TAGTYPE_UINT64;
 	}
 	else{
-	m_uType = TAGTYPE_UINT32;
+		m_uType = TAGTYPE_UINT32;
 	}
 	m_uVal = uVal;
 	m_uName = uName;
@@ -839,7 +839,7 @@ CString CTag::GetFullInfo(CString (*pfnDbgGetFileMetaTagName)(UINT uMetaTagID)) 
 	}
 	else if (m_uType >= TAGTYPE_STR1 && m_uType <= TAGTYPE_STR16)
 	{
-		strTag.AppendFormat(_T("(Str%u)\"%s\""), m_uType - TAGTYPE_STR1 + 1, m_pstrVal);
+		strTag.AppendFormat(_T("(Str%u)\"%s\""), m_uType - TAGTYPE_STR1 + 1, *m_pstrVal);
 	}
 	else if (m_uType == TAGTYPE_UINT32)
 	{
@@ -879,13 +879,13 @@ void CTag::AssertValid() const
 
 	ASSERT( m_uType != 0 );
 	ASSERT( m_uName != 0 && m_pszName == NULL || m_uName == 0 && m_pszName != NULL );
-	ASSERT( m_pszName == NULL || AtlIsValidString(m_pszName) );
+	ASSERT( m_pszName == NULL || AfxIsValidString(m_pszName) );
 	if (IsStr())
-		ASSERT( m_pstrVal != NULL && AtlIsValidString(*m_pstrVal) );
+		ASSERT( m_pstrVal != NULL && AfxIsValidString(*m_pstrVal) );
 	else if (IsHash())
-		ASSERT( m_pData != NULL && AtlIsValidAddress(m_pData, 16) );
+		ASSERT( m_pData != NULL && AfxIsValidAddress(m_pData, 16) );
 	else if (IsBlob())
-		ASSERT( m_pData != NULL && AtlIsValidAddress(m_pData, m_nBlobSize) );
+		ASSERT( m_pData != NULL && AfxIsValidAddress(m_pData, m_nBlobSize) );
 }
 
 void CTag::Dump(CDumpContext& dc) const
@@ -893,12 +893,3 @@ void CTag::Dump(CDumpContext& dc) const
 	CObject::Dump(dc);
 }
 #endif
-
-bool WriteOptED2KUTF8Tag(CFileDataIO* data, LPCWSTR pwsz, uint8 uTagName)
-{
-	if (!NeedUTF8String(pwsz))
-		return false;
-	CTag tag(uTagName, pwsz);
-	tag.WriteTagToFile(data, utf8strOptBOM);
-	return true;
-}

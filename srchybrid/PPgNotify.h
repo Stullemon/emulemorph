@@ -28,6 +28,7 @@ public:
 
 protected:
 	bool m_bEnableEMail;
+	HICON m_icoBrowse;
 
 	void UpdateControls();
 	void ApplyNotifierSoundType();
@@ -48,4 +49,5 @@ protected:
 	afx_msg void OnBnClickedBrowseAudioFile();
 	afx_msg void OnBnClickedTestNotification();
 	afx_msg void OnBnClickedCbEnablenotifications();
+	afx_msg void OnDestroy();
 };

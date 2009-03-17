@@ -1904,19 +1904,18 @@ END
 STRINGTABLE 
 BEGIN
     IDS_UPNPSTART           "Benutze UPnP zur Porteinstellung"
-
     IDS_UPNPSETUP           "Versuche Port-Weiterleitungen via UPnP einzustellen..."
     IDS_UPNPFAILED          "UPnP konnte die Portweiterleitung nicht konfigurieren. Bitte führe die Portweiterleitung manuell durch!"
     IDS_UPNPSUCCESS         "UPnP hat erfolgreich Portweiterleitungen für die Ports %u (TCP) und %u (UDP) durchgeführt."
+    IDS_FO_PREFBUTTON_NEW   "Öffne Ports in der WinXP SP1 Firewall"
     IDS_UPNP_NOSERVICE      "UPnP Device Host Dienst läuft nicht - überspringe UPnP Setup"
     IDS_DELAYEDBYUPNP       "Verbinden mit dem Netzwerk wird verzögert, da UPnP noch die Portweiterleitungen konfiguriert."
     IDS_DELAYEDBYUPNP2      "Bitte warte einige Sekunden, eMule wird sich verbinden sobald UPnP fertig ist."
+    IDS_UPNP                "UPnP" //!
+    IDS_UPNPCLOSEONEXIT     "Lösche UPnP Portweiterleitungen beim Programmende"
     IDS_UPNPSKIPWANIP       "Überspringe WAN IP Setup"
     IDS_UPNPSKIPWANPPP      "Überspringe WAN PPP Setup"
-
-      IDS_FO_PREFBUTTON_NEW   "Öffne Ports in der WinXP SP1 Firewall"
-    IDS_UPNP                "Universal Plug and Play (UPnP)"
-    IDS_SHAREEMULELABEL     "eMule mit anderen Benutzern teilen"
+    IDS_SHAREEMULELABEL     "eMule mit anderen Benutztern teilen"
     IDS_SHAREEMULEMULTI     "Jeder Nutzer hat seine eigene Konfiguration und Downloads"
     IDS_SHAREEMULEPUBLIC    "Jeder hat dieselbe Konfiguration und Downloads"
     IDS_SHAREEMULEOLD       "Speichert die Konfiguration und Downloads im eMule Programmverzeichnis"
@@ -1953,6 +1952,19 @@ BEGIN
                             "Möchtest du Kad-Kontakte (nodes.dat) von der folgenden Adresse herunterladen und benutzen: %s ?"
     IDS_AUTOMATIC           "Automatisch"
     IDS_NOTCONNECTEDANY     "Du bist weder zu einem Server noch zum Kad-Netzwerk verbunden!"
+    IDS_ERR_SHARED_DIR      "Das folgende freigegebene Verzeichnis konnte nicht gelesen werden: ""%s"" - %s"
+    IDS_FILE_WARNING_DRM    "Die Datei ""%s"" scheint mittels Digitalem Rechtemanagement geschützt zu sein.\r\n\r\nWahrscheinlich wirst du nicht in der Lage sein, die Datei ohne eine Lizens vom Urheber zu nutzen. Das Öffnen dieser Datei wird wahrscheinlich dazu führen, dass dein Mediaplayer einen Browser mit der Seite des Urhebers öffnen wird, um eine Lizens zu erwerben.\r\n\r\nSoll diese Datei nun geöffnet werden?"
+    IDS_CHECK_FILE_OPEN     "Warnung beim Öffnen unzuverlässiger Dateien"
+    IDS_BOOTABLE            "bootbar"
+    IDS_UNSUPPORTEDIMAGE    "Imagetyp nicht unterstützt"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UNSHARE             "Freigabe aufheben"
+    IDS_WEBUPNPINCLUDE      "Port in UPnP Einrichtung aufnehmen"
+    IDS_ADDEDON             "hinzugefügt am"
+    IDS_RESOLVELINKS        "Shell-Links in freigegebenen Verzeichnissen auflösen"
 END
 
 // Morph

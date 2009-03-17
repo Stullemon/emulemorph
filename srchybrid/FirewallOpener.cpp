@@ -190,7 +190,7 @@ bool CFirewallOpener::AddRule(const CICSRuleInfo& riPortRule, const INetSharingC
                              riPortRule.m_nPortNumber,
                              riPortRule.m_nPortNumber,
                              0,
-                             L"127.0.0.1",
+                             CComBSTR(L"127.0.0.1"),
                              ICSTT_IPADDRESS,
                              &pNSPM);
 		CComBSTR bstrName;

@@ -83,7 +83,8 @@ namespace Kademlia
 			bool		GetUseExternKadPort() const;
 			void		SetUseExternKadPort(bool bVal);
 			uint16		GetExternalKadPort() const;
-			void		SetExternKadPort(uint16 uVal);
+			void		SetExternKadPort(uint16 uVal, uint32 nFromIP);
+			bool		FindExternKadPort(bool bReset = false);
 			uint16		GetInternKadPort() const;
 			uint8		GetMyConnectOptions(bool bEncryption = true, bool bCallback = true);
 			void		StatsIncUDPFirewalledNodes(bool bFirewalled);
@@ -119,6 +120,8 @@ namespace Kademlia
 			bool m_bLastFirewallState;
 			bool m_bUseExternKadPort;
 			uint16 m_nExternKadPort;
+			CArray<uint32> m_anExternPortIPs;
+			CArray<uint16> m_anExternPorts;
 			uint32 m_nStatsUDPOpenNodes;
 			uint32 m_nStatsUDPFirewalledNodes;
 			uint32 m_nStatsTCPOpenNodes;

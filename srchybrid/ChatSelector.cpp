@@ -114,7 +114,7 @@ void CChatSelector::SetAllIcons()
 	SetImageList(&iml);
 	m_imlChat.DeleteImageList();
 	m_imlChat.Attach(iml.Detach());
-	SetPadding(CSize(12, 0));
+	SetPadding(CSize(12, 3));
 }
 
 void CChatSelector::UpdateFonts(CFont* pFont)
@@ -130,7 +130,7 @@ void CChatSelector::UpdateFonts(CFont* pFont)
 
 CChatItem* CChatSelector::StartSession(CUpDownClient* client, bool show)
 {
-     if (show)
+	if (show)
 		m_pParent->m_wndMessage.SetFocus();
 	if (GetTabByClient(client) != -1){
 		if (show){
@@ -228,8 +228,8 @@ void CChatSelector::ProcessMessage(CUpDownClient* sender, const CString& message
 	sender->IncMessagesReceived();
 	CChatItem* ci = GetItemByClient(sender);
 
-    AddLogLine(true, GetResString(IDS_NEWMSG), sender->GetUserName(), ipstr(sender->GetConnectIP()));
-
+	AddLogLine(true, GetResString(IDS_NEWMSG), sender->GetUserName(), ipstr(sender->GetConnectIP()));
+	
 	bool isNewChatWindow = false;
 	if (!ci)
 	{
@@ -303,7 +303,7 @@ bool CChatSelector::SendMessage(const CString& rstrMessage)
 	ci->client->SetSpammer(false);
 	if (ci->client->GetChatState() == MS_CONNECTING)
 		return false;
-
+	
 	if (ci->client->GetChatCaptchaState() == CA_CAPTCHARECV)
 		ci->client->SetChatCaptchaState(CA_SOLUTIONSENT);
 	else if (ci->client->GetChatCaptchaState() == CA_SOLUTIONSENT)
@@ -319,8 +319,8 @@ bool CChatSelector::SendMessage(const CString& rstrMessage)
 	{
 		// 1.) the client is connected already - this is simple, jsut send it
 		ci->client->SendChatMessage(rstrMessage);
-	if (thePrefs.GetIRCAddTimeStamp())
-		AddTimeStamp(ci);
+		if (thePrefs.GetIRCAddTimeStamp())
+			AddTimeStamp(ci);
 		ci->log->AppendKeyWord(thePrefs.GetUserNick(), SENT_TARGET_MSG_COLOR);
 		ci->log->AppendText(_T(": "));
 		ci->log->AppendText(rstrMessage + _T("\n"));
@@ -570,7 +570,7 @@ void CChatSelector::OnDestroy()
 
 BOOL CChatSelector::OnCommand(WPARAM wParam, LPARAM lParam)
 {
-	switch (wParam){
+	switch (wParam) {
 		case MP_DETAIL:{
 			const CChatItem* ci = GetItemByIndex(m_iContextIndex);
 			if (ci) {
@@ -650,8 +650,8 @@ void CChatSelector::OnContextMenu(CWnd*, CPoint point)
 void CChatSelector::EnableSmileys(bool bEnable)
 {
 	for (int i = 0; i < GetItemCount(); i++){
-	TCITEM cur_item;
-	cur_item.mask = TCIF_PARAM;
+		TCITEM cur_item;
+		cur_item.mask = TCIF_PARAM;
 		if (GetItem(i, &cur_item) && ((CChatItem*)cur_item.lParam)->log)
 			((CChatItem*)cur_item.lParam)->log->EnableSmileys(bEnable);
 	}

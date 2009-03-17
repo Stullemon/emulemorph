@@ -46,7 +46,7 @@ namespace Kademlia
 
 		uint32	m_uIP;
 		uint32	m_dwLastExpire;	
-		CArray<TrackedRequestIn_Struct, TrackedRequestIn_Struct&> m_aTrackedRequests;
+		CArray<TrackedRequestIn_Struct> m_aTrackedRequests;
 	};
 
 	class CPacketTracking

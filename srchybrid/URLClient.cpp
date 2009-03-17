@@ -30,7 +30,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -72,7 +72,6 @@ void CUrlClient::SetRequestFile(CPartFile* pReqFile)
 
 bool CUrlClient::SetUrl(LPCTSTR pszUrl, uint32 nIP)
 {
-	USES_CONVERSION;
 	TCHAR szCanonUrl[INTERNET_MAX_URL_LENGTH];
 	DWORD dwCanonUrlSize = ARRSIZE(szCanonUrl);
 	if (!InternetCanonicalizeUrl(pszUrl, szCanonUrl, &dwCanonUrlSize, ICU_NO_ENCODE))
@@ -132,7 +131,7 @@ bool CUrlClient::SetUrl(LPCTSTR pszUrl, uint32 nIP)
 	if (nIP)
 		m_nConnectIP = nIP;
 	else
-		m_nConnectIP = inet_addr(T2A(szHostName));
+		m_nConnectIP = inet_addr(CT2A(szHostName));
 	ResetIP2Country(m_nConnectIP); //MORPH Added by SiRoB, IPtoCountry URLClient
 //	if (m_nConnectIP == INADDR_NONE)
 //		m_nConnectIP = 0;
@@ -153,7 +152,6 @@ void CUrlClient::SendBlockRequests()
 
 bool CUrlClient::SendHttpBlockRequests()
 {
-	USES_CONVERSION;
 	m_dwLastBlockReceived = ::GetTickCount();
 	if (reqfile == NULL)
 		throw CString(_T("Failed to send block requests - No 'reqfile' attached"));
@@ -161,7 +159,7 @@ bool CUrlClient::SendHttpBlockRequests()
 	CreateBlockRequests(PARTSIZE / EMBLOCKSIZE);
 	if (m_PendingBlocks_list.IsEmpty()){
 		SetDownloadState(DS_NONEEDEDPARTS);
-		SwapToAnotherFile(_T("A4AF for NNP file. UrlClient::SendHttpBlockRequests()"), true, false, false, NULL, true, true);
+        SwapToAnotherFile(_T("A4AF for NNP file. UrlClient::SendHttpBlockRequests()"), true, false, false, NULL, true, true);
 		return false;
 	}
 	

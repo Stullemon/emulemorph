@@ -485,7 +485,7 @@ bool CIndexed::AddKeyword(const CUInt128& uKeyID, const CUInt128& uSourceID, Kad
 					m_uTotalIndexKeyword++;
 					DebugLogWarning(_T("Kad: Indexing: Keywords: Multiple sizes published for file %s"), pEntry->m_uSourceID.ToHexString());
 				}
-				DEBUG_ONLY( AddDebugLogLine(DLP_VERYLOW, false, _T("Indexed file %s"), pEntry->GetCommonFileName()) );
+				DEBUG_ONLY( AddDebugLogLine(DLP_VERYLOW, false, _T("Indexed file %s"), pEntry->m_uSourceID.ToHexString()) );
 				delete pOldEntry;
 				pOldEntry = NULL;
 			}
@@ -704,7 +704,9 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 	KeyHash* pCurrKeyHash;
 	if(m_mapKeyword.Lookup(CCKey(uKeyID.GetData()), pCurrKeyHash))
 	{
-		byte byPacket[1024*50];
+		byte byPacket[1024*5];
+		byte bySmallBuffer[2048];
+
 		CByteIO byIO(byPacket,sizeof(byPacket));
 		byIO.WriteByte(OP_KADEMLIAHEADER);
 		if(bKad2)
@@ -715,9 +717,15 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 		else
 			byIO.WriteByte(KADEMLIA_SEARCH_RES);
 		byIO.WriteUInt128(uKeyID);
-		byIO.WriteUInt16(50);
+		
+		byte* pbyCountPos = byPacket + byIO.GetUsed();
+		ASSERT( byPacket+18+16 == pbyCountPos || byPacket+18 == pbyCountPos);
+		byIO.WriteUInt16(0);
+
 		const uint16 uMaxResults = 300;
 		int iCount = 0-uStartPosition;
+		int iUnsentCount = 0;
+		CByteIO byIOTmp(bySmallBuffer, sizeof(bySmallBuffer));
 		// we do 2 loops: In the first one we ignore all results which have a trustvalue below 1
 		// in the second one we then also consider those. That way we make sure our 300 max results are not full
 		// of spam entries. We could also sort by trustvalue, but we would risk to only send popular files this way
@@ -736,7 +744,7 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 				{
 					CKeyEntry* pCurrName = (CKeyEntry*)pCurrSource->ptrlEntryList.GetNext(pos2);
 					ASSERT( pCurrName->IsKeyEntry() );
-					if ( (bOnlyTrusted ^ (pCurrName->GetTrustValue() < 1.0f)) && (!pSearchTerms || pCurrName->SearchTermsMatch(pSearchTerms)) )
+					if ( (bOnlyTrusted ^ (pCurrName->GetTrustValue() < 1.0f)) && (!pSearchTerms || pCurrName->StartSearchTermsMatch(pSearchTerms)) )
 					{
 						if( iCount < 0 )
 							iCount++;
@@ -749,14 +757,16 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 									dbgResultsTrusted++;
 								else
 									dbgResultsUntrusted++;
-								byIO.WriteUInt128(pCurrName->m_uSourceID);
+								byIOTmp.WriteUInt128(pCurrName->m_uSourceID);
 								if (bKad2)
-									pCurrName->WriteTagListWithPublishInfo(&byIO);
+									pCurrName->WriteTagListWithPublishInfo(&byIOTmp);
 								else
-									pCurrName->WriteTagList(&byIO);
-								if( iCount % 50 == 0 )
+									pCurrName->WriteTagList(&byIOTmp);
+								
+								if( byIO.GetUsed() + byIOTmp.GetUsed() > UDP_KAD_MAXFRAGMENT && iUnsentCount > 0)
 								{
 									uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+									PokeUInt16(pbyCountPos, (uint16)iUnsentCount);
 									CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 									byIO.Reset();
 									byIO.WriteByte(OP_KADEMLIAHEADER);
@@ -774,8 +784,14 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 										byIO.WriteByte(KADEMLIA_SEARCH_RES);
 									}
 									byIO.WriteUInt128(uKeyID);
-									byIO.WriteUInt16(50);
+									byIO.WriteUInt16(0);
+									DEBUG_ONLY(DebugLog(_T("Sent %u keyword search results in one packet to avoid fragmentation"), iUnsentCount)); 
+									iUnsentCount = 0;
 								}
+								ASSERT( byIO.GetUsed() + byIOTmp.GetUsed() <= UDP_KAD_MAXFRAGMENT );
+								byIO.WriteArray(bySmallBuffer, byIOTmp.GetUsed());
+								byIOTmp.Reset();
+								iUnsentCount++;
 							}
 						}
 						else
@@ -795,27 +811,21 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 		// LOGTODO: Remove Log
 		//DebugLog(_T("Kad Keyword search Result Request: Send %u trusted and %u untrusted results"), dbgResultsTrusted, dbgResultsUntrusted);
 
-		if(iCount > 0)
+		if(iUnsentCount > 0)
 		{
-			uint16 uCountLeft = (uint16)iCount % 50;
-			if( uCountLeft )
+			uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+			PokeUInt16(pbyCountPos, (uint16)iUnsentCount);
+			if(bKad2&& thePrefs.GetDebugClientKadUDPLevel() > 0)
 			{
-				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
-				if(bKad2)
-				{
-					memcpy(byPacket+18+16, &uCountLeft, 2);
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
-				}
-				else
-				{
-					memcpy(byPacket+18, &uCountLeft, 2);
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
-				}
-				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
+				DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
 			}
+			else if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
+			CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
+			DEBUG_ONLY(DebugLog(_T("Sent %u keyword search results in last packet to avoid fragmentation"), iUnsentCount));
 		}
+		else if (iCount > 0)
+			ASSERT( false );
 	}
 	Clean();
 }
@@ -831,7 +841,8 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 	SrcHash* pCurrSrcHash;
 	if(m_mapSources.Lookup(CCKey(uKeyID.GetData()), pCurrSrcHash))
 	{
-		byte byPacket[1024*50];
+		byte byPacket[1024*5];
+		byte bySmallBuffer[2048];
 		CByteIO byIO(byPacket,sizeof(byPacket));
 		byIO.WriteByte(OP_KADEMLIAHEADER);
 		if(bKad2)
@@ -841,8 +852,15 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 		}
 		else
 			byIO.WriteByte(KADEMLIA_SEARCH_RES);
+
 		byIO.WriteUInt128(uKeyID);
-		byIO.WriteUInt16(50);
+		byte* pbyCountPos = byPacket + byIO.GetUsed();
+		ASSERT( byPacket+18+16 == pbyCountPos || byPacket+18 == pbyCountPos);
+		byIO.WriteUInt16(0);
+		
+		int iUnsentCount = 0;
+		CByteIO byIOTmp(bySmallBuffer, sizeof(bySmallBuffer));
+
 		uint16 uMaxResults = 300;
 		int iCount = 0-uStartPosition;
 		for(POSITION pos1 = pCurrSrcHash->ptrlistSource.GetHeadPosition(); pos1 != NULL; )
@@ -857,12 +875,13 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 				{
 					if( !uFileSize || !pCurrName->m_uSize || pCurrName->m_uSize == uFileSize )
 					{
-						byIO.WriteUInt128(pCurrName->m_uSourceID);
-						pCurrName->WriteTagList(&byIO);
+						byIOTmp.WriteUInt128(pCurrName->m_uSourceID);
+						pCurrName->WriteTagList(&byIOTmp);
 						iCount++;
-						if( iCount % 50 == 0 )
+						if( byIO.GetUsed() + byIOTmp.GetUsed() > UDP_KAD_MAXFRAGMENT && iUnsentCount > 0)
 						{
 							uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+							PokeUInt16(pbyCountPos, (uint16)iUnsentCount);
 							CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 							byIO.Reset();
 							byIO.WriteByte(OP_KADEMLIAHEADER);
@@ -880,8 +899,14 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 								byIO.WriteByte(KADEMLIA_SEARCH_RES);
 							}
 							byIO.WriteUInt128(uKeyID);
-							byIO.WriteUInt16(50);
+							byIO.WriteUInt16(0);
+							//DEBUG_ONLY(DebugLog(_T("Sent %u source search results in one packet to avoid fragmentation"), iUnsentCount)); 
+							iUnsentCount = 0;
 						}
+						ASSERT( byIO.GetUsed() + byIOTmp.GetUsed() <= UDP_KAD_MAXFRAGMENT );
+						byIO.WriteArray(bySmallBuffer, byIOTmp.GetUsed());
+						byIOTmp.Reset();
+						iUnsentCount++;
 					}
 				}
 				else
@@ -890,27 +915,22 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 				}
 			}
 		}
-		if( iCount > 0 )
+
+		if(iUnsentCount > 0)
 		{
-			uint16 uCountLeft = (uint16)iCount % 50;
-			if( uCountLeft )
+			uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+			PokeUInt16(pbyCountPos, (uint16)iUnsentCount);
+			if(bKad2&& thePrefs.GetDebugClientKadUDPLevel() > 0)
 			{
-				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
-				if(bKad2)
-				{
-					memcpy(byPacket+18+16, &uCountLeft, 2);
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
-				}
-				else
-				{
-					memcpy(byPacket+18, &uCountLeft, 2);
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
-				}
-				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
+				DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
 			}
+			else if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+				DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
+			CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
+			//DEBUG_ONLY(DebugLog(_T("Sent %u source search results in last packet to avoid fragmentation"), iUnsentCount));
 		}
+		else if (iCount > 0)
+			ASSERT( false );
 	}
 	Clean();
 }
@@ -928,7 +948,8 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 		SrcHash* pCurrNoteHash;
 		if(m_mapNotes.Lookup(CCKey(uKeyID.GetData()), pCurrNoteHash))
 		{
-			byte byPacket[1024*50];
+			byte byPacket[1024*5];
+			byte bySmallBuffer[2048];
 			CByteIO byIO(byPacket,sizeof(byPacket));
 			byIO.WriteByte(OP_KADEMLIAHEADER);
 			if(bKad2)
@@ -939,7 +960,13 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 			else
 				byIO.WriteByte(KADEMLIA_SEARCH_NOTES_RES);
 			byIO.WriteUInt128(uKeyID);
-			byIO.WriteUInt16(50);
+
+			byte* pbyCountPos = byPacket + byIO.GetUsed();
+			ASSERT( byPacket+18+16 == pbyCountPos || byPacket+18 == pbyCountPos);
+			byIO.WriteUInt16(0);
+
+			int iUnsentCount = 0;
+			CByteIO byIOTmp(bySmallBuffer, sizeof(bySmallBuffer));
 			uint16 uMaxResults = 150;
 			uint16 uCount = 0;
 			for(POSITION pos1 = pCurrNoteHash->ptrlistSource.GetHeadPosition(); pos1 != NULL; )
@@ -952,12 +979,13 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 					{
 						if( !uFileSize || !pCurrName->m_uSize || uFileSize == pCurrName->m_uSize )
 						{
-							byIO.WriteUInt128(pCurrName->m_uSourceID);
-							pCurrName->WriteTagList(&byIO);
+							byIOTmp.WriteUInt128(pCurrName->m_uSourceID);
+							pCurrName->WriteTagList(&byIOTmp);
 							uCount++;
-							if( uCount % 50 == 0 )
+							if( byIO.GetUsed() + byIOTmp.GetUsed() > UDP_KAD_MAXFRAGMENT && iUnsentCount > 0)
 							{
 								uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
+								PokeUInt16(pbyCountPos, (uint16)iUnsentCount);
 								CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 								byIO.Reset();
 								byIO.WriteByte(OP_KADEMLIAHEADER);
@@ -975,8 +1003,14 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 									byIO.WriteByte(KADEMLIA_SEARCH_NOTES_RES);
 								}
 								byIO.WriteUInt128(uKeyID);
-								byIO.WriteUInt16(50);
+								byIO.WriteUInt16(0);
+								DEBUG_ONLY(DebugLog(_T("Sent %u keyword search results in one packet to avoid fragmentation"), iUnsentCount)); 
+								iUnsentCount = 0;
 							}
+							ASSERT( byIO.GetUsed() + byIOTmp.GetUsed() <= UDP_KAD_MAXFRAGMENT );
+							byIO.WriteArray(bySmallBuffer, byIOTmp.GetUsed());
+							byIOTmp.Reset();
+							iUnsentCount++;
 						}
 					}
 					else
@@ -985,24 +1019,21 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 					}
 				}
 			}
-			uint16 uCountLeft = uCount % 50;
-			if( uCountLeft )
+			if(iUnsentCount > 0)
 			{
 				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
-				if(bKad2)
+				PokeUInt16(pbyCountPos, (uint16)iUnsentCount);
+				if(bKad2&& thePrefs.GetDebugClientKadUDPLevel() > 0)
 				{
-					memcpy(byPacket+18+16, &uCountLeft, 2);
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+					DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
 				}
-				else
-				{
-					memcpy(byPacket+18, &uCountLeft, 2);
-					if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-						DebugSend("KADEMLIA_SEARCH_NOTES_RES", uIP, uPort);
-				}
+				else if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+					DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
 				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
+				DEBUG_ONLY(DebugLog(_T("Sent %u note search results in last packet to avoid fragmentation"), iUnsentCount));
 			}
+			else if (uCount > 0)
+				ASSERT( false );
 		}
 	}
 	catch(...)

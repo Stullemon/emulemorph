@@ -47,7 +47,7 @@ enum EIPFilterCols
 	IPFILTER_COL_DESC
 };
 
-static LCX_COLUMN_INIT _aColumns[] =
+static LCX_COLUMN_INIT s_aColumns[] =
 {
 	{ IPFILTER_COL_START,	_T("Start"),		IDS_IP_START,	LVCFMT_LEFT,	-1, 0, ASCENDING,  NONE, _T("255.255.255.255") },
 	{ IPFILTER_COL_END,		_T("End"),			IDS_IP_END,		LVCFMT_LEFT,	-1, 1, ASCENDING,  NONE, _T("255.255.255.255")},
@@ -63,18 +63,18 @@ int CIPFilterDlg::sm_iSortColumn = IPFILTER_COL_HITS;
 IMPLEMENT_DYNAMIC(CIPFilterDlg, CDialog)
 
 BEGIN_MESSAGE_MAP(CIPFilterDlg, CResizableDialog)
-	ON_WM_DESTROY()
-	ON_NOTIFY(LVN_COLUMNCLICK, IDC_IPFILTER, OnLvnColumnClickIPFilter)
-	ON_NOTIFY(LVN_KEYDOWN, IDC_IPFILTER, OnLvnKeyDownIPFilter)
-	ON_BN_CLICKED(IDC_REMOVE, OnBnClickedDelete)
 	ON_BN_CLICKED(IDC_APPEND, OnBnClickedAppend)
+	ON_BN_CLICKED(IDC_REMOVE, OnBnClickedDelete)
+	ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
 	ON_COMMAND(MP_COPYSELECTED, OnCopyIPFilter)
+	ON_COMMAND(MP_FIND, OnFind)
 	ON_COMMAND(MP_REMOVE, OnDeleteIPFilter)
 	ON_COMMAND(MP_SELECTALL, OnSelectAllIPFilter)
-	ON_COMMAND(MP_FIND, OnFind)
-	ON_BN_CLICKED(IDC_SAVE, OnBnClickedSave)
-	ON_NOTIFY(LVN_GETDISPINFO, IDC_IPFILTER, OnLvnGetDispInfoIPFilter)
+	ON_NOTIFY(LVN_COLUMNCLICK, IDC_IPFILTER, OnLvnColumnClickIPFilter)
 	ON_NOTIFY(LVN_DELETEITEM, IDC_IPFILTER, OnLvnDeleteItemIPFilter)
+	ON_NOTIFY(LVN_GETDISPINFO, IDC_IPFILTER, OnLvnGetDispInfoIPFilter)
+	ON_NOTIFY(LVN_KEYDOWN, IDC_IPFILTER, OnLvnKeyDownIPFilter)
+	ON_WM_DESTROY()
 END_MESSAGE_MAP()
 
 CIPFilterDlg::CIPFilterDlg(CWnd* pParent /*=NULL*/)
@@ -107,7 +107,7 @@ void CIPFilterDlg::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_IPFILTER, m_ipfilter);
 }
 
-static int _lParamSort = 0;
+static int s_lParamSort = 0;
 
 int __cdecl CompareIPFilterItems(const void* lParam1, const void* lParam2)
 {
@@ -120,23 +120,23 @@ int __cdecl CompareIPFilterItems(const void* lParam1, const void* lParam2)
 
 	int iResult;
 
-	if (_lParamSort == IPFILTER_COL_START)
+	if (s_lParamSort == IPFILTER_COL_START)
 	{
 		iResult = COMPARE_NUM((*((const SIPFilter**)lParam1))->start, (*((const SIPFilter**)lParam2))->start);
 	}
-	else if (_lParamSort == IPFILTER_COL_END)
+	else if (s_lParamSort == IPFILTER_COL_END)
 	{
 		iResult = COMPARE_NUM((*((const SIPFilter**)lParam1))->end, (*((const SIPFilter**)lParam2))->end);
 	}
-	else if (_lParamSort == IPFILTER_COL_LEVEL)
+	else if (s_lParamSort == IPFILTER_COL_LEVEL)
 	{
 		iResult = COMPARE_NUM((*((const SIPFilter**)lParam1))->level, (*((const SIPFilter**)lParam2))->level);
 	}
-	else if (_lParamSort == IPFILTER_COL_HITS)
+	else if (s_lParamSort == IPFILTER_COL_HITS)
 	{
 		iResult = COMPARE_NUM((*((const SIPFilter**)lParam1))->hits, (*((const SIPFilter**)lParam2))->hits);
 	}
-	else if (_lParamSort == IPFILTER_COL_DESC)
+	else if (s_lParamSort == IPFILTER_COL_DESC)
 	{
 		iResult = _stricmp/*CompareLocaleStringNoCase*/((*((const SIPFilter**)lParam1))->desc, (*((const SIPFilter**)lParam2))->desc);
 	}
@@ -148,7 +148,7 @@ int __cdecl CompareIPFilterItems(const void* lParam1, const void* lParam2)
 
 #undef COMPARE_NUM
 
-	if (_aColumns[_lParamSort].eSortOrder == DESCENDING)
+	if (s_aColumns[s_lParamSort].eSortOrder == DESCENDING)
 		return -iResult;
 	else
 		return iResult;
@@ -159,7 +159,7 @@ void CIPFilterDlg::SortIPFilterItems()
 	// Update (sort, if needed) the listview items
 	if (m_ipfilter.GetSortColumn() != -1)
 	{
-		_lParamSort = m_ipfilter.GetSortColumn();
+		s_lParamSort = m_ipfilter.GetSortColumn();
 		qsort((void*)m_ppIPFilterItems, m_uIPFilterItems, sizeof(*m_ppIPFilterItems), CompareIPFilterItems);
 	}
 }
@@ -167,7 +167,7 @@ void CIPFilterDlg::SortIPFilterItems()
 void CIPFilterDlg::OnLvnColumnClickIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 {
 	LPNMLISTVIEW pNMLV = reinterpret_cast<LPNMLISTVIEW>(pNMHDR);
-	m_ipfilter.UpdateSortOrder(pNMLV, ARRSIZE(_aColumns), _aColumns);
+	m_ipfilter.UpdateSortOrder(pNMLV, ARRSIZE(s_aColumns), s_aColumns);
 	SortIPFilterItems();
 	m_ipfilter.Invalidate();
 	m_ipfilter.UpdateWindow();
@@ -193,12 +193,12 @@ BOOL CIPFilterDlg::OnInitDialog()
 	ASSERT( m_ipfilter.GetStyle() & LVS_OWNERDATA );
 	// Win98: Explicitly set to Unicode to receive Unicode notifications.
 	m_ipfilter.SendMessage(CCM_SETUNICODEFORMAT, TRUE);
-	m_ipfilter.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_INFOTIP);
+	m_ipfilter.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP | LVS_EX_GRIDLINES);
 	m_ipfilter.EnableHdrCtrlSortBitmaps();
-	m_ipfilter.ReadColumnStats(ARRSIZE(_aColumns), _aColumns);
-	m_ipfilter.CreateColumns(ARRSIZE(_aColumns), _aColumns);
-  	m_ipfilter.InitColumnOrders(ARRSIZE(_aColumns), _aColumns);
-	m_ipfilter.UpdateSortColumn(ARRSIZE(_aColumns), _aColumns);
+	m_ipfilter.ReadColumnStats(ARRSIZE(s_aColumns), s_aColumns);
+	m_ipfilter.CreateColumns(ARRSIZE(s_aColumns), s_aColumns);
+  	m_ipfilter.InitColumnOrders(ARRSIZE(s_aColumns), s_aColumns);
+	m_ipfilter.UpdateSortColumn(ARRSIZE(s_aColumns), s_aColumns);
 
 	SetIcon(m_icoDlg = theApp.LoadIcon(_T("IPFilter")), FALSE);
 
@@ -242,6 +242,8 @@ void CIPFilterDlg::InitIPFilters()
 	const CIPFilterArray& ipfilter = theApp.ipfilter->GetIPFilter();
 	m_uIPFilterItems = ipfilter.GetCount();
 	m_ppIPFilterItems = (const SIPFilter**)malloc(sizeof(*m_ppIPFilterItems) * m_uIPFilterItems);
+	if (m_ppIPFilterItems == NULL)
+		m_uIPFilterItems = 0;
 
 	m_ulFilteredIPs = 0;
 	for (UINT i = 0; i < m_uIPFilterItems; i++)
@@ -289,8 +291,7 @@ void CIPFilterDlg::OnLvnGetDispInfoIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 				break;
 			case IPFILTER_COL_DESC:
 				if (pDispInfo->item.cchTextMax > 0){
-					USES_CONVERSION;
-					_tcsncpy(pDispInfo->item.pszText, A2T(m_ppIPFilterItems[pDispInfo->item.iItem]->desc), pDispInfo->item.cchTextMax);
+					_tcsncpy(pDispInfo->item.pszText, CA2T(m_ppIPFilterItems[pDispInfo->item.iItem]->desc), pDispInfo->item.cchTextMax);
 					pDispInfo->item.pszText[pDispInfo->item.cchTextMax - 1] = _T('\0');
 				}
 				break;
@@ -357,9 +358,11 @@ void CIPFilterDlg::OnBnClickedAppend()
 			CZIPFile zip;
 			if (zip.Open(strFilePath))
 			{
-				CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
+				CZIPFile::File* zfile = zip.GetFile(_T("ipfilter.dat"));
 				if (zfile == NULL)
-					zfile = zip.GetFile(_T("ipfilter.dat"));
+					zfile = zip.GetFile(_T("guarding.p2p"));
+				if (zfile == NULL)
+					zfile = zip.GetFile(_T("guardian.p2p"));
 				if (zfile)
 				{
 					_tmakepathlimit(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
@@ -379,7 +382,7 @@ void CIPFilterDlg::OnBnClickedAppend()
 				else
 				{
 					CString strError;
-					strError.Format(_T("Failed to find IP filter file \"guarding.p2p\" or \"ipfilter.dat\" in ZIP file \"%s\"."), strFilePath);
+					strError.Format(_T("Failed to find IP filter file \"guarding.p2p\", \"guardian.p2p\" or \"ipfilter.dat\" in ZIP file \"%s\"."), strFilePath);
 					AfxMessageBox(strError, MB_ICONERROR);
 				}
 				zip.Close();
@@ -398,7 +401,9 @@ void CIPFilterDlg::OnBnClickedAppend()
 			{
 				CString strFile;
 				if (rar.GetNextFile(strFile)
-					&& (strFile.CompareNoCase(_T("ipfilter.dat")) == 0 || strFile.CompareNoCase(_T("guarding.p2p")) == 0))
+					&& (   strFile.CompareNoCase(_T("ipfilter.dat")) == 0 
+					    || strFile.CompareNoCase(_T("guarding.p2p")) == 0
+						|| strFile.CompareNoCase(_T("guardian.p2p")) == 0))
 				{
 					_tmakepathlimit(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
 					strTempUnzipFilePath.ReleaseBuffer();
@@ -417,7 +422,7 @@ void CIPFilterDlg::OnBnClickedAppend()
 				else
 				{
 					CString strError;
-					strError.Format(_T("Failed to find IP filter file \"guarding.p2p\" or \"ipfilter.dat\" in RAR file \"%s\"."), strFilePath);
+					strError.Format(_T("Failed to find IP filter file \"guarding.p2p\", \"guardian.p2p\" or \"ipfilter.dat\" in RAR file \"%s\"."), strFilePath);
 					AfxMessageBox(strError, MB_ICONERROR);
 				}
 				rar.Close();
@@ -575,7 +580,7 @@ void CIPFilterDlg::OnLvnKeyDownIPFilter(NMHDR *pNMHDR, LRESULT *pResult)
 
 void CIPFilterDlg::OnDestroy()
 {
-	m_ipfilter.WriteColumnStats(ARRSIZE(_aColumns), _aColumns);
+	m_ipfilter.WriteColumnStats(ARRSIZE(s_aColumns), s_aColumns);
 	CResizableDialog::OnDestroy();
 }
 
@@ -594,14 +599,12 @@ void CIPFilterDlg::OnBnClickedSave()
 
 bool CIPFilterDlg::FindItem(const CListCtrlX& lv, int iItem, DWORD_PTR lParam)
 {
-	USES_CONVERSION;
-
 	if (lv.GetFindColumn() != IPFILTER_COL_START)
 		return CListCtrlX::FindItem(lv, iItem, lParam);
 
 	const CIPFilterDlg* dlg = reinterpret_cast<CIPFilterDlg*>(lParam);
 	ASSERT_VALID(dlg);
-	u_long ip = htonl(inet_addr(T2A(lv.GetFindText())));
+	u_long ip = htonl(inet_addr(CT2A(lv.GetFindText())));
 	const SIPFilter* filter = dlg->m_ppIPFilterItems[iItem];
 	return (ip >= filter->start && ip <= filter->end);
 }

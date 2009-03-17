@@ -17,7 +17,7 @@
 #pragma once
 
 class CPartFile;
-class CKnownFile;
+class CShareableFile;
 struct Gap_Struct;
 
 #define ZIP_LOCAL_HEADER_MAGIC		0x04034b50
@@ -27,6 +27,8 @@ struct Gap_Struct;
 #define ZIP_COMMENT					"Recovered by eMule"
 
 #define RAR_HEAD_FILE 0x74
+
+#define LODWORD(l)           ((DWORD)(((LONG64)(l)) & 0xffffffff))
 
 #pragma pack(1)
 struct ZIP_Entry
@@ -190,6 +192,161 @@ struct ACE_BlockFile
 };
 #pragma pack()
 
+// ################################
+// ISO related
+static unsigned char sig_udf_bea[5]  = { 0x42, 0x45, 0x41, 0x30, 0x31 };		// "BEA01"
+static unsigned char sig_udf_nsr2[5] = { 0x4e, 0x53, 0x52, 0x30, 0x32 };		// "NSR02"
+static unsigned char sig_udf_nsr3[5] = { 0x4e, 0x53, 0x52, 0x30, 0x33 };		// "NSR03"
+static unsigned char sig_tea[5]		 = { 0x54, 0x45, 0x41, 0x30, 0x31 };		// "TEA01"
+static const    char sElToritoID[]		 = "EL TORITO SPECIFICATION";
+
+enum ISO_ImageType
+{
+	ISOtype_unknown		= 0,
+	ISOtype_9660		= 1,
+	ISOtype_joliet		= 2,
+	ISOtype_UDF_nsr02	= 4,
+	ISOtype_UDF_nsr03	= 8,
+};
+enum ISO_FileFlags
+{
+	ISO_HIDDEN		= 1,
+	ISO_DIRECTORY	= 2,
+	ISO_FILE		= 4,
+	ISO_RECORD		= 8,
+	ISO_READONLY	= 16
+};
+#pragma pack(1)
+struct ISO_DateTimePVD_s
+{ 
+	unsigned char year[4];
+	unsigned char month[2];
+	unsigned char day[2];
+	unsigned char hour[2];
+	unsigned char minute[2];
+	unsigned char second[2];
+	unsigned char sechundr[2];
+	unsigned char offsetGreenwich;
+};
+#pragma pack()
+
+#pragma pack(1)
+struct ISO_DateTimeFileFolder_s
+{ 
+	unsigned char year;
+	unsigned char month;
+	unsigned char day;
+	unsigned char hour;
+	unsigned char minute;
+	unsigned char second;
+	unsigned char offsetGreenwich;
+};
+#pragma pack()
+
+#pragma pack(1)
+struct ISO_PVD_s { 
+	unsigned char descr_type;
+	unsigned char magic[5];
+	unsigned char descr_ver;
+	unsigned char unused;
+	unsigned char sysid[32];
+	unsigned char volid[32];
+	unsigned char zeros1[8];
+	unsigned char seknum[8];
+	unsigned char escSeq[32];
+	
+	UINT32 volsetsize;
+	UINT32 volseqnum;
+	UINT32 seksize;
+	UINT64 pathtablen;
+
+	UINT32 firstSek_LEpathTab1_LE;
+	UINT32 firstsek_LEpathtab2_LE;
+	UINT32 firstsek_BEpathtab1_BE;
+	UINT32 firstsek_BEpathtab2_BE;
+
+	unsigned char rootdir[34];
+	unsigned char volsetid[128];
+	unsigned char pubid[128];
+	unsigned char dataprepid[128];
+	unsigned char appid[128];
+	unsigned char copyr[37];
+	unsigned char abstractfileid[37];
+	unsigned char bibliofileid[37];
+
+	ISO_DateTimePVD_s creationdate;
+	ISO_DateTimePVD_s modifydate;
+	ISO_DateTimePVD_s expiredate;
+
+	unsigned char effective[17];
+	unsigned char filestruc_ver;
+	unsigned char zero;
+	unsigned char app_use[512];
+	unsigned char res[653];
+};
+#pragma pack()
+
+#pragma pack(1)
+struct BootDescr
+{ 
+	unsigned char descr_type;
+	unsigned char magic[5];
+	unsigned char descr_ver;
+	unsigned char sysid[32];
+	unsigned char bootid[32];
+	unsigned char system_use[1977]; 
+};
+#pragma pack()
+
+#pragma pack(1)
+struct ISO_BootDescr_s
+{ 
+	unsigned char descr_type;
+	unsigned char magic[5];
+	unsigned char descr_ver;
+	unsigned char sysid[32];
+	unsigned char bootid[32];
+	unsigned char system_use[1977]; 
+};
+#pragma pack()
+
+#pragma pack(1)
+struct ISO_PathtableEntry
+{ 
+	BYTE	len;
+	BYTE	lenExt;
+	unsigned int	sectorOfExtension;
+	UINT16	sectorOfParent;
+	char*	name;
+};
+#pragma pack()
+#pragma pack(1)
+struct ISO_FileFolderEntry
+{ 
+	BYTE	lenRecord;
+	BYTE	nrOfSecInExt;
+	UINT64	sector1OfExtension;
+	UINT64	dataSize;
+	ISO_DateTimeFileFolder_s dateTime;
+	BYTE	fileFlags;
+	BYTE	fileUnitSize;
+	BYTE	interleaveGapSize;
+	unsigned int	volSeqNr;
+	BYTE	nameLen;
+	TCHAR*	name;
+	ISO_FileFolderEntry() { name=NULL;};
+	~ISO_FileFolderEntry() { if (name) free(name);};
+};
+#pragma pack()
+struct ISOInfos_s
+{
+	bool	bBootable;
+	DWORD	secSize;
+	bool	bUDF;
+	int		iJolietUnicode;
+	DWORD	type;
+};
+
 struct ThreadParam
 {
 	CPartFile *partFile;
@@ -203,9 +360,11 @@ struct archiveinfo_s {
 	CTypedPtrList<CPtrList, ZIP_CentralDirectory*> *centralDirectoryEntries;
 	CTypedPtrList<CPtrList, RAR_BlockFile*> *RARdir;
 	CTypedPtrList<CPtrList, ACE_BlockFile*> *ACEdir;
+	CTypedPtrList<CPtrList, ISO_FileFolderEntry*> *ISOdir;
 	
 	bool bZipCentralDir;
 	WORD rarFlags;
+	ISOInfos_s isoInfos;
 	ACE_ARCHIVEHEADER *ACEhdr;
 	archiveinfo_s() { 
 		centralDirectoryEntries=NULL;
@@ -214,10 +373,13 @@ struct archiveinfo_s {
 		rarFlags=0;
 		bZipCentralDir=false;
 		ACEhdr=NULL;
+		isoInfos.bBootable=false;
+		isoInfos.secSize=false;
+		isoInfos.iJolietUnicode=0;
 	}
 };
 struct archiveScannerThreadParams_s {
-	CKnownFile*		file;
+	CShareableFile*	file;
 	archiveinfo_s*	ai;
 	CTypedPtrList<CPtrList, Gap_Struct*> *filled;
 	int				type;
@@ -234,6 +396,7 @@ public:
 	static bool recoverZip(CFile *zipInput, CFile *zipOutput, archiveScannerThreadParams_s* ai, CTypedPtrList<CPtrList, Gap_Struct*> *filled, bool fullSize);
 	static bool recoverRar(CFile *rarInput, CFile *rarOutput, archiveScannerThreadParams_s* ai, CTypedPtrList<CPtrList, Gap_Struct*> *filled);
 	static bool recoverAce(CFile *aceInput, CFile *aceOutput, archiveScannerThreadParams_s* ai, CTypedPtrList<CPtrList, Gap_Struct*> *filled);
+	static bool recoverISO(CFile *aceInput, CFile *aceOutput, archiveScannerThreadParams_s* ai, CTypedPtrList<CPtrList, Gap_Struct*> *filled);
 
 private:
 	CArchiveRecovery(void); // Just use static recover method
@@ -257,6 +420,8 @@ private:
 	static void DeleteMemory(ThreadParam *tp);
 	static bool IsFilled(uint32 start, uint32 end, CTypedPtrList<CPtrList, Gap_Struct*> *filled);
 
+	static void ISOReadDirectory(archiveScannerThreadParams_s* aitp, UINT32 startSec, CFile* isoInput, CString currentDirName);
+
 	static void ProcessProgress(archiveScannerThreadParams_s* aitp, UINT64 pos);
 
 	static uint16 readUInt16(CFile *input);
@@ -265,4 +430,5 @@ private:
 	static uint32 calcUInt32(BYTE *input);
 	static void writeUInt16(CFile *output, uint16 val);
 	static void writeUInt32(CFile *output, uint32 val);
-};
+
+};	 // class

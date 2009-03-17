@@ -98,6 +98,7 @@ public:
 	//MORPH START - Added by SiRoB, New Version check
 	void DoMVersioncheck(bool manual);
 	//MORPH END   - Added by SiRoB, New Version check
+	void DoIPFilterVersioncheck(); //MORPH - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 	void ApplyHyperTextFont(LPLOGFONT pFont);
 	void ApplyLogFont(LPLOGFONT pFont);
 	void ProcessED2KLink(LPCTSTR pszData);
@@ -108,6 +109,7 @@ public:
 	void SetToolTipsDelay(UINT uDelay);
 #ifdef USE_OFFICIAL_UPNP
 	void StartUPnP(bool bReset = true, uint16 nForceTCPPort = 0, uint16 nForceUDPPort = 0);
+	void RefreshUPnP(bool bRequestAnswer = false);
 #endif
 	HBRUSH GetCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 
@@ -167,6 +169,9 @@ protected:
 	//MORPH START - Added by SiRoB, Version check
 	char			m_acMVCDNSBuffer[MAXGETHOSTSTRUCT];
 	//MORPH END   - Added by SiRoB, Version check
+	//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	char			m_acIPFilterAutoBuffer[MAXGETHOSTSTRUCT];
+	//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 
 	// Splash screen
 	CSplashScreen *m_pSplashWnd;
@@ -237,6 +242,7 @@ protected:
 	afx_msg void OnSysColorChange();
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
 	afx_msg void OnSettingChange(UINT uFlags, LPCTSTR lpszSection);
+	afx_msg BOOL OnDeviceChange(UINT nEventType, DWORD_PTR dwData);
 	afx_msg BOOL OnQueryEndSession();
 	afx_msg void OnEndSession(BOOL bEnding);
 	afx_msg LRESULT OnUserChanged(WPARAM wParam, LPARAM lParam);
@@ -295,6 +301,9 @@ protected:
 	//MORPH - Added by SiRoB, New Version check
 	afx_msg LRESULT OnMVersionCheckResponse(WPARAM wParam, LPARAM lParam);
 
+	//MORPH - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	afx_msg LRESULT OnIPFilterAutoVerCheckResponse(WPARAM wParam, LPARAM lParam);
+
 	// Peercache DNS
 	afx_msg LRESULT OnPeerCacheResponse(WPARAM wParam, LPARAM lParam);
 
@@ -346,6 +355,8 @@ public:
 	afx_msg void OnDrawClipboard();
 	afx_msg void OnChangeCbChain(HWND hWndRemove, HWND hWndAfter);
 	// MORPH END leuk_he clipboard chain instead of timer
+
+	void	CheckIPFilter(); //MORPH - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 };
 
 

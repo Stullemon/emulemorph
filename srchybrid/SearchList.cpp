@@ -38,12 +38,12 @@
 #include "SearchListCtrl.h"
 #include "Log.h"
 
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
 
 #define SPAMFILTER_FILENAME		_T("SearchSpam.met")
 #define STOREDSEARCHES_FILENAME	_T("StoredSearches.met")
@@ -790,16 +790,21 @@ void CSearchList::AddResultCount(uint32 nSearchID, const uchar* hash, UINT nCoun
 }
 // FIXME LARGE FILES
 void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* fileID, LPCTSTR name,
-										uint64 size, LPCTSTR type, UINT uKadPublishInfo,  UINT numProperties, ...)
+										uint64 size, LPCTSTR type, UINT uKadPublishInfo
+										, SSearchTerm* pQueriedSearchTerm,  UINT numProperties, ...)
 {
 	va_list args;
 	va_start(args, numProperties);
 
 	EUtf8Str eStrEncode = utf8strRaw;
 	CSafeMemFile* temp = new CSafeMemFile(250);
+	Kademlia::CKeyEntry verifierEntry;
+
+	verifierEntry.m_uKeyID.SetValue(*fileID);
 	uchar fileid[16];
 	fileID->ToByteArray(fileid);
 	temp->WriteHash16(fileid);
+	
 	
 	temp->WriteUInt32(0);	// client IP
 	temp->WriteUInt16(0);	// client port
@@ -813,16 +818,19 @@ void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt12
 	CTag tagName(FT_FILENAME, name);
 	tagName.WriteTagToFile(temp, eStrEncode);
 	tagcount++;
+	verifierEntry.SetFileName(name);
 
 	CTag tagSize(FT_FILESIZE, size, true); 
 	tagSize.WriteTagToFile(temp, eStrEncode);
 	tagcount++;
+	verifierEntry.m_uSize = size;
 
 	if (type != NULL && type[0] != _T('\0'))
 	{
 		CTag tagType(FT_FILETYPE, type);
 		tagType.WriteTagToFile(temp, eStrEncode);
 		tagcount++;
+		verifierEntry.AddTag(new Kademlia::CKadTagStr(TAG_FILETYPE, type));
 	}
 
 	// additional tags
@@ -845,16 +853,18 @@ void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt12
 					CTag tagProp(pszPropName, (LPCTSTR)pvPropValue);
 					tagProp.WriteTagToFile(temp, eStrEncode);
 				}
+				verifierEntry.AddTag(new Kademlia::CKadTagStr(pszPropName, (LPCTSTR)pvPropValue));
 				tagcount++;
 			}
 		}
 		else if (uPropType == 3 /*TAGTYPE_UINT32*/)
 		{
 			if ((uint32)pvPropValue != 0)
-			{
+			{	
 				CTag tagProp(pszPropName, (uint32)pvPropValue);
 				tagProp.WriteTagToFile(temp, eStrEncode);
 				tagcount++;
+				verifierEntry.AddTag(new Kademlia::CKadTagUInt(pszPropName, (uint32)pvPropValue));
 			}
 		}
 		else
@@ -867,9 +877,16 @@ void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt12
 	temp->WriteUInt32(tagcount);
 	
 	temp->SeekToBegin();
-	CSearchFile* tempFile = new CSearchFile(temp, eStrEncode == utf8strRaw, searchID, 0, 0, 0, true);
-	tempFile->SetKadPublishInfo(uKadPublishInfo);
-	AddToList(tempFile);
+	if (pQueriedSearchTerm == NULL || verifierEntry.StartSearchTermsMatch(pQueriedSearchTerm))
+	{
+		CSearchFile* tempFile = new CSearchFile(temp, eStrEncode == utf8strRaw, searchID, 0, 0, 0, true);
+		tempFile->SetKadPublishInfo(uKadPublishInfo);
+		AddToList(tempFile);
+	}
+	else
+	{
+		DebugLogWarning(_T("Kad Searchresult failed sanitize check against search query, ignoring. (%s)"), name);
+	}
 	
 	delete temp;
 }
@@ -1491,13 +1508,13 @@ void CSearchList::SaveSpamFilter(){
 		
 		for (int i = 0; i < m_astrKnownSpamNames.GetCount(); i++){
 			CTag tag(SP_FILEFULLNAME, m_astrKnownSpamNames[i]);
-			tag.WriteNewEd2kTag(&file);
+			tag.WriteNewEd2kTag(&file, utf8strOptBOM);
 			nCount++;
 		}
 
 		for (int i = 0; i < m_astrKnownSimilarSpamNames.GetCount(); i++){
 			CTag tag(SP_FILESIMILARNAME, m_astrKnownSimilarSpamNames[i]);
-			tag.WriteNewEd2kTag(&file);
+			tag.WriteNewEd2kTag(&file, utf8strOptBOM);
 			nCount++;
 		}
 
@@ -1673,7 +1690,7 @@ void CSearchList::LoadSearches(){
 		for (int i = 0; i < nCount; i++){
 			SSearchParams* pParams = new SSearchParams(file);
 			uint32 nFileCount = file.ReadUInt32();
-			
+
 			// backward compability fix for new automatic option
 			if (pParams->eType == SearchTypeAutomatic)
 				pParams->eType = SearchTypeEd2kServer;

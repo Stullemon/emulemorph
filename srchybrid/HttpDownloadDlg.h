@@ -61,7 +61,7 @@ protected:
 										   LPVOID lpvStatusInformation, DWORD dwStatusInformationLength);
 	void OnStatusCallBack(HINTERNET hInternet, DWORD dwInternetStatus,
 						  LPVOID lpvStatusInformation, DWORD dwStatusInformationLength);
-	CString GetStatusInfo(LPVOID lpvStatusInformation);
+	CString GetStatusInfo(LPVOID lpvStatusInformation, DWORD dwStatusInformationLength);
 	static UINT _DownloadThread(LPVOID pParam);
 	void HandleThreadErrorWithLastError(CString strIDError, DWORD dwLastError = 0);
 	void HandleThreadError(CString strIDError);

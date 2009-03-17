@@ -47,7 +47,7 @@ namespace Kademlia
 
 			uint64		GetIntTagValue(CKadTagNameString strTagName, bool bIncludeVirtualTags = true) const;
 			bool		GetIntTagValue(CKadTagNameString strTagName, uint64& rValue, bool bIncludeVirtualTags = true) const;
-			CStringW	GetStrTagValue(CKadTagNameString strTagName) const;
+			CKadTagValueString GetStrTagValue(CKadTagNameString strTagName) const;
 			void		AddTag(CKadTag* pTag)			{ m_listTag.push_back(pTag); }
 			uint32		GetTagCount() const; // Adds filename and size to the count if not empty, even if they are not stored as tags
 			void		WriteTagList(CDataIO* pData)	{ WriteTagListInc(pData, 0); }
@@ -67,7 +67,7 @@ namespace Kademlia
 
 		protected:
 			void		WriteTagListInc(CDataIO* pData, uint32 nIncreaseTagNumber = 0);
-			CList<structFileNameEntry, structFileNameEntry&>		m_listFileNames;	
+			CList<structFileNameEntry> m_listFileNames;	
 			TagList m_listTag;
 	};
 
@@ -85,7 +85,7 @@ namespace Kademlia
 			virtual	CEntry*		Copy();
 			virtual bool IsKeyEntry()					{ return true; }
 
-			bool				SearchTermsMatch(const SSearchTerm* pSearchTerm) const;
+			bool				StartSearchTermsMatch(const SSearchTerm* pSearchTerm);
 			void				MergeIPsAndFilenames(CKeyEntry* pFromEntry);
 			void				CleanUpTrackedPublishers();
 			float				GetTrustValue();
@@ -101,7 +101,10 @@ namespace Kademlia
 			
 			uint32	dwLastTrustValueCalc;			
 			float	m_fTrustValue;
-			CList<structPublishingIP, structPublishingIP&>*			 m_pliPublishingIPs;
+			CList<structPublishingIP> *m_pliPublishingIPs;
 			static CMap<uint32, uint32, uint32, uint32> s_mapGlobalPublishIPs; // tracks count of publishings for each 255.255.255.0/28 subnet
+
+			bool SearchTermsMatch(const SSearchTerm* pSearchTerm) const;
+			CKadTagValueString m_strSearchTermCacheCommonFileNameLowerCase; // contains a valid value only while 'SearchTermsMatch' is running.
 	};
 }

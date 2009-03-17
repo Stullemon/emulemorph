@@ -77,8 +77,7 @@ BOOL CCustomAutoComplete::Bind(HWND p_hWndEdit, DWORD p_dwOptions, LPCTSTR p_lps
 			}
 		}
 
-		USES_CONVERSION;
-		if (SUCCEEDED(hr = m_pac->Init(p_hWndEdit, this, NULL, T2CW(p_lpszFormatString))))
+		if (SUCCEEDED(hr = m_pac->Init(p_hWndEdit, this, NULL, p_lpszFormatString)))
 		{
 			m_fBound = TRUE;
 			return TRUE;
@@ -259,7 +258,6 @@ STDMETHODIMP CCustomAutoComplete::QueryInterface(REFIID riid, void** ppvObject)
 //
 STDMETHODIMP CCustomAutoComplete::Next(ULONG celt, LPOLESTR *rgelt, ULONG *pceltFetched)
 {
-	USES_CONVERSION;
 	HRESULT hr = S_FALSE;
 
 	if (!celt)
@@ -273,7 +271,7 @@ STDMETHODIMP CCustomAutoComplete::Next(ULONG celt, LPOLESTR *rgelt, ULONG *pcelt
 			break;
 
 		rgelt[i] = (LPWSTR)::CoTaskMemAlloc((ULONG) sizeof(WCHAR) * (m_asList[m_nCurrentElement].GetLength() + 1));
-		wcscpy(rgelt[i], T2CW(m_asList[m_nCurrentElement]));
+		wcscpy(rgelt[i], m_asList[m_nCurrentElement]);
 
 		if (pceltFetched)
 			(*pceltFetched)++;

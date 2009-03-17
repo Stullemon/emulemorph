@@ -82,17 +82,29 @@
 // Commander - Added: Custom incoming folder icon [emulEspaña] - End
 #include "ntservice.h" // MORPH leuk_he:run as ntservice v1.. 
 
-
-CLogFile theLog;
-CLogFile theVerboseLog;
-bool g_bLowColorDesktop = false;
-bool g_bGdiPlusInstalled = false;
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
+
+
+#if _MSC_VER>=1400 && defined(_UNICODE)
+#if defined _M_IX86
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='x86' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_IA64
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='ia64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#elif defined _M_X64
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='amd64' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#else
+#pragma comment(linker,"/manifestdependency:\"type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
+#endif
+#endif
+
+CLogFile theLog;
+CLogFile theVerboseLog;
+bool g_bLowColorDesktop = false;
+bool g_bGdiPlusInstalled = false;
 
 //#define USE_16COLOR_ICONS
 
@@ -169,8 +181,147 @@ int eMuleAllocHook(int mode, void* pUserData, size_t nSize, int nBlockUse, long 
 //CString _strCrtDebugReportFilePath(_T("eMule CRT Debug Log.log"));
 // don't use a CString for that memory - it will not be available on application termination!
 #define APP_CRT_DEBUG_LOG_FILE _T("eMule CRT Debug Log.log")
-static TCHAR _szCrtDebugReportFilePath[MAX_PATH] = APP_CRT_DEBUG_LOG_FILE;
+static TCHAR s_szCrtDebugReportFilePath[MAX_PATH] = APP_CRT_DEBUG_LOG_FILE;
 #endif //_DEBUG
+
+
+///////////////////////////////////////////////////////////////////////////////
+// SafeSEH - Safe Exception Handlers
+//
+// This security feature must be enabled at compile time, due to using the
+// linker command line option "/SafeSEH". Depending on the used libraries and
+// object files which are used to link eMule.exe, the linker may or may not
+// throw some errors about 'safeseh'. Those errors have to get resolved until
+// the linker is capable of linking eMule.exe *with* "/SafeSEH".
+//
+// At runtime, we just can check if the linker created an according SafeSEH
+// exception table in the '__safe_se_handler_table' object. If SafeSEH was not
+// specified at all during link time, the address of '__safe_se_handler_table'
+// is NULL -> hence, no SafeSEH is enabled.
+///////////////////////////////////////////////////////////////////////////////
+extern "C" PVOID __safe_se_handler_table[];
+extern "C" BYTE  __safe_se_handler_count;
+
+void InitSafeSEH()
+{
+	// Need to workaround the optimizer of the C-compiler...
+	volatile PVOID safe_se_handler_table = __safe_se_handler_table;
+	if (safe_se_handler_table == NULL)
+	{
+		AfxMessageBox(_T("eMule.exe was not linked with /SafeSEH!"), MB_ICONSTOP);
+	}
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// DEP - Data Execution Prevention
+// 
+// For Windows XP SP2 and later. Does *not* have any performance impact!
+//
+// VS2003:	DEP must be enabled dynamically because the linker does not support 
+//			the "/NXCOMPAT" command line option.
+// VS2005:	DEP can get enabled at link time by using the "/NXCOMPAT" command 
+//			line option.
+// VS2008:	DEP can get enabled at link time by using the "DEP" option within
+//			'Visual Studio Linker Advanced Options'.
+//
+#ifndef PROCESS_DEP_ENABLE
+#define	PROCESS_DEP_ENABLE						0x00000001
+#define	PROCESS_DEP_DISABLE_ATL_THUNK_EMULATION	0x00000002
+BOOL WINAPI GetProcessDEPPolicy(HANDLE hProcess, LPDWORD lpFlags, PBOOL lpPermanent);
+BOOL WINAPI SetProcessDEPPolicy(DWORD dwFlags);
+#endif//!PROCESS_DEP_ENABLE
+
+void InitDEP()
+{
+	BOOL (WINAPI *pfnGetProcessDEPPolicy)(HANDLE hProcess, LPDWORD lpFlags, PBOOL lpPermanent);
+	BOOL (WINAPI *pfnSetProcessDEPPolicy)(DWORD dwFlags);
+	(FARPROC&)pfnGetProcessDEPPolicy = GetProcAddress(GetModuleHandle(_T("kernel32")), "GetProcessDEPPolicy");
+	(FARPROC&)pfnSetProcessDEPPolicy = GetProcAddress(GetModuleHandle(_T("kernel32")), "SetProcessDEPPolicy");
+	if (pfnGetProcessDEPPolicy && pfnSetProcessDEPPolicy)
+	{
+		DWORD dwFlags;
+		BOOL bPermanent;
+		if ((*pfnGetProcessDEPPolicy)(GetCurrentProcess(), &dwFlags, &bPermanent))
+		{
+			// Vista SP1
+			// ===============================================================
+			//
+			// BOOT.INI nx=OptIn,  VS2003/VS2005
+			// ---------------------------------
+			// DEP flags: 00000000
+			// Permanent: 0
+			//
+			// BOOT.INI nx=OptOut, VS2003/VS2005
+			// ---------------------------------
+			// DEP flags: 00000001 (PROCESS_DEP_ENABLE)
+			// Permanent: 0
+			//
+			// BOOT.INI nx=OptIn/OptOut, VS2003 + EditBinX/NXCOMPAT
+			// ----------------------------------------------------
+			// DEP flags: 00000003 (PROCESS_DEP_ENABLE | *PROCESS_DEP_DISABLE_ATL_THUNK_EMULATION*)
+			// Permanent: *1*
+			// ---
+			// There is no way to remove the PROCESS_DEP_DISABLE_ATL_THUNK_EMULATION flag at runtime,
+			// because the DEP policy is already permanent due to the NXCOMPAT flag.
+			//
+			// BOOT.INI nx=OptIn/OptOut, VS2005 + /NXCOMPAT
+			// --------------------------------------------
+			// DEP flags: 00000003 (PROCESS_DEP_ENABLE | PROCESS_DEP_DISABLE_ATL_THUNK_EMULATION)
+			// Permanent: *1*
+			//
+			// NOTE: It is ultimately important to explicitly enable the DEP policy even if the
+			// process' DEP policy is already enabled. If the DEP policy is already enabled due
+			// to an OptOut system policy, the DEP policy is though not yet permanent. As long as
+			// the DEP policy is not permanent it could get changed during runtime...
+			//
+			// So, if the DEP policy for the current process is already enabled but not permanent,
+			// it has to be explicitly enabled by calling 'SetProcessDEPPolicy' to make it permanent.
+			//
+			if (  ((dwFlags & PROCESS_DEP_ENABLE) == 0 || !bPermanent)
+#if _ATL_VER>0x0710
+				|| (dwFlags & PROCESS_DEP_DISABLE_ATL_THUNK_EMULATION) == 0
+#endif
+			   )
+			{
+				// VS2003:	Enable DEP (with ATL-thunk emulation) if not already set by system policy
+				//			or if the policy is not yet permanent.
+				//
+				// VS2005:	Enable DEP (without ATL-thunk emulation) if not already set by system policy 
+				//			or linker "/NXCOMPAT" option or if the policy is not yet permanent. We should
+				//			not reach this code path at all because the "/NXCOMPAT" option is specified.
+				//			However, the code path is here for safety reasons.
+				dwFlags = PROCESS_DEP_ENABLE;
+#if _ATL_VER>0x0710
+				// VS2005: Disable ATL-thunks.
+				dwFlags |= PROCESS_DEP_DISABLE_ATL_THUNK_EMULATION;
+#endif
+				(*pfnSetProcessDEPPolicy)(dwFlags);
+			}
+		}
+	}
+}
+
+
+///////////////////////////////////////////////////////////////////////////////
+// Heap Corruption Detection
+//
+// For Windows Vista and later. Does *not* have any performance impact!
+// 
+#ifndef HeapEnableTerminationOnCorruption
+#define HeapEnableTerminationOnCorruption (HEAP_INFORMATION_CLASS)1
+WINBASEAPI BOOL WINAPI HeapSetInformation(HANDLE HeapHandle, HEAP_INFORMATION_CLASS HeapInformationClass, PVOID HeapInformation, SIZE_T HeapInformationLength);
+#endif//!HeapEnableTerminationOnCorruption
+
+void InitHeapCorruptionDetection()
+{
+	BOOL (WINAPI *pfnHeapSetInformation)(HANDLE HeapHandle, HEAP_INFORMATION_CLASS HeapInformationClass, PVOID HeapInformation, SIZE_T HeapInformationLength);
+	(FARPROC&)pfnHeapSetInformation = GetProcAddress(GetModuleHandle(_T("kernel32")), "HeapSetInformation");
+	if (pfnHeapSetInformation)
+	{
+		(*pfnHeapSetInformation)(NULL, HeapEnableTerminationOnCorruption, NULL, 0);
+	}
+}
 
 
 struct SLogItem
@@ -199,7 +350,7 @@ void CALLBACK myLogHandler(LPCSTR lpMsg)
 		theApp.QueueLogLine(false, _T("%hs"), lpMsg);
 }
 
-const static UINT UWM_ARE_YOU_EMULE=RegisterWindowMessage(EMULE_GUID);
+const static UINT UWM_ARE_YOU_EMULE = RegisterWindowMessage(EMULE_GUID);
 
 BOOL WINAPI ConsoleCtrlHandler(DWORD dwCtrlType);
 
@@ -213,6 +364,13 @@ END_MESSAGE_MAP()
 CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	:CWinApp(lpszAppName)
 {
+	// Initialize Windows security features.
+#ifndef _DEBUG
+	InitSafeSEH();
+#endif
+	InitDEP();
+	InitHeapCorruptionDetection();
+
 	// This does not seem to work well with multithreading, although there is no reason why it should not.
 	//_set_sbh_threshold(768);
 
@@ -387,9 +545,9 @@ BOOL CemuleApp::InitInstance()
 #endif
 		//MORPH - Changed by SiRoB, [-modname-]
 		/*
-		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg, true);
+		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg, true, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 		*/
-        theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion+ _T("]"), true);
+		theCrashDumper.Enable(_T("eMule ") + m_strCurVersionLongDbg + _T(" [") + theApp.m_strModLongVersion+ _T("]"), true, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
 
 	///////////////////////////////////////////////////////////////////////////
 	// Locale initialization -- BE VERY CAREFUL HERE!!!
@@ -415,21 +573,16 @@ BOOL CemuleApp::InitInstance()
 	if (ProcessCommandline())
 		return false;
 
-	// Should not be needed any longer as Unicode eMule was already released since quite some
-	// time. Right now, that warning (if it gets triggered) is indeed just annoying and I
-	// guess nobody ever understood that warning text nor for what it was really used for.
-	// So, just use the default code page.
-	//extern bool CheckThreadLocale();
-	//if (!CheckThreadLocale())
-	//	return false;
-
 	///////////////////////////////////////////////////////////////////////////
 	// Common Controls initialization
 	//
-	//          Mjr Min
-	// -------------------------
-	// XP SP3	6   0
-	// Vista    6   16
+	//						Mjr Min
+	// ----------------------------
+	// W98 SE, IE5			5	8
+	// W2K SP4, IE6 SP1		5	81
+	// XP SP2 				6   0
+	// XP SP3				6   0
+	// Vista SP1			6   16
 	InitCommonControls();
 	DWORD dwComCtrlMjr = 4;
 	DWORD dwComCtrlMin = 0;
@@ -446,6 +599,15 @@ BOOL CemuleApp::InitInstance()
 		}
 	}
 
+	///////////////////////////////////////////////////////////////////////////
+	// Shell32 initialization
+	//
+	//						Mjr Min
+	// ----------------------------
+	// W98 SE, IE5			4	72
+	// W2K SP4, IE6 SP1		5	0
+	// XP SP2 				6   0
+	// Vista SP1			6   0
 	DWORD dwShellMjr = 4;
 	DWORD dwShellMin = 0;
 	AtlGetShellVersion(&dwShellMjr, &dwShellMin);
@@ -466,7 +628,11 @@ BOOL CemuleApp::InitInstance()
 	UpdateDesktopColorDepth();
 
 	CWinApp::InitInstance();
+
 	//MORPH START - Added by SiRoB, eWombat [WINSOCK2]
+	/*
+	if (!AfxSocketInit())
+	*/
 	memset(&m_wsaData,0,sizeof(WSADATA));
 	if (!InitWinsock2(&m_wsaData)) // <<< eWombat first try it with winsock2
 		{
@@ -523,7 +689,7 @@ BOOL CemuleApp::InitInstance()
 	//MORPH END   - Added by IceCream, high process priority
 
 #ifdef _DEBUG
-	_sntprintf(_szCrtDebugReportFilePath, _countof(_szCrtDebugReportFilePath) - 1, _T("%s%s"), thePrefs.GetMuleDirectory(EMULE_LOGDIR, false), APP_CRT_DEBUG_LOG_FILE);
+	_sntprintf(s_szCrtDebugReportFilePath, _countof(s_szCrtDebugReportFilePath) - 1, _T("%s%s"), thePrefs.GetMuleDirectory(EMULE_LOGDIR, false), APP_CRT_DEBUG_LOG_FILE);
 #endif
 	VERIFY( theLog.SetFilePath(thePrefs.GetMuleDirectory(EMULE_LOGDIR, thePrefs.GetLog2Disk()) + _T("eMule.log")) );
 	VERIFY( theVerboseLog.SetFilePath(thePrefs.GetMuleDirectory(EMULE_LOGDIR, false) + _T("eMule_Verbose.log")) );
@@ -627,7 +793,7 @@ BOOL CemuleApp::InitInstance()
 	}
 	// End -UPnPNAT Support-
 
-	// Highres scheduling gives better resolution for Sleep(...) calls, and timeGetTime() calls
+    // Highres scheduling gives better resolution for Sleep(...) calls, and timeGetTime() calls
     m_wTimerRes = 0;
     if(thePrefs.GetHighresTimer()) {
         TIMECAPS tc;
@@ -650,7 +816,6 @@ BOOL CemuleApp::InitInstance()
         }
     }
 
-	ipfilter 	= new CIPFilter();
 	ip2country = new CIP2Country(); //EastShare - added by AndCycle, IP to Country
 	FakeCheck 	= new CFakecheck(); //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
@@ -671,6 +836,7 @@ BOOL CemuleApp::InitInstance()
 	clientcredits = new CClientCreditsList();
 	downloadqueue = new CDownloadQueue();	// bugfix - do this before creating the uploadqueue
 	uploadqueue = new CUploadQueue();
+	ipfilter 	= new CIPFilter();
 	webserver = new CWebServer(); // Webserver [kuchin]
 	wapserver = new CWapServer(); //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	mmserver = new CMMServer();
@@ -718,7 +884,7 @@ int CemuleApp::ExitInstance()
 {
 	AddDebugLogLine(DLP_VERYLOW, _T("%hs"), __FUNCTION__);
 
-   if(m_wTimerRes != 0) {
+	if (m_wTimerRes != 0) {
         timeEndPeriod(m_wTimerRes);
     }
 
@@ -728,7 +894,7 @@ int CemuleApp::ExitInstance()
 #ifdef _DEBUG
 int CrtDebugReportCB(int reportType, char* message, int* returnValue)
 {
-	FILE* fp = _tfsopen(_szCrtDebugReportFilePath, _T("a"), _SH_DENYWR);
+	FILE* fp = _tfsopen(s_szCrtDebugReportFilePath, _T("a"), _SH_DENYWR);
 	if (fp){
 		time_t tNow = time(NULL);
 		TCHAR szTime[40];
@@ -762,7 +928,7 @@ int eMuleAllocHook(int mode, void* pUserData, size_t nSize, int nBlockUse, long 
 bool CemuleApp::ProcessCommandline()
 {
 	bool bIgnoreRunningInstances = (GetProfileInt(_T("eMule"), _T("IgnoreInstances"), 0) != 0);
-   bool bExitParam=false;
+   bool bExitParam=false; //MORPH leuk_he:run as ntservice v1..
 
 	for (int i = 1; i < __argc; i++){
 		LPCTSTR pszParam = __targv[i];
@@ -808,63 +974,68 @@ bool CemuleApp::ProcessCommandline()
 	HWND maininst = NULL;
 	bool bAlreadyRunning = false;
 	if (!bIgnoreRunningInstances){
-		bAlreadyRunning = ( ::GetLastError() == ERROR_ALREADY_EXISTS ||::GetLastError() == ERROR_ACCESS_DENIED);
-    	if ( bAlreadyRunning ) EnumWindows(SearchEmuleWindow, (LPARAM)&maininst);
+		bAlreadyRunning = (::GetLastError() == ERROR_ALREADY_EXISTS ||::GetLastError() == ERROR_ACCESS_DENIED);
+    	if (bAlreadyRunning) EnumWindows(SearchEmuleWindow, (LPARAM)&maininst);
 	}
 
     if (cmdInfo.m_nShellCommand == CCommandLineInfo::FileOpen) {
 		CString* command = new CString(cmdInfo.m_strFileName);
 		if (command->Find(_T("://"))>0) {
 			sendstruct.cbData = (command->GetLength() + 1)*sizeof(TCHAR);
-			sendstruct.dwData = OP_ED2KLINK; 
-			sendstruct.lpData = const_cast<LPTSTR>((LPCTSTR)*command); 
+			sendstruct.dwData = OP_ED2KLINK;
+			sendstruct.lpData = const_cast<LPTSTR>((LPCTSTR)*command);
     		if (maininst){
       			SendMessage(maininst, WM_COPYDATA, (WPARAM)0, (LPARAM)(PCOPYDATASTRUCT)&sendstruct);
 				delete command;
-      			return true; 
-			} 
-    		else 
-				// MORPH leuk_he:run as ntservice v1.. START
-				if (IsServiceRunningMutexActive()) 
-					PassLinkToWebService(sendstruct.dwData,*command);
-				else
-                // MORPH leuk_he:run as ntservice v1.. END
+      			return true;
+			}
+    		else
+			// MORPH leuk_he:run as ntservice v1.. START
+			if (IsServiceRunningMutexActive()) 
+				PassLinkToWebService(sendstruct.dwData,*command);
+			else
+			// MORPH leuk_he:run as ntservice v1.. END
       			pstrPendingLink = command;
 		}
-		else if (CCollection::HasCollectionExtention(*command)){
+		else if (CCollection::HasCollectionExtention(*command)) {
 			sendstruct.cbData = (command->GetLength() + 1)*sizeof(TCHAR);
-			sendstruct.dwData = OP_COLLECTION; 
-			sendstruct.lpData = const_cast<LPTSTR>((LPCTSTR)*command); 
+			sendstruct.dwData = OP_COLLECTION;
+			sendstruct.lpData = const_cast<LPTSTR>((LPCTSTR)*command);
     		if (maininst){
       			SendMessage(maininst, WM_COPYDATA, (WPARAM)0, (LPARAM)(PCOPYDATASTRUCT)&sendstruct);
       			delete command;
-				return true; 
-			} 
-    		else 
-				// MORPH leuk_he:run as ntservice v1.. START
-				if (IsServiceRunningMutexActive()) 
-					PassLinkToWebService(sendstruct.dwData,*command);
-				else
-                // MORPH leuk_he:run as ntservice v1.. END
+				return true;
+			}
+    		else
+			// MORPH leuk_he:run as ntservice v1.. START
+			if (IsServiceRunningMutexActive()) 
+				PassLinkToWebService(sendstruct.dwData,*command);
+			else
+			// MORPH leuk_he:run as ntservice v1.. END
       			pstrPendingLink = command;
 		}
 		else {
 			sendstruct.cbData = (command->GetLength() + 1)*sizeof(TCHAR);
 			sendstruct.dwData = OP_CLCOMMAND;
-			sendstruct.lpData = const_cast<LPTSTR>((LPCTSTR)*command); 
+			sendstruct.lpData = const_cast<LPTSTR>((LPCTSTR)*command);
     		if (maininst){
       			SendMessage(maininst, WM_COPYDATA, (WPARAM)0, (LPARAM)(PCOPYDATASTRUCT)&sendstruct);
       			delete command;
-				return true; 
+				return true;
 			}
 			// MORPH leuk_he:run as ntservice v1.. START
 			else if (IsServiceRunningMutexActive()) 
 				PassLinkToWebService(sendstruct.dwData,*command);
-                // MORPH leuk_he:run as ntservice v1.. END
+			// MORPH leuk_he:run as ntservice v1.. END
 			// Don't start if we were invoked with 'exit' command.
+			// MORPH leuk_he:run as ntservice v1.. START
+			/*
+			if (command->CompareNoCase(_T("exit")) == 0) {
+			*/
 			if (  (command->CompareNoCase(_T("exit")) == 0)||
-                  (command->CompareNoCase(_T("uninstall")) == 0))
+				(command->CompareNoCase(_T("uninstall")) == 0))
 			{
+			// MORPH leuk_he:run as ntservice v1.. END
 				delete command;
 				return true;
 			}
@@ -1035,7 +1206,7 @@ bool CemuleApp::CopyTextToClipboard(CString strText)
 	}
 	/* MORPH start moved to before setclipboarddata 
 	else
-        IgnoreClipboardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
+		IgnoreClipboardLinks(strText); // this is so eMule won't think the clipboard has ed2k links for adding
 	 MORPH end  moved to before setclipboarddata  */
 
 	return (iCopied != 0);
@@ -1154,20 +1325,24 @@ void CemuleApp::OnlineSig() // Added By Bouc7
 		} 
 		else 
 			file.Write("0",1); 
-
 		file.Write("\n",1); 
-		sprintf(buffer,"%.1f",(float)downloadqueue->GetDatarate()/1024); 
-		file.Write(buffer,strlen(buffer)); 
-		file.Write("|",1); 
+
+		_snprintf(buffer, _countof(buffer), "%.1f", (float)downloadqueue->GetDatarate() / 1024);
+		buffer[_countof(buffer) - 1] = '\0';
+		file.Write(buffer, strlen(buffer)); 
+		file.Write("|", 1);
+
 		//MORPH - Changed by SiRoB, Keep An average datarate value for USS system
 		/*
-		sprintf(buffer,"%.1f",(float)uploadqueue->GetDatarate()/1024); 
+		_snprintf(buffer, _countof(buffer), "%.1f", (float)uploadqueue->GetDatarate() / 1024); 
 		*/
-		sprintf(buffer,"%.1f",(float)uploadqueue->GetDatarate(true)/1024); 
-		file.Write(buffer,strlen(buffer)); 
-		file.Write("|",1); 
-		_itoa(uploadqueue->GetWaitingUserCount(),buffer,10); 
-		file.Write(buffer,strlen(buffer)); 
+		_snprintf(buffer, _countof(buffer), "%.1f", (float)uploadqueue->GetDatarate(true) / 1024); 
+		buffer[_countof(buffer) - 1] = '\0';
+		file.Write(buffer, strlen(buffer));
+		file.Write("|", 1);
+
+		_itoa(uploadqueue->GetWaitingUserCount(), buffer, 10);
+		file.Write(buffer, strlen(buffer));
 
 		file.Close(); 
 	}
@@ -1262,16 +1437,20 @@ bool CemuleApp::ShowWebHelp(UINT uTopic)
 
 int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -1 */, bool bNormalsSize)
 {
-	//TODO: This has to be MBCS aware..
 	DWORD dwFileAttributes;
 	LPCTSTR pszCacheExt = NULL;
 	if (iLength == -1)
-	    {// morph, JUst woraaround a reported chrashdump 
-			if (pszFilePath== NULL) 
-               iLength =0;
-			else  //original:
-				iLength = _tcslen(pszFilePath); 
-	} // morph
+		// morph, JUst woraaround a reported chrashdump 
+		/*
+		iLength = _tcslen(pszFilePath);
+		*/
+	{
+		if (pszFilePath== NULL) 
+			iLength =0;
+		else  //original:
+			iLength = _tcslen(pszFilePath); 
+	}
+		// morph, JUst woraaround a reported chrashdump 
 	if (iLength > 0 && (pszFilePath[iLength - 1] == _T('\\') || pszFilePath[iLength - 1] == _T('/'))){
 		// it's a directory
 		pszCacheExt = _T("\\");
@@ -1297,7 +1476,7 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 	LPVOID vData;
 	if (bNormalsSize){
 		if (!m_aBigExtToSysImgIdx.Lookup(pszCacheExt, vData)){
-			// Get index for the system's small icon image list
+			// Get index for the system's big icon image list
 			SHFILEINFO sfi;
 			DWORD dwResult = SHGetFileInfo(pszFilePath, dwFileAttributes, &sfi, sizeof(sfi),
 										SHGFI_USEFILEATTRIBUTES | SHGFI_SYSICONINDEX);
@@ -1316,7 +1495,7 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 			// Get index for the system's small icon image list
 			SHFILEINFO sfi;
 			DWORD dwResult = SHGetFileInfo(pszFilePath, dwFileAttributes, &sfi, sizeof(sfi),
-										   SHGFI_USEFILEATTRIBUTES | SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
+										SHGFI_USEFILEATTRIBUTES | SHGFI_SYSICONINDEX | SHGFI_SMALLICON);
 			if (dwResult == 0)
 				return 0;
 			ASSERT( m_hSystemImageList == NULL || m_hSystemImageList == (HIMAGELIST)dwResult );
@@ -1328,9 +1507,7 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 		}
 	}
 
-
 	// Return already cached value
-	// Elandal: Assumes sizeof(void*) == sizeof(int)
 	return (int)vData;
 }
 
@@ -1532,7 +1709,8 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 			{
 				if (uFlags != 0 || !(cx == cy && (cx == 16 || cx == 32)))
 				{
-					static UINT (WINAPI *_pfnPrivateExtractIcons)(LPCTSTR, int, int, int, HICON*, UINT*, UINT, UINT) = (UINT (WINAPI *)(LPCTSTR, int, int, int, HICON*, UINT*, UINT, UINT))GetProcAddress(GetModuleHandle(_T("user32")), _TWINAPI("PrivateExtractIcons"));
+					static UINT (WINAPI *_pfnPrivateExtractIcons)(LPCTSTR, int, int, int, HICON*, UINT*, UINT, UINT) 
+						= (UINT (WINAPI *)(LPCTSTR, int, int, int, HICON*, UINT*, UINT, UINT))GetProcAddress(GetModuleHandle(_T("user32")), _TWINAPI("PrivateExtractIcons"));
 					if (_pfnPrivateExtractIcons)
 					{
 						UINT uIconId;
@@ -1585,7 +1763,7 @@ HICON CemuleApp::LoadIcon(LPCTSTR lpszResourceName, int cx, int cy, UINT uFlags)
 			else
 			{
 				// WINBUG???: 'ExtractIcon' does not work well on ICO-files when using the color 
-				// scheme 'Windows-Standard (extragro?' -> always try to use 'LoadImage'!
+				// scheme 'Windows-Standard (extragroß)' -> always try to use 'LoadImage'!
 				//
 				// If the ICO file contains a 16x16 icon, 'LoadImage' will though return a 32x32 icon,
 				// if LR_DEFAULTSIZE is specified! -> always specify the requested size!
@@ -2133,7 +2311,7 @@ void CemuleApp::CreateAllFonts()
 }
 
 const CString &CemuleApp::GetDefaultFontFaceName()
-	{
+{
 	if (m_strDefaultFontFaceName.IsEmpty())
 	{
 		OSVERSIONINFO osvi;
@@ -2182,11 +2360,12 @@ void CemuleApp::UpdateDesktopColorDepth()
 		m_iDfltImageListColorFlags = GetAppImageListColorFlag();
 
 		// Don't use 32-bit image lists if not supported by COMCTL32.DLL
-		if (m_iDfltImageListColorFlags == ILC_COLOR32 && m_ullComCtrlVer < MAKEDLLVERULL(6,0,0,0)) {
+		if (m_iDfltImageListColorFlags == ILC_COLOR32 && m_ullComCtrlVer < MAKEDLLVERULL(6,0,0,0))
+		{
 			// We fall back to 16-bit image lists because we do not provide 24-bit
 			// versions of icons any longer (due to resource size restrictions for Win98). We
 			// could also fall back to 24-bit image lists here but the difference is minimal
-			// and considered to be not worth the additinoal memory consumption.
+			// and considered not to be worth the additinoal memory consumption.
 			//
 			// Though, do not fall back to 8-bit image lists because this would let Windows
 			// reduce the color resolution to the standard 256 color window system palette.
@@ -2195,15 +2374,6 @@ void CemuleApp::UpdateDesktopColorDepth()
 			// loosing any colors.
 			m_iDfltImageListColorFlags = ILC_COLOR16;
 		}
-/* MORPH win95 is not supported, vs2008 does not support .win95
-		// Don't use >8-bit image lists with OSs with restricted memory for GDI resources
-		if (afxIsWin95) {
-			// NOTE: ILC_COLOR8 leads to converting all icons to the standard windows system
-			// 256 color palette. Thus this option leads to loosing some color resolution.
-			// Though there is no other chance with Win98 because of the 64K GDI limit.
-			m_iDfltImageListColorFlags = ILC_COLOR8;
-		}
-MORPH END */
 	}
 
 	// Doesn't help..
@@ -2321,10 +2491,18 @@ void CemuleApp::ResetStandByIdleTimer()
 	}
 }
 
+bool CemuleApp::IsXPThemeActive() const
+{
+	// TRUE: If an XP style (and only an XP style) is active
+	return theApp.m_ullComCtrlVer < MAKEDLLVERULL(6,16,0,0) && g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed();
+}
+
 bool CemuleApp::IsVistaThemeActive() const
 {
+	// TRUE: If a Vista (or better) style is active
 	return theApp.m_ullComCtrlVer >= MAKEDLLVERULL(6,16,0,0) && g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed();
 }
+
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
 void CemuleApp::AddIncomingFolderIcon(){
 	CString desktopFile, exePath;

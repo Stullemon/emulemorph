@@ -463,7 +463,8 @@ void EditTextFloatFormat(CDataExchange* pDX, int nIDC, HTREEITEM hItem, void* pD
 	else
 	{
 		TCHAR szBuffer[400];
-		_stprintf(szBuffer, _T("%.*g"), nSizeGcvt, value);
+		_sntprintf(szBuffer, _countof(szBuffer), _T("%.*g"), nSizeGcvt, value);
+		szBuffer[_countof(szBuffer) - 1] = _T('\0');
 		pCtrlTreeOptions->SetEditText(hItem, szBuffer);
 	}
 }
@@ -496,7 +497,8 @@ void EditTextWithFormat(CDataExchange* pDX, int nIDC, HTREEITEM hItem, LPCTSTR l
 	else
 	{
 		TCHAR szT[64];
-		_vstprintf(szT, lpszFormat, pData);
+		_vsntprintf(szT, _countof(szT), lpszFormat, pData);
+		szT[_countof(szT) - 1] = _T('\0');
 			// does not support floating point numbers - see dlgfloat.cpp
 		pCtrlTreeOptions->SetEditText(hItem, szT);
 	}

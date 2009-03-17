@@ -104,6 +104,7 @@ CString CToolBarCtrlX::GetBtnText(int nID)
 	tbbi.pszText = szString;
 	tbbi.cchText = _countof(szString);
 	GetButtonInfo(nID, &tbbi);
+	szString[_countof(szString) - 1] = _T('\0');
 	return szString;
 }
 

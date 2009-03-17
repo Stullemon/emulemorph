@@ -23,9 +23,18 @@ bool IsValidEd2kStringA(LPCSTR psz);
 
 __inline bool NeedUTF8String(LPCWSTR pwsz)
 {
+	// This function is used for determining whether it is valid to convert an
+	// Unicode string into an MBCS string (e.g. for local storage in *.met
+	// files) without loosing any characters - or in other words whether a
+	// string conversion from Unicode->MBCS->Unicode will lead to the same
+	// result again. With certain code pages (e.g. 1251 - Cyrillic) some
+	// characters from within the range 0x80-0xFF are converted to ASCII
+	// characters! Thus to safely evaluate whether a string can get stored with
+	// MBCS without loosing any characters due to the conversion, the valid
+	// character range must be 0x00-0x7F.
 	while (*pwsz != L'\0')
 	{
-		if (*pwsz >= 0x100U)
+		if (*pwsz > 0x007f/*ATL_ASCII*/)	// VS2008: ATL_ASCII(0x007f) is no longer defined
 			return true;
 		pwsz++;
 	}

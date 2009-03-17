@@ -438,6 +438,7 @@ public:
 	CString		   m_sEditText;
 	// End emulEspaña
 
+
 	//Methods
 	CTreeOptionsItemData() 
 	{
@@ -608,7 +609,7 @@ protected:
 	afx_msg void OnKeyDown( UINT nChar, UINT nRepCnt, UINT nFlags );
 	afx_msg void OnKillFocus(CWnd* pNewWnd);
 	//}}AFX_MSG
-	afx_msg BOOL OnClick(NMHDR* pNMHDR, LRESULT* pResult);
+	afx_msg BOOL OnNmClick(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnSelchanged(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnDeleteItem(NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg BOOL OnMouseWheel(UINT nFlags, short zDelta, CPoint pt);

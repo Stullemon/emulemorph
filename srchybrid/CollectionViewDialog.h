@@ -15,7 +15,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
-#include "afxcmn.h"
 #include "CollectionListCtrl.h"
 #include "ResizableLib\ResizableDialog.h"
 
@@ -53,7 +52,7 @@ protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnNMDblClkCollectionList(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnBnClickedViewCollection();
 	afx_msg void OnBnClickedOk();
+	afx_msg void OnBnClickedViewCollection();
+	afx_msg void OnNmDblClkCollectionList(NMHDR *pNMHDR, LRESULT *pResult);
 };

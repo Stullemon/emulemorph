@@ -29,37 +29,36 @@ public:
 	virtual ~CQueueListCtrl();
 
 	void	Init();
-	void	AddClient(/*const*/ CUpDownClient* client, bool resetclient = true);
-	void	RemoveClient(const CUpDownClient* client);
-	void	RefreshClient(const CUpDownClient* client);
-	void	Hide() {ShowWindow(SW_HIDE);}
-	void	Visable() {ShowWindow(SW_SHOW);}
+	void	AddClient(/*const*/ CUpDownClient *client, bool resetclient = true);
+	void	RemoveClient(const CUpDownClient *client);
+	void	RefreshClient(const CUpDownClient *client);
+	void	Hide() { ShowWindow(SW_HIDE); }
+	void	Show() { ShowWindow(SW_SHOW); }
 	void	Localize();
 	void	ShowSelectedUserDetails();
 	void	ShowQueueClients();
 
 protected:
-	void SetAllIcons();
-	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+	CImageList m_ImageList;
+	UINT_PTR m_hTimer;
 
-	virtual BOOL OnCommand(WPARAM wParam,LPARAM lParam );
+	void SetAllIcons();
+	void GetItemDisplayText(const CUpDownClient *pClient, int iSubItem, LPTSTR pszText, int cchTextMax);
+	static int CALLBACK SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort);
+	static void CALLBACK QueueUpdateTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
+
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 
 	DECLARE_MESSAGE_MAP()
-	afx_msg void OnSysColorChange();
-	afx_msg	void OnColumnClick( NMHDR* pNMHDR, LRESULT* pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
-	afx_msg void OnNMDblclk(NMHDR *pNMHDR, LRESULT *pResult);
-	afx_msg void OnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnNmDblClk(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnSysColorChange();
 
 private:
-	CImageList imagelist;
-
 	// Mighty Knife: Community visualization
 	CImageList m_overlayimages;
 	// [end] Mighty Knife
-
-	// Barry - Refresh the queue every 10 seconds
-	UINT_PTR m_hTimer;
-	static void CALLBACK QueueUpdateTimer(HWND hwnd, UINT uiMsg, UINT idEvent, DWORD dwTime);
 };

@@ -25,7 +25,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -39,11 +39,11 @@ CServer::CServer(const ServerMet_Struct* in_data)
 	users = 0;
 	m_uPreference = 0;
 	ping = 0;
-	failedcount = 0; 
+	failedcount = 0;
 	lastpinged = 0;
 	lastpingedtime = 0;
 	staticservermember = false;
-	maxusers=0;
+	maxusers = 0;
 	softfiles = 0;
 	hardfiles = 0;
 	lastdescpingedcout = 0;
@@ -63,11 +63,10 @@ CServer::CServer(const ServerMet_Struct* in_data)
 
 CServer::CServer(uint16 in_port, LPCTSTR i_addr)
 {
-	USES_CONVERSION;
 	port = in_port;
 	realport = 0;//Morph - added by AndCycle, aux Ports, by lugdunummaster
-	
-	if ((ip = inet_addr(T2CA(i_addr))) == INADDR_NONE && _tcscmp(i_addr, _T("255.255.255.255")) != 0){
+
+	if ((ip = inet_addr(CT2CA(i_addr))) == INADDR_NONE && _tcscmp(i_addr, _T("255.255.255.255")) != 0){
 		m_strDynIP = i_addr;
 		ip = 0;
 	}
@@ -76,11 +75,11 @@ CServer::CServer(uint16 in_port, LPCTSTR i_addr)
 	users = 0;
 	m_uPreference = 0;
 	ping = 0;
-	failedcount = 0; 
+	failedcount = 0;
 	lastpinged = 0;
 	lastpingedtime = 0;
 	staticservermember = false;
-	maxusers=0;
+	maxusers = 0;
 	softfiles = 0;
 	hardfiles = 0;
 	lastdescpingedcout = 0;
@@ -102,14 +101,14 @@ CServer::CServer(const CServer* pOld)
 {
 	port = pOld->port;
 	ip = pOld->ip; 
-	staticservermember=pOld->IsStaticMember();
+	staticservermember = pOld->IsStaticMember();
 	_tcscpy(ipfull, pOld->ipfull);
 	files = pOld->files;
 	users = pOld->users;
 	realport = pOld->realport;//Morph - added by AndCycle, aux Ports, by lugdunummaster
 	m_uPreference = pOld->m_uPreference;
 	ping = pOld->ping;
-	failedcount = pOld->failedcount; 
+	failedcount = pOld->failedcount;
 	lastpinged = pOld->lastpinged;
 	lastpingedtime = pOld->lastpingedtime;
 	maxusers = pOld->maxusers;
@@ -141,7 +140,7 @@ CServer::~CServer()
 bool CServer::AddTagFromFile(CFileDataIO* servermet)
 {
 	CTag* tag = new CTag(servermet, false);
-	switch(tag->GetNameID()){		
+	switch (tag->GetNameID()) {
 	case ST_SERVERNAME:
 		ASSERT( tag->IsStr() );
 		if (tag->IsStr()){
@@ -328,8 +327,9 @@ uint32 CServer::GetServerKeyUDP(bool bForce) const{
 }
 
 void CServer::SetServerKeyUDP(uint32 dwServerKeyUDP){
+	// MORPH lh require obfuscated server connection  modified
 	/* old code:
-   ASSERT( (theApp.GetPublicIP() != 0) || dwServerKeyUDP == 0 );	 // MORPH lh require obfuscated server connection  modified
+	ASSERT( theApp.GetPublicIP() != 0 || dwServerKeyUDP == 0 );
    */
    // we need a server key for the first connect BEFORE we gat a valid ip
    // optimization: determine ip in a different way (upnp or adapter)

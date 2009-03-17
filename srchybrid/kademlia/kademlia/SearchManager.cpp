@@ -51,9 +51,9 @@ there client on the eMule forum..
 static char THIS_FILE[] = __FILE__;
 #endif
 
-LPCSTR _aszInvKadKeywordCharsA = INV_KAD_KEYWORD_CHARS;
-LPCTSTR _aszInvKadKeywordChars = _T(INV_KAD_KEYWORD_CHARS);
-LPCWSTR _awszInvKadKeywordChars = L" ()[]{}<>,._-!?:;\\/";
+LPCSTR g_aszInvKadKeywordCharsA = INV_KAD_KEYWORD_CHARS;
+LPCTSTR g_aszInvKadKeywordChars = _T(INV_KAD_KEYWORD_CHARS);
+LPCWSTR g_awszInvKadKeywordChars = L" ()[]{}<>,._-!?:;\\/";
 
 using namespace Kademlia;
 
@@ -118,7 +118,7 @@ bool CSearchManager::StartSearch(CSearch* pSearch)
 	return true;
 }
 
-CSearch* CSearchManager::PrepareFindKeywords(bool bUnicode, LPCTSTR szKeyword, UINT uSearchTermsSize, LPBYTE pucSearchTermsData)
+CSearch* CSearchManager::PrepareFindKeywords(LPCTSTR szKeyword, UINT uSearchTermsSize, LPBYTE pucSearchTermsData)
 {
 	// Create a keyword search object.
 	CSearch *pSearch = new CSearch;
@@ -136,16 +136,8 @@ CSearch* CSearchManager::PrepareFindKeywords(bool bUnicode, LPCTSTR szKeyword, U
 		}
 
 		// Get the targetID based on the primary keyword.
-		CStringW wstrKeyword = pSearch->m_listWords.front();
-		if (bUnicode)
-			KadGetKeywordHash(wstrKeyword, &pSearch->m_uTarget);
-		else
-		{
-			// backward compatibility: use local ACP encoding
-			// TODO: to be removed in some months (when majority of nodes are Unicode compatible)
-			CStringA strA(wstrKeyword);
-			KadGetKeywordHash(strA, &pSearch->m_uTarget);
-		}
+		CKadTagValueString wstrKeyword = pSearch->m_listWords.front();
+		KadGetKeywordHash(wstrKeyword, &pSearch->m_uTarget);
 
 		// Verify that we are not already searching for this target.
 		if (AlreadySearchingFor(pSearch->m_uTarget))
@@ -157,6 +149,7 @@ CSearch* CSearchManager::PrepareFindKeywords(bool bUnicode, LPCTSTR szKeyword, U
 		}
 
 		pSearch->SetSearchTermData( uSearchTermsSize, pucSearchTermsData );
+		pSearch->SetGUIName(szKeyword);
 		// Inc our searchID
 		pSearch->m_uSearchID = ++m_uNextID;
 		// Insert search into map.
@@ -283,10 +276,10 @@ void CSearchManager::GetWords(LPCTSTR sz, WordList *plistWords)
 	LPCTSTR szS = sz;
 	size_t uChars = 0;
 	size_t uBytes = 0;
-	CStringW sWord;
+	CKadTagValueString sWord;
 	while (_tcslen(szS) > 0)
 	{
-		uChars = _tcscspn(szS, _aszInvKadKeywordChars);
+		uChars = _tcscspn(szS, g_aszInvKadKeywordChars);
 		sWord = szS;
 		sWord.Truncate(uChars);
 		// TODO: We'd need a safe way to determine if a sequence which contains only 3 chars is a real word.
@@ -299,8 +292,7 @@ void CSearchManager::GetWords(LPCTSTR sz, WordList *plistWords)
 		if (uBytes >= 3)
 		{
 			KadTagStrMakeLower(sWord);
-			plistWords->remove
-			(sWord);
+			plistWords->remove(sWord);
 			plistWords->push_back(sWord);
 		}
 		szS += uChars;

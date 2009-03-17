@@ -8,7 +8,7 @@
 //
 //This program is distributed in the hope that it will be useful,
 //but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 //GNU General Public License for more details.
 //
 //You should have received a copy of the GNU General Public License
@@ -17,7 +17,7 @@
 #pragma once
 #include "BarShader.h"
 #include "StatisticFile.h"
-#include "AbstractFile.h"
+#include "ShareableFile.h"
 #include <list>
 
 class CxImage;
@@ -30,9 +30,8 @@ class CCollection;
 class CSafeMemFile;	// SLUGFILLER: hideOS
 
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
-enum EFileType;
 
-class CKnownFile : public CAbstractFile
+class CKnownFile : public CShareableFile
 {
 	DECLARE_DYNAMIC(CKnownFile)
 	friend class CImportPartsFileThread; //MORPH - Added by SiRoB, ImportParts
@@ -41,59 +40,50 @@ public:
 	virtual ~CKnownFile();
 
 	virtual void SetFileName(LPCTSTR pszFileName, bool bReplaceInvalidFileSystemChars = false, bool bRemoveControlChars = false); // 'bReplaceInvalidFileSystemChars' is set to 'false' for backward compatibility!
-
-	const CString& GetPath() const { return m_strDirectory; }
-	void SetPath(LPCTSTR path);
-
-	const CString& GetFilePath() const { return m_strFilePath; }
-	void SetFilePath(LPCTSTR pszFilePath);
-
-	// SLUGFILLER: mergeKnown, for TAHO, .met file control
-	void	SetLastSeen()	{ m_dwLastSeen = time(NULL); }
-	time_t	GetLastSeen()	{ return m_dwLastSeen; }
-	// SLUGFILLER: mergeKnown, for TAHO, .met file control
-
-	bool CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam); // create date, hashset and tags from a file
-	bool LoadFromFile(CFileDataIO* file);	//load date, hashset and tags from a .met file
+	
+	bool	CreateFromFile(LPCTSTR directory, LPCTSTR filename, LPVOID pvProgressParam); // create date, hashset and tags from a file
+	bool	LoadFromFile(CFileDataIO* file);	//load date, hashset and tags from a .met file
 	bool	WriteToFile(CFileDataIO* file);
 	//MORPH START - Added by SiRoB, Import Parts [SR13]
 	bool	SR13_ImportParts();
 	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 	bool	CreateAICHHashSetOnly();
 
-	EFileType GetVerifiedFileType() { return m_verifiedFileType; }
-	void	  SetVerifiedFileType(EFileType in) { m_verifiedFileType=in; }
-
 	// last file modification time in (DST corrected, if NTFS) real UTC format
 	// NOTE: this value can *not* be compared with NT's version of the UTC time
-	CTime	GetUtcCFileDate() const { return CTime(m_tUtcLastModified); }
-	time_t	GetUtcFileDate() const { return m_tUtcLastModified; }
+	CTime	GetUtcCFileDate() const										{ return CTime(m_tUtcLastModified); }
+	time_t	GetUtcFileDate() const										{ return m_tUtcLastModified; }
 
-	virtual void SetFileSize(EMFileSize nFileSize);
+	// Did we not see this file for a long time so that some information should be purged?
+	bool	ShouldPartiallyPurgeFile() const;
+	bool	ShouldCompletlyPurgeFile() const; //EastShare - Added by TAHO, .met control
+	void	SetLastSeen()												{ m_timeLastSeen = time(NULL); }
+
+	virtual void	SetFileSize(EMFileSize nFileSize);
 
 	// local available part hashs
 	UINT	GetHashCount() const { return hashlist.GetCount(); }
 	uchar*	GetPartHash(UINT part) const;
-	const CArray<uchar*, uchar*>& GetHashset() const { return hashlist; }
+	const CArray<uchar*, uchar*>& GetHashset() const					{ return hashlist; }
 	bool	SetHashset(const CArray<uchar*, uchar*>& aHashset);
 
 	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
 	/*
 	// nr. of part hashs according the file size wrt ED2K protocol
-	uint16	GetED2KPartHashCount() const { return m_iED2KPartHashCount; }
+	uint16	GetED2KPartHashCount() const								{ return m_iED2KPartHashCount; }
 	*/
 
 	// nr. of 9MB parts (file data)
-	__inline uint16 GetPartCount() const { return m_iPartCount; }
+	__inline uint16 GetPartCount() const								{ return m_iPartCount; }
 
 	// nr. of 9MB parts according the file size wrt ED2K protocol (OP_FILESTATUS)
 	__inline uint16 GetED2KPartCount() const { return m_iED2KPartCount; }
 
 	// file upload priority
-	uint8	GetUpPriority(void) const { return m_iUpPriority; }
+	uint8	GetUpPriority(void) const									{ return m_iUpPriority; }
 	void	SetUpPriority(uint8 iNewUpPriority, bool bSave = true);
-	bool	IsAutoUpPriority(void) const { return m_bAutoUpPriority; }
-	void	SetAutoUpPriority(bool NewAutoUpPriority) { m_bAutoUpPriority = NewAutoUpPriority; }
+	bool	IsAutoUpPriority(void) const								{ return m_bAutoUpPriority; }
+	void	SetAutoUpPriority(bool NewAutoUpPriority)					{ m_bAutoUpPriority = NewAutoUpPriority; }
 	void	UpdateAutoUpPriority();
 
 	// This has lost it's meaning here.. This is the total clients we know that want this file..
@@ -136,7 +126,8 @@ public:
 	virtual Packet* CreateSrcInfoPacket(const CUpDownClient* forClient, uint8 byRequestedVersion, uint16 nRequestedOptions) const;
 	UINT	GetMetaDataVer() const { return m_uMetaDataVer; }
 	void	UpdateMetaDataTags();
-	void	RemoveMetaDataTags();
+	void	RemoveMetaDataTags(UINT uTagType = 0);
+	void	RemoveBrokenUnicodeMetaDataTags();
 
 	// preview
 	bool	IsMovie() const;
@@ -149,7 +140,7 @@ public:
 	void			SetAICHHashset(CAICHHashSet* val)				{m_pAICHHashSet = val;}
 
 	// Display / Info / Strings
-	CString			GetInfoSummary() const;
+	virtual CString	GetInfoSummary() const;
 	CString			GetUpPriorityDisplayString() const;
 
 
@@ -247,9 +238,8 @@ protected:
 	//MORPH START - Revisited , we only get static Client PartCount now
 	void	CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	//MORPH END   - Revisited , we only get static Client PartCount now
+
 	CArray<uchar*, uchar*>	hashlist;
-	CString					m_strDirectory;
-	CString					m_strFilePath;
 	CAICHHashSet*			m_pAICHHashSet;
 
 private:
@@ -266,8 +256,7 @@ private:
 	uint32	m_lastBuddyIP;
 	Kademlia::WordList wordlist;
 	UINT	m_uMetaDataVer;
-	EFileType m_verifiedFileType;
-	uint32	m_dwLastSeen;	// SLUGFILLER: mergeKnown, for TAHO, .met file control
+	time_t	m_timeLastSeen; // we only "see" files when they are in a shared directory
 
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	bool	InChangedSharedStatusBar;

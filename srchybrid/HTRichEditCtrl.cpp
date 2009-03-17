@@ -84,7 +84,7 @@ void CHTRichEditCtrl::Init(LPCTSTR pszTitle, LPCTSTR pszSkinKey)
 	VERIFY( SendMessage(EM_SETUNDOLIMIT, 0, 0) == 0 );
 	int iMaxLogBuff = thePrefs.GetMaxLogBuff();
 	/* morph no win95 vs2008
-	if (afxIsWin95)
+	if (afxIsWin95())
 		LimitText(iMaxLogBuff > 0xFFFF ? 0xFFFF : iMaxLogBuff);
 	else
 	*/ // end vs2008
@@ -346,7 +346,7 @@ void CHTRichEditCtrl::ScrollToLastLine(bool bForceLastLineAtBottom)
 	// WM_VSCROLL does not work correctly under Win98 (or older version of comctl.dll)
 	SendMessage(WM_VSCROLL, SB_BOTTOM);
 	/* no win95 vs2008
-	if (afxIsWin95)
+	if (afxIsWin95())
 	{
 		// older version of comctl.dll seem to need this to properly update the display
 		int iPos = GetScrollPos(SB_VERT);
@@ -361,7 +361,7 @@ void CHTRichEditCtrl::ScrollToFirstLine()
 	// WM_VSCROLL does not work correctly under Win98 (or older version of comctl.dll)
 	SendMessage(WM_VSCROLL, SB_TOP);
 	/* morph no win98 vs2008
-	if (afxIsWin95)
+	if (afxIsWin95())
 	{
 		// older version of comctl.dll seem to need this to properly update the display
 		int iPos = GetScrollPos(SB_VERT);
@@ -745,7 +745,7 @@ static const struct
 {
 	LPCTSTR pszScheme;
 	int iLen;
-} _apszSchemes[] =
+} s_apszSchemes[] =
 {
     { _T("ed2k://"),  7 },
     { _T("http://"),  7 },
@@ -763,9 +763,9 @@ void CHTRichEditCtrl::AppendText(const CString& sText)
 	while (*psz != _T('\0'))
 	{
 		bool bFoundScheme = false;
-		for (int i = 0; i < _countof(_apszSchemes); i++)
+		for (int i = 0; i < _countof(s_apszSchemes); i++)
 		{
-			if (_tcsncmp(psz, _apszSchemes[i].pszScheme, _apszSchemes[i].iLen) == 0)
+			if (_tcsncmp(psz, s_apszSchemes[i].pszScheme, s_apszSchemes[i].iLen) == 0)
 			{
 				// output everything before the URL
 				if (psz - pszStart > 0){
@@ -830,8 +830,8 @@ BOOL CHTRichEditCtrl::OnEnLink(NMHDR *pNMHDR, LRESULT *pResult)
 
 		// check if that "URL" has a valid URL scheme. if it does not have, pass that notification up to the
 		// parent window which may interpret that "URL" in some other way.
-		for (int i = 0; i < _countof(_apszSchemes); i++){
-			if (_tcsncmp(strUrl, _apszSchemes[i].pszScheme, _apszSchemes[i].iLen) == 0){
+		for (int i = 0; i < _countof(s_apszSchemes); i++){
+			if (_tcsncmp(strUrl, s_apszSchemes[i].pszScheme, s_apszSchemes[i].iLen) == 0){
 				ShellExecute(NULL, NULL, strUrl, NULL, NULL, SW_SHOWDEFAULT);
 				*pResult = 1;
 				bMsgHandled = TRUE; // do not route this message to any parent
@@ -1015,6 +1015,7 @@ BOOL CHTRichEditCtrl::OnSetCursor(CWnd* pWnd, UINT nHitTest, UINT message)
 	}
 	return CRichEditCtrl::OnSetCursor(pWnd, nHitTest, message);
 }
+
 
 class CBitmapDataObject : public CCmdTarget
 {

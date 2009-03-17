@@ -28,6 +28,11 @@
 #include "HttpDownloadDlg.h"//MORPH START added by Yun.SF3: Ipfilter.dat update
 #include "ZipFile.h"//MORPH - Added by SiRoB, ZIP File download decompress
 #include "GZipFile.h"//MORPH - Added by SiRoB, GZIP File download decompress
+//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+#include "PreferencesDlg.h"
+#include "PPgMorph2.h"
+//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+#include "RarFile.h" //MORPH - Added by Stulle, RAR File download decompress [official]
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -35,6 +40,7 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+bool GetMimeType(LPCTSTR pszFilePath, CString& rstrMimeType); //MORPH - Added by Stulle, RAR File download decompress [official]
 
 #define	DFLT_FILTER_LEVEL	100 // default filter level if non specified
 
@@ -73,9 +79,15 @@ CString CIPFilter::GetDefaultFilePath() const
 int CIPFilter::LoadFromDefaultFile(bool bShowResponse)
 {
 	RemoveAllIPFilters();
-	// ==> Static IP Filter - Stulle
+
+	//MORPH START - Added by Stulle, IP Filter White List [Stulle]
+	AddFromFileWhite(GetDefaultWhiteFilePath());
+	//MORPH END   - Added by Stulle, IP Filter White List [Stulle]
+
+	//MORPH START - Added by leuk_he, Static  IP Filter [Stulle]
 	AddFromFile2(GetDefaultStaticFilePath());
-	// <== Static IP Filter - Stulle
+	//MORPH END   - Added by leuk_he, Static  IP Filter [Stulle]
+
 	return AddFromFile(GetDefaultFilePath(), bShowResponse);
 }
 
@@ -424,6 +436,11 @@ void CIPFilter::RemoveAllIPFilters()
 	for (int i = 0; i < m_iplist.GetCount(); i++)
 		delete m_iplist[i];
 	m_iplist.RemoveAll();
+	//MORPH START - Added by Stulle, IP Filter White List [Stulle]
+	for (int i = 0; i < m_iplist_White.GetCount(); i++)
+		delete m_iplist_White[i];
+	m_iplist_White.RemoveAll();
+	//MORPH END   - Added by Stulle, IP Filter White List [Stulle]
 	m_pLastHit = NULL;
 }
 
@@ -462,6 +479,21 @@ bool CIPFilter::IsFiltered(uint32 ip, UINT level) /*const*/
 	//	*)	use a dumb plain array for storing the IP range structures. this will give more cach hits when processing
 	//		the list. but(!) this would require to also use a dumb SIPFilter structure (don't use data items with ctors).
 	//		otherwise the creation of the array would be rather slow.
+
+	//MORPH START - Added by Stulle, IP Filter White List [Stulle]
+	if(m_iplist_White.GetCount() > 0)
+	{
+		SIPFilter** ppFound_White = (SIPFilter**)bsearch(&ip, m_iplist_White.GetData(), m_iplist_White.GetCount(), sizeof(m_iplist_White[0]), CmpSIPFilterByAddr);
+		if (ppFound_White && (*ppFound_White)->level < level)
+		{
+			(*ppFound_White)->hits++;
+			if(thePrefs.GetVerbose() && thePrefs.GetLogFilteredIPs())
+				AddDebugLogLine(false, _T("Prevented filtering IP %s in range: %s - %s Description: %s Hits: %u"),ipstr_rev(ip),ipstr_rev((*ppFound_White)->start),ipstr_rev((*ppFound_White)->end),CString((*ppFound_White)->desc),(*ppFound_White)->hits);
+			return false;
+		}
+	}
+	//MORPH END   - Added by Stulle, IP Filter White List [Stulle]
+
 	SIPFilter** ppFound = (SIPFilter**)bsearch(&ip, m_iplist.GetData(), m_iplist.GetCount(), sizeof(m_iplist[0]), CmpSIPFilterByAddr);
 	if (ppFound && (*ppFound)->level < level)
 	{
@@ -498,7 +530,13 @@ bool CIPFilter::RemoveIPFilter(const SIPFilter* pFilter)
 }
 
 //MORPH START added by Yun.SF3: Ipfilter.dat update
+
+//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+/*
 void CIPFilter::UpdateIPFilterURL()
+*/
+void CIPFilter::UpdateIPFilterURL(uint32 uNewVersion)
+//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 {
 	CString sbuffer;
 	CString strURL = thePrefs.GetUpdateURLIPFilter();
@@ -514,15 +552,30 @@ void CIPFilter::UpdateIPFilterURL()
 		memcpy(&SysTime, thePrefs.GetIPfilterVersion(), sizeof(SYSTEMTIME));
 	else
 		memset(&SysTime, 0, sizeof(SYSTEMTIME));
-	dlgDownload.m_pLastModifiedTime = &SysTime;
+	//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	if(thePrefs.IsIPFilterViaDynDNS())
+		dlgDownload.m_pLastModifiedTime = NULL;
+	else
+	//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+		dlgDownload.m_pLastModifiedTime = &SysTime;
 
 	if (dlgDownload.DoModal() != IDOK)
 	{
 		LogError(LOG_STATUSBAR, GetResString(IDS_DWLIPFILTERFAILED));
 		return;
 	}
+	//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	/*
 	if (dlgDownload.m_pLastModifiedTime == NULL)
+	*/
+	if (thePrefs.IsIPFilterViaDynDNS() == false && dlgDownload.m_pLastModifiedTime == NULL)
+	//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 		return;
+
+	//MORPH START - Added by Stulle, RAR File download decompress [official]
+	CString strMimeType;
+	GetMimeType(szTempFilePath, strMimeType);
+	//MORPH END   - Added by Stulle, RAR File download decompress [official]
 
 	bool bIsZipFile = false;
 	bool bUnzipped = false;
@@ -532,6 +585,10 @@ void CIPFilter::UpdateIPFilterURL()
 		bIsZipFile = true;
 
 		CZIPFile::File* zfile = zip.GetFile(_T("guarding.p2p"));
+		if (zfile == NULL)
+			zfile = zip.GetFile(_T("guardian.p2p"));
+		if(!zfile)                                       // << guarding.p2p not found in zip
+			zfile = zip.GetFile(_T("ipfilter.dat")); // << try ipfilter.dat
 		if (zfile)
 		{
 			CString strTempUnzipFilePath;
@@ -558,6 +615,58 @@ void CIPFilter::UpdateIPFilterURL()
 
 		zip.Close();
 	}
+	//MORPH START - Added by Stulle, RAR File download decompress [official]
+	else if (strMimeType.CompareNoCase(_T("application/x-rar-compressed")) == 0)
+	{
+		bIsZipFile = true;
+
+		CRARFile rar;
+		if (rar.Open(szTempFilePath))
+		{
+			CString strFile;
+				if (rar.GetNextFile(strFile)
+					&& (   strFile.CompareNoCase(_T("ipfilter.dat")) == 0 
+					    || strFile.CompareNoCase(_T("guarding.p2p")) == 0
+						|| strFile.CompareNoCase(_T("guardian.p2p")) == 0))
+			{
+				CString strTempUnzipFilePath;
+				_tmakepathlimit(strTempUnzipFilePath.GetBuffer(MAX_PATH), NULL, thePrefs.GetMuleDirectory(EMULE_CONFIGDIR), DFLT_IPFILTER_FILENAME, _T(".unzip.tmp"));
+				strTempUnzipFilePath.ReleaseBuffer();
+				if (rar.Extract(strTempUnzipFilePath))
+				{
+					rar.Close();
+
+					if (_tremove(theApp.ipfilter->GetDefaultFilePath()) != 0)
+						TRACE(_T("*** Error: Failed to remove default IP filter file \"%s\" - %hs\n"), theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
+					if (_trename(strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath()) != 0)
+						TRACE(_T("*** Error: Failed to rename uncompressed IP filter file \"%s\" to default IP filter file \"%s\" - %hs\n"), strTempUnzipFilePath, theApp.ipfilter->GetDefaultFilePath(), strerror(errno));
+					if (_tremove(szTempFilePath) != 0)
+						TRACE(_T("*** Error: Failed to remove temporary IP filter file \"%s\" - %hs\n"), szTempFilePath, strerror(errno));
+					bUnzipped = true;
+				}
+				else
+				{
+					CString strError;
+					strError.Format(_T("Failed to extract IP filter file from RAR file \"%s\"."), szTempFilePath);
+					AfxMessageBox(strError, MB_ICONERROR);
+				}
+			}
+			else
+			{
+				CString strError;
+				strError.Format(_T("Failed to find IP filter file \"guarding.p2p\" or \"ipfilter.dat\" in RAR file \"%s\"."), szTempFilePath);
+				AfxMessageBox(strError, MB_ICONERROR);
+			}
+			rar.Close();
+		}
+		else
+		{
+			CString strError;
+			strError.Format(_T("Failed to open file \"%s\".\r\n\r\nInvalid file format?\r\n\r\nDownload latest version of UNRAR.DLL from http://www.rarlab.com and copy UNRAR.DLL into eMule installation folder."), strURL);
+			AfxMessageBox(strError, MB_ICONERROR);
+		}
+	}
+	//MORPH END   - Added by Stulle, RAR File download decompress [official]
 	else
 	{
 		CGZIPFile gz;
@@ -600,7 +709,36 @@ void CIPFilter::UpdateIPFilterURL()
 	}
 
 	//Moved up to not retry if archive don't contain the awaited file
+	//MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	/*
 	memcpy(thePrefs.GetIPfilterVersion(), &SysTime, sizeof SysTime); //Commander - Added: Update version number
+	*/
+	thePrefs.m_uIPFilterVersionNum = uNewVersion;
+	if(thePrefs.IsIPFilterViaDynDNS())
+	{
+		memset(&SysTime, 0, sizeof(SYSTEMTIME));
+		if(theApp.emuledlg->preferenceswnd &&
+			theApp.emuledlg->preferenceswnd->m_wndMorph2 &&
+			theApp.emuledlg->preferenceswnd->m_wndMorph2.GetDlgItem(IDC_IPFILTER_VERSION) != NULL)
+		{
+			CString strBuffer = NULL;
+			strBuffer.Format(_T("v%u"), thePrefs.GetIPFilterVersionNum());
+			theApp.emuledlg->preferenceswnd->m_wndMorph2.GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(strBuffer);
+		}
+	}
+	else
+		memcpy(&thePrefs.m_IPfilterVersion, &SysTime, sizeof SysTime);
+	if(thePrefs.IsIPFilterViaDynDNS() == false &&
+		theApp.emuledlg->preferenceswnd &&
+		theApp.emuledlg->preferenceswnd->m_wndMorph2 &&
+		theApp.emuledlg->preferenceswnd->m_wndMorph2.GetDlgItem(IDC_IPFILTER_VERSION) != NULL)
+	{
+		TCHAR sTime[30];
+		sTime[0] = _T('\0');
+		SysTimeToStr(thePrefs.GetIPfilterVersion(), sTime);
+		theApp.emuledlg->preferenceswnd->m_wndMorph2.GetDlgItem(IDC_IPFILTER_VERSION)->SetWindowText(sTime);
+	}
+	//MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 	thePrefs.Save();
 
 	if(bIsZipFile && !bUnzipped){
@@ -611,7 +749,7 @@ void CIPFilter::UpdateIPFilterURL()
 }
 //MORPH END added by Yun.SF3: Ipfilter.dat update
 
-// ==> Static IP Filter - Stulle
+//MORPH START - Added by leuk_he, Static  IP Filter [Stulle]
 void CIPFilter::AddFromFile2(LPCTSTR pszFilePath)
 {
 	FILE* readFile = _tfsopen(pszFilePath, _T("r"), _SH_DENYWR);
@@ -732,4 +870,130 @@ CString CIPFilter::GetDefaultStaticFilePath() const
 {
 	return thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + DFLT_STATIC_IPFILTER_FILENAME;
 }
-// <== Static IP Filter - Stulle
+//MORPH END   - Added by leuk_he, Static  IP Filter [Stulle]
+
+//MORPH START - Added by Stulle, IP Filter White List [Stulle]
+void CIPFilter::AddFromFileWhite(LPCTSTR pszFilePath)
+{
+	FILE* readFile = _tfsopen(pszFilePath, _T("r"), _SH_DENYWR);
+	if (readFile != NULL)
+	{
+		_setmode(fileno(readFile), _O_TEXT);
+
+		int iLine = 0;
+		CStringA sbuffer;
+		CHAR szBuffer[1024];
+		while (fgets(szBuffer, _countof(szBuffer), readFile) != NULL)
+		{
+			iLine++;
+			sbuffer = szBuffer;
+			
+			// ignore comments & too short lines
+			if (sbuffer.GetAt(0) == '#' || sbuffer.GetAt(0) == '/' || sbuffer.GetLength() < 5) {
+				sbuffer.Trim(" \t\r\n");
+				DEBUG_ONLY( (!sbuffer.IsEmpty()) ? TRACE("IP filter (white): ignored line %u\n", iLine) : 0 );
+				continue;
+			}
+
+			bool bValid = false;
+			uint32 start = 0;
+			uint32 end = 0;
+			UINT level = 0;
+			CStringA desc;
+			bValid = ParseFilterLine1(sbuffer, start, end, level, desc);
+
+			// add a filter
+			if (bValid)
+			{
+				AddIPRangeWhite(start, end, level, desc);
+				DEBUG_ONLY( TRACE("Added White Entry - start: %u end: %u level: %u desc: %s\n", start, end, level, desc));
+			}
+			else
+			{
+				sbuffer.Trim(" \t\r\n");
+				DEBUG_ONLY( (!sbuffer.IsEmpty()) ? TRACE("IP filter (white list): ignored line %u\n", iLine) : 0 );
+			}
+		}
+		fclose(readFile);
+
+		// sort the IP filter list by IP range start addresses
+		qsort(m_iplist_White.GetData(), m_iplist_White.GetCount(), sizeof(m_iplist_White[0]), CmpSIPFilterByStartAddr);
+
+		// merge overlapping and adjacent filter ranges
+		if (m_iplist_White.GetCount() >= 2)
+		{
+			// On large IP-filter lists there is a noticeable performance problem when merging the list.
+			// The 'CIPFilterArray::RemoveAt' call is way too expensive to get called during the merging,
+			// thus we use temporary helper arrays to copy only the entries into the final list which
+			// are not get deleted.
+
+			// Reserve a byte array (its used as a boolean array actually) as large as the current 
+			// IP-filter list, so we can set a 'to delete' flag for each entry in the current IP-filter list.
+			char* pcToDelete = new char[m_iplist_White.GetCount()];
+			memset(pcToDelete, 0, m_iplist_White.GetCount());
+			int iNumToDelete = 0;
+
+			SIPFilter* pPrv = m_iplist_White[0];
+			int i = 1;
+			while (i < m_iplist_White.GetCount())
+			{
+				SIPFilter* pCur = m_iplist_White[i];
+				if (   pCur->start >= pPrv->start && pCur->start <= pPrv->end	 // overlapping
+					|| pCur->start == pPrv->end+1 && pCur->level == pPrv->level) // adjacent
+				{
+					if (pCur->start != pPrv->start || pCur->end != pPrv->end) // don't merge identical entries
+					{
+						//TODO: not yet handled, overlapping entries with different 'level'
+						if (pCur->end > pPrv->end)
+							pPrv->end = pCur->end;
+						//pPrv->desc += _T("; ") + pCur->desc; // this may create a very very long description string...
+					}
+					else
+					{
+						// if we have identical entries, use the lowest 'level'
+						if (pCur->level < pPrv->level)
+							pPrv->level = pCur->level;
+					}
+					delete pCur;
+					//m_iplist_White.RemoveAt(i);	// way too expensive (read above)
+					pcToDelete[i] = 1;		// mark this entry as 'to delete'
+					iNumToDelete++;
+					i++;
+					continue;
+				}
+				pPrv = pCur;
+				i++;
+			}
+
+			// Create new IP-filter list which contains only the entries from the original IP-filter list
+			// which are not to be deleted.
+			if (iNumToDelete > 0)
+			{
+				CIPFilterArray newList;
+				newList.SetSize(m_iplist_White.GetCount() - iNumToDelete);
+				int iNewListIndex = 0;
+				for (int i = 0; i < m_iplist_White.GetCount(); i++) {
+					if (!pcToDelete[i])
+						newList[iNewListIndex++] = m_iplist_White[i];
+				}
+				ASSERT( iNewListIndex == newList.GetSize() );
+
+				// Replace current list with new list. Dump, but still fast enough (only 1 memcpy)
+				m_iplist_White.RemoveAll();
+				m_iplist_White.Append(newList);
+				newList.RemoveAll();
+				m_bModified = true;
+			}
+			delete[] pcToDelete;
+		}
+	}
+	if(m_iplist_White.GetCount()>0)
+		AddLogLine(false, GetResString(IDS_IPFILTERWHITELOADED), m_iplist_White.GetCount());
+	return;
+}
+
+CString CIPFilter::GetDefaultWhiteFilePath() const
+{
+	return thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + DFLT_WHITE_IPFILTER_FILENAME;
+}
+//MORPH END   - Added by Stulle, IP Filter White List [Stulle]

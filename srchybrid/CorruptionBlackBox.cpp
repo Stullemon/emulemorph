@@ -341,8 +341,8 @@ void CCorruptionBlackBox::EvaluateData(uint16 nPart)
 		// parse all recorded data for this file to produce a statistic for the involved clients
 		
 		// first init arrays for the statistic
-		CArray<uint64, uint64> aDataCorrupt;
-		CArray<uint64, uint64> aDataVerified;
+		CArray<uint64> aDataCorrupt;
+		CArray<uint64> aDataVerified;
 		aDataCorrupt.SetSize(aGuiltyClients.GetCount());
 		aDataVerified.SetSize(aGuiltyClients.GetCount());
 		for (int j = 0; j < aGuiltyClients.GetCount(); j++)

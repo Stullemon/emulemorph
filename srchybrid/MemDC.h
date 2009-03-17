@@ -27,24 +27,25 @@
 class CMemDC : public CDC
 {
 private:
-    CBitmap    m_bitmap;        // Offscreen bitmap
-    CBitmap*   m_oldBitmap;		// bitmap originally found in CMemDC
-    CDC*       m_pDC;           // Saves CDC passed in constructor
-    CRect      m_rect;          // Rectangle of drawing area.
-    BOOL       m_bMemDC;        // TRUE if CDC really is a Memory DC.
-	bool	   m_bFlushed;
+	CBitmap		m_bitmap;		// Offscreen bitmap
+	CBitmap*	m_oldBitmap;	// bitmap originally found in CMemDC
+	CFont*		m_oldFont;
+	CDC*		m_pDC;			// Saves CDC passed in constructor
+	CRect		m_rect;			// Rectangle of drawing area.
+	bool		m_bMemDC;		// TRUE if CDC really is a Memory DC.
+	bool		m_bFlushed;
 
 public:
-	CMemDC(CDC* pDC, LPCRECT pRect = NULL)
+	CMemDC(CDC *pDC, LPCRECT pRect = NULL, COLORREF crBackground = CLR_DEFAULT)
 		: CDC()
 	{
-		ASSERT(pDC != NULL);
+		ASSERT( pDC != NULL );
 
-		// Some initialization
 		m_pDC = pDC;
 		m_oldBitmap = NULL;
 		m_bMemDC = !pDC->IsPrinting();
 		m_bFlushed = false;
+		m_oldFont = NULL;
 
 		// Get the rectangle to draw
 		if (pRect == NULL)
@@ -56,7 +57,6 @@ public:
 		{
 			// Create a Memory DC
 			CreateCompatibleDC(pDC);
-			//pDC->LPtoDP(&m_rect);	// what is this needed for= -- we can't use that for RTL DCs!
 
 			VERIFY( m_bitmap.CreateCompatibleBitmap(pDC, m_rect.Width(), m_rect.Height()) );
 			m_oldBitmap = SelectObject(&m_bitmap);
@@ -64,24 +64,41 @@ public:
 			SetMapMode(pDC->GetMapMode());
 			SetWindowExt(pDC->GetWindowExt());
 			SetViewportExt(pDC->GetViewportExt());
-            //pDC->DPtoLP(&m_rect);	// what is this needed for? -- we can't use that for RTL DCs!
+
+			// Apply the window origin of the memory DC to the source rectangle (which is supposed to
+			// refer to window origin of some other window). This way we can use the original window
+			// coordinates within the memory DC without the need to explicitly adjust them.
 			SetWindowOrg(m_rect.left, m_rect.top);
 		}
 		else
 		{
 			m_bPrinting = pDC->m_bPrinting;
-			m_hDC		 = pDC->m_hDC;
+			m_hDC		= pDC->m_hDC;
 			m_hAttribDC = pDC->m_hAttribDC;
 		}
 
-		// Fill background
-		FillSolidRect(m_rect, pDC->GetBkColor());
+		FillBackground(crBackground);
 	}
-    
-    ~CMemDC()      
-    {
+
+	~CMemDC()
+	{
 		Flush();
-    }
+		if (m_oldFont)
+			SelectObject(m_oldFont);
+	}
+
+	void FillBackground(COLORREF crBackground)
+	{
+		// Fill background - this function also sets the current background color!
+		if (crBackground != CLR_NONE)
+			FillSolidRect(m_rect, (crBackground == CLR_DEFAULT) ? m_pDC->GetBkColor() : crBackground);
+	}
+
+	void SetFont(CFont *pFont)
+	{
+		ASSERT( m_oldFont == NULL );
+		m_oldFont = SelectObject(pFont);
+	}
 
 	void Flush()
 	{
@@ -91,11 +108,11 @@ public:
 			if (m_bMemDC)
 			{
 				// Copy the offscreen bitmap onto the screen.
-				m_pDC->BitBlt(m_rect.left, m_rect.top, 
-							  m_rect.Width(), m_rect.Height(), this, 
-							  m_rect.left, m_rect.top, SRCCOPY);            
+				m_pDC->BitBlt(m_rect.left, m_rect.top,
+							  m_rect.Width(), m_rect.Height(), this,
+							  m_rect.left, m_rect.top, SRCCOPY);
 				
-				//Swap back the original bitmap.
+				// Swap back the original bitmap.
 				SelectObject(m_oldBitmap);
 			}
 			else
@@ -103,15 +120,15 @@ public:
 		}
 	}
 
-    // Allow usage as a pointer    
-    CMemDC* operator->() 
-    {
-        return this;
-    }       
- 
-    // Allow usage as a pointer    
-    operator CMemDC*() 
-    {
-        return this;
-    }
+	// Allow usage as a pointer
+	CMemDC* operator->()
+	{
+		return this;
+	}
+
+	// Allow usage as a pointer
+	operator CMemDC*()
+	{
+		return this;
+	}
 };

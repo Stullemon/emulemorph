@@ -49,7 +49,7 @@ typedef struct {
 
 class CFileDataIO;
 class CAbstractFile;
-
+struct SSearchTerm;
 
 class CSearchList
 {
@@ -75,11 +75,11 @@ public:
 	void	AddFileToDownloadByHash(const uchar* hash, int cat);
 	bool	AddToList(CSearchFile* toadd, bool bClientResponse = false, uint32 dwFromUDPServerIP = 0);
 	CSearchFile* GetSearchFileByHash(const uchar* hash) const;
-	void	KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* pfileID, LPCTSTR name, uint64 size, LPCTSTR type, UINT uKadPublishInfo, UINT numProperties, ...);
+	void	KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* pfileID, LPCTSTR name, uint64 size, LPCTSTR type, UINT uKadPublishInfo, SSearchTerm* pQueriedSearchTerm, UINT numProperties, ...);
 	bool	AddNotes(Kademlia::CEntry* entry, const uchar* hash);
 	void	SetNotesSearchStatus(const uchar* pFileHash, bool bSearchRunning);
-	void	SentUDPRequestNotification(uint32 nSearchID, uint32 dwServerIP);	
-	
+	void	SentUDPRequestNotification(uint32 nSearchID, uint32 dwServerIP);
+
 	void	StoreSearches();
 	void	LoadSearches();
 	
@@ -122,7 +122,7 @@ private:
 	CMap<uint32, uint32, bool, bool>		m_mapKnownSpamServerIPs;
 	CMap<uint32, uint32, bool, bool>		m_mapKnownSpamSourcesIPs;
 	CMap<CSKey,const CSKey&, bool, bool>	m_mapKnownSpamHashs;
-	CArray<uint64, uint64>					m_aui64KnownSpamSizes;
+	CArray<uint64>							m_aui64KnownSpamSizes;
 	CArray<uint32, uint32>					m_aCurED2KSentRequestsIPs;
 	CArray<uint32, uint32>					m_aCurED2KSentReceivedIPs;
 	bool									m_bSpamFilterLoaded;

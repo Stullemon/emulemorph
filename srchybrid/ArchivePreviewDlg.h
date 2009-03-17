@@ -41,13 +41,16 @@ public:
 	enum { IDD = IDD_ARCHPREV };
 
 protected:
-	CListCtrlX m_ContentList;
 	const CSimpleArray<CObject*>* m_paFiles;
-	bool m_bDataChanged;
 	archiveScannerThreadParams_s* m_activeTParams;
+
+	CListCtrlX	m_ContentList;
+	bool		m_bDataChanged;
+	int			m_StoredColWidth2, m_StoredColWidth5;
 
 	void Localize();
 	void UpdateArchiveDisplay(bool doscan);
+	int ShowISOResults(int ret, archiveScannerThreadParams_s* tp);
 	int ShowZipResults(int ret, archiveScannerThreadParams_s* tp);
 	int ShowRarResults(int ret, archiveScannerThreadParams_s* tp);
 	int ShowAceResults(int ret, archiveScannerThreadParams_s* tp);

@@ -38,11 +38,11 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
-#define KNOWN_MET_FILENAME	_T("known.met")
+#define KNOWN_MET_FILENAME		_T("known.met")
 #define CANCELLED_MET_FILENAME	_T("cancelled.met")
 
 #define CANCELLED_HEADER_OLD	MET_HEADER
@@ -179,9 +179,9 @@ bool CKnownFileList::LoadCancelledFiles(){
 		if (!bOldVersion){
 			byVersion = file.ReadUInt8();
 			if (byVersion > CANCELLED_VERSION){
-			file.Close();
-			return false;
-		}
+				file.Close();
+				return false;
+			}
 
 			m_dwCancelledFilesSeed = file.ReadUInt32();
 		}
@@ -251,23 +251,23 @@ void CKnownFileList::Save()
 			bool bContainsAnyLargeFiles = false;
 			file.WriteUInt32(nRecordsNumber);
 			POSITION pos = m_Files_map.GetStartPosition();
-			// SLUGFILLER: mergeKnown, for TAHO, .met file control
-			const time_t  dwExpired = time(NULL) - (thePrefs.GetKnownMetDays() == 0 ? 12960000 : thePrefs.GetKnownMetDays()*86400);	// Morph - modified by AndCycle, .met file control + vs2005
 			while( pos != NULL )
 			{
 				CKnownFile* pFile;
 				CCKey key;
 				m_Files_map.GetNextAssoc( pos, key, pFile );
 				if (!thePrefs.IsRememberingDownloadedFiles() && !theApp.sharedfiles->IsFilePtrInList(pFile)){
-						continue;
-					}
+					continue;
+				}
 				else{
+					// SLUGFILLER: mergeKnown, for TAHO, .met file control
 					if (theApp.sharedfiles->GetFileByID(pFile->GetFileHash()) == pFile)
 						pFile->SetLastSeen();
-					if (pFile->GetLastSeen() >= dwExpired) {
+					if (!pFile->ShouldCompletlyPurgeFile()){
+					// SLUGFILLER: mergeKnown, for TAHO, .met file control
 						pFile->WriteToFile(&file);
 						nRecordsNumber++;
-					}
+					} // SLUGFILLER: mergeKnown, for TAHO, .met file control
 					if (pFile->IsLargeFile())
 						bContainsAnyLargeFiles = true;
 				}
@@ -355,6 +355,7 @@ void CKnownFileList::Save()
 
 void CKnownFileList::Clear()
 {
+	m_mapKnownFilesByAICH.RemoveAll();
 	POSITION pos = m_Files_map.GetStartPosition();
 	while( pos != NULL )
 	{
@@ -385,14 +386,15 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 	CKnownFile* pFileInMap;
 	if (m_Files_map.Lookup(key, pFileInMap))
 	{
-		TRACE(_T("%hs: Already in known list:   %s \"%s\"\n"), __FUNCTION__, md4str(pFileInMap->GetFileHash()), pFileInMap->GetFileName());
-		TRACE(_T("%hs: Old entry replaced with: %s \"%s\"\n"), __FUNCTION__, md4str(toadd->GetFileHash()), toadd->GetFileName());
+		TRACE(_T("%hs: Already in known list:   %s %I64u \"%s\"\n"), __FUNCTION__, md4str(pFileInMap->GetFileHash()), pFileInMap->GetFileSize(), pFileInMap->GetFileName());
+		TRACE(_T("%hs: Old entry replaced with: %s %I64u \"%s\"\n"), __FUNCTION__, md4str(toadd->GetFileHash()), toadd->GetFileSize(), toadd->GetFileName());
 
 		// if we hash files which are already in known file list and add them later (when the hashing thread is finished),
 		// we can not delete any already available entry from known files list. that entry can already be used by the
 		// shared file list -> crash.
 
 		m_Files_map.RemoveKey(CCKey(pFileInMap->GetFileHash()));
+		m_mapKnownFilesByAICH.RemoveKey(pFileInMap->GetAICHHashset()->GetMasterHash());
 		//This can happen in a couple situations..
 		//File was renamed outside of eMule.. 
 		//A user decided to redownload a file he has downloaded and unshared..
@@ -428,8 +430,8 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 		//Maybe in the furture we can change the client to not just use Hash as a key throughout the entire client..
 		ASSERT( toadd->GetFileSize() == pFileInMap->GetFileSize() );
 		ASSERT( toadd != pFileInMap );
-		if( toadd->GetFileSize() == pFileInMap->GetFileSize() )
-			toadd->statistic.MergeFileStats( &pFileInMap->statistic );
+		if (toadd->GetFileSize() == pFileInMap->GetFileSize())
+			toadd->statistic.MergeFileStats(&pFileInMap->statistic);
 
 		ASSERT( theApp.sharedfiles==NULL || !theApp.sharedfiles->IsFilePtrInList(pFileInMap) );
 		ASSERT( theApp.downloadqueue==NULL || !theApp.downloadqueue->IsPartFile(pFileInMap) );
@@ -451,6 +453,8 @@ bool CKnownFileList::SafeAddKFile(CKnownFile* toadd)
 	if (bRemovedDuplicateSharedFile) {
 		theApp.sharedfiles->SafeAddKFile(toadd);
 	}
+	if (toadd->GetAICHHashset()->HasValidMasterHash())
+		m_mapKnownFilesByAICH.SetAt(toadd->GetAICHHashset()->GetMasterHash(), toadd);
 	return true;
 }
 
@@ -463,7 +467,7 @@ CKnownFile* CKnownFileList::FindKnownFile(LPCTSTR filename, uint32 date, uint64 
 		CCKey key;
 		m_Files_map.GetNextAssoc(pos, key, cur_file);
 		if (cur_file->GetUtcFileDate() == date && cur_file->GetFileSize() == size && !_tcscmp(filename, cur_file->GetFileName()))
-				return cur_file;
+			return cur_file;
 	}
 	return NULL;
 }
@@ -582,6 +586,34 @@ void CKnownFileList::CopyKnownFileMap(CMap<CCKey,const CCKey&,CKnownFile*,CKnown
 			Files_Map.SetAt(key, cur_file);
 		}
 	}
+}
+
+bool CKnownFileList::ShouldPurgeAICHHashset(const CAICHHash& rAICHHash) const
+{
+	const CKnownFile* pFile = NULL;
+	if (m_mapKnownFilesByAICH.Lookup(rAICHHash, pFile))
+	{
+		// EastShare START - Added by TAHO, .met file control
+		if (thePrefs.DoRemoveAichImmediatly())
+		{
+			if(!pFile->IsPartFile() && // this is neither a download
+				(theApp.sharedfiles && theApp.sharedfiles->GetFileByID(pFile->GetFileHash()) == NULL)) // and nor shared
+				return true; // so purge it immediatly
+		}
+		// EastShare END   - Added by TAHO, .met file control
+		if (!pFile->ShouldPartiallyPurgeFile())
+			return false;
+	}
+	else
+		ASSERT( false );
+	return true;
+}
+
+void CKnownFileList::AICHHashChanged(const CAICHHash* pOldAICHHash, const CAICHHash& rNewAICHHash, CKnownFile* pFile)
+{
+	if (pOldAICHHash != NULL)
+		m_mapKnownFilesByAICH.RemoveKey(*pOldAICHHash);
+	m_mapKnownFilesByAICH.SetAt(rNewAICHHash, pFile);
 }
 
 //MORPH START - Added, Downloaded History [Monki/Xman]

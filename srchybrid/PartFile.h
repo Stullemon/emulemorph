@@ -7,7 +7,7 @@
 //
 //This program is distributed in the hope that it will be useful,
 //but WITHOUT ANY WARRANTY; without even the implied warranty of
-//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	See the
 //GNU General Public License for more details.
 //
 //You should have received a copy of the GNU General Public License
@@ -42,8 +42,7 @@ enum EPartFileStatus{
 #define PR_VERYHIGH			3
 #define PR_AUTO				5 //UAP Hunter
 
-//#define BUFFER_SIZE_LIMIT	500000 // Max bytes before forcing a flush
-#define BUFFER_TIME_LIMIT	60000   // Max milliseconds before forcing a flush
+//#define BUFFER_SIZE_LIMIT 500000 // Max bytes before forcing a flush
 
 #define	PARTMET_BAK_EXT	_T(".bak")
 #define	PARTMET_TMP_EXT	_T(".backup")
@@ -57,6 +56,14 @@ enum EPartFileFormat{
 	PMT_NEWOLD,
 	PMT_SHAREAZA,
 	PMT_BADFORMAT	
+};
+
+enum EPartFileLoadResult{
+	PLR_LOADSUCCESS = 1,
+	PLR_CHECKSUCCESS = 2,
+	PLR_FAILED_METFILE_CORRUPT = -1,
+	PLR_FAILED_METFILE_NOACCESS = -2,
+	PLR_FAILED_OTHER   = 0
 };
 
 #define	FILE_COMPLETION_THREAD_FAILED	0x0000
@@ -177,10 +184,10 @@ public:
 	*/
 	uint32	Process(uint32 reducedownload, UINT icounter, uint32 friendReduceddownload,uint32 httpReduceddownload);
 	//MORPH END   - Changed by Stulle, No zz ratio for http traffic
-	uint8		LoadPartFile(LPCTSTR in_directory, LPCTSTR filename,bool getsizeonly=false); //filename = *.part.met
-	uint8	ImportShareazaTempfile(LPCTSTR in_directory,LPCTSTR in_filename , bool getsizeonly);
+	EPartFileLoadResult	LoadPartFile(LPCTSTR in_directory, LPCTSTR filename, EPartFileFormat* pOutCheckFileFormat = NULL); //filename = *.part.met
+	EPartFileLoadResult	ImportShareazaTempfile(LPCTSTR in_directory,LPCTSTR in_filename, EPartFileFormat* pOutCheckFileFormat = NULL);
 
-	bool	SavePartFile();
+	bool	SavePartFile(bool bDontOverrideBak = false);
 	void	PartFileHashFinished(CKnownFile* result);
 	bool	HashSinglePart(UINT partnumber); // true = ok , false = corrupted //MORPH - Flush Thread
 	// SLUGFILLER: SafeHash - replaced old handlers, full hash checker remains for file completion
@@ -518,7 +525,6 @@ private:
 	//Morph Start - added by AndCycle, ICS
     // enkeyDev: ICS
     CArray<uint16,uint16> m_SrcIncPartFrequency;
-    int     m_ics_filemode;
     // <--- enkeyDev: ICS
     //Morph End - added by AndCycle, ICS
 

@@ -11,13 +11,13 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-static HINSTANCE _hLangDLL = NULL;
+static HINSTANCE s_hLangDLL = NULL;
 
 CString GetResString(UINT uStringID, WORD wLanguageID)
 {
 	CString resString;
-	if (_hLangDLL)
-		(void)resString.LoadString(_hLangDLL, uStringID, wLanguageID);
+	if (s_hLangDLL)
+		(void)resString.LoadString(s_hLangDLL, uStringID, wLanguageID);
 	if (resString.IsEmpty())
 		(void)resString.LoadString(GetModuleHandle(NULL), uStringID, LANGID_EN_US);
 	return resString;
@@ -26,8 +26,8 @@ CString GetResString(UINT uStringID, WORD wLanguageID)
 CString GetResString(UINT uStringID)
 {
 	CString resString;
-	if (_hLangDLL)
-		resString.LoadString(_hLangDLL, uStringID);
+	if (s_hLangDLL)
+		resString.LoadString(s_hLangDLL, uStringID);
 	if (resString.IsEmpty())
 		resString.LoadString(GetModuleHandle(NULL), uStringID);
 	return resString;
@@ -87,7 +87,7 @@ struct SLanguage {
 // iso-2022-jp		 932	Japanese (JIS)
 // iso-2022-kr		 949	Korean (ISO)
 
-static SLanguage _aLanguages[] =
+static SLanguage s_aLanguages[] =
 {
 	{LANGID_AR_AE,	_T(""),				FALSE,	_T("ar_AE"),	1256,	_T("windows-1256")},	// Arabic (UAE)
 	{LANGID_BA_BA,	_T(""),				FALSE,	_T("ba_BA"),	1252,	_T("windows-1252")},	// Basque
@@ -100,7 +100,8 @@ static SLanguage _aLanguages[] =
 	{LANGID_EN_US,	_T("english"),		TRUE,	_T("en_US"),	1252,	_T("windows-1252")},	// English
 	{LANGID_ES_ES_T,_T("spanish"),		FALSE,	_T("es_ES_T"),	1252,	_T("windows-1252")},	// Spanish (Castilian)
 	{LANGID_ES_AS,  _T("spanish"),		FALSE,	_T("es_AS"),	1252,	_T("windows-1252")},	// Asturian
-	{LANGID_VA_ES,  _T(""),				FALSE,	_T("va_ES"),	1252,	_T("windows-1252")},	// Valencian
+	{LANGID_VA_ES,  _T(""),				FALSE,	_T("va_ES"),	1252,	_T("windows-1252")},	// Valencian AVL
+	{LANGID_VA_ES_RACV,  _T(""),				FALSE,	_T("va_ES_RACV"),	1252,	_T("windows-1252")},	// Valencian RACV
 	{LANGID_ET_EE,	_T(""),				FALSE,	_T("et_EE"),	1257,	_T("windows-1257")},	// Estonian
 	{LANGID_FA_IR,	_T("farsi"),		FALSE,	_T("fa_IR"),	1256,	_T("windows-1256")},	// Farsi
 	{LANGID_FI_FI,	_T("finnish"),		FALSE,	_T("fi_FI"),	1252,	_T("windows-1252")},	// Finnish
@@ -150,10 +151,10 @@ static void InitLanguages(const CString& rstrLangDir1, const CString& rstrLangDi
 		bEnd = !ff.FindNextFile();
 		if (ff.IsDirectory())
 			continue;
-		TCHAR szLandDLLFileName[MAX_PATH];
+		TCHAR szLandDLLFileName[_MAX_FNAME];
 		_tsplitpath(ff.GetFileName(), NULL, NULL, szLandDLLFileName, NULL);
 
-		SLanguage* pLangs = _aLanguages;
+		SLanguage* pLangs = s_aLanguages;
 		if (pLangs){
 			while (pLangs->lid){
 				if (_tcsicmp(pLangs->pszISOLocale, szLandDLLFileName) == 0){
@@ -175,15 +176,15 @@ static void InitLanguages(const CString& rstrLangDir1, const CString& rstrLangDi
 
 static void FreeLangDLL()
 {
-	if (_hLangDLL != NULL && _hLangDLL != GetModuleHandle(NULL)){
-		VERIFY( FreeLibrary(_hLangDLL) );
-		_hLangDLL = NULL;
+	if (s_hLangDLL != NULL && s_hLangDLL != GetModuleHandle(NULL)){
+		VERIFY( FreeLibrary(s_hLangDLL) );
+		s_hLangDLL = NULL;
 	}
 }
 
 void CPreferences::GetLanguages(CWordArray& aLanguageIDs)
 {
-	const SLanguage* pLang = _aLanguages;
+	const SLanguage* pLang = s_aLanguages;
 	while (pLang->lid){
 		//if (pLang->bSupported)
 		//show all languages, offer download if not supported ones later
@@ -231,7 +232,7 @@ static bool CheckLangDLLVersion(const CString& rstrLangDLL)
 
 static bool LoadLangLib(const CString& rstrLangDir1, const CString& rstrLangDir2, LANGID lid)
 {
-	const SLanguage* pLangs = _aLanguages;
+	const SLanguage* pLangs = s_aLanguages;
 	if (pLangs){
 		while (pLangs->lid){
 			if (pLangs->bSupported && pLangs->lid == lid){
@@ -239,7 +240,7 @@ static bool LoadLangLib(const CString& rstrLangDir1, const CString& rstrLangDir2
 
 				bool bLoadedLib = false;
 				if (pLangs->lid == LANGID_EN_US){
-					_hLangDLL = NULL;
+					s_hLangDLL = NULL;
 					bLoadedLib = true;
 				}
 				else{
@@ -247,8 +248,8 @@ static bool LoadLangLib(const CString& rstrLangDir1, const CString& rstrLangDir2
 					strLangDLL += pLangs->pszISOLocale;
 					strLangDLL += _T(".dll");
 					if (CheckLangDLLVersion(strLangDLL)){
-						_hLangDLL = LoadLibrary(strLangDLL);
-						if (_hLangDLL)
+						s_hLangDLL = LoadLibrary(strLangDLL);
+						if (s_hLangDLL)
 							bLoadedLib = true;
 					}
 					if (rstrLangDir1.CompareNoCase(rstrLangDir2) != 0){
@@ -256,8 +257,8 @@ static bool LoadLangLib(const CString& rstrLangDir1, const CString& rstrLangDir2
 						strLangDLL += pLangs->pszISOLocale;
 						strLangDLL += _T(".dll");
 						if (CheckLangDLLVersion(strLangDLL)){
-							_hLangDLL = LoadLibrary(strLangDLL);
-							if (_hLangDLL)
+							s_hLangDLL = LoadLibrary(strLangDLL);
+							if (s_hLangDLL)
 								bLoadedLib = true;
 						}
 					}
@@ -309,7 +310,7 @@ bool CPreferences::IsLanguageSupported(LANGID lidSelected, bool bUpdateBefore){
 	InitLanguages(GetMuleDirectory(EMULE_INSTLANGDIR), GetMuleDirectory(EMULE_ADDLANGDIR, false), bUpdateBefore);
 	if (lidSelected == LANGID_EN_US)
 		return true;
-	const SLanguage* pLang = _aLanguages;
+	const SLanguage* pLang = s_aLanguages;
 	for (;pLang->lid;pLang++){
 		if (pLang->lid == lidSelected && pLang->bSupported){
 			bool bResult = CheckLangDLLVersion(GetMuleDirectory(EMULE_INSTLANGDIR) + CString(pLang->pszISOLocale) + _T(".dll"));
@@ -320,7 +321,7 @@ bool CPreferences::IsLanguageSupported(LANGID lidSelected, bool bUpdateBefore){
 }
 
 CString CPreferences::GetLangDLLNameByID(LANGID lidSelected){
-	const SLanguage* pLang = _aLanguages;
+	const SLanguage* pLang = s_aLanguages;
 	for (;pLang->lid;pLang++){
 		if (pLang->lid == lidSelected)
 			return CString(pLang->pszISOLocale) + _T(".dll"); 
@@ -331,7 +332,7 @@ CString CPreferences::GetLangDLLNameByID(LANGID lidSelected){
 
 void CPreferences::SetRtlLocale(LCID lcid)
 {
-	const SLanguage* pLangs = _aLanguages;
+	const SLanguage* pLangs = s_aLanguages;
 	while (pLangs->lid)
 	{
 		if (pLangs->lid == LANGIDFROMLCID(lcid))
@@ -379,36 +380,6 @@ void CPreferences::InitThreadLocale()
 		// (Unicode->MBCS conversion may fail)
 		SetRtlLocale(lcid);
 	}
-	else if (theApp.GetProfileInt(_T("eMule"), _T("SetSystemACP"), 0) != 0)
-	{
-		LCID lcidSystem = GetSystemDefaultLCID();	// Installation, or altered by user in control panel (WinXP)
-		//LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
-
-		// get the ANSI code page which is to be used for all non-Unicode conversions.
-		LANGID lidSystem = LANGIDFROMLCID(lcidSystem);
-
-		// get user's sorting preferences
-		//UINT uSortIdUser = SORTIDFROMLCID(lcidUser);
-		//UINT uSortVerUser = SORTVERSIONFROMLCID(lcidUser);
-		// we can't use the same sorting paramters for 2 different Languages..
-		UINT uSortIdUser = SORT_DEFAULT;
-		UINT uSortVerUser = 0;
-
-		// create a thread locale which gives full backward compability for users which had run ANSI emule on 
-		// a system where the system's code page did not match the user's language..
-		LCID lcid = MAKESORTLCID(lidSystem, uSortIdUser, uSortVerUser);
-		LCID lcidThread = GetThreadLocale();
-		if (lcidThread != lcid)
-		{
-			TRACE("+++ Setting thread locale: 0x%08x\n", lcid);
-			SetThreadLocale(lcid);
-
-			// if we set the thread locale (see comments above) we also have to specify the proper
-			// code page for the C-RTL, otherwise we may not be able to store some strings as MBCS
-			// (Unicode->MBCS conversion may fail)
-			SetRtlLocale(lcid);
-		}
-	}
 }
 
 void InitThreadLocale()
@@ -437,69 +408,12 @@ CString GetCodePageNameForLocale(LCID lcid)
 	return strCodePage;
 }
 
-bool CheckThreadLocale()
-{
-	if (theApp.GetProfileInt(_T("eMule"), _T("SetLanguageACP"), 0) != 0)
-		return true;
-	int iSetSysACP = theApp.GetProfileInt(_T("eMule"), _T("SetSystemACP"), -1);
-	if (iSetSysACP != -1)
-		return true;
-	iSetSysACP = 0;
-
-	LCID lcidSystem = GetSystemDefaultLCID();	// Installation, or altered by user in control panel (WinXP)
-	//LCID lcidUser = GetUserDefaultLCID();		// Installation, or altered by user in control panel (WinXP)
-
-	// get the ANSI code page which is to be used for all non-Unicode conversions.
-	LANGID lidSystem = LANGIDFROMLCID(lcidSystem);
-
-	// get user's sorting preferences
-	//UINT uSortIdUser = SORTIDFROMLCID(lcidUser);
-	//UINT uSortVerUser = SORTVERSIONFROMLCID(lcidUser);
-	// we can't use the same sorting paramters for 2 different Languages..
-	UINT uSortIdUser = SORT_DEFAULT;
-	UINT uSortVerUser = 0;
-
-	// create a thread locale which gives full backward compability for users which had run ANSI emule on 
-	// a system where the system's code page did not match the user's language..
-	LCID lcidSys = MAKESORTLCID(lidSystem, uSortIdUser, uSortVerUser);
-	LCID lcidUsr = GetThreadLocale();
-	if (lcidUsr != lcidSys)
-	{
-		CString strUsrCP = GetCodePageNameForLocale(lcidUsr);
-		if (!strUsrCP.IsEmpty())
-			strUsrCP = _T(" \"") + strUsrCP + _T('\"');
-		
-		CString strSysCP = GetCodePageNameForLocale(lcidSys);
-		if (!strSysCP.IsEmpty())
-			strSysCP = _T(" \"") + strSysCP + _T('\"');
-
-		static const TCHAR szMsg[] =
-			_T("eMule has detected that your current code page%s is not the same as your system's code page%s. For converting non-Unicode data to Unicode, you need to specify which code page to use.\r\n")
-			_T("\r\n")
-			_T("If you want eMule to use your current code page for converting non-Unicode data, click 'Yes'. (If you are using eMule for the first time or if you don't care about this issue at all, choose this option. This is the recommended setting.)\r\n")
-			_T("\r\n")
-			_T("If you want eMule to use your system's code page for converting non-Unicode data, click 'No'. (This will give you more backward compatibility when reading older *.met files created with non-Unicode eMule versions.)\r\n")
-			_T("\r\n")
-			_T("If you want to cancel and create backup of all your configuration files or visit our forum to learn more about this issue, click 'Cancel'.\r\n")
-			;
-		CString strFullMsg;
-		strFullMsg.Format(szMsg, strUsrCP, strSysCP);
-		int iAnswer = AfxMessageBox(strFullMsg, MB_ICONSTOP | MB_YESNOCANCEL | MB_DEFBUTTON1);
-		if (iAnswer == IDCANCEL)
-			return false;
-		if (iAnswer == IDNO)
-			iSetSysACP = 1;
-	}
-	VERIFY( theApp.WriteProfileInt(_T("eMule"), _T("SetSystemACP"), iSetSysACP) );
-	return true;
-}
-
 CString CPreferences::GetHtmlCharset()
 {
 	ASSERT( m_wLanguageID != 0 );
 
 	LPCTSTR pszHtmlCharset = NULL;
-	const SLanguage* pLangs = _aLanguages;
+	const SLanguage* pLangs = s_aLanguages;
 	while (pLangs->lid)
 	{
 		if (pLangs->lid == m_wLanguageID)
