@@ -774,11 +774,10 @@ void CUpDownClient::ProcessFileInfo(CSafeMemFile* data, CPartFile* file)
 		uint8* thisAbyPartStatus;
 		if(m_PartStatus_list.Lookup(reqfile, thisAbyPartStatus))
 		{
-			//WiZaRd: NOTE! It is NOT necessary to delete ALL information right now... especially hiding information might prove useful again!
-			for(uint16 i = 0; i < m_nPartCount; ++i)
-				thisAbyPartStatus[i] &= ~SC_AVAILABLE; //clear "avail" flag
+			delete[] thisAbyPartStatus;
+			m_PartStatus_list.RemoveKey(reqfile);
 		}
-		// m_abyPartStatus = NULL;
+		m_abyPartStatus = NULL;
 		//MORPH   END - Changed by SiRoB, Keep A4AF infos
 		m_nPartCount = reqfile->GetPartCount();
 		m_abyPartStatus = new uint8[m_nPartCount];
@@ -858,9 +857,8 @@ void CUpDownClient::ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPart
 	uint8* thisAbyPartStatus;
 	if(m_PartStatus_list.Lookup(reqfile, thisAbyPartStatus))
 	{
-		//WiZaRd: NOTE! It is NOT necessary to delete ALL information right now... especially hiding information might prove useful again!
-		for(uint16 i = 0; i < m_nPartCount; ++i)
-			thisAbyPartStatus[i] &= ~SC_AVAILABLE; //clear "avail" flag
+		delete[] thisAbyPartStatus;
+		m_PartStatus_list.RemoveKey(reqfile);
 	}
 	m_abyPartStatus = NULL;
 	//MORPH   END - Added by SiRoB, Keep A4AF infos
@@ -2754,9 +2752,8 @@ bool CUpDownClient::DoSwap(CPartFile* SwapTo, bool bRemoveCompletely, LPCTSTR re
 		//MORPH START - Changed by SiRoB, Keep A4AF infos
 		uint8* PartStatus;
 		if(m_PartStatus_list.Lookup(reqfile,PartStatus)){
-			//WiZaRd: NOTE! It is NOT necessary to delete ALL information right now... especially hiding information might prove useful again!
-			for(uint16 i = 0; i < m_nPartCount; ++i)
-				PartStatus[i] &= ~SC_AVAILABLE; //clear "avail" flag
+			delete[] PartStatus;
+			m_PartStatus_list.RemoveKey(reqfile);
 		}
 		m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
 		//MORPH END   - Changed by SiRoB, Keep A4AF infos
@@ -2921,9 +2918,8 @@ void CUpDownClient::SetRequestFile(CPartFile* pReqFile)
 		uint8* PartStatus;
 		if (pReqFile == NULL) {
 			if(m_PartStatus_list.Lookup(reqfile,PartStatus)){
-				//WiZaRd: NOTE! It is NOT necessary to delete ALL information right now... especially hiding information might prove useful again!
-				for(uint16 i = 0; i < m_nPartCount; ++i)
-					PartStatus[i] &= ~SC_AVAILABLE; //clear "avail" flag
+				delete[] PartStatus;
+				m_PartStatus_list.RemoveKey(reqfile);
 			}
 			m_nUpCompleteSourcesCount_list.RemoveKey(reqfile);
 		} else {

@@ -40,7 +40,7 @@ FIX: Incorrect and redundent operation for Double backup [AndCycle]
 FIX: Display FairPlay in lists only if requested file is complete [gomez82]
 FIX: Improper localization of altered category column in DownloadList [Stulle]
 FIX: Failing support of emulepawcio ipfilter.zip format [D10Tmain]
-FIX: Memleak fix, memset fix and fix for keep A4AF code [WiZaRd]
+FIX: Memleak fix around hashing [WiZaRd]
 
 Note: Additional options stored in Known.met will be purged like some official stuff is.
 Note: Due to change in column orders we recommend a clean install. You may experience strange looks otherwise.
