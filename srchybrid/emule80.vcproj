@@ -228,7 +228,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Inserting Vista application icon..."
-				CommandLine="..\ReplaceVistaIcon\release\ReplaceVistaIcon &quot;$(TargetPath)&quot; &quot;$(ProjectDir)\res\MOD\Mule_Vista.ico&quot; AAAEMULEAPP"
+				CommandLine="..\ReplaceVistaIcon\release\ReplaceVistaIcon &quot;$(TargetPath)&quot; &quot;$(ProjectDir)res\MOD\Mule_Vista.ico&quot; AAAEMULEAPP"
 			/>
 		</Configuration>
 		<Configuration
@@ -338,7 +338,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Inserting Vista application icon..."
-				CommandLine="..\ReplaceVistaIcon\release\ReplaceVistaIcon &quot;$(TargetPath)&quot; &quot;$(ProjectDir)\res\MOD\Mule_Vista.ico&quot; AAAEMULEAPP"
+				CommandLine="..\ReplaceVistaIcon\release\ReplaceVistaIcon &quot;$(TargetPath)&quot; &quot;$(ProjectDir)res\MOD\Mule_Vista.ico&quot; AAAEMULEAPP"
 			/>
 		</Configuration>
 	</Configurations>

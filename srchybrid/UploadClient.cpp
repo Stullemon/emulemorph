@@ -1805,7 +1805,7 @@ uint32 CUpDownClient::GetAvUpDatarate() const
 //MORPH START - Added by SiRoB, ShareOnlyTheNeed hide Uploaded and uploading part
 void CUpDownClient::GetUploadingAndUploadedPart(uint8* m_abyUpPartUploadingAndUploaded, uint32 partcount) const
 {
-	memset(m_abyUpPartUploadingAndUploaded,0,partcount*sizeof(uint32));
+	memset(m_abyUpPartUploadingAndUploaded,0,partcount);
 	const Requested_Block_Struct* block;
 	if (!m_BlockRequests_queue.IsEmpty()){
 		block = m_BlockRequests_queue.GetHead();
