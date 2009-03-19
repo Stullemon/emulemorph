@@ -21,6 +21,8 @@ ADD: IP Filter White list [Stulle]
 ADD: New default IPFilter (Maintained by Ozzy) [Stulle]
 	+ uses DynDNS to check version, mirrored at SourceForge, unrar.dll required!
 ADD: RAR File download decompress for auto update [official]
+ADD: New hidden options to Advanced Options and Tooltips for new options [Stulle]
+ADD: Rebind UPnP mappings (except WAP for now) like the official does [Stulle]
 CHANGE: Display NNS in UploadListCtrl [Diabolo111]
 CHANGE: Updated German language file [Morella/Myth88]
 CHANGE: Updated French language file [Nicolas_FR]
@@ -34,6 +36,9 @@ CHANGE: Rewrite of Downloaded History List according to new List code layout fro
 CHANGE: Accept more file names for contents of downloaded ipfilter archives [official]
 CHANGE: Send ICS info even if the file is not extremely rare (as pointed out by WiZaRd) [Stulle]
 CHANGE: Made ICS mode local variable to save some bytes in RAM usage (as pointed out by WiZaRd) [Stulle]
+CHANGE: Updated Show less controls for new columns and added it for context menus [Stulle]
+CHANGE: Enabling Extended controls disables Show less controls and vice versa [Stulle]
+	+ close preferences window to avoid odd behaviour... kinda tricky...
 FIX: Corrupted userhash ban [taz]
 FIX: Double increase for badrequests [taz]
 FIX: Incorrect and redundent operation for Double backup [AndCycle]

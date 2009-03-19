@@ -923,6 +923,7 @@ void CQueueListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS), true);
 	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED), MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("CLIENTDETAILS"));
 	ClientMenu.SetDefaultItem(MP_DETAIL);
+	if(!thePrefs.IsLessControls()){ //MORPH show less controls
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND), _T("ADDFRIEND"));
 	//MORPH START - Added by SiRoB, Friend Addon
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND), _T("DELETEFRIEND"));
@@ -939,6 +940,15 @@ void CQueueListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
 	ClientMenu.AppendMenu(MF_STRING | (client ? MF_ENABLED : MF_GRAYED),MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED), _T("FILEREQUESTED")); // Added by sivka
 	//MORPH END - Added by Yun.SF3, List Requested Files
+	//MORPH START show less controls
+	}
+	else
+	{
+		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
+		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES), _T("VIEWFILES"));
+		ClientMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND), _T("Search"));
+	}
+	//MORPH END show less controls
 	GetPopupMenuPos(*this, point);
 	ClientMenu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 }

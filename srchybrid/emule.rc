@@ -481,8 +481,8 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     EDITTEXT        IDC_INCFILES,11,13,210,12,ES_AUTOHSCROLL
     PUSHBUTTON      "...",IDC_SELINCDIR,210,7,14,14
-    EDITTEXT        IDC_TEMPFILES,11,45,200,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_SELTEMPDIR,196,39,14,14
+    EDITTEXT        IDC_TEMPFILES,11,45,210,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_SELTEMPDIR,210,39,14,14
     CONTROL         "",IDC_SHARESELECTOR,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
                     TVS_CHECKBOXES | WS_BORDER | WS_TABSTOP | 0x800,10,76,
@@ -6105,7 +6105,6 @@ BEGIN
     IDS_PREVIEWONICONDBLCLK "PreviewOnIconDblClk"
     IDS_INTERNETSECURITYZONE "InternetSecurityZone"
     IDS_TXTEDITOR           "TxtEditor"
-    IDS_DATETIMEFORMAT      "datetimeformat"
     IDS_SERVERUDPPORT       "ServerUDPPort"
 END
 
@@ -6333,6 +6332,19 @@ BEGIN
    IDS_AUTOIPFILTERFAILED   "Failed to check IPFilter version."
    IDS_DL_NONE              "None"
    //MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+   IDS_X_FILE_BUFFER_TIME_LIMIT "File Buffer Time Limit (in sec)"
+   IDS_X_FILE_BUFFER_TIME_LIMIT_TIP "Maximum time until data is flushed from download\ncache to harddisk"
+   IDS_X_DATETIMEFORMAT4LIST "Date&Time format for lists"
+   IDS_X_REARRANGEKADSEARCH "Rearrange KAD search keywords"
+   IDS_X_REARRANGEKADSEARCH_TIP "If enabled eMule will automatically rearrange\nsearch keywords to avoid limitations by KAD.\nDefault: enabled"
+   IDS_RESOLVE_SHARED_SHELL_TIP "Resolve shell links which lets eMule share 'linked'\nfiles (Windows Explorer shortcuts). This way one\ncan also share single files within unshared directories."
+   IDS_AUTO_ARCH_TIP        "When you check the file details for an archive eMule creates\nare preview to show you which files are within this archive.\nYou can disable this behaviour to avoid having to wait (a short\ntime on slow PCs) when walking through the file details. In\nthis case you can still start the preview manually for each archive."
+   IDS_MET_PURGE_DONT_TIP   "Old entries in the known.met file will never be purged."
+   IDS_MET_PURGE_PART_TIP   "Parts of old entries in the known.met file will be purged.\nThis is the way the official does it."
+   IDS_MET_PURGE_COMPL_TIP  "Old entries in the known.met file will be purged completly.\nThis is the way Morph did it in the past."
+   IDS_REMOVE_AICH_TIP      "Enable if AICH hash of unshared files should\nbe deleted immediatly.\nDefault: disabled"
+   IDS_WSUPNP_TIP           "Includes Webserver port into UPnP port forwarding."
+   IDS_CHECK_FILE_OPEN_TIP  "Enables prompt before opening a file via eMule."
 END
 
 #endif    // English (U.S.) resources

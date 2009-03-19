@@ -209,6 +209,8 @@ void CKademlia::Process()
 	{
 #ifdef USE_OFFICIAL_UPNP
 		theApp.emuledlg->RefreshUPnP();
+#else
+		theApp.RebindUPnP(); //emulEspaa: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 #endif
 		m_tNextUPnPCheck = 0; // will be reset on firewallcheck
 	}

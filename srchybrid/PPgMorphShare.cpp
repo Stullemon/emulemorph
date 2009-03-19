@@ -13,6 +13,10 @@
 #include "sharedfilelist.h" //MORPH - Added by SiRoB, POWERSHARE Limit
 #include "uploadqueue.h" //MORPH - Added by SiRoB, PS Internal prio
 #include "UserMsgs.h"
+//MORPH START show less controls
+#include "PreferencesDlg.h"
+#include "PPgTweaks.h"
+//MORPH END show less controls
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -203,6 +207,7 @@ BOOL CPPgMorphShare::OnInitDialog()
 	m_bStaticIcon = thePrefs.GetStaticIcon(); //MORPH - Added, Static Tray Icon
 	// MORPH START show less controls
     m_bShowLessControls = thePrefs.IsLessControls();
+	m_bOverideBySetExtControls = false;
 	// MORPH END  show less controls
 
 	CPropertyPage::OnInitDialog();
@@ -271,9 +276,14 @@ BOOL CPPgMorphShare::OnApply()
 	}
 	thePrefs.m_bStaticIcon = m_bStaticIcon;
 	//MORPH END   - Added, Static Tray Icon
-	// MORPH START show less controls
-    thePrefs.SetLessControls(m_bShowLessControls);
-	// MORPH END  show less controls
+	//MORPH START show less controls
+	// disable extended controls when we want to show less controls
+	if(m_bShowLessControls && thePrefs.m_bExtControls)
+		thePrefs.m_bExtControls = false;
+	if(!m_bOverideBySetExtControls)
+	    thePrefs.SetLessControls(m_bShowLessControls);
+	m_bOverideBySetExtControls = false; // we just want to override once
+	//MORPH END  show less controls
 	
 	//theApp.scheduler->SaveOriginals(); //Removed by SiRoB, no scheduler param in this ppg //Added by SiRoB, Fix for Param used in scheduler
 

@@ -291,14 +291,16 @@ public:
 	bool IsWaitingForCryptPingConnect();  
 // Morph end lh: lh require obfuscated server connection 
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
-	public:
-		bool	IsEd2kFriendLinkInClipboard();
+public:
+	bool	IsEd2kFriendLinkInClipboard();
 // MORPH END - Added by Commander, Friendlinks [emulEspaña]
-		#define  SVC_NO_OPT 0
-		#define	 SVC_LIST_OPT 4
-		#define  SVC_SVR_OPT 6
-		#define SVC_FULL_OPT 10
-				bool	IsRunningAsService(int OptimizeLevel = SVC_NO_OPT );// MORPH leuk_he:run as ntservice v1..
+#define  SVC_NO_OPT 0
+#define	 SVC_LIST_OPT 4
+#define  SVC_SVR_OPT 6
+#define SVC_FULL_OPT 10
+	bool	IsRunningAsService(int OptimizeLevel = SVC_NO_OPT );// MORPH leuk_he:run as ntservice v1..
+
+	void RebindUPnP(); //emulEspaa: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 };
 
 extern CemuleApp theApp;

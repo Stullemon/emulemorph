@@ -3135,7 +3135,6 @@
 #define IDS_PREVIEWONICONDBLCLK         21099
 #define IDS_INTERNETSECURITYZONE        21100
 #define IDS_TXTEDITOR                   21101
-#define IDS_DATETIMEFORMAT              21102
 #define IDS_SERVERUDPPORT               21103
 #define IDS_REMOVEFILESTOBIN            21104
 #define IDS_MINIMULEAUTOCLOSE_TIP       21105
@@ -3779,6 +3778,19 @@
 #define IDS_AUTOIPFILTERFAILED          31312
 #define IDS_DL_NONE                     31313
 //MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+#define IDS_X_FILE_BUFFER_TIME_LIMIT    31314
+#define IDS_X_FILE_BUFFER_TIME_LIMIT_TIP 31315
+#define IDS_X_DATETIMEFORMAT4LIST       31316
+#define IDS_X_REARRANGEKADSEARCH        31317
+#define IDS_X_REARRANGEKADSEARCH_TIP    31318
+#define IDS_RESOLVE_SHARED_SHELL_TIP    31319
+#define IDS_AUTO_ARCH_TIP               31320
+#define IDS_MET_PURGE_DONT_TIP          31321
+#define IDS_MET_PURGE_PART_TIP          31322
+#define IDS_MET_PURGE_COMPL_TIP         31323
+#define IDS_REMOVE_AICH_TIP             31324
+#define IDS_WSUPNP_TIP                  31325
+#define IDS_CHECK_FILE_OPEN_TIP         31326
 
 // Next default values for new objects
 // 

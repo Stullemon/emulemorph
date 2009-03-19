@@ -1449,122 +1449,127 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	m_SharedFilesMenu.EnableMenuItem(thePrefs.GetShowCopyEd2kLinkCmd() ? MP_GETED2KLINK : MP_SHOWED2KLINK, (!bContainsOnlyShareableFile && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
 	m_SharedFilesMenu.EnableMenuItem(MP_FIND, GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED);
 
-	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SpreadbarMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
-	switch (thePrefs.GetSpreadbarSetStatus()){
-		case 0:
+	//MORPH START show less controls
+	if(!thePrefs.IsLessControls())
+	{
+		//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+		m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SpreadbarMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
+		switch (thePrefs.GetSpreadbarSetStatus()){
+			case 0:
+				buffer.Format(_T(" (%s)"),GetResString(IDS_DISABLED));
+				break;
+			case 1:
+				buffer.Format(_T(" (%s)"),GetResString(IDS_ENABLED));
+				break;
+			default:
+				buffer = _T(" (?)");
+				break;
+		}
+		m_SpreadbarMenu.ModifyMenu(MP_SPREADBAR_DEFAULT, MF_STRING, MP_SPREADBAR_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
+		m_SpreadbarMenu.CheckMenuRadioItem(MP_SPREADBAR_DEFAULT, MP_SPREADBAR_ON, uSpreadbarMenuItem, 0);
+		//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+		
+		//MORPH START - Added by SiRoB, HIDEOS
+		m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_HideOSMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
+		m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SelectiveChunkMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
+		if (thePrefs.GetHideOvershares()==0)
 			buffer.Format(_T(" (%s)"),GetResString(IDS_DISABLED));
-			break;
-		case 1:
-			buffer.Format(_T(" (%s)"),GetResString(IDS_ENABLED));
-			break;
-		default:
-			buffer = _T(" (?)");
-			break;
-	}
-	m_SpreadbarMenu.ModifyMenu(MP_SPREADBAR_DEFAULT, MF_STRING, MP_SPREADBAR_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
-	m_SpreadbarMenu.CheckMenuRadioItem(MP_SPREADBAR_DEFAULT, MP_SPREADBAR_ON, uSpreadbarMenuItem, 0);
-	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	
-	//MORPH START - Added by SiRoB, HIDEOS
-	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_HideOSMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
-	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_SelectiveChunkMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
-	if (thePrefs.GetHideOvershares()==0)
-		buffer.Format(_T(" (%s)"),GetResString(IDS_DISABLED));
-	else
-		buffer.Format(_T(" (%u)"),thePrefs.GetHideOvershares());
-	m_HideOSMenu.ModifyMenu(MP_HIDEOS_DEFAULT, MF_STRING,MP_HIDEOS_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
-	if (iHideOS==-1)
-		buffer = GetResString(IDS_EDIT);
-	else if (iHideOS==0)
-		buffer = GetResString(IDS_DISABLED);
-	else
-		buffer.Format(_T("%i"), iHideOS);
-	m_HideOSMenu.ModifyMenu(MP_HIDEOS_SET, MF_STRING,MP_HIDEOS_SET, buffer);
-	m_HideOSMenu.CheckMenuRadioItem(MP_HIDEOS_DEFAULT, MP_HIDEOS_SET, uHideOSMenuItem, 0);
-	buffer.Format(_T(" (%s)"),thePrefs.IsSelectiveShareEnabled()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
-	m_SelectiveChunkMenu.ModifyMenu(MP_SELECTIVE_CHUNK, MF_STRING, MP_SELECTIVE_CHUNK, GetResString(IDS_DEFAULT) + buffer);
-	m_SelectiveChunkMenu.CheckMenuRadioItem(MP_SELECTIVE_CHUNK, MP_SELECTIVE_CHUNK_1, uSelectiveChunkMenuItem, 0);
-	//MORPH END   - Added by SiRoB, HIDEOS
-	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
-	buffer.Format(_T(" (%s)"),thePrefs.GetShareOnlyTheNeed()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
-	m_ShareOnlyTheNeedMenu.ModifyMenu(MP_SHAREONLYTHENEED, MF_STRING, MP_SHAREONLYTHENEED, GetResString(IDS_DEFAULT) + buffer);
-	m_ShareOnlyTheNeedMenu.CheckMenuRadioItem(MP_SHAREONLYTHENEED, MP_SHAREONLYTHENEED_1, uShareOnlyTheNeedMenuItem, 0);
-	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+		else
+			buffer.Format(_T(" (%u)"),thePrefs.GetHideOvershares());
+		m_HideOSMenu.ModifyMenu(MP_HIDEOS_DEFAULT, MF_STRING,MP_HIDEOS_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
+		if (iHideOS==-1)
+			buffer = GetResString(IDS_EDIT);
+		else if (iHideOS==0)
+			buffer = GetResString(IDS_DISABLED);
+		else
+			buffer.Format(_T("%i"), iHideOS);
+		m_HideOSMenu.ModifyMenu(MP_HIDEOS_SET, MF_STRING,MP_HIDEOS_SET, buffer);
+		m_HideOSMenu.CheckMenuRadioItem(MP_HIDEOS_DEFAULT, MP_HIDEOS_SET, uHideOSMenuItem, 0);
+		buffer.Format(_T(" (%s)"),thePrefs.IsSelectiveShareEnabled()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
+		m_SelectiveChunkMenu.ModifyMenu(MP_SELECTIVE_CHUNK, MF_STRING, MP_SELECTIVE_CHUNK, GetResString(IDS_DEFAULT) + buffer);
+		m_SelectiveChunkMenu.CheckMenuRadioItem(MP_SELECTIVE_CHUNK, MP_SELECTIVE_CHUNK_1, uSelectiveChunkMenuItem, 0);
+		//MORPH END   - Added by SiRoB, HIDEOS
+		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+		m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
+		buffer.Format(_T(" (%s)"),thePrefs.GetShareOnlyTheNeed()?GetResString(IDS_ENABLED):GetResString(IDS_DISABLED));
+		m_ShareOnlyTheNeedMenu.ModifyMenu(MP_SHAREONLYTHENEED, MF_STRING, MP_SHAREONLYTHENEED, GetResString(IDS_DEFAULT) + buffer);
+		m_ShareOnlyTheNeedMenu.CheckMenuRadioItem(MP_SHAREONLYTHENEED, MP_SHAREONLYTHENEED_1, uShareOnlyTheNeedMenuItem, 0);
+		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
-	//MORPH START - Added by SiRoB, Show Share Permissions
-	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
-	switch (thePrefs.GetPermissions()){
-		case PERM_ALL:
-			buffer.Format(_T(" (%s)"),GetResString(IDS_PW_EVER));
-			break;
-		case PERM_FRIENDS:
-			buffer.Format(_T(" (%s)"),GetResString(IDS_FSTATUS_FRIENDSONLY));
-			break;
-		case PERM_NOONE:
-			buffer.Format(_T(" (%s)"),GetResString(IDS_HIDDEN));
-			break;
+		//MORPH START - Added by SiRoB, Show Share Permissions
+		m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
+		switch (thePrefs.GetPermissions()){
+			case PERM_ALL:
+				buffer.Format(_T(" (%s)"),GetResString(IDS_PW_EVER));
+				break;
+			case PERM_FRIENDS:
+				buffer.Format(_T(" (%s)"),GetResString(IDS_FSTATUS_FRIENDSONLY));
+				break;
+			case PERM_NOONE:
+				buffer.Format(_T(" (%s)"),GetResString(IDS_HIDDEN));
+				break;
+			// Mighty Knife: Community visible filelist
+			case PERM_COMMUNITY:
+				buffer.Format(_T(" (%s)"),GetResString(IDS_COMMUNITY));
+				break;
+			// [end] Mighty Knife
+			default:
+				buffer = _T(" (?)");
+				break;
+		}
+		m_PermMenu.ModifyMenu(MP_PERMDEFAULT, MF_STRING, MP_PERMDEFAULT, GetResString(IDS_DEFAULT) + buffer);
 		// Mighty Knife: Community visible filelist
-		case PERM_COMMUNITY:
-			buffer.Format(_T(" (%s)"),GetResString(IDS_COMMUNITY));
-			break;
+		m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT,MP_PERMCOMMUNITY, uPermMenuItem, 0);
 		// [end] Mighty Knife
-		default:
-			buffer = _T(" (?)");
-			break;
-	}
-	m_PermMenu.ModifyMenu(MP_PERMDEFAULT, MF_STRING, MP_PERMDEFAULT, GetResString(IDS_DEFAULT) + buffer);
-	// Mighty Knife: Community visible filelist
-	m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT,MP_PERMCOMMUNITY, uPermMenuItem, 0);
-	// [end] Mighty Knife
-	//MORPH END   - Added by SiRoB, Show Share Permissions
+		//MORPH END   - Added by SiRoB, Show Share Permissions
 
-	//MORPH START - Added by SiRoB, Avoid misusing of powershare
-	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PowershareMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
-	switch (thePrefs.GetPowerShareMode()){
-		case 0:
-			buffer.Format(_T(" (%s)"),GetResString(IDS_POWERSHARE_DISABLED));
-			break;
-		case 1:
-			buffer.Format(_T(" (%s)"),GetResString(IDS_POWERSHARE_ACTIVATED));
-			break;
-		case 2:
-			buffer.Format(_T(" (%s)"),GetResString(IDS_POWERSHARE_AUTO));
-			break;
-		case 3:
-			buffer.Format(_T(" (%s)"),GetResString(IDS_POWERSHARE_LIMITED));
-			break;
-		default:
-			buffer = _T(" (?)");
-			break;
+		//MORPH START - Added by SiRoB, Avoid misusing of powershare
+		m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_PowershareMenu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
+		switch (thePrefs.GetPowerShareMode()){
+			case 0:
+				buffer.Format(_T(" (%s)"),GetResString(IDS_POWERSHARE_DISABLED));
+				break;
+			case 1:
+				buffer.Format(_T(" (%s)"),GetResString(IDS_POWERSHARE_ACTIVATED));
+				break;
+			case 2:
+				buffer.Format(_T(" (%s)"),GetResString(IDS_POWERSHARE_AUTO));
+				break;
+			case 3:
+				buffer.Format(_T(" (%s)"),GetResString(IDS_POWERSHARE_LIMITED));
+				break;
+			default:
+				buffer = _T(" (?)");
+				break;
+		}
+		m_PowershareMenu.ModifyMenu(MP_POWERSHARE_DEFAULT, MF_STRING,MP_POWERSHARE_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
+		m_PowershareMenu.CheckMenuRadioItem(MP_POWERSHARE_DEFAULT, MP_POWERSHARE_LIMITED, uPowershareMenuItem, 0);
+		//MORPH END   - Added by SiRoB, Avoid misusing of powershare
+		//MORPH START - Added by SiRoB, POWERSHARE Limit
+		m_PowershareMenu.EnableMenuItem((UINT_PTR)m_PowerShareLimitMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+		if (iPowerShareLimit==0)
+			buffer.Format(_T(" (%s)"),GetResString(IDS_DISABLED));
+		else
+			buffer.Format(_T(" (%u)"),thePrefs.GetPowerShareLimit());
+		m_PowerShareLimitMenu.ModifyMenu(MP_POWERSHARE_LIMIT, MF_STRING,MP_POWERSHARE_LIMIT, GetResString(IDS_DEFAULT) + buffer);
+		if (iPowerShareLimit==-1)
+			buffer = GetResString(IDS_EDIT);
+		else if (iPowerShareLimit==0)
+			buffer = GetResString(IDS_DISABLED);
+		else
+			buffer.Format(_T("%i"),iPowerShareLimit);
+		m_PowerShareLimitMenu.ModifyMenu(MP_POWERSHARE_LIMIT_SET, MF_STRING,MP_POWERSHARE_LIMIT_SET, buffer);
+		m_PowerShareLimitMenu.CheckMenuRadioItem(MP_POWERSHARE_LIMIT, MP_POWERSHARE_LIMIT_SET, uPowerShareLimitMenuItem, 0);
+		//MORPH END   - Added by SiRoB, POWERSHARE Limit
+		
+		//MORPH START - Added by SiRoB, Mighty Knife: CRC32-Tag
+		m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_CRC32Menu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
+		//MORPH END   - Added by SiRoB, [end] Mighty Knife
+		//MORPH START - Added by SiRoB, Mighty Knife: Mass Rename
+		m_SharedFilesMenu.EnableMenuItem(MP_MASSRENAME, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
+		//MORPH END   - Added by SiRoB, [end] Mighty Knife
 	}
-	m_PowershareMenu.ModifyMenu(MP_POWERSHARE_DEFAULT, MF_STRING,MP_POWERSHARE_DEFAULT, GetResString(IDS_DEFAULT) + buffer);
-	m_PowershareMenu.CheckMenuRadioItem(MP_POWERSHARE_DEFAULT, MP_POWERSHARE_LIMITED, uPowershareMenuItem, 0);
-	//MORPH END   - Added by SiRoB, Avoid misusing of powershare
-	//MORPH START - Added by SiRoB, POWERSHARE Limit
-	m_PowershareMenu.EnableMenuItem((UINT_PTR)m_PowerShareLimitMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-	if (iPowerShareLimit==0)
-		buffer.Format(_T(" (%s)"),GetResString(IDS_DISABLED));
-	else
-		buffer.Format(_T(" (%u)"),thePrefs.GetPowerShareLimit());
-	m_PowerShareLimitMenu.ModifyMenu(MP_POWERSHARE_LIMIT, MF_STRING,MP_POWERSHARE_LIMIT, GetResString(IDS_DEFAULT) + buffer);
-	if (iPowerShareLimit==-1)
-		buffer = GetResString(IDS_EDIT);
-	else if (iPowerShareLimit==0)
-		buffer = GetResString(IDS_DISABLED);
-	else
-		buffer.Format(_T("%i"),iPowerShareLimit);
-	m_PowerShareLimitMenu.ModifyMenu(MP_POWERSHARE_LIMIT_SET, MF_STRING,MP_POWERSHARE_LIMIT_SET, buffer);
-	m_PowerShareLimitMenu.CheckMenuRadioItem(MP_POWERSHARE_LIMIT, MP_POWERSHARE_LIMIT_SET, uPowerShareLimitMenuItem, 0);
-	//MORPH END   - Added by SiRoB, POWERSHARE Limit
-	
-	//MORPH START - Added by SiRoB, Mighty Knife: CRC32-Tag
-	m_SharedFilesMenu.EnableMenuItem((UINT_PTR)m_CRC32Menu.m_hMenu, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
-	//MORPH END   - Added by SiRoB, [end] Mighty Knife
-	//MORPH START - Added by SiRoB, Mighty Knife: Mass Rename
-	m_SharedFilesMenu.EnableMenuItem(MP_MASSRENAME, (!bContainsShareableFiles && iSelectedItems > 0) ? MF_ENABLED : MF_GRAYED);
-	//MORPH END   - Added by SiRoB, [end] Mighty Knife
+	//MORPH END show less controls
 
 	m_CollectionsMenu.EnableMenuItem(MP_MODIFYCOLLECTION, (!bContainsShareableFiles && pSingleSelFile != NULL && ((CKnownFile*)pSingleSelFile)->m_pCollection != NULL ) ? MF_ENABLED : MF_GRAYED);
 	m_CollectionsMenu.EnableMenuItem(MP_VIEWCOLLECTION, (!bContainsShareableFiles && pSingleSelFile != NULL && ((CKnownFile*)pSingleSelFile)->m_pCollection != NULL ) ? MF_ENABLED : MF_GRAYED);
@@ -2769,66 +2774,71 @@ void CSharedFilesCtrl::CreateMenues()
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOVERYHIGH, GetResString(IDS_PRIORELEASE));
 	m_PrioMenu.AppendMenu(MF_STRING,MP_PRIOAUTO, GetResString(IDS_PRIOAUTO));//UAP
 
-	//MORPH START - Added by SiRoB, Show Permissions
-	m_PermMenu.CreateMenu();
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT));
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
-	// Mighty Knife: Community visible filelist
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,GetResString(IDS_COMMUNITY));
-	// [end] Mighty Knife
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_PW_EVER));
-	//MORPH END   - Added by SiRoB, Show Permissions
+	//MORPH START show less controls
+	if(!thePrefs.IsLessControls())
+	{
+		//MORPH START - Added by SiRoB, Show Permissions
+		m_PermMenu.CreateMenu();
+		m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT));
+		m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
+		m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
+		// Mighty Knife: Community visible filelist
+		m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,GetResString(IDS_COMMUNITY));
+		// [end] Mighty Knife
+		m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_PW_EVER));
+		//MORPH END   - Added by SiRoB, Show Permissions
 
-	//MORPH START - Added by SiRoB, ZZ Upload System
-	// add powershare switcher
-	m_PowershareMenu.CreateMenu();
-	m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_DEFAULT,GetResString(IDS_DEFAULT));
-	m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_OFF,GetResString(IDS_POWERSHARE_DISABLED));
-	m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_ON,GetResString(IDS_POWERSHARE_ACTIVATED));
-	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_AUTO,GetResString(IDS_POWERSHARE_AUTO));
-	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-	//MORPH START - Added by SiRoB, POWERSHARE Limit
-	m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_LIMITED,GetResString(IDS_POWERSHARE_LIMITED)); 
-	m_PowerShareLimitMenu.CreateMenu();
-	m_PowerShareLimitMenu.AppendMenu(MF_STRING,MP_POWERSHARE_LIMIT,	GetResString(IDS_DEFAULT));
-	m_PowerShareLimitMenu.AppendMenu(MF_STRING,MP_POWERSHARE_LIMIT_SET,	GetResString(IDS_DISABLED));
-	//MORPH END   - Added by SiRoB, POWERSHARE Limit
-	//MORPH END   - Added by SiRoB, ZZ Upload System
+		//MORPH START - Added by SiRoB, ZZ Upload System
+		// add powershare switcher
+		m_PowershareMenu.CreateMenu();
+		m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_DEFAULT,GetResString(IDS_DEFAULT));
+		m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_OFF,GetResString(IDS_POWERSHARE_DISABLED));
+		m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_ON,GetResString(IDS_POWERSHARE_ACTIVATED));
+		//MORPH START - Added by SiRoB, Avoid misusing of powersharing
+		m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_AUTO,GetResString(IDS_POWERSHARE_AUTO));
+		//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
+		//MORPH START - Added by SiRoB, POWERSHARE Limit
+		m_PowershareMenu.AppendMenu(MF_STRING,MP_POWERSHARE_LIMITED,GetResString(IDS_POWERSHARE_LIMITED)); 
+		m_PowerShareLimitMenu.CreateMenu();
+		m_PowerShareLimitMenu.AppendMenu(MF_STRING,MP_POWERSHARE_LIMIT,	GetResString(IDS_DEFAULT));
+		m_PowerShareLimitMenu.AppendMenu(MF_STRING,MP_POWERSHARE_LIMIT_SET,	GetResString(IDS_DISABLED));
+		//MORPH END   - Added by SiRoB, POWERSHARE Limit
+		//MORPH END   - Added by SiRoB, ZZ Upload System
 
-	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	m_SpreadbarMenu.CreateMenu();
-	m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_DEFAULT, GetResString(IDS_DEFAULT));
-	m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_OFF, GetResString(IDS_DISABLED));
-	m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_ON, GetResString(IDS_ENABLED));
-	m_SpreadbarMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
-	m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_RESET, GetResString(IDS_RESET));
-	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+		//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+		m_SpreadbarMenu.CreateMenu();
+		m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_DEFAULT, GetResString(IDS_DEFAULT));
+		m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_OFF, GetResString(IDS_DISABLED));
+		m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_ON, GetResString(IDS_ENABLED));
+		m_SpreadbarMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
+		m_SpreadbarMenu.AppendMenu(MF_STRING,MP_SPREADBAR_RESET, GetResString(IDS_RESET));
+		//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 
-	//MORPH START - Added by SiRoB, HIDEOS
-	m_HideOSMenu.CreateMenu();
-	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_DEFAULT, GetResString(IDS_DEFAULT));
-	m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_SET, GetResString(IDS_DISABLED));
-	m_SelectiveChunkMenu.CreateMenu();
-	m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK,	GetResString(IDS_DEFAULT));
-	m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK_0,	GetResString(IDS_DISABLED));
-	m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK_1,	GetResString(IDS_ENABLED));
-	//MORPH END   - Added by SiRoB, HIDEOS
-	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	m_ShareOnlyTheNeedMenu.CreateMenu();
-	m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED,	GetResString(IDS_DEFAULT));
-	m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED_0,	GetResString(IDS_DISABLED));
-	m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED_1,	GetResString(IDS_ENABLED));
-	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+		//MORPH START - Added by SiRoB, HIDEOS
+		m_HideOSMenu.CreateMenu();
+		m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_DEFAULT, GetResString(IDS_DEFAULT));
+		m_HideOSMenu.AppendMenu(MF_STRING,MP_HIDEOS_SET, GetResString(IDS_DISABLED));
+		m_SelectiveChunkMenu.CreateMenu();
+		m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK,	GetResString(IDS_DEFAULT));
+		m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK_0,	GetResString(IDS_DISABLED));
+		m_SelectiveChunkMenu.AppendMenu(MF_STRING,MP_SELECTIVE_CHUNK_1,	GetResString(IDS_ENABLED));
+		//MORPH END   - Added by SiRoB, HIDEOS
+		//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
+		m_ShareOnlyTheNeedMenu.CreateMenu();
+		m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED,	GetResString(IDS_DEFAULT));
+		m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED_0,	GetResString(IDS_DISABLED));
+		m_ShareOnlyTheNeedMenu.AppendMenu(MF_STRING,MP_SHAREONLYTHENEED_1,	GetResString(IDS_ENABLED));
+		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 
-	//MORPH START - Changed by SiRoB, Mighty Knife: CRC32-Tag
-	m_CRC32Menu.CreateMenu();
-	m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_CALCULATE,GetResString(IDS_CRC32_CALCULATE));
-	m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_RECALCULATE,GetResString(IDS_CRC32_RECALCULATE));
-	m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_TAG,GetResString(IDS_CRC32_TAG));
-	m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_ABORT,GetResString(IDS_CRC32_ABORT));
-	//MORPH END   - Changed by SiRoB, [end] Mighty Knife
+		//MORPH START - Changed by SiRoB, Mighty Knife: CRC32-Tag
+		m_CRC32Menu.CreateMenu();
+		m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_CALCULATE,GetResString(IDS_CRC32_CALCULATE));
+		m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_RECALCULATE,GetResString(IDS_CRC32_RECALCULATE));
+		m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_TAG,GetResString(IDS_CRC32_TAG));
+		m_CRC32Menu.AppendMenu(MF_STRING,MP_CRC32_ABORT,GetResString(IDS_CRC32_ABORT));
+		//MORPH END   - Changed by SiRoB, [end] Mighty Knife
+	}
+	//MORPH END show less controls
 
 	m_CollectionsMenu.CreateMenu();
 	m_CollectionsMenu.AddMenuTitle(NULL, true);
@@ -2849,30 +2859,36 @@ void CSharedFilesCtrl::CreateMenues()
 		m_SharedFilesMenu.AppendMenu(MF_STRING,Irc_SetSendLink,GetResString(IDS_IRC_ADDLINKTOIRC), _T("IRCCLIPBOARD"));
 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
-	//MOPRH START - Added by SiRoB, Keep permission flag	
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION), _T("FILEPERMISSION"));	// xMule_MOD: showSharePermissions - done
-	//MOPRH END   - Added by SiRoB, Keep permission flag
-	//MORPH START - Added by SiRoB, ZZ Upload System
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PowershareMenu.m_hMenu, GetResString(IDS_POWERSHARE), _T("FILEPOWERSHARE"));
-	//MORPH END - Added by SiRoB, ZZ Upload System
-	//MORPH START - Added by SiRoB, POWERSHARE Limit
-	m_PowershareMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
-	m_PowershareMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PowerShareLimitMenu.m_hMenu, GetResString(IDS_POWERSHARE_LIMIT));
-	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 
-	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_SpreadbarMenu.m_hMenu, GetResString(IDS_SPREADBAR), _T("FILESPREADBAR"));
-	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+	//MORPH START show less controls
+	if(!thePrefs.IsLessControls())
+	{
+		//MOPRH START - Added by SiRoB, Keep permission flag	
+		m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION), _T("FILEPERMISSION"));	// xMule_MOD: showSharePermissions - done
+		//MOPRH END   - Added by SiRoB, Keep permission flag
+		//MORPH START - Added by SiRoB, ZZ Upload System
+		m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PowershareMenu.m_hMenu, GetResString(IDS_POWERSHARE), _T("FILEPOWERSHARE"));
+		//MORPH END - Added by SiRoB, ZZ Upload System
+		//MORPH START - Added by SiRoB, POWERSHARE Limit
+		m_PowershareMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
+		m_PowershareMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PowerShareLimitMenu.m_hMenu, GetResString(IDS_POWERSHARE_LIMIT));
+		//MORPH END   - Added by SiRoB, POWERSHARE Limit
 
-	//MORPH START - Added by SiRoB, HIDEOS
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_HideOSMenu.m_hMenu, GetResString(IDS_HIDEOS), _T("FILEHIDEOS"));
-	m_HideOSMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
-	m_HideOSMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_SelectiveChunkMenu.m_hMenu, GetResString(IDS_SELECTIVESHARE));
-	//MORPH END   - Added by SiRoB, HIDEOS
+		//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
+		m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_SpreadbarMenu.m_hMenu, GetResString(IDS_SPREADBAR), _T("FILESPREADBAR"));
+		//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 
-	//MORPH START - Added by SiRoB,	SHARE_ONLY_THE_NEED
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, GetResString(IDS_SHAREONLYTHENEED), _T("FILESHAREONLYTHENEED"));
-	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+		//MORPH START - Added by SiRoB, HIDEOS
+		m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_HideOSMenu.m_hMenu, GetResString(IDS_HIDEOS), _T("FILEHIDEOS"));
+		m_HideOSMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
+		m_HideOSMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_SelectiveChunkMenu.m_hMenu, GetResString(IDS_SELECTIVESHARE));
+		//MORPH END   - Added by SiRoB, HIDEOS
+
+		//MORPH START - Added by SiRoB,	SHARE_ONLY_THE_NEED
+		m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_ShareOnlyTheNeedMenu.m_hMenu, GetResString(IDS_SHAREONLYTHENEED), _T("FILESHAREONLYTHENEED"));
+		//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
+	}
+	//MORPH END show less controls
 
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) + _T(" (") + GetResString(IDS_PW_CON_UPLBL) + _T(")"), _T("FILEPRIORITY"));
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
@@ -2889,14 +2905,19 @@ void CSharedFilesCtrl::CreateMenues()
 	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_FIND, GetResString(IDS_FIND), _T("Search"));
 	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR);
 
-	//MORPH START - Changed by SiRoB, Mighty Knife: CRC32-Tag
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_CRC32Menu.m_hMenu, GetResString(IDS_CRC32), _T("FILECRC32"));
-	//MORPH START - Changed by SiRoB, [end] Mighty Knife
+	//MORPH START show less controls
+	if(!thePrefs.IsLessControls())
+	{
+		//MORPH START - Changed by SiRoB, Mighty Knife: CRC32-Tag
+		m_SharedFilesMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_CRC32Menu.m_hMenu, GetResString(IDS_CRC32), _T("FILECRC32"));
+		//MORPH START - Changed by SiRoB, [end] Mighty Knife
 
-	// Mighty Knife: Mass Rename
-	m_SharedFilesMenu.AppendMenu(MF_STRING,MP_MASSRENAME,GetResString(IDS_MR), _T("FILEMASSRENAME"));
-	m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
-	// [end] Mighty Knife
+		// Mighty Knife: Mass Rename
+		m_SharedFilesMenu.AppendMenu(MF_STRING,MP_MASSRENAME,GetResString(IDS_MR), _T("FILEMASSRENAME"));
+		m_SharedFilesMenu.AppendMenu(MF_STRING|MF_SEPARATOR); 
+		// [end] Mighty Knife
+	}
+	//MORPH END show less controls
 
 #if defined(_DEBUG)
 	if (thePrefs.IsExtControlsEnabled()){

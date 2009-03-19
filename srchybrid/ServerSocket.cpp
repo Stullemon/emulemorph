@@ -360,9 +360,11 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 					uint8 state = thePrefs.GetSmartIdState();
 					if ( state > 0 )
 					{
-#ifdef USE_OFFICIAL_UPNP
 						if (state == 1)
+#ifdef USE_OFFICIAL_UPNP
 							theApp.emuledlg->RefreshUPnP(false); // refresh the UPnP mappings once
+#else
+							theApp.RebindUPnP(); //emulEspaa: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 #endif
 						state++;
 						if( state > 2 )
@@ -379,9 +381,11 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 						uint8 state = thePrefs.GetSmartIdState();
 						if ( state > 0 )
 						{
-#ifdef USE_OFFICIAL_UPNP
 							if (state == 1)
+#ifdef USE_OFFICIAL_UPNP
 								theApp.emuledlg->RefreshUPnP(false); // refresh the UPnP mappings once
+#else
+								theApp.RebindUPnP(); //emulEspaa: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 #endif
 							state++;
 							if( state > 2 )

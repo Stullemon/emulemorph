@@ -385,6 +385,10 @@ void CPPgEastShare::Localize(void)
 		SetTool(m_htiPayBackFirstLimit,IDS_PAYBACKFIRSTLIMI_TIP);
 		//SetTool(m_htiMetControl,IDS_MET_FILE_CONTROL_TIP);
 		SetTool(m_htiKnownMet,IDS_EXPIRED_KNOWN_TIP);
+		SetTool(m_htiDontPurge,IDS_MET_PURGE_DONT_TIP);
+		SetTool(m_htiPartiallyPurge,IDS_MET_PURGE_PART_TIP);
+		SetTool(m_htiCompletelyPurge,IDS_MET_PURGE_COMPL_TIP);
+		SetTool(m_htiRemoveAichImmediatly,IDS_REMOVE_AICH_TIP);
 		// MORPH END - leuk_he tooltipped
 	}	
 

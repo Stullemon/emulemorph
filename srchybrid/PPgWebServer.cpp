@@ -313,6 +313,7 @@ void CPPgWebServer::Localize(void)
 		SetTool(IDC_WSRELOADTMPL,IDC_WSRELOADTMPL_TIP);
 	    SetTool(IDC_TMPLBROWSE,IDC_TMPLBROWSE_TIP);
 		SetTool(IDC_GUIDELINK,IDC_GUIDELINK_TIP);
+		SetTool(IDC_WSUPNP,IDS_WSUPNP_TIP);
 		//MORPH END leuk_he tooltipped
 	}
 }

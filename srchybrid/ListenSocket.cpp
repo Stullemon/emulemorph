@@ -586,21 +586,10 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					client->ProcessFileStatus(false, &data, file);
 
                     //MORPH START - ZZUL_20070513-2310
-					// why is this causing a crash?
-//					/* // see "find them weird bugs!"
-					try
-					{
 			if(client->GetDownloadState() == DS_DOWNLOADING) {
                         AddDebugLogLine(false, _T("Checking if we should send block request, since OP_FILESTATUS was received when client->GetDownloadState() == DS_DOWNLOADING() %s"), client->DbgGetClientInfo());
                         client->SendBlockRequests();
-                    }
-					}
-					catch(...)
-					{
-						theApp.QueueLogLine(false, _T("WARNING: Crash in ZZ code! NULL-client: %s  NULL-packet: %s  packet size: %u"),client?_T("no"):_T("yes"),packet?_T("no"):_T("yes"),size);
-					}
-//					*/
-			//MORPH END  - ZZUL_20070513-2310
+					//MORPH END  - ZZUL_20070513-2310
 
 					break;
 				}
@@ -1510,20 +1499,10 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 								client->ProcessFileStatus(false, &data_in, reqfile);
 
                                 //MORPH START - ZZUL_20070513-2310
-								// why is this causing a crash?
-//								/* // see "find them weird bugs!"
-								try
-								{
 				if(client->GetDownloadState() == DS_DOWNLOADING) {
                                     AddDebugLogLine(false, _T("Checking if we should send block request, since OP_FILESTATUS in OP_MULTIPACKETANSWER was received when client->GetDownloadState() == DS_DOWNLOADING() %s"), client->DbgGetClientInfo());
                                     client->SendBlockRequests();
                                 }
-								}
-								catch(...)
-								{
-									theApp.QueueLogLine(false, _T("WARNING: Crash in ZZ code! NULL-client: %s  NULL-packet: %s  packet size: %u"),client?_T("no"):_T("yes"),packet?_T("no"):_T("yes"),size);
-								}
-//								*/
 				//MORPH END  - ZZUL_20070513-2310
 
 								break;

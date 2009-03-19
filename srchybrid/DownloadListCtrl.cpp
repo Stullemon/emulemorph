@@ -1986,17 +1986,22 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			m_FileMenu.EnableMenuItem(MP_FORCE,iFileNotSeenCompleteSource > 0 ? MF_ENABLED : MF_GRAYED);
 			//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 
-			//EastShare Start - FollowTheMajority by AndCycle
-			m_FileMenu.EnableMenuItem(MP_FOLLOW_THE_MAJORITY,MF_ENABLED); // just in case
-			if(iSelectedItems == 1)
-			    m_FileMenu.CheckMenuItem(MP_FOLLOW_THE_MAJORITY, iFileFollowTheMajority == 1 ? MF_CHECKED : MF_UNCHECKED);
-			else if(iFileFollowTheMajority == 0)
-			    m_FileMenu.CheckMenuItem(MP_FOLLOW_THE_MAJORITY, MF_UNCHECKED);
-			else if(iFileFollowTheMajority == iSelectedItems)
-			    m_FileMenu.CheckMenuItem(MP_FOLLOW_THE_MAJORITY, MF_CHECKED);
-			else //if(iSelectedItems > 1 && iFileFollowTheMajority != iSelectedItems)
-			    m_FileMenu.ModifyMenu(MP_FOLLOW_THE_MAJORITY, MF_UNCHECKED | MF_STRING, MP_FOLLOW_THE_MAJORITY, GetResString(IDS_INVERT) + _T(" ") + GetResString(IDS_FOLLOW_THE_MAJORITY));
-			//EastShare End   - FollowTheMajority by AndCycle
+			//MORPH START show less controls
+			if(!thePrefs.IsLessControls())
+			{
+				//EastShare Start - FollowTheMajority by AndCycle
+				m_FileMenu.EnableMenuItem(MP_FOLLOW_THE_MAJORITY,MF_ENABLED); // just in case
+				if(iSelectedItems == 1)
+					m_FileMenu.CheckMenuItem(MP_FOLLOW_THE_MAJORITY, iFileFollowTheMajority == 1 ? MF_CHECKED : MF_UNCHECKED);
+				else if(iFileFollowTheMajority == 0)
+					m_FileMenu.CheckMenuItem(MP_FOLLOW_THE_MAJORITY, MF_UNCHECKED);
+				else if(iFileFollowTheMajority == iSelectedItems)
+					m_FileMenu.CheckMenuItem(MP_FOLLOW_THE_MAJORITY, MF_CHECKED);
+				else //if(iSelectedItems > 1 && iFileFollowTheMajority != iSelectedItems)
+					m_FileMenu.ModifyMenu(MP_FOLLOW_THE_MAJORITY, MF_UNCHECKED | MF_STRING, MP_FOLLOW_THE_MAJORITY, GetResString(IDS_INVERT) + _T(" ") + GetResString(IDS_FOLLOW_THE_MAJORITY));
+				//EastShare End   - FollowTheMajority by AndCycle
+			}
+			//MORPH END show less controls
 
 			bool bOpenEnabled = (iSelectedItems == 1 && iFilesToOpen == 1);
 			m_FileMenu.EnableMenuItem(MP_OPEN, bOpenEnabled ? MF_ENABLED : MF_GRAYED);
@@ -2021,12 +2026,17 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 				m_FileMenu.SetDefaultItem((UINT)-1);
 			m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, (iSelectedItems >= 1 /*&& iFilesNotDone == 1*/) ? MF_ENABLED : MF_GRAYED);
 			
-			//MORPH START - Added by SiRoB, Import Parts [SR13]
-			m_FileMenu.ModifyMenuAndIcon(MP_SR13_ImportParts, MF_STRING, MP_SR13_ImportParts,(iFilesToImport > 0) ? GetResString(IDS_IMPORTPARTS_STOP) :GetResString(IDS_IMPORTPARTS), _T("FILEIMPORTPARTS"));
-			m_FileMenu.EnableMenuItem(MP_SR13_ImportParts, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
-			
-			//m_FileMenu.EnableMenuItem(MP_SR13_InitiateRehash, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
-			//MORPH END   - Added by SiRoB, Import Parts [SR13]
+			//MORPH START show less controls
+			if(!thePrefs.IsLessControls())
+			{
+				//MORPH START - Added by SiRoB, Import Parts [SR13]
+				m_FileMenu.ModifyMenuAndIcon(MP_SR13_ImportParts, MF_STRING, MP_SR13_ImportParts,(iFilesToImport > 0) ? GetResString(IDS_IMPORTPARTS_STOP) :GetResString(IDS_IMPORTPARTS), _T("FILEIMPORTPARTS"));
+				m_FileMenu.EnableMenuItem(MP_SR13_ImportParts, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
+				
+				//m_FileMenu.EnableMenuItem(MP_SR13_InitiateRehash, (iSelectedItems == 1 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
+				//MORPH END   - Added by SiRoB, Import Parts [SR13]
+			}
+			//MORPH END show less controls
 
 			int total;
 			m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab, total) > 0 ? MF_ENABLED : MF_GRAYED);
@@ -2042,37 +2052,45 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			m_FileMenu.EnableMenuItem(MP_FIND, GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem(MP_SEARCHRELATED, theApp.emuledlg->searchwnd->CanSearchRelatedFiles() ? MF_ENABLED : MF_GRAYED);
 
-			//MORPH START - Added by SiRoB, Show Share Permissions
-			m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-			CString buffer;
-			switch (thePrefs.GetPermissions()){
-				case PERM_ALL:
-				buffer.Format(_T(" (%s)"),GetResString(IDS_PW_EVER));
-					break;
-				case PERM_FRIENDS:
-				buffer.Format(_T(" (%s)"),GetResString(IDS_FSTATUS_FRIENDSONLY));
-					break;
-				case PERM_NOONE:
-				buffer.Format(_T(" (%s)"),GetResString(IDS_HIDDEN));
-					break;
+			//MORPH START show less controls
+			if(!thePrefs.IsLessControls())
+			{
+				//MORPH START - Added by SiRoB, Show Share Permissions
+				m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
+				CString buffer;
+				switch (thePrefs.GetPermissions()){
+					case PERM_ALL:
+					buffer.Format(_T(" (%s)"),GetResString(IDS_PW_EVER));
+						break;
+					case PERM_FRIENDS:
+					buffer.Format(_T(" (%s)"),GetResString(IDS_FSTATUS_FRIENDSONLY));
+						break;
+					case PERM_NOONE:
+					buffer.Format(_T(" (%s)"),GetResString(IDS_HIDDEN));
+						break;
+					// Mighty Knife: Community visible filelist
+					case PERM_COMMUNITY:
+					buffer.Format(_T(" (%s)"),GetResString(IDS_COMMUNITY));
+						break;
+					// [end] Mighty Knife
+					default:
+					buffer = _T(" (?)");
+						break;
+				}
+				m_PermMenu.ModifyMenu(MP_PERMDEFAULT, MF_STRING, MP_PERMDEFAULT, GetResString(IDS_DEFAULT) + buffer);
 				// Mighty Knife: Community visible filelist
-				case PERM_COMMUNITY:
-				buffer.Format(_T(" (%s)"),GetResString(IDS_COMMUNITY));
-					break;
+				m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT, MP_PERMCOMMUNITY, uPermMenuItem, 0);
 				// [end] Mighty Knife
-				default:
-				buffer = _T(" (?)");
-					break;
+				//MORPH END   - Added by SiRoB, Show Share Permissions
 			}
-			m_PermMenu.ModifyMenu(MP_PERMDEFAULT, MF_STRING, MP_PERMDEFAULT, GetResString(IDS_DEFAULT) + buffer);
-			// Mighty Knife: Community visible filelist
-			m_PermMenu.CheckMenuRadioItem(MP_PERMDEFAULT, MP_PERMCOMMUNITY, uPermMenuItem, 0);
-			// [end] Mighty Knife
-			//MORPH END   - Added by SiRoB, Show Share Permissions
+			//MORPH END show less controls
 
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
 			m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK_US, iSelectedItems > 0? MF_ENABLED : MF_GRAYED);
-			m_FileMenu.EnableMenuItem(MP_MASSRENAME, iSelectedItems > 0? MF_ENABLED : MF_GRAYED); //Commander - Added: MassRename [Dragon]
+			//MORPH START show less controls
+			if(!thePrefs.IsLessControls())
+				m_FileMenu.EnableMenuItem(MP_MASSRENAME, iSelectedItems > 0? MF_ENABLED : MF_GRAYED); //Commander - Added: MassRename [Dragon]
+			//MORPH END show less controls
 	
 			CTitleMenu WebMenu;
 			WebMenu.CreateMenu();
@@ -2141,11 +2159,13 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS), true);
 			ClientMenu.AppendMenu(MF_STRING, MP_DETAIL, GetResString(IDS_SHOWDETAILS), _T("CLIENTDETAILS"));
 			ClientMenu.SetDefaultItem(MP_DETAIL);
+			if(!thePrefs.IsLessControls()){ //MORPH show less controls
 			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && !client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_ADDFRIEND, GetResString(IDS_ADDFRIEND), _T("ADDFRIEND"));
 			//MORPH START - Added by SiRoB, Friend Addon
 			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED : MF_GRAYED), MP_REMOVEFRIEND, GetResString(IDS_REMOVEFRIEND), _T("DELETEFRIEND"));
 			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->IsFriend()) ? MF_ENABLED  | ((!client->HasLowID() && client->IsFriend() && client->GetFriendSlot())?MF_CHECKED : MF_UNCHECKED) : MF_GRAYED), MP_FRIENDSLOT, GetResString(IDS_FRIENDSLOT), _T("FRIENDSLOT"));
 			//MORPH END - Added by SiRoB, Friend Addon
+			} //MORPH show less controls
 			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
 			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES), _T("VIEWFILES"));
 			if (Kademlia::CKademlia::IsRunning() && !Kademlia::CKademlia::IsConnected())
@@ -2166,10 +2186,15 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 					ClientMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)A4AFMenu.m_hMenu, GetResString(IDS_A4AF));
 			}
 			
-			//MORPH START - Added by Yun.SF3, List Requested Files
-			ClientMenu.AppendMenu(MF_SEPARATOR);
-			ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED), _T("FILEREQUESTED")); // Added by sivka
-			//MORPH END - Added by Yun.SF3, List Requested Files
+			//MORPH START show less controls
+			if(!thePrefs.IsLessControls())
+			{
+				//MORPH START - Added by Yun.SF3, List Requested Files
+				ClientMenu.AppendMenu(MF_SEPARATOR);
+				ClientMenu.AppendMenu(MF_STRING,MP_LIST_REQUESTED_FILES, GetResString(IDS_LISTREQUESTED), _T("FILEREQUESTED")); // Added by sivka
+				//MORPH END - Added by Yun.SF3, List Requested Files
+			}
+			//MORPH END show less controls
 
 			GetPopupMenuPos(*this, point);
 			ClientMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
@@ -2194,20 +2219,28 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 		//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 		m_FileMenu.EnableMenuItem(MP_FORCE,MF_GRAYED);//shadow#(onlydownloadcompletefiles)
 		//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
-		//MORPH START - Added by SiRoB, ShowPermissions
-		m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, MF_GRAYED);
-		//MORPH END   - Added by SiRoB, ShowPermissions
+		
+		if(!thePrefs.IsLessControls()) //MORPH show less controls
+			//MORPH START - Added by SiRoB, ShowPermissions
+			m_FileMenu.EnableMenuItem((UINT_PTR)m_PermMenu.m_hMenu, MF_GRAYED);
+			//MORPH END   - Added by SiRoB, ShowPermissions
 		//MORPH START - Added by SiRoB, copy feedback feature
 		m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_COPYFEEDBACK_US, MF_GRAYED);
 		//MORPH END   - Added by SiRoB, copy feedback feature
-		m_FileMenu.EnableMenuItem(MP_MASSRENAME,MF_GRAYED);//Commander - Added: MassRename
+		if(!thePrefs.IsLessControls()) //MORPH show less controls
+			m_FileMenu.EnableMenuItem(MP_MASSRENAME,MF_GRAYED);//Commander - Added: MassRename
 		m_FileMenu.EnableMenuItem(MP_PREVIEW, MF_GRAYED);
-		//MORPH START - Added by SiRoB, Import Parts [SR13]
-		m_FileMenu.EnableMenuItem(MP_SR13_ImportParts,MF_GRAYED);
-		//m_FileMenu.EnableMenuItem(MP_SR13_InitiateRehash,MF_GRAYED);
-		//MORPH END   - Added by SiRoB, Import Parts [SR13]
-		m_FileMenu.EnableMenuItem(MP_FOLLOW_THE_MAJORITY,MF_GRAYED); //EastShare - FollowTheMajority by AndCycle
+		//MORPH START show less controls
+		if(!thePrefs.IsLessControls())
+		{
+			//MORPH START - Added by SiRoB, Import Parts [SR13]
+			m_FileMenu.EnableMenuItem(MP_SR13_ImportParts,MF_GRAYED);
+			//m_FileMenu.EnableMenuItem(MP_SR13_InitiateRehash,MF_GRAYED);
+			//MORPH END   - Added by SiRoB, Import Parts [SR13]
+			m_FileMenu.EnableMenuItem(MP_FOLLOW_THE_MAJORITY,MF_GRAYED); //EastShare - FollowTheMajority by AndCycle
+		}
+		//MORPH END show less controls
 		m_FileMenu.EnableMenuItem(MP_METINFO, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_VIEWFILECOMMENTS, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_CLEARCOMPLETED, GetCompleteDownloads(curTab,total) > 0 ? MF_ENABLED : MF_GRAYED);
@@ -3596,19 +3629,24 @@ void CDownloadListCtrl::CreateMenues()
 	m_PrioMenu.AppendMenu(MF_STRING, MP_PRIOHIGH, GetResString(IDS_PRIOHIGH));
 	m_PrioMenu.AppendMenu(MF_STRING, MP_PRIOAUTO, GetResString(IDS_PRIOAUTO));
 
-	// xMule_MOD: showSharePermissions
-	m_PermMenu.CreateMenu();
-	m_PermMenu.AddMenuTitle(NULL, true);
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT));
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
-	// Mighty Knife: Community visible filelist
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,GetResString(IDS_COMMUNITY));
-	// [end] Mighty Knife
-	m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_PW_EVER));
-	// xMule_MOD: showSharePermissions
+	//MORPH START show less controls
+	if(!thePrefs.IsLessControls())
+	{
+		// xMule_MOD: showSharePermissions
+		m_PermMenu.CreateMenu();
+		m_PermMenu.AddMenuTitle(NULL, true);
+		m_PermMenu.AppendMenu(MF_STRING,MP_PERMDEFAULT,	GetResString(IDS_DEFAULT));
+		m_PermMenu.AppendMenu(MF_STRING,MP_PERMNONE,	GetResString(IDS_HIDDEN));
+		m_PermMenu.AppendMenu(MF_STRING,MP_PERMFRIENDS,	GetResString(IDS_FSTATUS_FRIENDSONLY));
+		// Mighty Knife: Community visible filelist
+		m_PermMenu.AppendMenu(MF_STRING,MP_PERMCOMMUNITY,GetResString(IDS_COMMUNITY));
+		// [end] Mighty Knife
+		m_PermMenu.AppendMenu(MF_STRING,MP_PERMALL,		GetResString(IDS_PW_EVER));
+		// xMule_MOD: showSharePermissions
+		m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION), _T("FILEPERMISSION"));	// xMule_MOD: showSharePermissions
+	}
+	//MORPH END show less controls
 
-	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP,(UINT_PTR)m_PermMenu.m_hMenu, GetResString(IDS_PERMISSION), _T("FILEPERMISSION"));	// xMule_MOD: showSharePermissions
 	m_FileMenu.AppendMenu(MF_STRING|MF_POPUP, (UINT_PTR)m_PrioMenu.m_hMenu, GetResString(IDS_PRIORITY) + _T(" (") + GetResString(IDS_DOWNLOAD) + _T(")"), _T("FILEPRIORITY"));
 
 	// Add file commands
@@ -3633,12 +3671,17 @@ void CDownloadListCtrl::CreateMenues()
 	m_FileMenu.AppendMenu(MF_STRING, MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
 	m_FileMenu.AppendMenu(MF_STRING, MP_METINFO, GetResString(IDS_DL_INFO), _T("FILEINFO"));
 	m_FileMenu.AppendMenu(MF_STRING, MP_VIEWFILECOMMENTS, GetResString(IDS_CMT_SHOWALL), _T("FILECOMMENTS"));
-	//MORPH START - Added by SiRoB, Import Parts [SR13]
-	m_FileMenu.AppendMenu(MF_STRING,MP_SR13_ImportParts, GetResString(IDS_IMPORTPARTS), _T("FILEIMPORTPARTS"));
- 	//m_FileMenu.AppendMenu(MF_STRING,MP_SR13_InitiateRehash, GetResString(IDS_INITIATEREHASH), _T("FILEINITIATEREHASH"));
-	//MORPH END   - Added by SiRoB, Import Parts [SR13]
-	if (thePrefs.IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, GetResString(IDS_MR), _T("FILEMASSRENAME"));//Commander - Added: MassRename [Dragon]
-	m_FileMenu.AppendMenu(MF_STRING, MP_FOLLOW_THE_MAJORITY, GetResString(IDS_FOLLOW_THE_MAJORITY)); // EastShare       - FollowTheMajority by AndCycle
+	//MORPH START show less controls
+	if(!thePrefs.IsLessControls())
+	{
+		//MORPH START - Added by SiRoB, Import Parts [SR13]
+		m_FileMenu.AppendMenu(MF_STRING,MP_SR13_ImportParts, GetResString(IDS_IMPORTPARTS), _T("FILEIMPORTPARTS"));
+ 		//m_FileMenu.AppendMenu(MF_STRING,MP_SR13_InitiateRehash, GetResString(IDS_INITIATEREHASH), _T("FILEINITIATEREHASH"));
+		//MORPH END   - Added by SiRoB, Import Parts [SR13]
+		if (thePrefs.IsExtControlsEnabled()) m_FileMenu.AppendMenu(MF_STRING,MP_MASSRENAME, GetResString(IDS_MR), _T("FILEMASSRENAME"));//Commander - Added: MassRename [Dragon]
+		m_FileMenu.AppendMenu(MF_STRING, MP_FOLLOW_THE_MAJORITY, GetResString(IDS_FOLLOW_THE_MAJORITY)); // EastShare       - FollowTheMajority by AndCycle
+	}
+	//MORPH END show less controls
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING, MP_CLEARCOMPLETED, GetResString(IDS_DL_CLEAR), _T("CLEARCOMPLETE"));
 

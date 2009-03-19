@@ -4256,6 +4256,8 @@ LRESULT  CemuleDlg::OnPowerBroadcast(WPARAM wParam, LPARAM lParam)
 				DebugLog(_T("Reconnect after Power state change. wParam=%d lPararm=%ld"),wParam,lParam);
 #ifdef USE_OFFICIAL_UPNP
 				RefreshUPnP(true);
+#else
+				theApp.RebindUPnP(); //emulEspaa: Added by MoNKi [MoNKi: -UPnPNAT Support-]
 #endif
 				PostMessage(WM_SYSCOMMAND , MP_CONNECT, 0); // tell to connect.. a sec later...
 			}
@@ -4572,22 +4574,29 @@ void setcolumns(CMuleListCtrl * control,CString Columnstohide, bool Show)
 	 while (foundString != "");
  }
 
-void CemuleDlg::ShowLessControls (bool enable) {
+void CemuleDlg::ShowLessControls (bool enable)
+{
+	// toolbar:
+	NMHDR nmh;
+	nmh.code = TBN_RESET;
+	nmh.hwndFrom = /*theApp.emuledlg->*/toolbar->GetSafeHwnd();
+	nmh.idFrom = /*theApp.emuledlg->*/toolbar->GetDlgCtrlID();
+	/*theApp.emuledlg->*/toolbar->SendMessage(WM_NOTIFY, nmh.idFrom, (LPARAM)&nmh);
 
-// toolbar:
-  NMHDR nmh;
- nmh.code = TBN_RESET;
-  nmh.hwndFrom = theApp.emuledlg->toolbar->GetSafeHwnd();
- nmh.idFrom = theApp.emuledlg->toolbar->GetDlgCtrlID();
- theApp.emuledlg->toolbar->SendMessage(WM_NOTIFY, nmh.idFrom, (LPARAM)&nmh);
- // Listcontrols. 
- // note, the settings are eqaul to the xxxCtrlcolumnHidden=0,1... line in preferences.ini when less controls are displayed
- setcolumns(&(transferwnd->downloadlistctrl),_T("1,0,0,1,0,0,0,0,1,0,1,1,1,1,1,1,1,1"),enable);
- setcolumns(&(transferwnd->uploadlistctrl), _T("0,0,0,0,1,1,0,1,1,1,1,0,1,1,0,1,1"),enable);
- /* maybe todo: queuelistctrl;	clientlistctrl;	downloadclientsctrl; */
- setcolumns(&(serverwnd->serverlistctrl),_T("0,0,1,1,0,0,0,0,1,1,1,1,1,1,0,1,1"),enable);
- setcolumns(&(searchwnd->m_pwndResults->searchlistctrl),_T("0,0,0,0,0,0,1,1,1,1,1,1,1,0,1"),enable);
- setcolumns(&( sharedfileswnd->sharedfilesctrl),_T("0,0,0,0,0,1,1,1,0,1,1,1,1,0,1,1,0,1,1,1,1,1"),enable);
+	// Listcontrols
+	// note, the settings are eqaul to the xxxCtrlcolumnHidden=0,1... line in preferences.ini when less controls are displayed
+	setcolumns(&(transferwnd->downloadlistctrl),_T("0,0,1,1,0,0,0,0,0,0,1,1,1,1,1,0,1"),enable);
+	setcolumns(&(transferwnd->uploadlistctrl), _T("0,0,0,0,1,1,0,1,1,1,1,0,1,1,0,1,1"),enable);
+	setcolumns(&(transferwnd->queuelistctrl), _T("0,0,0,0,0,1,1,1,1,0,1,1,1,1"),enable);
+	setcolumns(&(transferwnd->clientlistctrl), _T("0,0,0,0,0,0,1,1,1,1,1"),enable);
+	setcolumns(&(transferwnd->downloadclientsctrl), _T("0,1,0,0,0,0,0,1,1,1,1,1,1"),enable);
+	setcolumns(&(serverwnd->serverlistctrl),_T("0,0,1,1,0,0,0,0,1,1,1,1,1,1,0,1,1"),enable);
+	setcolumns(&(searchwnd->m_pwndResults->searchlistctrl),_T("0,0,0,0,0,1,1,1,1,1,1,1,1,1,1"),enable);
+	setcolumns(&(sharedfileswnd->sharedfilesctrl),_T("0,0,0,0,1,1,1,0,0,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1"),enable);
+
+	//context menus
+	transferwnd->downloadlistctrl.CreateMenues();
+	sharedfileswnd->sharedfilesctrl.CreateMenues();
 }
 // MORPH END show less controls
 

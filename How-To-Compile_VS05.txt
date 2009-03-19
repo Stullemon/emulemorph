@@ -1,6 +1,6 @@
----------------------------------------------------------------------
-	How to compile eMule MorphXT using Visual Studio 2005
----------------------------------------------------------------------
+-------------------------------------------------------------------------
+	How to compile eMule MorphXT using Visual Studio 2005 SP1
+-------------------------------------------------------------------------
 
 1. Download Microsoft Windows SDK for Windows Server 2008 and .NET Framework version 3.5 here:
 

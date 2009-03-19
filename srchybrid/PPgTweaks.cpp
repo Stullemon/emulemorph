@@ -30,6 +30,10 @@
 #include "HelpIDs.h"
 #include "Log.h"
 #include "UserMsgs.h"
+//MORPH START show less controls
+#include "PreferencesDlg.h"
+#include "PPgMorphShare.h"
+//MORPH END show less controls
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -230,7 +234,6 @@ CPPgTweaks::CPPgTweaks()
 	m_hti_m_bPreviewOnIconDblClk=NULL;
 	m_hti_sInternetSecurityZone=NULL;
 	m_hti_sTxtEditor=NULL;
-	m_hti_sdatetimeformat=NULL;
 	m_hti_iServerUDPPort=NULL;
 	m_hti_m_bRemoveFilesToBin=NULL;
 	m_hti_HighresTimer=NULL;
@@ -243,7 +246,9 @@ CPPgTweaks::CPPgTweaks()
 	m_hti_AllowedIPs=NULL;
 	m_hti_DebugSearchResultDetailLevel=NULL;
 	m_htiCryptTCPPaddingLength=NULL;
+	m_htidatetimeformat = NULL;
 	m_htidatetimeformat4log = NULL;
+	m_htidatetimeformat4list = NULL;
 	m_htiLogError = NULL;
 	m_htiLogWarning = NULL;
 	m_htiLogSuccess = NULL;
@@ -255,6 +260,8 @@ CPPgTweaks::CPPgTweaks()
 	m_htiShowVerticalHourMarkers = NULL;
     m_htiAdjustNTFSDaylightFileTime = NULL;
     m_htidontcompressavi = NULL;
+	m_htiFileBufferTimeLimit = NULL;
+	m_htiRearrangeKadSearchKeywords = NULL;
 	//MORPH END  leuk_he Advanced official preferences.
 }
 
@@ -440,10 +447,6 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_hti_sTxtEditor= m_ctrlTreeOptions.InsertItem(GetResString(IDS_TXTEDITOR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
 		m_ctrlTreeOptions.AddFileEditBox(m_hti_sTxtEditor,RUNTIME_CLASS(CTreeOptionsEdit), RUNTIME_CLASS(CTreeOptionsBrowseButton));
 
-
-		m_hti_sdatetimeformat= m_ctrlTreeOptions.InsertItem(GetResString(IDS_DATETIMEFORMAT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
-		m_ctrlTreeOptions.AddEditBox(m_hti_sdatetimeformat, RUNTIME_CLASS(CTreeOptionsEditEx));
-
 		m_hti_iServerUDPPort= m_ctrlTreeOptions.InsertItem(GetResString(IDS_SERVERUDPPORT),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_hti_iServerUDPPort, RUNTIME_CLASS(CNumTreeOptionsEdit));
 
@@ -472,9 +475,15 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiCryptTCPPaddingLength, RUNTIME_CLASS(CNumTreeOptionsEdit));													   
 
 		m_htiAdjustNTFSDaylightFileTime = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_ADJUSTNTFSDAYLIGHTFILETIME), m_hti_advanced, m_bAdjustNTFSDaylightFileTime);
+
+		m_htidatetimeformat= m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_DATETIMEFORMAT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_htidatetimeformat, RUNTIME_CLASS(CTreeOptionsEditEx));
+
 		m_htidatetimeformat4log = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_DATETIMEFORMAT4LOG), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_htidatetimeformat4log, RUNTIME_CLASS(CTreeOptionsEditEx));
 
+		m_htidatetimeformat4list = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_DATETIMEFORMAT4LIST), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_htidatetimeformat4list, RUNTIME_CLASS(CTreeOptionsEditEx));
 
 		m_htiLogError = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_LOGERROR), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
 		m_ctrlTreeOptions.AddColorSelector(m_htiLogError, RUNTIME_CLASS(CTreeOptionsBrowseButton));
@@ -487,6 +496,9 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
     	m_htiIconflashOnNewMessage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_ICON_FLASH_ON_NEW_MESSAGE), m_hti_advanced, m_bIconflashOnNewMessage);
 		m_htiShowCopyEd2kLinkCmd = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_SHOWCOPYED2KLINK), m_hti_advanced, m_bShowCopyEd2kLinkCmd);
 		m_htidontcompressavi = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_DONTCOMPRESSAVI), m_hti_advanced, m_dontcompressavi);
+		m_htiFileBufferTimeLimit = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_FILE_BUFFER_TIME_LIMIT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddEditBox(m_htiFileBufferTimeLimit, RUNTIME_CLASS(CTreeOptionsEditEx));
+		m_htiRearrangeKadSearchKeywords = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_REARRANGEKADSEARCH), m_hti_advanced, m_bRearrangeKadSearchKeywords);
 
 		if (m_bExtControls) // show more controls --> still possible to manully expand. 
 			m_ctrlTreeOptions.Expand(m_hti_advanced, TVE_EXPAND);
@@ -634,7 +646,6 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if (m_hti_sInternetSecurityZone) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_sInternetSecurityZone, sInternetSecurityZone);}
 									  //TODO only allow  Untrusted|Internet|Intranet|Trusted|LocalMachine 
 	if (m_hti_sNotifierMailEncryptCertName) DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_sNotifierMailEncryptCertName, sNotifierMailEncryptCertName);
-  	if (m_hti_sdatetimeformat) DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_sdatetimeformat, sdatetimeformat);
 	if (m_hti_iServerUDPPort) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_iServerUDPPort, iServerUDPPort);
 										 DDV_MinMaxInt(pDX, iServerUDPPort, 0,65535);}
 	if(m_hti_m_bRemoveFilesToBin) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_bRemoveFilesToBin,m_bRemoveFilesToBin);
@@ -652,9 +663,13 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if(m_hti_DebugSearchResultDetailLevel) DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_hti_DebugSearchResultDetailLevel,m_iDebugSearchResultDetailLevel); //TODO: check string for ip
 	if (m_htiCryptTCPPaddingLength) { DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_htiCryptTCPPaddingLength,m_iCryptTCPPaddingLength );
 									  DDV_MinMaxInt(pDX, m_iCryptTCPPaddingLength , 1,256);}
+	if (m_htiFileBufferTimeLimit) { DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_htiFileBufferTimeLimit,m_iFileBufferTimeLimit );
+									  DDV_MinMaxInt(pDX, m_iFileBufferTimeLimit , 1,6000);} // max 10 minutes
 
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAdjustNTFSDaylightFileTime, m_bAdjustNTFSDaylightFileTime);
+	DDX_Text(pDX, IDC_EXT_OPTS, m_htidatetimeformat, m_strDateTimeFormat);
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htidatetimeformat4log, m_strDateTimeFormat4Log);
+	DDX_Text(pDX, IDC_EXT_OPTS, m_htidatetimeformat4list, m_strDateTimeFormat4List);
 	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogError, m_crLogError);
 	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogWarning, m_crLogWarning);
 	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogSuccess, m_crLogSuccess);
@@ -664,6 +679,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiShowCopyEd2kLinkCmd, m_bShowCopyEd2kLinkCmd);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiIconflashOnNewMessage, m_bIconflashOnNewMessage);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiReBarToolbar, m_bReBarToolbar);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiRearrangeKadSearchKeywords, m_bRearrangeKadSearchKeywords);
     // MORPH END  leuk_he Advanced official preferences.
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -765,7 +781,6 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bPreviewOnIconDblClk=thePrefs.m_bPreviewOnIconDblClk;
 	sInternetSecurityZone=thePrefs.sInternetSecurityZone;
 	sTxtEditor=thePrefs.GetTxtEditor();
-	sdatetimeformat=thePrefs.GetDateTimeFormat();
 	iServerUDPPort=thePrefs.GetServerUDPPort();
 	m_bRemoveFilesToBin=thePrefs.GetRemoveToBin();
 	m_bHighresTimer=thePrefs.m_bHighresTimer;
@@ -784,6 +799,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bAdjustNTFSDaylightFileTime = thePrefs.m_bAdjustNTFSDaylightFileTime;
 	m_strDateTimeFormat = thePrefs.m_strDateTimeFormat;
 	m_strDateTimeFormat4Log = thePrefs.m_strDateTimeFormat4Log;
+	m_strDateTimeFormat4List = thePrefs.m_strDateTimeFormat4Lists;
 	m_crLogError = thePrefs.m_crLogError;
 	m_crLogWarning = thePrefs.m_crLogWarning;
 	m_crLogSuccess = thePrefs.m_crLogSuccess;
@@ -793,6 +809,8 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bIconflashOnNewMessage = thePrefs.m_bIconflashOnNewMessage;
 	m_bShowVerticalHourMarkers = thePrefs.m_bShowVerticalHourMarkers;
 	m_bReBarToolbar = thePrefs.m_bReBarToolbar;
+	m_iFileBufferTimeLimit = thePrefs.GetFileBufferTimeLimit()/1000;
+	m_bRearrangeKadSearchKeywords = thePrefs.GetRearrangeKadSearchKeywords();
 	// MORPH END  leuk_he Advanced official preferences.
 
 	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
@@ -919,6 +937,14 @@ BOOL CPPgTweaks::OnApply()
 		theApp.emuledlg->transferwnd->downloadlistctrl.CreateMenues();
 		theApp.emuledlg->searchwnd->CreateMenus();
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.CreateMenues();
+		//MORPH START show less controls
+		// show all controls when we enabled the extended controls
+		if(m_bExtControls && thePrefs.m_bShowLessControls)
+		{
+			theApp.emuledlg->preferenceswnd->m_wndMorphShare.m_bOverideBySetExtControls = true;
+			thePrefs.SetLessControls(false);
+		}
+		//MORPH END show less controls
 	}
 	thePrefs.m_dwServerKeepAliveTimeout = m_uServerKeepAliveTimeout * 60000;
 	// MORPH START leuk_he bindaddr
@@ -980,7 +1006,6 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bPreviewOnIconDblClk=m_bPreviewOnIconDblClk;
 	thePrefs.sInternetSecurityZone=sInternetSecurityZone;
 	thePrefs.m_strTxtEditor=sTxtEditor;
-	thePrefs.m_strDateTimeFormat=sdatetimeformat;
 	thePrefs.nServerUDPPort=(uint16) iServerUDPPort; 
 	thePrefs.m_bRemove2bin=m_bRemoveFilesToBin;
 	thePrefs.m_bHighresTimer=m_bHighresTimer;
@@ -1006,6 +1031,7 @@ BOOL CPPgTweaks::OnApply()
     thePrefs.m_bAdjustNTFSDaylightFileTime = m_bAdjustNTFSDaylightFileTime;
 	thePrefs.m_strDateTimeFormat = m_strDateTimeFormat;
 	thePrefs.m_strDateTimeFormat4Log = m_strDateTimeFormat4Log;
+	thePrefs.m_strDateTimeFormat4Lists = m_strDateTimeFormat4List;
 	thePrefs.m_crLogError = m_crLogError;
 	thePrefs.m_crLogWarning = m_crLogWarning;
 	thePrefs.m_crLogSuccess = m_crLogSuccess;
@@ -1016,6 +1042,8 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bIconflashOnNewMessage = m_bIconflashOnNewMessage;
 	thePrefs.m_bShowVerticalHourMarkers = m_bShowVerticalHourMarkers;
 	thePrefs.m_bReBarToolbar = m_bReBarToolbar;
+	thePrefs.m_uFileBufferTimeLimit = SEC2MS(m_iFileBufferTimeLimit);
+	thePrefs.m_bRearrangeKadSearchKeywords = m_bRearrangeKadSearchKeywords;
 	//MORPH END  leuk_he Advanced official preferences.
 
 
@@ -1139,6 +1167,7 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiFilterLANIPs,IDS_PW_FILTER_TIP);
 		SetTool(m_htiExtControls,IDS_SHOWEXTSETTINGS_TIP);
 		SetTool(m_htiA4AFSaveCpu,IDS_A4AF_SAVE_CPU_TIP);
+		SetTool(m_htiAutoArch,IDS_AUTO_ARCH_TIP);
 		SetTool(m_htiYourHostname,IDS_YOURHOSTNAME_TIP);
 		SetTool(m_htiDisablePeerCache,IDS_DISABLEPEERACHE_TIP);
 		SetTool(m_htiSparsePartFiles,IDS_SPARSEPARTFILES_TIP);
@@ -1157,6 +1186,7 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiVerboseGroup,IDS_VERBOSE_TIP);
 		SetTool(m_htiVerbose,IDS_ENABLED_TIP);
 		SetTool(m_htiLogLevel,IDS_LOG_LEVEL_TIP);
+		SetTool(m_htiResolveShellLinks,IDS_RESOLVE_SHARED_SHELL_TIP);
 		// MORPH START leuk_he Advanced official preferences.
 		SetTool(m_hti_advanced,IDS_ADVANCEDPREFS_TIP);
 		SetTool(m_hti_bMiniMuleAutoClose,IDS_MINIMULEAUTOCLOSE_TIP);
@@ -1181,7 +1211,6 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_hti_m_bPreviewOnIconDblClk,IDS_PREVIEWONICONDBLCLK_TIP);
 		SetTool(m_hti_sInternetSecurityZone,IDS_INTERNETSECURITYZONE_TIP);
 		SetTool(m_hti_sTxtEditor,IDS_TXTEDITOR_TIP);
-		SetTool(m_hti_sdatetimeformat,IDS_DATETIMEFORMAT_TIP);
 		SetTool(m_hti_iServerUDPPort,IDS_SERVERUDPPORT_TIP);
 		SetTool(m_hti_m_bRemoveFilesToBin,IDS_REMOVEFILESTOBIN_TIP);
 		SetTool(m_hti_HighresTimer,IDS_HIGHRESTIMER_TIP);
@@ -1195,7 +1224,9 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_hti_DebugSearchResultDetailLevel,IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP); 
 		SetTool(m_htiCryptTCPPaddingLength,IDS_CRYPTTCPPADDINGLENGTH_TIP);
 		SetTool(m_htiAdjustNTFSDaylightFileTime, IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP);
+		SetTool(m_htidatetimeformat,IDS_DATETIMEFORMAT_TIP);
 		SetTool(m_htidatetimeformat4log ,IDS_DATETIMEFORMAT_TIP);
+		SetTool(m_htidatetimeformat4list ,IDS_DATETIMEFORMAT_TIP);
 		SetTool(m_htiLogError  ,  IDS_X_LOGERROR_TIP );
 		SetTool(m_htiLogWarning ,IDS_X_LOGERROR_TIP );
 		SetTool(m_htiLogSuccess,IDS_X_LOGERROR_TIP );
@@ -1204,12 +1235,10 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiIconflashOnNewMessage,IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP);
 		SetTool(m_htiShowCopyEd2kLinkCmd, IDS_X_SHOWCOPYED2KLINK_TIP);
 		SetTool(m_htidontcompressavi,IDS_X_DONTCOMPRESSAVI_TIP);
-
+		SetTool(m_htiFileBufferTimeLimit,IDS_X_FILE_BUFFER_TIME_LIMIT_TIP);
+		SetTool(m_htiRearrangeKadSearchKeywords,IDS_X_REARRANGEKADSEARCH_TIP);
 		//MORPH END leuk_he tooltipped
-
 	}
-
-
 }
 
 void CPPgTweaks::OnDestroy()
@@ -1281,7 +1310,61 @@ void CPPgTweaks::OnDestroy()
 	m_htiShareeMuleOldStyle = NULL;
 	//m_htiExtractMetaDataMediaDet = NULL;
 	m_htiResolveShellLinks = NULL;
-    
+
+	// continue extra official preferences....
+	m_hti_advanced=NULL;
+	m_hti_bMiniMuleAutoClose=NULL;
+	m_hti_iMiniMuleTransparency=NULL;
+	m_hti_bCreateCrashDump=NULL;
+	m_hti_bCheckComctl32 =NULL;
+	m_hti_bCheckShell32=NULL;
+	m_hti_bIgnoreInstances=NULL;
+	m_hti_sNotifierMailEncryptCertName=NULL;
+	m_hti_sMediaInfo_MediaInfoDllPath=NULL;
+	m_hti_bMediaInfo_RIFF=NULL;
+	m_hti_bMediaInfo_ID3LIB=NULL;
+	m_hti_iMaxLogBuff=NULL;
+	m_hti_m_iMaxChatHistory=NULL;
+	m_hti_m_iPreviewSmallBlocks=NULL;
+	m_hti_m_bRestoreLastMainWndDlg=NULL;
+	m_hti_m_bRestoreLastLogPane=NULL;
+	m_hti_m_bPreviewCopiedArchives=NULL;
+	m_hti_m_iStraightWindowStyles=NULL;
+	m_hti_m_iLogFileFormat=NULL;
+	m_hti_m_bRTLWindowsLayout=NULL;
+	m_hti_m_bPreviewOnIconDblClk=NULL;
+	m_hti_sInternetSecurityZone=NULL;
+	m_hti_sTxtEditor=NULL;
+	m_hti_iServerUDPPort=NULL;
+	m_hti_m_bRemoveFilesToBin=NULL;
+	m_hti_HighresTimer=NULL;
+	m_hti_TrustEveryHash=NULL;
+	m_hti_InspectAllFileTypes=NULL;
+	m_hti_maxmsgsessions=NULL;
+	m_hti_PreferRestrictedOverUser=NULL;
+	m_hti_UseUserSortedServerList=NULL;
+	m_hti_WebFileUploadSizeLimitMB =NULL;
+	m_hti_AllowedIPs=NULL;
+	m_hti_DebugSearchResultDetailLevel=NULL;
+	m_htiCryptTCPPaddingLength=NULL;
+	m_htidatetimeformat = NULL;
+	m_htidatetimeformat4log = NULL;
+	m_htidatetimeformat4list = NULL;
+	m_htiLogError = NULL;
+	m_htiLogWarning = NULL;
+	m_htiLogSuccess = NULL;
+	m_htidontcompressavi = NULL;
+	m_htiShowCopyEd2kLinkCmd = NULL;
+	m_htiIconflashOnNewMessage = NULL;
+	m_htiReBarToolbar = NULL;
+	m_htiICH = NULL;
+	m_htiShowVerticalHourMarkers = NULL;
+    m_htiAdjustNTFSDaylightFileTime = NULL;
+    m_htidontcompressavi = NULL;
+	m_htiFileBufferTimeLimit = NULL;
+	m_htiRearrangeKadSearchKeywords = NULL;
+	//MORPH END  leuk_he Advanced official preferences.
+
     CPropertyPage::OnDestroy();
 }
 

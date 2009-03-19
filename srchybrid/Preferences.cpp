@@ -2149,6 +2149,7 @@ void CPreferences::SavePreferences()
 	ini.WriteString(L"CommentFilter",commentFilter);
 	ini.WriteString(L"DateTimeFormat",GetDateTimeFormat());
 	ini.WriteString(L"DateTimeFormat4Log",GetDateTimeFormat4Log());
+	ini.WriteString(L"DateTimeFormat4Lists",GetDateTimeFormat4Lists());
 	ini.WriteString(L"WebTemplateFile",m_strTemplateFile);
 	ini.WriteString(L"FilenameCleanups",filenameCleanups);
 	ini.WriteInt(L"ExtractMetaData",m_iExtractMetaData);
@@ -2346,6 +2347,8 @@ void CPreferences::SavePreferences()
     ini.WriteBool(L"IconflashOnNewMessage",m_bIconflashOnNewMessage);
     ini.WriteBool(L"ReBarToolbar",m_bReBarToolbar);
 	ini.WriteBool(L"ICH",IsICHEnabled());	// 10.5
+	ini.WriteInt(L"FileBufferTimeLimit", m_uFileBufferTimeLimit/1000);
+	ini.WriteBool(L"RearrangeKadSearchKeywords",m_bRearrangeKadSearchKeywords);
 
 	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
 	CString WriteAllowedIPs ;
@@ -2354,7 +2357,6 @@ void CPreferences::SavePreferences()
            WriteAllowedIPs = WriteAllowedIPs  + _T(";") + ipstr(GetAllowedRemoteAccessIPs()[i]);
     ini.WriteString(L"AllowedIPs",WriteAllowedIPs);  // End Seciotn Webserver
     ini.WriteBool(L"ShowVerticalHourMarkers",m_bShowVerticalHourMarkers,L"Statistics");
-
 	// MORPH END  leuk_he Advanced official preferences. 
 
 
@@ -4831,8 +4833,6 @@ uint16	CPreferences::GetWSPort()
 // MORPH leuk_he:run as ntservice v1.. (startup and ws port) 
 
 // MORPH START show less controls
-
-
 bool CPreferences::SetLessControls(bool newvalue)
 {
 	if (newvalue ==  m_bShowLessControls)
