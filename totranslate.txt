@@ -3,6 +3,27 @@
 // here: http://emulemorph.cvs.sourceforge.net/*checkout*/emulemorph/CVSROOT/MorphKad/srchybrid/emule.rc
 // Mail result to leuk_he at xs4all d0t nl 
 
+	IDS_VIEW3               " (shared with subdir)"
+    IDS_PERMISSION          "Show Permission"
+
+STRINGTABLE 
+BEGIN
+    IDS_CRC32_ABORT         "Abort calculation"
+    IDS_DONTREMOVESPARETRICKLESLOT "Don't remove spare trickle slot"
+    IDS_MINDATARATEFRIEND   "Global datarate (0kB/s = unlimited, 1...3kB/s = no zzRatio)"
+    IDS_MINDATARATEPOWERSHARE "Global datarate (0kB/s = unlimited)"
+    IDS_MAXCLIENTDATARATEFRIEND "Max client datarate (0kB/s = unlimited)"
+    IDS_MAXCLIENTDATARATEPOWERSHARE "Max client datarate (0kB/s = unlimited)"
+    IDS_MAXCLIENTDATARATE   "Max client datarate (0kB/s = unlimited)"
+    IDS_DISPLAYFUNNYNICK    "Enable FunnyNick display"
+    IDS_MAXDATARATEFRIEND   "Max Global datarate limit (% of upload speed)"
+    IDS_MAXDATARATEPOWERSHARE "Max Global datarate limit (% of upload speed)"
+    IDS_HIDDEN              "Hidden"
+END
+
+    IDS_CRYPT_INITFAILED    "Failed to initialize cryptokeys - secure ident disabled\nCheck directory permission on config dir."
+    IDS_UPNP                "Universal Plug and Play (UPnP)"
+
 STRINGTABLE 
 BEGIN
     IDS_CRASHRPT_DONE       "Crash report has been generated."

@@ -187,7 +187,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_IP                  "IP"
+    IDS_IP                  "IP"//!
     IDS_DESCRIPTION         "描述"
     IDS_PING                "反應"
     IDS_FILES               "檔案數"
@@ -293,11 +293,11 @@ BEGIN
     IDS_SRV_NOTADDED        "伺服器沒有被加入!"
     IDS_SRV_NOURLAV         "沒有可用的網址."
     IDS_INVALIDURL          "無效的網址"
-    IDS_ERR_FAILEDDOWNLOADMET "從 %s 下載伺服器清單失敗"
 END
 
 STRINGTABLE 
 BEGIN
+    IDS_ERR_FAILEDDOWNLOADMET "從 %s 下載伺服器清單失敗"
     IDS_PERMISSION          "許可"
     IDS_SHAREDFILES         "已分享檔案"
     IDS_PRIOVERYLOW         "最低"
@@ -307,6 +307,10 @@ BEGIN
     IDS_VIAPASSIVE          "經由被動"
     IDS_ERR_RENAMESF        "重新命名失敗\r\n    ""%s""\r\n到\r\n    ""%s""\r\n\r\n%s"
     IDS_AVAILABLE           "有用的"
+END
+
+STRINGTABLE 
+BEGIN
     IDS_FSTAT_TRANSFER      "傳輸"
     IDS_FSTAT_CONNECTION    "連線"
     IDS_FSTAT_SERVERS       "伺服器"
@@ -629,14 +633,14 @@ BEGIN
     IDS_QUEUEFULL           "等候區已滿"
     IDS_AVG                 "平均"
     IDS_BYTES               "位元組"
-    IDS_KBYTES              "KB"
-    IDS_MBYTES              "MB"
+    IDS_KBYTES              "KB"//!
+    IDS_MBYTES              "MB"//!
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_GBYTES              "GB"
-    IDS_TBYTES              "TB"
+    IDS_GBYTES              "GB"//!
+    IDS_TBYTES              "TB"//!
     IDS_SECS                "秒"
     IDS_MINS                "分"
     IDS_HOURS               "時"
@@ -694,7 +698,7 @@ STRINGTABLE
 BEGIN
     IDS_PW_CON_CAPFRM       "能力"
     IDS_IRC_PRIVATECHANSTART "* 私人的聊天會議已開始"
-    IDS_IRC_SLAPMSG         "* %s 用大隻的巴比倫魚打了 %s 一巴掌!"
+    IDS_IRC_SLAPMSG         "* %s 用大隻的巴別魚打了 %s 一巴掌!"
     IDS_IRC_PRIVMESSAGE     "私人訊息"
     IDS_WEB_REMOTE_LINK_ADDED "連結已被加入: "
     IDS_WEB_REMOTE_LINK_NOT_ADDED "連結未被加入. 不正確的密碼."
@@ -721,7 +725,7 @@ BEGIN
     IDS_IRC_NICK            "暱稱"
     IDS_IRC_SEND            "送出"
     IDS_IRC_NAME            "名稱"
-    IDS_IRC_SLAPMSGSEND     "PRIVMSG %s :\001ACTION 用大隻的巴比倫魚掌了 %s!\001"
+    IDS_IRC_SLAPMSGSEND     "PRIVMSG %s :\001ACTION 用大隻的巴別魚掌了 %s!\001"
     IDS_IRC_ADDTIMESTAMP    "在訊息上加時間標籤"
 END
 
@@ -835,9 +839,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_PRIOAUTONORMAL      "自動 [一般]"
-    IDS_PRIOAUTOHIGH        "自動 [高]"
+    IDS_PRIOAUTOHIGH        "自動 [最高]"
     IDS_PRIOAUTORELEASE     "自動 [釋放]"
-    IDS_PRIOAUTOLOW         "自動 [低]"
+    IDS_PRIOAUTOLOW         "自動 [最低]"
     IDS_ERR_CONTIMEOUT      "嘗試連線到 ""%s"" (%s:%u ) 已逾時"
     IDS_OUTOFSERVERS        "在清單中的所有伺服器連線失敗. 使用其他途徑."
     IDS_PW_CONLIMITS        "連線限制"
@@ -875,10 +879,10 @@ BEGIN
     IDS_CMT_FAIR            "尚可"
     IDS_CMT_EXCELLENT       "優良"
     IDS_CMT_NOTRATED        "沒有等級"
-    IDS_KILO                "K"
-    IDS_MEGA                "M"
-    IDS_GIGA                "G"
-    IDS_TERRA               "T"
+    IDS_KILO                "K"//!
+    IDS_MEGA                "M"//!
+    IDS_GIGA                "G"//!
+    IDS_TERRA               "T"//!
     IDS_IRC_EMULEPROTO_IGNOREINFOMESSAGE "忽略 eMule 協定訊息"
     IDS_SMARTLOWIDCHECK     "在連線時使用智慧型 低-ID 檢查"
     IDS_SF_SRVOCC           "伺服器佔有期間: %.2f%%"
@@ -935,7 +939,7 @@ BEGIN
     IDS_PW_VIDEOPLAYER      "影像播放器"
     IDS_VIDEOBACKUP         "建立備份來預覽"
     IDS_MYINFO              "我的資訊"
-    IDS_ID                  "ID"
+    IDS_ID                  "ID"//!
     IDS_IDLOW               "低-ID"
     IDS_IDHIGH              "高-ID"
     IDS_UPSTATUS            "已獲得部分"
@@ -1014,7 +1018,6 @@ BEGIN
     IDS_USECREDITSYSTEM     "使用額度系統 (獎賞上載者)"
     IDS_FIRSTAUTODOWN       "假如您想要讓 eMule 管理您的下載優先權, 啟用這個選項.\n\n開啟這項功能將會允許 eMule 使一個檔案下載有大量的來源但不會影響到少量來源檔案的下載. 這項功能將只會影響未來的下載."
     IDS_FIRSTAUTOUP         "假如您想要讓 eMule 管理您的上載優先權, 啟用這個選項.\n\n開啟這項功能將會允許 eMule 去增進稀有檔案的流通率將會幫助不易取得的人得到它. 關閉這項功能將會允許 eMule 去上載一個流通的檔案優先於稀有的檔案. 這項功能將只會影響未來的分享檔案."
-    IDS_FIRSTFULLCHUNK      "假如您想要上載完整區塊, 啟用這個選項.\n\n使用完整區塊給客戶端一個好的完整的區塊. 關閉這項功能將會幫助你的等候區快速輪流. 假如您專注於釋放檔案者, 您將會想要開啟這個功能."
     IDS_FIRSTSAFECON        "假如您想要讓 eMule 使用安全的方式連線, 啟用這個選項.\n\n關閉這項功能將允許 eMule 加快一些連線到伺服器的速度, 但或許會造成您得到 低-ID 或連線失敗的機會."
     IDS_FIRSTAUTOCON        "假如您想要 eMule 在啟動時連線, 啟用這個選項."
     IDS_FIRSTCOMPLETE       "您現在已完成第一次的精靈設定.\n\n所有的設定值都能由按下選項圖示來改變. 如需解釋及說明請在 eMule 按 F1 !"
@@ -1160,7 +1163,7 @@ BEGIN
     IDS_HM_SCHED_ON         "啟用時間表"
     IDS_HM_SCHED_OFF        "停用時間表"
     IDS_HM_LINKHP           "eMule 首頁"
-    IDS_HM_LINKFAQ          "eMule FAQ"
+    IDS_HM_LINKFAQ          "eMule FAQ"//!
     IDS_HM_LINKVC           "eMule 版本檢查"
     IDS_DEBUG_SOURCE_EXCHANGE "記錄客戶端來源交換及伺服器來源查詢/回覆"
     IDS_SHAREDREQ1          "使用者 %s (%u) 要求您的已分享資料夾清單 -> %s"
@@ -1306,7 +1309,7 @@ BEGIN
     IDS_VERSION             "版本"
     IDS_PASTE               "貼上"
     IDS_A4AF                "來源處理"
-    IDS_MOBILEMULE          "MobileMule"
+    IDS_MOBILEMULE          "MobileMule"//!
     IDS_ENABLEMM            "啟用 MobileMule"
     IDS_AUTOCAT_LABEL       "自動 類別-分配 (樣式, 以 | 做分隔)"
     IDS_SHOWEXTSETTINGS     "顯示更多控制 (進階的模式控制)"
@@ -1464,7 +1467,7 @@ BEGIN
     IDS_KAD_RECHECKFW       "重新檢查防火牆"
     IDS_SHAREDTITLE         "分享 eD2K|Kad"
     IDS_FIREWALLED          "防火牆內"
-    IDS_KADEMLIA            "Kad"
+    IDS_KADEMLIA            "Kad"//!
     IDS_KADCONTACTLAB       "聯繫"
     IDS_KADDISTANCE         "距離"
     IDS_KEY                 "鍵"
@@ -1864,7 +1867,7 @@ BEGIN
     IDS_WARNING_WRONGFILEEXTENTION 
                             "警告: 檔案的副檔名 ""%s"" 沒有相對應的典型副檔名\r\n來使用這個檔案格式. 您或許想要重新命名檔案到\r\n那些副檔名 ""%s"" 其中之一\r\n來適當的使用或檢視那樣的檔案格式.\r\n"
     IDS_MEDIAINFO_DRMWARNING 
-                            "警告: 這個檔案 ""%s"" 似乎被數位版權管理保護.\r\n您大多數將不能夠在沒有原始檔案的一個授權情形使用那樣的檔案.\r\n"
+                            "警告: 這個檔案 ""%s"" 似乎被數位版權管理保護(DRM).\r\n在沒有創作者的授權下大部分情況下您將不能使用這個檔案.\r\n"
     IDS_LOADFILTER_EMTOOLBAR "eMule 工具列點陣圖檔案"
     IDS_LOADFILTER_EMSKINFILES "eMule 面板檔案"
     IDS_OPTIONS             "選項"
@@ -1890,7 +1893,7 @@ BEGIN
     IDS_UNVERIFIED          "未驗證"
     IDS_INVALIDFILEEXT      "無效的副檔名"
     IDS_UNKNOWNFILEEXT      "未知的副檔名"
-    IDS_ENABLEMINIMULE      "啟用迷你騾"
+    IDS_ENABLEMINIMULE      "啟用 MiniMule"
     IDS_DISABLE_AUTOARCHPREV 
                             "在檔案詳細資訊內停用自動壓縮檔預覽"
     IDS_US_STALLEDW4BR      "動彈不得! 區塊要求等待中."
@@ -1912,7 +1915,7 @@ BEGIN
     IDS_UPNP_NOSERVICE      "UPnP 裝置主機服務沒有執行, 略過 UPnP 設定"
     IDS_DELAYEDBYUPNP       "連線到網路有點延遲, 因為 UPnP 仍然忙於連接埠轉向的設定."
     IDS_DELAYEDBYUPNP2      "請稍候, eMule 將儘快完成 UPnP 連線."
-    IDS_UPNP                "UPnP"
+    IDS_UPNP                "UPnP"//!
     IDS_UPNPCLOSEONEXIT     "在離開時移除 UPnP 連接埠的轉向"
     IDS_UPNPSKIPWANIP       "略過 WAN IP 設定"
     IDS_UPNPSKIPWANPPP      "略過 WAN PPP 設定"
@@ -1929,6 +1932,44 @@ BEGIN
     IDS_MARKSPAM            "標記為廣告"
     IDS_MARKNOTSPAM         "標記為非廣告"
     IDS_SEARCHSPAMFILTER    "啟用搜尋結果廣告過濾"
+    IDS_SHOWSMILEYS         "顯示表情符號"
+    IDS_CAPTCHAREQUEST      "為了避免廣告訊息, 這個使用者需要您回覆正確的 Captcha 您才可以傳送訊息給他. 請在這個圖片中輸入您所看到的字母:"
+    IDS_CAPTCHAFAILED       "您回覆的 Captcha 不正確且您的訊息將被忽略. 您可以再提出一個新的 Captcha 請求來傳送新訊息."
+    IDS_CAPTCHASOLVED       "您通過 Captcha 檢查且這個使用者也接收了您的訊息."
+    IDS_USECAPTCHAS         "要求 Captcha 認證"
+    IDS_BOOTSRAPNODESDAT    "Nodes.dat 來自 URL:"
+    IDS_DOWNLOADING_NODESDAT_FROM "Nodes.dat 從 %s 下載中"
+    IDS_DOWNLOADING_NODESDAT "Nodes.dat 下載中..."
+    IDS_ERR_FAILEDDOWNLOADNODES "Nodes.dat 從 %s 下載失敗"
+    IDS_PREVENTSTANDBY      "當 eMule 執行時避免進入休眠模式"
+    IDS_KADID               "KadID"//!
+    IDS_SEARCHINGFRIENDKAD  "正在 Kad 網路搜尋好友"
+    IDS_FOUND               "發現"
+    IDS_EXTERNUDPPORT       "外部 UDP 連接埠"
+    IDS_STORESEARCHES       "在重新啟動時記住開啟的搜尋"
+    IDS_WRN_INCFILE_EXISTS  "您已經選擇做為新進檔案的一個新資料夾並不是空的. 所有已經存在於這個資料夾的檔案將會被 eMule 自動地分享."
+    IDS_EDITSPAMFILTER      "編輯廣告過濾器..."
+    IDS_EDITSPAMFILTERCOMMENTS "編輯用於註解的廣告過濾器"
+    IDS_WIZZARDOBFUSCATION  "假如您想要啟用模糊化協定請啟用這個選項\n\n如果您的 ISP 嘗試壓制或封鎖 eMule, 啟用模糊化將會幫助改善像這樣的限制."
+    IDS_BETANAG             "這是一個測試版的 eMule. 請回報問題並經常地在我們的論壇檢查是否有更新 (http://forum.emule-project.net)."
+    IDS_CONFIRMNODESDOWNLOAD 
+                            "您想要下載並使用 Kad 聯繫 (nodes.dat) 來自這個位址:\n%s ?"
+    IDS_AUTOMATIC           "自動的"
+    IDS_NOTCONNECTEDANY     "您尚未連線到一個伺服器或 Kad 網路!"
+    IDS_ERR_SHARED_DIR      "讀取已分享資料夾 ""%s"" 失敗 - %s"
+    IDS_FILE_WARNING_DRM    "檔案 ""%s"" 似乎被數位版權管理保護(DRM).\r\n\r\n在沒有創作者的授權下大部分情況下您將不能使用這個檔案. 您必須注意到當開啟這個檔案大部分情況下會使您的多媒體播放器去開啟一個 Web 瀏覽器且將會自動連接到檔案的創作者網站並且要求獲得一個授權.\r\n\r\n您真的想要繼續開啟這檔案?"
+    IDS_CHECK_FILE_OPEN     "當開啟未信任檔案時提出警告"
+    IDS_BOOTABLE            "可啟動的"
+    IDS_UNSUPPORTEDIMAGE    "未知援的影像"
+END
+
+
+STRINGTABLE 
+BEGIN
+    IDS_UNSHARE             "解除分享"
+    IDS_WEBUPNPINCLUDE      "包含連接埠至 UPnP 設定"
+    IDS_ADDEDON             "已加入在"
+    IDS_RESOLVELINKS        "解析在已分享資內的捷徑"
 END
 
 STRINGTABLE 

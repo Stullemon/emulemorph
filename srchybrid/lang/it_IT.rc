@@ -109,7 +109,6 @@ BEGIN
     IDS_FD_COMPR            "Compressione"
     IDS_WIZARD_NETWORK      "Scegli le reti da usare."
     IDS_MAIN_READY          "eMule v%s è pronto"
-    IDS_TRANSVERSION        "  |  Traduzione Italiana di FrankyFive"
     IDS_WIZARD_ED2K         "Impostazioni eD2K"
     IDS_SEL_SKIN            "Scegli una Skin..."
     IDS_MAIN_SOCKETERROR    "Errore Fatale: Impossibile creare un Socket sulla porta %u"
@@ -848,7 +847,7 @@ BEGIN
     IDS_PW_TBN_POP_ALWAYS   "Viene ricevuto un Messaggio"
     IDS_PW_TBN_ONDOWNLOAD   "Viene terminato un Download"
     IDS_PW_EKDEV_OPTIONS    "Notifiche"
-    IDS_PW_TASKBARNOTIFIER  "PopUp dei messaggi"
+    IDS_PW_TASKBARNOTIFIER  "Messaggi PopUp"
     IDS_PW_TBN_OPTIONS      "Avvertimi quando:"
     IDS_TBN_NEWCHATMSG      "Messaggio da"
     IDS_PW_CON_CAPFRM       "Capacità"
@@ -913,7 +912,7 @@ BEGIN
     IDS_PREF_STARTNEXTFILECATONLY "Solo nella stessa categoria"
     IDS_LOG_ULDL_EVENTS     "Registra gli eventi di Upload/Download"
     IDS_PEERCACHE_ENABLED   "Il tuo ISP supporta la tecnologia PeerCache, Cache dei Download abilitata!"
-    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "Consenti all'utente di aggiungerti alla sua Lista degli Amici"
+    IDS_IRC_EMULEPROTO_ALLOWADDFRIEND "Consenti agli altri di aggiungerti alla Lista degli Amici"
     IDS_SOURCESWAPBLOCKED   "Scambio bloccato"
     IDS_TRICKLING           "Standby" //!
     IDS_A4AF_CHECK_THIS_NOW "Esamina adesso questa fonte (Debug)"
@@ -1056,7 +1055,7 @@ BEGIN
     IDS_ADD                 "Aggiungi"
     IDS_RECOVERED_PARTMET   "File part.met del File ""%s"" recuperato!"
     IDS_CMT_QUEST           "Commenta questo File! (Questo testo verrà mostrato a tutti gli utenti)"
-    IDS_CMT_AIDE            "Grazie a questa funzione puoi dare un voto e/o un commento ai File condivisi nella Rete di eMule. Se questo è un film, puoi indicare la sua durata, la trama, la lingua... e se invece è una Fake puoi informare tutti gli altri utenti... "
+    IDS_CMT_AIDE            "Grazie a questa funzione puoi dare un voto e/o un commento ai File condivisi nella Rete di eMule. Per un film, puoi indicare la sua durata, la trama, la lingua... e se invece è un Fake puoi informare tutti gli altri utenti..."
     IDS_CMT_ADD             "Comm&enti..."
     IDS_CMT_NONE            "Nessun Commento presente"
     IDS_CMT_READ            "Commento File:"
@@ -1114,7 +1113,6 @@ BEGIN
     IDS_USECREDITSYSTEM     "Usa il Sistema dei Crediti (Favorirai chi ti fa scaricare)"
     IDS_FIRSTAUTODOWN       "Vuoi che eMule gestisca le priorità dei File in Download?\n\nAttivando quest'opzione permetterai ad eMule di controllare che i File con molte fonti non interferiscano con quelli con poche fonti. Quest'opzione avrà effetto solo sui Download futuri."
     IDS_FIRSTAUTOUP         "Vuoi che eMule gestisca le priorità degli Upload?\n\nAttivando quest'opzione consentirai ad eMule di accelerare la diffusione dei File più rari, inviando di meno i File popolari. Disattivando quest'opzione consentirai ad eMule di inviare con la stessa intensità i File rari e quelli popolari. Quest'opzione avrà effetto solo sui File condivisi in futuro."
-    IDS_AUTOMATIC           "Automatico"
     IDS_FIRSTSAFECON        "Vuoi che eMule si connetta ai Server utilizzando una connessione sicura?\n\nDisattivando questa funzione, permetterai ad eMule di connettersi ai Server più velocemente, ma sarà maggiore la possibilità di ottenere falsi ID Bassi."
     IDS_FIRSTAUTOCON        "Connetti automaticamente eMule al suo avvio."
     IDS_FIRSTCOMPLETE       "Hai completato il processo d'impostazione passo-passo.\n\nTutte queste ed altre opzioni possono essere modificate cliccando sul pulsante 'Opzioni'. Per spiegazioni e supporto controlla la guida premendo F1 in eMule!"
@@ -1148,7 +1146,7 @@ BEGIN
     IDS_WEB_REFRESH_TIME    "Aggiorna finestre ogni"
     IDS_WEB_REFRESH_COMMENT "Tempo in secondi (0 = Disattivato):"
     IDS_SV_URL              "URL" //!
-    IDS_WS_RELOAD_TMPL      "Stile del WS"
+    IDS_WS_RELOAD_TMPL      "Stile del WebServer"
     IDS_SV_DEBUGLOG         "Registro Approfondito"
 END
 
@@ -1511,7 +1509,7 @@ BEGIN
     IDS_IMP_ERR_FAILED      "Errore: Conversione Fallita!"
     IDS_IMP_STATUSQUEUED    "In Coda"
     IDS_IMP_ALRDWL          "Già in Download"
-    IDS_IMP_ADDBTN          "&Aggiungi File"
+    IDS_IMP_ADDBTN          "&Aggiungi File..."
     IDS_IMP_RETRYBTN        "&Riprova"
     IDS_IMP_REMOVEBTN       "El&imina"
     IDS_IMP_SELFOLDER       "Scegli una cartella per cercare i File temporanei in Download (part.met)! (le sottocartelle saranno incluse)"
@@ -1588,7 +1586,7 @@ STRINGTABLE
 BEGIN
     IDS_RADCLIENTS          "Dai Client Conosciuti"
     IDS_KADUDPPORTERR       "La porta UDP usata dalla rete Kad è in conflitto con quella usata da eMule per il Protocollo Esteso o per la connessione ai Server. La porta è stata cambiata con la %u."
-    IDS_CONFIRM_FILEDELETE  "Vuoi veramente rimuovere tutti i File selezionati dal disco?"
+    IDS_CONFIRM_FILEDELETE  "Vuoi davvero rimuovere tutti i File selezionati?"
     IDS_OPENFOLDER          "Apri Cartella"
     IDS_RUNASUSER           "Esegui eMule come utente non privilegiato"
     IDS_DELETE              "Cancella dal disco"
@@ -1772,7 +1770,7 @@ BEGIN
     IDS_COLL_TEXTFORMAT     "Salva la Collezione in formato testo"
     IDS_RUNNINGRESTRICTED   "eMule è in esecuzione con privilegi limitati"
     IDS_USS_MANUALUPLOADLIMITDETECTED 
-                            "UploadSpeedSense: Trovato un Limite di Upload. Avviata la modalità di reazione veloce per i primi 60 secondi."
+                            "UploadSpeedSense: Rilevato un incremento del Limite di Upload nelle Opzioni. Avviata la modalità di reazione veloce per i primi 60 secondi."
     IDS_USS_STATE_PREPARING "Preparazione..."
     IDS_USS_STATE_WAITING   "Attesa..."
     IDS_USS_STATE_ERROR     "Errore!"
@@ -1920,7 +1918,21 @@ BEGIN
     IDS_BETANAG             "Questa è una versione beta di eMule. Riferisci i problemi e controlla regolarmente la presenza di aggiornamenti nel nostro forum (http://forum.emule-project.net)."
     IDS_CONFIRMNODESDOWNLOAD 
                             "Vuoi scaricare ed usare i contatti Kad (nodes.dat) da questo indirizzo:\n%s ?"
+    IDS_AUTOMATIC           "Automatico"
     IDS_NOTCONNECTEDANY     "Non sei connesso ad un Server o alla rete Kad!"
+    IDS_ERR_SHARED_DIR      "Errore nella lettura della cartella condivisa ""%s"" - %s"
+    IDS_FILE_WARNING_DRM    "Il File ""%s"" sembra essere protetto con un Digital Rights Management.\r\n\r\nProbabilmente non sarai in grado di usarlo senza avere una licenza dal produttore. Dovresti essere consapevole che l'apertura di questo File col tuo lettore multimediale attiverà, molto probabilmente, il tuo Web Browser che ti trasferirà automaticamente al sito web del produttore del File in oggetto, dove ti verrà chiesto di acquistare una licenza.\r\n\r\nSei sicuro di voler continuare con l'apertura di questo File?"
+    IDS_CHECK_FILE_OPEN     "Avvisami durante l'apertura di File non attendibili"
+    IDS_BOOTABLE            "avviabile"
+    IDS_UNSUPPORTEDIMAGE    "immagine non supportata"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_UNSHARE             "Non condividere"
+    IDS_WEBUPNPINCLUDE      "Includi la porta nelle impostazioni dell'UPnP"
+    IDS_ADDEDON             "Aggiunto"
+    IDS_RESOLVELINKS        "Risolvi i Link nelle cartelle condivise"
 END
 
 //////////////////////////// MorphXT strings //////////////////////////////////
