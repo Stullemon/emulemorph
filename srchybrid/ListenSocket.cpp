@@ -2448,10 +2448,6 @@ bool CClientReqSocket::PacketReceivedCppEH(Packet* packet)
 {
 	bool bResult;
 	UINT uRawSize = packet->size;
-	//MORPH START - find them weird bugs!
-	if(packet == NULL)
-		theApp.QueueLogLine(false, _T("WARNING: NULL-Packet in PacketReceivedCppEH"));
-	//MORPH END   - find them weird bugs!
 	switch (packet->prot){
 		case OP_EDONKEYPROT:
 			bResult = ProcessPacket((const BYTE*)packet->pBuffer, packet->size, packet->opcode);

@@ -310,6 +310,11 @@ BOOL CEMSocket::AsyncSelect(long lEvent){
 }
 
 void CEMSocket::OnReceive(int nErrorCode){
+//MORPH START take download ack overhead into account
+	OnReceive(nErrorCode,true);
+}
+void CEMSocket::OnReceive(int nErrorCode, bool bAddACK){
+//MORPH END take download ack overhead into account
 	// the 2 meg size was taken from another place
 	static char GlobalReadBuffer[10*1024*1024];
 
@@ -370,7 +375,8 @@ void CEMSocket::OnReceive(int nErrorCode){
 		downloadLimit -= GetRealReceivedBytes();
 	}
 	// Morph START take download ack overhead into account
-	theApp.uploadBandwidthThrottler->SetDownDataOverheadOtherPackets((GetRealReceivedBytes()/1460+ (GetRealReceivedBytes()%1460)?1:0)*40); // 40 bytes tcp overhead per frame.
+	if(bAddACK)
+		theApp.uploadBandwidthThrottler->SetDownDataOverheadOtherPackets((GetRealReceivedBytes()/1460+ (GetRealReceivedBytes()%1460)?1:0)*40); // 40 bytes tcp overhead per frame.
 	// Morph END take download ack overhead into account
 
 	// CPU load improvement
@@ -497,7 +503,12 @@ void CEMSocket::SetDownloadLimit(uint32 limit){
 
 	// CPU load improvement
 	if(limit > 0 && pendingOnReceive == true){
+		//MORPH START take download ack overhead into account
+		/*
 		OnReceive(0);
+		*/
+		OnReceive(0,false);
+		//MORPH END take download ack overhead into account
 	}
 }
 
@@ -506,7 +517,12 @@ void CEMSocket::DisableDownloadLimit(){
 
 	// CPU load improvement
 	if(pendingOnReceive == true){
+		//MORPH START take download ack overhead into account
+		/*
 		OnReceive(0);
+		*/
+		OnReceive(0,false);
+		//MORPH END take download ack overhead into account
 	}
 }
 

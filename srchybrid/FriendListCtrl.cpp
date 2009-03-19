@@ -123,7 +123,12 @@ void CFriendListCtrl::UpdateFriend(int iItem, const CFriend* pFriend)
 {
     // Mighty Knife: log friend activities
 	CString OldName = GetItemText (iItem,0);
-	if ((OldName != pFriend->m_strName) && (thePrefs.GetLogFriendlistActivities ())) {
+	// don't log if the new or old name is/ was a FunnyNick
+	bool bOldNameWasFunny = ((_tcsnicmp(OldName, _T("http://"),7) == 0 || _tcsnicmp(OldName, _T("0."),2) == 0 || _tcsicmp(OldName, _T("")) == 0) &&
+		thePrefs.DisplayFunnyNick());
+	bool bNewNameIsFunny = ((_tcsnicmp(pFriend->m_strName, _T("http://"),7) == 0 || _tcsnicmp(pFriend->m_strName, _T("0."),2) == 0 || _tcsicmp(pFriend->m_strName, _T("")) == 0) &&
+		thePrefs.DisplayFunnyNick());
+	if (!bOldNameWasFunny && !bNewNameIsFunny && (OldName != pFriend->m_strName) && (thePrefs.GetLogFriendlistActivities ())) {
  		#ifdef MIGHTY_TWEAKS
 		AddLogLine(false, GetResString(IDS_FRIENDNAME_CHANGED1),
 									(LPCTSTR) OldName, (LPCTSTR) pFriend->m_strName, (uint8)pFriend->m_dwLastUsedIP, 

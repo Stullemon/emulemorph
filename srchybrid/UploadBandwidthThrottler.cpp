@@ -388,7 +388,8 @@ void UploadBandwidthThrottler::Pause(bool paused) {
 void UploadBandwidthThrottler::SetDownDataOverheadOtherPackets(long bytes)	{
 	sendLocker.Lock();
 	m_nUpDataOverheadFromDownload+=bytes;
-	theStats.AddUpDataOverheadOther((uint32)bytes); // add to overhead calculations
+	if(thePrefs.m_bUseDownloadOverhead)
+		theStats.AddUpDataOverheadOther((uint32)bytes); // add to overhead calculations
 	sendLocker.Unlock();
 }
 
@@ -830,7 +831,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 			if(thePrefs.m_bUseDownloadOverhead) //MORPH leuk_he include download overhead in upload stats
 			   { uint64 downloadoverhead =GetDownDataOverheadOtherPackets_andreset()	;
 			     ControlspentBytes+=	downloadoverhead ;
-			     m_SentBytesSinceLastCallOverheadClass[2] +=downloadoverhead ; // so it correctly displayed in statistics
+			     m_SentBytesSinceLastCallOverheadClass[LAST_CLASS] +=downloadoverhead ; // so it correctly displayed in statistics
 			   }
 			else 
 				GetDownDataOverheadOtherPackets_andreset(); // just reset stats (when enabled later in session)

@@ -112,6 +112,7 @@ protected:
 	virtual void	OnClose(int nErrorCode);
 	virtual void	OnSend(int nErrorCode);	
 	virtual void	OnReceive(int nErrorCode);
+	void	OnReceive(int nErrorCode, bool bAddACK); //MORPH take download ack overhead into account
 	uint8	byConnected;
 	UINT	m_uTimeOut;
 	bool	m_bProxyConnectFailed;

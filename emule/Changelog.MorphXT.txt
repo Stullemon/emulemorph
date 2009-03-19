@@ -39,6 +39,7 @@ CHANGE: Made ICS mode local variable to save some bytes in RAM usage (as pointed
 CHANGE: Updated Show less controls for new columns and added it for context menus [Stulle]
 CHANGE: Enabling Extended controls disables Show less controls and vice versa [Stulle]
 	+ close preferences window to avoid odd behaviour... kinda tricky...
+CHANGE: Switched on Global Hard Limit by default (upgrade unaffected) [Stulle]
 FIX: Corrupted userhash ban [taz]
 FIX: Double increase for badrequests [taz]
 FIX: Incorrect and redundent operation for Double backup [AndCycle]
@@ -46,7 +47,9 @@ FIX: Display FairPlay in lists only if requested file is complete [gomez82]
 FIX: Improper localization of altered category column in DownloadList [Stulle]
 FIX: Failing support of emulepawcio ipfilter.zip format [D10Tmain]
 FIX: Memleak fix around hashing [WiZaRd]
+FIX: Download ACK measurement was incorrect (when download was limited) [Stulle]
 FIX: Download ACK was not displayed and counted in stats as overhead [Stulle]
+FIX: Improper Friend Logging for FunnyNick affected friend clients [Stulle]
 
 Note: Additional options stored in Known.met will be purged like some official stuff is.
 Note: Due to change in column orders we recommend a clean install. You may experience strange looks otherwise.

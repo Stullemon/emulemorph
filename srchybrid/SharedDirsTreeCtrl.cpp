@@ -1077,7 +1077,7 @@ bool CSharedDirsTreeCtrl::FileSystemTreeHasSubdirectories(CString strDir)
 bool CSharedDirsTreeCtrl::FileSystemTreeHasSharedSubdirectory(CString strDir, bool bOrFiles)
 {
 	// SLUGFILLER START: shareSubdir
-	if (!FileSystemTreeHasSubdirectories(strDir))	// early check
+	if (!FileSystemTreeHasSubdirectories(strDir) && !bOrFiles)	// early check
 		return false;
 	// SLUGFILLER END: shareSubdir
 	if (strDir.Right(1) != _T('\\'))
