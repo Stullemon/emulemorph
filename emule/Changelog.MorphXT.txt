@@ -22,7 +22,7 @@ ADD: New default IPFilter (Maintained by Ozzy) [Stulle]
 	+ uses DynDNS to check version, mirrored at SourceForge, unrar.dll required!
 ADD: RAR File download decompress for auto update [official]
 ADD: New hidden options to Advanced Options and Tooltips for new options [Stulle]
-ADD: Rebind UPnP mappings (except WAP for now) like the official does [Stulle]
+ADD: Rebind UPnP mappings (UDP, TCP and Webserver for now) like the official does [Stulle]
 CHANGE: Display NNS in UploadListCtrl [Diabolo111]
 CHANGE: Updated German language file [Morella/Myth88]
 CHANGE: Updated French language file [Nicolas_FR]

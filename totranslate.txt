@@ -375,8 +375,8 @@ BEGIN
     IDS_RATIO_CREDIT        "Ratio Credit"
     IDS_EASTSHARE_CREDIT    "EastShare Credit"
     IDS_PREFER_SHARE_ALL    "Prefer Share All"
-    IDS_MET_FILE_CONTROL    ".met File Control (be ware of changing any value !!)"
-    IDS_EXPIRED_KNOWN       "Expired time of known files (day) (0 = Default)"
+    IDS_MET_FILE_CONTROL    "known.met File Control"
+    IDS_EXPIRED_KNOWN       "Days until purge (0 = Default [31 days])"
     IDS_DELETEFILE          "Delete File"
     IDS_PAWCIO_CREDIT       "Pawcio Credit"
 END
@@ -849,15 +849,15 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDC_FILTE_TIP           "Messages containing these words are considered spam and\nare filtered and the client sending them are banned. Friend\nare not banned"
+    IDC_FILTE_TIP           "Messages containing these words are considered spam and\nare filtered and the clients sending them are banned. Friends\nare not banned"
     IDC_MSGONLYFRIEND_TIP   "Messages from clients not in your friendlist are not displayed"
     IDC_COMMENTFILTE_TIP    "File comments that contains these words will\nbe considered spam and will not be displayed\nin the file details"
-    IDC_SEC_MIS_TIP         "Secure identification is always enabled for morph.\nRun as secure user is only availbe on NT based(NT/2000/XP)  systems"
-    IDC_RUNASUSER_TIP       "Run emule as a restricted user. Emule will create a user\n'eMule_secure' that is only allowed to write in the\ninstallation folder, temp and incoming folders. Note:\nRunning files/preview from eMule might fail,\nassociating eMule with ed2k link is restricted.\nYour system is more secure against hacks.\ncheck in the taksmananager if emules run as 'eMule_secure'"
+    IDC_SEC_MIS_TIP         "Secure identification is always enabled for morph.\nRun as secure user is only available on NT based(NT/2000/XP)  systems"
+    IDC_RUNASUSER_TIP       "Run emule as a restricted user. Emule will create a user\n'eMule_secure' that is only allowed to write in the\ninstallation folder, temp and incoming folders. Note:\nRunning files/preview from eMule might fail,\nassociating eMule with ed2k link is restricted.\nYour system is more secure against hacks.\ncheck in the task manager if emule runs as 'eMule_secure'"
     IDC_MSGONLYSEC_SEC      "Only messages from clients that had a secure identification are accepted"
     IDC_ADVSPAMFILTER_TIP   "Duplicate messages or messages that you do not answer within\na few  messages are considered spam and the client will be banned"
     IDS_LOG_SERVER_FILTERED "Removed server at %s  from list '%s' :in ipfilter '%s'"
-    IDC_ENABLEPROXY_TIP     "Enable this if the only option for you to \nconnect to internet is via a proxy. This should\nalways result in a lowid (not optimal)\n<b>WARNING:</b>\nOnly enter a proxy if you are sure you have one\nand you are able to provide the correct information.\nProxies are only seldom used on home PCs and\noffer no advantage for users outside a LAN.\nHardware routers or modems are no proxies!"
+    IDC_ENABLEPROXY_TIP     "Enable this if the only option for you to \nconnect to internet is via a proxy. This should\nalways result in a lowid (not optimal)\n<b>WARNING:</b>\nOnly enter a proxy if you are sure you have one\nand you are able to provide the correct information.\nProxies are only seldom used on home PCs and\noffer no advantage for users outside a LAN.\nHardware routers or modems are not proxies!"
     IDC_PROXYTYPE_TIP       "Set the protocol of the proxy.\nThe precedence of the proxy protocol performance is as follows.\n1. SOCKS 4a (highest performance because of least overhead)\n2. SOCKS 4\n3. SOCKS 5\n4. HTTP/1.0\n5. HTTP/1.1 (lowest performance because of most overhead)"
     IDC_PROXYNAME_TIP       "Hostname or ip address of proxy"
     IDC_PROXYPORT_TIP       "port number the proxy communicates on.\nTypical 1080 for socks and 80 or 8080 for http."
@@ -876,9 +876,9 @@ BEGIN
     IDS_PW_SCORE_TIP        "Use the server priority to connect to high priority servers first"
     IDS_MANUALSERVERHIGHPRIO_TIP 
                             "Give servers that are manually\ntyped in a high priority"
-    IDS_EDITLIST_TIP        "Edit the address.dat file to update the serverlist on startup with.\nYOu should put an entry in the address.dat file if you enable this checkbox"
+    IDS_EDITLIST_TIP        "Edit the addresses.dat file to update the serverlist on startup.\nYou should put an entry in the addresses.dat file if you enable this checkbox"
     IDS_PW_AUTOCONNECTSTATICONLY_TIP 
-                            "Connect to server that are set to static only. If there are no server static automatic connect will fail."
+                            "Only connect to servers that are set to static. If there are no static servers set, automatic connect will fail."
     IDS_MAXCONNECTIONSSWITCHBORDER_TIP 
                             "Maximal concurrent connection to switch between USS and SUC\nUSS is better in low connection, SUC needs several connection to determine a good average."
     IDS_SUC_TIP             "Use Smart Upload Control \nThe turnaround time to a peer is determined to find the delay\nof the line. Advantage: No overhead\nDisadvantage: requires active clients to measure speed"
@@ -893,16 +893,16 @@ BEGIN
     IDS_SCC_TIP             "How to handle categories in the transfer window"
     IDS_SAC_TIP             "Handling of sources that have\nmultiple files (<b>A</b>sked <b>4</b> for <b>A</b>nother <a>F</a>ile)\n&Smart af4f control "
     IDS_DEFAULT_TIP         "IDS_DEFAULT_TIP"
-    IDS_UM_TIP              "Handling of the upload:\nSlot control ,\nupload bandthwidth\nspeed sensing"
-    IDS_DYNUPLOAD_TIP       "Vary the upload speed automatic by detecing available bandwidth."
+    IDS_UM_TIP              "Handling of the upload:\nSlot control ,\nupload bandwidth\nspeed sensing"
+    IDS_DYNUPLOAD_TIP       "Vary the upload speed automatically by detecting available bandwidth."
     IDS_SECURITY_TIP        "Security options: Anti leecher & anti credit hack"
     IDS_PW_DISPLAY_TIP      "How to display some items \nin the download window"
     IDS_PW_FRIENDS_TIP      "Speed settings for friend slots.\nA user can be made a friend and then establish a\nfriend slot for a direct starting download"
-    IDS_POWERSHARE_TIP      "Powershare are high priority upload slot for releasing files and/or Payback First.\nSpeed settings"
+    IDS_POWERSHARE_TIP      "Powershare slots are high priority upload slots for releasing files and/or Payback First.\nSpeed settings"
     IDS_AUTODYNUPSWITCHING_TIP "Switch between SUC and USS"
     IDS_SLOT_LIMIT_NONE_TIP "Do not limit the number of open slots.\nThis is the recommended setting, but the upload has to be correct\nor too many very slow slots will be opened when the set upload speed\ncannot be reached."
     IDS_SLOT_LIMIT_THREE_TIP 
-                            "Limit the number of slots to the set upload speed / 3kb like the official\nclient. Does not apply until at least upload 4 slots are active (Default)"
+                            "Limit the number of slots to the set upload speed / 3kb like the official\nclient. Does not apply until at least 4 upload slots are active (Default)"
     IDS_DYNDISABLED_TIP     "Use the value supplied in the connections tab for upload"
 END
 
@@ -925,18 +925,18 @@ BEGIN
     IDS_DOWNLOAD_IN_BOLD_TIP 
                             "Display the files that are\ncurrently downloading\nin the download window in <b>Bold</b>"
     IDS_CLIENTPERCENTAGE_TIP 
-                            "Show the percentage that the peer client has in the spreadbar."
-    IDS_ANTI_LEECHER_TIP    "Ban and refuse clients that can be used\nfor leecher ativities or does not send a\nproper identification(ghosts).(default:enabled)"
-    IDS_ANTI_CREDITHACK_TIP "Prevents our credits/userhash to be stolen (default:activated)"
+                            "Show the percentage that the peer client has in the progress bar."
+    IDS_ANTI_LEECHER_TIP    "Ban and refuse clients that can be used\nfor leecher activities or which do not send a\nproper identification(ghosts).(default:enabled)"
+    IDS_ANTI_CREDITHACK_TIP "Prevents our credits/userhash from being stolen (default:activated)"
     IDS_INFINITEQUEUE_TIP   "Give our queue an unlimited size"
     IDS_DONTREMOVESPARETRICKLESLOT_TIP 
-                            "If Morph opens extra trickle(slow upload) slots,\ndisabling this option will close those slots when\nno longer needed and put the users back in the \nqueue without loosing position"
+                            "If Morph opens extra trickle(slow upload) slots,\ndisabling this option will close those slots when\nno longer needed and put the users back in the \nqueue without losing position.\nEnabling this option disables slotfocus\n"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_DISPLAYFUNNYNICK_TIP 
-                            "Create a artificial <i>[Funnynick]Madeup1 madeup2</i> for users that do not set their nick."
+                            "Create an artificial <i>[Funnynick]Madeup1 madeup2</i> for users that do not set their nick."
     IDS_CLIENTQUEUEPROGRESSBAR_TIP 
                             "Show a bar in the bottom of the \ntransfer windows with the number of clients in the queue."
     IDS_DOWNLOADDATARATEAVERAGETIME_TIP 
@@ -948,36 +948,36 @@ BEGIN
     IDS_MAXCLIENTDATARATEFRIEND_TIP 
                             "The max speed that is available for a single friend slot."
     IDS_MINDATARATEPOWERSHARE_TIP 
-                            "The total speed that is spend on all powershare slots. (Default:all)"
+                            "The total speed that is spent on all powershare slots. (Default:all)"
     IDS_MAXCLIENTDATARATEPOWERSHARE_TIP 
-                            "The maxs upload speed that is available for 1 slot in powershared status.\nDetault=0, slotfocus, focus all powershare speed to the lowest slot number.\nSetting a value here makes morph swtich from slotfocus to distibute bandtwidth\nmodus."
+                            "The max upload speed that is available for 1 slot in powershared status.\nDetault=0, slotfocus, focus all powershare speed to the lowest slot number.\nSetting a value here makes morph switch from slotfocus to distributed bandwidth\nmodus."
     IDS_MAXCLIENTDATARATE_TIP 
-                            "Max upload speed that 1 single normal client slot receives.\nDefault = 0, slotfocus, all speed to lowest slot number\nto complete a chunk as fast as possible. If a value is \nentered here the upload of normal slots distributes the \nbandwidth over the slots with a targeted max of the value\nset here. Note that this speed may be exceeded for a short\nwhile to fill available\nupload capacity"
+                            "Max upload speed that 1 single normal client slot receives.\nDefault = 0, slotfocus, all speed to lowest slot number\nto complete a chunk as fast as possible. If a value is \nentered here the upload of normal slots distributes the \nbandwidth over the slots with a targeted max of the value\nset here. Note that this speed may be exceeded for  short\nperiods to fill available\nupload capacity"
     IDS_SLOT_LIMIT_GROUP_TIP 
                             "Last resort option to limit the number of slots.\nFirst the upload speed classes are applied and\nthis is only a last resort to limit the number\nof upload slots if the speed limits cannot be\nset correct"
     IDS_SLOT_LIMIT_NUM_TIP  "The upper limit of open slots is a set number. This is only useful for clients that have a high upload."
     IDS_CAT_SHOWCATNAME_TIP "Show the Full category name or the category number in the\nCategory column of the transfer window."
     IDS_CAT_SHOWSELCATDLG_TIP 
                             "Show a category selection/addition dialog \nevery time a file is added to eMule"
-    IDS_CAT_USEAUTOCAT_TIP  "Use The selection criteria filled in the category \n(size/sources/advanced) to find a appropriate category \nto start the download in"
+    IDS_CAT_USEAUTOCAT_TIP  "Use The selection criteria filled in the category \n(size/sources/advanced) to find an appropriate category \nto start the download in"
     IDS_CAT_USEACTIVE_TIP   "Use the active category to start new downloads in"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_CAT_AUTORESUMEORD_TIP 
-                            "Assign a <b>L</b>Linear <b>P</b>riority /n to each download so resume of paused files can be done in the same order."
+                            "Assign a <b>L</b>Linear <b>P</b>riority /n to each download so that resume of paused files can be done in the same order."
     IDS_CAT_SMALLFILEDLPUSH_TIP 
                             "Assign a linear priority of 0 to files smaller than 154624 bytes."
     IDS_CAT_STARTFILESONADD_TIP 
-                            "If you created a new category in the Select catagory\ndialog,when adding multiple files in a paused state\nThe number of files entered here will be started (Default=0, disabled)"
+                            "If you created a new category in the Select category\ndialog, when adding multiple files in a paused state\nThe number of files entered here will be started (Default=0, disabled)"
     IDS_A4AF_SMARTSWAP_TIP  "Activate <b>A</b>sked <b>4</b> for <b>A</b>nonther <b>F</b>ile handling"
     IDS_A4AF_SHOWDEBUG_TIP  "Show message about a4af in the verbose log if the verbose log is enabled"
-    IDS_A4AF_ADVMODE_TIP    "Options how to handle if a source has multiple source. "
+    IDS_A4AF_ADVMODE_TIP    "Extra options for managing sources with multiple files.."
     IDS_A4AF_DISABLED_TIP   "Disable extra a4af handling"
     IDS_A4AF_BALANCE_TIP    "Divide the a4af source equally over the files."
     IDS_A4AF_STACK_TIP      "Move all a4af sources to one file"
-    IDS_SLS_USESLS_TIP      "Save sources when exiting eMule so they\nare loaded again when starting eMule\nagain within 30 minutes"
+    IDS_SLS_USESLS_TIP      "Save sources when exiting eMule so they\nare loaded again when restarting eMule\n within 30 minutes"
     IDS_REMTIMEAVRREAL_TIP  "What to show in the remaining time \ncolumn in the downloads window"
     IDS_BOTH_TIP            "Show wall time & time left to transfer."
     IDS_REALTIME_TIP_TIP    "Show the wall time only."
@@ -988,15 +988,15 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_COMMUNITYTAG_TIP    "Community tags that are recognized in other peoples tag .e.g. a user <i>Andu[<b>NWO</b>]</i>\nwill be recognised a community you fill in the 'NWO' tag here. Community is only usefule for\nshowing shared files to the community. (No community boost!). For showing shared files you have to set rights\nat the Files preferences, the Morph share show permisssion and on induvidual files. You do\nnot have to fill in a [TAG] in your own username, the tag will also not be added by this setting"
+    IDS_COMMUNITYTAG_TIP    "Community tags are used to identify a user as being part of a 'community'\n .e.g. a user <i>Andu[<b>NWO</b>]</i>will be recognised as 'community' when you fill in the 'NWO' tag here.\n Community is only useful for showing shared files to the community. (No community boost!).\nFor showing shared files you have to set rights at the Files preferences, the Morph share show permission\n and on individual files. You do not have to fill in a [TAG] in your own username, \nthe tag will also not be added to your username by this setting"
     IDS_MORPH_RFHA_TIP      "File hashing activities in the log."
     IDS_MORPH_RAIF_TIP      "Adding and removing of friends in the log"
-    IDS_MORPH_KSSERV_SIP    "If a static server in the server list goes over \nthe max number of retries it is disabled instead\nof removing until the restart of eMule"
-    IDS_GLOBAL_HL_TIP       "Global hardlimit is a global limit for the total number of source\ninstead of the sources per file limit eMule normally uses."
+    IDS_MORPH_KSSERV_SIP    "If a static server in the server list goes over \nthe max number of retries it is disabled instead\nof being removed until the restart of eMule"
+    IDS_GLOBAL_HL_TIP       "Global hardlimit is a global limit for the total number of sources\ninstead of the sources per file limit that eMule normally uses."
     IDS_SUC_ENABLED_TIP     "Enable global hardlimit instead of the sources per file."
     IDS_GLOBAL_HL_LIMIT_TIP "Value for global hard limit, \ndepends on available upload/download speed \nand latency. Normal value between 3000 and 6000."
     IDS_MAXDATARATEFRIEND_TIP 
-                            "Max Global friend datarate limit (% of upload speed) usefule When using USS/SUC). If the\nfriend upload set exceeds this percentage, this percentage is used instead"
+                            "Max Global friend datarate limit (% of upload speed) (useful when using USS/SUC). If the\nfriend upload set exceeds this percentage, this percentage is used instead"
     IDS_MAXDATARATEPOWERSHARE_TIP 
                             "Max Global powershare datarate limit (% of upload speed) if the powershare upload set\nexceeds this percentage, this percentage is used instead"
 END
@@ -1004,9 +1004,9 @@ END
 STRINGTABLE 
 BEGIN
     IDS_EXTRACT_META_DATA_TIP "Extract id3 and bitrate data from files"
-    IDS_NEVER_TIP1          "Behave normally. Good when crashed do not occur."
+    IDS_NEVER_TIP1          "Behave normally. Good when crashes do not occur."
     IDS_META_DATA_ID3LIB_TIP "Use the id3lib"
-    IDS_LOG2DISK_TIP        "Save the normal log to 'logs' dir of eMule\nThis is usefule to determine what eMule was\ndoing when the pc was stopped. "
+    IDS_LOG2DISK_TIP        "Save the normal log to 'logs' dir of eMule\nThis is useful for determining what eMule was\ndoing when the pc was stopped. "
     IDS_DATEFILENAMELOG_TIP "Save log file in logs dir in format:\neMule - YYYY.MM.DD.log"
     IDS_VERBOSE_TIP         "debug log settings. Meant for some debugging of the program"
     IDS_ENABLED_TIP         "Show log messages in the verbose tab"
@@ -1024,39 +1024,39 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_CON_CAPFRM_TIP   "In this group you fill the capabilities of your network connection \nto the internet. These are not send to servers or peers but are used\nto draw correct statistics in the graph screen"
-    IDS_PW_CON_LIMITFRM_TIP "In this group you set the amount of bandtwidth that eMule is \nallowed to use. The more you upload the more credit you aquire\nto pass faster through the queue of the peers"
+    IDS_PW_CON_CAPFRM_TIP   "In this group you fill the capabilities of your network connection \nto the internet. These are not sent to servers or peers but are used\nto draw correct graphs in the statistics window"
+    IDS_PW_CON_LIMITFRM_TIP "In this group you set the amount of bandwidth that eMule is \nallowed to use. The more you upload the more credit you acquire\nto pass faster through the queues of the peers"
     IDS_PW_DOWNL_TIP        "Enable a download limit. eMule will not download faster than this limit.\nNote that if you upload too slow(avg speed less than 10 kb per sec) the download speed is \nlowered to a ratio of your upload."
-    IDS_PW_UPL_TIP          "Enable a upload limit\n(when disabled, eMule will try to determine the optimal upload speed itself ).\nSet this speed to 80% of your theoretical internet line speed. \nSet this speed too high and your internet connection may become\nunstable, set it too low and you will not gather the optimal credits\nto pass in the download queue of your peer. A value below 10 Kb/s will\nLimit your download with a ratio"
+    IDS_PW_UPL_TIP          "Enable an upload limit\n(when disabled, eMule will try to determine the optimal upload speed itself ).\nSet this speed to 80% of your theoretical internet line speed. \nSet this speed too high and your internet connection may become\nunstable, set it too low and you will not gather sufficient credits\nfor optimal progress in the queues of your peers. A value below 10 KB/s will\nlimit your download with a ratio"
     IDS_NETWORK_TIP         "Enable at least one network that eMule will use to find peers and to publish your files to the internet"
-    IDS_SHOWOVERHEAD_TIP    "Show the actual bandwidth(overhead bandwidth) in brackets in the status bar.\nOverhead is ed2k overhead that is not used to actually transfer files but meta data\nlike what to transfer and queue positions and such things"
+    IDS_SHOWOVERHEAD_TIP    "Show the actual bandwidth (overhead bandwidth) in brackets in the status bar.\nOverhead is ed2k overhead that is not used to actually transfer files but meta data\nsuch as what to transfer, queue positions etc."
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_CLIENTPORT_TIP   "Setting on what ports eMule will listen to the internet"
+    IDS_PW_CLIENTPORT_TIP   "Setting on what ports eMule will use to listen to the internet"
     IDS_PW_AUTOCON_TIP      "Automatically connect to the eD2K and/or Kad network. "
     IDS_PW_RECON_TIP        "Automatically try to reconnect to ed2k when the server connection is lost."
     IDS_WIZARD_TIP          "Show the startup wizard that is used to set your internet connection.\nRunning the wizard will update some values in this screen with fair values.\nThe complete startup wizard can be started from the tools menu"
-    IDS_UDPDISABLED_TIP     "Disable UDP traffic.\nIf your internet connection (router) gets unstable from\nthe udp traffic there is an option to disable UDP. This\nwill cost more overhead but eMule wil still function."
+    IDS_UDPDISABLED_TIP     "Disable UDP traffic.\nIf your internet connection (router) becomes unstable due to\nthe udp traffic there is an option to disable UDP. This\nwill cost more overhead but eMule will still function."
     IDS_STARTTEST_TIP       "Start a browser that will connect to emule-project.net to test if the eMule ports are reachable\nfrom that web server. eMule might still function if the ports cannot be reached but will be slower.\nIf the connection test fails check if something is blocking inbound traffic from the internet"
-    IDS_RANDOMPORTS_TIP     "Instead of the set ports use a random port \nbetween the ranges set. Make sure those ports are\nreachable from the internet by having a direct connection\nor use uPnP(see eMuleespana settings) to forward the ports\nin your router."
+    IDS_RANDOMPORTS_TIP     "Instead of the set ports use a random port \nbetween the ranges set. Make sure those ports are\nreachable from the internet by having a direct connection\nor use uPnP(see emulEspana settings) to forward the ports\nin your router."
     IDS_MINPORT_TIP         "Minimal port number that is used to select a random port.\nSome providers block ports below 1024."
     IDS_MAXPORT_TIP         "Maximal port number that is used to select a random port"
-    IDC_DOWNLOAD_CAP_TIP    "The theoretical maximum download speed of your internet connection.\nThis will be used to calculate the scale in the statistics screen"
-    IDC_UPLOAD_CAP_TIP      "The maximum upload speed of your internet connection in kilobytes per\nsecond. This will be used to calculate the scale in the statistics screen\nand not be send to other clients."
+    IDC_DOWNLOAD_CAP_TIP    "The theoretical maximum download speed of your internet connection.\nThis will be used to calculate the graph scales in the statistics screen"
+    IDC_UPLOAD_CAP_TIP      "The maximum upload speed of your internet connection in kilobytes per\nsecond. This will be used to calculate the graph scales in the statistics screen\nand not be sent to other clients."
 END
 
 STRINGTABLE 
 BEGIN
-    IDC_PORT_TIP            "TCP port number that eMule uses to communicate on.\nThis can be any number between 1 and 65535 as far as not\nother active application is using the port. you can\nconnect to more clients if the port you fill is \nreachable from the internet, indicated by a high id/green arrow\nin the status bar on the world (if correctly forwarded in a router and\nopenened in a personal firewall). Port 80 or 8080 (http) might get\nyou a small webcache boost, port 1755 is a workaround for some traffic\nshaped people, but any number will do."
-    IDC_UDPPORT_TIP         "UDP port number that eMule uses to communicate on.\nThis can be any number between 1 and 65535 as far\nas no other active application is using the port.\nIt can even be the same as tcp since it uses a different\nprotocol. Forward this port in the router/firewal for\noptimal performance"
+    IDC_PORT_TIP            "TCP port number that eMule uses to communicate on.\nThis can be any number between 1 and 65535 as far as no\nother active application is using the port. you can\nconnect to more clients if the port you fill is \nreachable from the internet, indicated by a high id/green arrow\nin the status bar on the world (if correctly forwarded in a router and\nopened in a personal firewall). port 1755 is a workaround for some traffic\nshaped people, but any number will do."
+    IDC_UDPPORT_TIP         "UDP port number that eMule uses to communicate on.\nThis can be any number between 1 and 65535 as far\nas no other active application is using the port.\nIt can even be the same as tcp since it uses a different\nprotocol. Forward this port in the router/firewall for\noptimal performance"
     IDC_MAXSOURCEPERFILE_TIP 
-                            "The max sources(peers) eMule will collect for a file.\nNote that Morph also has the option in the morph settings\nto enable a global hardlimit that defines a limit for all\nfiles together instead max sources per file"
-    IDC_MAXCON_TIP          "Maximum number of simultanious tcp/ip connections\nthat eMule will make. Reduce this numbers if you have\nnetwork problems, increase this number to find souces faster.\n(Also take a look at conns/5secs for sources in 'too \nmany connections' state)"
+                            "The max sources (peers) eMule will collect for a file.\nNote that Morph also has the option in the morph settings\nto enable a global hardlimit that defines a limit for all\nfiles together instead of max sources per file"
+    IDC_MAXCON_TIP          "Maximum number of simultaneous tcp/ip connections\nthat eMule will make. Reduce this number if you have\nnetwork problems, increase this number to find sources faster.\n(Also take a look at conns/5secs for sources in 'too \nmany connections' state)"
     IDC_NETWORK_KADEMLIA_TIP 
-                            "Enable the serverless kademlia  network.\nThis network finds sources better for small\nfiles and is not dependant on server since \neach eMule client will be a small server.\nThis network uses the UDP protocol."
-    IDC_NETWORK_ED2K_TIP    "Enable the ed2k server protocol. A lot of centralized\nservers maintain data where the files in the network can \nbe found. Make sure you connect to a good server(that returns \nproper search results). This protocol is compatible with more \nclients than kad but depends on the quality of the servers"
+                            "Enable the serverless kademlia  network.\nThis network finds sources better for small\nfiles and is not dependent on servers since \neach eMule client will be a small server.\nThis network uses the UDP protocol."
+    IDC_NETWORK_ED2K_TIP    "Enable the eD2K server protocol. A lot of centralized\nservers maintain data relating to where the files in the network can \nbe found. Make sure you connect to a good server (that returns \nproper search results). This protocol is compatible with more \nclients than Kad but depends on the quality of the servers"
     IDS_QL_USERNAME_TIP     "The username that is displayed to other users.\nput your spam or [community names] here."
     IDS_PW_LANG_TIP         "Language of the interface.\neMule will download a dll and put it in the lang directory\nif you select a language that is not installed yet. dll's \nfor the morph extensions are not downloaded and should be\nput manually in the lang dir or installed there by the\nmorph installer. (this tooltip is a morph extension)"
     IDS_PW_BEEP_TIP         "Beep on errors"
@@ -1066,12 +1066,12 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_FRONT_TIP        "Keep eMule on background or bring eMule to \nthe foreground if you add a link from your browser"
+    IDS_PW_FRONT_TIP        "Keep eMule in the background or bring eMule to \nthe foreground if you add a link from your browser"
     IDS_PREF_ONLINESIG_TIP  "Write onlinesig.dat in the eMule directory\nOther applications can read this and translate\nthis to a nice banner for your forum. \n(only visible when extended-> 'show more controls' is enabled)"
-    IDS_PREF_STARTMIN_TIP   "When eMule start up minimize it.\nIf the invisible mode is also activated\neMule will hide on windows startup so you \nwill have to press the invisible key to\nshow eMule"
-    IDS_WEBSVEDIT_TIP       "Edit the webservices.dat file to associate a menu item\non the file with a online webservice"
+    IDS_PREF_STARTMIN_TIP   "When eMule starts up, minimize it.\nIf the invisible mode is also activated\neMule will hide on windows startup so you \nwill have to press the invisible key to\nshow eMule"
+    IDS_WEBSVEDIT_TIP       "Edit the webservices.dat file to associate a menu item\non the file with an online webservice"
     IDS_ED2KLINKFIX_TIP     "Reassociate the 'ed2k//' link format in the windows shell\nwith this application. If this fails first run\n'linkkiller.exe' and press this button again. This might fail\nif eMule runs in secure mode"
-    IDS_CHECK4UPDATE_TIP    "Let eMule check for new eMule and\nMorph version every xxx days"
+    IDS_CHECK4UPDATE_TIP    "Let eMule check for new eMule and\nMorph versions every xxx days"
     IDS_STARTWITHWINDOWS_TIP 
                             "Start eMule when windows starts. eMule is added to the registry at\nHKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Run"
     IDS_PW_STARTUPSOUND_TIP "Play <i>startup.wav</i> from the config\ndirectory on startup of MorphXT"
@@ -1084,16 +1084,16 @@ STRINGTABLE
 BEGIN
     IDS_SFM_TIP             "Options about the files you share. "
     IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP 
-                            "Enable collection data for the spreadbar.\nTHis is is optimal for better releases but \ncan take some extra memeory"
-    IDS_HIDEOVERSHARES_TIP  "Balance the upload of chunks within a file. \nIt is hiding chunks, which were uploaded significantly\nmore than other chunks, from downloaders. This causes\ndownloaders to request other, less shared, chunks.\nAlways some chunks are visible "
-    IDS_SELECTIVESHARE_TIP  "You can choose to make Hide Overshare stricter by only revealing\none chunk to each user, starting with the least uploaded chunks,\nand considering the chunks that were already offered when choosing\nthe next. Hide overshares must not be disabled for this to work\n(Off by default)."
+                            "Enable collection data for the spreadbar.\nThis is optimal for better releases but \ncan take some extra memory"
+    IDS_HIDEOVERSHARES_TIP  "Balance the upload of chunks within a file. \nIt hides chunks, which were uploaded significantly\nmore than other chunks, from downloaders. This causes\ndownloaders to request other, less shared, chunks.\nThere are always some chunks visible "
+    IDS_SELECTIVESHARE_TIP  "You can choose to make Hide Overshares stricter by only revealing\none chunk to each user, starting with the least uploaded chunks,\nand considering the chunks that were already offered when choosing\nthe next. Hide overshares must not be disabled for this to work\n(Off by default)."
     IDS_SHAREONLYTHENEED_TIP 
-                            "Share Only the Need hides Chunks which were already\nasked by other clients on your queue. eMule analyzes\nyour upload queue if every user are asking for the\nsame chunks. if true, eMule hides the chunks which\nat least one user has already got and shows just\nthe chunks that no one has.\nTHey are purple in the spreadbar.\nThere is always one visible."
+                            "Share Only the Need hides Chunks which were already\nasked for by other clients in your queue. eMule analyzes\nyour upload queue if all users are asking for the\nsame chunks. If true, eMule hides the chunks which\nat least one user has already got and shows just\nthe chunks that no one has.\nThey are purple in the spreadbar.\nThere is always one visible."
     IDS_POWERSHARE_TIP2     "Settings for powershare, \ngive absolute priority to\na file without the need\nfor unsharing other files"
     IDS_POWERSHARE_DISABLED_TIP 
-                            "No powersharing if not set on individual file."
+                            "No powersharing if not manually set on individual file."
     IDS_POWERSHARE_ACTIVATED_TIP 
-                            "Powersharing activated unless other mode on file."
+                            "Powersharing activated unless other mode manually set on individual files."
 END
 
 STRINGTABLE 
@@ -1106,10 +1106,10 @@ BEGIN
     IDS_POWERSHARE_INTERPRIO_TIP 
                             "Use the other priorities within powershared files as \nindividual absolute priorities. e.g. high priority always goes before normal priority instead of a factor.\n(default disabled)"
     IDS_PERMISSION_TIP      "Default permission to show peer a list of all your files. "
-    IDS_FSTATUS_EVER_TIP    "All files are public if the individual file permission\nare  allowed  and the permission in the file permission allows it"
+    IDS_FSTATUS_EVER_TIP    "All files are public if the individual file permissions\nare allowed and the permission in the file permission allows it"
     IDS_FSTATUS_FRIENDSONLY_TIP 
-                            "Allow only friend to see a list of your files."
-    IDS_HIDDEN_TIP          "All show shared files are hidden"
+                            "Allow only friends to see a list of your files."
+    IDS_HIDDEN_TIP          "All shared files are hidden"
     IDS_COMMUNITY_TIP       "Only people in your community (userstring of users defined in Morph -> community) \nare allowed to see your files"
     IDS_PW_DISPLAY_TIP2     "Visual settings"
     IDS_FOLDERICON_TIP      "Change the icon of shared dirs and temp dirs\nto the icon of eMule in explorer"
@@ -1120,27 +1120,27 @@ BEGIN
     IDS_TCPIP_CONNS_TIP     "Tweak tcp/ip settings"
     IDS_MAXCON5SECLABEL_TIP "This is the number of new connections eMule MAY open\nduring 5 seconds. (Default is 20.) If you raise\nthis value you also have to raise the half open value"
     IDS_MAXHALFOPENCONS_TIP "Max number of not fully completed connections\nYou will have to increase this value together with conns/5sec\n set this value too high you will have to patch tcp/ip.sys(XPSP2)\nand your router may overload. Increasing this value\nmakes eMule connect faster to sources in \n'too many open connection' state."
-    IDS_CONDTCPACCEPT_TIP   "Fast Connection Reject uses a more efficient method to \nreject incoming TCP connection attempts of banned clients\nand/or from clients which IPs are found in IP-filter list.\nIt's using a special Winsock feature called 'SO_CONDITIONAL_ACCEPT'\nwhich leads to less TCP overhead in case the TCP connection is rejected\nBut causes more ip lookups (cpu usage) if  the client is rejected"
+    IDS_CONDTCPACCEPT_TIP   "Fast Connection Reject uses a more efficient method to \nreject incoming TCP connection attempts of banned clients\nand/or from clients whose IPs are found in IP-filter list.\nIt uses a special Winsock feature called 'SO_CONDITIONAL_ACCEPT'\nwhich leads to less TCP overhead in case the TCP connection is rejected\nBut causes more ip lookups (cpu usage) if  the client is rejected"
 END
 
 STRINGTABLE 
 BEGIN
     IDS_SERVERKEEPALIVETIMEOUT_TIP 
-                            "Set this value to a slight lower value than the router nat timeout\nif you experience disconnects form the server. Setting a too low value\nhere will get you banned from the servers"
+                            "Set this value to a slightly lower value than the router nat timeout\nif you experience disconnects from the server. Setting a too low value\nhere will get you banned from the servers"
     IDS_AUTOTAKEED2KLINKS_TIP 
                             "Only automatically send ed2k links to eMule when eMule is running.\nMight not work in secure mode. "
     IDS_USECREDITSYSTEM_TIP "You must use the credit system in morph."
     IDS_PW_FILTER_TIP       "Filter out RFC 1918 addresses."
     IDS_SHOWEXTSETTINGS_TIP "Show some more menu options and settings. (advanced)"
-    IDS_A4AF_SAVE_CPU_TIP   "Disable eMule checking balancing sources to other files\naccoring to priorities."
-    IDS_YOURHOSTNAME_TIP    "Hostname that is added instead of your ip when you\ncreate a ed2k link and use 'Add yourself as source' "
+    IDS_A4AF_SAVE_CPU_TIP   "Disable eMule checking balancing sources to other files\naccording to priorities."
+    IDS_YOURHOSTNAME_TIP    "Hostname that is added instead of your ip when you\ncreate an ed2k link and use 'Add yourself as source' "
     IDS_DISABLEPEERACHE_TIP "Disable peercache http cache technology."
     IDS_SPARSEPARTFILES_TIP "Do not allocate all disk space when you\ncreate a tempfile, but only allocate what is needed.\nRequires NTFS file system. Saves disk space during\ndownload but might increase fragmentation"
-    IDS_FULLALLOC_TIP       "Allocates full filesize when the first bytes of a file are recieved.\nA download will not be halted due to not enough diskspace and fragmentation\nwill be minimal. Requires more diskspace during downloading"
-    IDS_CHECKDISKSPACE_TIP  "Check diskspace when allocating space.\nPrevent your disk from getting completely full."
+    IDS_FULLALLOC_TIP       "Allocates full filesize when the first bytes of a file are received.\nA download will not be halted due to lack of diskspace and fragmentation\nwill be minimal. Requires more diskspace during downloading"
+    IDS_CHECKDISKSPACE_TIP  "Check diskspace when allocating space.\nPrevents your disk from getting completely full."
     IDS_MINFREEDISKSPACE_TIP 
                             "amount of disk space that eMule will leave free per disk."
-    IDS_COMMITFILES_TIP     "Prevent data corruption on .met and dat files."
+    IDS_COMMITFILES_TIP     "Prevent data corruption on .met and .dat files."
     IDS_NEVER_TIP2          "Never, might prevent crashes on strange mp3 files."
     IDS_ONSHUTDOWN_TIP      "Safe writing of .met and .dat file on exit of eMule\nShutdown might take longer."
     IDS_ALWAYS_TIP          "Always flush data to .dat and .met files.\nDecreases performance of eMule but data is safer"
@@ -1148,8 +1148,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP_ENABLE_TIP     "Forward ports in the router to your pc.\nYou might have to enable uPnP in the router\nYou do not need to set this setting if you \nmanully forwarded ports yourself or do not have\na router. Recommended if you use 'random ports'\n(default: autodetect)"
-    IDS_UPNP_ENABLEWEB_TIP  "Also forward the port that is used for the webinterface so the webinterface is reachable form the internet"
+    IDS_UPNP_ENABLE_TIP     "Forward ports in the router to your pc.\nYou might have to enable uPnP in the router\nYou do not need to enable this setting if you \nmanually forwarded ports yourself or do not have\na router. Recommended if you use 'random ports'\n(default: autodetect)"
+    IDS_UPNP_ENABLEWEB_TIP  "Also forward the port that is used for the webinterface so the webinterface is reachable from the internet"
     WAP_TIP                 "Wireless Application Protocol (WAP) is an open international standard\nfor applications that use wireless communication (for example, Internet\naccess from a mobile phone)"
     ENABLEWAP_TIP           "Enable the wap interface"
     TEMPLATE_TIP            "Select the wap template that morph will use\nDefault location is in the emule\\wapserver directory (not config!)"
@@ -1167,7 +1167,7 @@ END
 STRINGTABLE 
 BEGIN
     IDC_WSPASS_TIP          "Sets the password to access the Webinterface. \nIt is important to set a proper password or \nanyone may access your eMule via the web interface.\nAn entered password is displayed as ***. There is \nno default password"
-    IDC_WSPASSLOW_TIP       "Enbale the geuest account who can only watch,\nthe guest cannot alter any setting"
+    IDC_WSPASSLOW_TIP       "Enable the guest account who can only watch,\nthe guest cannot alter any setting"
     IDC_MMPASSWORDFIELD_TIP "Password for the java client access"
     IDC_WSPORT_TIP          "Port for Webinterface. Default is 4711. \nChange this to make it harder  to find your \nwebinterface. Or change it to port 80. So\nit is better reachable from some locations \nIf you have a router forward this port or\nenable uPnp"
     IDC_MMPORT_FIELD_TIP    "Port this Emule mobileinterface  will listen on.\nMost javaphones prefer port 80 (default)"
@@ -1176,7 +1176,7 @@ BEGIN
     IDC_WSENABLED_TIP       "Enable the emule webinterface.\nYou can control eMule from a webbrowser\nfrom a remote location"
     IDC_WSENABLEDLOW_TIP    "Enable the read-only guest account.\nDefault disabled."
     IDC_MMENABLED_TIP       "Enable the mobilemule.\nRemote-control your eMule with any java-enabled  mobile\nphone. Most java enabled mobile phones which have 40 KB\nfree fixed memory and about 150-200KB Heap can be used."
-    IDC_WS_GZIP_TIP         "Compress the data send to the webinterface.\nAll modern browers support this but if\nyou control emule with some script you\nmight want to disable this"
+    IDC_WS_GZIP_TIP         "Compress the data sent to the webinterface.\nAll modern browers support this but if\nyou control emule with some script you\nmight want to disable this"
     IDC_WS_ALLOWHILEVFUNC_TIP 
                             "This the administrator login allows to quit eMule \nand shutdown or restart the computer. Useful together\nwith the Start with Windows setting in\nPreferences -> General"
 END
@@ -1189,12 +1189,12 @@ BEGIN
     IDS_PREFER_SHARE_ALL_TIP 
                             "Connect first to servers that can handle the number\nof files (softlimit) that you are sharing."
     IDS_ONLY_DOWNLOAD_COMPLETE_FILES_TIP 
-                            "Only start to download a file if it has been seen complete\nat least once. This  will prevent you from starting a download\na file that can never complete, but might delay downloading of\na file if you ask multiple files from only one complete source"
+                            "Only start to download a file if it has been seen complete\nat least once. This  will prevent you from starting to download\na file that can never complete, but might delay downloading of\na file if you ask for multiple files from only one complete source"
     IDS_SAVE_UPLOAD_QUEUE_WAIT_TIME_TIP 
-                            "Save Upload Queue Wait Time.\nBasically, SUQWT allows one to carry wait time from previous dead-end upload queue\nwaiting sessions over to the next upload queue sessions until one manages to get\nthrough the upload queue, somewhat like holding a spot in a waiting line by using \nyour gym bag or other article - if you're not there, the bag stays there and people\nmove around it. (in an ideal civilized world anyway). Default: enabled"
+                            "Save Upload Queue Wait Time.\nWhen you close emule the waiting time of your upload queue clients is remembered \nIf you encounter any of these clients the next time you open emule \nthey join your queue with their remembered waiting time, \ninstead of rejoining with a waiting time of 0"
     IDS_ENABLE_CHUNKDOTS_TIP "Show dots on the spread bar every 9.28Mb"
     IDS_ECFEF_TIP           "One queue per file/all files equal chance.\nChange the priority of each file based on the\nuploaded data  and requests in this session"
-    IDS_IP2COUNTRY_TIP      "Country names and flags on the client details in the \ntransfer window. You need a up to date country.csv file\nfrom the morph update settings to show the correct\ncountries based on the guessed location of the ip \nnumber of the peer."
+    IDS_IP2COUNTRY_TIP      "Country names and flags on the client details in the \ntransfer window. You need an up to date country.csv file\nfrom the morph update settings to show the correct\ncountries based on the guessed location of the ip \nnumber of the peer."
     IDS_DISABLED_TIP        "No country letters. (disable country column on next startup)"
     IDS_COUNTRYNAME_SHOWFLAG_TIP 
                             "Show country flags in the country column or at the start of the line. "
@@ -1204,25 +1204,25 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_LOVELACE_CREDIT_TIP "Start:1, max:100, min:0.1, ratio:1:1.5\nl-modifier=100*((1-1/(1+exp((3*{MB uploaded to us}^2-{MB downloaded from us}^2)/1000)))^6.6667)\nOnly clients using the 'SecureHash' are able to get a multiplier of 100. All others will stay at 10.\nIn contrast to the original credit system, credits are evaluated more on differences and not on\nquotients. Using the original system you have the best credit values shortly after generating a new\nuserhash. With the new credit system you get good credit values faster if you already have uploaded\nmany MB before (and did not cheat by killing the userhash). "
+    IDS_LOVELACE_CREDIT_TIP "Start:1, max:100, min:0.1, ratio:1:1.5\nl-modifier=100*((1-1/(1+exp((3*{MB uploaded to us}^2-{MB downloaded from us}^2)/1000)))^6.6667)\nOnly clients using the 'SecureHash' are able to get a multiplier of 100. All others will stay at 10.\nIn contrast to the original credit system, credits are evaluated more on differences and not on\nquotients. Using the original system you have the best credit values shortly after generating a new\nuserhash. With the new credit system you get good credit values faster if you have already uploadeded\nmany MB before (and did not cheat by killing the userhash). "
     IDS_PAWCIO_CREDIT_TIP   "Start:3 min: 1 max: 100.\nratio = 3 * downloaded / uploaded - For new clients (downloaded and uploaded data less than 1MB)\nratio = 3.0 (instead of 1.0) - If you have received more than 1MB from someone but haven't given\nanything back user gets ratio = 100.0 - Small bonus for clients that have given you many MB:\n- if you get 100MB then user receive ratio = 50.0 "
     IDS_EASTSHARE_CREDIT_TIP 
                             "Start:100 min: 10 max: 5000\nRatio = +6 per MB uploaded and -2 for downloaded\nbonux  +100 if upload 1MB+\nlow value if uploaded at least  1MB+, ratio = 50"
-    IDS_PAYBACKFIRST_TIP    "Open a powershare slot to payback the client the uploaded data immediate.\nWorks only on complete files, not on partial downloaded files."
+    IDS_PAYBACKFIRST_TIP    "Open a powershare slot to payback the client the uploaded data immediately.\nWorks only on complete files, not on partial downloaded files."
     IDS_PAYBACKFIRSTLIMI_TIP 
-                            "Amount the peer must have upload more to us\nthen we downloaded from him before PBF starts"
+                            "The excess amount the peer must have uploaded to us\nthan we downloaded from him before PBF starts"
     IDS_EXPIRED_KNOWN_TIP   "Clean up .met files after file \nhas not been seen for xxx days\nSaves diskspace. Applies for\nknown*.met. Never set a very\nlow value (less than 30) here"
     IDS_FOLLOW_THE_MAJORITY_TIP 
-                            "Auto rename your file with majority used, \ncan be direct active from right click or disable by any rename operation."
-    IDS_FAIR_PLAY_TIP       "at least upload one copy of downloaded file with priority."
+                            "Auto rename your file with the most popular filename used, \ncan also be directly activated from right click or disabled by any rename operation."
+    IDS_FAIR_PLAY_TIP       "upload at least one copy of a downloaded file with priority."
 END
 
 STRINGTABLE 
 BEGIN
     IDC_FILTERSERVERBYIPFILTE_TIP 
-                            "Also apply the following filter for servers (recommended).\nIf you set this filtered servers are grayed out and removed\non connect. Disable this setting and you can connect to\nfitlered (fake....) servers but might get a lowid"
+                            "Also apply the following filter for servers (recommended).\nIf you set this, filtered servers are grayed out and removed\non connect. Disable this setting and you can connect to\nfiltered (fake....) servers but might get a false High ID"
     IDC_STATIC_FILTERLEVE_TIP 
-                            "Level of the filter entries that are applied.\nEach entry of the ipfilter.dat has a (possible) value\nenter a value of 0 to disable the ipfilter temporary\n0 Recommended for testing opening port, or delete\nipfilter.dat to save memory) Default value 127.\nIn the meuh4567 list used by morph update\nthe following levels are available\nset to 0 for maximal sources , 254 for some paranoia"
+                            "Level of the filter entries that are applied.\nEach entry of the ipfilter.dat has a (possible) value\nenter a value of 0 to disable the ipfilter temporarily\n0 Recommended for testing opening port, or delete\nipfilter.dat to save memory) Default value 127.\nIn the meuh4567 list used by morph update\nthe following levels are available\nset to 0 for maximal sources , 254 for some paranoia"
     IDC_RELOADFILTE_TIP     "Load the file again in memory"
     IDC_EDITFILTE_TIP       "Edit ipfilter.dat with notepad."
     IDC_LOADUR_TIP          "Load an ipfilter from the http link displayed here. \nyou can find blocklist at<a=""http://www.bluetack.co.uk""> http://bluetack.co.uk</a>\nmorph update provides a complete blocklist as well.\nzip & rar (unrar.dll required) is supported also\n(Only use one of these)"
@@ -1243,13 +1243,13 @@ END
 STRINGTABLE 
 BEGIN
     IDC_UPDATEFAKES_TIP     "Download & reload the fakes.zip now.\nIf the fakesfile is newer than the previous download"
-    IDC_RESETFAKESURL_TIP   "Reset the url field to the morph default:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
+    IDC_RESETFAKESURL_TIP   "Reset the url field to the morph default:\nhttp://emulepawcio.sourceforge.net/fakes.zip"
     IDC_UPDATE_URL_FAKELIST_TIP 
                             "Where to fetch the fakelist. Fakelist must be in\nzip format. Morph checks if the date on the file\nis newer than the previous download and will\nonly update if the file on the web is newer. "
     IDC_AUTOUPIPFILTER_TIP  "Try to update the list before connecting to the network"
     IDC_UPDATEIPFURL_TIP    "Download & reload the ipfilter.zip now.\nIf the ipfilter is newer than the previous download"
     IDS_PW_TOOL_TIP         "If the mouse hovers on a download or  preference\na little note will appear with information on this item.\nSpecifies the delay until this tip pops up.\nThis text is is a tooltip."
-    IDC_RESETIPFURL_TIP     "Reset the url to the morph default\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
+    IDC_RESETIPFURL_TIP     "Reset the url to the morph default\nhttp://emulepawcio.sourceforge.net/ipfilter.zip"
     IDC_UPDATE_URL_IPFILTER_TIP 
                             "Url where to download the ipfilter.dat (zip format)"
     IDC_MORPH2_COUNTRY_TIP  "Download the countrylist for the flags on startup"
@@ -1264,7 +1264,7 @@ BEGIN
     IDS_PW_RESET_TIP        "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Reset button will clear all entries."
     IDS_DISABLEHIST_TIP     "The history saves all user entries from the search, Kademlia bootstrap IP,\nserver update URL and IP filter update URL fields and offers to complete the\nentry if it finds something suitable in the saved entries.\nThe Enabled checkmark allows to turn off this option"
     IDS_PW_SHOWTRANSTOOLBAR_TIP 
-                            "New icons in the transfer window will appear.\nThey allow quick toggeling through various display modes:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queue\nDisplays all known clients"
+                            "New icons in the transfer window will appear.\nThey allow quick toggling through various display modes:\nSplit view. Showing all files in the download list and the uploading clients list\nShow only files in the download list\nShow current uploads in progress\nShow currently downloading files\nShows the upload queue\nDisplays all known clients"
     IDC_SHOWDWLPERCENT_TIP  "A %-completed value will be added for each download in its progress bar."
     IDC_EXITQUESTION_TIP    "You can stop eMule now ('Yes') and stop downloading and uploading now\nIf you keep eMule running you gather credits that make future\ndownloads faster. (choose No!) "
     IDC_DONTASKMEAGAINCB_TIP 
@@ -1293,7 +1293,7 @@ BEGIN
     IDS_DISABLEQUEUELIST_TIP 
                             "Similar to the Known Clients List the Queue List\nwill also consume system resources.\nDisable to save them."
     IDS_SHOWCATINFO_TIP     "Will display two values (x/y) right after a category name.\nThe first value (x) is the number of currently active (downloading)\nfiles and the second one (y) the total number of files for this category."
-    IDS_REPAINTGRAPHS_TIP   "eMule may shortly freeze when the window is resized.\nThis is caused by redrawing the graphs with saved data.\nIf this option is checked, the graphs will not be\nrecreated and start new."
+    IDS_REPAINTGRAPHS_TIP   "eMule may freeze briefly when the window is resized.\nThis is caused by redrawing the graphs with saved data.\nIf this option is checked, the graphs will not be\nrecreated and start anew."
     IDC_SELECT_HYPERTEXT_FONT_TIP 
                             "This button opens a dialog to choose the font, style and color\nof the text displayed in the server info, messages lines and IRC windows"
     IDS_AUTOREMOVEFD_TIP    "eMule shows finished downloads with a green progress bar.\nThis option will remove them automatically from the downloads list."
@@ -1316,6 +1316,7 @@ BEGIN
     IDS_ADVADMIN_USER       "Username:"
     IDS_ADVADMIN_CAT        "Categories (sep. by |):"
     IDS_WS_COOKIE_LOGGEDIN  "Remain Logged In:"
+	IDS_WS_COOKIE_LASTUSER  "Memorize Last User:"
 END
 
 STRINGTABLE 
@@ -1344,7 +1345,7 @@ BEGIN
     IDS_ADVADMIN_PREFS_TIP  "Allow access to the emule preferences"
     IDS_ADVADMIN_USERLEVEL_TIP 
                             "-- Userlevels --\nGuest: Has only access to the allowed pages, but has no real access\nOperator: Has access to the allowed pages and can use almost all\n              functions without the admin functions (same as Admin without\n                      Hi-Level functions in the original)\nAdmin: Like Operator but can also shut down emule\nHi-Admin: Like Admin but can also shut down and reboot your system\n     (same as Admin with Hi-Level functions in the original)"
-    IDS_ADVADMIN_CATS_TIP   "Categories the user has access to. Leave blank for all. \nSeperate categorie names with a pipe symbol (|)"
+    IDS_ADVADMIN_CATS_TIP   "Categories the user has access to. Leave blank for all. \nSeparate category names with a pipe symbol (|)"
     IDS_ADVADMIN_DELETE_TIP "Delete the current displayed account"
     IDS_STATIC_ADVADMIN_CATS_TIP "IDS_STATIC_ADVADMIN_CATS_TIPs"
 END
@@ -1373,9 +1374,9 @@ BEGIN
     IDS_UPDATEFAKELISTWEEK  "Update weekly"
     IDS_AUTOUPIPFILTERWEEK  "Update weekly"
     IDS_UPDATEFAKELISTWEEK_TIP 
-                            "Add a entry to the schedule to update the\nfakelist.dat from the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
+                            "Add an entry to the schedule to update the\nfakelist.dat from the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
     IDS_UPDATEIPFILTERWEEK_TIP 
-                            "Add a entry to the schedule to update the\nipfilter.dat form the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
+                            "Add an entry to the schedule to update the\nipfilter.dat from the url once every week.\nSchedule is activated. Note that this will\n only work if morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
     IDS_SCHEDTEXT           "Added by morph autoupdate"
 END
 
@@ -1487,7 +1488,6 @@ BEGIN
     IDS_PREVIEWONICONDBLCLK "PreviewOnIconDblClk"
     IDS_INTERNETSECURITYZONE "InternetSecurityZone"
     IDS_TXTEDITOR           "TxtEditor"
-    IDS_DATETIMEFORMAT      "datetimeformat"
     IDS_SERVERUDPPORT       "ServerUDPPort"
 END
 
@@ -1519,10 +1519,10 @@ BEGIN
     IDS_MINIMULEAUTOCLOSE_TIP 
                             "The MiniMule window will usually remain visible until closed.\nSetting this value to 0 will automatically close the window when\nthe cursor is moved out of the window. Similar to a tooltip.\n(default=1)"
     IDS_MINIMULETRANSPARENCY_TIP 
-                            "Controls the transparency of the MiniMule window. 0 means opaque\nand 100 is translucent.\n(default=0),might require restart."
-    IDS_CREATECRASHDUMP_TIP "When this key is enabled eMule will automatically save a crash\ndump should eMule unexpectedly crash. This can help the developers\nto track down the problem. The dump is saved in eMule's\ninstallation folder, called 'eMule-version-number-Modversion.dmp'\nShould you have crash problems set this check this key and report at the\nmorph forum (or mailto leukhe\\@gmail.com) with details\nDefault=unchecked"
-    IDS_CHECKCOMCTL32_TIP   "Suppress the warning about a old version of the common dialog dll. This\ncan be the case if you run a version of Windows that is not updated.\neMule might work without the update but might look bad. You can download \n the updated dll at Microsoft\ndefault=checked"
-    IDS_CHECKSHELL32_TIP    "Suppress the warning about a old version of the windows shell (pre internet explorer 4)\nSome windows shell integrations functions might not work. The preferred solution is to update\nthe shell.dll which comes as a part of internet explorer. \n Default=checked"
+                            "Controls the transparency of the MiniMule window. 0 and 100 are opaque \n1 is translucent.\n(default=0),might require restart."
+    IDS_CREATECRASHDUMP_TIP "When this key is enabled eMule will automatically save a crash\ndump should eMule unexpectedly crash. This can help the developers\nto track down the problem. The dump is saved in eMule's\ninstallation folder, called 'eMule-version-number-Modversion.dmp'\nShould you have crash problems enable this key and report at the\nmorph forum (or mailto leukhe\\@gmail.com) with details\nDefault=unchecked (disabled)"
+    IDS_CHECKCOMCTL32_TIP   "Suppress the warning about an old version of the common dialog dll. This\ncan be the case if you run a version of Windows that is not updated.\neMule might work without the update but might look bad. You can download \n the updated dll at Microsoft\ndefault=checked"
+    IDS_CHECKSHELL32_TIP    "Suppress the warning about an old version of the windows shell (pre internet explorer 4)\nSome windows shell integrations functions might not work. The preferred solution is to update\nthe shell.dll which comes as a part of internet explorer. \n Default=checked"
     IDS_IGNOREINSTANCES_TIP "Allows the execution of multiple eMule instances.\nNote:\nFor two eMules running on the same machine they must\nbe installed to different folders, must have different\ntemp folders and also the ports used by each eMule have\nto be unique. It is not recommended to run two eMules \nconcurrently apart from testing purposes.\ndefault:0"
     IDS_NOTIFIERMAILENCRYPTCERTNAME_TIP 
                             "Name of the certificate for the encryption of email notifications with S/MIME. The certificate will be looked up in the local windows address book"
@@ -1578,7 +1578,7 @@ BEGIN
     IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
                             "No valid obfuscated servers with key to connect in serverlist found(refresh serverlist or enable udp)"
     IDS_DEBUGSEARCHDETAILLEVEL "DebugSearchDetailLevel"
-    IDS_CRYPTTCPPADDINGLENGTH "CryptTCPPaddingLength=[1-256]"
+    IDS_CRYPTTCPPADDINGLENGTH "CryptTCPPaddingLength=[1-254]"
     IDS_CRYPTTCPPADDINGLENGTH_TIP 
                             "The amount of random bytes that is added to obfucsated traffic. (default 128). \nLow values means less overhead (try 16), higher values means better obfuscation."
 END
@@ -1591,11 +1591,20 @@ BEGIN
     IDS_UPNP_INFOENABLED    ",enabled\r\n"
     IDS_UPNP_INFODISABLED   ",disabled\r\n"
     IDS_UPNP_INFOSTANDBY    "No Device detected\r\n"
+    IDS_UPNP_INFO_NONEED    "Failed or not needed"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNP_INFO_NONEED    "Failed or not needed"
+   IDS_ADDSHAREDIR    "Add share or UNC manually"
+   IDS_TEXTSHRETOADD  "Share to add"
+   IDS_SHAREWITHSUBDIR	 "Share with subdirectories"
+   IDS_SUBDIRS "Subdirs"
+   IDS_UNCLIST_INACTIVE  "Inactive shares"
+   IDS_SCHED_RELOAD "Scheduler:Reload shared files"
+   IDS_SCHED_WARNENDTIME   "End time should be equal to start time for one time events"
+   IDS_SCHED_WARN_APPLY "Press Ok or Apply before selecting an other schedule"
+   IDS_SCHED_WARN_APPLY_TITLE "Warning"
 END
 
 STRINGTABLE 
@@ -1603,8 +1612,122 @@ BEGIN
     IDS_DISABLECATCOLORS       "Disable category colors"
     IDS_DISABLECATCOLOR_TIP    "Disable category colors in text tab of the transfer window"
     IDS_CHANGEUSERASSERVICE    "You will have to change the user login of the service manually, or save config files in a program directory"
-    IDS_MORPHWIZ_GUI            "Mod options"
-    IDS_MORPHWIZ_NEXT	        "On Finishing of wizard" 
+END
+
+STRINGTABLE 
+BEGIN
+   IDS_USSPINGDATASIZE		"ICMP data size (0=default 0..64 allowed)" 
+   IDS_PINGDATASIZE_TIP            "Some firewalls/routers do not reply proper to icmp ping\nrequest with datasize 0. THis option allows you to set a\nsmall data size to work arround these buggy router"
+END
+
+STRINGTABLE 
+BEGIN
+  IDS_INCFILES_TIP "Specifies the directory to which completed downloads are moved.\nif the default path is changed an existing folder  that you can \nwrite into must be entered. eMule will not create this directory.\nYou can override this setting per category in the transfer window\nby choosing a different	Incoming Files category folder.\nYour Incoming Files folder will be shared."
+  IDS_TEMPFILES_TIP "This option specifies the directory, or directories, where the\ndownloads in progress are stored. Because of the concurrent \ndownload system, eMule creates dummy files (*.part) of the\nsize the finished download will have. You can configure eMule\nto use only the size the file currently has by enabling the 'Sparse'\noption in Extended (only works on NTFS filesystems, under \nwindows 2000 and XP, not vista).   You can add multiple \ndirectories by clicking the [+] button, next to the browse button \n(visible only with 'show more controls'). \nThe tempdir for a file is selected as follows:\n1. On same drive as incoming and enough space for all downloading\n2. Enough space for all downloading\n3. Most actual free space \nNote that it does not make sense to put multiple temp dir on\nthe same drive letter.\n"
+  IDS_SHARESELECTOR_TIP "Select Additional shared directories and shared network paths here. \nIf you press the control key while selecting a directory it is shared including\nit (future) subdirectories."
+  IDS_UNCLIST_TIP "Shares that were once shared but were not readable when eMule was started.\nThey will be tried again when pressing apply. This can be shares or network drives.\nNote that shares that time-out share can increase the startup time"
+  IDS_UNCADD_TIP "Manually add shares. Useful for network shares that are not yet listed in the shareselector"
+  IDS_UNCREM_TIP "remove the current selected inactive share"
+
+  IDS_ENABLE_SCHED_TIP "Enable the scheduler.\nWhen disabled no of the events defined here will happen\n(default: disabled , dont forget to enable)"
+  IDS_REMOVE_SCHED_TIP "Remove the current selected starttime event"
+  IDS_NEW_SCHED_TIP "Create a new action event"
+  IDS_SCHEDLIST_TIP "Displays the defined action profile. \nUse NEW to add events and REMOVE button to delete lines\nyou will have to apply after each line or else selection of an other item might fail"
+  IDS_S_ENABLE_TIP "Enable this current profile action"
+  IDS_S_TITLE_TIP "Edit the name of the current profile action"
+  IDS_TIMESEL_SCHED_TIP "Select how often a event happens"
+  IDS_DATETIMEPICKER1_TIP "Start time"
+  IDS_DATETIMEPICKER2_TIP "End time. Note that of event that happen once like\nupdate of ipfilter the endtime should be equal to the start time"
+  IDS_CHECKNOENDTIME_SCHED_TIP "event has no end"
+  IDS_SCHEDACTION_TIP "Right-click this window to add/remove actions from the current profile\nSome actions have parameters that can be edited"
+
+  IDS_OVERWRITE1          "File %s Already Exists. OverWrite It?"
+  IDS_OVERWRITE2          "OverWrite?"    
+  IDS_BACKUPERROR         "Error encountered during backup"
+  IDS_BACKUP_PART         "Because of their size, backing up *.part files may take a few minutes.\nAre you sure you want to do this?"
+  IDS_BACKUP_PART_W       "Are you sure?"
+  IDS_BACKUP_COMPLETE     "File(s) Copied Successfully."
+
+  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME "Adjust NTFS daylight file time"
+  IDS_X_PEERCACHESHOW     "Show PeerCache informations"
+  IDS_X_DATETIMEFORMAT    "Date&Time format"
+  IDS_X_DATETIMEFORMAT4LOG "Date&Time format for log"
+  IDS_X_LOGWARNING        "Log warning color"
+  IDS_X_LOGSUCCESS        "Log success color"
+  IDS_X_LOGERROR          "Log error color"
+  IDS_X_ICH               "Intelligent Corruption Handing (ICH)"
+  IDS_X_DONTCOMPRESSAVI   "Don't compress avi"
+  IDS_X_SHOWCOPYED2KLINK  "Show 'copy ed2k link' command"
+  IDS_X_ICON_FLASH_ON_NEW_MESSAGE "Flash tray icon on new message"
+  IDS_X_SHOWVERTICALHOURMARKERS "Stats- Show vertical hour markers"
+  IDS_X_REBARTOOLBAR      "disable some Toolbar options"
+
+
+END
+
+STRINGTABLE 
+BEGIN
+  IDS_OUTOFSERVERS_O "Failed to connect obfuscated to  servers with obfuscation key. Making another pass."
+  IDS_NO_OBFUSCATION_KEY "Server has no obfuscation key."
+  IDS_URL_FOR_UPDATING_IP2COUNTRY "File-URL for updating"
+
+  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP "if the a file is located on a NTFS fs\nthe time on the file is  modified by 1 hour\nif daylightsaving is active.  See KB 129574\ndefault=enabled"
+	IDS_X_LOGERROR_TIP "Color of the log lines in the server pane log."
+    IDS_X_SHOWVERTICALHOURMARKERS_TIP "Show an vertical line in the statics window every hour.\nResize statistics window to see effect (default: enabled)"
+	IDS_X_REBARTOOLBAR_TIP      "option to disable toolbar options like i.e.:\nAdded chevron support: If toolbar is too small to display all buttons a\nchevron ('>>' icon) is shown at the very right side which opens a menu \nwith the remaining button commands.\nTooltips for truncated button titles and in 'No Labels' mode of toolbar.\nButtons can be moved and/or removed from the toolbar by holding down \nCtrl+Alt key while draging a button with the mouse.\nButton sizes more similar to Windows Explorer.\n(default: checked)"
+	IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "Flash the system tray icon when a new message is received. (default=on)"
+	IDS_X_SHOWCOPYED2KLINK_TIP "In the shared files windows,  Show Copy link to clipboard menu option\ninstead of the 'ed2k links....' context menu. (default = off)"
+	IDS_X_DONTCOMPRESSAVI_TIP   "normally all file data is compressed before transfering,\nexcept for rar, zip and some other archive formats\nThis options disables compressing avi files like rar files\nFOr high speed upload links this increases performance, but\nfor some avi file some possible compression is lost.\n(default= false). Note that morph has the option to\ndisable/decrease compression  for all files."
+
+END
+STRINGTABLE 
+BEGIN
+  IDS_UPNPDETECTSTATUS "wizard auto detect status"
+  IDS_DETECTUPNP_TIP  "Current status of automatic upnp detection in startup wizard\n2: ReDetect upnp on next start(only usefule value to set to 2)\n0: upnp gateway detected.\n-1: Not detected.\n-2:Detection disabled on non local lan address\n-10:Not needed.(other values ignored)"
+  IDS_UPNPPORT_TIP  "Port upnp uses. DO NOT FORWARD THIS PORT (default 0=automatic)"
+  IDS_UPNPCLEARONCLOSE_TIP "enabled=create static portmapping and close on exit\ndisabled=create dynamic portmapping and do not close on exit"
+  IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "Forward only ports on the first device found\nNote that some windows installations return\na Residential gateway device that is NOT a\ninternet device. Defaut: disabled"
+  IDS_UPNPCLOSEONEXIT "Close Ports on exit"
+  IDS_UPNPLIMITTOFIRSTCONNECTION "Forward ports only on first connection"
+  IDS_UPNFORCEUPDATE "Force periodic updates"
+  IDS_UPNFORCEUPDATE_TIP "Instead of checking on the internet gateway device\nif a portmapping rule still  exists, just add a \nmapping every 10 minutes (default = disabled!)"
+END
+
+STRINGTABLE 
+BEGIN
+   IDS_DONOTWATCHCLIP "Stop watching clipboard"
+   IDS_DONOTWATCHCLIP_TIP "One or more of the links that is copied from the clipboard.\nCheck this option to disable watching of the clipboard.\npress cancel to not paste the link. \nEnter or select a catagory and press ok to insert the links"
+   IDS_USS_INITIAL_TTL     "Initial TTL" // [MoNKi: -USS initial TTL-] - Stulle
+   IDS_USS_INITIAL_TTL_TIP	"In finding the last common router Skip the first n routers\nThis might be usefule if the providers blocks pings at the\ninternel routers. Test this with the 'tracert' command. Default =0, \nIf you go higher than 8 you have a strange ISP network. max = 20\n20 is not recommended. Setting a too high value will cause\n'Network topology has changed.' verbose messages. Loosing the \neffectiveness  of the USS"
+   IDS_SELFILES_TIP "Filesname that were in the link queue at the first display \nof this category selection. More may be added during \n the category selection but are not displayed here"
+   IDS_USEDOWNLOADOVERHEAD "Use download overhead"
+   IDS_USEDOWNLOADOVERHEAD_TIP "Use the ack traffic coming from the download session\nIn the upload statistics, allowing to set your upload\nslightly higher when downloading a lot(default=on)"
+   IDS_APPLY_SETTINGS       "Should the necessary settings be applied now?"
+   IDS_TAB_WEB_SERVER       "Web Server"
+   IDS_TAB_MULTI_USER       "Multi User"
+   IDS_TAB_NT_SERVICE       "NT Service"
+   IDS_PURGE_DONT           "Don't purge entries"
+   IDS_PURGE_PARTIALLY      "Partially purge entries (Original)"
+   IDS_PURGE_COMPLETLY      "Completely purge entries (MorphXT)"
+   IDS_REMOVE_AICH_IMMEDIATLY "Remove unused AICH hashes immediatly"
+   IDS_IPFILTERWHITELOADED  "%u IPs loaded to the IP Filter White List" //MORPH - Added by Stulle, IP Filter White List [Stulle]
+   //MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+   IDS_AUTOIPFILTERFAILED   "Failed to check IPFilter version."
+   IDS_DL_NONE              "None"
+   //MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+   IDS_X_FILE_BUFFER_TIME_LIMIT "File Buffer Time Limit (in sec)"
+   IDS_X_FILE_BUFFER_TIME_LIMIT_TIP "Maximum time until data is flushed from download\ncache to harddisk"
+   IDS_X_DATETIMEFORMAT4LIST "Date&Time format for lists"
+   IDS_X_REARRANGEKADSEARCH "Rearrange KAD search keywords"
+   IDS_X_REARRANGEKADSEARCH_TIP "If enabled eMule will automatically rearrange\nsearch keywords to avoid limitations by KAD.\nDefault: enabled"
+   IDS_RESOLVE_SHARED_SHELL_TIP "Resolve shell links which lets eMule share 'linked'\nfiles (Windows Explorer shortcuts). This way one\ncan also share single files within unshared directories."
+   IDS_AUTO_ARCH_TIP        "When you check the file details for an archive eMule creates\nare preview to show you which files are within this archive.\nYou can disable this behaviour to avoid having to wait (a short\ntime on slow PCs) when walking through the file details. In\nthis case you can still start the preview manually for each archive."
+   IDS_MET_PURGE_DONT_TIP   "Old entries in the known.met file will never be purged."
+   IDS_MET_PURGE_PART_TIP   "Parts of old entries in the known.met file will be purged.\nThis is the way the official does it."
+   IDS_MET_PURGE_COMPL_TIP  "Old entries in the known.met file will be purged completly.\nThis is the way Morph did it in the past."
+   IDS_REMOVE_AICH_TIP      "Enable if AICH hash of unshared files should\nbe deleted immediatly.\nDefault: disabled"
+   IDS_WSUPNP_TIP           "Includes Webserver port into UPnP port forwarding."
+   IDS_CHECK_FILE_OPEN_TIP  "Enables prompt before opening a file via eMule."
 END
 
 /// For the installer the following strings need to be translated (assuming ther eis a inno setup translation available
@@ -1623,10 +1746,3 @@ locofdata=Location of datafiles
 progdir=install configuration and data files into subdir of program (default)
 appdir=install data files into common applications directory
 userdocdir=install data files into local homedirecotry of user
-
-
-
-
-
-
-
