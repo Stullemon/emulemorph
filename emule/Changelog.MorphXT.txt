@@ -46,6 +46,7 @@ FIX: Display FairPlay in lists only if requested file is complete [gomez82]
 FIX: Improper localization of altered category column in DownloadList [Stulle]
 FIX: Failing support of emulepawcio ipfilter.zip format [D10Tmain]
 FIX: Memleak fix around hashing [WiZaRd]
+FIX: Download ACK was not displayed and counted in stats as overhead [Stulle]
 
 Note: Additional options stored in Known.met will be purged like some official stuff is.
 Note: Due to change in column orders we recommend a clean install. You may experience strange looks otherwise.

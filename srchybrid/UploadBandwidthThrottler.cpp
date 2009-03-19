@@ -26,6 +26,7 @@
 #include "emuledlg.h"
 #include "uploadqueue.h"
 #include "preferences.h"
+#include "Statistics.h" // add download ack
 
 
 #ifdef _DEBUG
@@ -387,6 +388,7 @@ void UploadBandwidthThrottler::Pause(bool paused) {
 void UploadBandwidthThrottler::SetDownDataOverheadOtherPackets(long bytes)	{
 	sendLocker.Lock();
 	m_nUpDataOverheadFromDownload+=bytes;
+	theStats.AddUpDataOverheadOther((uint32)bytes); // add to overhead calculations
 	sendLocker.Unlock();
 }
 
