@@ -589,6 +589,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 			if(client->GetDownloadState() == DS_DOWNLOADING) {
                         AddDebugLogLine(false, _T("Checking if we should send block request, since OP_FILESTATUS was received when client->GetDownloadState() == DS_DOWNLOADING() %s"), client->DbgGetClientInfo());
                         client->SendBlockRequests();
+			}
 					//MORPH END  - ZZUL_20070513-2310
 
 					break;
