@@ -570,7 +570,7 @@ void CSearchResultsWnd::DownloadSelected(bool bPaused)
 	if (!pos) return; // No point in asking for a category if there are no selected files to download.
 	int useCat = GetSelectedCat();
 	bool	bCreatedNewCat = false;
-	if (useCat==-1 && thePrefs.SelectCatForNewDL())
+	if (useCat==-1 && thePrefs.SelectCatForNewDL() && thePrefs.GetCatCount()>1)
 	{
 		CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg);
 		getCatDlg->DoModal();

@@ -24,8 +24,6 @@ ADD: RAR File download decompress for auto update [official]
 ADD: New hidden options to Advanced Options and Tooltips for new options [Stulle]
 ADD: Rebind UPnP mappings (UDP, TCP and Webserver for now) like the official does [Stulle]
 CHANGE: Display NNS in UploadListCtrl [Diabolo111]
-CHANGE: Updated German language file [Morella/Myth88]
-CHANGE: Updated French language file [Nicolas_FR]
 CHANGE: Cleaned up Static IP Filter code [Stulle]
 	+ only ipfilter.dat layout allowed!
 CHANGE: Switch category column and download started column (group cat related) [Stulle]
@@ -40,6 +38,7 @@ CHANGE: Updated Show less controls for new columns and added it for context menu
 CHANGE: Enabling Extended controls disables Show less controls and vice versa [Stulle]
 	+ close preferences window to avoid odd behaviour... kinda tricky...
 CHANGE: Switched on Global Hard Limit by default (upgrade unaffected) [Stulle]
+CHANGE: Only display category selection dialog if there is more than one category [Stulle]
 FIX: Corrupted userhash ban [taz]
 FIX: Double increase for badrequests [taz]
 FIX: Incorrect and redundent operation for Double backup [AndCycle]
@@ -56,6 +55,9 @@ Note: Due to change in column orders we recommend a clean install. You may exper
 Note: Microsoft DirectX 9 SDK for MS VS2005 build has already been added in an earlier version.
 Note: See How-To-Compile_VS05.txt in source package for guide on how to get the sources to compile.
 Note: New IPFilter will only be set when resetting the url or making a clean install.
+Note: Following languages updated: CHANGE: German [Morella/Myth88]; French [Nicolas_FR]; Spanish [guijarrelson];
+	Portuguese (Brazil) [Heiler]
+
 
 IP Filter White List:
 + IPs on this list will not be banned

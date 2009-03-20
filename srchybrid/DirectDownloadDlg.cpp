@@ -160,7 +160,12 @@ BOOL CDirectDownloadDlg::OnInitDialog()
 	GetDlgItem(IDCANCEL)->SetWindowText(GetResString(IDS_CANCEL));
 	
 
+	//khaos::categorymod+
+	/*
 	if (thePrefs.GetCatCount()==0) {
+	*/
+	if (thePrefs.GetCatCount()==1) {
+	//khaos::categorymod-
 		GetDlgItem(IDC_CATLABEL)->ShowWindow(SW_HIDE);
 		GetDlgItem(IDC_CATS)->ShowWindow(SW_HIDE);
 	}

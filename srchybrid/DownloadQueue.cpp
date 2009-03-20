@@ -471,7 +471,7 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 	int		addedFiles = 0;
 	bool	bCreatedNewCat = false;
 	bool	bCanceled = false; //MORPH - Added by SiRoB, WasCanceled
-	if (thePrefs.SelectCatForNewDL() || m_bClipboardLinkInQueue)
+	if ((thePrefs.SelectCatForNewDL() || m_bClipboardLinkInQueue) && thePrefs.GetCatCount()>1)
 	{
 		CSelCategoryDlg* getCatDlg = new CSelCategoryDlg((CWnd*)theApp.emuledlg,m_bClipboardLinkInQueue);
 		getCatDlg->DoModal();
