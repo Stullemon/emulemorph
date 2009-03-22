@@ -1253,7 +1253,6 @@ BEGIN
     IDS_STATS_TIMESTATS     "Statistiques temporelles"
     IDS_STATS_AVGANDPROJ    "Moyennes prévues"
     IDS_STATS_TIMESINCERESET "Temps depuis la dernière réinitialisation : %s"
-    IDS_CRYPT_INITFAILED    "Impossible d'initialiser les clés de cryptage - identification sécurisée désactivée"
     IDS_CD_IDENT            "Identification :"
     IDS_IDENTOK             "Réussie"
     IDS_IDENTFAILED         "Invalide"
@@ -1919,7 +1918,6 @@ BEGIN
     IDS_UPNP_NOSERVICE      "Le service système UPnP n'est pas activé, paramétrage UPnP ignoré"
     IDS_DELAYEDBYUPNP       "La connexion au réseau est retardée car l'UPnP est toujours occupé à configurer le mappage des ports."
     IDS_DELAYEDBYUPNP2      "Veuillez patienter, eMule se connectera dès que l'UPnP aura terminé."
-    IDS_UPNP                "UPnP" //!
     IDS_UPNPCLOSEONEXIT     "Supprimer le mappage des ports UPnP à la fermeture"
     IDS_UPNPSKIPWANIP       "Ignorer le paramétrage WAN IP"
     IDS_UPNPSKIPWANPPP      "Ignorer le paramétrage WAN PPP"
@@ -1979,7 +1977,6 @@ END
 STRINGTABLE
 BEGIN
     IDS_VIEW3       " (partagés avec des sous-dossiers)"
-    IDS_PERMISSION       "Affiche permissions"
     IDS_CRC32_ABORT       "Arrêter le calcul"
     IDS_DONTREMOVESPARETRICKLESLOT       "Ne pas renvoyer les slots de rechange en file d'attente"
     IDS_MINDATARATEFRIEND       "Débit total (défaut 0 ko/s = illimité, de 1 à 3ko/s = pas de zzRatio)"
@@ -3567,7 +3564,7 @@ BEGIN
     IDS_UPNPPORT_TIP       "Ports UPnP utilisés. NE PAS ROUTER CES PORTS (Par défaut: 0=automatique)"
     IDS_UPNPCLEARONCLOSE_TIP       "Activé=créé un routage static des ports et les ferme en quittant eMule.\nDésactivé=créé un routage dynamique des ports et ne les ferme pas en quittant."
     IDS_UPNPLIMITTOFIRSTCONNECTION_TIP       "Route les ports seulement sur le premier équipement trouvé.\nNotez que quelques installations peuvent signaler un routeur résidentiel alors que ce n'EST PAS un système connecté à internet.\nPar défaut: désactivé"
-    IDS_UPNPCLOSEONEXIT       "Fermer les ports en quittant"
+//    IDS_UPNPCLOSEONEXIT       "Fermer les ports en quittant"
     IDS_UPNPLIMITTOFIRSTCONNECTION       "Router les ports uniquement à la première connexion"
     IDS_UPNFORCEUPDATE       "Force une mise à jour périodique"
     IDS_UPNFORCEUPDATE_TIP       "Au lieu de vérifier sur la passerelle internet si les ports sont routés,\najoute simplement et systèmatiquement un routage toutes les 10 minutes (Par défaut: désactivé !)"
