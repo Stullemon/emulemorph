@@ -389,9 +389,10 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 						//EastShare Start - added by AndCycle, IP to Country, modified by Commander
 						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(15)){
-							cur_rec.left+=20;
+							cur_rec.left += 20;
 							POINT point2= {cur_rec.left,cur_rec.top+1};
 							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, client->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+							cur_rec.left += sm_iLabelOffset;
 						}
 						//EastShare End - added by AndCycle, IP to Country
 
@@ -402,7 +403,8 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 						//EastShare Start - added by AndCycle, IP to Country
 						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(15)){
-							cur_rec.left-=20;
+							cur_rec.left -= 20;
+							cur_rec.left -= sm_iLabelOffset;
 						}
 						//EastShare End - added by AndCycle, IP to Country
 

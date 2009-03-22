@@ -55,9 +55,8 @@ Note: Due to change in column orders we recommend a clean install. You may exper
 Note: Microsoft DirectX 9 SDK for MS VS2005 build has already been added in an earlier version.
 Note: See How-To-Compile_VS05.txt in source package for guide on how to get the sources to compile.
 Note: New IPFilter will only be set when resetting the url or making a clean install.
-Note: Following languages updated: CHANGE: German [Morella/Myth88]; French [Nicolas_FR]; Spanish [guijarrelson];
+Note: Following languages updated: German [Morella/Myth88]; French [Nicolas_FR]; Spanish [guijarrelson];
 	Portuguese (Brazil) [Heiler]
-
 
 IP Filter White List:
 + IPs on this list will not be banned

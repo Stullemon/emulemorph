@@ -328,6 +328,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							POINT point2= {cur_rec.left,cur_rec.top+1};
 							int index = client->GetCountryFlagIndex();
 							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+							cur_rec.left += sm_iLabelOffset;
 						}
 						//EastShare End - added by AndCycle, IP to Country
 
@@ -339,6 +340,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//EastShare Start - added by AndCycle, IP to Country
 						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(12)){
 							cur_rec.left-=20;
+							cur_rec.left -= sm_iLabelOffset;
 						}
 						//EastShare End - added by AndCycle, IP to Country
 						break;

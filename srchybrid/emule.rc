@@ -6326,7 +6326,7 @@ BEGIN
    IDS_PURGE_DONT           "Don't purge entries"
    IDS_PURGE_PARTIALLY      "Partially purge entries (Original)"
    IDS_PURGE_COMPLETLY      "Completely purge entries (MorphXT)"
-   IDS_REMOVE_AICH_IMMEDIATLY "Remove unused AICH hashes immediatly"
+   IDS_REMOVE_AICH_IMMEDIATLY "Remove unused AICH hashes immediately"
    IDS_IPFILTERWHITELOADED  "%u IPs loaded to the IP Filter White List" //MORPH - Added by Stulle, IP Filter White List [Stulle]
    //MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
    IDS_AUTOIPFILTERFAILED   "Failed to check IPFilter version."
