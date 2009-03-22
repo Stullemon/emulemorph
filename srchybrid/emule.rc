@@ -6338,7 +6338,7 @@ BEGIN
    IDS_X_REARRANGEKADSEARCH "Rearrange KAD search keywords"
    IDS_X_REARRANGEKADSEARCH_TIP "If enabled eMule will automatically rearrange\nsearch keywords to avoid limitations by KAD.\nDefault: enabled"
    IDS_RESOLVE_SHARED_SHELL_TIP "Resolve shell links which lets eMule share 'linked'\nfiles (Windows Explorer shortcuts). This way one\ncan also share single files within unshared directories."
-   IDS_AUTO_ARCH_TIP        "When you check the file details for an archive eMule creates\nare preview to show you which files are within this archive.\nYou can disable this behaviour to avoid having to wait (a short\ntime on slow PCs) when walking through the file details. In\nthis case you can still start the preview manually for each archive."
+   IDS_AUTO_ARCH_TIP        "When you check the file details for an archive eMule creates\na preview to show you which files are within this archive.\nYou can disable this behaviour to avoid having to wait (a short\ntime on slow PCs) when walking through the file details. In\nthis case you can still start the preview manually for each archive."
    IDS_MET_PURGE_DONT_TIP   "Old entries in the known.met file will never be purged."
    IDS_MET_PURGE_PART_TIP   "Parts of old entries in the known.met file will be purged.\nThis is the way the official does it."
    IDS_MET_PURGE_COMPL_TIP  "Old entries in the known.met file will be purged completly.\nThis is the way Morph did it in the past."

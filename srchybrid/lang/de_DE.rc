@@ -302,7 +302,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PERMISSION          "Erlaubnis"
+    IDS_PERMISSION          "Zeigeerlaubnis"
     IDS_SHAREDFILES         "Freigegebene Dateien"
     IDS_PRIOVERYLOW         "Sehr niedrig"
     IDS_PRIORELEASE         "Release" //!
@@ -1912,7 +1912,7 @@ BEGIN
     IDS_DELAYEDBYUPNP       "Verbinden mit dem Netzwerk wird verzögert, da UPnP noch die Portweiterleitungen konfiguriert."
     IDS_DELAYEDBYUPNP2      "Bitte warte einige Sekunden, eMule wird sich verbinden sobald UPnP fertig ist."
     IDS_UPNP                "UPnP" //!
-    IDS_UPNPCLOSEONEXIT     "Lösche UPnP Portweiterleitungen beim Programmende"
+//    IDS_UPNPCLOSEONEXIT     "Lösche UPnP Portweiterleitungen beim Programmende"
     IDS_UPNPSKIPWANIP       "Überspringe WAN IP Setup"
     IDS_UPNPSKIPWANPPP      "Überspringe WAN PPP Setup"
     IDS_SHAREEMULELABEL     "eMule mit anderen Benutztern teilen"
@@ -2341,8 +2341,8 @@ BEGIN
     IDS_RATIO_CREDIT        "Ratio Credit"
     IDS_EASTSHARE_CREDIT    "EastShare Credit"
     IDS_PREFER_SHARE_ALL    "Bevorzuge Server die kompletten Share indexieren"
-    IDS_MET_FILE_CONTROL    "known.met Datei Kontrolle (VORSICHT beim Ändern !!)"
-    IDS_EXPIRED_KNOWN       "Tage, nach denen bekannte Datei vergessen wird (0 = Standard)"
+    IDS_MET_FILE_CONTROL    "known.met Datei Kontrollen"
+    IDS_EXPIRED_KNOWN       "Tage bis zum säubern (0 = Standard [31 Tage])"
     IDS_DELETEFILE          "Datei Löschen"
     IDS_PAWCIO_CREDIT       "Pawcio Credits"
 END
@@ -2842,7 +2842,7 @@ BEGIN
     IDS_PW_SCORE_TIP        "Automatisches Verbinden zu Server in der Reihenfolge ihrer Priorität.\nhohe Priorität zuerst,..."
     IDS_MANUALSERVERHIGHPRIO_TIP 
                             "Manuell hinzugefügte Server \nerhalten automatisch die Priorität hoch"
-    IDS_EDITLIST_TIP        "Wenn du diese Checkbox aktivierst wird deine \nServerliste beim starten von eMule aktualisiert.\nDazu musst du eine gültige URL zu \neiner Serverliste in die Adress.dat eintragen."
+    IDS_EDITLIST_TIP        "Wenn du diese Checkbox aktivierst wird deine \nServerliste beim starten von eMule aktualisiert.\nDazu musst du eine gültige URL zu \neiner Serverliste in die Adresses.dat eintragen."
     IDS_PW_AUTOCONNECTSTATICONLY_TIP 
                             "Automatisches Verbinden nur zu Servern aus der Liste der festen Servern. \nIst diese Liste leer so kann eMule nicht automatisch zu einem Server verbinden."
     IDS_MAXCONNECTIONSSWITCHBORDER_TIP 
@@ -2891,12 +2891,12 @@ BEGIN
     IDS_DOWNLOAD_IN_BOLD_TIP 
                             "Dateien die momentan laden \nwerden im Downloadfenster \nin <b>fett</b> angezeigt."
     IDS_CLIENTPERCENTAGE_TIP 
-                            "Es wird in Prozenten angezeigt wie viel \ndein Gegenüber bereits von einer Datei gesaugt hat."
+                            "Es wird in Prozenten angezeigt wie viel \ndein Gegenüber bereits von einer Datei geladen hat."
     IDS_ANTI_LEECHER_TIP    "Clients die dem ed2k-Netz schaden (Leecher) oder die keine gültige Identifikation senden (Ghostmods) werden gebannt.(Standard:aktiviert)"
     IDS_ANTI_CREDITHACK_TIP "Durch aktivieren dieser Option können deine Credits/dein Userhash nicht mehr so leicht gestohlen werden. (Standard:aktiviert)"
     IDS_INFINITEQUEUE_TIP   "Die Größenbegrenzung deiner Warteschlange wird aufgehoben."
     IDS_DONTREMOVESPARETRICKLESLOT_TIP 
-                            "Wenn der Morph Mod zusätzliche Reserveslots (langsame UploadSlots) \nöffnet werden diese sobald sie nicht mehr benötigt werden \nwieder entfernt. \nDie User werden dabei wieder ohne Platzverlust \nin deine Warteschlange gestellt."
+                            "Wenn der Morph Mod zusätzliche Reserveslots (langsame UploadSlots) \nöffnet werden diese sobald sie nicht mehr benötigt werden \nwieder entfernt. \nDie User werden dabei wieder ohne Platzverlust \nin deine Warteschlange gestellt.\nDiese Option ein- bedeutet Slotfocus ausschalten."
 END
 
 STRINGTABLE 
@@ -2939,7 +2939,7 @@ BEGIN
                             "Wenn im Kategorieauswahldialogfenster eine neue Kategorie erstellt wurde \nund mehrere Dateien im Pause Modus hinzugefügt werden \nwird diese Anzahl Dateien gestartet (Standard=0, deaktiviert)"
     IDS_A4AF_SMARTSWAP_TIP  "Aktiviere <b>A</b>sked <b>4</b> for <b>A</b>nonther <b>F</b>ile \n""andere Datei angefordert"" Einstellungen"
     IDS_A4AF_SHOWDEBUG_TIP  "Bei aktiviertem Verbose Log werden A4AF Aktivitäten dort angezeigt"
-    IDS_A4AF_ADVMODE_TIP    "Einstellungen wenn ein User mehrere brauchbare Dateien hat."
+    IDS_A4AF_ADVMODE_TIP    "Extra Einstellungen für Handhabung von Nutzern mit mehreren\nbrauchbaren Dateien."
     IDS_A4AF_DISABLED_TIP   "Deaktiviert zusätzliche A4AF Einstellung"
     IDS_A4AF_BALANCE_TIP    "Verteilt die A4AF gleichmäßig auf die Dateien."
     IDS_A4AF_STACK_TIP      "Alle A4AF Quellen werden auf eine Datei konzentriert"
@@ -2954,7 +2954,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_COMMUNITYTAG_TIP    "Alle User mit dem hier eingegebenen Text im Namen werden euch als Community Mitglieder <b>angezeigt<b>. \nDiesen Usern kann eine Berechtigung zur Einsicht eurer gesharten Dateien erteilt werden."
+    IDS_COMMUNITYTAG_TIP    "Community tags werden benutzt um Nutzer als Teil einer 'Community' zu\nerkennen, zB ein Nutzer <i>Andu[<b>NWO</b>]</i> wird als 'Community' erkannt, wenn du hier 'NWO' einträgst.\nCommunity ist nur nützlich für das Zeigen von freigegbenen Dateien zur Community (Keine Bevorzugung!).\nFür das Zeigen freigegebener Dateien musst du die Berechtigung in den Datei Einstellungen, der Morph\nZeigeerlaubnis und an der jeweiligen Datei einstellen. Du brauchst kein [TAG] in\n deinen Nutzernamen eintragen, das tag wird auch nicht an deinen\nNutzernamen angefügt durch diese Funktion."
     IDS_MORPH_RFHA_TIP      "Das Hashen von Dateien wird im Verbose Log ausgegeben."
     IDS_MORPH_RAIF_TIP      "Das hinzufügen und löschen so wie Namensänderungen von Freunden werden im Verbose Log ausgegeben."
     IDS_MORPH_KSSERV_SIP    "Feste Server werden bei mehrmalig misslungenem Verbindungsversuch, \nbis zum nächsten Start von eMule lediglich deaktiviert, anstatt \naus der Serverliste entfernt zu werden."
@@ -3209,13 +3209,13 @@ END
 STRINGTABLE 
 BEGIN
     IDC_UPDATEFAKES_TIP     "Lädt jetzt die fakes.zip Datei runter und aktualisiert sie. \nWenn eine neuere Fake-Datei als vorhanden zum Download zur Verfügung steht."
-    IDC_RESETFAKESURL_TIP   "Setzt die URL auf den Morph Standard zurück:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
+    IDC_RESETFAKESURL_TIP   "Setzt die URL auf den Morph Standard zurück:\nhttp://emulepawcio.sourceforge.net/fakes.zip"
     IDC_UPDATE_URL_FAKELIST_TIP 
                             "Url woher die Fakeliste heruntergeladen werden soll. Die Fakeliste muss im \nzip Format vorliegen. Morph überprüft, ob das Datum der Datei \nneuer ist als das der vorhandenen und \nwird nur eine neuere Version herunterladen."
     IDC_AUTOUPIPFILTER_TIP  "Versucht die Liste zu aktualisieren bevor ihr euch mit dem Netzwerk verbindet."
     IDC_UPDATEIPFURL_TIP    "Lädt jetzt die ipfilter.zip Datei runter und aktualisiert sie. \nWenn eine neuere IPFilter-Datei als die vorhandene zum Download zur Verfügung steht."
     IDS_PW_TOOL_TIP         "Wenn die Maus auf ein Download oder Einstellung zeigt, \nwird ein kleines Popup Fenster erscheinen mit Informationen darüber. \nDieser Wert legt die Verzögerungszeit fest bis der Hinweis erscheint."
-    IDC_RESETIPFURL_TIP     "Setzt die URL auf den Morph Standard zurück\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
+    IDC_RESETIPFURL_TIP     "Setzt die URL auf den Morph Standard zurück\nhttp://downloads.sourceforge.net/scarangel/ipfilter.rar"
     IDC_UPDATE_URL_IPFILTER_TIP 
                             "Url woher die ipfilter.dat heruntergeladen werden soll.(zip format)"
     IDC_MORPH2_COUNTRY_TIP  "Lädt die Liste für die Länderflaggen (IP2Country) beim Start runter."
@@ -3454,7 +3454,6 @@ BEGIN
     IDS_PREVIEWONICONDBLCLK "Vorschei bei Doppelklick auf Datei"
     IDS_INTERNETSECURITYZONE "InternetSecurityZone"
     IDS_TXTEDITOR           "TextEditor"
-    IDS_DATETIMEFORMAT      "Datei Zeitformat"
     IDS_SERVERUDPPORT       "ServerUDPPort"
 END
 
@@ -3545,7 +3544,7 @@ BEGIN
     IDS_ERR_NOVALIDOBFUSCATEDSERVERSFOUND 
                             "Es wurde kein Server in der Serverliste gefunden der eine obfuskierte Verbindung unterstützt. (Serverliste aktualisieren oder UDP Port aktiveren)"
 	IDS_DEBUGSEARCHDETAILLEVEL    "DebugSearchDetailLevel"
-    IDS_CRYPTTCPPADDINGLENGTH	  "CryptTCPPaddingLength=[1-256]"
+    IDS_CRYPTTCPPADDINGLENGTH	  "CryptTCPPaddingLength=[1-254]"
 	IDS_CRYPTTCPPADDINGLENGTH_TIP
 							 "Anzahl der zufälligen Bytes die zum Herstellen einer \nobfuskierten Verbindung versendet werden. (Standard 128). \nein kleiner Wert bedeutet weniger Overhead (z.B. 16), Ein hoher Wert bedeutet eine bessere Verschleierung."
 END
@@ -3670,6 +3669,28 @@ BEGIN
    IDS_TAB_WEB_SERVER "Web Server"
    IDS_TAB_MULTI_USER "Multi Nutzer"
    IDS_TAB_NT_SERVICE "NT Service"
+   IDS_PURGE_DONT           "Bereinige keine Einträge"
+   IDS_PURGE_PARTIALLY      "Bereinige Einträge teilweise (Original)"
+   IDS_PURGE_COMPLETLY      "Bereinige Einträge komplett (MorphXT)"
+   IDS_REMOVE_AICH_IMMEDIATLY "Entferne unbenutzte AICH Hashes sofort"
+   IDS_IPFILTERWHITELOADED  "%u IPs in die IP Filter White List geladen" //MORPH - Added by Stulle, IP Filter White List [Stulle]
+   //MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+   IDS_AUTOIPFILTERFAILED   "Überprüfung der IPFilter version fehlgeschlagen."
+   IDS_DL_NONE              "Keine"
+   //MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+   IDS_X_FILE_BUFFER_TIME_LIMIT "Dateipuffer Zeitbegrenzung (in Sek)"
+   IDS_X_FILE_BUFFER_TIME_LIMIT_TIP "Maximale Zeit bis Daten von Downloads aus dem\nCache auf die Festplatte geschrieben werden."
+   IDS_X_DATETIMEFORMAT4LIST "Datum&Zeit Format fürs Listen"
+   IDS_X_REARRANGEKADSEARCH "Ordne KAD Suchbegriffe neu an"
+   IDS_X_REARRANGEKADSEARCH_TIP "Wenn eingeschaltet wird eMule automatisch\nSuchbegriffe umordnen um Begrenzungen durch KAD\nzu vermeiden.\nStandard: eingeschaltet"
+   IDS_RESOLVE_SHARED_SHELL_TIP "Löse Shell-Links auf, die eMule 'verknüfpte' Dateien\n(Windows Explorer Verknüpfungen) freigeben lässt.\nAuf diese Weise kann man auch einzelne Dateien in nicht\nfreigegeben Ordnern freigeben."
+   IDS_AUTO_ARCH_TIP        "Wenn du die Dateidetails für ein Archiv prüfst erstellt eMule\neine Vorschau um dir zu zeigen welche Dateien im Archiv sind.\nDu kannst dieses Verhalten ändern um zu verhindern, dass du (eine\n kurze Zeit auf langsamen PCs) warten musst, wenn du durch\ndie Dateidetails gehst. In diesem Fall kannst du immernoch die Vorschau\nselbst die Voschau für jedes Archiv starten."
+   IDS_MET_PURGE_DONT_TIP   "Alte Einträge in der known.met Datei werden nie bereinigt."
+   IDS_MET_PURGE_PART_TIP   "Teile alter Einträge in der known.met Datei werden bereinigt.\nDas ist die Art wie der offizielle eMule es macht."
+   IDS_MET_PURGE_COMPL_TIP  "Alte Einträge in der known.met Datei werden komplett bereinigt.\nDies ist die Art wie es Morph in der Vergagenheit gemacht\nhat."
+   IDS_REMOVE_AICH_TIP      "Schalte dies ein um AICH hash von nicht mehr\nfreigegebenen Dateien sofort zu löschen.\nStandard: ausgeschaltet"
+   IDS_WSUPNP_TIP           "Bezieht den Webserver port in das UPnP Portweiterleiten ein."
+   IDS_CHECK_FILE_OPEN_TIP  "Schaltet Abfrage vor dem Öffnen einer Datei mittels\neMule ein."
 END
 
 #endif    // German (Germany) resources
