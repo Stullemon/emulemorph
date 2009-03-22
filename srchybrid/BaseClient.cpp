@@ -587,7 +587,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion, _T("SPEED EMULE"))|| //MyTh	
 			StrStrI(m_strModVersion, _T("SPIKE2 +"))|| //MyTh hard leecher
 			StrStrI(m_strModVersion, _T("WIKINGER"))|| //MyTh apple-com
-			StrStrI(m_strModVersion, _T("Adunanza"))|| //MyTh italian ISP-spec com user
+			//StrStrI(m_strModVersion, _T("Adunanza"))|| //MyTh italian ISP-spec com user
 			StrStrI(m_strModVersion, _T("Asiklar"))|| //MyTh apple-com
 			StrStrI(m_strModVersion, _T("Shadow"))|| //MyTh
 			StrStrI(m_strModVersion, _T("RC-Atlantis"))|| //MyTh

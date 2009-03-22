@@ -3192,13 +3192,13 @@ END
 STRINGTABLE 
 BEGIN
     IDC_UPDATEFAKES_TIP     "Baixe e re-leia o fakes.zip agora.\n(Se o fakes.zip for mais novo que o já baixado)"
-    IDC_RESETFAKESURL_TIP   "Reseta o campo de URL para o padrão do Morph:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
+    IDC_RESETFAKESURL_TIP   "Reseta o campo de URL para o padrão do Morph:\nhttp://emulepawcio.sourceforge.net/fakes.zip"
     IDC_UPDATE_URL_FAKELIST_TIP 
                             "De onde baixar fakelist. Fakelist tem de estar no formato\nZIP. O Morph verifica se a data do arquivo é\nmais nova que a do download anterior e só\nirá atualizar se o arquivo da Web for mais recente."
     IDC_AUTOUPIPFILTER_TIP  "Tenta atualizar a lista de filtros de IP antes de conectar a rede."
     IDC_UPDATEIPFURL_TIP    "Faz Download & recarrega o ipfilter.zip agora.\n (só baixa se o da Web for mais recente)"
     IDS_PW_TOOL_TIP         "Se o mouse passar em cima de um download ou de uma opção,\num pequeno balão irá aparecer com informações sobre o item.\nEspecifique aqui o atraso até que este balão-dica apareça.\nEsse texto, por exemplo, é uma dica."
-    IDC_RESETIPFURL_TIP     "Reseta o campo de URL para o padrão do Morph:\nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
+    IDC_RESETIPFURL_TIP     "Reseta o campo de URL para o padrão do Morph:\nhttp://downloads.sourceforge.net/scarangel/ipfilter.rar"
     IDC_UPDATE_URL_IPFILTER_TIP 
                             "De onde baixar o ipfilter.dat. IPFilter tem de estar no formato\nZIP. O Morph verifica se a data do arquivo é\nmais nova que a do download anterior e só\nirá atualizar se o arquivo da Web for mais recente."
     IDC_MORPH2_COUNTRY_TIP  "Tenta atualizar a lista de bandeiras\nde países antes de conectar à rede."

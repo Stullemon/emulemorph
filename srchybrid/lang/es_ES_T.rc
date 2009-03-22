@@ -3025,7 +3025,7 @@ BEGIN
     IDC_AUTOUPIPFILTER_TIP  "Intentar actualizar la lista antes de conectar con la red"
     IDC_UPDATEIPFURL_TIP    "Descargar y actualizar el archivo ipfilter.zip ahora.\nSi el archivo es más nuevo que el existente se descarga"
     IDS_PW_TOOL_TIP         "Si posicionas el ratón encima de una descarga o en una opción,\naparece una pequeña nota con la información. Especifica el tiempo que quieres\nde retraso desde que posicionas el ratón hasta que salte la nota"
-    IDC_RESETIPFURL_TIP     "Resetear el campo de URL y ponerlo por defecto\nhttp://emulepawcio.sourceforge.net/ipfilter.zip"
+    IDC_RESETIPFURL_TIP     "Resetear el campo de URL y ponerlo por defecto\nhttp://downloads.sourceforge.net/scarangel/ipfilter.rar"
     IDC_UPDATE_URL_IPFILTER_TIP "URL desde donde descargar el arhivo ipfilter.dat (formato zip)"
     IDC_MORPH2_COUNTRY_TIP  "Descargar la lista de banderas de paises en el inicio"
     IDC_UPDATEIPCURL_TIP    "Descargar los rangos de IP por paises que se exiben en la columna de pais"

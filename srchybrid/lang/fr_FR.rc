@@ -3166,12 +3166,12 @@ END
 STRINGTABLE
 BEGIN
     IDC_UPDATEFAKES_TIP       "Télécharge et traite fakes.zip immédiatement.\Si le fichier des fake est plus récent que la version précédente."
-    IDC_RESETFAKESURL_TIP       "Remet l'adresse par défaut de la morph: http://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/fakes.zip"
+    IDC_RESETFAKESURL_TIP       "Remet l'adresse par défaut de la morph:\nhttp://emulepawcio.sourceforge.net/fakes.zip"
     IDC_UPDATE_URL_FAKELIST_TIP       "Où télécharger la liste des faux fichiers (fake) ?\nLe fichier fake doit être au format zip.\nMorph vérifie si le nouveau fichier est plus récent et ne mettra à jour que si c'est le cas."
     IDC_AUTOUPIPFILTER_TIP       "Essaie de mettre à jour la liste avant de se connecter au réseau."
     IDC_UPDATEIPFURL_TIP       "Télécharge et traite ipfilter.zip immédiatement.\nSi la liste des ip est plus récente que la version précédente."
     IDS_PW_TOOL_TIP       "Si la souris passe sur un téléchargement ou un menu, une petite note apparaît avec des explications.\nSpécifiez le délai avant que cette note s'affiche.\nCe texte en est un exemple."
-    IDC_RESETIPFURL_TIP       "Remet l'adresse par défaut de la morph: \nhttp://emulepawcio.sourceforge.net/nieuwe_site/Ipfilter_fakes/ipfilter.zip"
+    IDC_RESETIPFURL_TIP       "Remet l'adresse par défaut de la morph: \nhttp://downloads.sourceforge.net/scarangel/ipfilter.rar"
     IDC_UPDATE_URL_IPFILTER_TIP       "Adresse URL où télécharger le fichier ipfilter.dat (format zip)."
     IDC_MORPH2_COUNTRY_TIP       "Au démarrage, télécharge la liste des pays pour les drapeaux."
     IDC_UPDATEIPCURL_TIP       "Télécharge les plages d'adresse IP par pays afin d'afficher les drapeaux dans les colonnes."

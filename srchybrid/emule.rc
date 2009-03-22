@@ -474,7 +474,7 @@ BEGIN
     GROUPBOX        "Static",IDC_LBL_MISC,4,60,223,104
 END
 
-IDD_PPG_DIRECTORIES DIALOGEX 0, 0, 231, 241
+IDD_PPG_DIRECTORIES DIALOGEX 0, 0, 231, 291
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Directories"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
@@ -486,16 +486,16 @@ BEGIN
     CONTROL         "",IDC_SHARESELECTOR,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
                     TVS_CHECKBOXES | WS_BORDER | WS_TABSTOP | 0x800,10,76,
-                    211,110
+                    211,160
     CONTROL         "",IDC_UNCLIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_NOSORTHEADER | 
-                    WS_BORDER | WS_TABSTOP,10,190,195,43
-    PUSHBUTTON      "+",IDC_UNCADD,208,190,14,13,BS_CENTER
-    PUSHBUTTON      "-",IDC_UNCREM,208,220,14,13,BS_CENTER
+                    WS_BORDER | WS_TABSTOP,10,240,195,43
+    PUSHBUTTON      "+",IDC_UNCADD,208,240,14,13,BS_CENTER
+    PUSHBUTTON      "-",IDC_UNCREM,208,270,14,13,BS_CENTER
     GROUPBOX        "Incoming Files",IDC_INCOMING_FRM,4,2,223,30
     GROUPBOX        "Temporary Files",IDC_TEMP_FRM,4,34,223,29
     GROUPBOX        "Shared Directories (Ctrl-Click includes subdirectories)",
-                    IDC_SHARED_FRM,4,65,223,172
+                    IDC_SHARED_FRM,4,65,223,222
     PUSHBUTTON      "+",IDC_SELTEMPDIRADD,212,45,11,12,BS_CENTER
 END
 
@@ -701,7 +701,7 @@ BEGIN
     PUSHBUTTON      "Test",IDC_TEST_NOTIFICATION,164,13,57,14
 END
 
-IDD_PPG_IRC DIALOGEX 0, 0, 231, 241
+IDD_PPG_IRC DIALOGEX 0, 0, 231, 291
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "IRC"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
@@ -722,9 +722,9 @@ BEGIN
     CONTROL         "Use perform string on connect",IDC_IRC_USEPERFORM,
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,11,113,202,10
     EDITTEXT        IDC_IRC_PERFORM_BOX,11,123,208,12,ES_AUTOHSCROLL
-    GROUPBOX        "Miscellaneous",IDC_IRC_MISC_FRM,4,142,223,96
+    GROUPBOX        "Miscellaneous",IDC_IRC_MISC_FRM,4,142,223,146
     CONTROL         "",IDC_MISC_IRC,"SysTreeView32",TVS_SHOWSELALWAYS | 
-                    WS_BORDER | WS_TABSTOP | 0x800,10,152,211,81
+                    WS_BORDER | WS_TABSTOP | 0x800,10,152,211,131
 END
 
 IDD_WIZARD DIALOGEX 0, 0, 257, 223
@@ -5866,7 +5866,7 @@ BEGIN
     IDC_AUTOUPIPFILTER_TIP  "Try to update the list before connecting to the network"
     IDC_UPDATEIPFURL_TIP    "Download & reload the ipfilter.zip now.\nIf the ipfilter is newer than the previous download"
     IDS_PW_TOOL_TIP         "If the mouse hovers on a download or  preference\na little note will appear with information on this item.\nSpecifies the delay until this tip pops up.\nThis text is is a tooltip."
-    IDC_RESETIPFURL_TIP     "Reset the url to the morph default\nhttp://emulepawcio.sourceforge.net/ipfilter.zip"
+    IDC_RESETIPFURL_TIP     "Reset the url to the morph default\nhttp://downloads.sourceforge.net/scarangel/ipfilter.rar"
     IDC_UPDATE_URL_IPFILTER_TIP 
                             "Url where to download the ipfilter.dat (zip format)"
     IDC_MORPH2_COUNTRY_TIP  "Download the countrylist for the flags on startup"
