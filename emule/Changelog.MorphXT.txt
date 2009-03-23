@@ -1,7 +1,7 @@
 --------------------------------------
-Changelog for eMule 0.49c MorphXT v11.x
+Changelog for eMule 0.49c MorphXT v11.2
 --------------------------------------
-XX-XX-2009
+23-03-2009
 
 Merged to 0.49c [Stulle]
 ADD: Autojoin to #emule-morph in IRC [Stulle]
