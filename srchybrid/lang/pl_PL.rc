@@ -3452,7 +3452,6 @@ BEGIN
     IDS_PREVIEWONICONDBLCLK "Podgl¹d po 2x klikniêciu na ikonê"
     IDS_INTERNETSECURITYZONE "Strefa ochrony internetu"
     IDS_TXTEDITOR           "Edytor tekstu"
-    IDS_DATETIMEFORMAT      "Format czasu i daty"
     IDS_SERVERUDPPORT       "Port UDP serwera"
 END
 

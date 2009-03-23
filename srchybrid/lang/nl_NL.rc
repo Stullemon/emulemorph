@@ -1917,7 +1917,6 @@ BEGIN
     IDS_UPNP_NOSERVICE      "UPnP Device Host-service is niet uitvoerend, slaat instellen van UPnP over"
     IDS_DELAYEDBYUPNP       "Verbinden met het netwerk is vertraagd omdat UPnP nog steeds bezig is met het configureren van de poortdoorverwijzingen."
     IDS_DELAYEDBYUPNP2      "Wacht a.u.b. enkele seconden, eMule zal meteen verbinden als UPnP klaar is."
-    IDS_UPNP                "UPnP" //!
     IDS_UPNPCLOSEONEXIT     "UPnP-poortdoorverwijzingen bij afsluiten verwijderen"
     IDS_UPNPSKIPWANIP       "WAN IP instellen overslaan"
     IDS_UPNPSKIPWANPPP      "WAN PPP instellen overslaan"

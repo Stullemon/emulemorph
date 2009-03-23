@@ -23,6 +23,7 @@ ADD: New default IPFilter (Maintained by Ozzy) [Stulle]
 ADD: RAR File download decompress for auto update [official]
 ADD: New hidden options to Advanced Options and Tooltips for new options [Stulle]
 ADD: Rebind UPnP mappings (UDP, TCP and Webserver for now) like the official does [Stulle]
+ADD: Turkish translation (partially) [omeringen]
 CHANGE: Display NNS in UploadListCtrl [Diabolo111]
 CHANGE: Cleaned up Static IP Filter code [Stulle]
 	+ only ipfilter.dat layout allowed!

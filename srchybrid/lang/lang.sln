@@ -35,6 +35,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "languages - Chinese (Taiwan
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "languages - Turkish", "tr_TR_vc71.vcproj", "{EFE9605D-BF5C-4339-9A5A-32184D4BD03C}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Dynamic = Dynamic
@@ -60,6 +64,8 @@ Global
 		{C7F4CB73-7D57-4077-9C04-931A6CB0677D}.Dynamic.Build.0 = Dynamic|Win32
 		{DB748474-ADA6-4AEB-8694-F02088D88AD7}.Dynamic.ActiveCfg = Dynamic|Win32
 		{DB748474-ADA6-4AEB-8694-F02088D88AD7}.Dynamic.Build.0 = Dynamic|Win32
+		{EFE9605D-BF5C-4339-9A5A-32184D4BD03C}.Dynamic.ActiveCfg = Dynamic|Win32
+		{EFE9605D-BF5C-4339-9A5A-32184D4BD03C}.Dynamic.Build.0 = Dynamic|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
