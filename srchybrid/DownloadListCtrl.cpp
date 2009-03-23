@@ -2766,7 +2766,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					InputBox	inputOrder;
 					if (selectedCount <= 1) break;
 						
-					inputOrder.SetLabels(GetResString(IDS_CAT_SETORDER), GetResString(IDS_CAT_EXPAUTOINC), _T("0"));
+					inputOrder.SetLabels(GetResString(IDS_CAT_SETORDER), GetResString(IDS_CAT_EXPAUTOINC), _T("1"));
 					inputOrder.SetNumber(true);
                     if (inputOrder.DoModal() == IDOK)
 					{

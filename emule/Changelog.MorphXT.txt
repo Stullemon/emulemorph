@@ -40,6 +40,7 @@ CHANGE: Enabling Extended controls disables Show less controls and vice versa [S
 CHANGE: Switched on Global Hard Limit by default (upgrade unaffected) [Stulle]
 CHANGE: Only display category selection dialog if there is more than one category [Stulle]
 CHANGE: Enlarged IRC settings tree control and dir tree control in Directories preferences panel [Stulle]
+CHANGE: Use '1' as default min linear priority to reserve '0' for small files [JackieKu]
 FIX: Corrupted userhash ban [taz]
 FIX: Double increase for badrequests [taz]
 FIX: Incorrect and redundent operation for Double backup [AndCycle]
@@ -50,6 +51,10 @@ FIX: Memleak fix around hashing [WiZaRd]
 FIX: Download ACK measurement was incorrect (when download was limited) [Stulle]
 FIX: Download ACK was not displayed and counted in stats as overhead [Stulle]
 FIX: Improper Friend Logging for FunnyNick affected friend clients [Stulle]
+FIX: Network mapped drives could not be selected [JackieKu]
+	http://social.msdn.microsoft.com/Forums/en-US/vcgeneral/thread/95f7b7e8-87fe-4566-bf9a-4f49a6c21811/
+FIX: Shared files were sometimes unneccessarily reloaded due to shareSubdir [JackieKu]
+FIX: Some improper localization in Morph preferences window [Stulle]
 REMOVED: Adunanza ban [Stulle]
 
 Note: Additional options stored in Known.met will be purged like some official stuff is.
@@ -58,7 +63,7 @@ Note: Microsoft DirectX 9 SDK for MS VS2005 build has already been added in an e
 Note: See How-To-Compile_VS05.txt in source package for guide on how to get the sources to compile.
 Note: New IPFilter will only be set when resetting the url or making a clean install.
 Note: Following languages updated: German [Morella/Myth88/Stulle]; French [Nicolas_FR]; Spanish [guijarrelson];
-	Portuguese (Brazil) [Heiler]; Chinese (P.R.C.) [zz_fly]
+	Portuguese (Brazil) [Heiler]; Chinese (P.R.C.) [zz_fly]; Chinese (Taiwan) [JackieKu]
 
 IP Filter White List:
 + IPs on this list will not be banned

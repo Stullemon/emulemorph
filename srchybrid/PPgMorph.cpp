@@ -14,7 +14,6 @@
 #include "UserMsgs.h"
 #include "Log.h" //MORPH - Added by Stulle, Global Source Limit
 #include "DownloadQueue.h" //MORPH - Added by Stulle, Global Source Limit
-#include ".\ppgmorph.h"
 #include "Ntservice.h"
 #include "TransferWnd.h" // MORPH START leuk_he disable catcolor
 
@@ -120,7 +119,7 @@ CPPgMorph::CPPgMorph()
 	m_htiCompressLevel =NULL ;// morph settable compresslevel
 	m_htiUseCompression=NULL ;// morph Use compress 
 
-	m_htiDisplayFunnyNick;//MORPH - Added by SiRoB, Optionnal funnynick display
+	m_htiDisplayFunnyNick = NULL;//MORPH - Added by SiRoB, Optionnal funnynick display
 	m_htiDisableCatColors = NULL;
 	m_htiClientQueueProgressBar = NULL; //MORPH - Added by Commander, ClientQueueProgressBar
 	//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -151,8 +150,6 @@ CPPgMorph::CPPgMorph()
 	m_htiSlotLimitNumB = NULL;
 	m_htiSlotLimitNum = NULL;
 	// <== Slot Limit - Stulle
-
-
 }
 
 CPPgMorph::~CPPgMorph()
@@ -760,7 +757,9 @@ void CPPgMorph::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* /*pScroll
 void CPPgMorph::Localize(void)
 {	
 	if(m_hWnd)
-	{   SetTool(m_htiDM,IDS_DM_TIP);
+	{
+		// first we set tools for the groups
+		SetTool(m_htiDM,IDS_DM_TIP);
 		SetTool(m_htiSCC,IDS_SCC_TIP);
 		SetTool(m_htiSAC,IDS_SAC_TIP);
 		//SetTool(m_htiAdvA4AFMode,IDS_DEFAULT_TIP);
@@ -773,7 +772,8 @@ void CPPgMorph::Localize(void)
 		SetTool(m_htiFriend,IDS_PW_FRIENDS_TIP);
 		SetTool(m_htiPowerShare,IDS_POWERSHARE_TIP);
 		SetTool(m_htiSlotLimitGroup,IDS_SLOT_LIMIT_GROUP_TIP);
-		 
+		SetTool(m_htiGlobalHlGroup ,IDS_GLOBAL_HL_TIP);
+
 		GetDlgItem(IDC_WARNINGMORPH)->SetWindowText(GetResString(IDS_WARNINGMORPH));
 		CString Buffer;
 		//MORPH START - Added by Yun.SF3, Auto DynUp changing
@@ -785,6 +785,9 @@ void CPPgMorph::Localize(void)
 			SetTool(m_htiMaxConnectionsSwitchBorder,IDS_MAXCONNECTIONSSWITCHBORDER_TIP);
 		}
 		//MORPH END - Added by Yun.SF3, Auto DynUp changing
+		if (m_htiDynUpOFF) {m_ctrlTreeOptions.SetItemText(m_htiDynUpOFF, GetResString(IDS_DISABLED));
+							SetTool(m_htiDynUpOFF,IDS_DYNDISABLED_TIP);
+		}
 		if (m_htiDynUpSUC) {m_ctrlTreeOptions.SetItemText(m_htiDynUpSUC, GetResString(IDS_SUC));
 							SetTool(m_htiDynUpSUC,IDS_SUC_TIP);
 		}
@@ -817,8 +820,12 @@ void CPPgMorph::Localize(void)
 		if (m_htiUSSLog) {m_ctrlTreeOptions.SetItemText(m_htiUSSLog, GetResString(IDS_USS_LOG));
 						  SetTool(m_htiUSSLog,IDS_USS_LOG_TIP);
 		}
-		if (m_htiUSSLog) m_ctrlTreeOptions.SetItemText(m_htiUSSLog, GetResString(IDS_USS_LOG));
 		if (m_htiUSSUDP) m_ctrlTreeOptions.SetItemText(m_htiUSSUDP, GetResString(IDS_USS_UDP));//MORPH - Added by SiRoB, USS UDP preferency
+		if (m_htiUSSLimit) m_ctrlTreeOptions.SetItemText(m_htiUSSLimit, GetResString(IDS_USS_USEMAXPING));
+		if (m_htiUSSPingLimit){
+			Buffer.Format(GetResString(IDS_USS_MAXPING),200);
+			m_ctrlTreeOptions.SetEditLabel(m_htiUSSPingLimit, Buffer);
+		}
 		if (m_htiUSSPingTolerance){
 			Buffer.Format(GetResString(IDS_USS_PINGTOLERANCE),800);
 			m_ctrlTreeOptions.SetEditLabel(m_htiUSSPingTolerance, Buffer);
@@ -879,20 +886,12 @@ void CPPgMorph::Localize(void)
 		SetTool(m_htiUSSTTL,IDS_USS_INITIAL_TTL_TIP); }
 		// <== [MoNKi: -USS initial TTL-] - Stulle
 
-		if (m_htiMinUpload) m_ctrlTreeOptions.SetEditLabel(m_htiMinUpload, GetResString(IDS_MINUPLOAD));
-		if (m_htiEnableDownloadInRed) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInRed, GetResString(IDS_DOWNLOAD_IN_RED)); //MORPH - Added by IceCream, show download in red
-		if (m_htiEnableDownloadInBold) m_ctrlTreeOptions.SetItemText(m_htiEnableDownloadInBold, GetResString(IDS_DOWNLOAD_IN_BOLD)); //MORPH - Added by SiRoB, show download in Bold
-		if (m_htiShowClientPercentage) m_ctrlTreeOptions.SetItemText(m_htiShowClientPercentage, GetResString(IDS_CLIENTPERCENTAGE));
 		//MORPH START - Added by Stulle, Global Source Limit
-		if (m_htiGlobalHL) m_ctrlTreeOptions.SetItemText(m_htiGlobalHL, GetResString(IDS_SUC_ENABLED));
-		if (m_htiGlobalHlLimit) m_ctrlTreeOptions.SetEditLabel(m_htiGlobalHlLimit, GetResString(IDS_GLOBAL_HL_LIMIT));
+		if (m_htiGlobalHL){ m_ctrlTreeOptions.SetItemText(m_htiGlobalHL, GetResString(IDS_SUC_ENABLED));
+		SetTool(m_htiGlobalHL ,IDS_SUC_ENABLED_TIP);}
+		if (m_htiGlobalHlLimit){ m_ctrlTreeOptions.SetEditLabel(m_htiGlobalHlLimit, GetResString(IDS_GLOBAL_HL_LIMIT));
+		SetTool(m_htiGlobalHlLimit,IDS_GLOBAL_HL_LIMIT_TIP);}
 		//MORPH END   - Added by Stulle, Global Source Limit
-		if (m_htiEnableAntiLeecher) m_ctrlTreeOptions.SetItemText(m_htiEnableAntiLeecher, GetResString(IDS_ANTI_LEECHER)); //MORPH - Added by IceCream, enable Anti-leecher
-		if (m_htiEnableAntiCreditHack) m_ctrlTreeOptions.SetItemText(m_htiEnableAntiCreditHack, GetResString(IDS_ANTI_CREDITHACK)); //MORPH - Added by IceCream, enable Anti-CreditHack
-		if (m_htiInfiniteQueue) m_ctrlTreeOptions.SetItemText(m_htiInfiniteQueue, GetResString(IDS_INFINITEQUEUE));	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
-		if (m_htiDontRemoveSpareTrickleSlot) m_ctrlTreeOptions.SetItemText(m_htiDontRemoveSpareTrickleSlot, GetResString(IDS_DONTREMOVESPARETRICKLESLOT));//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-		if (m_htiDisplayFunnyNick) m_ctrlTreeOptions.SetItemText(m_htiDisplayFunnyNick, GetResString(IDS_DISPLAYFUNNYNICK));//MORPH - Added by SiRoB, Optionnal funnynick display
-		if (m_htiClientQueueProgressBar) m_ctrlTreeOptions.SetItemText(m_htiClientQueueProgressBar, GetResString(IDS_CLIENTQUEUEPROGRESSBAR));//MORPH - Added by Commander, ClientQueueProgressBar
 		//MORPH START - Added by SiRoB, Datarate Average Time Management
 		if (m_htiDownloadDataRateAverageTime) {m_ctrlTreeOptions.SetEditLabel(m_htiDownloadDataRateAverageTime, GetResString(IDS_DATARATEAVERAGETIME));
 											   SetTool(m_htiDownloadDataRateAverageTime,IDS_DOWNLOADDATARATEAVERAGETIME_TIP);
@@ -920,7 +919,6 @@ void CPPgMorph::Localize(void)
 		if (m_htiMaxGlobalDataRatePowerShare){ m_ctrlTreeOptions.SetEditLabel(m_htiMaxGlobalDataRatePowerShare, GetResString(IDS_MAXDATARATEPOWERSHARE));
 		                                       SetTool(m_htiMaxGlobalDataRatePowerShare,IDS_MAXDATARATEPOWERSHARE_TIP);
 		}
-		if (m_htiMaxClientDataRate) m_ctrlTreeOptions.SetEditLabel(m_htiMaxClientDataRate, GetResString(IDS_MAXCLIENTDATARATE));
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
 		// ==> Slot Limit - Stulle
 		if (m_htiSlotLimitGroup) {m_ctrlTreeOptions.SetItemText(m_htiSlotLimitGroup, GetResString(IDS_SLOT_LIMIT_GROUP));
@@ -999,24 +997,39 @@ void CPPgMorph::Localize(void)
 		}
 		//MORPH END   - Added by IceCream, high process priority
        
-		SetTool(m_htiSlotLimitNone,IDS_SLOT_LIMIT_NONE_TIP);
-		SetTool(m_htiSlotLimitThree,IDS_SLOT_LIMIT_THREE_TIP);
-		SetTool(m_htiSlotLimitNumB,IDS_SLOT_LIMIT_NUM_TIP);
-		SetTool(m_htiDynUpOFF ,IDS_DYNDISABLED_TIP);
-
-		SetTool(m_htiReportHashingFiles, IDS_MORPH_RFHA_TIP);
-		SetTool(m_htiLogFriendlistActivities,IDS_MORPH_RAIF_TIP);
-		SetTool(m_htiDontRemoveStaticServers ,IDS_MORPH_KSSERV_SIP);
-		SetTool(m_htiGlobalHlGroup ,IDS_GLOBAL_HL_TIP);
-		SetTool(m_htiGlobalHL ,IDS_SUC_ENABLED_TIP);
-		SetTool(m_htiGlobalHlLimit,IDS_GLOBAL_HL_LIMIT_TIP);
-	    SetTool(m_htiMaxGlobalDataRateFriend,IDS_MAXDATARATEFRIEND_TIP);
-        SetTool(m_htiGlobalDataRatePowerShare,IDS_DATARATEPOWERSHARE_TIP);
-		SetTool(m_htiCompressLevel,IDS_COMPRESSLEVEL_TIP);
-        SetTool(m_htiUseCompression,IDS_USECOMPRESS_TIP);
-		SetTool(m_htiDisableCatColors,IDS_DISABLECATCOLOR_TIP);
-		SetTool(m_htiPingDataSize,IDS_PINGDATASIZE_TIP);   //MORPH leuk_he ICMP ping datasize <> 0 setting
-		
+		if (m_htiSlotLimitNone) {m_ctrlTreeOptions.SetItemText(m_htiSlotLimitNone, GetResString(IDS_SLOT_LIMIT_NONE));
+							SetTool(m_htiSlotLimitNone,IDS_SLOT_LIMIT_NONE_TIP);
+		}
+		if (m_htiSlotLimitThree) {m_ctrlTreeOptions.SetItemText(m_htiSlotLimitThree, GetResString(IDS_SLOT_LIMIT_THREE));
+							SetTool(m_htiSlotLimitThree,IDS_SLOT_LIMIT_THREE_TIP);
+		}
+		if (m_htiSlotLimitNumB) {m_ctrlTreeOptions.SetItemText(m_htiSlotLimitNumB, GetResString(IDS_SLOT_LIMIT_NUM_B));
+							SetTool(m_htiSlotLimitNumB,IDS_SLOT_LIMIT_NUM_TIP);
+		}
+		if (m_htiReportHashingFiles) {m_ctrlTreeOptions.SetItemText(m_htiReportHashingFiles, GetResString(IDS_MORPH_RFHA));
+						  SetTool(m_htiReportHashingFiles,IDS_MORPH_RFHA_TIP);
+		}
+		if (m_htiLogFriendlistActivities) {m_ctrlTreeOptions.SetItemText(m_htiLogFriendlistActivities, GetResString(IDS_MORPH_RAIF));
+						  SetTool(m_htiLogFriendlistActivities,IDS_MORPH_RAIF_TIP);
+		}
+		if (m_htiDontRemoveStaticServers) {m_ctrlTreeOptions.SetItemText(m_htiDontRemoveStaticServers, GetResString(IDS_MORPH_KSSERV));
+						  SetTool(m_htiDontRemoveStaticServers,IDS_MORPH_KSSERV_SIP);
+		}
+		if (m_htiMaxGlobalDataRateFriend) {m_ctrlTreeOptions.SetEditLabel(m_htiMaxGlobalDataRateFriend, GetResString(IDS_MAXDATARATEFRIEND));
+								SetTool(m_htiMaxGlobalDataRateFriend,IDS_MAXDATARATEFRIEND_TIP);
+		}
+		if (m_htiCompressLevel) {m_ctrlTreeOptions.SetEditLabel(m_htiCompressLevel, GetResString(IDS_COMPRESSLEVEL));
+								SetTool(m_htiCompressLevel,IDS_COMPRESSLEVEL_TIP);
+		}
+		if (m_htiUseCompression) {m_ctrlTreeOptions.SetItemText(m_htiUseCompression, GetResString(IDS_USECOMPRESS));
+						  SetTool(m_htiUseCompression,IDS_USECOMPRESS_TIP);
+		}
+		if (m_htiDisableCatColors) {m_ctrlTreeOptions.SetItemText(m_htiDisableCatColors, GetResString(IDS_DISABLECATCOLORS));
+						  SetTool(m_htiDisableCatColors,IDS_DISABLECATCOLOR_TIP);
+		}
+		if (m_htiPingDataSize) {m_ctrlTreeOptions.SetEditLabel(m_htiPingDataSize, GetResString(IDS_USSPINGDATASIZE));
+						  SetTool(m_htiPingDataSize,IDS_PINGDATASIZE_TIP);
+		}
 	}
 
 }

@@ -1194,7 +1194,13 @@ bool SelectDir(HWND hWnd, LPTSTR pszPath, LPCTSTR pszTitle, LPCTSTR pszDlgTitle)
 		BROWSEINFO BrsInfo = {0};
 		BrsInfo.hwndOwner = hWnd;
 		BrsInfo.lpszTitle = (pszTitle != NULL) ? pszTitle : pszDlgTitle;
+		//MORPH START - Changed by JackieKu, Network mapped drives could not be selected
+		//see http://social.msdn.microsoft.com/Forums/en-US/vcgeneral/thread/95f7b7e8-87fe-4566-bf9a-4f49a6c21811/
+		/*
 		BrsInfo.ulFlags = BIF_VALIDATE | BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS | BIF_SHAREABLE | BIF_DONTGOBELOWDOMAIN;
+		*/
+		BrsInfo.ulFlags = BIF_VALIDATE | BIF_NEWDIALOGSTYLE | BIF_RETURNONLYFSDIRS | BIF_DONTGOBELOWDOMAIN; // kumod ^= allow network mapped drives
+		//MORPH END   - Changed by JackieKu, Network mapped drives could not be selected
 
 		BROWSEINIT BrsInit = {0};
 		if (pszPath != NULL || pszTitle != NULL || pszDlgTitle != NULL){
@@ -4105,9 +4111,9 @@ void InitRandGen()
 // khaos::categorymod+
 // Compares strings using wildcards * and ?.
 // Credited To: Jack Handy
-int wildcmp(TCHAR *wild, TCHAR *string)
+int wildcmp(LPCTSTR wild, LPCTSTR string) // kumod ^= constant parameters
 {
-	TCHAR *cp, *mp;
+	LPCTSTR cp, mp; // kumod ^= constant parameters
 
 	while ((*string) && (*wild != '*'))
 	{

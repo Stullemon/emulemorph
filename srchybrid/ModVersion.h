@@ -21,9 +21,9 @@
 //START - This part should not be changed in anyway
 #define MOD_VERSION_MJR		11
 #define MOD_VERSION_MIN		2
-#define MOD_VERSION_BUILD   10
-#define	MOD_VERSION			_T("MorphXT a11 ")
-#define	MOD_VERSION_LONG	_T("MorphXT a11 v")
+#define MOD_VERSION_BUILD   12
+#define	MOD_VERSION			_T("MorphXT ")
+#define	MOD_VERSION_LONG	_T("MorphXT v")
 //END   - This part should not be changed in anyway
 
 #define	MOD_MOD_VERSION		_T("") //Use this to define your version based on MorphXT mod

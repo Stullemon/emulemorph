@@ -274,8 +274,16 @@ void CSharedFilesWnd::DoResize(int iDelta)
 void CSharedFilesWnd::Reload(bool bForceTreeReload)
 {	
 	sharedfilesctrl.SetDirectoryFilter(NULL, false);
+	//MORPH START - Changed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
+	/*
 	m_ctlSharedDirTree.Reload(bForceTreeReload); // force a reload of the tree to update the 'accessible' state of each directory
 	sharedfilesctrl.SetDirectoryFilter(m_ctlSharedDirTree.GetSelectedFilter(), false);
+	*/
+	bool bChanged = m_ctlSharedDirTree.Reload(bForceTreeReload); // force a reload of the tree to update the 'accessible' state of each directory
+	sharedfilesctrl.SetDirectoryFilter(m_ctlSharedDirTree.GetSelectedFilter(), false);
+	if (!bChanged && !bForceTreeReload)
+		return;
+	//MORPH END   - Changed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 	theApp.sharedfiles->Reload();
 
 	ShowSelectedFilesSummary();

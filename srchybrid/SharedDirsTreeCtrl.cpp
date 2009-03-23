@@ -1421,7 +1421,12 @@ void CSharedDirsTreeCtrl::EditSharedDirectories(const CDirectoryItem* pDir, bool
 	thePrefs.Save();
 }
 
+//MORPH START - Changed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
+/*
 void CSharedDirsTreeCtrl::Reload(bool bForce){
+*/
+bool CSharedDirsTreeCtrl::Reload(bool bForce){
+//MORPH END   - Changed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 	bool bChanged = false;
 	if (!bForce){
 		// check for changes in shared dirs
@@ -1489,14 +1494,35 @@ void CSharedDirsTreeCtrl::Reload(bool bForce){
 						strliFound.AddTail(strCatIncomingPath);
 					}
 					else{
+						//MORPH START - Added by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
+						POSITION pos = m_strliSharedDirsSubdir.GetHeadPosition();
+						bool bFound = false;
+						while (pos) {
+							CString sSubDir = m_strliSharedDirsSubdir.GetNext(pos);
+							if (sSubDir.Right(1) == _T("\\"))
+								sSubDir = sSubDir.Left(sSubDir.GetLength()-1);
+							if (PathIsPrefix(sSubDir, strCatIncomingPath)) {
+								bFound = true;
+								break;
+							}
+						}
+						if (bFound) {
+							strliFound.AddTail(strCatIncomingPath);
+							continue;
+						}
+						//MORPH END   - Added by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 						bChanged = true;
 						break;
 					}
 				}
 			}
 		}
+		//MORPH START - Removed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
+		/*
 		if (strliFound.GetCount() != m_strliCatIncomingDirs.GetCount())
 			bChanged = true;
+		*/
+		//MORPH END   - Removed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 
 	}
 	if (bChanged || bForce){
@@ -1506,7 +1532,9 @@ void CSharedDirsTreeCtrl::Reload(bool bForce){
 			Expand(m_pRootUnsharedDirectries->m_htItem, TVE_COLLAPSE); // collapsing is enough to sync for the filtetree, as all items are recreated on every expanding
 			m_bFileSystemRootDirty = false;
 		}
+		return true; //MORPH - Added by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 	}
+	return false; //MORPH - Added by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 }
 
 void CSharedDirsTreeCtrl::FetchSharedDirsList(){

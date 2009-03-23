@@ -69,7 +69,12 @@ public:
 	bool			IsCreatingTree() const		{return m_bCreatingTree;};
 	void			Localize();
 	void			EditSharedDirectories(const CDirectoryItem* pDir, bool bAdd, bool bSubDirectories);
+	//MORPH START - Changed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
+	/*
 	void			Reload(bool bFore = false);
+	*/
+	bool			Reload(bool bFore = false);
+	//MORPH END   - Changed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 	void			OnVolumesChanged();
 	void			FileSystemTreeUpdateBoldState(const CDirectoryItem* pDir = NULL);
 	bool			ShowFileSystemDirectory(const CString& strDir);
