@@ -1,5 +1,5 @@
 ; create by leuk_he on 10-01-2006
-; (c) 2006-2007 leuk_he (leukhe at gmail dot com)
+; (c) 2006-2009 leuk_he (leukhe at gmail dot com)
 
 [Setup]
 AppName=eMule
@@ -8,7 +8,7 @@ AppPublisher=Morph team
 AppPublisherURL=http://emulemorph.sourceforge.net/
 AppSupportURL=http://forum.emule-project.net/index.php?showforum=28
 AppUpdatesURL=http://sourceforge.net/project/showfiles.php?group_id=72158&package_id=107495
-AppCopyright=(c) 2007 Morph team.
+AppCopyright=(c) 2009 Morph team.
 
 UsePreviousAppDir=yes
 DirExistsWarning=No
@@ -44,7 +44,7 @@ Name: "spanish"; MessagesFile: "SpanishStd-2-5.1.0.isl" ;InfoBeforeFile: "..\sta
 Name: "polish"; MessagesFile: "compiler:Languages\Polish.isl"
 Name: "french";  MessagesFile: "compiler:Languages\French.isl";InfoBeforeFile: "..\staging\license-FR.txt"
 Name: "BrazilianPortuguese" ;MessagesFile: "compiler:Languages\BrazilianPortuguese.isl";InfoBeforeFile: "..\staging\license-PT_BR.txt"
-Name: "ChineseSimpl" ;MessagesFile: "ChineseSimp-11-5.1.0.isl"              ;InfoBeforeFile: "..\staging\lincesne-cn.txt"
+Name: "ChineseSimpl" ;MessagesFile: "ChineseSimp-11-5.1.0.isl"              ;InfoBeforeFile: "..\staging\license-CN.txt"
 Name: "ChineseTrad" ;MessagesFile: "ChineseTrad-2-5.1.11.isl"
 
 [Dirs]
@@ -65,7 +65,7 @@ Source: "..\staging\Template.eMuleSkin.ini"; DestDir: "{app}"; Flags: ignorevers
 Source: "..\staging\changelog.ger.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\Changelog.MorphXT.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\changelog.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "..\staging\emule.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\staging\eMule.exe"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\license.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\license-DK.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "..\staging\license-FR.txt"; DestDir: "{app}"; Flags: ignoreversion
