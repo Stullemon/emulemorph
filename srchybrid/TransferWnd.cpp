@@ -1187,8 +1187,12 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				EditCatTabLabel(newindex);
 				thePrefs.SaveCats();
 				VerifyCatTabSize();
+				//MORPH START - Removed by Stulle, handled in dialog already
+				/*
 				if (CompareDirectories(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR), thePrefs.GetCatPath(newindex)))
 					theApp.emuledlg->sharedfileswnd->Reload();
+				*/
+				//MORPH END   - Removed by Stulle, handled in dialog already
 			}
 			else
 				thePrefs.RemoveCat(newindex);
@@ -1214,8 +1218,12 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				theApp.emuledlg->searchwnd->UpdateCatTabs();
 				theApp.emuledlg->transferwnd->downloadlistctrl.UpdateCurrentCategoryView();
 				thePrefs.SaveCats();
+				//MORPH START - Removed by Stulle, handled in dialog already
+				/*
 				if (CompareDirectories(oldincpath, thePrefs.GetCatPath(rightclickindex)))
 					theApp.emuledlg->sharedfileswnd->Reload();
+				*/
+				//MORPH END   - Removed by Stulle, handled in dialog already
 			}
 			break;
 		}
@@ -1244,6 +1252,7 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			downloadlistctrl.ChangeCategory(useCat);
 			theApp.emuledlg->transferwnd->downloadlistctrl.UpdateCurrentCategoryView();
 			thePrefs.SaveCats();
+			//MORPH NOTE - This is not really great because both categories might have shared the same incoming folder.
 			theApp.emuledlg->sharedfileswnd->Reload();
 			break;
 		}
@@ -1265,6 +1274,8 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			// khaos::categorymod-
 			theApp.emuledlg->searchwnd->UpdateCatTabs();
 			VerifyCatTabSize();
+			//MORPH NOTE - this is not great because of shareSubdir we might have shared this folder already and a reload is unneeded
+			// but it's still better than falsely sharing files so we go through this trouble and reload... for now...
 			if (toreload)
 				theApp.emuledlg->sharedfileswnd->Reload();
 			break;
