@@ -412,7 +412,10 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_strCurVersionLong += _T(" DEBUG");
 #endif
 #ifdef _BETA
-	m_strCurVersionLong += _T(" alpha ");
+//	m_strCurVersionLong += _T(" alpha ");
+	m_strCurVersionLong.AppendFormat(_T(" a%u "),CemuleApp::m_nMVersionBld);
+	m_strCurVersionLong += _T(__TIME__);
+	m_strCurVersionLong += _T(" ");
 	m_strCurVersionLong += _T(__DATE__);
 #endif
 

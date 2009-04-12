@@ -24,6 +24,7 @@
 #include "TransferWnd.h"
 #include "CatDialog.h"
 #include "UserMsgs.h"
+#include "SharedFilesWnd.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -283,7 +284,16 @@ void CCatDialog::OnBnClickedOk()
 	}
 
 	if (m_myCat->strIncomingPath.CompareNoCase(oldpath)!=0)
-		theApp.sharedfiles->Reload();
+	{ // Automatic shared files updater [MoNKi] - Stulle
+		theApp.emuledlg->sharedfileswnd->Reload();
+	// ==> Automatic shared files updater [MoNKi] - Stulle
+#ifdef ASFU
+		theApp.QueueDebugLogLine(false,_T("ResetDirectoryWatcher: CCatDialog::OnBnClickedOk()"));
+		if(thePrefs.GetDirectoryWatcher())
+			theApp.ResetDirectoryWatcher();
+	}
+#endif
+	// <== Automatic shared files updater [MoNKi] - Stulle
 
 	m_myCat->color=newcolor;
 	m_myCat->prio=m_prio.GetCurSel();

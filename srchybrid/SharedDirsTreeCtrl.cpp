@@ -439,7 +439,7 @@ void CSharedDirsTreeCtrl::FilterTreeReloadTree(){
 					for (int i = 0; i < ARRSIZE(_aEd2kTypeView); i++)
 					{
 						CDirectoryItem* pEd2kType = new CDirectoryItem(CString(_T("")), 0, SDI_ED2KFILETYPE, _aEd2kTypeView[i].eType);
-#ifndef NO_HISTORY
+#ifdef NO_HISTORY
 						pEd2kType->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE, GetResString(_aEd2kTypeView[i].uStringId), i+6, i+6, 0, 0, (LPARAM)pEd2kType, pCurrent->m_htItem, TVI_LAST);
 #else
 						pEd2kType->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE, GetResString(_aEd2kTypeView[i].uStringId), i+7, i+7, 0, 0, (LPARAM)pEd2kType, pCurrent->m_htItem, TVI_LAST);
@@ -1112,7 +1112,9 @@ bool CSharedDirsTreeCtrl::FileSystemTreeHasSharedSubdirectory(CString strDir, bo
 	{
 		CString strCurrent = m_strliSharedDirsSubdir.GetNext(pos);
 		strCurrent.MakeLower();
-		if (strCurrent.Find(strDir) == 0 || strDir.Find(strCurrent) == 0)
+		if (strCurrent.Right(1) != _T("\\"))
+			strCurrent += _T("\\");
+		if (strCurrent.Find(strDir) == 0 || (strDir.Find(strCurrent) == 0 && strDir[strCurrent.GetLength()] == _T('\\')))
 			return true;
 	}
 	// SLUGFILLER END: shareSubdir
@@ -1209,7 +1211,7 @@ bool CSharedDirsTreeCtrl::FileSystemTreeIsShared(CString strDir, bool bCheckPare
 			if (str.Right(1) != _T('\\') && strDir.Right(1) == _T('\\')) // only add backslash when we need it for proper compare
 				str += _T('\\');
 			if (str.CompareNoCase(strDir) == 0 || // is this the shared with sub dir dir?
-				(bCheckParent && strDir.Find(str.MakeLower()) == 0)) // is this a shared subdir?
+				(bCheckParent && strDir.Find(str.MakeLower()) == 0 && strDir[str.GetLength()] == _T('\\'))) // is this a shared subdir?
 				return true;
 		}
 		if (bCheckIncoming) {
@@ -1421,12 +1423,7 @@ void CSharedDirsTreeCtrl::EditSharedDirectories(const CDirectoryItem* pDir, bool
 	thePrefs.Save();
 }
 
-//MORPH START - Changed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
-/*
 void CSharedDirsTreeCtrl::Reload(bool bForce){
-*/
-bool CSharedDirsTreeCtrl::Reload(bool bForce){
-//MORPH END   - Changed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 	bool bChanged = false;
 	if (!bForce){
 		// check for changes in shared dirs
@@ -1494,35 +1491,14 @@ bool CSharedDirsTreeCtrl::Reload(bool bForce){
 						strliFound.AddTail(strCatIncomingPath);
 					}
 					else{
-						//MORPH START - Added by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
-						POSITION pos = m_strliSharedDirsSubdir.GetHeadPosition();
-						bool bFound = false;
-						while (pos) {
-							CString sSubDir = m_strliSharedDirsSubdir.GetNext(pos);
-							if (sSubDir.Right(1) == _T("\\"))
-								sSubDir = sSubDir.Left(sSubDir.GetLength()-1);
-							if (PathIsPrefix(sSubDir, strCatIncomingPath)) {
-								bFound = true;
-								break;
-							}
-						}
-						if (bFound) {
-							strliFound.AddTail(strCatIncomingPath);
-							continue;
-						}
-						//MORPH END   - Added by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 						bChanged = true;
 						break;
 					}
 				}
 			}
 		}
-		//MORPH START - Removed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
-		/*
 		if (strliFound.GetCount() != m_strliCatIncomingDirs.GetCount())
 			bChanged = true;
-		*/
-		//MORPH END   - Removed by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 
 	}
 	if (bChanged || bForce){
@@ -1532,9 +1508,7 @@ bool CSharedDirsTreeCtrl::Reload(bool bForce){
 			Expand(m_pRootUnsharedDirectries->m_htItem, TVE_COLLAPSE); // collapsing is enough to sync for the filtetree, as all items are recreated on every expanding
 			m_bFileSystemRootDirty = false;
 		}
-		return true; //MORPH - Added by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 	}
-	return false; //MORPH - Added by JackieKu, prevent unnecessary shared file list reloading, for SLUGFILLER's shareSubdir
 }
 
 void CSharedDirsTreeCtrl::FetchSharedDirsList(){

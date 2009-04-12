@@ -200,7 +200,7 @@ void CDownloadListCtrl::Init()
 	//m_fontBoldSmaller.CreateFont(12,0,0,1,FW_BOLD,0,0,0,0,3,2,1,34,_T("MS Serif"));
 	LOGFONT lfSmallerFont = {0};
 	m_pFontBold->GetLogFont(&lfSmallerFont);
-	lfSmallerFont.lfWeight = FW_BOLD;
+	//lfSmallerFont.lfWeight = FW_BOLD;
 	lfSmallerFont.lfHeight = 11;
 	m_fontBoldSmaller.CreateFontIndirect(&lfSmallerFont);
 	//MORPH END   - Added by SiRoB, Draw Client Percentage
@@ -1457,54 +1457,54 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, UIN
 
 		// EastShare START - Added by TAHO, color
 		case 8:	{	// status
-			COLORREF crOldTxtColor = dc->SetTextColor((COLORREF)RGB(200,80,200));
+			COLORREF crOldTxtColor = dc->GetTextColor();
 			if (pCtrlItem->type == AVAILABLE_SOURCE){
 				switch (pClient->GetDownloadState()) {
 					case DS_CONNECTING:
-						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(210,210,10));
+						dc->SetTextColor((COLORREF)RGB(210,210,10));
 						break;
 					case DS_CONNECTED:
-						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(210,210,10));
+						dc->SetTextColor((COLORREF)RGB(210,210,10));
 						break;
 					case DS_WAITCALLBACK:
-						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(210,210,10));
+						dc->SetTextColor((COLORREF)RGB(210,210,10));
 						break;
 					case DS_ONQUEUE:
 						if( pClient->IsRemoteQueueFull() ){
-							crOldTxtColor = dc->SetTextColor((COLORREF)RGB(10,130,160));
+							dc->SetTextColor((COLORREF)RGB(10,130,160));
 						}
 						else {
 							if ( pClient->GetRemoteQueueRank()){
 								DWORD	estimatedTime = pClient->GetRemoteQueueRankEstimatedTime();
 								if (estimatedTime == (DWORD)-1)
-									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(240,125,10));
+									dc->SetTextColor((COLORREF)RGB(240,125,10));
 								else if(estimatedTime == 0 || estimatedTime > GetTickCount()+FILEREASKTIME)
-									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(60,10,240));
+									dc->SetTextColor((COLORREF)RGB(60,10,240));
 								else
-									crOldTxtColor = dc->SetTextColor((COLORREF)RGB(10,180,50));
+									dc->SetTextColor((COLORREF)RGB(10,180,50));
 							}
 							else{
-								crOldTxtColor = dc->SetTextColor((COLORREF)RGB(50,80,140));
+								dc->SetTextColor((COLORREF)RGB(50,80,140));
 							}
 						}
 						break;
 					case DS_DOWNLOADING:
-						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(192,0,0));
+						dc->SetTextColor((COLORREF)RGB(192,0,0));
 						break;
 					case DS_REQHASHSET:
-						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(245,240,100));
+						dc->SetTextColor((COLORREF)RGB(245,240,100));
 						break;
 					case DS_NONEEDEDPARTS:
-						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(30,200,240)); 
+						dc->SetTextColor((COLORREF)RGB(30,200,240)); 
 						break;
 					case DS_LOWTOLOWIP:
-						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(135,135,135)); 
+						dc->SetTextColor((COLORREF)RGB(135,135,135)); 
 						break;
 					case DS_TOOMANYCONNS:
-						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(135,135,135)); 
+						dc->SetTextColor((COLORREF)RGB(135,135,135)); 
 						break;
 					default:
-						crOldTxtColor = dc->SetTextColor((COLORREF)RGB(135,135,135)); 
+						dc->SetTextColor((COLORREF)RGB(135,135,135)); 
 				}
 			}
 			dc->DrawText(szItem, -1, const_cast<LPRECT>(lpRect), MLC_DT_TEXT | uDrawTextAlignment);
@@ -1522,7 +1522,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, UIN
 		case 12:	// category
 		case 13:	// added on
 			break;
-		// Note, the labels of the above two columns are not corretct. To simplify merging I will keep the official layout.
+		// Note, the labels of the above two columns are not correct. To simplify merging I will keep the official layout.
 		// MorphXT has 'category' in column 13 and 'added on' in column 12.
 		case 14:	//MORPH - linear priority
 			break;
@@ -3194,7 +3194,7 @@ void CDownloadListCtrl::OnListModified(NMHDR *pNMHDR, LRESULT * /*pResult*/)
 int CDownloadListCtrl::Compare(const CPartFile *file1, const CPartFile *file2, LPARAM lParamSort)
 {
 	// SLUGFILLER: DLsortFix - client-only sorting
-	if (lParamSort > 63)
+	if (lParamSort > 63 && lParamSort != 99)
 		return 0;
 	// SLUGFILLER: DLsortFix
 	int comp = 0;
@@ -3343,17 +3343,15 @@ int CDownloadListCtrl::Compare(const CPartFile *file1, const CPartFile *file2, L
 				comp=0;
 			break;
 		// khaos::categorymod-
-		// SLUGFILLER: DLsortFix
-		// this should be redundant because we return if lParamSort > 0
-		/*
-		case 99:	// met file name asc, only available as last-resort sort to make sure no two files are equal
-			comp=CompareLocaleStringNoCase(file1->GetFullName(), file2->GetFullName());
-		*/
-		// SLUGFILLER: DLsortFix
 		//MORPH START - IP2Country
 		case 16:
 			comp=0;
 		//MORPH END   - IP2Country
+		// SLUGFILLER: DLsortFix
+		case 99:	// met file name asc, only available as last-resort sort to make sure no two files are equal
+			comp=CompareLocaleStringNoCase(file1->GetFullName(), file2->GetFullName());
+			break;
+		// SLUGFILLER: DLsortFix
 	}
 	return comp;
 }

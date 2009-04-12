@@ -808,7 +808,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bShowCopyEd2kLinkCmd = thePrefs.m_bShowCopyEd2kLinkCmd;
 	m_bIconflashOnNewMessage = thePrefs.m_bIconflashOnNewMessage;
 	m_bShowVerticalHourMarkers = thePrefs.m_bShowVerticalHourMarkers;
-	m_bReBarToolbar = thePrefs.m_bReBarToolbar;
+	m_bReBarToolbar = !thePrefs.m_bReBarToolbar;
 	m_iFileBufferTimeLimit = thePrefs.GetFileBufferTimeLimit()/1000;
 	m_bRearrangeKadSearchKeywords = thePrefs.GetRearrangeKadSearchKeywords();
 	// MORPH END  leuk_he Advanced official preferences.
@@ -1041,7 +1041,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bShowCopyEd2kLinkCmd = m_bShowCopyEd2kLinkCmd;
 	thePrefs.m_bIconflashOnNewMessage = m_bIconflashOnNewMessage;
 	thePrefs.m_bShowVerticalHourMarkers = m_bShowVerticalHourMarkers;
-	thePrefs.m_bReBarToolbar = m_bReBarToolbar;
+	thePrefs.m_bReBarToolbar = !m_bReBarToolbar;
 	thePrefs.m_uFileBufferTimeLimit = SEC2MS(m_iFileBufferTimeLimit);
 	thePrefs.m_bRearrangeKadSearchKeywords = m_bRearrangeKadSearchKeywords;
 	//MORPH END  leuk_he Advanced official preferences.

@@ -1562,7 +1562,7 @@ void CIrcMain::ParsePerform()
 			CString sJoinHelpChannel = GetResString(IDS_IRC_HELPCHANNELPERFORM);
 			*/
 			CString sJoinHelpChannel;
-			sJoinHelpChannel.Format(_T("/join #emule-morph|%s"),GetResString(IDS_IRC_HELPCHANNELPERFORM));
+			sJoinHelpChannel.Format(_T("%s|/join #emule-morph"),GetResString(IDS_IRC_HELPCHANNELPERFORM));
 			//MORPH END   - Changed by Stulle, Autojoin help channel
 			sJoinHelpChannel.Trim();
 			if (!sJoinHelpChannel.IsEmpty())

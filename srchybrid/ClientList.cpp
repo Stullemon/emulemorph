@@ -366,7 +366,7 @@ CUpDownClient* CClientList::FindClientByIP(uint32 clientip) const
 			return cur_client;
 		//Fafner: error? (GetIP() doesn't always seem to work) - 070920
 		if (cur_client->GetConnectIP() == clientip) {
-			ASSERT(cur_client->GetConnectIP() == cur_client->GetIP()); // Official uses getip? do we have a bug here?
+			//ASSERT(cur_client->GetConnectIP() == cur_client->GetIP()); // Official uses getip? do we have a bug here?
 			return cur_client;
 		}
 	}

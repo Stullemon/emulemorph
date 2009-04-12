@@ -394,7 +394,12 @@ void CClientListCtrl::GetItemDisplayText(const CUpDownClient *client, int iSubIt
 			break;
 
 		case 5:
+			//MORPH START
+			/*
 			_tcsncpy(pszText, client->GetClientSoftVer(), cchTextMax);
+			*/
+			_sntprintf(pszText, cchTextMax, _T("%s%s"), client->GetClientSoftVer(), client->GetClientModTag());
+			//MORPH END
 			if (pszText[0] == _T('\0'))
 				_tcsncpy(pszText, GetResString(IDS_UNKNOWN), cchTextMax);
 			break;
@@ -778,10 +783,6 @@ void CClientListCtrl::RefreshClient(const CUpDownClient *client)
 	if (theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || !theApp.emuledlg->transferwnd->clientlistctrl.IsWindowVisible())
 		return;
 
-	//MORPH START - SiRoB, Don't Refresh item if not needed
-	if( theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || IsWindowVisible() == FALSE )
-		return;
-	//MORPH END   - SiRoB, Don't Refresh item if not needed
 	//MORPH START- UpdateItemThread
 	/*
 	LVFINDINFO find;

@@ -827,14 +827,6 @@ UINT UploadBandwidthThrottler::RunInternal() {
 					numberofclientinhigherclass += slotCounterClass[classID];
 				}
 			}
-			// add in any tcp overhead we got from ack download frames
-			if(thePrefs.m_bUseDownloadOverhead) //MORPH leuk_he include download overhead in upload stats
-			   { uint64 downloadoverhead =GetDownDataOverheadOtherPackets_andreset()	;
-			     ControlspentBytes+=	downloadoverhead ;
-			     m_SentBytesSinceLastCallOverheadClass[LAST_CLASS] +=downloadoverhead ; // so it correctly displayed in statistics
-			   }
-			else 
-				GetDownDataOverheadOtherPackets_andreset(); // just reset stats (when enabled later in session)
 			//
 			if (ControlspentBytes) {
 				// Comsume overhead byte in higher class too
@@ -848,6 +840,20 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				sendBytesLocker.Unlock();
 			}
 
+			// add in any tcp overhead we got from ack download frames
+			if(thePrefs.m_bUseDownloadOverhead) //MORPH leuk_he include download overhead in upload stats
+			{
+				uint64 downloadoverhead =GetDownDataOverheadOtherPackets_andreset()	;
+				//ControlspentOverhead += downloadoverhead;
+				realBytesToSpendClass[LAST_CLASS] -= 1000*downloadoverhead;
+				sendBytesLocker.Lock();
+				m_SentBytesSinceLastCallClass[LAST_CLASS] += downloadoverhead;
+				m_SentBytesSinceLastCallOverheadClass[LAST_CLASS] += downloadoverhead;
+				sendBytesLocker.Unlock();
+				//m_SentBytesSinceLastCallOverheadClass[LAST_CLASS] +=downloadoverhead ; // so it correctly displayed in statistics
+			}
+			else 
+				GetDownDataOverheadOtherPackets_andreset(); // just reset stats (when enabled later in session)
 
 
 			//loop 4

@@ -1735,8 +1735,7 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 		     theApp.m_app_state = APP_STATE_SHUTTINGDOWN; // do no ask to close
 			 OnClose(); 
 			 return true;}
-		if (clcommand==_T("reload")) {theApp.downloadqueue->StartNextFile(); return true;} // morph relaod shared files
-			 theApp.sharedfiles->Reload();
+		if (clcommand==_T("reload")) {theApp.sharedfiles->Reload(); return true;} // morph relaod shared files
 		// MORPH END	  do not ask exit from command prompt.
 		if (clcommand==_T("restore")) {RestoreWindow();return true;}
 		if (clcommand==_T("reloadipf")) {theApp.ipfilter->LoadFromDefaultFile(); return true;}
@@ -2456,7 +2455,7 @@ void CemuleDlg::OnTrayRButtonUp(CPoint pt)
 				break;
 			//MORPH START - Added by SiRoB
 			case IDC_TRAYRELOADSHARE:
-				theApp.sharedfiles->Reload();
+				theApp.emuledlg->sharedfileswnd->Reload();
 				break;
 			//MORPH END   - Added by SiRoB
 			case IDC_PREFERENCES:

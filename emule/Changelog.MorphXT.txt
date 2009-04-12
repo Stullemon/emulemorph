@@ -1,4 +1,26 @@
 --------------------------------------
+Changelog for eMule 0.49c MorphXT v11.3
+--------------------------------------
+XX-XX-2009
+
+CHANGE: reversed IRC chan join order [Stulle]
+CHANGE: Reworked "Use Download ACK" code to be less hacky [Stulle]
+CHANGE: Reapplied corrected sorting fix in Download List [Slugfiller/Stulle]
+CHANGE: Do not stop setting new PS limit if new value = old value [Stulle]
+CHANGE: Update GUI when reloading share via Tray Icon or on Cat add/edit [Stulle]
+FIX: Display proper icons in SharedDirsTreeCtrl [Stulle]
+FIX: Display extended info about tags client sent in Clients list [Stulle]
+FIX: Source items color in DownloadList was not always reset properly [JvA]
+FIX: "disable some toolbar options was set the other way around [Stulle]
+FIX: Falsely as shared display folders du to shareSubdir [Stulle]
+FIX: Do shared files reload via command line was broken [Stulle]
+FIX: (Official) sorting fix for filetype [moloko+]
+FIX: (Official) single shared files were hard excluded on unshare [Stulle]
+REMOVED: Unneccessary shared files reload fix (improper) [JackieKu]
+REMOVED: Dupe shared files reload on add/edit cat [Stulle]
+
+
+--------------------------------------
 Changelog for eMule 0.49c MorphXT v11.2
 --------------------------------------
 23-03-2009
