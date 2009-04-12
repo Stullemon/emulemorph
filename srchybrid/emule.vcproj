@@ -133,7 +133,7 @@
 				Name="VCPostBuildEventTool"
 				Description="Performing Post-Build Steps..."
 				CommandLine="echo Inserting Vista application icon...
-..\ReplaceVistaIcon\release\ReplaceVistaIcon &quot;$(TargetPath)&quot; &quot;$(ProjectDir)res\Mule_Vista.ico&quot; AAAEMULEAPP
+..\ReplaceVistaIcon\release\ReplaceVistaIcon &quot;$(TargetPath)&quot; &quot;$(ProjectDir)res\MOD\Mule_Vista.ico&quot; AAAEMULEAPP
 echo Enabling Dynamic Base support...
 ..\EditBinX\release\EditBinX /dynamicbase &quot;$(TargetPath)&quot;
 "/>
@@ -216,6 +216,7 @@ echo Enabling Dynamic Base support...
 ..\ReplaceVistaIcon\release\ReplaceVistaIcon &quot;$(TargetPath)&quot; &quot;$(ProjectDir)res\MOD\Mule_Vista.ico&quot; AAAEMULEAPP
 echo Enabling Dynamic Base support...
 ..\EditBinX\release\EditBinX /dynamicbase &quot;$(TargetPath)&quot;
+del $(IntDir)\emule.obj
 "/>
 			<Tool
 				Name="VCPreBuildEventTool"/>

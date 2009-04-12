@@ -2028,7 +2028,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					if (!file->IsKindOf(RUNTIME_CLASS(CKnownFile)))
 						continue;
 					if  (newPowerShareLimit == ((CKnownFile*)file)->GetPowerShareLimit())
-						break;
+						continue; // do not set new limit for this file because it is equal
 					((CKnownFile*)file)->SetPowerShareLimit(newPowerShareLimit);
 					if (((CKnownFile*)file)->IsPartFile())
 						((CPartFile*)file)->UpdatePartsInfo();
@@ -2480,6 +2480,8 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			{
 				LPCTSTR pszExt1 = PathFindExtension(item1->GetFileName());
 				LPCTSTR pszExt2 = PathFindExtension(item2->GetFileName());
+			//MORPH START - Changed by Stulle, sorting fix [moloko+]
+			/*
 				if ((pszExt1 == NULL) ^ (pszExt2 == NULL))
 					return pszExt1 == NULL ? 1 : (-1);
 				else
@@ -2487,6 +2489,13 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			}
 			else
 				return iResult;
+			*/
+				if ((pszExt1 == NULL) ^ (pszExt2 == NULL))
+					iResult = pszExt1 == NULL ? 1 : (-1);
+				else
+					iResult = pszExt1 != NULL ? _tcsicmp(pszExt1, pszExt2) : 0;
+			}
+			//MORPH   END - Changed by Stulle, sorting fix [moloko+]
 		}
 
 		case 9: //folder

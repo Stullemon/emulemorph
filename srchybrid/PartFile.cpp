@@ -2393,7 +2393,11 @@ bool CPartFile::GetNextEmptyBlockInPart(UINT partNumber, Requested_Block_Struct 
 
             bool shrinkSucceeded = ShrinkToAvoidAlreadyRequested(tempStart, tempEnd);
             if(shrinkSucceeded) {
+				//MORPH START - Removed by Stulle, prevent spamming the verbose log
+				/*
                 AddDebugLogLine(false, _T("Shrunk interval to prevent collision with already requested block: Old interval %I64u-%I64u. New interval: %I64u-%I64u. File %s."), start, end, tempStart, tempEnd, GetFileName());
+				*/
+				//MORPH END   - Removed by Stulle, prevent spamming the verbose log
 
                 // Was this block to be returned
 			    if (result != NULL)

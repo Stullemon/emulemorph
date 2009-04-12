@@ -312,7 +312,7 @@ int CmdInstallService(bool b_autostart)
         if ( schService )
         {
 			SERVICE_DESCRIPTION sdBuf;
-			sdBuf.lpDescription = SZSERVICEDISCR;
+			sdBuf.lpDescription = SZSERVICEDESCR;
 			(void)!ChangeServiceConfig2( // I don't care if it works :P
 				schService,                 // handle to service
 				SERVICE_CONFIG_DESCRIPTION, // change: description

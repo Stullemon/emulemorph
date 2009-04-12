@@ -1824,6 +1824,10 @@ bool CSharedFileList::ExcludeFile(CString strFilePath)
 		}
 	}
 
+	//MORPH START - Added by Stulle, Only exclude file if it was not single shared
+	bool bSingleShared = bShared;
+	//MORPH END   - Added by Stulle, Only exlcude file if it was not single shared
+
 	// check if we implicity share this file
 	bShared |= ShouldBeShared(strFilePath.Left(strFilePath.ReverseFind('\\') + 1), strFilePath, false);
 
@@ -1840,7 +1844,10 @@ bool CSharedFileList::ExcludeFile(CString strFilePath)
 	}
 
 	// add to exclude list
-	m_liSingleExcludedFiles.AddTail(strFilePath);
+	//MORPH START - Added by Stulle, Only exclude file if it was not single shared
+	if(!bSingleShared)
+	//MORPH END   - Added by Stulle, Only exlcude file if it was not single shared
+		m_liSingleExcludedFiles.AddTail(strFilePath);
 	
 	// check if the file is in the shared list (doesn't has to for example if it is hashing or not loaded yet) and remove
 	CKnownFile* cur_file;
