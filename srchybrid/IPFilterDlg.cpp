@@ -80,6 +80,9 @@ END_MESSAGE_MAP()
 CIPFilterDlg::CIPFilterDlg(CWnd* pParent /*=NULL*/)
 	: CResizableDialog(CIPFilterDlg::IDD, pParent)
 {
+	//MORPH START - Added by schnulli900, dynamic IP-Filters (original by Xman)
+	theApp.ipdlgisopen=true; //Xman dynamic IP-Filters
+        //MORPH End - Added by schnulli900, dynamic IP-Filters (original by Xman)
 	m_uIPFilterItems = 0;
 	m_ppIPFilterItems = NULL;
 	m_icoDlg = NULL;
@@ -99,6 +102,9 @@ CIPFilterDlg::~CIPFilterDlg()
 	sm_iSortColumn = m_ipfilter.GetSortColumn();
 	if (m_icoDlg)
 		VERIFY( ::DestroyIcon(m_icoDlg) );
+        //MORPH START - Added by schnulli900, dynamic IP-Filters (original by Xman)
+	theApp.ipdlgisopen=false; 
+        //MORPH End - Added by schnulli900, dynamic IP-Filters (original by Xman)
 }
 
 void CIPFilterDlg::DoDataExchange(CDataExchange* pDX)

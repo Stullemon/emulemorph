@@ -3,6 +3,8 @@ Changelog for eMule 0.49c MorphXT v11.3
 --------------------------------------
 XX-XX-2009
 
+ADD: Filter clients with failed downlods(original by Xman) [schnulli900]
+ADD: Count failed TCP/IP Connections(original by Xman) [schnulli900]
 CHANGE: reversed IRC chan join order [Stulle]
 CHANGE: Reworked "Use Download ACK" code to be less hacky [Stulle]
 CHANGE: Reapplied corrected sorting fix in Download List [Slugfiller/Stulle]
@@ -16,6 +18,7 @@ FIX: Falsely as shared display folders du to shareSubdir [Stulle]
 FIX: Do shared files reload via command line was broken [Stulle]
 FIX: (Official) sorting fix for filetype [moloko+]
 FIX: (Official) single shared files were hard excluded on unshare [Stulle]
+FIX: Create logs Dir "on apply" preferences if log2disk is enabled [schnulli900]
 REMOVED: Unneccessary shared files reload fix (improper) [JackieKu]
 REMOVED: Dupe shared files reload on add/edit cat [Stulle]
 

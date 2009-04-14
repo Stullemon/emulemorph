@@ -133,6 +133,15 @@ public:
 	void	AddFailedUDPFileReasks()						{m_nFailedUDPFileReasks++;}
 	uint32	GetFailedUDPFileReasks() const					{return m_nFailedUDPFileReasks;}
 
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+	//Xman Xtreme Mod
+	void	AddTCPFileReask()								{m_TCPFileReask++;}
+	uint32	GetTCPFileReasks() const							{return m_TCPFileReask;}
+	void	AddFailedTCPFileReask()							{m_FailedTCPFileReask++;}
+	uint32	GetFailedTCPFileReasks() const					{return m_FailedTCPFileReask;}
+	//Xman end
+        //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+
 	// categories
 	// khaos::categorymod+	
 	void	ResetCatParts(UINT cat, UINT useCat = 0);
@@ -210,6 +219,13 @@ private:
 	uint64		m_datarateMS;
 	uint32		m_nUDPFileReasks;
 	uint32		m_nFailedUDPFileReasks;
+
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+	//Xman Xtreme Mod
+	uint32		m_TCPFileReask;
+	uint32		m_FailedTCPFileReask;
+	//Xman end
+        //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
 
 	// By BadWolf - Accurate Speed Measurement
 	typedef struct TransferredData {
