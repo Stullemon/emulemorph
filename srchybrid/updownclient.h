@@ -655,6 +655,12 @@ public:
 
 	LPCTSTR		TestLeecher(); //MORPH - Added by IceCream, anti-leecher feature
 	
+    //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
+	uint16 m_faileddownloads;
+    //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+
+
+	
 	//EastShare Start - Added by AndCycle, PayBackFirst
 	bool	IsMoreUpThanDown() const;
 	bool	IsMoreUpThanDown(const CKnownFile* file) const; //MORPH - Added by SiRoB, Code Optimization
@@ -850,6 +856,17 @@ protected:
 	//////////////////////////////////////////////////////////
 	// Download
 	//
+
+
+	
+	 //MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+public:
+	uint8	m_cFailed; //Xman Downloadmanager / Xtreme Mod // holds the failed connection attempts
+     //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+
+
+protected:
+
 	CPartFile*	reqfile;
 	CAICHHash*  m_pReqFileAICHHash; 
 	UINT		m_cDownAsked;

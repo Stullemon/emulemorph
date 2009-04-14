@@ -98,6 +98,10 @@ public:
 #ifdef USE_OFFICIAL_UPNP
 	CUPnPImplWrapper*	m_pUPnPFinder;
 #endif
+	//Xman dynamic IP-Filters
+        //MORPH START - Added by schnulli900, dynamic IP-Filters (original by Xman)
+	bool				ipdlgisopen;
+        //MORPH End - Added by schnulli900, dynamic IP-Filters (original by Xman)
 
 	CFakecheck*			FakeCheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	CPPgBackup*			ppgbackup; //EastShare - Added by Pretender, TBH-AutoBackup

@@ -75,6 +75,15 @@ CDownloadQueue::CDownloadQueue()
 	// khaos::kmod+ A4AF
 	forcea4af_file = NULL;
 	// khaos::kmod-
+
+
+	
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+	//Xman Xtreme Mod
+	m_TCPFileReask=0;
+	m_FailedTCPFileReask=0;
+	//Xman end
+        //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
 }
 
 void CDownloadQueue::AddPartFilesToShare()

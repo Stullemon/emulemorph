@@ -120,6 +120,15 @@ void CUpDownClient::Init()
 	dwSessionDLTime = 0;
 	dwTotalDLTime = 0;
 	//SLAHAM: ADDED Show Downloading Time <=
+
+    //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
+	m_faileddownloads=0;
+    //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+
+	 //MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+	m_cFailed = 0; //Xman Downloadmanager / Xtreme Mod // holds the failed connection attempts
+     //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+
 	m_nChatstate = MS_NONE;
 	m_nKadState = KS_NONE;
 	m_nChatCaptchaState = CA_NONE;
@@ -2050,6 +2059,25 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	// is supposed to be valid until the proxy itself tells us that the IP can not be
 	// connected to (e.g. 504 Bad Gateway)
 	//
+        //MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+        bool bAddDeadSource = true;
+	switch(m_nDownloadState){
+		case DS_CONNECTING:
+			{
+
+				m_cFailed++;
+			if (socket && socket->GetProxyConnectFailed())
+				bAddDeadSource = false;
+			}
+
+
+		case DS_WAITCALLBACK:
+			if (bAddDeadSource)
+				theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
+			theApp.downloadqueue->AddFailedTCPFileReask(); //Xman Xtreme Mod: count the failed TCP-connections
+                 }   
+        //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+ 
 	if ( (m_nConnectingState != CCS_NONE && !(socket && socket->GetProxyConnectFailed()))
 		|| m_nDownloadState == DS_ERROR)
 	{
@@ -2415,6 +2443,12 @@ void CUpDownClient::Connect()
 
 void CUpDownClient::ConnectionEstablished()
 {
+
+
+	
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+	m_cFailed = 0; //Xman Downloadmanager / Xtreme Mod // holds the failed connection attempts
+        //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
 	// ok we have a connection, lets see if we want anything from this client
 	
 	// was this a direct callback?

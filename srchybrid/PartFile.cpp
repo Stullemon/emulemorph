@@ -3287,6 +3287,21 @@ uint32 CPartFile::Process(uint32 reducedownload, UINT icounter/*in percent*/, ui
 					cur_src->dwStartDLTime = 0; //SLAHAM: ADDED Show Downloading Time
 					// To Mods, please stop instantly removing these sources..
 					// This causes sources to pop in and out creating extra overhead!
+                    //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)			
+					if(cur_src->m_faileddownloads>=3 && thePrefs.GetFilterClientFailedDown())
+					{
+						cur_src->SetDownloadState(DS_ERROR, _T("Morph Filter-Failed-Download-Clients")); //force the delete
+                		DebugLog(LOG_MORPH, _T("Morph Filter-Failed-Download-Clients: Client %s "), cur_src->DbgGetClientInfo());
+					    theApp.ipfilter->AddIPTemporary(ntohl(cur_src->GetConnectIP()));
+						if(cur_src->Disconnected(_T("Morph Filter-Failed-Download-Clients")))
+							delete cur_src;
+						else
+							//if it's a friend it isn't deleted->remove it
+							theApp.downloadqueue->RemoveSource(cur_src);
+						break;
+					}
+					else 
+                    //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
 					if( cur_src->IsRemoteQueueFull() )
 					{
 						if( ((dwCurTick - lastpurgetime) > MIN2MS(1)) && (GetSourceCount() >= (GetMaxSources()*.8 )) )
