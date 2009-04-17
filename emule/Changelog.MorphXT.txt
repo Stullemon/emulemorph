@@ -5,6 +5,7 @@ XX-XX-2009
 
 ADD: Filter clients with failed downlods [Xman]
 ADD: Count failed TCP/IP Connections [Xman]
+ADD: Temporary IP Filter [Xman]
 CHANGE: reversed IRC chan join order [Stulle]
 CHANGE: Reworked "Use Download ACK" code to be less hacky [Stulle]
 CHANGE: Reapplied corrected sorting fix in Download List [Slugfiller/Stulle]
