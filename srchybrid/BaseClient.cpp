@@ -121,13 +121,13 @@ void CUpDownClient::Init()
 	dwTotalDLTime = 0;
 	//SLAHAM: ADDED Show Downloading Time <=
 
-    //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
-	m_faileddownloads=0;
-    //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+	//MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+	m_uFailedDownloads=0;
+	//MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 
-	 //MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
-	m_cFailed = 0; //Xman Downloadmanager / Xtreme Mod // holds the failed connection attempts
-     //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+	m_cFailed = 0;
+	//MORPH END   - Added by schnulli900, count failed TCP/IP connections [Xman]
 
 	m_nChatstate = MS_NONE;
 	m_nKadState = KS_NONE;
@@ -2047,6 +2047,14 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		case DS_NONEEDEDPARTS:
 		case DS_LOWTOLOWIP:
 			bDelete = false;
+        //MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+		break; // this break is required because the above cases got nothing to do with these mod cases
+		case DS_CONNECTING:
+			m_cFailed++;
+		case DS_CONNECTED:
+		case DS_WAITCALLBACK:
+			theApp.downloadqueue->AddFailedTCPFileReask();
+        //MORPH END   - Added by schnulli900, count failed TCP/IP connections [Xman]
 	}
 
 	// Dead Soure Handling
@@ -2059,25 +2067,6 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	// is supposed to be valid until the proxy itself tells us that the IP can not be
 	// connected to (e.g. 504 Bad Gateway)
 	//
-        //MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
-        bool bAddDeadSource = true;
-	switch(m_nDownloadState){
-		case DS_CONNECTING:
-			{
-
-				m_cFailed++;
-			if (socket && socket->GetProxyConnectFailed())
-				bAddDeadSource = false;
-			}
-
-
-		case DS_WAITCALLBACK:
-			if (bAddDeadSource)
-				theApp.clientlist->m_globDeadSourceList.AddDeadSource(this);
-			theApp.downloadqueue->AddFailedTCPFileReask(); //Xman Xtreme Mod: count the failed TCP-connections
-                 }   
-        //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
- 
 	if ( (m_nConnectingState != CCS_NONE && !(socket && socket->GetProxyConnectFailed()))
 		|| m_nDownloadState == DS_ERROR)
 	{
@@ -2443,12 +2432,9 @@ void CUpDownClient::Connect()
 
 void CUpDownClient::ConnectionEstablished()
 {
-
-
-	
-	//MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
-	m_cFailed = 0; //Xman Downloadmanager / Xtreme Mod // holds the failed connection attempts
-        //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+	m_cFailed = 0;
+        //MORPH END   - Added by schnulli900, count failed TCP/IP connections [Xman]
 	// ok we have a connection, lets see if we want anything from this client
 	
 	// was this a direct callback?

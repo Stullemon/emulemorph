@@ -2702,7 +2702,6 @@
 #define IDC_RESETBUTTON                 4891
 #define IDS_INVISIBLEMODE               4891
 #define IDS_ICS_USEICS                  4892
-#define IDS_FILTER_CLIENTFAILEDDOWN     4893
 #define IDC_RICHEDIT21                  4897
 #define IDC_RESETFAKESURL               4898
 #define IDC_RESETIPFURL                 4899
@@ -3606,7 +3605,6 @@
 #define IDC_DISABLEOBFUSCATION_TIP      30601
 #define IDC_ONLYOBFUSCATED_TIP          30602
 #define IDC_ENABLEOBFUSCATION_TIP       30603
-#define IDS_FILTER_CLIENTFAILEDDOWN_TIP 30604
 
 #define IDS_CHANGEUSERASSERVICE         30699
 #define IDS_SVC_RUNNINGASSERVICE        30700
@@ -3793,6 +3791,9 @@
 #define IDS_REMOVE_AICH_TIP             31324
 #define IDS_WSUPNP_TIP                  31325
 #define IDS_CHECK_FILE_OPEN_TIP         31326
+#define IDS_FILTER_CLIENTFAILEDDOWN     31327
+#define IDS_FILTER_CLIENTFAILEDDOWN_TIP 31328
+#define IDS_TCP_CONS                    31329
 
 // Next default values for new objects
 // 

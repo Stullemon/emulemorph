@@ -48,9 +48,9 @@
 #include "Kademlia/Kademlia/Prefs.h"
 #include "Log.h"
 #include "collection.h"
-//MORPH START - Added by schnulli900, dynamic IP-Filters (original by Xman)
+//MORPH START - Added by schnulli900, dynamic IP-Filters [Xman]
 #include "IPFilter.h" 
-//MORPH End - Added by schnulli900, dynamic IP-Filters (original by Xman)
+//MORPH END   - Added by schnulli900, dynamic IP-Filters [Xman]
 #include "PartFile.h" //Fafner: look for PFOP_COPYING below - 080421
 
 #ifdef _DEBUG
@@ -1828,12 +1828,12 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 
 			// try to use different time intervals here to not create any disk-IO bottle necks by saving all files at once
 			theApp.clientcredits->Process();	// 13 minutes
-	                //MORPH START - Added by schnulli900, dynamic IP-Filters (original by Xman)
-			theApp.ipfilter->Process(); 
-                        //MORPH End - Added by schnulli900, dynamic IP-Filters (original by Xman)
 			theApp.serverlist->Process();		// 17 minutes
 			theApp.knownfiles->Process();		// 11 minutes
 			theApp.friendlist->Process();		// 19 minutes
+	                //MORPH START - Added by schnulli900, dynamic IP-Filters [Xman]
+			theApp.ipfilter->Process(); // hourly
+                        //MORPH END   - Added by schnulli900, dynamic IP-Filters [Xman]
 			theApp.clientlist->Process();
 			theApp.sharedfiles->Process();
 			if( Kademlia::CKademlia::IsRunning() )

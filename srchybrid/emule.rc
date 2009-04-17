@@ -4710,9 +4710,6 @@ BEGIN
     IDS_SF_TURN_SIMPLE      "File UL (simple)"
     IDS_SF_FULLUPLOAD       "File UL (full)"
     IDS_UM                  "Upload Management"
-    //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
-    IDS_FILTER_CLIENTFAILEDDOWN        "Filter Clients with failed downlads"
-    //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
     IDS_ANTI_LEECHER        "Enable anti-leechers control"
     IDS_PROGRESS_PERCENT    "Show percentage in progress bar"
     IDS_DOWNLOAD_IN_BOLD    "Show downloading files in bold"
@@ -5546,9 +5543,6 @@ BEGIN
                             "Display the files that are\ncurrently downloading\nin the download window in <b>Bold</b>"
     IDS_CLIENTPERCENTAGE_TIP 
                             "Show the percentage that the peer client has in the progress bar."
-    //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
-    IDS_FILTER_CLIENTFAILEDDOWN_TIP    "Filter clients that deny download \nmore than 3 times and transfer less \nthan 12kb during a session. (default:enabled)"
-    //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
     IDS_ANTI_LEECHER_TIP    "Ban and refuse clients that can be used\nfor leecher activities or which do not send a\nproper identification(ghosts).(default:enabled)"
     IDS_ANTI_CREDITHACK_TIP "Prevents our credits/userhash from being stolen (default:activated)"
     IDS_INFINITEQUEUE_TIP   "Give our queue an unlimited size"
@@ -6351,6 +6345,11 @@ BEGIN
    IDS_REMOVE_AICH_TIP      "Enable if AICH hash of unshared files should\nbe deleted immediatly.\nDefault: disabled"
    IDS_WSUPNP_TIP           "Includes Webserver port into UPnP port forwarding."
    IDS_CHECK_FILE_OPEN_TIP  "Enables prompt before opening a file via eMule."
+   //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_FILTER_CLIENTFAILEDDOWN        "Filter Clients with failed downlads"
+   IDS_FILTER_CLIENTFAILEDDOWN_TIP    "Filter clients that deny download \nmore than 3 times and transfer less \nthan 12kb during a session. (default:enabled)"
+   //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_TCP_CONS             "TCP-connections"
 END
 
 #endif    // English (U.S.) resources

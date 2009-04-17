@@ -70,7 +70,8 @@ static int __cdecl CmpSIPFilterByStartAddr(const void* p1, const void* p2)
 	const SIPFilter* rng2 = *(SIPFilter**)p2;
 	return CompareUnsigned(rng1->start, rng2->start);
 }
-//MORPH START - Added by schnulli900, dynamic IP-Filters (original by Xman)
+
+//MORPH START - Added by schnulli900, dynamic IP-Filters [Xman]
 void CIPFilter::AddIPTemporary(uint32 addip)
 {
 	SIPFilter* newFilter = new SIPFilter;
@@ -84,7 +85,7 @@ void CIPFilter::AddIPTemporary(uint32 addip)
 	// sort the IP filter list by IP range start addresses
 	qsort(m_iplist.GetData(), m_iplist.GetCount(), sizeof(m_iplist[0]), CmpSIPFilterByStartAddr);
 }
-//MORPH End - Added by schnulli900, dynamic IP-Filters (original by Xman)
+//MORPH END   - Added by schnulli900, dynamic IP-Filters [Xman]
 
 CString CIPFilter::GetDefaultFilePath() const
 {
@@ -352,10 +353,10 @@ void CIPFilter::SaveToDefaultFile()
 		{
 			const SIPFilter* flt = m_iplist[i];
 
-	                //MORPH START - Added by schnulli900, dynamic IP-Filters (original by Xman)
+	                //MORPH START - Added by schnulli900, dynamic IP-Filters [Xman]
 			if(flt->timestamp!=0)
 				continue; //don't save temporary filters
-                        //MORPH End - Added by schnulli900, dynamic IP-Filters (original by Xman)
+                        //MORPH END   - Added by schnulli900, dynamic IP-Filters [Xman]
 
 			CHAR szStart[16];
 			ipstrA(szStart, _countof(szStart), htonl(flt->start));
@@ -464,12 +465,12 @@ void CIPFilter::RemoveAllIPFilters()
 	m_pLastHit = NULL;
 }
 
-//MORPH START - Added by schnulli900, dynamic IP-Filters (original by Xman)
+//MORPH START - Added by schnulli900, dynamic IP-Filters [Xman]
 void CIPFilter::Process()
 {
 	if(m_iplist.GetCount()==0)
 		return;
-	if(theApp.ipdlgisopen)
+	if(theApp.m_bIsIPDlgOpen)
 		return; //don't process if user is working on ipfilter
 	uint32 lasttick=::GetTickCount();
 	static uint32 m_lastcleanup;
@@ -504,7 +505,7 @@ void CIPFilter::Process()
 		AddDebugLogLine(false,_T("%u temporary IPFilters deleted, %u left"),countdel, countall)	;
 	}
 }
-//MORPH End - Added by schnulli900, dynamic IP-Filters (original by Xman)
+//MORPH END   - Added by schnulli900, dynamic IP-Filters [Xman]
 
 bool CIPFilter::IsFiltered(uint32 ip) /*const*/
 {

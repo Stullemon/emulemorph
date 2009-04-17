@@ -84,9 +84,9 @@ CPPgMorph::CPPgMorph()
 	m_htiGlobalHL = NULL;
 	m_htiGlobalHlLimit = NULL;
 	//MORPH END   - Added by Stulle, Global Source Limit
-        //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
+        //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
 	m_htiFilterClientFailedDown = NULL; 
-        //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+        //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, activate Anti-leecher
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, activate Anti-CreditHack
 	m_htiSCC = NULL;
@@ -329,9 +329,9 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiMinUpload, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		
 		m_htiUpSecu = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SECURITY), iImgSecu, m_htiUM);
-                //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
+                //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
 	        m_htiFilterClientFailedDown = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FILTER_CLIENTFAILEDDOWN), m_htiUpSecu, m_bFilterClientFailedDown); 
-                //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+                //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 		m_htiEnableAntiLeecher = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ANTI_LEECHER), m_htiUpSecu, m_bEnableAntiLeecher); //MORPH - Added by IceCream, Enable Anti-leecher
 		m_htiEnableAntiCreditHack = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ANTI_CREDITHACK), m_htiUpSecu, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, Enable Anti-CreditHack
 
@@ -435,9 +435,9 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
     DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiDisableCatColors, m_bDisableCatColors); //MORPH - Added by SiRoB, show download in Bold
    // MORPH END   leuk_he disable catcolor
 
-        //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
+        //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiFilterClientFailedDown, m_bFilterClientFailedDown); 
-        //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+        //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiLeecher, m_bEnableAntiLeecher); //MORPH - Added by IceCream, enable Anti-leecher
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableAntiCreditHack, m_bEnableAntiCreditHack); //MORPH - Added by IceCream, enable Anti-CreditHack
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiInfiniteQueue, m_bInfiniteQueue);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -546,9 +546,9 @@ BOOL CPPgMorph::OnInitDialog()
 	m_iGlobalHL = thePrefs.GetGlobalHL();
 	//MORPH END   - Added by Stulle, Global Source Limit
 
-        //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
-	m_bFilterClientFailedDown = thePrefs.filterClientFailedDown; 
-        //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+        //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+	m_bFilterClientFailedDown = thePrefs.m_bFilterClientFailedDown; 
+        //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 	m_bEnableAntiLeecher = thePrefs.enableAntiLeecher; //MORPH - Added by IceCream, enabnle Anti-leecher
 	m_bEnableAntiCreditHack = thePrefs.enableAntiCreditHack; //MORPH - Added by IceCream, enabnle Anti-CreditHack
 	m_bInfiniteQueue = thePrefs.infiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -685,9 +685,9 @@ BOOL CPPgMorph::OnApply()
 		}
 	}
 	//MORPH END   - Added by Stulle, Global Source Limit
-        //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
-	thePrefs.filterClientFailedDown = m_bFilterClientFailedDown; 
-        //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+        //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+	thePrefs.m_bFilterClientFailedDown = m_bFilterClientFailedDown; 
+        //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 	thePrefs.enableAntiLeecher = m_bEnableAntiLeecher; //MORPH - Added by IceCream, enable Anti-leecher
 	thePrefs.enableAntiCreditHack = m_bEnableAntiCreditHack; //MORPH - Added by IceCream, enable Anti-CreditHack
 	thePrefs.infiniteQueue = m_bInfiniteQueue;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -874,11 +874,11 @@ void CPPgMorph::Localize(void)
 		if (m_htiShowClientPercentage) {m_ctrlTreeOptions.SetItemText(m_htiShowClientPercentage, GetResString(IDS_CLIENTPERCENTAGE));
 										SetTool(m_htiShowClientPercentage,IDS_CLIENTPERCENTAGE_TIP);
 		}
-        //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
+		//MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
 		if (m_htiFilterClientFailedDown) {m_ctrlTreeOptions.SetItemText(m_htiFilterClientFailedDown, GetResString(IDS_FILTER_CLIENTFAILEDDOWN)); 
 									 SetTool(m_htiFilterClientFailedDown,IDS_FILTER_CLIENTFAILEDDOWN_TIP);
 		}
-        //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+		//MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 		if (m_htiEnableAntiLeecher) {m_ctrlTreeOptions.SetItemText(m_htiEnableAntiLeecher, GetResString(IDS_ANTI_LEECHER)); //MORPH - Added by IceCream, enable Anti-leecher
 									 SetTool(m_htiEnableAntiLeecher,IDS_ANTI_LEECHER_TIP);
 		}
@@ -1096,9 +1096,9 @@ void CPPgMorph::OnDestroy()
 	m_htiGlobalHlLimit = NULL;
 	//MORPH END   - Added by Stulle, Global Source Limit
 	m_htiUpSecu = NULL;
-        //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
+        //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
 	m_htiFilterClientFailedDown = NULL; 
-        //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+        //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 	m_htiEnableAntiLeecher = NULL; //MORPH - Added by IceCream, enable Anti-leecher
 	m_htiEnableAntiCreditHack = NULL; //MORPH - Added by IceCream, enable Anti-CreditHack
 	m_htiDisableCatColors = NULL;
