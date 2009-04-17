@@ -3791,6 +3791,9 @@
 #define IDS_REMOVE_AICH_TIP             31324
 #define IDS_WSUPNP_TIP                  31325
 #define IDS_CHECK_FILE_OPEN_TIP         31326
+#define IDS_FILTER_CLIENTFAILEDDOWN     31327
+#define IDS_FILTER_CLIENTFAILEDDOWN_TIP 31328
+#define IDS_TCP_CONS                    31329
 
 // Next default values for new objects
 // 

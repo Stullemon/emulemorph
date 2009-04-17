@@ -1167,6 +1167,12 @@ void CStatisticsDlg::ShowStatistics(bool forceUpdate)
 					stattree.SetItemText( down_sources[i] , cbuffer );
 					i++;
 
+		                        //MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+					cbuffer.Format(_T("%s: %s, %s: %s (%.1f%%)"), GetResString(IDS_TCP_CONS), CastItoIShort(theApp.downloadqueue->GetTCPFileReasks()), GetResString(IDS_UFAILED), CastItoIShort(theApp.downloadqueue->GetFailedTCPFileReasks()), theApp.downloadqueue->GetTCPFileReasks() ? (theApp.downloadqueue->GetFailedTCPFileReasks() * 100.0 / theApp.downloadqueue->GetTCPFileReasks()) : 0.0 );
+					stattree.SetItemText( down_sources[i] , cbuffer );
+					i++;
+                                        //MORPH END   - Added by schnulli900, count failed TCP/IP connections [Xman]
+
 					cbuffer.Format(_T("%s: %s (%s + %s)"), GetResString(IDS_DEADSOURCES), CastItoIShort(theApp.clientlist->m_globDeadSourceList.GetDeadSourcesCount() + myStats.a[22]), CastItoIShort(theApp.clientlist->m_globDeadSourceList.GetDeadSourcesCount()), CastItoIShort((UINT)myStats.a[22]));
 					stattree.SetItemText( down_sources[i] , cbuffer );
 					i++;

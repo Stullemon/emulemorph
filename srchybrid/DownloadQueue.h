@@ -252,4 +252,15 @@ protected:
 	bool m_bPassiveMode;
 	bool m_bGlobalHLSrcReqAllowed;
 	//MORPH END   - Added by Stulle, Global Source Limit
+
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+public:
+	void	AddTCPFileReask()		{m_uTCPFileReask++;}
+	uint32	GetTCPFileReasks() const	{return m_uTCPFileReask;}
+	void	AddFailedTCPFileReask()		{m_uFailedTCPFileReask++;}
+	uint32	GetFailedTCPFileReasks() const	{return m_uFailedTCPFileReask;}
+private:
+	uint32	m_uTCPFileReask;
+	uint32	m_uFailedTCPFileReask;
+        //MORPH END   - Added by schnulli900, count failed TCP/IP connections [Xman]
 };

@@ -393,6 +393,10 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	m_sizBigSystemIcon.cy = 32;
 	m_iDfltImageListColorFlags = ILC_COLOR;
 
+	//MORPH START - Added by schnulli900, dynamic IP-Filters [Xman]
+	m_bIsIPDlgOpen = false;
+        //MORPH END   - Added by schnulli900, dynamic IP-Filters [Xman]
+
 // MOD Note: Do not change this part - Merkur
 
 	// this is the "base" version number <major>.<minor>.<update>.<build>

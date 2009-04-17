@@ -18,18 +18,30 @@
 
 struct SIPFilter
 {
+	//MORPH START - Added by schnulli900, dynamic IP-Filters [Xman]
+	SIPFilter() {} 
+        //MORPH END   - Added by schnulli900, dynamic IP-Filters [Xman]
 	SIPFilter(uint32 newStart, uint32 newEnd, UINT newLevel, const CStringA& newDesc)
 		: start(newStart),
 		  end(newEnd),
 		  level(newLevel),
 		  desc(newDesc),
+		  //MORPH START - Changed by schnulli900, dynamic IP-Filters [Xman]
+		  /*
 		  hits(0)
+		  */
+		  hits(0),
+		  timestamp(0)		
+		  //MORPH END   - Changed by schnulli900, dynamic IP-Filters [Xman]
 	{ }
 	uint32		start;
 	uint32		end;
 	UINT		level;
 	CStringA	desc;
 	UINT		hits;
+	//MORPH START - Added by schnulli900, dynamic IP-Filters [Xman]
+	uint32	timestamp;
+        //MORPH END   - Added by schnulli900, dynamic IP-Filters [Xman]
 };
 
 #define	DFLT_IPFILTER_FILENAME	_T("ipfilter.dat")
@@ -92,4 +104,10 @@ private:
 	}
 	CIPFilterArray m_iplist_White;
 	//MORPH END   - Added by Stulle, IP Filter White List [Stulle]
+
+	//MORPH START - Added by schnulli900, dynamic IP-Filters [Xman]
+public:
+	void AddIPTemporary(uint32 addip);
+	void Process(); 
+        //MORPH END   - Added by schnulli900, dynamic IP-Filters [Xman]
 };
