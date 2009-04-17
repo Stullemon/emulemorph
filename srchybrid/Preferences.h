@@ -619,9 +619,9 @@ public:
 	static	bool	m_bAutomaticArcPreviewStart;
 
 	static bool	enableDownloadInRed; //MORPH - Added by IceCream, show download in red
-    //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
-	static bool	filterClientFailedDown; 
-    //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+	//MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+	static bool	m_bFilterClientFailedDown; 
+	//MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 	static bool	enableAntiLeecher; //MORPH - Added by IceCream, enableAntiLeecher
 	static bool	enableAntiCreditHack; //MORPH - Added by IceCream, enableAntiCreditHack
 	static int	creditSystemMode; // EastShare - Added by linekin, creditsystem integration
@@ -1012,13 +1012,11 @@ public:
 	static	void	ChangeUserDirMode(int nNewMode);
 
 	// SLUGFILLER: SafeHash remove - global form of IsTempFile unnececery
-// removed due to not created logs Dir "on apply" schnulli900
-//	/*
+	/*
 	static	bool	IsTempFile(const CString& rstrDirectory, const CString& rstrName);
 	static	bool	IsShareableDirectory(const CString& rstrDirectory);
 	static	bool	IsInstallationDirectory(const CString& rstrDir);
-//	*/
-// removed due to not created logs Dir "on apply" schnulli900
+	*/
 	static	bool	IsConfigFile(const CString& rstrDirectory, const CString& rstrName);
 	// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 
@@ -1838,9 +1836,9 @@ public:
 	static	bool	GetEnableAntiCreditHack()					{ return enableAntiCreditHack; }//MORPH - Added by IceCream, enable AntiCreditHack
 
 	static	bool GetEnableDownloadInRed()	{ return enableDownloadInRed; } //MORPH - Added by IceCream, show download in red
-    //MORPH START - Added by schnulli900, filter clients with failed downloads (original by Xman)
-	static	bool GetFilterClientFailedDown ()		{ return filterClientFailedDown; } 
-    //MORPH End - Added by schnulli900, filter clients with failed downloads (original by Xman)
+	//MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+	static	bool GetFilterClientFailedDown ()		{ return m_bFilterClientFailedDown; } 
+	//MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 	static	bool GetEnableAntiLeecher()		{ return enableAntiLeecher; } //MORPH - Added by IceCream, enable Anti-leecher
 	
 	static	int		GetCreditSystem()	{return creditSystemMode;} // EastShare - Added by linekin, creditsystem integration

@@ -133,15 +133,6 @@ public:
 	void	AddFailedUDPFileReasks()						{m_nFailedUDPFileReasks++;}
 	uint32	GetFailedUDPFileReasks() const					{return m_nFailedUDPFileReasks;}
 
-	//MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
-	//Xman Xtreme Mod
-	void	AddTCPFileReask()								{m_TCPFileReask++;}
-	uint32	GetTCPFileReasks() const							{return m_TCPFileReask;}
-	void	AddFailedTCPFileReask()							{m_FailedTCPFileReask++;}
-	uint32	GetFailedTCPFileReasks() const					{return m_FailedTCPFileReask;}
-	//Xman end
-        //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
-
 	// categories
 	// khaos::categorymod+	
 	void	ResetCatParts(UINT cat, UINT useCat = 0);
@@ -220,13 +211,6 @@ private:
 	uint32		m_nUDPFileReasks;
 	uint32		m_nFailedUDPFileReasks;
 
-	//MORPH START - Added by schnulli900, count failed TCP/IP connections (original by Xman)
-	//Xman Xtreme Mod
-	uint32		m_TCPFileReask;
-	uint32		m_FailedTCPFileReask;
-	//Xman end
-        //MORPH End - Added by schnulli900, count failed TCP/IP connections (original by Xman)
-
 	// By BadWolf - Accurate Speed Measurement
 	typedef struct TransferredData {
 		uint32	datalen;
@@ -268,4 +252,15 @@ protected:
 	bool m_bPassiveMode;
 	bool m_bGlobalHLSrcReqAllowed;
 	//MORPH END   - Added by Stulle, Global Source Limit
+
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+public
+	void	AddTCPFileReask()		{m_uTCPFileReask++;}
+	uint32	GetTCPFileReasks() const	{return m_uTCPFileReask;}
+	void	AddFailedTCPFileReask()		{m_uFailedTCPFileReask++;}
+	uint32	GetFailedTCPFileReasks() const	{return m_uFailedTCPFileReask;}
+private:
+	uint32	m_uTCPFileReask;
+	uint32	m_uFailedTCPFileReask;
+        //MORPH END   - Added by schnulli900, count failed TCP/IP connections [Xman]
 };
