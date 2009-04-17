@@ -497,6 +497,11 @@ bool CUpDownClient::AskForDownload()
 	}
 
 	m_dwLastTriedToConnect = ::GetTickCount();
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+	if(m_cFailed==0)
+		theApp.downloadqueue->AddTCPFileReask();
+	//MORPH END   - Added by schnulli900, count failed TCP/IP connections [Xman]
+
     SwapToAnotherFile(_T("A4AF check before tcp file reask. CUpDownClient::AskForDownload()"), true, false, false, NULL, true, true);
 	uiDLAskingCounter +=1; //SLAHAM: ADDED Last Asked Counter
 	SetDownloadState(DS_CONNECTING);
@@ -1165,7 +1170,15 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			*/
 			//MORPH END   - Changed by SiRoB, don't overhide pszReason
 
+			//MORPH START - Changed by schnulli900, filter clients with failed downloads [Xman]
+			/*
 			ResetSessionDown();
+			*/
+			if(GetSessionDown()< (12*1024)) //12 kb
+				m_uFailedDownloads++;
+			else
+				m_uFailedDownloads=0; 
+			//MORPH END   - Changed by schnulli900, filter clients with failed downloads [Xman]
 
 			// -khaos--+++> Extended Statistics (Successful/Failed Download Sessions)
 			if ( m_bTransferredDownMini && nNewState != DS_ERROR )
@@ -1186,6 +1199,10 @@ void CUpDownClient::SetDownloadState(EDownloadState nNewState, LPCTSTR pszReason
 			*/
 			//wistily stop
 			// <-----khaos-
+
+			//MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+			ResetSessionDown(); 
+			//MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
 
 			m_nDownloadState = (_EDownloadState)nNewState;
 

@@ -1025,6 +1025,15 @@ EModClient	GetModClient() const	{ return (EModClient)m_uModClient; }
 //MORPH START - Added by Stulle, AppleJuice Detection [Xman]
 	bool CheckUserHash();
 //MORPH END   - Added by Stulle, AppleJuice Detection [Xman]
+
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+public:
+	uint8	m_cFailed;
+	//MORPH End   - Added by schnulli900, count failed TCP/IP connections [Xman]
+
+	//MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+	uint16 m_uFailedDownloads;
+	//MORPH End   - Added by schnulli900, filter clients with failed downloads [Xman]
 };
 //#pragma pack()
 //>>> eWombat [SNAFU_V3]

@@ -120,6 +120,15 @@ void CUpDownClient::Init()
 	dwSessionDLTime = 0;
 	dwTotalDLTime = 0;
 	//SLAHAM: ADDED Show Downloading Time <=
+
+	//MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+	m_uFailedDownloads=0;
+	//MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
+
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+	m_cFailed = 0;
+	//MORPH END   - Added by schnulli900, count failed TCP/IP connections [Xman]
+
 	m_nChatstate = MS_NONE;
 	m_nKadState = KS_NONE;
 	m_nChatCaptchaState = CA_NONE;
@@ -2038,6 +2047,14 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		case DS_NONEEDEDPARTS:
 		case DS_LOWTOLOWIP:
 			bDelete = false;
+        //MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+		break; // this break is required because the above cases got nothing to do with these mod cases
+		case DS_CONNECTING:
+			m_cFailed++;
+		case DS_CONNECTED:
+		case DS_WAITCALLBACK:
+			theApp.downloadqueue->AddFailedTCPFileReask();
+        //MORPH END   - Added by schnulli900, count failed TCP/IP connections [Xman]
 	}
 
 	// Dead Soure Handling
@@ -2415,6 +2432,9 @@ void CUpDownClient::Connect()
 
 void CUpDownClient::ConnectionEstablished()
 {
+	//MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
+	m_cFailed = 0;
+        //MORPH END   - Added by schnulli900, count failed TCP/IP connections [Xman]
 	// ok we have a connection, lets see if we want anything from this client
 	
 	// was this a direct callback?

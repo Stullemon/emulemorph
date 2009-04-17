@@ -6345,6 +6345,11 @@ BEGIN
    IDS_REMOVE_AICH_TIP      "Enable if AICH hash of unshared files should\nbe deleted immediatly.\nDefault: disabled"
    IDS_WSUPNP_TIP           "Includes Webserver port into UPnP port forwarding."
    IDS_CHECK_FILE_OPEN_TIP  "Enables prompt before opening a file via eMule."
+   //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_FILTER_CLIENTFAILEDDOWN        "Filter Clients with failed downlads"
+   IDS_FILTER_CLIENTFAILEDDOWN_TIP    "Filter clients that deny download \nmore than 3 times and transfer less \nthan 12kb during a session. (default:enabled)"
+   //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_TCP_CONS             "TCP-connections"
 END
 
 #endif    // English (U.S.) resources
