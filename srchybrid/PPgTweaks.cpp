@@ -872,14 +872,19 @@ BOOL CPPgTweaks::OnApply()
 	}
 
 	if (!thePrefs.log2disk && m_bLog2Disk)
+	//MORPH START - Added by Stulle, Create logs dir if saving enabled [Stulle]
+	{
+		(void)thePrefs.GetMuleDirectory(EMULE_LOGDIR);
+	//MORPH END   - Added by Stulle, Create logs dir if saving enabled [Stulle]
 		theLog.Open();
+	} //MORPH - Added by Stulle, Create logs dir if saving enabled [Stulle]
 	else if (thePrefs.log2disk && !m_bLog2Disk)
 		theLog.Close();
 	thePrefs.log2disk = m_bLog2Disk;
 
 	//Morph Start - added by AndCycle, Date File Name Log
-	if(thePrefs.m_bDateFileNameLog != (m_bDateFileNameLog != 0)){
-
+	if(thePrefs.m_bDateFileNameLog != (m_bDateFileNameLog != 0))
+	{
 		//close log first
 		theLog.Close();
 		theVerboseLog.Close();
@@ -900,7 +905,12 @@ BOOL CPPgTweaks::OnApply()
 	if (thePrefs.GetEnableVerboseOptions())
 	{
 		if (!thePrefs.GetDebug2Disk() && m_bVerbose && m_bDebug2Disk)
+		//MORPH START - Added by Stulle, Create logs dir if saving enabled [Stulle]
+		{
+			(void)thePrefs.GetMuleDirectory(EMULE_LOGDIR);
+		//MORPH END   - Added by Stulle, Create logs dir if saving enabled [Stulle]
 			theVerboseLog.Open();
+		} //MORPH - Added by Stulle, Create logs dir if saving enabled [Stulle]
 		else if (thePrefs.GetDebug2Disk() && (!m_bVerbose || !m_bDebug2Disk))
 			theVerboseLog.Close();
 		thePrefs.debug2disk = m_bDebug2Disk;
