@@ -892,7 +892,18 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 		//MORPH START - Modified by SiRoB, Client Software	
 		case 8:
+			/*
 			iResult=item2->GetClientSoftVer().CompareNoCase(item1->GetClientSoftVer());
+			*/
+			if (item1->GetClientSoft() == item2->GetClientSoft())
+				if (item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
+					iResult= CompareOptLocaleStringNoCase(item2->GetClientSoftVer(), item1->GetClientSoftVer());
+				}
+				else {
+					iResult= item1->GetVersion() - item2->GetVersion();
+				}
+			else
+				iResult=-(item1->GetClientSoft() - item2->GetClientSoft());
 			break;
 		//MORPH END - Modified by SiRoB, Client Software
 

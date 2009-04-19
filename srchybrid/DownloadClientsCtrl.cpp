@@ -617,11 +617,25 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 			break;
 
 		case 1:
+			//MORPH START - Added by IceCream, ET_MOD_VERSION
+			/*
 			if (item1->GetClientSoft() == item2->GetClientSoft())
 			    iResult = item1->GetVersion() - item2->GetVersion();
 		    else 
 				iResult = -(item1->GetClientSoft() - item2->GetClientSoft()); // invert result to place eMule's at top
 			break;
+			*/
+			if (item1->GetClientSoft() == item2->GetClientSoft())
+				if (item2->GetVersion() == item1->GetVersion() && item1->GetClientSoft() == SO_EMULE){
+					iResult= CompareOptLocaleStringNoCase(item2->GetClientSoftVer(), item1->GetClientSoftVer());
+				}
+				else {
+					iResult= item1->GetVersion() - item2->GetVersion();
+				}
+			else
+				iResult=-(item1->GetClientSoft() - item2->GetClientSoft());
+			break;
+			//MORPH END   - Added by IceCream, ET_MOD_VERSION
 
 		case 2: {
 			const CKnownFile *file1 = item1->GetRequestFile();

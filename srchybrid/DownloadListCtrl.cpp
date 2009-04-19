@@ -3408,7 +3408,6 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
  			//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 			// Maella -Support for tag ET_MOD_VERSION 0x55-
 			/*
-		case 6:
 			if (client1->GetClientSoft() == client2->GetClientSoft())
 				return client1->GetVersion() - client2->GetVersion();
 			return -(client1->GetClientSoft() - client2->GetClientSoft()); // invert result to place eMule's at top
@@ -3418,10 +3417,10 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 				if(client2->GetVersion() == client1->GetVersion() && client1->GetClientSoft() == SO_EMULE)
 					return CompareOptLocaleStringNoCase(client2->GetClientSoftVer(), client1->GetClientSoftVer());
 				else
-					return client2->GetVersion() - client1->GetVersion();
+					return client1->GetVersion() - client2->GetVersion();
 			}
 			else
-				return client1->GetClientSoft() - client2->GetClientSoft();
+				return -(client1->GetClientSoft() - client2->GetClientSoft());
 			// Maella end
 			//MORPH - Added by Yun.SF3, Maella -Support for tag ET_MOD_VERSION 0x55 II-
 		
