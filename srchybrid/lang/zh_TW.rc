@@ -3668,6 +3668,11 @@ BEGIN
 	IDS_REMOVE_AICH_TIP     "啟用這個選項之後，所有目前已沒有在\n分享的檔案的AICH都會被立即清除。"
 	IDS_WSUPNP_TIP          "用UPnP建立Web介面的連接埠對映。"
 	IDS_CHECK_FILE_OPEN_TIP "在eMule開啟檔案前先詢問使用者是否真的要開啟。"
+   //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_FILTER_CLIENTFAILEDDOWN        "過濾下載失敗的用戶端"
+   IDS_FILTER_CLIENTFAILEDDOWN_TIP    "過濾傳輸速度低於12kB達三次的用戶端\n預設值: 啟用"
+   //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_TCP_CONS             "TCP連線"
 END
 
 

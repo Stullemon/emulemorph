@@ -3696,6 +3696,14 @@ IDS_TAB_NT_SERVICE "系统服务"
    IDS_CHECK_FILE_OPEN_TIP  "通过eMule打开文件时要求确认."
 END
 
+STRINGTABLE
+BEGIN
+//MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_FILTER_CLIENTFAILEDDOWN        "剔除多次下载失败的客户端"
+   IDS_FILTER_CLIENTFAILEDDOWN_TIP    "剔除传输速度小于每分钟12kB并且下载失败超过3次的客户端.\n默认: 开启"
+   //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_TCP_CONS             "TCP链接数"
+END
 #endif    // Chinese (P.R.C.) resources
 /////////////////////////////////////////////////////////////////////////////
 

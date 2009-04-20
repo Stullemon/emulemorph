@@ -3691,6 +3691,11 @@ BEGIN
    IDS_REMOVE_AICH_TIP      "Schalte dies ein um AICH hash von nicht mehr\nfreigegebenen Dateien sofort zu löschen.\nStandard: ausgeschaltet"
    IDS_WSUPNP_TIP           "Bezieht den Webserver port in das UPnP Portweiterleiten ein."
    IDS_CHECK_FILE_OPEN_TIP  "Schaltet Abfrage vor dem Öffnen einer Datei mittels\neMule ein."
+   //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_FILTER_CLIENTFAILEDDOWN        "Filtere Clients mit fehlgeschlagenen Downloads"
+   IDS_FILTER_CLIENTFAILEDDOWN_TIP    "Filtere Clients die in drei Mal pro Download\nSession weniger als 12 kB übertragen haben\nStandard: eingeschaltet"
+   //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_TCP_CONS             "TCP-Verbindungen"
 END
 
 #endif    // German (Germany) resources
