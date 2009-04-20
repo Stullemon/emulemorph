@@ -3605,6 +3605,11 @@ BEGIN
     IDS_REMOVE_AICH_TIP       "A activer si les hasch AICH des fichiers non partagés doivent être effacés immédiatement.\nPar défaut: désactivé."
     IDS_WSUPNP_TIP       "Inclure le routage automatique UPnP des ports du serveur WEB."
     IDS_CHECK_FILE_OPEN_TIP       "Demande confirmation avant d'ouvrir un fichier depuis eMule."
+//MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+IDS_FILTER_CLIENTFAILEDDOWN "Filtrer les clients défaillants en émission"
+IDS_FILTER_CLIENTFAILEDDOWN_TIP "Filtre les clients qui envoient à moins de 12Ko\nplus de trois fois dans une session.\nPar défaut: activé"
+//MORPH END - Added by schnulli900, filter clients with failed downloads [Xman]
+IDS_TCP_CONS "Connexions TCP"
 END
 
 

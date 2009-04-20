@@ -6347,7 +6347,7 @@ BEGIN
    IDS_CHECK_FILE_OPEN_TIP  "Enables prompt before opening a file via eMule."
    //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
    IDS_FILTER_CLIENTFAILEDDOWN        "Filter clients with failed downlads"
-   IDS_FILTER_CLIENTFAILEDDOWN_TIP    "Filter clients that transfer less than 12kb\nin a download session more than thrice.\nDefault: enabled"
+   IDS_FILTER_CLIENTFAILEDDOWN_TIP    "Filter clients that transfer less than 12kB\nin a download session more than thrice.\nDefault: enabled"
    //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
    IDS_TCP_CONS             "TCP-connections"
 END

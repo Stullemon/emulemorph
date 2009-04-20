@@ -4,32 +4,26 @@
 # 
 # Format: Name,URL
 #
-# Placeholders:
-# #filename 	-> name of the file
-# #hashid	-> hashid of the file
-# #filesize	-> size of the file
+# Placeholders
+# ------------
+# #filename       -> name of the file
+# #cleanfilename  -> cleaned up name of the file
+# #name           -> name of the file without extension
+# #cleanname      -> cleaned up name of the file without extension
+# #hashid         -> hashid of the file
+# #filesize       -> size of the file
 #
-# Example: 
+# Example 
+# -------
 # eMule Homepage,http://www.emule-project.net
 # Testservice,http://www.webservice.com/search?p=ed2k:#filesize:#hashid
 #
 # Comment lines begin with # or /
-
 eMule Morph (En), http://emulemorph.sourceforge.net/
+--,--
+ed2k-stats shortypower,http://ed2k.shortypower.dyndns.org/?hash=#hashid
+ed2k-check peerates,http://edk.peerates.net/check.php?hash=#hashid
 #--,--
-#Donkey Fakes,http://donkeyfakes.gambri.net/
-#DF - Fake Check,http://donkeyfakes.gambri.net/index.php?action=search&ed2k=&hash=#hashid
-#DF - Fake Report,http://donkeyfakes.gambri.net/report.php?link=ed2k://|file|#filename|#filesize|#hashid|/
-#--,--
-#Jugle,http://www.jugle.net/
-#Jugle - File Comments,http://www.jugle.net/?comments=#hashid
-#--,--
-#eD2k history,http://stats.razorback2.com/ed2khistory?ed2k=#hashid
-#eD2k history2,http://62.241.53.2/cgi-bin/ed2khistory?ed2k=#hashid
-Stats tothbenedek,http://tothbenedek.hu/ed2kstats/ed2k?hash=#hashid
-edkfakes,http://www.edkfakes.info/action.php?link=#filesize:#hashid
-#OFFLINE 28 JUNE 2007 ? 
-#DF Check,http://donkeyfakes.net/fakes.php?referer=emule&hash=#hashid&size=#filesize&name=#filename 
-#DF Report,http://donkeyfakes.net/report.php?hash=#hashid&size=#filesize&name=#filename
+DF Check,http://donkeyfakes.net/fakes.php?referer=emule&hash=#hashid&size=#filesize&name=#filename 
+DF Report,http://donkeyfakes.net/report.php?hash=#hashid&size=#filesize&name=#filename
 Fake Check Bitzi,http://bitzi.com/lookup/ed2k:#hashid?ref=eMule
-
