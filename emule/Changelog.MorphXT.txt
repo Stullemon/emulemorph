@@ -1,7 +1,7 @@
 --------------------------------------
 Changelog for eMule 0.49c MorphXT v11.3
 --------------------------------------
-XX-XX-2009
+20-04-2009
 
 ADD: Filter clients with failed downlods [Xman]
 ADD: Count failed TCP/IP Connections [Xman]
