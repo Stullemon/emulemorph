@@ -3529,6 +3529,11 @@ BEGIN
     IDS_REMOVE_AICH_TIP      "Actívalo si los AICH hash de los archivos no compartidos se deben\neliminar inmediatamente. (Por defecto=Desactivado)."
     IDS_WSUPNP_TIP           "Incluye el puerto del Servidor Web en el UPnP."
     IDS_CHECK_FILE_OPEN_TIP  "Activa un mensaje antes de abrir un archivo desde eMule."
+   //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_FILTER_CLIENTFAILEDDOWN        "Filtrar clientes con descargas fallidas"
+   IDS_FILTER_CLIENTFAILEDDOWN_TIP    "Filtrar clientes cuya trasnferencia es menor de 12kB\nen cada sesión de descarga mayor que tres veces.\nPor defecto: activado"
+   //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
+   IDS_TCP_CONS             "Conexiones TCP"
 END
 
 #endif    // Spanish (Castilian) resources

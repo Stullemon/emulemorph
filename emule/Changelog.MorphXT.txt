@@ -27,7 +27,7 @@ REMOVED: Unneccessary shared files reload fix (improper) [JackieKu]
 REMOVED: Dupe shared files reload on add/edit cat [Stulle]
 
 Note: Following languages updated: German [Stulle]; French [Nicolas_FR]; Chinese (P.R.C.) [zz_fly]; 
-	Chinese (Taiwan) [AndCycle]; Italian [v-x-vendetta]; Turkish [omeringen]
+	Chinese (Taiwan) [AndCycle]; Italian [v-x-vendetta]; Turkish [omeringen]; Spanish [guijarrelson]
 
 
 --------------------------------------
