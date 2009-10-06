@@ -1,4 +1,12 @@
 --------------------------------------
+Changelog for eMule 0.49c MorphXT v11.4
+--------------------------------------
+XX-XX-2009
+
+CHANGE: Disable FollowTheMajority if file is renamed in Shared Files Dialog [Stulle]
+
+
+--------------------------------------
 Changelog for eMule 0.49c MorphXT v11.3
 --------------------------------------
 20-04-2009
