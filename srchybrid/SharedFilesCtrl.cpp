@@ -1714,6 +1714,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 
 						if (pKnownFile->IsKindOf(RUNTIME_CLASS(CPartFile)))
 						{
+							((CPartFile*) file)->SetFollowTheMajority(false); // EastShare       - FollowTheMajority by AndCycle
 							pKnownFile->SetFileName(newname);
 							STATIC_DOWNCAST(CPartFile, pKnownFile)->SetFullName(newpath); 
 						}
@@ -2321,6 +2322,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 									// CString.Format+AddLogLine, because if "%"-characters are
 									// in the string they would be misinterpreted as control sequences!
 									AddLogLine(false,_T("Successfully renamed .part file '%s' to '%s'"), ((CKnownFile*)file)->GetFileName(), newname);
+									((CPartFile*) file)->SetFollowTheMajority(false); // EastShare       - FollowTheMajority by AndCycle
 									((CKnownFile*)file)->SetFileName(newname, true); 
 									((CPartFile*) file)->UpdateDisplayedInfo();
 									((CPartFile*) file)->SavePartFile(); 
