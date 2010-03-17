@@ -144,9 +144,7 @@ void CKadContactListCtrl::UpdateContact(int iItem, const Kademlia::CContact *con
 
 void CKadContactListCtrl::UpdateKadContactCount()
 {
-	CString id;
-	id.Format(_T("%s (%i)"), GetResString(IDS_KADCONTACTLAB), GetItemCount());
-	theApp.emuledlg->kademliawnd->GetDlgItem(IDC_KADCONTACTLAB)->SetWindowText(id);
+	theApp.emuledlg->kademliawnd->UpdateContactCount();
 }
 
 bool CKadContactListCtrl::ContactAdd(const Kademlia::CContact *contact)

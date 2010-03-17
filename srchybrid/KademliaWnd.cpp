@@ -19,10 +19,13 @@
 #include "KademliaWnd.h"
 #include "KadContactListCtrl.h"
 #include "KadContactHistogramCtrl.h"
+#include "KadLookupGraph.h"
 #include "KadSearchListCtrl.h"
 #include "Kademlia/Kademlia/kademlia.h"
 #include "Kademlia/Kademlia/prefs.h"
+#include "kademlia/utils/LookupHistory.h"
 #include "Kademlia/net/kademliaudplistener.h"
+#include "kademlia/kademlia/search.h"
 #include "Ini2.h"
 #include "CustomAutoComplete.h"
 #include "OtherFunctions.h"
@@ -32,6 +35,9 @@
 #include "HttpDownloadDlg.h"
 #include "Kademlia/routing/RoutingZone.h"
 #include "HelpIDs.h"
+#include ".\kademliawnd.h"
+#include "DropDownButton.h"
+#include "MenuCmds.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -41,6 +47,14 @@ static char THIS_FILE[] = __FILE__;
 
 
 #define	ONBOOTSTRAP_STRINGS_PROFILE	_T("AC_BootstrapIPs.dat")
+
+#define	DFLT_TOOLBAR_BTN_WIDTH	24
+
+#define	WND1_BUTTON_XOFF	8
+#define	WND1_BUTTON_WIDTH	250
+#define	WND1_BUTTON_HEIGHT	22	// don't set the height to something different than 22 unless you know exactly what you are doing!
+#define	WND1_NUM_BUTTONS	2
+
 
 // KademliaWnd dialog
 
@@ -61,6 +75,8 @@ BEGIN_MESSAGE_MAP(CKademliaWnd, CResizableDialog)
 	ON_BN_CLICKED(IDC_RADIP, UpdateControlsState)
 	ON_BN_CLICKED(IDC_RADNODESURL, UpdateControlsState)
 	ON_WM_HELPINFO()
+	ON_NOTIFY(NM_DBLCLK, IDC_SEARCHLIST, OnNMDblclkSearchlist)
+	ON_NOTIFY(LVN_ITEMCHANGED, IDC_SEARCHLIST, OnListModifiedSearchlist)
 END_MESSAGE_MAP()
 
 CKademliaWnd::CKademliaWnd(CWnd* pParent /*=NULL*/)
@@ -68,10 +84,11 @@ CKademliaWnd::CKademliaWnd(CWnd* pParent /*=NULL*/)
 {
 	m_contactListCtrl = new CKadContactListCtrl;
 	m_contactHistogramCtrl = new CKadContactHistogramCtrl;
+	m_kadLookupGraph = new CKadLookupGraph;
 	searchList = new CKadSearchListCtrl;
 	m_pacONBSIPs = NULL;
+	m_pbtnWnd = new CDropDownButton;
 
-	icon_kadcont=NULL;
 	icon_kadsea=NULL;
 }
 
@@ -84,9 +101,9 @@ CKademliaWnd::~CKademliaWnd()
 	delete m_contactListCtrl;
 	delete m_contactHistogramCtrl;
 	delete searchList;
+	delete m_kadLookupGraph;
+	delete m_pbtnWnd;
 
-	if (icon_kadcont)
-		VERIFY( DestroyIcon(icon_kadcont) );
 	if (icon_kadsea)
 		VERIFY( DestroyIcon(icon_kadsea) );
 }
@@ -104,16 +121,77 @@ BOOL CKademliaWnd::OnInitDialog()
 	CResizableDialog::OnInitDialog();
 	InitWindowStyles(this);
 	m_contactListCtrl->Init();
+	m_kadLookupGraph->Init();
 	searchList->Init();
+
+    // Initalize Toolbar
+	CRect rcBtn1;
+	rcBtn1.top = 5;
+	rcBtn1.left = WND1_BUTTON_XOFF;
+	rcBtn1.right = rcBtn1.left + WND1_BUTTON_WIDTH + WND1_NUM_BUTTONS*DFLT_TOOLBAR_BTN_WIDTH;
+	rcBtn1.bottom = rcBtn1.top + WND1_BUTTON_HEIGHT;
+	m_pbtnWnd->Init(false);
+	m_pbtnWnd->MoveWindow(&rcBtn1);
 	SetAllIcons();
+
+	// Vista: Remove the TBSTYLE_TRANSPARENT to avoid flickering (can be done only after the toolbar was initially created with TBSTYLE_TRANSPARENT !?)
+	m_pbtnWnd->ModifyStyle((theApp.m_ullComCtrlVer >= MAKEDLLVERULL(6, 16, 0, 0)) ? TBSTYLE_TRANSPARENT : 0, TBSTYLE_TOOLTIPS);
+	m_pbtnWnd->SetExtendedStyle(m_pbtnWnd->GetExtendedStyle() | TBSTYLE_EX_MIXEDBUTTONS);
+
+	TBBUTTON atb1[1+WND1_NUM_BUTTONS] = {0};
+	atb1[0].iBitmap = 0;
+	atb1[0].idCommand = IDC_KADICO1;
+	atb1[0].fsState = TBSTATE_ENABLED;
+	atb1[0].fsStyle = BTNS_BUTTON | BTNS_SHOWTEXT;
+	atb1[0].iString = -1;
+
+	atb1[1].iBitmap = 0;
+	atb1[1].idCommand = MP_VIEW_KADCONTACTS;
+	atb1[1].fsState = TBSTATE_ENABLED;
+	atb1[1].fsStyle = BTNS_BUTTON | BTNS_CHECKGROUP | BTNS_AUTOSIZE;
+	atb1[1].iString = -1;
+
+	atb1[2].iBitmap = 1;
+	atb1[2].idCommand = MP_VIEW_KADLOOKUP;
+	atb1[2].fsState = TBSTATE_ENABLED;
+	atb1[2].fsStyle = BTNS_BUTTON | BTNS_CHECKGROUP | BTNS_AUTOSIZE;
+	atb1[2].iString = -1;
+	m_pbtnWnd->AddButtons(_countof(atb1), atb1);
+
+	TBBUTTONINFO tbbi = {0};
+	tbbi.cbSize = sizeof tbbi;
+	tbbi.dwMask = TBIF_SIZE | TBIF_BYINDEX;
+	tbbi.cx = WND1_BUTTON_WIDTH;
+	m_pbtnWnd->SetButtonInfo(0, &tbbi);
+
+	// 'GetMaxSize' does not work properly under:
+	//	- Win98SE with COMCTL32 v5.80
+	//	- Win2000 with COMCTL32 v5.81 
+	// The value returned by 'GetMaxSize' is just couple of pixels too small so that the 
+	// last toolbar button is nearly not visible at all.
+	// So, to circumvent such problems, the toolbar control should be created right with
+	// the needed size so that we do not really need to call the 'GetMaxSize' function.
+	// Although it would be better to call it to adapt for system metrics basically.
+	if (theApp.m_ullComCtrlVer > MAKEDLLVERULL(5,81,0,0))
+	{
+		CSize size;
+		m_pbtnWnd->GetMaxSize(&size);
+		CRect rc;
+		m_pbtnWnd->GetWindowRect(&rc);
+		ScreenToClient(&rc);
+		// the with of the toolbar should already match the needed size (see comment above)
+		ASSERT( size.cx == rc.Width() );
+		m_pbtnWnd->MoveWindow(rc.left, rc.top, size.cx, rc.Height());
+	}
+
 	Localize();
 
 	AddAnchor(IDC_KADICO1, TOP_LEFT);
 	AddAnchor(IDC_CONTACTLIST, TOP_LEFT, MIDDLE_RIGHT);
+	AddAnchor(IDC_KAD_LOOKUPGRAPH, TOP_LEFT, MIDDLE_RIGHT);
 	AddAnchor(IDC_KAD_HISTOGRAM, TOP_RIGHT, MIDDLE_RIGHT);
 	AddAnchor(IDC_KADICO2, MIDDLE_LEFT);
 	AddAnchor(IDC_SEARCHLIST, MIDDLE_LEFT, BOTTOM_RIGHT);
-	AddAnchor(IDC_KADCONTACTLAB, TOP_LEFT);
 	AddAnchor(IDC_FIREWALLCHECKBUTTON, TOP_RIGHT);
 	AddAnchor(IDC_KADCONNECT, TOP_RIGHT);
 	AddAnchor(IDC_KADSEARCHLAB, MIDDLE_LEFT);
@@ -140,7 +218,8 @@ BOOL CKademliaWnd::OnInitDialog()
 	}
 
 	CheckDlgButton(IDC_RADCLIENTS,1);
-
+	ShowLookupGraph(false);
+	
 	return true;
 }
 
@@ -149,8 +228,10 @@ void CKademliaWnd::DoDataExchange(CDataExchange* pDX)
 	CResizableDialog::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_CONTACTLIST, *m_contactListCtrl);
 	DDX_Control(pDX, IDC_KAD_HISTOGRAM, *m_contactHistogramCtrl);
+	DDX_Control(pDX, IDC_KAD_LOOKUPGRAPH, *m_kadLookupGraph);
 	DDX_Control(pDX, IDC_SEARCHLIST, *searchList);
 	DDX_Control(pDX, IDC_BSSTATIC, m_ctrlBootstrap);
+	DDX_Control(pDX, IDC_KADICO1, *m_pbtnWnd);
 }
 
 BOOL CKademliaWnd::PreTranslateMessage(MSG* pMsg) 
@@ -212,8 +293,7 @@ void CKademliaWnd::OnBnClickedBootstrapbutton()
 			Kademlia::CKademlia::Start();
 			theApp.emuledlg->ShowConnectionState();
 		}
-		// JOHNTODO - Switch between Kad1 and Kad2
-		Kademlia::CKademlia::Bootstrap(strIP, nPort, true);
+		Kademlia::CKademlia::Bootstrap(strIP, nPort);
 	}
 	else if (IsDlgButtonChecked(IDC_RADNODESURL) != 0)
 	{
@@ -263,15 +343,19 @@ void CKademliaWnd::SetAllIcons()
 	// frames
 	m_ctrlBootstrap.SetIcon(_T("KadBootstrap"));
 
-	if (icon_kadcont)
-		VERIFY( DestroyIcon(icon_kadcont) );
-	icon_kadcont = theApp.LoadIcon(_T("KadContactList"), 16, 16);
-	((CStatic*)GetDlgItem(IDC_KADICO1))->SetIcon(icon_kadcont);
-
 	if (icon_kadsea)
 		VERIFY( DestroyIcon(icon_kadsea) );
 	icon_kadsea = theApp.LoadIcon(_T("KadCurrentSearches"), 16, 16);
 	((CStatic*)GetDlgItem(IDC_KADICO2))->SetIcon(icon_kadsea);
+
+	CImageList iml;
+	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 1, 1);
+	iml.Add(CTempIconLoader(_T("KadContactList")));
+	iml.Add(CTempIconLoader(_T("FriendSlot")));
+	CImageList* pImlOld = m_pbtnWnd->SetImageList(&iml);
+	iml.Detach();
+	if (pImlOld)
+		pImlOld->DeleteImageList();
 }
 
 void CKademliaWnd::Localize()
@@ -283,7 +367,6 @@ void CKademliaWnd::Localize()
 	GetDlgItem(IDC_NODESDATLABEL)->SetWindowText(GetResString(IDS_BOOTSRAPNODESDAT));
 	GetDlgItem(IDC_FIREWALLCHECKBUTTON)->SetWindowText(GetResString(IDS_KAD_RECHECKFW));
 	
-	SetDlgItemText(IDC_KADCONTACTLAB,GetResString(IDS_KADCONTACTLAB));
 	SetDlgItemText(IDC_KADSEARCHLAB,GetResString(IDS_KADSEARCHLAB));
 
 	SetDlgItemText(IDC_RADCLIENTS,GetResString(IDS_RADCLIENTS));
@@ -292,6 +375,11 @@ void CKademliaWnd::Localize()
 	m_contactHistogramCtrl->Localize();
 	m_contactListCtrl->Localize();
 	searchList->Localize();
+	m_kadLookupGraph->Localize();
+
+	m_pbtnWnd->SetWindowText(GetResString(IDS_KADCONTACTLAB));
+	m_pbtnWnd->SetBtnText(MP_VIEW_KADCONTACTS, GetResString(IDS_KADCONTACTLAB));
+	m_pbtnWnd->SetBtnText(MP_VIEW_KADLOOKUP, GetResString(IDS_LOOKUPGRAPH));
 }
 
 void CKademliaWnd::UpdateControlsState()
@@ -332,16 +420,17 @@ void CKademliaWnd::UpdateKadContactCount()
 	m_contactListCtrl->UpdateKadContactCount();
 }
 
-void CKademliaWnd::ShowContacts()
+void CKademliaWnd::StartUpdateContacts()
 {
-	m_contactHistogramCtrl->ShowWindow(SW_SHOW);
-	m_contactListCtrl->Visible();
+	m_contactHistogramCtrl->SetRedraw(TRUE);
+	m_contactHistogramCtrl->Invalidate();
+	m_contactListCtrl->SetRedraw(TRUE);
 }
 
-void CKademliaWnd::HideContacts()
+void CKademliaWnd::StopUpdateContacts()
 {
-	m_contactHistogramCtrl->ShowWindow(SW_HIDE);
-	m_contactListCtrl->Hide();
+	m_contactHistogramCtrl->SetRedraw(FALSE);
+	m_contactListCtrl->SetRedraw(FALSE);
 }
 
 bool CKademliaWnd::ContactAdd(const Kademlia::CContact* contact)
@@ -396,4 +485,128 @@ HBRUSH CKademliaWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 	if (hbr)
 		return hbr;
 	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
+}
+
+void CKademliaWnd::UpdateSearchGraph(Kademlia::CLookupHistory* pLookupHistory)
+{
+	if (Kademlia::CKademlia::IsRunning())
+	{
+		m_kadLookupGraph->UpdateSearch(pLookupHistory);
+		if (m_kadLookupGraph->GetAutoShowLookups() && !m_kadLookupGraph->HasActiveLookup())
+		{
+			bool bGraphVisible = m_pbtnWnd->IsButtonChecked(MP_VIEW_KADLOOKUP) == TRUE ? true : false;
+			Kademlia::CLookupHistory* pActiveLookupHistory = searchList->FetchAndSelectActiveSearch(bGraphVisible);
+			if (pActiveLookupHistory != NULL)
+				SetSearchGraph(pActiveLookupHistory, false);
+		}
+	}
+	else
+	{
+		// we could allow watching lookups while Kad is disconnected, but it feels cleaner and disconnecteder if we wipe the graph
+		if (m_kadLookupGraph->HasLookup())
+			SetSearchGraph(NULL, false);
+	}
+}
+
+void CKademliaWnd::SetSearchGraph(Kademlia::CLookupHistory* pLookupHistory, bool bMakeVisible)
+{
+	m_kadLookupGraph->SetSearch(pLookupHistory);
+	if (bMakeVisible)
+		ShowLookupGraph(true);
+	else
+	{
+		bool bGraphVisible = m_pbtnWnd->IsButtonChecked(MP_VIEW_KADLOOKUP) == TRUE ? true : false;
+		UpdateButtonTitle(bGraphVisible);
+	}
+}
+
+void CKademliaWnd::OnNMDblclkSearchlist(NMHDR *pNMHDR, LRESULT *pResult)
+{
+	LPNMITEMACTIVATE pItemInfo = (LPNMITEMACTIVATE)pNMHDR;
+	if (pItemInfo->iItem >= 0)
+	{
+		Kademlia::CSearch* pSearch = (Kademlia::CSearch*)searchList->GetItemData(pItemInfo->iItem);
+		if (pSearch != NULL)
+		{
+			SetSearchGraph(pSearch->GetLookupHistory(), true);
+			m_kadLookupGraph->SetAutoShowLookups(false);
+		}
+	}
+	*pResult = 0;
+}
+
+void CKademliaWnd::OnListModifiedSearchlist(NMHDR* /*pNMHDR*/, LRESULT *pResult)
+{
+	POSITION pos = searchList->GetFirstSelectedItemPosition();
+	if (pos != NULL)
+	{
+		Kademlia::CSearch* pSearch = (Kademlia::CSearch*)searchList->GetItemData(searchList->GetNextSelectedItem(pos));
+		if (pSearch != NULL)
+			SetSearchGraph(pSearch->GetLookupHistory(), false);
+	}
+	*pResult = 0;
+}
+
+void CKademliaWnd::ShowLookupGraph(bool bShow)
+{
+	int iIcon;
+	CString strText;
+	if (bShow)
+	{
+		iIcon = 1;
+		m_pbtnWnd->CheckButton(MP_VIEW_KADLOOKUP);
+	}
+	else
+	{
+		iIcon = 0;
+		m_pbtnWnd->CheckButton(MP_VIEW_KADCONTACTS);
+	}
+	TBBUTTONINFO tbbi = {0};
+	tbbi.cbSize = sizeof tbbi;
+	tbbi.dwMask = TBIF_IMAGE;
+	tbbi.iImage = iIcon;
+	m_pbtnWnd->SetButtonInfo(GetWindowLong(*m_pbtnWnd, GWL_ID), &tbbi);
+	m_kadLookupGraph->ShowWindow(bShow ? SW_SHOW : SW_HIDE);
+	m_contactListCtrl->ShowWindow(bShow ? SW_HIDE : SW_SHOW);
+	UpdateButtonTitle(bShow);
+}
+
+void CKademliaWnd::UpdateButtonTitle(bool bLookupGraph)
+{
+	CString strText;
+	if (bLookupGraph)
+	{
+		if (m_kadLookupGraph->HasLookup())
+			strText.Format(_T("%s (%s)"), GetResString(IDS_LOOKUPGRAPH), m_kadLookupGraph->GetCurrentLookupTitle());
+		else
+			strText =  GetResString(IDS_LOOKUPGRAPH);
+	}
+	else
+		strText.Format(_T("%s (%i)"), GetResString(IDS_KADCONTACTLAB), m_contactListCtrl->GetItemCount());
+	m_pbtnWnd->SetWindowText(strText);
+}
+
+void CKademliaWnd::UpdateContactCount()
+{
+	if (m_pbtnWnd->IsButtonChecked(MP_VIEW_KADCONTACTS))
+		UpdateButtonTitle(false);
+}
+
+BOOL CKademliaWnd::OnCommand(WPARAM wParam, LPARAM lParam)
+{
+	switch (wParam)
+	{ 
+		case IDC_KADICO1:
+			ShowLookupGraph(m_contactListCtrl->IsWindowVisible() == TRUE ? true : false);
+			break;
+		case MP_VIEW_KADCONTACTS:
+			ShowLookupGraph(false);
+			break;
+		case MP_VIEW_KADLOOKUP:
+			ShowLookupGraph(true);
+			break;
+		default:
+			return CWnd::OnCommand(wParam, lParam);
+	}
+	return TRUE;
 }

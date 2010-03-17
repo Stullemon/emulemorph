@@ -36,6 +36,7 @@ public:
 	virtual ~CArchivePreviewDlg();
 
 	void SetFiles(const CSimpleArray<CObject*>* paFiles) { m_paFiles = paFiles; m_bDataChanged = true;	}
+	void SetReducedDialog()								 { m_bReducedDlg = true; }
 
 // Dialog Data
 	enum { IDD = IDD_ARCHPREV };
@@ -47,6 +48,7 @@ protected:
 	CListCtrlX	m_ContentList;
 	bool		m_bDataChanged;
 	int			m_StoredColWidth2, m_StoredColWidth5;
+	bool		m_bReducedDlg;
 
 	void Localize();
 	void UpdateArchiveDisplay(bool doscan);
@@ -62,7 +64,7 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnSetActive();
 
-	CProgressCtrl* m_progressbar;
+	CProgressCtrl m_progressbar;
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedRead();

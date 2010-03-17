@@ -32,7 +32,7 @@
 #include "StatisticsDlg.h"
 #include "Opcodes.h"
 #include "QArray.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "UploadQueue.h"
 #include "UpDownClient.h"
 #include "UserMsgs.h"
@@ -708,8 +708,8 @@ void CWebServer::ProcessURL(ThreadData Data)
 
 								char szBuf[512];
 								int nLen = _snprintf(szBuf, _countof(szBuf), "HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Description: \"%s\"\r\nContent-Disposition: attachment; filename=\"%s\";\r\nContent-Transfer-Encoding: binary\r\nContent-Length: %I64u\r\n\r\n", 
-									(LPCSTR) CT2CA(kf->GetFileName()),
-									(LPCSTR) CT2CA(kf->GetFileName()),
+									(LPCSTR)CT2CA(kf->GetFileName()),
+									(LPCSTR)CT2CA(kf->GetFileName()),
 									(uint64)filesize);
 								Data.pSocket->SendData(szBuf, nLen);
 
@@ -2398,7 +2398,7 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 	CArray<DownloadFiles> FilesArray;
 	CArray<CPartFile*,CPartFile*> partlist;
 
-	theApp.emuledlg->transferwnd->downloadlistctrl.GetDisplayedFiles(&partlist);
+	theApp.emuledlg->transferwnd->GetDownloadList()->GetDisplayedFiles(&partlist);
 
 	// Populating array
 	for (int i=0;i<partlist.GetCount();i++) {

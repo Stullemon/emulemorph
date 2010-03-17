@@ -61,7 +61,7 @@ int CAICHSyncThread::Run()
 	if ( !theApp.emuledlg->IsRunning() )
 		return 0;
 	// we need to keep a lock on this file while the thread is running
-	CSingleLock lockKnown2Met(&CAICHHashSet::m_mutKnown2File);
+	CSingleLock lockKnown2Met(&CAICHRecoveryHashSet::m_mutKnown2File);
 	lockKnown2Met.Lock();
 	
 	CSafeFile file;
@@ -135,38 +135,68 @@ int CAICHSyncThread::Run()
 	}
 	
 	// now we check that all files which are in the sharedfilelist have a corresponding hash in out list
-	// those how don'T are added to the hashinglist
+	// those who don'T are added to the hashinglist
 	CList<CAICHHash> liUsedHashs;	
 	CSingleLock sharelock(&theApp.sharedfiles->m_mutWriteList);
 	sharelock.Lock();
 
+	bool bDbgMsgCreatingPartHashs = true;
 	for (int i = 0; i < theApp.sharedfiles->GetCount(); i++){
 		CKnownFile* pCurFile = theApp.sharedfiles->GetFileByIndex(i);
-		if (pCurFile != NULL && !pCurFile->IsPartFile() ){
+		if (pCurFile != NULL && !pCurFile->IsPartFile() )
+		{
 			if (theApp.emuledlg==NULL || !theApp.emuledlg->IsRunning()) // in case of shutdown while still hashing
 				return 0;
-			if (pCurFile->GetAICHHashset()->GetStatus() == AICH_HASHSETCOMPLETE){
+			if (pCurFile->GetFileIdentifier().HasAICHHash()){
 				bool bFound = false;
 				for (POSITION pos = liKnown2Hashs.GetHeadPosition();pos != 0;)
 				{
 					CAICHHash current_hash = liKnown2Hashs.GetNext(pos);
-					if (current_hash == pCurFile->GetAICHHashset()->GetMasterHash()){
+					if (current_hash == pCurFile->GetFileIdentifier().GetAICHHash()){
 						bFound = true;
 						liUsedHashs.AddTail(current_hash);
+						pCurFile->SetAICHRecoverHashSetAvailable(true);
+						// Has the file the proper AICH Parthashset? If not probably upgrading, create it
+						if (!pCurFile->GetFileIdentifier().HasExpectedAICHHashCount())
+						{
+							if (bDbgMsgCreatingPartHashs)
+							{
+								bDbgMsgCreatingPartHashs = false;
+								DebugLogWarning(_T("Missing AICH Part Hashsets for known files - maybe upgrading from earlier version. Creating them out of full AICH Recovery Hashsets, shouldn't take too long"));
+							}
+							CAICHRecoveryHashSet tempHashSet(pCurFile, pCurFile->GetFileSize());
+							tempHashSet.SetMasterHash(pCurFile->GetFileIdentifier().GetAICHHash(), AICH_HASHSETCOMPLETE);
+							if (!tempHashSet.LoadHashSet())
+							{
+								ASSERT( false );
+								DebugLogError(_T("Failed to load full AICH Recovery Hashset - known2.met might be corrupt. Unable to create AICH Part Hashset - %s"), pCurFile->GetFileName());
+							}
+							else
+							{
+								if (!pCurFile->GetFileIdentifier().SetAICHHashSet(tempHashSet))
+								{
+									DebugLogError(_T("Failed to create AICH Part Hashset out of full AICH Recovery Hashset - %s"), pCurFile->GetFileName());
+									ASSERT( false );
+								}
+								ASSERT(pCurFile->GetFileIdentifier().HasExpectedAICHHashCount());
+							}
+						}
 						//theApp.QueueDebugLogLine(false, _T("%s - %s"), current_hash.GetString(), pCurFile->GetFileName());
-#ifdef _DEBUG
+						/*#ifdef _DEBUG
 						// in debugmode we load and verify all hashsets
-						ASSERT( pCurFile->GetAICHHashset()->LoadHashSet() );
-//			 			pCurFile->GetAICHHashset()->DbgTest();
-						pCurFile->GetAICHHashset()->FreeHashSet();
-#endif
+						CAICHRecoveryHashSet* pTempHashSet = new CAICHRecoveryHashSet(pCurFile);
+						pTempHashSet->SetFileSize(pCurFile->GetFileSize());
+						pTempHashSet->SetMasterHash(pCurFile->GetFileIdentifier().GetAICHHash(), AICH_HASHSETCOMPLETE)
+						ASSERT( pTempHashSet->LoadHashSet() );
+						delete pTempHashSet;
+#endif*/
 						break;
 					}
 				}
 				if (bFound) // hashset is available, everything fine with this file
 					continue;
 			}
-			pCurFile->GetAICHHashset()->SetStatus(AICH_ERROR);
+			pCurFile->SetAICHRecoverHashSetAvailable(false);
 			m_liToHash.AddTail(pCurFile);
 		}
 	}
@@ -228,6 +258,7 @@ int CAICHSyncThread::Run()
 					// used Hashset, but it does not need to be moved as nothing changed yet
 					file.Seek(nHashCount*CAICHHash::GetHashSize(), CFile::current);
 					posWritePos = file.GetPosition();
+					CAICHRecoveryHashSet::AddStoredAICHHash(aichHash);
 				}
 				else{
 					// used Hashset, move position in file
@@ -240,7 +271,8 @@ int CAICHSyncThread::Run()
 					file.Write(buffer, nHashCount*CAICHHash::GetHashSize());
 					delete[] buffer;
 					posWritePos = file.GetPosition();
-					file.Seek(posReadPos, CFile::begin); 
+					file.Seek(posReadPos, CFile::begin);
+					CAICHRecoveryHashSet::AddStoredAICHHash(aichHash);
 				}
 			}
 			posReadPos = file.GetPosition();
@@ -263,6 +295,14 @@ int CAICHSyncThread::Run()
 			}
 			error->Delete();
 			return false;
+		}
+	}
+	else
+	{
+		// remember (/index) all hashs which are stored in the file for faster checking lateron
+		for (POSITION pos = liKnown2Hashs.GetHeadPosition();pos != 0;)
+		{
+			CAICHRecoveryHashSet::AddStoredAICHHash(liKnown2Hashs.GetNext(pos));
 		}
 	}
 	lockKnown2Met.Unlock();

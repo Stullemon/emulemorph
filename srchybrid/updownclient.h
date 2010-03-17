@@ -147,9 +147,9 @@ public:
 	const uchar*	GetUserHash() const								{ return (uchar*)m_achUserHash; }
 	void			SetUserHash(const uchar* pUserHash);
 	bool			HasValidHash() const
-					{
-							return ((const int*)m_achUserHash)[0] != 0 || ((const int*)m_achUserHash)[1] != 0 || ((const int*)m_achUserHash)[2] != 0 || ((const int*)m_achUserHash)[3] != 0; //Xman Bugfix by ilmira
-					}
+						{
+							return ((const uint32*)m_achUserHash)[0] != 0 || ((const uint32*)m_achUserHash)[1] != 0 || ((const uint32*)m_achUserHash)[2] != 0 || ((const uint32*)m_achUserHash)[3] != 0;
+						}
 	int				GetHashType() const;
 	const uchar*	GetBuddyID() const								{ return (uchar*)m_achBuddyID; }
 	void			SetBuddyID(const uchar* m_achTempBuddyID);
@@ -170,6 +170,7 @@ public:
 	bool			SupportExtMultiPacket() const					{ return m_fExtMultiPacket; }
 	bool			SupportPeerCache() const						{ return m_fPeerCache; }
 	bool			SupportsLargeFiles() const						{ return m_fSupportsLargeFiles; }
+	bool			SupportsFileIdentifiers() const					{ return m_fSupportsFileIdent; }
 	bool			IsEmuleClient() const							{ return m_byEmuleVersion!=0; }
 	uint8			GetSourceExchange1Version() const				{ return m_bySourceExchange1Ver; }
 	bool			SupportsSourceExchange2() const					{ return m_fSupportsSourceEx2; }
@@ -226,7 +227,7 @@ public:
 	void			SetSentCancelTransfer(bool bVal)				{ m_fSentCancelTransfer = bVal; }
 	void			ProcessPublicIPAnswer(const BYTE* pbyData, UINT uSize);
 	void			SendPublicIPRequest();
-	uint8			GetKadVersion()									{ return m_byKadVersion; }
+	uint8			GetKadVersion()	const							{ return m_byKadVersion; }
 	bool			SendBuddyPingPong()								{ return m_dwLastBuddyPingPongTime < ::GetTickCount(); }
 	bool			AllowIncomeingBuddyPingPong()					{ return m_dwLastBuddyPingPongTime < (::GetTickCount()-(3*60*1000)); }
 	void			SetLastBuddyPingPongTime()						{ m_dwLastBuddyPingPongTime = (::GetTickCount()+(10*60*1000)); }
@@ -300,7 +301,7 @@ public:
 	void			CreateNextBlockPackage();
 	uint32			GetUpStartTimeDelay() const						{ return ::GetTickCount() - m_dwUploadTime; }
 	void 			SetUpStartTime()								{ m_dwUploadTime = ::GetTickCount(); }
-	void			SendHashsetPacket(const uchar* fileid);
+	void			SendHashsetPacket(const uchar* pData, uint32 nSize, bool bFileIdentifiers);
 	const uchar*	GetUploadFileID() const							{ return requpfileid; }
 	void			SetUploadFileID(CKnownFile* newreqfile);
 	//MORPH START - Added by SiRoB, Optimization requpfile
@@ -420,7 +421,7 @@ public:
 	bool			IsPartAvailable(UINT iPart) const {
 						//MORPH - Changed by SiRoB, ICS merged into partstatus
 						/*
-						return (iPart>=m_nPartCount || !m_abyPartStatus) ? false : (m_abyPartStatus[iPart]!=0);
+						return (iPart >= m_nPartCount || !m_abyPartStatus) ? false : m_abyPartStatus[iPart] != 0;
 						*/
 						return (iPart>=m_nPartCount || !m_abyPartStatus) ? false : (m_abyPartStatus[iPart]&SC_AVAILABLE);
 						//MORPH - Changed by SiRoB, ICS merged into partstatus
@@ -460,7 +461,7 @@ public:
 	void			SendStartupLoadReq();
 	void			ProcessFileInfo(CSafeMemFile* data, CPartFile* file);
 	void			ProcessFileStatus(bool bUdpPacket, CSafeMemFile* data, CPartFile* file);
-	void			ProcessHashSet(const uchar* data, UINT size);
+	void			ProcessHashSet(const uchar* data, UINT size, bool bFileIdentifiers);
 	void			ProcessAcceptUpload();
 	bool			AddRequestForAnotherFile(CPartFile* file);
 	//MORPH START - Enhanced DBR
@@ -496,7 +497,7 @@ public:
 
 	void			SetDownStartTime()								{ m_dwDownStartTime = ::GetTickCount(); }
 	uint32			GetDownTimeDifference(boolean clear = true)	{
-						uint32 myTime = m_dwDownStartTime; 
+						uint32 myTime = m_dwDownStartTime;
 						if(clear) m_dwDownStartTime = 0;
 						return ::GetTickCount() - myTime;
 					}
@@ -545,13 +546,13 @@ public:
 	void			SetKadState(EKadState nNewS)					{ m_nKadState = (_EKadState)nNewS; }
 
 	//File Comment
-	bool			HasFileComment() const						{ return !m_strFileComment.IsEmpty(); }
-    const CString&	GetFileComment() const						{ return m_strFileComment; } 
-    void			SetFileComment(LPCTSTR pszComment)			{ m_strFileComment = pszComment; }
+	bool			HasFileComment() const							{ return !m_strFileComment.IsEmpty(); }
+    const CString&	GetFileComment() const							{ return m_strFileComment; } 
+    void			SetFileComment(LPCTSTR pszComment)				{ m_strFileComment = pszComment; }
 
-	bool			HasFileRating() const						{ return m_uFileRating > 0; }
-    uint8			GetFileRating() const						{ return m_uFileRating; }
-    void			SetFileRating(uint8 uRating)				{ m_uFileRating = uRating; }
+	bool			HasFileRating() const							{ return m_uFileRating > 0; }
+    uint8			GetFileRating() const							{ return m_uFileRating; }
+    void			SetFileRating(uint8 uRating)					{ m_uFileRating = uRating; }
 
 	// Barry - Process zip file as it arrives, don't need to wait until end of block
 	int				unzip(Pending_Block_Struct *block, const BYTE *zipped, UINT lenZipped, BYTE **unzipped, UINT *lenUnzipped, int iRecursion = 0);
@@ -560,17 +561,17 @@ public:
     void            SetFileListRequested(int iFileListRequested)	{ m_iFileListRequested = iFileListRequested; }
 
 	virtual void	SetRequestFile(CPartFile* pReqFile);
-	CPartFile*		GetRequestFile() const						{return reqfile;}
+	CPartFile*		GetRequestFile() const							{ return reqfile; }
 
 	// AICH Stuff
 	void			SetReqFileAICHHash(CAICHHash* val);
-	CAICHHash*		GetReqFileAICHHash() const					{return m_pReqFileAICHHash;}
-	bool			IsSupportingAICH() const					{return m_fSupportsAICH & 0x01;}
+	CAICHHash*		GetReqFileAICHHash() const						{ return m_pReqFileAICHHash; }
+	bool			IsSupportingAICH() const						{ return m_fSupportsAICH & 0x01; }
 	void			SendAICHRequest(CPartFile* pForFile, uint16 nPart);
-	bool			IsAICHReqPending() const					{return m_fAICHRequested; }
+	bool			IsAICHReqPending() const						{ return m_fAICHRequested; }
 	void			ProcessAICHAnswer(const uchar* packet, UINT size);
 	void			ProcessAICHRequest(const uchar* packet, UINT size);
-	void			ProcessAICHFileHash(CSafeMemFile* data, CPartFile* file);
+	void			ProcessAICHFileHash(CSafeMemFile* data, CPartFile* file, const CAICHHash* pAICHHash);
 
 	EUtf8Str		GetUnicodeSupport() const;
 
@@ -582,8 +583,8 @@ public:
 	LPCTSTR			DbgGetKadState() const;
 	CString			DbgGetClientInfo(bool bFormatIP = false) const;
 	CString			DbgGetFullClientSoftVer() const;
-	const CString&	DbgGetHelloInfo() const { return m_strHelloInfo; }
-	const CString&	DbgGetMuleInfo() const { return m_strMuleInfo; }
+	const CString&	DbgGetHelloInfo() const							{ return m_strHelloInfo; }
+	const CString&	DbgGetMuleInfo() const							{ return m_strMuleInfo; }
 
 // ZZ:DownloadManager -->
     const bool      IsInNoNeededList(const CPartFile* fileToCheck) const;
@@ -616,17 +617,17 @@ public:
 	//MORPH END   - Changed by SiRoB, ZZ LowID handling
 	uint32			m_nSelectedChunk;	// SLUGFILLER: hideOS
 
-	void SetSlotNumber(UINT newValue) { m_slotNumber = newValue; }
-	UINT GetSlotNumber() const { return m_slotNumber; }
+    void			SetSlotNumber(UINT newValue)					{ m_slotNumber = newValue; }
+    UINT			GetSlotNumber() const							{ return m_slotNumber; }
 	//MORPH START - Added by SiRoB, UPload Splitting Class
 	uint32 GetClassID() const {return m_classID;}
 	void	SetClassID(uint32 newvalue) { m_classID = newvalue;}
 	//MORPH END   - Added by SiRoB, UPload Splitting Class
-	CEMSocket* GetFileUploadSocket(bool log = false);
+    CEMSocket*		GetFileUploadSocket(bool log = false);
 
 	///////////////////////////////////////////////////////////////////////////
 	// PeerCache client
-	// 
+	//
 	bool IsDownloadingFromPeerCache() const;
 	bool IsUploadingToPeerCache() const;
 	void SetPeerCacheDownState(EPeerCacheDownState eState);
@@ -641,7 +642,7 @@ public:
 	bool ProcessPeerCacheAcknowledge(const uchar* packet, UINT size);
 	void OnPeerCacheDownSocketClosed(int nErrorCode);
 	bool OnPeerCacheDownSocketTimeout();
-
+	
 	bool ProcessPeerCacheDownHttpResponse(const CStringAArray& astrHeaders);
 	bool ProcessPeerCacheDownHttpResponseBody(const BYTE* pucData, UINT uSize);
 	void ProcessPeerCacheUpHttpResponse(const CStringAArray& astrHeaders);
@@ -698,12 +699,12 @@ public:
 	void	SetReadBlockFromFileBuffer(byte* pdata) {m_abyfiledata = pdata;};
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
 protected:
-	int m_iHttpSendState;
-	uint32 m_uPeerCacheDownloadPushId;
-	uint32 m_uPeerCacheUploadPushId;
-	uint32 m_uPeerCacheRemoteIP;
-	bool m_bPeerCacheDownHit;
-	bool m_bPeerCacheUpHit;
+	int		m_iHttpSendState;
+	uint32	m_uPeerCacheDownloadPushId;
+	uint32	m_uPeerCacheUploadPushId;
+	uint32	m_uPeerCacheRemoteIP;
+	bool	m_bPeerCacheDownHit;
+	bool	m_bPeerCacheUpHit;
 	EPeerCacheDownState m_ePeerCacheDownState;
 	EPeerCacheUpState m_ePeerCacheUpState;
 
@@ -715,7 +716,8 @@ protected:
 	void	CreateStandartPackets(byte* data, UINT togo, Requested_Block_Struct* currentblock, bool bFromPF = true);
 	void	CreatePackedPackets(byte* data, UINT togo, Requested_Block_Struct* currentblock, bool bFromPF = true);
 	void	SendFirewallCheckUDPRequest();
-	
+	void	SendHashSetRequest();
+
 	uint32	m_nConnectIP;		// holds the supposed IP or (after we had a connection) the real IP
 	uint32	m_dwUserIP;			// holds 0 (real IP not yet available) or the real IP (after we had a connection)
 	uint32	m_dwServerIP;
@@ -723,34 +725,34 @@ protected:
 	uint16	m_nUserPort;
 	uint16	m_nServerPort;
 	UINT	m_nClientVersion;
-//--group to aligned int32
+	//--group to aligned int32
 	uint8	m_byEmuleVersion;
 	uint8	m_byDataCompVer;
 	bool	m_bEmuleProtocol;
 	bool	m_bIsHybrid;
-//--group to aligned int32
+	//--group to aligned int32
 	TCHAR*	m_pszUsername;
 	TCHAR*	m_pszFunnyNick; //MORPH - Added by SiRoB, FunnyNick
 	TCHAR*	old_m_pszUsername; //MORPH - Added by IceCream, Antileecher feature
 	uchar	m_achUserHash[16];
 	uint16	m_nUDPPort;
 	uint16	m_nKadPort;
-//--group to aligned int32
+	//--group to aligned int32
 	uint8	m_byUDPVer;
 	uint8	m_bySourceExchange1Ver;
 	uint8	m_byAcceptCommentVer;
 	uint8	m_byExtendedRequestsVer;
-//--group to aligned int32
+	//--group to aligned int32
 	uint8	m_byCompatibleClient;
 	bool	m_bFriendSlot;
 	bool	m_bCommentDirty;
 	bool	m_bIsML;
-//--group to aligned int32
+	//--group to aligned int32
 	bool	m_bGPLEvildoer;
 	bool	m_bHelloAnswerPending;
 	uint8	m_byInfopacketsReceived;	// have we received the edonkeyprot and emuleprot packet already (see InfoPacketsReceived() )
 	uint8	m_bySupportSecIdent;
-//--group to aligned int32
+	//--group to aligned int32
 	uint32	m_dwLastSignatureIP;
 	CString m_strClientSoftware;
 	CString	old_m_strClientSoftware; //MORPH - Added by IceCream, Antileecher feature
@@ -806,7 +808,7 @@ protected:
 	////////////////////////////////////////////////////////////////////////
 	// Upload
 	//
-	int	GetFilePrioAsNumber() const;
+    int GetFilePrioAsNumber() const;
 
 	UINT		m_nTransferredUp;
 	uint32		m_dwUploadTime;
@@ -877,6 +879,7 @@ protected:
 	bool		m_bReaskPending;
 	bool		m_bUDPPending;
 	bool		m_bTransferredDownMini;
+	bool		m_bHasMatchingAICHHash;
 
 	// Download from URL
 	CStringA	m_strUrlPath;
@@ -897,6 +900,7 @@ protected:
 	UINT		m_nSumForAvgUpDataRate;
 	CList<TransferredData> m_AvarageUDR_list;
 	DWORD		m_AvarageUDRLastRemovedTimestamp;	//MORPH - Added by SiRoB, Better datarate mesurement for low and high speed
+
 	//////////////////////////////////////////////////////////
 	// Download data rate computation
 	//
@@ -928,7 +932,7 @@ protected:
     uint32      m_random_update_wait;
 
 	// using bitfield for less important flags, to save some bytes
-	UINT m_fHashsetRequesting : 1, // we have sent a hashset request to this client in the current connection
+	UINT m_fHashsetRequestingMD4 : 1, // we have sent a hashset request to this client in the current connection
 		 m_fSharedDirectories : 1, // client supports OP_ASKSHAREDIRS opcodes
 		 m_fSentCancelTransfer: 1, // we have sent an OP_CANCELTRANSFER in the current connection
 		 m_fNoViewSharedFiles : 1, // client has disabled the 'View Shared Files' feature, if this flag is not set, we just know that we don't know for sure if it is enabled
@@ -952,8 +956,9 @@ protected:
 		 m_fRequiresCryptLayer: 1,
 		 m_fSupportsSourceEx2 : 1,
 		 m_fSupportsCaptcha	  : 1,
-		 m_fDirectUDPCallback : 1;	// 1 bits left
-
+		 m_fDirectUDPCallback : 1,	
+		 m_fSupportsFileIdent : 1; // 0 bits left
+	UINT m_fHashsetRequestingAICH : 1; // 31 bits left
 	CTypedPtrList<CPtrList, Pending_Block_Struct*>	 m_PendingBlocks_list;
 	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DownloadBlocks_list;
 
@@ -1006,12 +1011,7 @@ private:
 	// <--- enkeyDEV: ICS
 //Morph End - added by AndCycle, ICS
 
-	//MORPH START - prevent being banned by old MorphXT
-	bool m_bSendOldMorph;
 public:
-	bool GetOldMorph();
-	//MORPH END   - prevent being banned by old MorphXT
-
 	bool	IsMorphLeecher(); // Morph Start - added by Stulle, Morph Leecher Detection
 //MORPH START - Added by Stulle, Mod Icons
 EModClient	GetModClient() const	{ return (EModClient)m_uModClient; }

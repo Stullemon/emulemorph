@@ -51,6 +51,8 @@ CList<UsedClient_Struct> CUDPFirewallTester::m_liUsedTestClients;
 
 bool CUDPFirewallTester::IsFirewalledUDP(bool bLastStateIfTesting)
 { 
+	if (CKademlia::IsRunningInLANMode())
+		return false;
 	if (!m_bTimedOut && IsFWCheckUDPRunning())
 	{
 		if (!m_bFirewalledUDP && CKademlia::IsFirewalled() && m_dwTestStart != 0 && ::GetTickCount() - m_dwTestStart > MIN2MS(6)
@@ -189,7 +191,7 @@ void CUDPFirewallTester::Connected(){
 
 bool CUDPFirewallTester::IsFWCheckUDPRunning()
 {
-	return m_byFWChecksFinishedUDP < UDP_FIREWALLTEST_CLIENTSTOASK;
+	return m_byFWChecksFinishedUDP < UDP_FIREWALLTEST_CLIENTSTOASK && !CKademlia::IsRunningInLANMode();
 }
 
 void CUDPFirewallTester::Reset(){
@@ -255,4 +257,9 @@ void CUDPFirewallTester::QueryNextClient(){ // try the next available client for
 			}
 		}
 	}
+}
+
+bool CUDPFirewallTester::IsVerified()
+{ 
+	return m_bIsFWVerifiedUDP || CKademlia::IsRunningInLANMode();
 }

@@ -1,9 +1,17 @@
 --------------------------------------
-Changelog for eMule 0.49c MorphXT v11.4
+Changelog for eMule 0.50a MorphXT v12.0
 --------------------------------------
-XX-XX-2009
+XX-XX-2010
 
+Merged to 0.50a [Stulle]
+ADD: Settings removed from official eMule to Advanced Preferences [Officials/Stulle]
+ADD: Some more Tooltips for the preferences [Stulle]
+ADD: Icon for "Pause when preview possible" menu entry [Stulle]
 CHANGE: Disable FollowTheMajority if file is renamed in Shared Files Dialog [Stulle]
+CHANGE: General settings dialog has been revised to achieve original layout [Stulle]
+FIX: Properly localize some Advanced Preferences (official) [Stulle]
+REMOVED: Official changes for high upload speed in favor for more advanced MorphXT code [Stulle]
+REMOVED: "MorphXT 9.7" workaround [Stulle]
 
 
 --------------------------------------

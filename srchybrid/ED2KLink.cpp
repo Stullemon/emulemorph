@@ -226,7 +226,7 @@ CED2KFileLink::CED2KFileLink(const TCHAR* pszName, const TCHAR* pszSize, const T
 		throw GetResString(IDS_ERR_TOOLARGEFILE);
 	if (_tstoi64(pszSize)<=0)
 		throw GetResString(IDS_ERR_NOTAFILELINK);
-	if (_tstoi64(pszSize) > OLD_MAX_EMULE_FILE_SIZE && !thePrefs.CanFSHandleLargeFiles())
+	if (_tstoi64(pszSize) > OLD_MAX_EMULE_FILE_SIZE && !thePrefs.CanFSHandleLargeFiles(0))
 		throw GetResString(IDS_ERR_FSCANTHANDLEFILE);
 	
 	for (int idx = 0; idx < 16; ++idx) {

@@ -442,8 +442,6 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	//MORPH START - Added by SiRoB, [-modname-]
 	m_strModVersion = CemuleApp::m_szMVersion;
 	m_strModVersion.AppendFormat(_T(" %u.%u"), CemuleApp::m_nMVersionMjr, CemuleApp::m_nMVersionMin);
-	m_strModVersionOld = CemuleApp::m_szMVersion;
-	m_strModVersionOld.AppendFormat(_T(" 9.7"));
 	if (CemuleApp::m_szMMVersion[0]!=0)
 		m_strModVersion.AppendFormat(_T(" %s"), CemuleApp::m_szMMVersion);
 	m_strModLongVersion = CemuleApp::m_szMVersionLong;
@@ -1106,7 +1104,7 @@ CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
 
 	CString strLink;
 	strLink.Format(_T("ed2k://|file|%s|%I64u|%s|/|sources,%i.%i.%i.%i:%i|/"),
-		EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName(), false)),
+		EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName())),
 		f->GetFileSize(),
 		EncodeBase16(f->GetFileHash(),16),
 		(uint8)dwID,(uint8)(dwID>>8),(uint8)(dwID>>16),(uint8)(dwID>>24), thePrefs.GetPort() );
@@ -1121,7 +1119,7 @@ CString CemuleApp::CreateKadSourceLink(const CAbstractFile* f)
 		CString KadID;
 		Kademlia::CKademlia::GetPrefs()->GetKadID().Xor(Kademlia::CUInt128(true)).ToHexString(&KadID);
 		strLink.Format(_T("ed2k://|file|%s|%I64u|%s|/|kadsources,%s:%s|/"),
-			EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName(), false)),
+			EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName())),
 			f->GetFileSize(),
 			EncodeBase16(f->GetFileHash(),16),
 			md4str(thePrefs.GetUserHash()), KadID);

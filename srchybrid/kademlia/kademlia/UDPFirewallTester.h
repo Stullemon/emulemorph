@@ -34,7 +34,7 @@ namespace Kademlia
 		static void		SetUDPFWCheckResult(bool bSucceeded, bool bTestCancelled, uint32 uFromIP, uint16 nIncomingPort);
 		static void		ReCheckFirewallUDP(bool bSetUnverified);
 		static bool		IsFWCheckUDPRunning();
-		static bool		IsVerified()					{ return m_bIsFWVerifiedUDP; }
+		static bool		IsVerified();
 		static void		AddPossibleTestContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, const CUInt128 &uTarget, uint8 uVersion, CKadUDPKey cUDPKey, bool bIPVerified);
 		static void		Reset(); // when stopping Kad
 		static void		Connected();

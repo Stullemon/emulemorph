@@ -438,6 +438,16 @@ CTag::CTag(uint8 uName, uint32 nSize, const BYTE* pucData){
 	ASSERT_VALID(this);
 }
 
+CTag::CTag(uint8 uName, BYTE* pucAttachData, uint32 nSize)
+{
+	m_uType = TAGTYPE_BLOB;
+	m_uName = uName;
+	m_pszName = NULL;
+	m_pData = pucAttachData;
+	m_nBlobSize = nSize;
+	ASSERT_VALID(this);
+}
+
 CTag::CTag(const CTag& rTag)
 {
 	m_uType = rTag.m_uType;

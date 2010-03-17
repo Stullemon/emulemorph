@@ -36,8 +36,8 @@ static char THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNAMIC(CAbstractFile, CObject)
 
 CAbstractFile::CAbstractFile()
+	: m_FileIdentifier(m_nFileSize)
 {
-	md4clr(m_abyFileHash);
 	m_nFileSize = (uint64)0;
 	m_uRating = 0;
 	m_bCommentLoaded = false;
@@ -47,9 +47,9 @@ CAbstractFile::CAbstractFile()
 }
 
 CAbstractFile::CAbstractFile(const CAbstractFile* pAbstractFile)
+	: m_FileIdentifier(pAbstractFile->m_FileIdentifier, m_nFileSize)
 {
 	m_strFileName = pAbstractFile->m_strFileName;
-	md4cpy(m_abyFileHash, pAbstractFile->GetFileHash());
 	m_nFileSize = pAbstractFile->m_nFileSize;
 	m_strComment = pAbstractFile->m_strComment;
 	m_uRating = pAbstractFile->m_uRating;
@@ -84,7 +84,7 @@ void CAbstractFile::AssertValid() const
 {
 	CObject::AssertValid();
 	(void)m_strFileName;
-	(void)m_abyFileHash;
+	(void)m_FileIdentifier;
 	(void)m_nFileSize;
 	(void)m_strComment;
 	(void)m_uRating;
@@ -207,15 +207,9 @@ CString CAbstractFile::GetFileTypeDisplayStr() const
 	return strFileTypeDisplayStr;
 }
 
-
-void CAbstractFile::SetFileHash(const uchar* pucFileHash)
-{
-	md4cpy(m_abyFileHash, pucFileHash);
-}
-
 bool CAbstractFile::HasNullHash() const
 {
-	return isnulmd4(m_abyFileHash);
+	return isnulmd4(m_FileIdentifier.GetMD4Hash());
 }
 
 uint32 CAbstractFile::GetIntTagValue(uint8 tagname) const

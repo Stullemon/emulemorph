@@ -490,7 +490,6 @@ BEGIN
     IDS_PW_USS              "Mettre à jour la liste de serveurs au démarrage"
     IDS_PW_MISC             "Options diverses"
     IDS_PW_TRAY             "Réduire en &icône"
-    IDS_PW_BEEP             "Bip sur erreurs"
     IDS_PW_PROMPT           "Confirmation en sortie"
     IDS_PW_SPLASH           "Afficher l'écran de démarrage"
     IDS_PW_DBLCLICK         "Double-clic pour voir les sources"
@@ -690,7 +689,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DOWNLOADMOVIECHUNKS "Priorité aux parties nécessaires à l'aperçu"
-    IDS_UPDATEQUEUE         "Ne pas mettre à jour la file d'attente en temps réel"
     IDS_RECOVER_SINGLE      "1 fichier récupéré."
     IDS_RECOVER_MULTIPLE    "%u fichiers récupérés."
     IDS_ATTEMPTING_RECOVERY "Essai de récupération d'archives..."
@@ -1080,7 +1078,6 @@ BEGIN
     IDS_WEB_BADLOGINATTEMPT "Serveur Web : Echec de la tentative de connexion"
     IDS_ERR_TOOLARGEFILE    "Le fichier a une taille trop importante (>=4 Go). Ce n'est pas supporté par le protocole sur le réseau eDonkey "
     IDS_MSGONLYFRIENDS      "Autoriser seulement les amis"
-    IDS_MSGONLYSEC          "Autoriser seulement les clients valides"
     IDS_DAY_MO_SA           "Lun-Dim"
     IDS_LIMITSOURCES        "Limite sources"
     IDS_LIMITCONS5SEC       "Limite connexions/5secs"
@@ -1130,7 +1127,6 @@ BEGIN
     IDS_DL_RESUMENEXT       "Reprendre le prochain en pause"
     IDS_STARTPRIO           "Priorité pour cette catégorie"
     IDS_PREF_STARTNEXTFILECAT "Préférer la même catégorie"
-    IDS_REPAINTGRAPHS       "Ne pas recréer les graphes de stats au redimensionnement"
     IDS_SOFTFILES           "Limite faible de fichiers"
 END
 
@@ -1542,7 +1538,6 @@ BEGIN
     IDS_FO_PREF_FAILED      "La configuration du pare-feu XP pour les ports sélectionnés a échoué !"
     IDS_FO_PREF_STARTUP    "Ouverture/Fermeture des ports du pare-feu XP lors du lancement/fermeture d'eMule"
     IDS_LOG_LEVEL          "Niveau de consignation"
-    IDS_DISABLEPEERACHE    "Désactiver le téléchargement à partir du PeerCache"
     IDS_FO_TEMPTCP_S        "Port %u (TCP) ouvert dans le pare-feu XP pour cette session eMule"
     IDS_FO_TEMPTCP_F        "Echec de l'ouverture du port %u (TCP) dans le pare-feu XP pour cette session eMule"
     IDS_FO_TEMPUDP_S        "Port %u (UDP) ouvert dans le pare-feu XP pour cette session eMule"
@@ -1640,7 +1635,7 @@ BEGIN
     IDS_LD_COPYCLIPBOARD    "Copier vers le presse-papiers"
     IDS_LD_HOSTNAME         "Utiliser le nom d'hôte (des préférences) au lieu de l'IP lors de la création d'un lien avec source"
     IDS_SAVEACFAILED        "Echec lors de la sauvegarde de la table de hachage AICH !"
-    IDS_IACHHASH            "Hachage AICH "
+    IDS_AICHHASH            "Hachage AICH "
     IDS_BYTESPERSEC         "o/s"
     IDS_KBYTESPERSEC        "Ko/s"
     IDS_MBYTESPERSEC        "Mo/s"
@@ -3605,11 +3600,6 @@ BEGIN
     IDS_REMOVE_AICH_TIP       "A activer si les hasch AICH des fichiers non partagés doivent être effacés immédiatement.\nPar défaut: désactivé."
     IDS_WSUPNP_TIP       "Inclure le routage automatique UPnP des ports du serveur WEB."
     IDS_CHECK_FILE_OPEN_TIP       "Demande confirmation avant d'ouvrir un fichier depuis eMule."
-//MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
-IDS_FILTER_CLIENTFAILEDDOWN "Filtrer les clients défaillants en émission"
-IDS_FILTER_CLIENTFAILEDDOWN_TIP "Filtre les clients qui envoient à moins de 12Ko\nplus de trois fois dans une session.\nPar défaut: activé"
-//MORPH END - Added by schnulli900, filter clients with failed downloads [Xman]
-IDS_TCP_CONS "Connexions TCP"
 END
 
 

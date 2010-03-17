@@ -369,9 +369,7 @@ int CPartFileConvert::performConvertToeMule(CString folder)
 		MoveFile(folder+_T("\\")+partfile,newfilename);
 	else CopyFile(folder+_T("\\")+partfile,newfilename,false);
 
-	for (int i = 0; i < file->hashlist.GetSize(); i++)
-		delete[] file->hashlist[i];
-	file->hashlist.RemoveAll();
+	file->GetFileIdentifier().DeleteMD4Hashset();
 	while (file->gaplist.GetCount()>0 ) {
 		delete file->gaplist.GetAt(file->gaplist.GetHeadPosition());
 		file->gaplist.RemoveAt(file->gaplist.GetHeadPosition());

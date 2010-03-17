@@ -137,7 +137,7 @@ CRoutingZone::~CRoutingZone()
 	if ((m_pSuperZone == NULL) && (m_sFilename.GetLength() > 0))
 	{
 		// Hide contacts in the GUI
-		theApp.emuledlg->kademliawnd->HideContacts();
+		theApp.emuledlg->kademliawnd->StopUpdateContacts();
 		WriteFile();
 	}
 	// If this zone is a leaf, delete our contact bin.
@@ -152,7 +152,7 @@ CRoutingZone::~CRoutingZone()
 	
 	// All branches are deleted, show the contact list in the GUI.
 	if (m_pSuperZone == NULL)
-		theApp.emuledlg->kademliawnd->ShowContacts();
+		theApp.emuledlg->kademliawnd->StartUpdateContacts();
 }
 
 void CRoutingZone::ReadFile(CString strSpecialNodesdate)
@@ -198,7 +198,7 @@ void CRoutingZone::ReadFile(CString strSpecialNodesdate)
 			if (uNumContacts != 0 && uNumContacts * 25 <= (file.GetLength() - file.GetPosition()))
 			{
 				// Hide contact list in the GUI
-				theApp.emuledlg->kademliawnd->HideContacts();
+				theApp.emuledlg->kademliawnd->StopUpdateContacts();
 				
 				uint32 uValidContacts = 0;
 				CUInt128 uID;
@@ -267,7 +267,7 @@ void CRoutingZone::ReadFile(CString strSpecialNodesdate)
 		DebugLogError(_T("CFileException in CRoutingZone::readFile"));
 	}
 	// Show contact list in GUI
-	theApp.emuledlg->kademliawnd->ShowContacts();
+	theApp.emuledlg->kademliawnd->StartUpdateContacts();
 }
 
 void CRoutingZone::ReadBootstrapNodesDat(CFileDataIO& file){
@@ -489,15 +489,12 @@ bool CRoutingZone::Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 
 }
 
 // Returns true if a contact was added or updated, false if the routing table was not touched
-bool CRoutingZone::AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, CKadUDPKey cUDPKey, bool& bIPVerified, bool bUpdate, bool bFromNodesDat, bool bFromHello)
+bool CRoutingZone::AddUnfiltered(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, CKadUDPKey cUDPKey, bool& bIPVerified, bool bUpdate, bool /*bFromNodesDat*/, bool bFromHello)
 {
-	if (uID != uMe)
+	if (uID != uMe && uVersion > 1)
 	{
-		// JOHNTODO -- How do these end up leaking at times?
 		CContact* pContact = new CContact(uID, uIP, uUDPPort, uTCPPort, uVersion, cUDPKey, bIPVerified);
-		if (bFromNodesDat)
-			pContact->CheckIfKad2(); // do not test nodes which we loaded from our nodes.dat for Kad2 again
-		else if (bFromHello)
+		if (bFromHello)
 			pContact->SetReceivedHelloPacket();
 
 		if (Add(pContact, bUpdate, bIPVerified)){
@@ -757,8 +754,6 @@ uint32 CRoutingZone::Consolidate()
 		m_pSubZones[0]->m_pBin->GetEntries(&list0);
 		m_pSubZones[1]->m_pBin->GetEntries(&list1);
 
-		m_pSubZones[0]->m_pSuperZone = NULL;
-		m_pSubZones[1]->m_pSuperZone = NULL;
 		m_pSubZones[0]->m_pBin->m_bDontDeleteContacts = true;
 		m_pSubZones[1]->m_pBin->m_bDontDeleteContacts = true;
 		delete m_pSubZones[0];
@@ -923,17 +918,7 @@ void CRoutingZone::OnSmallTimer()
 			ASSERT( CKadUDPKey(0) == pContact->GetUDPKey() );
 		}
 		else
-		{
-			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-				DebugSend("KADEMLIA_HELLO_REQ", pContact->GetIPAddress(), pContact->GetUDPPort());
-			CKademlia::GetUDPListener()->SendMyDetails(KADEMLIA_HELLO_REQ, pContact->GetIPAddress(), pContact->GetUDPPort(), 0, 0, NULL, false);
-			if (pContact->CheckIfKad2())
-			{
-				if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-					DebugSend("KADEMLIA2_HELLO_REQ", pContact->GetIPAddress(), pContact->GetUDPPort());
-				CKademlia::GetUDPListener()->SendMyDetails(KADEMLIA2_HELLO_REQ, pContact->GetIPAddress(), pContact->GetUDPPort(), 1, 0, NULL, false);
-			}
-		}
+			ASSERT( false );
 	}
 }
 
@@ -1023,6 +1008,8 @@ bool CRoutingZone::IsAcceptableContact(const CContact* pToCheck) const
 {
 	// Check if we know a conact with the same ID or IP but notmatching IP/ID and other limitations, similar checks like when adding a node to the table except allowing duplicates
 	// we use this to check KADEMLIA_RES routing answers on searches
+	if (pToCheck->GetVersion() <= 1)	// No Kad1 Contacts allowed
+		return false;
 	CContact* pDuplicate = GetContact(pToCheck->GetClientID());
 	if (pDuplicate != NULL)
 	{
@@ -1041,4 +1028,12 @@ bool CRoutingZone::IsAcceptableContact(const CContact* pToCheck) const
 #else
 	return CRoutingBin::CheckGlobalIPLimits(pToCheck->GetIPAddress(), pToCheck->GetUDPPort(), false);
 #endif
+}
+
+bool CRoutingZone::HasOnlyLANNodes() const
+{
+	if (IsLeaf())
+		return m_pBin->HasOnlyLANNodes();
+	else
+		return m_pSubZones[0]->HasOnlyLANNodes() && m_pSubZones[1]->HasOnlyLANNodes();
 }

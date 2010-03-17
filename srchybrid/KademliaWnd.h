@@ -5,8 +5,14 @@
 
 class CKadContactListCtrl;
 class CKadContactHistogramCtrl;
+class CKadLookupGraph;
 class CKadSearchListCtrl;
 class CCustomAutoComplete;
+class CDropDownButton;
+namespace Kademlia
+{
+	class CLookupHistory;
+}
 
 class CKademliaWnd : public CResizableDialog
 {
@@ -22,12 +28,16 @@ public:
 	// Contacts
 	UINT GetContactCount() const;
 	void UpdateKadContactCount();
-	void ShowContacts();
-	void HideContacts();
+	void StartUpdateContacts();
+	void StopUpdateContacts();
 	bool ContactAdd(const Kademlia::CContact* contact);
 	void ContactRem(const Kademlia::CContact* contact);
 	void ContactRef(const Kademlia::CContact* contact);
 	void UpdateNodesDatFromURL(CString strURL);
+	void UpdateSearchGraph(Kademlia::CLookupHistory* pLookupHistory);
+	void SetSearchGraph(Kademlia::CLookupHistory* pLookupHistory, bool bMakeVisible);
+	void ShowLookupGraph(bool bShow);
+	void UpdateContactCount();
 
 	// Searches
 	CKadSearchListCtrl* searchList;
@@ -37,18 +47,21 @@ public:
 	BOOL SaveAllSettings();
 
 protected:
-	CIconStatic m_ctrlBootstrap;
-	CKadContactListCtrl* m_contactListCtrl;
-	CKadContactHistogramCtrl* m_contactHistogramCtrl;
-	CCustomAutoComplete* m_pacONBSIPs;
-	HICON icon_kadcont;
-	HICON icon_kadsea;
+	CIconStatic					m_ctrlBootstrap;
+	CKadContactListCtrl*		m_contactListCtrl;
+	CKadContactHistogramCtrl*	m_contactHistogramCtrl;
+	CKadLookupGraph*			m_kadLookupGraph; 
+	CCustomAutoComplete*		m_pacONBSIPs;
+	HICON						icon_kadsea;
+	CDropDownButton*			m_pbtnWnd;
 
-	void SetAllIcons();
+	void		SetAllIcons();
+	void		UpdateButtonTitle(bool bLookupGraph);
 
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 	virtual BOOL PreTranslateMessage(MSG* pMsg);
+	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnBnClickedBootstrapbutton();
@@ -59,4 +72,6 @@ protected:
 	afx_msg void OnEnSetfocusBootstrapNodesdat();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg HBRUSH OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor);
+	afx_msg void OnNMDblclkSearchlist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnListModifiedSearchlist(NMHDR *pNMHDR, LRESULT *pResult);
 };

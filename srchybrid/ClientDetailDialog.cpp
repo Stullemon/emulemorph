@@ -33,7 +33,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -47,10 +47,10 @@ BEGIN_MESSAGE_MAP(CClientDetailPage, CResizablePage)
 END_MESSAGE_MAP()
 
 CClientDetailPage::CClientDetailPage()
-	: CResizablePage(CClientDetailPage::IDD,0)
+	: CResizablePage(CClientDetailPage::IDD, 0 )
 {
-	m_paClients = NULL;
-	m_bDataChanged = false;
+	m_paClients		= NULL;
+	m_bDataChanged	= false;
 	m_strCaption	= GetResString(IDS_CD_TITLE);
 	m_psp.pszTitle	= m_strCaption;
 	m_psp.dwFlags  |= PSP_USETITLE;
@@ -73,11 +73,11 @@ BOOL CClientDetailPage::OnInitDialog()
 	AddAnchor(IDC_STATIC30, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_STATIC40, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_STATIC50, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_DNAME, TOP_LEFT, TOP_RIGHT);
+	AddAnchor(IDC_DSNAME, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_DDOWNLOADING, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_UPLOADING, TOP_LEFT, TOP_RIGHT);
-
 	AddAnchor(IDC_OBFUSCATION_STAT, TOP_LEFT, TOP_RIGHT);
-
 
 	Localize();
 	return TRUE;
@@ -97,7 +97,7 @@ BOOL CClientDetailPage::OnSetActive()
 			GetDlgItem(IDC_DNAME)->SetWindowText(client->GetUserName());
 		else
 			GetDlgItem(IDC_DNAME)->SetWindowText(_T("?"));
-	
+		
 		//EastShare Start - added by AndCycle, IP to Country
 		// Superlexx
 		bool longCountryName = true;
@@ -122,7 +122,7 @@ BOOL CClientDetailPage::OnSetActive()
 			GetDlgItem(IDC_DHASH)->SetWindowText(md4str(client->GetUserHash()));
 		else
 			GetDlgItem(IDC_DHASH)->SetWindowText(_T("?"));
-	
+		
 		GetDlgItem(IDC_DSOFT)->SetWindowText(client->GetClientSoftVer());
 
 		if (client->SupportsCryptLayer() && thePrefs.IsClientCryptLayerSupported() && (client->RequestsCryptLayer() || thePrefs.IsClientCryptLayerRequested()) 
@@ -142,7 +142,7 @@ BOOL CClientDetailPage::OnSetActive()
 
 		buffer.Format(_T("%s"),(client->HasLowID() ? GetResString(IDS_IDLOW):GetResString(IDS_IDHIGH)));
 		GetDlgItem(IDC_DID)->SetWindowText(buffer);
-	
+		
 		if (client->GetServerIP()){
 			GetDlgItem(IDC_DSIP)->SetWindowText(ipstr(client->GetServerIP()));
 			CServer* cserver = theApp.serverlist->GetServerByIPTCP(client->GetServerIP(), client->GetServerPort());
@@ -158,7 +158,7 @@ BOOL CClientDetailPage::OnSetActive()
 
 		CKnownFile* file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
 		if (file)
-			GetDlgItem(IDC_DDOWNLOADING)->SetWindowText(file->GetFileName() );
+			GetDlgItem(IDC_DDOWNLOADING)->SetWindowText(file->GetFileName());
 		else
 			GetDlgItem(IDC_DDOWNLOADING)->SetWindowText(_T("-"));
 
@@ -186,18 +186,18 @@ BOOL CClientDetailPage::OnSetActive()
 		buffer.Format(_T("%s"),CastItoXBytes(client->GetAvUpDatarate(), false, true));
 		//MORPH END   - Changed by SiRoB, Average display [wistily]
 		GetDlgItem(IDC_DAVDR)->SetWindowText(buffer);
-	
+		
 		if (client->Credits()){
 			GetDlgItem(IDC_DUPTOTAL)->SetWindowText(CastItoXBytes(client->Credits()->GetDownloadedTotal(), false, false));
 			GetDlgItem(IDC_DDOWNTOTAL)->SetWindowText(CastItoXBytes(client->Credits()->GetUploadedTotal(), false, false));
 			//MORPH START - Changed by IceCream, VQB: ownCredits
 			/*
-			buffer.Format(_T("%.1f"),(float)client->Credits()->GetScoreRatio(m_client->GetIP()));
+			buffer.Format(_T("%.1f"),(float)client->Credits()->GetScoreRatio(client->GetIP()));
 			*/
 			buffer.Format(_T("%.1f  [%.1f]"),(float)client->Credits()->GetScoreRatio(client->GetIP()),(float)client->Credits()->GetMyScoreRatio(client->GetIP()));
 			//MORPH END   - Changed by IceCream, VQB: ownCredits
 			GetDlgItem(IDC_DRATIO)->SetWindowText(buffer);
-		
+			
 			if (theApp.clientcredits->CryptoAvailable()){
 				switch(client->Credits()->GetCurrentIdentState(client->GetIP())){
 					case IS_NOTAVAILABLE:
@@ -228,7 +228,7 @@ BOOL CClientDetailPage::OnSetActive()
 			GetDlgItem(IDC_DRATING)->SetWindowText(buffer);
 		}
 		else
-		GetDlgItem(IDC_DRATING)->SetWindowText(_T("?"));
+			GetDlgItem(IDC_DRATING)->SetWindowText(_T("?"));
 
 		if (client->GetUploadState() != US_NONE && client->Credits()!=NULL){
 			if (!client->GetFriendSlot()){
@@ -246,7 +246,7 @@ BOOL CClientDetailPage::OnSetActive()
 		else
 			buffer.Format( _T("%s"), GetResString(IDS_DISCONNECTED));
 		GetDlgItem(IDC_CLIENTDETAIL_KADCON)->SetWindowText(buffer);
-	
+
 		// [MightyKnife] Private modification
 		#ifdef MIGHTY_TWEAKS
 		CString AddInfo;

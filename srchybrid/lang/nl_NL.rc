@@ -176,7 +176,7 @@ BEGIN
     IDS_WAITING             "Wachten..."
     IDS_HASHING             "Hashen..."
     IDS_COMPLETING          "Afronden..."
-    IDS_COMPLETE            "Compleet"
+    IDS_COMPLETE            "Voltooid"
     IDS_PAUSED              "Gepauzeerd"
     IDS_ERRORLIKE           "Foutief"
     IDS_ASSIGNED2K          "eMule is niet toegewezen aan ED2K-verwijzingen. Wilt u eMule nu toewijzen aan ED2K-verwijzingen (aanbevolen)?"
@@ -493,7 +493,6 @@ BEGIN
     IDS_PW_USS              "Ververs serverlijst automatisch bij opstarten"
     IDS_PW_MISC             "Diversen"
     IDS_PW_TRAY             "Minimaliseer naar systeembalkicoon"
-    IDS_PW_BEEP             "Geluid bij fouten"
     IDS_PW_PROMPT           "Bevestiging bij afsluiten"
     IDS_PW_SPLASH           "Welkomstvenster tonen"
     IDS_PW_DBLCLICK         "Dubbelklikken op bestand voor informatie"
@@ -623,7 +622,7 @@ BEGIN
     IDS_SF_USER             "Totale gebruikers"
     IDS_SF_FILE             "Totale bestanden"
     IDS_UPLOADTIME          "Uploadtijd"
-    IDS_LASTSEENCOMPL       "Laatste complete deel:"
+    IDS_LASTSEENCOMPL       "Laatst compleet gezien:"
     IDS_YES                 "Ja"
     IDS_NO                  "Nee"
     IDS_UNBAN               "Ban opgeheven"
@@ -693,7 +692,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DOWNLOADMOVIECHUNKS "Eerste/laatste filmdeel als eerste downloaden"
-    IDS_UPDATEQUEUE         "Wachtrijlijst niet in realtime aanpassen"
     IDS_RECOVER_SINGLE      "1 bestand hersteld."
     IDS_RECOVER_MULTIPLE    "%u bestanden hersteld."
     IDS_ATTEMPTING_RECOVERY "Poging om archief te herstellen..."
@@ -973,7 +971,7 @@ BEGIN
     IDS_ERR_MAKEBAKCREDITFILE "Fout bij het maken van kredietbestandbackup"
     IDS_COMMENT             "Commentaar"
     IDS_IPFILTERED          "Gefiltreerde IP: %s (%s)"
-    IDS_DL_TRANSFCOMPL      "Compleet"
+    IDS_DL_TRANSFCOMPL      "Voltooid"
     IDS_DL_ACTIVE_TIME      "Downloadtijd"
     IDS_STATS_FILTEREDCLIENTS "Gefiltreerd: %u"
     IDS_FILTERLABEL         "Filtreer berichten met (scheidingsteken | ):"
@@ -1084,7 +1082,6 @@ BEGIN
     IDS_WEB_BADLOGINATTEMPT "Webserver: mislukte inlogpoging"
     IDS_ERR_TOOLARGEFILE    "Bestand is groter dan ondersteund door het eDonkey-protocol (>=256 GB)"
     IDS_MSGONLYFRIENDS      "Accepteer alleen van vrienden"
-    IDS_MSGONLYSEC          "Accepteer alleen van geldige gebruikers"
     IDS_DAY_MO_SA           "Maa-Zat"
     IDS_LIMITSOURCES        "Limiet bronnen"
     IDS_LIMITCONS5SEC       "Limiet verbindingen/5 sec."
@@ -1134,7 +1131,6 @@ BEGIN
     IDS_DL_RESUMENEXT       "Ga verder met het volgende gepauzeerde bestand"
     IDS_STARTPRIO           "Prioriteit voor deze categorie"
     IDS_PREF_STARTNEXTFILECAT "Prefereer dezelfde categorie"
-    IDS_REPAINTGRAPHS       "Statistiekgrafieken niet hertekenen bij aanpassen venstergrootte"
     IDS_SOFTFILES           "Zacht bestandslimiet"
 END
 
@@ -1546,7 +1542,6 @@ BEGIN
     IDS_FO_PREF_FAILED      "Configuren van de interne Windows XP-firewall mislukt voor de geselcteerde poorten!"
     IDS_FO_PREF_STARTUP     "Open/sluit poorten in de Windows XP-firewall tijdens het starten/verlaten van eMule"
     IDS_LOG_LEVEL           "Logniveau"
-    IDS_DISABLEPEERACHE     "Deactiveer downloaden van PeerCache"
     IDS_FO_TEMPTCP_S        "Poort %u (TCP) is geopend in de interne Windows XP-firewall voor deze eMule-sessie"
     IDS_FO_TEMPTCP_F        "Openen van poort %u (TCP) mislukt in de interne Windows XP-firewall voor deze eMule-sessie"
     IDS_FO_TEMPUDP_S        "Poort %u (UDP) geopend in de interne Windows XP-firewall voor deze eMule-sessie"
@@ -1644,7 +1639,7 @@ BEGIN
     IDS_LD_COPYCLIPBOARD    "Kopiëren naar klembord"
     IDS_LD_HOSTNAME         "Hostnaam gebruiken (van uitgebriede instellingen) i.p.v. IP bij het maken van bronverwijzing"
     IDS_SAVEACFAILED        "AICH-hashset opslaan mislukt!"
-    IDS_IACHHASH            "AICH-hash"
+    IDS_AICHHASH            "AICH-hash"
     IDS_BYTESPERSEC         "B/s" //!
     IDS_KBYTESPERSEC        "KB/s" //!
     IDS_MBYTESPERSEC        "MB/s" //!
@@ -1917,7 +1912,7 @@ BEGIN
     IDS_UPNP_NOSERVICE      "UPnP Device Host-service is niet uitvoerend, slaat instellen van UPnP over"
     IDS_DELAYEDBYUPNP       "Verbinden met het netwerk is vertraagd omdat UPnP nog steeds bezig is met het configureren van de poortdoorverwijzingen."
     IDS_DELAYEDBYUPNP2      "Wacht a.u.b. enkele seconden, eMule zal meteen verbinden als UPnP klaar is."
-    IDS_UPNPCLOSEONEXIT     "UPnP-poortdoorverwijzingen bij afsluiten verwijderen"
+//    IDS_UPNPCLOSEONEXIT     "UPnP-poortdoorverwijzingen bij afsluiten verwijderen"
     IDS_UPNPSKIPWANIP       "WAN IP instellen overslaan"
     IDS_UPNPSKIPWANPPP      "WAN PPP instellen overslaan"
     IDS_SHAREEMULELABEL     "Deelt eMule met andere computergebruikers"
@@ -1975,6 +1970,32 @@ BEGIN
     IDS_WEBUPNPINCLUDE      "Poort bijvoegen in UPnP-instelling"
     IDS_ADDEDON             "toegevoegd op"
     IDS_RESOLVELINKS        "Shelllinks oplossen in gedeelde mappen"
+END
+
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNLOADCOMMANDS    "Downloadcommando's"
+    IDS_CLOSETOOLBAR        "Werkbalk sluiten"
+    IDS_SHOWTOOLBAR         "Werkbalk tonen"
+    IDS_SEARCH_BADOPERATORCOMBINATION 
+                            "U kunt bij zoekopdrachten voor Kad niet in het eerste sleutelwoord een OR-operator gebruiken!\n\nBijvoorbeeld: ""Sleutelwoord1 OR Sleutelwoord2"" is niet mogelijk. Probeer ""Sleutelwoord1 AND (Sleutelwoord2 OR Sleutelwoord3)"" of voer meerdere zoekopdrachten uit."
+    IDS_DISCOVEREDBY        "Ontdekt door"
+    IDS_NODES               "Node(s)" //!
+    IDS_ROUTINGTABLE        "Routingtabel"
+    IDS_PROTOCOLVERSION     "Protocolversie"
+    IDS_FOUNDNODESUSEFUL    "Gevonden nodes (bruikbaar)"
+    IDS_NORESPONSE          "Geen antwoord"
+    IDS_NOTASKED            "Niet gevraagd"
+    IDS_LOOKUPGRAPH         "Zoekdetails"
+    IDS_AUTOKADLOOKUPGRAPH  "Automatisch actieve zoekopdrachten tonen"
+    IDS_PAUSEONPREVIEW      "Pauzeren indien voorvertoning mogelijk is"
+    IDS_PREVIEWWITH         "Voorvertonen met"
+    IDS_CLOSEEMULE          "eMule sluiten"
+    IDS_DONOTASKAGAIN       "Niet opnieuw vragen"
+    IDS_POPULARITY          "Populariteitsrang"
+    IDS_SHOWWIN7TASKBARGOODIES "Taakbalkeffecten van Windows 7 inschakelen"
+    IDS_LANMODE             "LAN-mode"
 END
 
 STRINGTABLE 

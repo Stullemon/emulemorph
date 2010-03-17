@@ -631,7 +631,7 @@ BOOL CChatWnd::OnCommand(WPARAM wParam, LPARAM lParam)
 				CString sLink;
 				CED2KFriendLink myLink(CPreferences::GetUserNick(), CPreferences::GetUserHash());
 				myLink.GetLink(sLink);
-				sLink = _T("<a href=\"") + sLink + _T("\">") + StripInvalidFilenameChars(CPreferences::GetUserNick(), true) + _T("</a>");
+				sLink = _T("<a href=\"") + sLink + _T("\">") + StripInvalidFilenameChars(CPreferences::GetUserNick()) + _T("</a>");
 				theApp.CopyTextToClipboard(sLink);
 			}
 			break;

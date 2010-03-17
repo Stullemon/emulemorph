@@ -43,7 +43,7 @@
 #include "SharedFilesWnd.h"
 #include "HighColorTab.hpp"
 #include "PartFile.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -875,7 +875,7 @@ void CHistoryListCtrl::RemoveFile(CKnownFile *toRemove) {
 		return;
 
 	if (toRemove->IsKindOf(RUNTIME_CLASS(CPartFile)))
-		theApp.emuledlg->transferwnd->downloadlistctrl.ClearCompleted(static_cast<CPartFile*>(toRemove));
+		theApp.emuledlg->transferwnd->GetDownloadList()->ClearCompleted(static_cast<CPartFile*>(toRemove));
 
 	if(theApp.knownfiles->RemoveKnownFile(toRemove)){
 		LVFINDINFO info;
@@ -954,7 +954,7 @@ void CHistoryListCtrl::UpdateFile(const CKnownFile* file)
 	//MORPH END   - SiRoB, Don't Refresh item if not needed
 
 	m_updatethread->AddItemToUpdate((LPARAM)file);
-	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
 }
 //MORPH END - UpdateItemThread
 

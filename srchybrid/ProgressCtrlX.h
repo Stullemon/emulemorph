@@ -101,6 +101,8 @@ public:
 	void SetBorders(const CRect& rcBorders) { m_rcBorders = rcBorders; }
 	const CRect& GetBorders() { return m_rcBorders; }
 
+	void SetEmpty(bool bVal, bool bRefresh = false)							{ m_bEmpty = bVal; if (bRefresh) Invalidate();}
+
 // Operations
 public:
 	
@@ -131,6 +133,7 @@ protected:
 	CRect ConvertToReal(const CDrawInfo& info, const CRect& rcVirt);
 	virtual BOOL SetSnakePos(int& nOldPos, int nNewPos, BOOL fIncrement = FALSE);
 
+	bool m_bEmpty;
 	// color atributes
 	CDWordArray m_ardwGradColors;
 	CBrush* m_pbrBar; 

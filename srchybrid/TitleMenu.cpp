@@ -145,7 +145,8 @@ void CTitleMenu::EnableIcons()
 	if (thePrefs.GetWindowsVersion() == _WINVER_XP_ || 
 		thePrefs.GetWindowsVersion() == _WINVER_2K_ || 
 		thePrefs.GetWindowsVersion() == _WINVER_2003_ || 
-		thePrefs.GetWindowsVersion() == _WINVER_VISTA_)
+		thePrefs.GetWindowsVersion() == _WINVER_VISTA_|| 
+		thePrefs.GetWindowsVersion() == _WINVER_7_)
 	{
 		m_bIconMenu = true;
 		m_ImageList.DeleteImageList();
@@ -328,8 +329,7 @@ static HBITMAP IconToBitmap32(HICON hIcon, int cx, int cy)
 
 void CTitleMenu::SetMenuBitmap(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR /*lpszNewItem*/, LPCTSTR lpszIconName)
 {
-	if (!m_bIconMenu || (nFlags & MF_SEPARATOR) != 0 ||
-		!(thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2K_ || thePrefs.GetWindowsVersion() == _WINVER_2003_ || thePrefs.GetWindowsVersion() == _WINVER_VISTA_)) {
+	if (!m_bIconMenu || (nFlags & MF_SEPARATOR) != 0 || !(thePrefs.GetWindowsVersion() >= _WINVER_2K_ )) {
 		if (m_bIconMenu && lpszIconName != NULL)
 			ASSERT(0);
 		return;
@@ -347,9 +347,9 @@ void CTitleMenu::SetMenuBitmap(UINT nFlags, UINT_PTR nIDNewItem, LPCTSTR /*lpszN
 
 	CString strIconLower(lpszIconName);
 	strIconLower.MakeLower();
-	if (thePrefs.GetWindowsVersion() == _WINVER_VISTA_)
+	if (thePrefs.GetWindowsVersion() >= _WINVER_VISTA_)
 	{
-		// Vista: Use the Windows built-in feature for 32-bit menu item bitmaps.
+		// Vista+: Use the Windows built-in feature for 32-bit menu item bitmaps.
 		// 'MeasureItem', 'DrawItem' will not get called any longer and Vista 
 		// cares properly about grayed/selected menu item bitmaps.
 		if (!strIconLower.IsEmpty())

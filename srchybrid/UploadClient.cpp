@@ -36,7 +36,7 @@
 #include "SafeFile.h"
 #include "DownloadQueue.h"
 #include "emuledlg.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "Log.h"
 #include "Collection.h"
 
@@ -490,7 +490,7 @@ void CUpDownClient::SetUploadState(EUploadState eNewState)
 		}
 		// don't add any final cleanups for US_NONE here
 		m_nUploadState = (_EUploadState)eNewState;
-		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
+		theApp.emuledlg->transferwnd->GetClientList()->RefreshClient(this);
 	}
 }
 
@@ -998,7 +998,7 @@ bool CUpDownClient::ProcessExtendedInfo(CSafeMemFile* data, CKnownFile* tempreqf
 		}
 		m_uiCompletedParts = result;
 	}
-	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
+	theApp.emuledlg->transferwnd->GetQueueList()->RefreshClient(this);
 	return true;
 }
 
@@ -1252,7 +1252,7 @@ void CUpDownClient::SetUploadFileID(CKnownFile* newreqfile)
 		// as well as in the sharedlist (redownloading a unshared file, then resharing it before the first part has been downloaded)
 		// to make sure that in no case a deleted client object is left on the list, we need to doublecheck
 		// TODO: Fix the whole issue properly
-		CKnownFile* pCheck = theApp.knownfiles->FindKnownFileByID(requpfileid);
+		CKnownFile* pCheck = theApp.sharedfiles->GetFileByID(requpfileid);
 		if (pCheck != NULL && pCheck != oldreqfile)
 		{
 			ASSERT( false );
@@ -1454,14 +1454,15 @@ uint32 CUpDownClient::SendBlockData(){
     // Check if it's time to update the display.
 	//MORPH START - UpdateItemThread
 	/*
-	if (curTick-m_lastRefreshedULDisplay > MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE+(uint32)(rand()*800/RAND_MAX)) {
+    if (curTick-m_lastRefreshedULDisplay > MINWAIT_BEFORE_ULDISPLAY_WINDOWUPDATE+(uint32)(rand()*800/RAND_MAX)) {
         // Update display
-		theApp.emuledlg->transferwnd->uploadlistctrl.RefreshClient(this);
-		theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
-		m_lastRefreshedULDisplay = curTick;
-	}*/
-	theApp.emuledlg->transferwnd->uploadlistctrl.RefreshClient(this);
-	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
+        theApp.emuledlg->transferwnd->GetUploadList()->RefreshClient(this);
+        theApp.emuledlg->transferwnd->GetClientList()->RefreshClient(this);
+        m_lastRefreshedULDisplay = curTick;
+    }
+	*/
+        theApp.emuledlg->transferwnd->GetUploadList()->RefreshClient(this);
+        theApp.emuledlg->transferwnd->GetClientList()->RefreshClient(this);
 	//MORPH END - UpdateItemThread
 
     return (UINT)(sentBytesCompleteFile + sentBytesPartFile);
@@ -1492,24 +1493,55 @@ void CUpDownClient::FlushSendBlocks(){ // call this when you stop upload, or the
         socket->TruncateQueues();
 }
 
-void CUpDownClient::SendHashsetPacket(const uchar* forfileid)
+void CUpDownClient::SendHashsetPacket(const uchar* pData, uint32 nSize, bool bFileIdentifiers)
 {
-	CKnownFile* file = theApp.sharedfiles->GetFileByID(forfileid);
-	if (!file){
-		CheckFailedFileIdReqs(forfileid);
-		throw GetResString(IDS_ERR_REQ_FNF) + _T(" (SendHashsetPacket)");
+	Packet* packet;
+	CSafeMemFile fileResponse(1024);
+	if (bFileIdentifiers)
+	{
+		CSafeMemFile data(pData, nSize);
+		CFileIdentifierSA fileIdent;
+		if (!fileIdent.ReadIdentifier(&data))
+			throw _T("Bad FileIdentifier (OP_HASHSETREQUEST2)");
+		CKnownFile* file = theApp.sharedfiles->GetFileByIdentifier(fileIdent, false);
+		if (file == NULL)
+		{
+			CheckFailedFileIdReqs(fileIdent.GetMD4Hash());
+			throw GetResString(IDS_ERR_REQ_FNF) + _T(" (SendHashsetPacket2)");
+		}
+		uint8 byOptions = data.ReadUInt8();
+		bool bMD4 = (byOptions & 0x01) > 0;
+		bool bAICH = (byOptions & 0x02) > 0;
+		if (!bMD4 && !bAICH)
+		{
+			DebugLogWarning(_T("Client sent HashSet request with none or unknown HashSet type requested (%u) - file: %s, client %s")
+				, byOptions, file->GetFileName(), DbgGetClientInfo());
+			return;
+		}
+		file->GetFileIdentifier().WriteIdentifier(&fileResponse);
+		// even if we don't happen to have an AICH hashset yet for some reason we send a proper (possible empty) response
+		file->GetFileIdentifier().WriteHashSetsToPacket(&fileResponse, bMD4, bAICH); 
+		if (thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP__HashSetAnswer", this, file->GetFileIdentifier().GetMD4Hash());
+		packet = new Packet(&fileResponse, OP_EMULEPROT, OP_HASHSETANSWER2);
 	}
-
-	CSafeMemFile data(1024);
-	data.WriteHash16(file->GetFileHash());
-	UINT parts = file->GetHashCount();
-	data.WriteUInt16((uint16)parts);
-	for (UINT i = 0; i < parts; i++)
-		data.WriteHash16(file->GetPartHash(i));
-	if (thePrefs.GetDebugClientTCPLevel() > 0)
-		DebugSend("OP__HashSetAnswer", this, forfileid);
-	Packet* packet = new Packet(&data);
-	packet->opcode = OP_HASHSETANSWER;
+	else
+	{
+		if (nSize != 16)
+		{
+			ASSERT( false );
+			return;
+		}
+		CKnownFile* file = theApp.sharedfiles->GetFileByID(pData);
+		if (!file){
+			CheckFailedFileIdReqs(pData);
+			throw GetResString(IDS_ERR_REQ_FNF) + _T(" (SendHashsetPacket)");
+		}
+		file->GetFileIdentifier().WriteMD4HashsetToFile(&fileResponse);
+		if (thePrefs.GetDebugClientTCPLevel() > 0)
+			DebugSend("OP__HashSetAnswer", this, pData);
+		packet = new Packet(&fileResponse, OP_EDONKEYPROT, OP_HASHSETANSWER);
+	}
 	theStats.AddUpDataOverheadFileRequest(packet->size);
 	SendPacket(packet, true);
 }
@@ -1641,7 +1673,7 @@ void CUpDownClient::Ban(LPCTSTR pszReason)
 	theApp.clientlist->AddBannedClient(GetIP());
 	SetUploadState(US_BANNED);
 	theApp.emuledlg->transferwnd->ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
-	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
+	theApp.emuledlg->transferwnd->GetQueueList()->RefreshClient(this);
 	if (socket != NULL && socket->IsConnected())
 		socket->ShutDown(SD_RECEIVE); // let the socket timeout, since we dont want to risk to delete the client right now. This isnt acutally perfect, could be changed later
 }
@@ -1667,7 +1699,7 @@ void CUpDownClient::BanLeecher(LPCTSTR pszReason){
 	theApp.clientlist->AddBannedClient( GetIP() );
 	SetUploadState(US_BANNED);
 	theApp.emuledlg->transferwnd->ShowQueueCount(theApp.uploadqueue->GetWaitingUserCount());
-	theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(this);
+	theApp.emuledlg->transferwnd->GetQueueList()->RefreshClient(this);
 	if (socket != NULL && socket->IsConnected())
 		socket->ShutDown(SD_RECEIVE); // let the socket timeout, since we dont want to risk to delete the client right now. This isnt acutally perfect, could be changed later
 }

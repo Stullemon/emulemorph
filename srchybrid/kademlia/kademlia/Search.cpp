@@ -1,6 +1,6 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-Copyright (C)2004-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+Copyright (C)2004-2010 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
  
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -56,6 +56,7 @@ there client on the eMule forum..
 #include "../../Log.h"
 #include "../../KnownFileList.h"
 #include "../utils/KadClientSearcher.h"
+#include "../utils/LookupHistory.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -69,13 +70,13 @@ void DebugSend(LPCTSTR pszMsg, uint32 uIP, uint16 uUDPPort);
 
 CSearch::CSearch()
 {
+	m_pLookupHistory = new CLookupHistory();
 	m_tCreated = time(NULL);
 	m_uType = (uint32)-1;
 	m_uAnswers = 0;
 	m_uTotalRequestAnswers = 0;
 	m_uKadPacketSent = 0;
 	m_uSearchID = (uint32)-1;
-	(void)m_sGUIName;
 	m_bStoping = false;
 	m_uTotalLoad = 0;
 	m_uTotalLoadResponses = 0;
@@ -86,6 +87,7 @@ CSearch::CSearch()
 	pNodeSpecialSearchRequester = NULL;
 	m_uClosestDistantFound = 0;
 	m_pSearchTerm = NULL;
+	pRequestedMoreNodesContact = NULL;
 }
 
 CSearch::~CSearch()
@@ -119,6 +121,11 @@ CSearch::~CSearch()
 	// Remove search from GUI
 	theApp.emuledlg->kademliawnd->searchList->SearchRem(this);
 
+	// delete/deref searchhistory (will delete itself if not used by the GUI)
+	m_pLookupHistory->SetSearchDeleted();
+	m_pLookupHistory = NULL;
+	theApp.emuledlg->kademliawnd->UpdateSearchGraph(NULL);
+
 	// Check if a source search is currently being done.
 	CPartFile* pPartFile = theApp.downloadqueue->GetFileByKadFileSearchID(GetSearchID());
 
@@ -144,7 +151,10 @@ CSearch::~CSearch()
 
 	// Delete any temp contacts..
 	for (ContactList::const_iterator itContactList = m_listDelete.begin(); itContactList != m_listDelete.end(); ++itContactList)
-		delete *itContactList;
+	{
+		if (!((CContact*)*itContactList)->InUse())
+			delete *itContactList;
+	}
 
 	// Check if this search was contacting a overload node and adjust time of next time we use that node.
 	if(CKademlia::IsRunning() && GetNodeLoad() > 20)
@@ -159,7 +169,7 @@ CSearch::~CSearch()
 	if(m_pucSearchTermsData)
 		delete[] m_pucSearchTermsData;
 
-	delete m_pSearchTerm;
+	CKademlia::GetUDPListener()->Free(m_pSearchTerm);
 	m_pSearchTerm = NULL;
 }
 
@@ -171,6 +181,10 @@ void CSearch::Go()
 		CUInt128 uDistance(CKademlia::GetPrefs()->GetKadID());
 		uDistance.Xor(m_uTarget);
 		CKademlia::GetRoutingZone()->GetClosestTo(3, m_uTarget, uDistance, 50, &m_mapPossible, true, true);
+
+		for (ContactMap::iterator itContactMap = m_mapPossible.begin(); itContactMap != m_mapPossible.end(); ++itContactMap)
+			m_pLookupHistory->ContactReceived(itContactMap->second, NULL, itContactMap->first, false);
+		theApp.emuledlg->kademliawnd->UpdateSearchGraph(m_pLookupHistory);
 	}
 	if (!m_mapPossible.empty())
 	{
@@ -257,10 +271,16 @@ void CSearch::PrepareToStop()
 
 	//Update search within GUI.
 	theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
+	m_pLookupHistory->SetSearchStopped();
+	theApp.emuledlg->kademliawnd->UpdateSearchGraph(m_pLookupHistory);
 }
 
 void CSearch::JumpStart()
 {
+	// If we had a response within the last 3 seconds, no need to jumpstart the search.
+	if (m_uLastResponse + SEC(3) > (uint32)time(NULL))
+		return;
+
 	// If we ran out of contacts, stop search.
 	if (m_mapPossible.empty())
 	{
@@ -268,9 +288,38 @@ void CSearch::JumpStart()
 		return;
 	}
 
-	// If we had a response within the last 3 seconds, no need to jumpstart the search.
-	if (m_uLastResponse + SEC(3) > (uint32)time(NULL))
-		return;
+	// Is this a find lookup and are the best two (=KADEMLIA_FIND_VALUE) nodes dead/unreachable?
+	// In this case try to discover more close nodes before using our other results
+	// The reason for this is that we may not have found the closest node alive due to results beeing limited to 2 contacts,
+	// which could very well have been the duplicates of our dead closest nodes [link paper]
+	bool bLookupCloserNodes = false;
+	if (pRequestedMoreNodesContact == NULL && GetRequestContactCount() == KADEMLIA_FIND_VALUE && m_mapTried.size() >= 3*KADEMLIA_FIND_VALUE)
+	{
+		ContactMap::const_iterator itContactMap = m_mapTried.begin();
+		bLookupCloserNodes = true;
+		for (uint32 i = 0; i < KADEMLIA_FIND_VALUE; i++)
+		{
+			if (m_mapResponded.count(itContactMap->first) > 0)
+			{
+				bLookupCloserNodes = false;
+				break;
+			}
+			itContactMap++;
+		}
+		if (bLookupCloserNodes)
+		{
+			while (itContactMap != m_mapTried.end())
+			{
+				if (m_mapResponded.count(itContactMap->first) > 0)
+				{
+					DEBUG_ONLY( DebugLogWarning(_T("Best KADEMLIA_FIND_VALUE nodes for LookUp (%s) were unreachable or dead, reasking closest for more"), GetGUIName()) );
+					SendFindValue(itContactMap->second, true);
+					return;
+				}
+				itContactMap++;
+			}
+		}
+	}
 
 	// Search for contacts that can be used to jumpstart a stalled search.
 	while(!m_mapPossible.empty())
@@ -283,7 +332,9 @@ void CSearch::JumpStart()
 		{
 			// Did we get a response from this node, if so, try to store or get info.
 			if(m_mapResponded.count(m_mapPossible.begin()->first) > 0)
+			{
 				StorePacket();
+			}
 			// Remove from possible list.
 			m_mapPossible.erase(m_mapPossible.begin());
 		}
@@ -305,18 +356,35 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 	for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
 		m_listDelete.push_back(*itContactList);
 
+	m_uLastResponse = time(NULL);
+
+	//Find contact that is responding.
+	CUInt128 uFromDistance((ULONG)0);
+	CContact* pFromContact = NULL;
+	for (ContactMap::const_iterator itContactMap = m_mapTried.begin(); itContactMap != m_mapTried.end(); ++itContactMap)
+	{
+		CContact* pTmpContact = itContactMap->second;
+		if ((pTmpContact->GetIPAddress() == uFromIP) && (pTmpContact->GetUDPPort() == uFromPort))
+		{
+			uFromDistance = itContactMap->first;
+			pFromContact = pTmpContact;
+			break;
+		}
+	}
+	
 	// Make sure the node is not sending more results than we requested, which is not only a protocol vialoation
 	// but most likely a malicous answer
-	if (plistResults->size() > GetRequestContactCount())
+	if (plistResults->size() > GetRequestContactCount() && !(pRequestedMoreNodesContact == pFromContact && plistResults->size() <= KADEMLIA_FIND_VALUE_MORE) )
 	{
 		DebugLogWarning(_T("Node %s sent more contacts than requested on a routing query, ignoring response"), ipstr(ntohl(uFromIP)));
 		return;
 	}
 
-	m_uLastResponse = time(NULL);
-
 	if (m_uType == NODEFWCHECKUDP){
 		m_uAnswers++;
+		// Results are not passed to the search and not much point in changing this, but make sure we show on the graph that the contact responded
+		m_pLookupHistory->ContactReceived(NULL, pFromContact, (ULONG)0, true);
+		theApp.emuledlg->kademliawnd->UpdateSearchGraph(m_pLookupHistory);
 		delete plistResults;
 		// Update search on the GUI.
 		theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
@@ -329,6 +397,13 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 	{
 		// Note we got an answer
 		m_uAnswers++;
+		// Add contacts to the History for GUI purposes
+		for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
+		{			
+			CUInt128 uDistance(((CContact*)*itContactList)->GetClientID().Xor(m_uTarget));
+			m_pLookupHistory->ContactReceived(*itContactList, pFromContact, uDistance, uDistance < uFromDistance, true);
+		}
+		theApp.emuledlg->kademliawnd->UpdateSearchGraph(m_pLookupHistory);
 		// We clear the possible list to force the search to stop.
 		// We do this so the user has time to visually see the results.
 		m_mapPossible.clear();
@@ -340,109 +415,109 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 
 	try
 	{
-		//Find contact that is responding.
-		for (ContactMap::const_iterator itContactMap = m_mapTried.begin(); itContactMap != m_mapTried.end(); ++itContactMap)
+		if (pFromContact != NULL)
 		{
-			CUInt128 uFromDistance(itContactMap->first);
-			CContact* pFromContact = itContactMap->second;
-
-			if ((pFromContact->GetIPAddress() == uFromIP) && (pFromContact->GetUDPPort() == uFromPort))
+			bool bProvidedCloserContacts = false;
+			std::map<uint32, uint32> mapReceivedIPs;
+			std::map<uint32, uint32> mapReceivedSubnets;
+			mapReceivedIPs[uFromIP] = 1; // A node is not allowd to answer with contacts to itself
+			mapReceivedSubnets[uFromIP & 0xFFFFFF00] = 1;
+			// Loop through their responses
+			for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
 			{
-				// Add to list of people who responded
-				m_mapResponded[uFromDistance] = pFromContact;
+				// Get next result
+				CContact* pContact = *itContactList;
 
-				std::map<uint32, uint32> mapReceivedIPs;
-				std::map<uint32, uint32> mapReceivedSubnets;
-				mapReceivedIPs[uFromIP] = 1; // A node is not allowd to answer with contacts to itself
-				mapReceivedSubnets[uFromIP & 0xFFFFFF00] = 1;
-				// Loop through their responses
-				for (ContactList::iterator itContactList = plistResults->begin(); itContactList != plistResults->end(); ++itContactList)
+				// Calc distance this result is to the target.
+				CUInt128 uDistance(pContact->GetClientID());
+				uDistance.Xor(m_uTarget);
+
+				if (uDistance < uFromDistance)
+					bProvidedCloserContacts = true;
+
+				m_pLookupHistory->ContactReceived(pContact, pFromContact, uDistance, bProvidedCloserContacts);
+				theApp.emuledlg->kademliawnd->UpdateSearchGraph(m_pLookupHistory);
+
+				// Ignore this contact if already know or tried it.
+				if (m_mapPossible.count(uDistance) > 0)
+					continue;
+				if (m_mapTried.count(uDistance) > 0)
+					continue;
+
+				// we only accept unique IPs in the answer, having multiple IDs pointing to one IP in the routing tables
+				// is no longer allowed since 0.49a anyway
+				if (mapReceivedIPs.count(pContact->GetIPAddress()) > 0){
+					DebugLogWarning(_T("Multiple KadIDs pointing to same IP (%s) in KADEMLIA(2)_RES answer - ignored, sent by %s")
+						, ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(pFromContact->GetIPAddress())));
+					continue;
+				}
+				else
+					mapReceivedIPs[pContact->GetIPAddress()] = 1;
+
+				// and no more than 2 IPs from the same /28 subnet
+				if (mapReceivedSubnets.count(pContact->GetIPAddress() & 0xFFFFFF00) > 0 && !::IsLANIP(ntohl(pContact->GetIPAddress())))
 				{
-					// Get next result
-					CContact* pContact = *itContactList;
-
-					// Calc distance this result is to the target.
-					CUInt128 uDistance(pContact->GetClientID());
-					uDistance.Xor(m_uTarget);
-
-					// Ignore this contact if already know or tried it.
-					if (m_mapPossible.count(uDistance) > 0)
-						continue;
-					if (m_mapTried.count(uDistance) > 0)
-						continue;
-					
-					// we only accept unique IPs in the answer, having multiple IDs pointing to one IP in the routing tables
-					// is no longer allowed since 0.49a anyway
-					if (mapReceivedIPs.count(pContact->GetIPAddress()) > 0){
-						DebugLogWarning(_T("Multiple KadIDs pointing to same IP (%s) in KADEMLIA(2)_RES answer - ignored, sent by %s")
-							, ipstr(ntohl(pContact->GetIPAddress())), ipstr(ntohl(pFromContact->GetIPAddress())));
+					ASSERT( mapReceivedSubnets.find(pContact->GetIPAddress() & 0xFFFFFF00) != mapReceivedSubnets.end() );
+					int nSubNetCount = mapReceivedSubnets.find(pContact->GetIPAddress() & 0xFFFFFF00)->second;
+					if (nSubNetCount >= 2)
+					{
+						DebugLogWarning(_T("More than 2 KadIDs pointing to same Subnet (%s) in KADEMLIA(2)_RES answer - ignored, sent by %s")
+							, ipstr(ntohl(pContact->GetIPAddress() & 0xFFFFFF00)), ipstr(ntohl(pFromContact->GetIPAddress())));
 						continue;
 					}
 					else
-						mapReceivedIPs[pContact->GetIPAddress()] = 1;
+						mapReceivedSubnets[pContact->GetIPAddress() & 0xFFFFFF00] = nSubNetCount + 1;
 
-					// and no more than 2 IPs from the same /28 subnet
-					if (mapReceivedSubnets.count(pContact->GetIPAddress() & 0xFFFFFF00) > 0 && !::IsLANIP(ntohl(pContact->GetIPAddress())))
+				}
+				else
+					mapReceivedSubnets[pContact->GetIPAddress() & 0xFFFFFF00] = 1;
+
+				// Add to possible
+				m_mapPossible[uDistance] = pContact;
+
+				// Verify if the result is closer to the target then the one we just checked.
+				if (uDistance < uFromDistance)
+				{
+					// The top APLPHA_QUERY of results are used to determine if we send a request.
+					bool bTop = false;
+					if (m_mapBest.size() < ALPHA_QUERY)
 					{
-						ASSERT( mapReceivedSubnets.find(pContact->GetIPAddress() & 0xFFFFFF00) != mapReceivedSubnets.end() );
-						int nSubNetCount = mapReceivedSubnets.find(pContact->GetIPAddress() & 0xFFFFFF00)->second;
-						if (nSubNetCount >= 2)
-						{
-							DebugLogWarning(_T("More than 2 KadIDs pointing to same Subnet (%s) in KADEMLIA(2)_RES answer - ignored, sent by %s")
-								, ipstr(ntohl(pContact->GetIPAddress() & 0xFFFFFF00)), ipstr(ntohl(pFromContact->GetIPAddress())));
-							continue;
-						}
-						else
-							mapReceivedSubnets[pContact->GetIPAddress() & 0xFFFFFF00] = nSubNetCount + 1;
-
+						bTop = true;
+						m_mapBest[uDistance] = pContact;
 					}
 					else
-						mapReceivedSubnets[pContact->GetIPAddress() & 0xFFFFFF00] = 1;
-
-					// Add to possible
-					m_mapPossible[uDistance] = pContact;
-
-					// Verify if the result is closer to the target then the one we just checked.
-					if (uDistance < uFromDistance)
 					{
-						// The top APLPHA_QUERY of results are used to determine if we send a request.
-						bool bTop = false;
-						if (m_mapBest.size() < ALPHA_QUERY)
+						ContactMap::iterator itContactMapBest = m_mapBest.end();
+						itContactMapBest--;
+						if (uDistance < itContactMapBest->first)
 						{
-							bTop = true;
+							// Prevent having more then ALPHA_QUERY within the Best list.
+							m_mapBest.erase(itContactMapBest);
 							m_mapBest[uDistance] = pContact;
-						}
-						else
-						{
-							ContactMap::iterator itContactMapBest = m_mapBest.end();
-							itContactMapBest--;
-							if (uDistance < itContactMapBest->first)
-							{
-								// Prevent having more then ALPHA_QUERY within the Best list.
-								m_mapBest.erase(itContactMapBest);
-								m_mapBest[uDistance] = pContact;
-								bTop = true;
-							}
-						}
-
-						if(bTop)
-						{
-							// We determined this contact is a canditate for a request.
-							// Add to the tried list.
-							m_mapTried[uDistance] = pContact;
-							// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
-							// Send request
-							SendFindValue(pContact);
+							bTop = true;
 						}
 					}
+
+					if(bTop)
+					{
+						// We determined this contact is a canditate for a request.
+						// Add to the tried list.
+						m_mapTried[uDistance] = pContact;
+						// Send the KadID so other side can check if I think it has the right KadID. (Saftey net)
+						// Send request
+						SendFindValue(pContact);
+					}
 				}
-				// Complete node search, just increase the answers and update the GUI
-				if( m_uType == NODECOMPLETE || m_uType == NODESPECIAL)
-				{
-					m_uAnswers++;
-					theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
-				}
-				break;
+			}
+
+			// Add to list of people who responded
+			m_mapResponded[uFromDistance] = bProvidedCloserContacts;
+
+			// Complete node search, just increase the answers and update the GUI
+			if( m_uType == NODECOMPLETE || m_uType == NODESPECIAL)
+			{
+				m_uAnswers++;
+				theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 			}
 		}
 	}
@@ -465,10 +540,10 @@ void CSearch::StorePacket()
 	if (uFromDistance < m_uClosestDistantFound || m_uClosestDistantFound == 0)
 		m_uClosestDistantFound = uFromDistance;
 	// Make sure this is a valid Node to store too.
-	// Shouldn't LAN IPs already be filtered?
-	if(thePrefs.FilterLANIPs() && uFromDistance.Get32BitChunk(0) > SEARCHTOLERANCE)
+	if(uFromDistance.Get32BitChunk(0) > SEARCHTOLERANCE && !::IsLANIP(ntohl(pFromContact->GetIPAddress())))
 		return;
-
+	m_pLookupHistory->ContactAskedKeyword(pFromContact);
+	theApp.emuledlg->kademliawnd->UpdateSearchGraph(m_pLookupHistory);
 	// What kind of search are we doing?
 	switch(m_uType)
 	{
@@ -645,7 +720,7 @@ void CSearch::StorePacket()
 				if (pFile)
 				{
 					// We set this mostly for GUI resonse.
-					m_sGUIName = pFile->GetFileName();
+					SetGUIName(pFile->GetFileName());
 
 					// Get our clientID for the packet.
 					CUInt128 uID(CKademlia::GetPrefs()->GetClientHash());
@@ -777,7 +852,7 @@ void CSearch::StorePacket()
 							iCount--;
 							iPacketCount++;
 							byIO.WriteUInt128(iID);
-							PreparePacketForTags( &byIO, pFile );
+							PreparePacketForTags( &byIO, pFile, pFromContact->GetVersion() );
 						}
 						++itListFileID;
 					}
@@ -804,11 +879,7 @@ void CSearch::StorePacket()
 						ASSERT( CKadUDPKey(0) == pFromContact->GetUDPKey() );
 					}
 					else
-					{
-						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-							DebugSend("KADEMLIA_PUBLISH_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
-					}
+						ASSERT( false );
 				}
 				// Inc total request answers
 				m_uTotalRequestAnswers++;
@@ -859,11 +930,7 @@ void CSearch::StorePacket()
 						ASSERT( CKadUDPKey(0) == pFromContact->GetUDPKey() );
 					}
 					else
-					{
-						if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-							DebugSend("KADEMLIA_PUBLISH_NOTES_REQ", pFromContact->GetIPAddress(), pFromContact->GetUDPPort());
-						CKademlia::GetUDPListener()->SendPacket( byPacket, sizeof(byPacket)-byIO.GetAvailable(), KADEMLIA_PUBLISH_NOTES_REQ, pFromContact->GetIPAddress(), pFromContact->GetUDPPort(), 0, NULL);
-					}
+						ASSERT( false );
 					// Inc total request answers
 					m_uTotalRequestAnswers++;
 					// Update search in the GUI
@@ -962,20 +1029,26 @@ void CSearch::StorePacket()
 	}
 }
 
-void CSearch::ProcessResult(const CUInt128 &uAnswer, TagList *plistInfo)
+void CSearch::ProcessResult(const CUInt128 &uAnswer, TagList *plistInfo, uint32 uFromIP, uint16 uFromPort)
 {
 	// We received a result, process it based on type.
+	uint32 iAnswerBefore = m_uAnswers;
 	switch(m_uType)
 	{
 		case FILE:
 			ProcessResultFile(uAnswer, plistInfo);
 			break;
 		case KEYWORD:
-			ProcessResultKeyword(uAnswer, plistInfo);
+			ProcessResultKeyword(uAnswer, plistInfo, uFromIP, uFromPort);
 			break;
 		case NOTES:
 			ProcessResultNotes(uAnswer, plistInfo);
 			break;
+	}
+	if (iAnswerBefore < m_uAnswers)
+	{
+		m_pLookupHistory->ContactRespondedKeyword(uFromIP, uFromPort, m_uAnswers - iAnswerBefore);
+		theApp.emuledlg->kademliawnd->UpdateSearchGraph(m_pLookupHistory);
 	}
 	// Update search for the GUI
 	theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
@@ -1159,8 +1232,24 @@ void CSearch::ProcessResultNotes(const CUInt128 &uAnswer, TagList *plistInfo)
 	delete pEntry;
 }
 
-void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
+void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo, uint32 uFromIP, uint16 uFromPort)
 {
+	// Find the contact who sent the answer - we need to know its protocol version
+	// Special publish answer tags need to be filtered based on its remote protocol version, because if an old node is not aware
+	// of those special tags, it doesn't knows it is not supposed accept and store such tags on publish request, so a malicious
+	// publisher could fake them and our remote node would relay them on answers
+	uint8 uFromKadVersion = 0;
+	CContact* pFromContact = NULL;
+	for (ContactMap::const_iterator itContactMap = m_mapTried.begin(); itContactMap != m_mapTried.end(); ++itContactMap)
+	{
+		CContact* pTmpContact = itContactMap->second;
+		if ((pTmpContact->GetIPAddress() == uFromIP) && (pTmpContact->GetUDPPort() == uFromPort))
+			pFromContact = pTmpContact;
+	}
+	if (pFromContact != NULL)
+		uFromKadVersion = pFromContact->GetVersion();
+	else
+		DebugLogWarning(_T("Unable to find answering contact in ProcessResultKeyword - %s"), ipstr(ntohl(uFromIP)));
 	// Process a keyword that we received.
 	// Set of data we can use for a keyword result
 	CKadTagValueString sName;
@@ -1175,6 +1264,8 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 	uint32 uBitrate = 0;
 	uint32 uAvailability = 0;
 	uint32 uPublishInfo = 0;
+	CArray<CAICHHash> aAICHHashs;
+	CArray<uint8> aAICHHashPopularity;
 	// Flag that is set if we want this keyword.
 	bool bFileName = false;
 	bool bFileSize = false;
@@ -1230,15 +1321,47 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 		}
 		else if (!pTag->m_name.Compare(TAG_PUBLISHINFO))
 		{
-			// we don't keep this as tag, but as a member property of the searchfile, as we only need its informations
-			// in the search list and don't want to carry the tag over when downloading the file (and maybe even wrongly publishing it)
-			uPublishInfo = (uint32)pTag->GetInt();
+			if (uFromKadVersion >= KADEMLIA_VERSION6_49aBETA)
+			{
+				// we don't keep this as tag, but as a member property of the searchfile, as we only need its informations
+				// in the search list and don't want to carry the tag over when downloading the file (and maybe even wrongly publishing it)
+				uPublishInfo = (uint32)pTag->GetInt();
 /*#ifdef _DEBUG
-			uint32 byDifferentNames = (uPublishInfo & 0xFF000000) >> 24;
-			uint32 byPublishersKnown = (uPublishInfo & 0x00FF0000) >> 16;
-			uint32 wTrustValue = uPublishInfo & 0x0000FFFF;
-			DebugLog(_T("Received PublishInfoTag: %u different names, %u Publishers, %.2f Trustvalue"), byDifferentNames, byPublishersKnown, (float)wTrustValue / 100.0f);  
-#endif*/
+				uint32 byDifferentNames = (uPublishInfo & 0xFF000000) >> 24;
+				uint32 byPublishersKnown = (uPublishInfo & 0x00FF0000) >> 16;
+				uint32 wTrustValue = uPublishInfo & 0x0000FFFF;
+				DebugLog(_T("Received PublishInfoTag: %u different names, %u Publishers, %.2f Trustvalue"), byDifferentNames, byPublishersKnown, (float)wTrustValue / 100.0f);  
+#endif*/	
+			}
+			else
+				DebugLogWarning(_T("ProcessResultKeyword: Received special pbulish tag (TAG_PUBLISHINFO) from node (version %u, ip: %s) which is not aware of it, filtering")
+					, uFromKadVersion, ipstr(ntohl(uFromIP)));
+		}
+		else if (!pTag->m_name.Compare(TAG_KADAICHHASHRESULT))
+		{
+			if (uFromKadVersion >= KADEMLIA_VERSION9_50a && pTag->IsBsob())
+			{
+				CSafeMemFile fileAICHTag(pTag->GetBsob(), pTag->GetBsobSize());
+				try
+				{
+					uint8 byCount = fileAICHTag.ReadUInt8();
+					for (uint8 i = 0; i < byCount; i++)
+					{
+						aAICHHashPopularity.Add(fileAICHTag.ReadUInt8());
+						aAICHHashs.Add(CAICHHash(&fileAICHTag));
+					}
+				}
+				catch (CFileException* pError)
+				{
+					DebugLogError(_T("ProcessResultKeyword: Corrupt or invalid TAG_KADAICHHASHRESULT received - ip: %s)") , ipstr(ntohl(uFromIP)));
+					pError->Delete();
+					aAICHHashPopularity.RemoveAll();
+					aAICHHashs.RemoveAll();
+				}
+			}
+			else
+				DebugLogWarning(_T("ProcessResultKeyword: Received special pbulish tag (TAG_KADAICHHASHRESULT) from node (version %u, ip: %s) which is not aware of it, filtering")
+					, uFromKadVersion, ipstr(ntohl(uFromIP)));
 		}
 		delete pTag;
 	}
@@ -1282,7 +1405,8 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 	theApp.emuledlg->kademliawnd->searchList->SearchRef(this);
 	// Send we keyword to searchlist to be processed.
 	// This method is still legacy from the multithreaded Kad, maybe this can be changed for better handling.
-	theApp.searchlist->KademliaSearchKeyword(m_uSearchID, &uAnswer, sName, uSize, sType, uPublishInfo, m_pSearchTerm, 8,
+	theApp.searchlist->KademliaSearchKeyword(m_uSearchID, &uAnswer, sName, uSize, sType, uPublishInfo
+		, aAICHHashs, aAICHHashPopularity, m_pSearchTerm, 8,
 		    2, TAG_FILEFORMAT, (LPCTSTR)sFormat,
 		    2, TAG_MEDIA_ARTIST, (LPCTSTR)sArtist,
 		    2, TAG_MEDIA_ALBUM, (LPCTSTR)sAlbum,
@@ -1293,7 +1417,7 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo)
 		    3, TAG_SOURCES, uAvailability);
 }
 
-void CSearch::SendFindValue(CContact* pContact)
+void CSearch::SendFindValue(CContact* pContact, bool bReAskMore)
 {
 	// Found a Node that we think has contacts closer to our target.
 	try
@@ -1304,6 +1428,17 @@ void CSearch::SendFindValue(CContact* pContact)
 		CSafeMemFile fileIO(33);
 		// The number of returned contacts is based on the type of search.
 		uint8 byContactCount = GetRequestContactCount();
+		if (bReAskMore)
+		{
+			if (pRequestedMoreNodesContact == NULL)
+			{
+				pRequestedMoreNodesContact = pContact;
+				ASSERT( byContactCount == KADEMLIA_FIND_VALUE);
+				byContactCount = KADEMLIA_FIND_VALUE_MORE;
+			}
+			else
+				ASSERT( false );
+		}
 		if (byContactCount > 0)
 			fileIO.WriteUInt8(byContactCount);
 		else
@@ -1319,6 +1454,8 @@ void CSearch::SendFindValue(CContact* pContact)
 
 		if (pContact->GetVersion() >= 2/*47a*/)
 		{
+			m_pLookupHistory->ContactAskedKad(pContact);
+			theApp.emuledlg->kademliawnd->UpdateSearchGraph(m_pLookupHistory);
 			if (pContact->GetVersion() >= 6){ /*48b*/
 				CUInt128 uClientID = pContact->GetClientID();
 				CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA2_REQ, pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetUDPKey(), &uClientID);
@@ -1367,47 +1504,7 @@ void CSearch::SendFindValue(CContact* pContact)
 			}
 		}
 		else
-		{
-			CKademlia::GetUDPListener()->SendPacket(&fileIO, KADEMLIA_REQ, pContact->GetIPAddress(), pContact->GetUDPPort(), 0, NULL);
-			if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-			{
-				switch(m_uType)
-				{
-					case NODE:
-						DebugSend("KADEMLIA_REQ(NODE)", pContact->GetIPAddress(), pContact->GetUDPPort());
-						break;
-					case NODECOMPLETE:
-						DebugSend("KADEMLIA_REQ(NODECOMPLETE)", pContact->GetIPAddress(), pContact->GetUDPPort());
-						break;
-					case NODESPECIAL:
-						DebugSend("KADEMLIA_REQ(NODECOMPLETE)", pContact->GetIPAddress(), pContact->GetUDPPort());
-						break;
-					case NODEFWCHECKUDP:
-						DebugSend("KADEMLIA_REQ(NODEFWCHECKUDP)", pContact->GetIPAddress(), pContact->GetUDPPort());
-						break;
-					case FILE:
-						DebugSend("KADEMLIA_REQ(FILE)", pContact->GetIPAddress(), pContact->GetUDPPort());
-						break;
-					case KEYWORD:
-						DebugSend("KADEMLIA_REQ(KEYWORD)", pContact->GetIPAddress(), pContact->GetUDPPort());
-						break;
-					case STOREFILE:
-						DebugSend("KADEMLIA_REQ(STOREFILE)", pContact->GetIPAddress(), pContact->GetUDPPort());
-						break;
-					case STOREKEYWORD:
-						DebugSend("KADEMLIA_REQ(STOREKEYWORD)", pContact->GetIPAddress(), pContact->GetUDPPort());
-						break;
-					case STORENOTES:
-						DebugSend("KADEMLIA_REQ(STORENOTES)", pContact->GetIPAddress(), pContact->GetUDPPort());
-						break;
-					case NOTES:
-						DebugSend("KADEMLIA_REQ(NOTES)", pContact->GetIPAddress(), pContact->GetUDPPort());
-						break;
-					default:
-						DebugSend("KADEMLIA_REQ()", pContact->GetIPAddress(), pContact->GetUDPPort());
-				}
-			}
-		}
+			ASSERT( false );
 	}
 	catch ( CIOException *ioe )
 	{
@@ -1475,7 +1572,7 @@ static bool IsRedundantMetaData(const CStringArray& rastrFileNameWords, const CS
 	return false;
 }
 
-void CSearch::PreparePacketForTags(CByteIO *byIO, CKnownFile *pFile)
+void CSearch::PreparePacketForTags(CByteIO *byIO, CKnownFile *pFile, uint8 byTargetKadVersion)
 {
 	// We are going to publish a keyword, setup the tag list.
 	TagList listTag;
@@ -1496,6 +1593,10 @@ void CSearch::PreparePacketForTags(CByteIO *byIO, CKnownFile *pFile)
 				listTag.push_back(new CKadTagUInt(TAG_FILESIZE, pFile->GetFileSize()));
 
 			listTag.push_back(new CKadTagUInt(TAG_SOURCES, pFile->m_nCompleteSourcesCount));
+
+			if (byTargetKadVersion >= KADEMLIA_VERSION9_50a && pFile->GetFileIdentifier().HasAICHHash())
+				listTag.push_back(new CKadTagBsob(TAG_KADAICHHASHPUB, pFile->GetFileIdentifier().GetAICHHash().GetRawHashC()
+				, (uint8)CAICHHash::GetHashSize()));
 
 			// eD2K file type (Audio, Video, ...)
 			// NOTE: Archives and CD-Images are published with file type "Pro"
@@ -1614,6 +1715,7 @@ uint32 CSearch::GetSearchTypes() const
 void CSearch::SetSearchTypes( uint32 uVal )
 {
 	m_uType = uVal;
+	m_pLookupHistory->SetSearchType(uVal);
 }
 void CSearch::SetTargetID( CUInt128 uVal )
 {
@@ -1637,11 +1739,11 @@ uint32 CSearch::GetRequestAnswer() const
 
 const CKadTagValueString& CSearch::GetGUIName() const
 {
-	return m_sGUIName;
+	return m_pLookupHistory->GetGUIName();
 }
 void CSearch::SetGUIName(const CKadTagValueString& sGUIName)
 {
-	m_sGUIName = sGUIName;
+	 m_pLookupHistory->SetGUIName(sGUIName);
 }
 CUInt128 CSearch::GetTarget() const
 {

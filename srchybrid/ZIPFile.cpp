@@ -350,11 +350,11 @@ BOOL CZIPFile::File::PrepareToDecompress(LPVOID pStream)
 	{
 		return ( m_nSize == m_nCompressedSize );
 	}
-	else
+	else if (m_nCompression == Z_DEFLATED)
 	{
-		ASSERT( m_nCompression == Z_DEFLATED );
 		return Z_OK == inflateInit2( (z_stream*)pStream, -MAX_WBITS );
 	}
+	return FALSE;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -384,6 +384,7 @@ BOOL CZIPFile::File::PrepareToDecompress(LPVOID pStream)
 	if ( nSource != (DWORD)m_nCompressedSize )
 	{
 		inflateEnd( &pStream );
+		delete [] pSource;
 		return NULL;
 	}
 	
@@ -426,7 +427,11 @@ BOOL CZIPFile::File::Extract(LPCTSTR pszFile)
 		FILE_ATTRIBUTE_NORMAL, NULL );
 	if ( hFile == INVALID_HANDLE_VALUE ) return FALSE;
 	
-	if ( ! PrepareToDecompress( &pStream ) ) return NULL;
+	if ( ! PrepareToDecompress( &pStream ) ) {
+		CloseHandle(hFile);
+		DeleteFile(pszFile);
+		return FALSE;
+	}
 	
 	uint64 nCompressed = 0, nUncompressed = 0;
 	

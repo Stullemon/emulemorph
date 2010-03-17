@@ -37,8 +37,6 @@ protected:
 
 	void Init();
 	void Localize();
-	void Hide() { ShowWindow(SW_HIDE); }
-	void Visible() { ShowWindow(SW_SHOW); }
 	void SaveAllSettings();
 	void UpdateKadContactCount();
 	void UpdateContact(int iItem, const Kademlia::CContact *contact);

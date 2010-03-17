@@ -513,7 +513,6 @@ BEGIN
     IDS_PW_USS              "Serverliste beim Programmstart aktualisieren"
     IDS_PW_MISC             "Verschiedene Optionen"
     IDS_PW_TRAY             "Zum Systemicon minimieren"
-    IDS_PW_BEEP             "Piepton bei Fehler"
     IDS_PW_PROMPT           "Sicherheitsabfrage bei Programmbeendigung"
 END
 
@@ -741,7 +740,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPDATEQUEUE         "Warteschlangenliste nicht in Echtzeit aktualisieren"
     IDS_RECOVER_SINGLE      "1 Datei restauriert."
     IDS_RECOVER_MULTIPLE    "%u Dateien restauriert."
     IDS_ATTEMPTING_RECOVERY "Versuche Archiv-Restaurierung..."
@@ -1096,7 +1094,6 @@ STRINGTABLE
 BEGIN
     IDS_ERR_TOOLARGEFILE    "Datei ist größer als vom Edonkey Protokoll unterstützt (>=256GB)"
     IDS_MSGONLYFRIENDS      "Nur von Freunden akzeptieren"
-    IDS_MSGONLYSEC          "Nur von gültigen Clients akzeptieren"
     IDS_DAY_MO_SA           "Mo-Sa"
     IDS_LIMITSOURCES        "Max. Quellen"
     IDS_LIMITCONS5SEC       "Max. neue Verb./5sek"
@@ -1146,7 +1143,6 @@ BEGIN
     IDS_DL_RESUMENEXT       "Nächste pausierte Datei fortsetzen"
     IDS_STARTPRIO           "Priorität dieser Kategorie"
     IDS_PREF_STARTNEXTFILECAT "Gleiche Kategorie bevorzugen"
-    IDS_REPAINTGRAPHS       "Statistikgraphen bei Fensteränderung nicht neu berechnen"
     IDS_SOFTFILES           "Dateilimit (weich)"
     IDS_HARDFILES           "Dateilimit (hart)"
     IDS_FILTER              "Filter" //!
@@ -1565,7 +1561,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_LOG_LEVEL           "Log Level"
-    IDS_DISABLEPEERACHE     "Download von PeerCache deaktivieren"
     IDS_NEWMSG              "Neue Nachricht von '%s' (IP:%s)"
     IDS_PREF_STARTNEXTFILECATONLY "Nur aus gleicher Kategorie"
     IDS_LOG_ULDL_EVENTS     "Logge Upload/Download Ereignisse"
@@ -1657,7 +1652,7 @@ BEGIN
     IDS_LD_COPYCLIPBOARD    "In Zwischenablage kopieren"
     IDS_LD_HOSTNAME         "Benutze Hostnamen (aus den Einstellungen) anstatt der IP, wenn eD2K-Links mit Quelle erstellt werden"
     IDS_SAVEACFAILED        "AICH Hashset konnte nicht gespeichert werden!"
-    IDS_IACHHASH            "AICH Hash" //!
+    IDS_AICHHASH            "AICH Hash" //!
     IDS_BYTESPERSEC         "B/s"			//!
     IDS_KBYTESPERSEC        "KB/s"		//!
     IDS_MBYTESPERSEC        "MB/s"		//!
@@ -1965,6 +1960,32 @@ BEGIN
     IDS_WEBUPNPINCLUDE      "Port in UPnP Einrichtung aufnehmen"
     IDS_ADDEDON             "hinzugefügt am"
     IDS_RESOLVELINKS        "Shell-Links in freigegebenen Verzeichnissen auflösen"
+END
+
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNLOADCOMMANDS    "Downloadbefehle"
+    IDS_CLOSETOOLBAR        "Schließe Toolbar"
+    IDS_SHOWTOOLBAR         "Zeige Toolbar"
+    IDS_SEARCH_BADOPERATORCOMBINATION 
+                            "Du darfst bei Suchanfragen an KAD nicht im ersten Schlüsselwort einen ODER-Operator (OR) nutzen!\n\nZum Beispiel ""Keyword1 OR Keyword2"" ist nicht möglich. Nutze stattdessen ""Keyword1 AND (Keyword2 OR Keyword3)"" oder führe mehrere Suchen durch."
+    IDS_DISCOVEREDBY        "Entdeckt von"
+    IDS_NODES               "Knoten"
+    IDS_ROUTINGTABLE        "Routingtabelle"
+    IDS_PROTOCOLVERSION     "Protokollversion"
+    IDS_FOUNDNODESUSEFUL    "gefundene Knoten (nützliche)"
+    IDS_NORESPONSE          "keine Antwort"
+    IDS_NOTASKED            "nicht angefragt"
+    IDS_LOOKUPGRAPH         "Suchdetails"
+    IDS_AUTOKADLOOKUPGRAPH  "automatisch aktive Suchen anzeigen"
+    IDS_PAUSEONPREVIEW      "Pausiere wenn Vorschau möglich"
+    IDS_PREVIEWWITH         "Vorschau mit"
+    IDS_CLOSEEMULE          "eMule beenden"
+    IDS_DONOTASKAGAIN       "nicht erneut nachfragen"
+    IDS_POPULARITY          "Popularitätsrang"
+    IDS_SHOWWIN7TASKBARGOODIES "Aktiviere Windows7 Taskbareffekte"
+    IDS_LANMODE             "LAN Modus"
 END
 
 // Morph
@@ -3691,11 +3712,6 @@ BEGIN
    IDS_REMOVE_AICH_TIP      "Schalte dies ein um AICH hash von nicht mehr\nfreigegebenen Dateien sofort zu löschen.\nStandard: ausgeschaltet"
    IDS_WSUPNP_TIP           "Bezieht den Webserver port in das UPnP Portweiterleiten ein."
    IDS_CHECK_FILE_OPEN_TIP  "Schaltet Abfrage vor dem Öffnen einer Datei mittels\neMule ein."
-   //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
-   IDS_FILTER_CLIENTFAILEDDOWN        "Filtere Clients mit fehlgeschlagenen Downloads"
-   IDS_FILTER_CLIENTFAILEDDOWN_TIP    "Filtere Clients die in drei Mal pro Download\nSession weniger als 12 kB übertragen haben\nStandard: eingeschaltet"
-   //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
-   IDS_TCP_CONS             "TCP-Verbindungen"
 END
 
 #endif    // German (Germany) resources

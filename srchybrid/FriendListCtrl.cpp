@@ -397,7 +397,7 @@ BOOL CFriendListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				CString sLink;
 				CED2KFriendLink friendLink(cur_friend->m_strName, cur_friend->m_abyUserhash);
 				friendLink.GetLink(sLink);
-				sLink = _T("<a href=\"") + sLink + _T("\">") + StripInvalidFilenameChars(cur_friend->m_strName, true) + _T("</a>");
+				sLink = _T("<a href=\"") + sLink + _T("\">") + StripInvalidFilenameChars(cur_friend->m_strName) + _T("</a>");
 				if ( !sCompleteLink.IsEmpty() )
 					sCompleteLink.Append(_T("\r\n"));
 				sCompleteLink.Append(sLink);

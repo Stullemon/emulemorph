@@ -17,7 +17,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -288,6 +288,8 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 			rCtrl << GetResString(IDS_FIREWALLED);
 		else
 			rCtrl << GetResString(IDS_KADOPEN);
+		if (Kademlia::CKademlia::IsRunningInLANMode())
+			rCtrl << _T(" (") << GetResString(IDS_LANMODE) << _T(")");
 		rCtrl << _T("\r\n");
 		rCtrl << _T("UDP ") + GetResString(IDS_STATUS) << _T(":\t");
 		if(Kademlia::CUDPFirewallTester::IsFirewalledUDP(true))
@@ -314,7 +316,7 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 			buffer.Format(_T("%u"), Kademlia::CKademlia::GetPrefs()->GetExternalKadPort());
 			rCtrl << GetResString(IDS_EXTERNUDPPORT) << _T(":\t") << buffer << _T("\r\n");
 		}
-
+		
 		if (Kademlia::CUDPFirewallTester::IsFirewalledUDP(true)) {
 			rCtrl << GetResString(IDS_BUDDY) << _T(":\t");
 			switch ( theApp.clientlist->GetBuddyStatus() )
@@ -369,7 +371,7 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 	rCtrl << (thePrefs.GetWSIsEnabled() ? GetResString(IDS_ENABLED) : GetResString(IDS_DISABLED)) << _T("\r\n");
 	if (thePrefs.GetWSIsEnabled()){
 		CString count;
-		count.Format(_T("%i %s"),theApp.webserver->GetSessionCount(),GetResString(IDS_ACTSESSIONS));
+		count.Format(_T("%i %s"), theApp.webserver->GetSessionCount(), GetResString(IDS_ACTSESSIONS));
 		rCtrl << _T("\t") << count << _T("\r\n");
 		CString strHostname;
 		if (!thePrefs.GetYourHostname().IsEmpty() && thePrefs.GetYourHostname().Find(_T('.')) != -1)
@@ -433,9 +435,4 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 	else
 		rCtrl << GetResString(IDS_DISABLED) << _T("\r\n");
 	// <== UPnP support [MoNKi] - leuk_he
-
-
-
-
-
 }

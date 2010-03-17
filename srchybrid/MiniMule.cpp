@@ -20,7 +20,7 @@
 #include <atlutil.h>
 #include "emule.h"
 #include "emuledlg.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "MiniMule.h"
 #include "OtherFunctions.h"
 #include "Preferences.h"
@@ -416,9 +416,9 @@ void CMiniMule::UpdateContent(UINT uUpDatarate, UINT uDownDatarate)
 	UINT uCompleted = 0;
 	if (thePrefs.GetRemoveFinishedDownloads())
 		uCompleted = thePrefs.GetDownSessionCompletedFiles();
-	else if (theApp.emuledlg && theApp.emuledlg->transferwnd && theApp.emuledlg->transferwnd->downloadlistctrl.m_hWnd) {
+	else if (theApp.emuledlg && theApp.emuledlg->transferwnd && theApp.emuledlg->transferwnd->GetDownloadList()->m_hWnd) {
 		int iTotal;
-		uCompleted = theApp.emuledlg->transferwnd->downloadlistctrl.GetCompleteDownloads(-1, iTotal);	 // [Ded]: -1 to get the count of all completed files in all categories
+		uCompleted = theApp.emuledlg->transferwnd->GetDownloadList()->GetCompleteDownloads(-1, iTotal);	 // [Ded]: -1 to get the count of all completed files in all categories
 	}
 	SetElementHtml(_T("completed"), CComBSTR(CastItoIShort(uCompleted, false, 0)));
 	SetElementHtml(_T("freeSpace"), CComBSTR(CastItoXBytes(GetFreeTempSpace(-1), false, false)));

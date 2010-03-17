@@ -76,7 +76,6 @@ CKnownFile::CKnownFile()
 {
 	m_iPartCount = 0;
 	m_iED2KPartCount = 0;
-	m_iED2KPartHashCount = 0;
 	m_tUtcLastModified = (UINT)-1;
 	if(thePrefs.GetNewAutoUp()){
 		m_iUpPriority = PR_HIGH;
@@ -99,9 +98,9 @@ CKnownFile::CKnownFile()
 	m_lastPublishTimeKadSrc = 0;
 	m_lastPublishTimeKadNotes = 0;
 	m_lastBuddyIP = 0;
-	m_pAICHHashSet = new CAICHHashSet(this);
 	m_pCollection = NULL;
 	m_timeLastSeen = 0;
+	m_bAICHRecoverHashSetAvailable = false;
 
 	//MORPH START - Added by SiRoB, Show Permission
 	m_iPermissions = -1;
@@ -138,9 +137,6 @@ CKnownFile::CKnownFile()
 
 CKnownFile::~CKnownFile()
 {
-	for (int i = 0; i < hashlist.GetSize(); i++)
-		delete[] hashlist[i];
-	delete m_pAICHHashSet;
 	delete m_pCollection;
 	//MORPH START - Added by SiRoB, Reduce SharedStatusBar CPU consumption
 	m_bitmapSharedStatusBar.DeleteObject();
@@ -160,12 +156,10 @@ void CKnownFile::AssertValid() const
 	(void)m_nCompleteSourcesCountHi;
 	m_ClientUploadList.AssertValid();
 	m_AvailPartFrequency.AssertValid();
-	hashlist.AssertValid();
 	(void)m_strDirectory;
 	(void)m_strFilePath;
 	(void)m_iPartCount;
 	(void)m_iED2KPartCount;
-	(void)m_iED2KPartHashCount;
 	ASSERT( m_iUpPriority == PR_VERYLOW || m_iUpPriority == PR_LOW || m_iUpPriority == PR_NORMAL || m_iUpPriority == PR_HIGH || m_iUpPriority == PR_VERYHIGH );
 	CHECK_BOOL(m_bAutoUpPriority);
 	(void)s_ShareStatusBar;
@@ -556,11 +550,12 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 		m_AvailPartFrequency[i] = 0;
 	
 	// create hashset
+	CAICHRecoveryHashSet cAICHHashSet(this, m_nFileSize);
 	uint64 togo = m_nFileSize;
 	UINT hashcount;
 	for (hashcount = 0; togo >= PARTSIZE; )
 	{
-		CAICHHashTree* pBlockAICHHashTree = m_pAICHHashSet->m_pHashTree.FindHash((uint64)hashcount*PARTSIZE, PARTSIZE);
+		CAICHHashTree* pBlockAICHHashTree = cAICHHashSet.m_pHashTree.FindHash((uint64)hashcount*PARTSIZE, PARTSIZE);
 		ASSERT( pBlockAICHHashTree != NULL );
 
 		uchar* newhash = new uchar[16];
@@ -587,7 +582,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 		}
 		//MORPH END   - Added by Stulle, Progress Hash (O2)
 
-		hashlist.Add(newhash);
+		m_FileIdentifier.GetRawMD4HashSet().Add(newhash);
 		togo -= PARTSIZE;
 		hashcount++;
 
@@ -604,7 +599,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 	if (togo == 0)
 		pBlockAICHHashTree = NULL; // sha hashtree doesnt takes hash of 0-sized data
 	else{
-		pBlockAICHHashTree = m_pAICHHashSet->m_pHashTree.FindHash((uint64)hashcount*PARTSIZE, togo);
+		pBlockAICHHashTree = cAICHHashSet.m_pHashTree.FindHash((uint64)hashcount*PARTSIZE, togo);
 		ASSERT( pBlockAICHHashTree != NULL );
 	}
 	
@@ -617,12 +612,20 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 		return false;
 	}
 	
-	m_pAICHHashSet->ReCalculateHash(false);
-	if (m_pAICHHashSet->VerifyHashTree(true))
+	cAICHHashSet.ReCalculateHash(false);
+	if (cAICHHashSet.VerifyHashTree(true))
 	{
-		m_pAICHHashSet->SetStatus(AICH_HASHSETCOMPLETE);
-		if (!m_pAICHHashSet->SaveHashSet())
+		cAICHHashSet.SetStatus(AICH_HASHSETCOMPLETE);
+		m_FileIdentifier.SetAICHHash(cAICHHashSet.GetMasterHash());
+		if (!m_FileIdentifier.SetAICHHashSet(cAICHHashSet))
+		{
+			ASSERT( false );
+			DebugLogError(_T("CreateFromFile() - failed to create AICH PartHashSet out of RecoveryHashSet - %s"), GetFileName());
+		}
+		if (!cAICHHashSet.SaveHashSet())
 			LogError(LOG_STATUSBAR, GetResString(IDS_SAVEACFAILED));
+		else
+			SetAICHRecoverHashSetAvailable(true);
 	}
 	else{
 		// now something went pretty wrong
@@ -631,18 +634,13 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 		DebugLogError(LOG_STATUSBAR, _T("Failed to calculate AICH Hashset from file %s"), GetFileName());
 	}
 
-	hashlist.Add(lasthash);		// SLUGFILLER: SafeHash - better handling of single-part files
 	if (!hashcount){
-		md4cpy(m_abyFileHash, lasthash);
-		// SLUGFILLER: SafeHash remove - removed delete
+		m_FileIdentifier.SetMD4Hash(lasthash);
+		delete[] lasthash;
 	} 
 	else {
-		// SLUGFILLER: SafeHash remove - moved up
-		uchar* buffer = new uchar[hashlist.GetCount()*16];
-		for (int i = 0; i < hashlist.GetCount(); i++)
-			md4cpy(buffer+(i*16), hashlist[i]);
-		CreateHash(buffer, hashlist.GetCount()*16, m_abyFileHash);
-		delete[] buffer;
+		m_FileIdentifier.GetRawMD4HashSet().Add(lasthash);
+		m_FileIdentifier.CalculateMD4HashByHashSet(false);
 	}
 
 	if (pvProgressParam && theApp.emuledlg && theApp.emuledlg->IsRunning()){
@@ -692,11 +690,7 @@ bool CKnownFile::CreateFromFile(LPCTSTR in_directory, LPCTSTR in_filename, LPVOI
 bool CKnownFile::CreateAICHHashSetOnly()
 {
 	ASSERT( !IsPartFile() );
-
-	CAICHHash oldMasterHash = m_pAICHHashSet->GetMasterHash();
-	bool bOldMasterHashValid = m_pAICHHashSet->HasValidMasterHash();
 	
-	m_pAICHHashSet->FreeHashSet();
 	FILE* file = _tfsopen(GetFilePath(), _T("rbS"), _SH_DENYNO); // can not use _SH_DENYWR because we may access a completing part file
 	if (!file){
 		LogError(GetResString(IDS_ERR_FILEOPEN) + _T(" - %s"), GetFilePath(), _T(""), _tcserror(errno));
@@ -706,11 +700,12 @@ bool CKnownFile::CreateAICHHashSetOnly()
 	setvbuf(file, NULL, _IOFBF, 1024*8*2);
 
 	// create aichhashset
+	CAICHRecoveryHashSet cAICHHashSet(this, m_nFileSize);
 	uint64 togo = m_nFileSize;
 	UINT hashcount;
 	for (hashcount = 0; togo >= PARTSIZE; )
 	{
-		CAICHHashTree* pBlockAICHHashTree = m_pAICHHashSet->m_pHashTree.FindHash((uint64)hashcount*PARTSIZE, PARTSIZE);
+		CAICHHashTree* pBlockAICHHashTree = cAICHHashSet.m_pHashTree.FindHash((uint64)hashcount*PARTSIZE, PARTSIZE);
 		ASSERT( pBlockAICHHashTree != NULL );
 		if (!CreateHash(file, PARTSIZE, NULL, pBlockAICHHashTree)) {
 			LogError(_T("Failed to hash file \"%s\" - %s"), GetFilePath(), _tcserror(errno));
@@ -729,7 +724,7 @@ bool CKnownFile::CreateAICHHashSetOnly()
 
 	if (togo != 0)
 	{
-		CAICHHashTree* pBlockAICHHashTree = m_pAICHHashSet->m_pHashTree.FindHash((uint64)hashcount*PARTSIZE, togo);
+		CAICHHashTree* pBlockAICHHashTree = cAICHHashSet.m_pHashTree.FindHash((uint64)hashcount*PARTSIZE, togo);
 		ASSERT( pBlockAICHHashTree != NULL );
 		if (!CreateHash(file, togo, NULL, pBlockAICHHashTree)) {
 			LogError(_T("Failed to hash file \"%s\" - %s"), GetFilePath(), _tcserror(errno));
@@ -738,12 +733,24 @@ bool CKnownFile::CreateAICHHashSetOnly()
 		}
 	}
 
-	m_pAICHHashSet->ReCalculateHash(false);
-	if (m_pAICHHashSet->VerifyHashTree(true))
+	cAICHHashSet.ReCalculateHash(false);
+	if (cAICHHashSet.VerifyHashTree(true))
 	{
-		m_pAICHHashSet->SetStatus(AICH_HASHSETCOMPLETE);
-		if (!m_pAICHHashSet->SaveHashSet())
+		cAICHHashSet.SetStatus(AICH_HASHSETCOMPLETE);
+		if (m_FileIdentifier.HasAICHHash() && m_FileIdentifier.GetAICHHash() != cAICHHashSet.GetMasterHash())
+			theApp.knownfiles->AICHHashChanged(&m_FileIdentifier.GetAICHHash(), cAICHHashSet.GetMasterHash(), this);
+		else
+			theApp.knownfiles->AICHHashChanged(NULL, cAICHHashSet.GetMasterHash(), this);
+		m_FileIdentifier.SetAICHHash(cAICHHashSet.GetMasterHash());
+		if (!m_FileIdentifier.SetAICHHashSet(cAICHHashSet))
+		{
+			ASSERT( false );
+			DebugLogError(_T("CreateAICHHashSetOnly() - failed to create AICH PartHashSet out of RecoveryHashSet - %s"), GetFileName());
+		}
+		if (!cAICHHashSet.SaveHashSet())
 			LogError(LOG_STATUSBAR, GetResString(IDS_SAVEACFAILED));
+		else
+			SetAICHRecoverHashSetAvailable(true);
 	}
 	else{
 		// now something went pretty wrong
@@ -755,14 +762,12 @@ bool CKnownFile::CreateAICHHashSetOnly()
 	fclose(file);
 	file = NULL;
 	
-	theApp.knownfiles->AICHHashChanged(bOldMasterHashValid ? &oldMasterHash : NULL, m_pAICHHashSet->GetMasterHash(), this);
 	return true;	
 }
 
 void CKnownFile::SetFileSize(EMFileSize nFileSize)
 {
 	CAbstractFile::SetFileSize(nFileSize);
-	m_pAICHHashSet->SetFileSize(nFileSize);
 
 	// Examples of parthashs, hashsets and filehashs for different filesizes
 	// according the ed2k protocol
@@ -813,19 +818,18 @@ void CKnownFile::SetFileSize(EMFileSize nFileSize)
 	//Hash[  3]: BCE50BEE7877BB07BB6FDA56BFE142FB
 	//
 
-	// File size       Data parts      ED2K parts      ED2K part hashs
-	// ---------------------------------------------------------------
-	// 1..PARTSIZE-1   1               1               0(!)
-	// PARTSIZE        1               2(!)            2(!)
-	// PARTSIZE+1      2               2               2
-	// PARTSIZE*2      2               3(!)            3(!)
-	// PARTSIZE*2+1    3               3               3
+	// File size       Data parts      ED2K parts      ED2K part hashs		AICH part hashs
+	// -------------------------------------------------------------------------------------------
+	// 1..PARTSIZE-1   1               1               0(!)					0 (!)
+	// PARTSIZE        1               2(!)            2(!)					0 (!)
+	// PARTSIZE+1      2               2               2					2
+	// PARTSIZE*2      2               3(!)            3(!)					2
+	// PARTSIZE*2+1    3               3               3					3
 
 	if (nFileSize == (uint64)0){
 		ASSERT(0);
 		m_iPartCount = 0;
 		m_iED2KPartCount = 0;
-		m_iED2KPartHashCount = 0;
 		return;
 	}
 
@@ -835,106 +839,6 @@ void CKnownFile::SetFileSize(EMFileSize nFileSize)
 
 	// nr. of parts to be used with OP_FILESTATUS
 	m_iED2KPartCount = (uint16)((uint64)nFileSize / PARTSIZE + 1);
-
-	// nr. of parts to be used with OP_HASHSETANSWER
-	m_iED2KPartHashCount = (uint16)((uint64)nFileSize / PARTSIZE);
-	if (m_iED2KPartHashCount != 0)
-		m_iED2KPartHashCount += 1;
-}
-
-// needed for memfiles. its probably better to switch everything to CFile...
-bool CKnownFile::LoadHashsetFromFile(CFileDataIO* file, bool checkhash){
-	uchar checkid[16];
-	file->ReadHash16(checkid);
-	//TRACE("File size: %u (%u full parts + %u bytes)\n", GetFileSize(), GetFileSize()/PARTSIZE, GetFileSize()%PARTSIZE);
-	//TRACE("File hash: %s\n", md4str(checkid));
-	ASSERT( hashlist.GetCount() == 0 );
-	UINT parts = file->ReadUInt16();
-	//TRACE("Nr. hashs: %u\n", (UINT)parts);
-	for (UINT i = 0; i < parts; i++){
-		uchar* cur_hash = new uchar[16];
-		file->ReadHash16(cur_hash);
-		//TRACE("Hash[%3u]: %s\n", i, md4str(cur_hash));
-		hashlist.Add(cur_hash);
-	}
-
-	// SLUGFILLER: SafeHash - always check for valid hashlist
-	if (!checkhash){
-		md4cpy(m_abyFileHash, checkid);
-		if (parts <= 1)	// nothing to check
-			return true;
-	}
-	else if (md4cmp(m_abyFileHash, checkid)){
-		// delete hashset
-		for (int i = 0; i < hashlist.GetSize(); i++)
-			delete[] hashlist[i];
-		hashlist.RemoveAll();
-		return false;	// wrong file?
-	}
-	else{
-		if (parts != GetED2KPartCount()){	// SLUGFILLER: SafeHash - use GetED2KPartCount
-			// delete hashset
-			for (int i = 0; i < hashlist.GetSize(); i++)
-				delete[] hashlist[i];
-			hashlist.RemoveAll();
-			return false;
-		}
-	}
-	// SLUGFILLER: SafeHash
-
-	if (!hashlist.IsEmpty()){
-		uchar* buffer = new uchar[hashlist.GetCount()*16];
-		for (int i = 0; i < hashlist.GetCount(); i++)
-			md4cpy(buffer+(i*16), hashlist[i]);
-		CreateHash(buffer, hashlist.GetCount()*16, checkid);
-		delete[] buffer;
-	}
-	if (!md4cmp(m_abyFileHash, checkid))
-		return true;
-	else{
-		// delete hashset
-		for (int i = 0; i < hashlist.GetSize(); i++)
-			delete[] hashlist[i];
-		hashlist.RemoveAll();
-		return false;
-	}
-}
-
-bool CKnownFile::SetHashset(const CArray<uchar*, uchar*>& aHashset)
-{
-	// delete hashset
-	for (int i = 0; i < hashlist.GetSize(); i++)
-		delete[] hashlist[i];
-	hashlist.RemoveAll();
-
-	// set new hash
-	for (int i = 0; i < aHashset.GetSize(); i++)
-	{
-		uchar* pucHash = new uchar[16];
-		md4cpy(pucHash, aHashset.GetAt(i));
-		hashlist.Add(pucHash);
-	}
-
-	// verify new hash
-	if (hashlist.IsEmpty())
-		return true;
-
-	uchar aucHashsetHash[16];
-	uchar* buffer = new uchar[hashlist.GetCount()*16];
-	for (int i = 0; i < hashlist.GetCount(); i++)
-		md4cpy(buffer+(i*16), hashlist[i]);
-	CreateHash(buffer, hashlist.GetCount()*16, aucHashsetHash);
-	delete[] buffer;
-
-	bool bResult = (md4cmp(aucHashsetHash, m_abyFileHash) == 0);
-	if (!bResult)
-	{
-		// delete hashset
-		for (int i = 0; i < hashlist.GetSize(); i++)
-			delete[] hashlist[i];
-		hashlist.RemoveAll();
-	}
-	return bResult;
 }
  
 bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
@@ -948,6 +852,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 	// SLUGFILLER: Spreadbars
 	//MORPH END - Added by SiRoB, SLUGFILLER: Spreadbars
 	UINT tagcount = file->ReadUInt32();
+	bool bHadAICHHashSetTag = false;
 	for (UINT j = 0; j < tagcount; j++){
 		CTag* newtag = new CTag(file, false);
 		switch (newtag->GetNameID()){
@@ -975,28 +880,28 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 			case FT_ATTRANSFERRED:{
 				ASSERT( newtag->IsInt() );
 				if (newtag->IsInt())
-					statistic.alltimetransferred = newtag->GetInt();
+					statistic.SetAllTimeTransferred(newtag->GetInt());
 				delete newtag;
 				break;
 			}
 			case FT_ATTRANSFERREDHI:{
 				ASSERT( newtag->IsInt() );
 				if (newtag->IsInt())
-					statistic.alltimetransferred = ((uint64)newtag->GetInt() << 32) | (UINT)statistic.alltimetransferred;
+					statistic.SetAllTimeTransferred(((uint64)newtag->GetInt() << 32) | (UINT)statistic.GetAllTimeTransferred());
 				delete newtag;
 				break;
 			}
 			case FT_ATREQUESTED:{
 				ASSERT( newtag->IsInt() );
 				if (newtag->IsInt())
-					statistic.alltimerequested = newtag->GetInt();
+					statistic.SetAllTimeRequests(newtag->GetInt());
 				delete newtag;
 				break;
 			}
  			case FT_ATACCEPTED:{
 				ASSERT( newtag->IsInt() );
 				if (newtag->IsInt())
-					statistic.alltimeaccepted = newtag->GetInt();
+					statistic.SetAllTimeAccepts(newtag->GetInt());
 				delete newtag;
 				break;
 			}
@@ -1077,7 +982,7 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 				}
 				CAICHHash hash;
 				if (DecodeBase32(newtag->GetStr(),hash) == (UINT)CAICHHash::GetHashSize())
-					m_pAICHHashSet->SetMasterHash(hash, AICH_HASHSETCOMPLETE);
+					m_FileIdentifier.SetAICHHash(hash);
 				else
 					ASSERT( false );
 				delete newtag;
@@ -1086,6 +991,18 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 			case FT_LASTSHARED:
 				if (newtag->IsInt())
 					m_timeLastSeen = newtag->GetInt();
+				else
+					ASSERT( false );
+				delete newtag;
+				break;
+			case FT_AICHHASHSET:
+				if (newtag->IsBlob())
+				{
+					CSafeMemFile aichHashSetFile(newtag->GetBlob(), newtag->GetBlobSize());
+					m_FileIdentifier.LoadAICHHashsetFromFile(&aichHashSetFile, false);
+					aichHashSetFile.Detach();
+					bHadAICHHashSetTag = true;
+				}
 				else
 					ASSERT( false );
 				delete newtag;
@@ -1153,6 +1070,14 @@ bool CKnownFile::LoadTagsFromFile(CFileDataIO* file)
 	}
 	//MORPH END   - Added by SiRoB, SLUGFILLER: Spreadbars
 
+	if (bHadAICHHashSetTag)
+	{
+		if (!m_FileIdentifier.VerifyAICHHashSet())
+			DebugLogError(_T("Failed to load AICH Part HashSet for file %s"), GetFileName());
+		//else
+		//	DebugLog(_T("Succeeded to load AICH Part HashSet for file %s"), GetFileName());
+	}
+
 	// 05-Jän-2004 [bc]: ed2k and Kad are already full of totally wrong and/or not properly attached meta data. Take
 	// the chance to clean any available meta data tags and provide only tags which were determined by us.
 	// It's a brute force method, but that wrong meta data is driving me crazy because wrong meta data is even worse than
@@ -1185,20 +1110,10 @@ bool CKnownFile::LoadDateFromFile(CFileDataIO* file){
 bool CKnownFile::LoadFromFile(CFileDataIO* file){
 	// SLUGFILLER: SafeHash - load first, verify later
 	bool ret1 = LoadDateFromFile(file);
-	bool ret2 = LoadHashsetFromFile(file,false);
+	bool ret2 = m_FileIdentifier.LoadMD4HashsetFromFile(file, false);
 	bool ret3 = LoadTagsFromFile(file);
 	UpdatePartsInfo();
-	if (GetED2KPartCount() <= 1) {	// ignore loaded hash for 1-chunk files
-		for (int i = 0; i < hashlist.GetSize(); i++)
-			delete[] hashlist[i];
-		hashlist.RemoveAll();
-		uchar* cur_hash = new uchar[16];
-		md4cpy(cur_hash, m_abyFileHash);
-		hashlist.Add(cur_hash);
-		ret2 = true;
-	} else if (GetED2KPartCount()!=GetHashCount())
-		ret2 = false;	// Final hash-count verification, needs to be done after the tags are loaded.
-	return ret1 && ret2 && ret3;
+	return ret1 && ret2 && ret3 && m_FileIdentifier.HasExpectedMD4HashCount();// Final hash-count verification, needs to be done after the tags are loaded.
 	// SLUGFILLER: SafeHash
 }
 
@@ -1208,11 +1123,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	file->WriteUInt32(m_tUtcLastModified);
 
 	// hashset
-	file->WriteHash16(m_abyFileHash);
-	UINT parts = hashlist.GetCount();
-	file->WriteUInt16((uint16)parts);
-	for (UINT i = 0; i < parts; i++)
-		file->WriteHash16(hashlist[i]);
+	m_FileIdentifier.WriteMD4HashsetToFile(file);
 
 	uint32 uTagCount = 0;
 	ULONG uTagCountFilePos = (ULONG)file->GetPosition();
@@ -1227,8 +1138,9 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	uTagCount++;
 
 	//AICH Filehash
-	if (m_pAICHHashSet->HasValidMasterHash() && (m_pAICHHashSet->GetStatus() == AICH_HASHSETCOMPLETE || m_pAICHHashSet->GetStatus() == AICH_VERIFIED)){
-		CTag aichtag(FT_AICH_HASH, m_pAICHHashSet->GetMasterHash().GetString());
+	if (m_FileIdentifier.HasAICHHash())
+	{
+		CTag aichtag(FT_AICH_HASH, m_FileIdentifier.GetAICHHash().GetString());
 		aichtag.WriteTagToFile(file);
 		uTagCount++;
 	}
@@ -1249,14 +1161,43 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	if (!ShouldPartiallyPurgeFile())
 	{
 		// those tags are no longer stored for long time not seen (shared) known files to tidy up known.met and known2.met
+		
+		// AICH Part HashSet
+		// no point in permanently storing the AICH part hashset if we need to rehash the file anyway to fetch the full recovery hashset
+		// the tag will make the known.met incompatible with emule version prior 0.44a - but that one is nearly 6 years old 
+		if (m_FileIdentifier.HasAICHHash() && m_FileIdentifier.HasExpectedAICHHashCount())
+		{
+			uint32 nAICHHashSetSize = (CAICHHash::GetHashSize() * (m_FileIdentifier.GetAvailableAICHPartHashCount() + 1)) + 2;
+			BYTE* pHashBuffer = new BYTE[nAICHHashSetSize];
+			CSafeMemFile hashSetFile(pHashBuffer, nAICHHashSetSize);
+			bool bWriteHashSet = true;
+			try
+			{
+				m_FileIdentifier.WriteAICHHashsetToFile(&hashSetFile);
+			}
+			catch (CFileException* pError)
+			{
+				ASSERT( false );
+				DebugLogError(_T("Memfile Error while storing AICH Part HashSet"));
+				bWriteHashSet = false;
+				delete[] hashSetFile.Detach();
+				pError->Delete();
+			}
+			if (bWriteHashSet)
+			{
+				CTag tagAICHHashSet(FT_AICHHASHSET, hashSetFile.Detach(), nAICHHashSetSize);
+				tagAICHHashSet.WriteTagToFile(file);
+				uTagCount++;
+			}
+		}
 
 		// statistic
-		if (statistic.alltimetransferred){
-			CTag attag1(FT_ATTRANSFERRED, (uint32)statistic.alltimetransferred);
+		if (statistic.GetAllTimeTransferred()){
+			CTag attag1(FT_ATTRANSFERRED, (uint32)statistic.GetAllTimeTransferred());
 			attag1.WriteTagToFile(file);
 			uTagCount++;
 			
-			CTag attag4(FT_ATTRANSFERREDHI, (uint32)(statistic.alltimetransferred >> 32));
+			CTag attag4(FT_ATTRANSFERREDHI, (uint32)(statistic.GetAllTimeTransferred() >> 32));
 			attag4.WriteTagToFile(file);
 			uTagCount++;
 		}
@@ -1447,7 +1388,7 @@ bool CKnownFile::WriteToFile(CFileDataIO* file)
 	return true;
 }
 
-void CKnownFile::CreateHash(CFile* pFile, uint64 Length, uchar* pMd4HashOut, CAICHHashTree* pShaHashOut) const
+void CKnownFile::CreateHash(CFile* pFile, uint64 Length, uchar* pMd4HashOut, CAICHHashTree* pShaHashOut)
 {
 	ASSERT( pFile != NULL );
 	ASSERT( pMd4HashOut != NULL || pShaHashOut != NULL );
@@ -1457,8 +1398,10 @@ void CKnownFile::CreateHash(CFile* pFile, uint64 Length, uchar* pMd4HashOut, CAI
 	uchar   X[64*128];
 	uint64	posCurrentEMBlock = 0;
 	uint64	nIACHPos = 0;
-	CAICHHashAlgo* pHashAlg = m_pAICHHashSet->GetNewHashAlgo();
 	CMD4 md4;
+	CAICHHashAlgo* pHashAlg = NULL;
+	if (pShaHashOut != NULL)
+		pHashAlg = CAICHRecoveryHashSet::GetNewHashAlgo();
 
 	while (Required >= 64){
         uint32 len; 
@@ -1469,7 +1412,7 @@ void CKnownFile::CreateHash(CFile* pFile, uint64 Length, uchar* pMd4HashOut, CAI
 		pFile->Read(X, len*64);
 
 		// SHA hash needs 180KB blocks
-		if (pShaHashOut != NULL){
+		if (pShaHashOut != NULL && pHashAlg != NULL){
 			if (nIACHPos + len*64 >= EMBLOCKSIZE){
 				uint32 nToComplete = (uint32)(EMBLOCKSIZE - nIACHPos);
 				pHashAlg->Add(X, nToComplete);
@@ -1532,7 +1475,7 @@ void CKnownFile::CreateHash(CFile* pFile, uint64 Length, uchar* pMd4HashOut, CAI
 	sLock1.Unlock();// SLUGFILLER: SafeHash - only one chunk-hash at a time
 }
 
-bool CKnownFile::CreateHash(FILE* fp, uint64 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut) const
+bool CKnownFile::CreateHash(FILE* fp, uint64 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut)
 {
 	bool bResult = false;
 	CStdioFile file(fp);
@@ -1548,7 +1491,7 @@ bool CKnownFile::CreateHash(FILE* fp, uint64 uSize, uchar* pucHash, CAICHHashTre
 	return bResult;
 }
 
-bool CKnownFile::CreateHash(const uchar* pucData, uint32 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut) const
+bool CKnownFile::CreateHash(const uchar* pucData, uint32 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut)
 {
 	bool bResult = false;
 	CMemFile file(const_cast<uchar*>(pucData), uSize);
@@ -1562,13 +1505,6 @@ bool CKnownFile::CreateHash(const uchar* pucData, uint32 uSize, uchar* pucHash, 
 		ex->Delete();
 	}
 	return bResult;
-}
-
-uchar* CKnownFile::GetPartHash(UINT part) const
-{
-	if (part >= (UINT)hashlist.GetCount())
-		return NULL;
-	return hashlist[part];
 }
 
 Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient, uint8 byRequestedVersion, uint16 nRequestedOptions) const
@@ -2359,26 +2295,34 @@ CString CKnownFile::GetInfoSummary() const
 	CString strType = GetFileTypeDisplayStr();
 	if (strType.IsEmpty())
 		strType = _T("-");
+	CString dbgInfo;
+#ifdef _DEBUG
+	dbgInfo.Format(_T("\nAICH Part HashSet: %s\nAICH Rec HashSet: %s"), m_FileIdentifier.HasExpectedAICHHashCount() ? _T("Yes") : _T("No")
+		, IsAICHRecoverHashSetAvailable() ? _T("Yes") : _T("No"));
+#endif
 
 	CString info;
 	info.Format(_T("%s\n")
-		+ GetResString(IDS_FD_HASH) + _T(" %s\n")
+		+ CString(_T("eD2K ")) + GetResString(IDS_FD_HASH) + _T(" %s\n")
+		+ GetResString(IDS_AICHHASH) + _T(": %s\n")
 		+ GetResString(IDS_FD_SIZE) + _T(" %s\n<br_head>\n")
 		+ GetResString(IDS_TYPE) + _T(": %s\n")
 		+ GetResString(IDS_FOLDER) + _T(": %s\n\n")
 		+ GetResString(IDS_PRIORITY) + _T(": %s\n")
 		+ GetResString(IDS_SF_REQUESTS) + _T(": %s\n")
 		+ GetResString(IDS_SF_ACCEPTS) + _T(": %s\n")
-		+ GetResString(IDS_SF_TRANSFERRED) + _T(": %s"),
+		+ GetResString(IDS_SF_TRANSFERRED) + _T(": %s%s"),
 		GetFileName(),
 		md4str(GetFileHash()),
+		m_FileIdentifier.GetAICHHash().GetString(),
 		CastItoXBytes(GetFileSize(), false, false),
 		strType,
 		strFolder,
 		GetUpPriorityDisplayString(),
 		strRequests,
 		strAccepts,
-		strTransferred);
+		strTransferred,
+		dbgInfo);
 	return info;
 }
 

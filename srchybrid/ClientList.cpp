@@ -35,7 +35,7 @@
 #include "Opcodes.h"
 #include "Sockets.h"
 #include "emuledlg.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "serverwnd.h"
 #include "Log.h"
 #include "packets.h"
@@ -228,7 +228,7 @@ void CClientList::AddClient(CUpDownClient* toadd, bool bSkipDupTest)
 		if(list.Find(toadd))
 			return;
 	}
-	theApp.emuledlg->transferwnd->clientlistctrl.AddClient(toadd);
+	theApp.emuledlg->transferwnd->GetClientList()->AddClient(toadd);
 	list.AddTail(toadd);
 }
 
@@ -250,7 +250,7 @@ void CClientList::RemoveClient(CUpDownClient* toremove, LPCTSTR pszReason){
 		}
 		 // EastShare END - Added by TAHO, modified SUQWT
 		theApp.downloadqueue->RemoveSource(toremove);
-		theApp.emuledlg->transferwnd->clientlistctrl.RemoveClient(toremove);
+		theApp.emuledlg->transferwnd->GetClientList()->RemoveClient(toremove);
 		list.RemoveAt(pos);
 	}
 	RemoveFromKadList(toremove);

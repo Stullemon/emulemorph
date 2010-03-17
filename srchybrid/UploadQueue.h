@@ -63,7 +63,9 @@ public:
 	uint32	GetActiveUploadsCountLongPerspective(uint32 classID = LAST_CLASS)					{return GetNumberOfSlotInAboveClass(classID)+m_MaxActiveClientsClass[classID];}
     /*zz*/uint32 GetEffectiveUploadListCount(uint32 classID = LAST_CLASS);
 	//MORPH END  - Upload Splitting Class
-
+	uint32	GetWaitingUserForFileCount(const CSimpleArray<CObject*>& raFiles, bool bOnlyIfChanged);
+	uint32	GetDatarateForFile(const CSimpleArray<CObject*>& raFiles) const;
+	
 	POSITION GetFirstFromUploadList()				{return uploadinglist.GetHeadPosition();}
 	CUpDownClient* GetNextFromUploadList(POSITION &curpos)	{return uploadinglist.GetNext(curpos);}
 	CUpDownClient* GetQueueClientAt(POSITION &curpos)	{return uploadinglist.GetAt(curpos);}
@@ -183,6 +185,7 @@ private:
     uint64  m_avarage_dr_USS_sum; //MORPH - Added by SiRoB, Keep An average datarate value for USS system
 	DWORD   m_lastproccesstick;	 //MORPH -- lh use same tick to check al slots. 
     DWORD   m_dwLastResortedUploadSlots;
+	bool	m_bStatisticsWaitingListDirty;
 
 	DWORD   m_dwLastCheckedForHighPrioClient;
 

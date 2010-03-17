@@ -15,7 +15,7 @@
 #include "Log.h" //MORPH - Added by Stulle, Global Source Limit
 #include "DownloadQueue.h" //MORPH - Added by Stulle, Global Source Limit
 #include "Ntservice.h"
-#include "TransferWnd.h" // MORPH START leuk_he disable catcolor
+#include "TransferDlg.h" // MORPH START leuk_he disable catcolor
 
 
 #ifdef _DEBUG

@@ -6,6 +6,8 @@
 #define	HAVE_SAPI_H
 #define HAVE_QEDIT_H
 #define HAVE_WMSDK_H
+#define HAVE_WIN7_SDK_H // Stullemon: this is disabled just for a while
+#define HAVE_VISTA_SDK	
 
 //////////////////////////////////////////////////////////////////////////////
 // Visual Studio 2003
@@ -73,7 +75,7 @@
 // is only shipped with the DirectX 9 SDK.
 // You need to install the DirectX 9 SDK to enable this feature.
 #if !defined(HAVE_VISTA_SDK) || !defined(HAVE_DIRECTX_SDK)
-#undef HAVE_QEDIT_H
+//#undef HAVE_QEDIT_H
 #endif//!defined(HAVE_VISTA_SDK) || !defined(HAVE_DIRECTX_SDK)
 
 // 'wmsdk.h' is not shipped with VS2005.

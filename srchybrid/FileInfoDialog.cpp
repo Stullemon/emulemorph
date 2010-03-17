@@ -22,6 +22,7 @@
 #include "PartFile.h"
 #include "Preferences.h"
 #include "UserMsgs.h"
+#include "SplitterControl.h"
 
 #include "SharedFileList.h" //MORPH - Added, Downloaded History [Monki/Xman]
 
@@ -387,6 +388,7 @@ CFileInfoDialog::CFileInfoDialog()
 	m_strCaption = GetResString(IDS_CONTENT_INFO);
 	m_psp.pszTitle = m_strCaption;
 	m_psp.dwFlags |= PSP_USETITLE;
+	m_bReducedDlg = false;
 }
 
 CFileInfoDialog::~CFileInfoDialog()
@@ -400,9 +402,61 @@ BOOL CFileInfoDialog::OnInitDialog()
 	CResizablePage::OnInitDialog();
 	InitWindowStyles(this);
 
+	if (!m_bReducedDlg)
+	{
+		AddAnchor(IDC_FILESIZE, TOP_LEFT, TOP_RIGHT);
+		AddAnchor(IDC_FULL_FILE_INFO, TOP_LEFT, BOTTOM_RIGHT);
+
+		/* morph vs2008 no win98
+		m_fi.LimitText(afxIsWin95() ? 0xFFFF : 0x7FFFFFFF);
+		*/
+		m_fi.LimitText(0x7FFFFFFF);
+		// end morph
+		m_fi.SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
+		m_fi.SetAutoURLDetect();
+		m_fi.SetEventMask(m_fi.GetEventMask() | ENM_LINK);
+	}
+	else
+	{
+		GetDlgItem(IDC_FILESIZE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_FULL_FILE_INFO)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_FD_XI1)->ShowWindow(SW_HIDE);
+	
+		CRect rc;
+		GetDlgItem(IDC_FILESIZE)->GetWindowRect(rc);
+		int nDelta = rc.Height();
+
+		CSplitterControl::ChangeHeight(GetDlgItem(IDC_GENERAL), -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_LENGTH), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FORMAT), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI3), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_VCODEC), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_VBITRATE), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_VWIDTH), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_VASPECT), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_VFPS), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI6), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI8), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI10), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI12), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_STATIC_LANGUAGE), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI4), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_ACODEC), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_ABITRATE), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_ACHANNEL), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_ASAMPLERATE), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_ALANGUAGE), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI5), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI9), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI7), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI14), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI13), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FD_XI2), 0, -nDelta);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_STATICFI), 0, -nDelta);
+	}
+
 	// General Group
 	AddAnchor(IDC_GENERAL, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_FILESIZE, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_LENGTH, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_FORMAT, TOP_LEFT, TOP_RIGHT);
 
@@ -429,15 +483,7 @@ BOOL CFileInfoDialog::OnInitDialog()
 	AddAnchor(IDC_ASAMPLERATE, TOP_CENTER, TOP_RIGHT);
 	AddAnchor(IDC_ALANGUAGE, TOP_CENTER, TOP_RIGHT);
 
-	AddAnchor(IDC_FULL_FILE_INFO, TOP_LEFT, BOTTOM_RIGHT);
-   /* morph vs2008 no win98
-	m_fi.LimitText(afxIsWin95() ? 0xFFFF : 0x7FFFFFFF);
-    */
-		m_fi.LimitText(0x7FFFFFFF);
-    // end morph
-	m_fi.SendMessage(EM_SETMARGINS, EC_LEFTMARGIN | EC_RIGHTMARGIN, MAKELONG(3, 3));
-	m_fi.SetAutoURLDetect();
-	m_fi.SetEventMask(m_fi.GetEventMask() | ENM_LINK);
+
 
 	CResizablePage::UpdateData(FALSE);
 	Localize();
@@ -760,7 +806,7 @@ LRESULT CFileInfoDialog::OnMediaInfoResult(WPARAM, LPARAM lParam)
 	if (ami.fFileLengthSec) {
 		CString strLength(CastSecondsToHM((time_t)ami.fFileLengthSec));
 		if (ami.bFileLengthEstimated)
-			strLength += _T(" (")+GetResString(IDS_ESTIMATED)+ _T(")");
+			strLength += _T(" (") + GetResString(IDS_ESTIMATED)+ _T(")");
 		SetDlgItemText(IDC_LENGTH, strLength);
 	}
 
@@ -874,8 +920,11 @@ LRESULT CFileInfoDialog::OnMediaInfoResult(WPARAM, LPARAM lParam)
 			SetDlgItemText(IDC_ALANGUAGE, _T(""));
 	}
 
-	m_fi.SetRTFText(pThreadRes->strInfo);
-	m_fi.SetSel(0, 0);
+	if (!m_bReducedDlg)
+	{
+		m_fi.SetRTFText(pThreadRes->strInfo);
+		m_fi.SetSel(0, 0);
+	}
 
 	delete pThreadRes;
 	return 1;
@@ -979,10 +1028,10 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 	//
 	bool bIsAVI = false;
 	/* morph use advanced pref
-	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RIFF"), 1)) 
+	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RIFF"), 1))
 	*/
 	if (CPreferences::bMediaInfo_RIFF) 
-    // end morph advanced pref
+	// end morph advanced pref
 	{
 		try
 		{
@@ -1248,7 +1297,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 					CString strText(sText);
 					strText.Trim();
 					strFidInfo << strText;
-					delete [] sText;
+					delete[] sText;
 					break;
 				}
 				case ID3FID_BPM:
@@ -1257,7 +1306,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 					long lLength = _wtol(sText);
 					if (lLength) // check for != "0"
 						strFidInfo << sText;
-					delete [] sText;
+					delete[] sText;
 					break;
 				}
 				case ID3FID_SONGLEN:
@@ -1270,7 +1319,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 						SecToTimeLength(lLength, strLength);
 						strFidInfo << strLength;
 					}
-					delete [] sText;
+					delete[] sText;
 					break;
 				}
 				case ID3FID_USERTEXT:
@@ -1291,8 +1340,8 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 							strFidInfo << _T(": ");
 						strFidInfo << strText;
 					}
-					delete [] sText;
-					delete [] sDesc;
+					delete[] sText;
+					delete[] sDesc;
 					break;
 				}
 				case ID3FID_COMMENT:
@@ -1322,9 +1371,9 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 							strFidInfo << _T(": ");
 						strFidInfo << strText;
 					}
-					delete [] sText;
-					delete [] sDesc;
-					delete [] sLang;
+					delete[] sText;
+					delete[] sDesc;
+					delete[] sLang;
 					break;
 				}
 				case ID3FID_WWWAUDIOFILE:
@@ -1340,7 +1389,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 					CString strURL(sURL);
 					strURL.Trim();
 					strFidInfo << strURL;
-					delete [] sURL;
+					delete[] sURL;
 					break;
 				}
 				case ID3FID_WWWUSER:
@@ -1361,8 +1410,8 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 							strFidInfo << _T(": ");
 						strFidInfo << strURL;
 					}
-					delete [] sURL;
-					delete [] sDesc;
+					delete[] sURL;
+					delete[] sDesc;
 					break;
 				}
 				case ID3FID_INVOLVEDPEOPLE:
@@ -1372,7 +1421,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 					{
 						wchar_t *sPeople = ID3_GetStringW(frame, ID3FN_TEXT, nIndex);
 						strFidInfo << sPeople;
-						delete [] sPeople;
+						delete[] sPeople;
 						if (nIndex + 1 < nItems)
 							strFidInfo << _T(", ");
 					}
@@ -1389,9 +1438,9 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 					nDataSize  = frame->GetField(ID3FN_DATA)->Size();
 					strFidInfo << _T("(") << sDesc << _T(")[") << sFormat << _T(", ")
 							   << nPicType << _T("]: ") << sMimeType << _T(", ") << nDataSize << _T(" bytes");
-					delete [] sMimeType;
-					delete [] sDesc;
-					delete [] sFormat;
+					delete[] sMimeType;
+					delete[] sDesc;
+					delete[] sFormat;
 					break;
 				}
 				case ID3FID_GENERALOBJECT:
@@ -1403,10 +1452,10 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 					size_t
 					nDataSize = frame->GetField(ID3FN_DATA)->Size();
 					strFidInfo << _T("(") << sDesc << _T(")[")
-						<< sFileName << _T("]: ") << sMimeType << _T(", ") << nDataSize << _T(" bytes");
-					delete [] sMimeType;
-					delete [] sDesc;
-					delete [] sFileName;
+							   << sFileName << _T("]: ") << sMimeType << _T(", ") << nDataSize << _T(" bytes");
+					delete[] sMimeType;
+					delete[] sDesc;
+					delete[] sFileName;
 					break;
 				}
 				case ID3FID_UNIQUEFILEID:
@@ -1414,7 +1463,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 					wchar_t *sOwner = ID3_GetStringW(frame, ID3FN_OWNER);
 					size_t nDataSize = frame->GetField(ID3FN_DATA)->Size();
 					strFidInfo << sOwner << _T(", ") << nDataSize << _T(" bytes");
-					delete [] sOwner;
+					delete[] sOwner;
 					break;
 				}
 				case ID3FID_PLAYCOUNTER:
@@ -1430,7 +1479,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 					nCounter = frame->GetField(ID3FN_COUNTER)->Get(),
 					nRating = frame->GetField(ID3FN_RATING)->Get();
 					strFidInfo << sEmail << _T(", counter=") << nCounter << _T(" rating=") << nRating;
-					delete [] sEmail;
+					delete[] sEmail;
 					break;
 				}
 				case ID3FID_CRYPTOREG:
@@ -1474,8 +1523,8 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 								<< format << "] ";
 						}
 					}*/
-					delete [] sDesc;
-					delete [] sLang;
+					delete[] sDesc;
+					delete[] sLang;
 					break;
 				}
 				case ID3FID_AUDIOCRYPTO:
@@ -1937,7 +1986,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
              					mi->strInfo << strInform ; //morph
 						}
 						// morph en verbose mediainfo
- 
+
 						theMediaInfoDLL.Close(Handle);
 
 						// MediaInfoLib does not handle MPEG files correctly in regards of
@@ -1995,7 +2044,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 				{
 					EED2KFileType eED2KFileType = GetED2KFileTypeID(pFile->GetFilePath());
 					if (eED2KFileType == ED2KFT_AUDIO || eED2KFileType == ED2KFT_VIDEO)
-					bGiveMediaInfoLibHint = true;
+						bGiveMediaInfoLibHint = true;
 				}
 			}
 			catch(...)
@@ -2258,7 +2307,7 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 		PathRemoveFileSpec(strInstFolder.GetBuffer(strInstFolder.GetLength()));
 		strInstFolder.ReleaseBuffer();
 		CString strHint;
-		strHint.Format( GetResString(IDS_MEDIAINFO_DLLMISSING), strInstFolder);
+		strHint.Format(GetResString(IDS_MEDIAINFO_DLLMISSING), strInstFolder);
 		if (!mi->strInfo.IsEmpty())
 			mi->strInfo << _T("\r\n");
 		mi->strInfo << strHint;
@@ -2276,7 +2325,6 @@ void CFileInfoDialog::DoDataExchange(CDataExchange* pDX)
 void CFileInfoDialog::Localize()
 {
 	GetDlgItem(IDC_GENERAL)->SetWindowText(GetResString(IDS_FD_GENERAL));
-	GetDlgItem(IDC_FD_XI1)->SetWindowText(GetResString(IDS_FD_SIZE));
 	GetDlgItem(IDC_FD_XI2)->SetWindowText(GetResString(IDS_LENGTH)+_T(":"));
 	GetDlgItem(IDC_FD_XI3)->SetWindowText(GetResString(IDS_VIDEO));
 	GetDlgItem(IDC_FD_XI4)->SetWindowText(GetResString(IDS_AUDIO));
@@ -2290,11 +2338,16 @@ void CFileInfoDialog::Localize()
 	GetDlgItem(IDC_FD_XI12)->SetWindowText(GetResString(IDS_SAMPLERATE)+_T(":"));
 	GetDlgItem(IDC_STATICFI)->SetWindowText(GetResString(IDS_FILEFORMAT)+_T(":"));
 	GetDlgItem(IDC_FD_XI14)->SetWindowText(GetResString(IDS_ASPECTRATIO)+_T(":"));
-	GetDlgItem(IDC_STATIC_LANGUAGE)->SetWindowText(GetResString(IDS_PW_LANG)+_T(":"));	
+	GetDlgItem(IDC_STATIC_LANGUAGE)->SetWindowText(GetResString(IDS_PW_LANG)+_T(":"));
+	if (!m_bReducedDlg)
+		GetDlgItem(IDC_FD_XI1)->SetWindowText(GetResString(IDS_FD_SIZE));
+
 }
 
 void CFileInfoDialog::AddFileInfo(LPCTSTR pszFmt, ...)
 {
+	if (m_bReducedDlg)
+		return;
 	va_list pArgp;
 	va_start(pArgp, pszFmt);
 	CString strInfo;

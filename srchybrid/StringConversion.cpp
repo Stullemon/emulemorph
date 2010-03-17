@@ -243,7 +243,10 @@ CString EncodeUrlUtf8(const CString& rstr)
 	CStringA utf8(StrToUtf8(rstr));
 	for (int i = 0; i < utf8.GetLength(); i++)
 	{
-		if ((BYTE)utf8[i] >= 0x7F)
+		// NOTE: The purpose of that function is to encode non-ASCII characters only for being used within
+		// an ED2K URL. An ED2K URL is not conforming to any RFC, thus any unsafe URI characters are kept
+		// as they are. The space character is though special and gets encoded as well.
+		if ((BYTE)utf8[i] == '%' || (BYTE)utf8[i] == ' ' || (BYTE)utf8[i] >= 0x7F)
 			url.AppendFormat(_T("%%%02X"), (BYTE)utf8[i]);
 		else
 			url += utf8[i];

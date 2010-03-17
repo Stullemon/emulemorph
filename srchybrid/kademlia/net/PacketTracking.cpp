@@ -22,6 +22,7 @@
 #include "../../opcodes.h"
 #include "../../OtherFunctions.h"
 #include "../../clientlist.h"
+#include "../Kademlia/Kademlia.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -59,17 +60,13 @@ void CPacketTracking::AddTrackedOutPacket(uint32 dwIP, uint8 byOpcode){
 bool CPacketTracking::IsTrackedOutListRequestPacket(uint8 byOpcode) const
 {
 	switch(byOpcode){
-		case KADEMLIA_BOOTSTRAP_REQ:
 		case KADEMLIA2_BOOTSTRAP_REQ:
-		case KADEMLIA_HELLO_REQ:
 		case KADEMLIA2_HELLO_REQ:
 		case KADEMLIA2_HELLO_RES:
-		case KADEMLIA_REQ:
 		case KADEMLIA2_REQ:
 		case KADEMLIA_SEARCH_NOTES_REQ:
 		case KADEMLIA2_SEARCH_NOTES_REQ:
 		case KADEMLIA_PUBLISH_REQ:
-		case KADEMLIA_PUBLISH_NOTES_REQ:
 		case KADEMLIA2_PUBLISH_KEY_REQ:
 		case KADEMLIA2_PUBLISH_SOURCE_REQ:
 		case KADEMLIA2_PUBLISH_NOTES_REQ:
@@ -110,44 +107,30 @@ bool CPacketTracking::InTrackListIsAllowedPacket(uint32 uIP, uint8 byOpcode, boo
 	uint32 iAllowedPacketsPerMinute;
 	const byte byDbgOrgOpcode = byOpcode;
 	switch (byOpcode){
-		case KADEMLIA_BOOTSTRAP_REQ:
-			byOpcode = KADEMLIA2_BOOTSTRAP_REQ;
 		case KADEMLIA2_BOOTSTRAP_REQ:
 			iAllowedPacketsPerMinute = 2;
 			break;
-		case KADEMLIA_HELLO_REQ:
-			byOpcode = KADEMLIA2_HELLO_REQ; 
 		case KADEMLIA2_HELLO_REQ:
 			iAllowedPacketsPerMinute = 3;
 			break;
-		case KADEMLIA_REQ:
-			byOpcode = KADEMLIA2_REQ;
 		case KADEMLIA2_REQ:
 			iAllowedPacketsPerMinute = 10;
 			break;
-		case KADEMLIA_SEARCH_NOTES_REQ:
-			byOpcode = KADEMLIA2_SEARCH_NOTES_REQ;
 		case KADEMLIA2_SEARCH_NOTES_REQ:
 			iAllowedPacketsPerMinute = 3;
 			break;
-		case KADEMLIA_SEARCH_REQ:
-			byOpcode = KADEMLIA2_SEARCH_KEY_REQ;
 		case KADEMLIA2_SEARCH_KEY_REQ:
 			iAllowedPacketsPerMinute = 3;
 			break;
 		case KADEMLIA2_SEARCH_SOURCE_REQ:
 			iAllowedPacketsPerMinute = 3;
 			break;
-		case KADEMLIA_PUBLISH_REQ:
-			byOpcode = KADEMLIA2_PUBLISH_KEY_REQ;
 		case KADEMLIA2_PUBLISH_KEY_REQ:
 			iAllowedPacketsPerMinute = 3;
 			break;
 		case KADEMLIA2_PUBLISH_SOURCE_REQ:
 			iAllowedPacketsPerMinute = 2;
 			break;
-		case KADEMLIA_PUBLISH_NOTES_REQ:
-			byOpcode = KADEMLIA2_PUBLISH_NOTES_REQ;
 		case KADEMLIA2_PUBLISH_NOTES_REQ:
 			iAllowedPacketsPerMinute = 2;
 			break;
@@ -207,6 +190,9 @@ bool CPacketTracking::InTrackListIsAllowedPacket(uint32 uIP, uint8 byOpcode, boo
 			// remember only for easier cleanup
 			pTrackEntry->m_dwLastExpire = max(pTrackEntry->m_dwLastExpire, rCurTrackedRequest.m_dwFirstAdded + SEC2MS(iSecondsPerPacket) * rCurTrackedRequest.m_nCount);
 		
+			if (CKademlia::IsRunningInLANMode() && ::IsLANIP(ntohl(uIP))) // no flood detection in LanMode
+				return true;
+
 			// now the actualy check if this request is allowed
 			if (rCurTrackedRequest.m_nCount > iAllowedPacketsPerMinute * 5){
 				// this is so far above the limit that it has to be an intentional flood / misuse in any case
@@ -288,9 +274,9 @@ bool CPacketTracking::IsLegacyChallenge(CUInt128 uChallengeID, uint32 uIP, uint8
 		}
 	}
 	if (bDbgWarning)
-				DebugLogWarning(_T("Kad: IsLegacyChallenge: Wrong challenge answer received, client not verified (%s)"), ipstr(ntohl(uIP)));
+		DebugLogWarning(_T("Kad: IsLegacyChallenge: Wrong challenge answer received, client not verified (%s)"), ipstr(ntohl(uIP)));
 	return false;
-		}
+}
 
 bool CPacketTracking::HasActiveLegacyChallenge(uint32 uIP) const
 {

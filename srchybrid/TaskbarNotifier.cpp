@@ -404,7 +404,7 @@ BOOL CTaskbarNotifier::SetBitmap(UINT nBitmapID, int red, int green, int blue)
 		return FALSE;
 	}
 	else
-	return TRUE;
+		return TRUE;
 }
 
 BOOL CTaskbarNotifier::SetBitmap(CBitmap* pBitmap, int red, int green, int blue)
@@ -978,6 +978,7 @@ void CTaskbarNotifier::OnTimer(UINT nIDEvent)
 	switch (nIDEvent)
 	{
 	case IDT_APPEARING:
+	{
 		m_nAnimStatus = IDT_APPEARING;
 		switch (m_nTaskbarPlacement)
 		{
@@ -1007,6 +1008,7 @@ void CTaskbarNotifier::OnTimer(UINT nIDEvent)
 			break;
 
 		case ABE_LEFT:
+
 			if (m_nCurrentWidth < m_nBitmapWidth)
 				m_nCurrentWidth += m_nIncrementShow;
 			else
@@ -1031,9 +1033,13 @@ void CTaskbarNotifier::OnTimer(UINT nIDEvent)
 			}
 			break;
 		}
+		HRGN hRgn = CreateRectRgn(0,0,0,0);
+		GetWindowRgn(hRgn);
 		SetWindowPos(&wndTopMost, m_nCurrentPosX, m_nCurrentPosY, m_nCurrentWidth, m_nCurrentHeight, SWP_NOACTIVATE);
+		VERIFY( SetWindowRgn(hRgn, TRUE) != 0 );
+		
 		break;
-
+	}
 	case IDT_WAITING:
 		KillTimer(IDT_WAITING);
 		if (m_bAutoClose)
@@ -1090,7 +1096,11 @@ void CTaskbarNotifier::OnTimer(UINT nIDEvent)
 			}
 			break;
 		}
+
+		HRGN hRgn = CreateRectRgn(0,0,0,0);
+		GetWindowRgn(hRgn);
 		SetWindowPos(&wndTopMost, m_nCurrentPosX, m_nCurrentPosY, m_nCurrentWidth, m_nCurrentHeight, SWP_NOACTIVATE);
+		VERIFY( SetWindowRgn(hRgn, TRUE) != 0 );
 		break;
 	}
 

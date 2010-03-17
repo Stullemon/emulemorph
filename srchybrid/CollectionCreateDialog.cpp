@@ -25,7 +25,7 @@
 #include "KnownFile.h"
 #include "KnownFileList.h"
 #include "PartFile.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "DownloadListCtrl.h"
 #pragma warning(disable:4516) // access-declarations are deprecated; member using-declarations provide a better alternative
 #pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
@@ -340,9 +340,9 @@ void CCollectionCreateDialog::OnBnClickedOk()
 				CKnownFile* pKnownFile = theApp.knownfiles->FindKnownFileByPath(sFilePath);
 				if (pKnownFile)
 				{
-					theApp.sharedfiles->RemoveFile(pKnownFile);
+					theApp.sharedfiles->RemoveFile(pKnownFile, true);
 					if (pKnownFile->IsKindOf(RUNTIME_CLASS(CPartFile)))
-						theApp.emuledlg->transferwnd->downloadlistctrl.ClearCompleted(static_cast<CPartFile*>(pKnownFile));
+						theApp.emuledlg->transferwnd->GetDownloadList()->ClearCompleted(static_cast<CPartFile*>(pKnownFile));
 				}
 				m_pCollection->WriteToFileAddShared(pSignkey);
 			}

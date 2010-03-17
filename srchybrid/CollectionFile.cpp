@@ -124,7 +124,7 @@ bool CCollectionFile::InitFromLink(CString sLink)
 	}
 
 	taglist.Add(new CTag(FT_FILEHASH, pFileLink->GetHashKey()));
-	md4cpy(m_abyFileHash, pFileLink->GetHashKey());
+	m_FileIdentifier.SetMD4Hash(pFileLink->GetHashKey()); //TODO fileident
 
 	taglist.Add(new CTag(FT_FILESIZE, pFileLink->GetSize(), true));
 	SetFileSize(pFileLink->GetSize());

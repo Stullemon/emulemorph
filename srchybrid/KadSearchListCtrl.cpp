@@ -24,6 +24,8 @@
 #include "emuledlg.h"
 #include "DownloadQueue.h"
 #include "PartFile.h"
+#include "kademlia/kademlia/search.h"
+#include "kademlia/utils/LookupHistory.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -197,7 +199,13 @@ void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch *search
 			id = GetResString(IDS_KAD_UNKNOWN);
 			break;
 	}
+#ifdef _DEBUG
+	CString strTypeNr;
+	strTypeNr.Format(_T(" (%u)"), search->GetSearchTypes());
+	id += strTypeNr;
+#endif
 	SetItemText(iItem, colType, id);
+
 	SetItemText(iItem, colName, search->GetGUIName());
 
 	if (search->GetTarget() != NULL)
@@ -352,4 +360,54 @@ int CKadSearchListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSo
 	if (HIWORD(lParamSort))
 		iResult = -iResult;
 	return iResult;
+}
+
+Kademlia::CLookupHistory* CKadSearchListCtrl::FetchAndSelectActiveSearch(bool bMark)
+{
+	int iIntrestingItem = (-1);
+	int iItem = (-1);
+	
+	for (int i = 1; i <= GetItemCount(); i++)
+	{
+		const Kademlia::CSearch* pSearch = (Kademlia::CSearch*)GetItemData(GetItemCount() - i);
+		if (pSearch != NULL && !pSearch->GetLookupHistory()->IsSearchStopped() && !pSearch->GetLookupHistory()->IsSearchDeleted())
+		{
+			// prefer interesting search rather than node searches
+			switch (pSearch->GetSearchTypes())
+			{
+				case Kademlia::CSearch::FILE:
+				case Kademlia::CSearch::KEYWORD:
+				case Kademlia::CSearch::STORENOTES:
+				case Kademlia::CSearch::NOTES:
+				case Kademlia::CSearch::STOREFILE:
+				case Kademlia::CSearch::STOREKEYWORD:
+					iIntrestingItem = GetItemCount() - i;
+					break;
+				case Kademlia::CSearch::NODE:
+				case Kademlia::CSearch::NODECOMPLETE:
+				case Kademlia::CSearch::NODESPECIAL:
+				case Kademlia::CSearch::NODEFWCHECKUDP:
+				case Kademlia::CSearch::FINDBUDDY:
+				default:
+					if (iItem == (-1))
+						iItem = GetItemCount() - i;
+					break;
+			}
+		}
+		if (iIntrestingItem >= 0)
+			break;
+	}
+	if (iIntrestingItem >= 0)
+	{
+		if (bMark)
+			SetItemState(iIntrestingItem, LVIS_SELECTED, LVIS_SELECTED);
+		return ((Kademlia::CSearch*)GetItemData(iIntrestingItem))->GetLookupHistory();
+	}
+	if (iItem >= 0)
+	{
+		if (bMark)
+			SetItemState(iItem, LVIS_SELECTED, LVIS_SELECTED);
+		return ((Kademlia::CSearch*)GetItemData(iItem))->GetLookupHistory();
+	}
+	return NULL;
 }

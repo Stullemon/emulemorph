@@ -22,7 +22,7 @@
 #include "MemDC.h"
 #include "MenuCmds.h"
 #include "FriendList.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "ChatWnd.h"
 #include "UpDownClient.h"
 #include "UploadQueue.h"
@@ -366,7 +366,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 								COLORREF oldclr = dc.SetTextColor(RGB(0,0,0));
 								int iOMode = dc.SetBkMode(TRANSPARENT);
 								buffer.Format(_T("%.1f%%"), percent);
-								CFont *pOldFont = dc.SelectObject(&theApp.emuledlg->transferwnd->downloadlistctrl.m_fontBoldSmaller);
+								CFont *pOldFont = dc.SelectObject(&theApp.emuledlg->transferwnd->GetDownloadList()->m_fontBoldSmaller);
 #define	DrawClientPercentText		dc.DrawText(buffer, buffer.GetLength(),&cur_rec, ((MLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
 								cur_rec.top-=1;cur_rec.bottom-=1;
 								DrawClientPercentText;cur_rec.left+=1;cur_rec.right+=1;
@@ -731,7 +731,7 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 	/*
 	//call secondary sortorder, if this one results in equal
 	int dwNextSort;
-	if (iResult == 0 && (dwNextSort = theApp.emuledlg->transferwnd->downloadclientsctrl.GetNextSortOrder(lParamSort)) != -1)
+	if (iResult == 0 && (dwNextSort = theApp.emuledlg->transferwnd->GetDownloadClientsList()->GetNextSortOrder(lParamSort)) != -1)
 		iResult = SortProc(lParam1, lParam2, dwNextSort);
 	*/
 	// SLUGFILLER: multiSort remove - handled in parent class
@@ -771,7 +771,7 @@ void CDownloadClientsCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES), _T("VIEWFILES"));
 	if (Kademlia::CKademlia::IsRunning() && !Kademlia::CKademlia::IsConnected())
-		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
+		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0 && client->GetKadVersion() > 1) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	ClientMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND), _T("Search"));
 	//MORPH START - Added by Yun.SF3, List Requested Files
 	ClientMenu.AppendMenu(MF_SEPARATOR); // Added by sivka
@@ -824,14 +824,14 @@ BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				break;
 			}
 			case MP_BOOT:
-				if (client->GetKadPort())
-					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
+				if (client->GetKadPort() && client->GetKadVersion() > 1)
+					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 				break;
 			//MORPH START - Modified by SiRoB, Added by Yun.SF3, ZZ Upload System
 			case MP_REMOVEFRIEND:{
 				if (client && client->IsFriend()){					
 					theApp.friendlist->RemoveFriend(client->m_Friend);
-					theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(client);
+					theApp.emuledlg->transferwnd->GetDownloadList()->UpdateItem(client);
 				}
 				break;
 			 }
@@ -848,7 +848,7 @@ BOOL CDownloadClientsCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 						client->SetFriendSlot(true);
 					}
 					theApp.friendlist->ShowFriends();
-					theApp.emuledlg->transferwnd->downloadlistctrl.UpdateItem(client);
+					theApp.emuledlg->transferwnd->GetDownloadList()->UpdateItem(client);
 				}
 				break;
 			}
@@ -873,7 +873,7 @@ void CDownloadClientsCtrl::AddClient(const CUpDownClient *client)
 
 	int iItemCount = GetItemCount();
 	InsertItem(LVIF_TEXT | LVIF_PARAM, iItemCount, LPSTR_TEXTCALLBACK, 0, 0, 0, (LPARAM)client);
-	theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Downloading, iItemCount + 1);
+	theApp.emuledlg->transferwnd->UpdateListCount(CTransferDlg::wnd2Downloading, iItemCount + 1);
 }
 
 void CDownloadClientsCtrl::RemoveClient(const CUpDownClient *client)
@@ -887,7 +887,7 @@ void CDownloadClientsCtrl::RemoveClient(const CUpDownClient *client)
 	int result = FindItem(&find);
 	if (result != -1) {
 		DeleteItem(result);
-		theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Downloading, GetItemCount()); 
+		theApp.emuledlg->transferwnd->UpdateListCount(CTransferDlg::wnd2Downloading, GetItemCount()); 
 	}
 }
 
@@ -898,7 +898,7 @@ void CDownloadClientsCtrl::RefreshClient(const CUpDownClient *client)
 	if (!theApp.emuledlg->IsRunning())
 		return;
 
-	if (theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || !theApp.emuledlg->transferwnd->downloadclientsctrl.IsWindowVisible())
+	if (theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || !theApp.emuledlg->transferwnd->GetDownloadClientsList()->IsWindowVisible())
 		return;
 
 	//MORPH START - UpdateItemThread

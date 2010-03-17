@@ -353,6 +353,8 @@ void CPPgMorphShare::Localize(void)
 		SetTool(m_htiCommunityName, IDS_COMMUNITYTAG_TIP);
 		SetTool(m_htiDisplay ,IDS_PW_DISPLAY_TIP);
 		SetTool(m_htiFolderIcons ,IDS_FOLDERICON_TIP);
+		SetTool(m_htiStaticIcon ,IDS_STATIC_ICON_TIP);
+		SetTool(m_htiShowLessControls ,IDS_MORPHWIZ_SHOWLESS_TIP);
         // MORPH END leuk_he tooltipped
 
 	}

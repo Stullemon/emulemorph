@@ -35,7 +35,7 @@
 #include "Server.h"
 #include "Sockets.h"
 #include "emuledlg.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "ClientListCtrl.h"
 #include "ChatWnd.h"
 #include "PeerCacheFinder.h"
@@ -291,7 +291,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					if (client)
 					{
 						client->ConnectionEstablished();
-						theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(client);
+						theApp.emuledlg->transferwnd->GetClientList()->RefreshClient(client);
 					}
 					break;
 				}
@@ -342,7 +342,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						client->SetCommentDirty();
 					}
 
-					theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(client);
+					theApp.emuledlg->transferwnd->GetClientList()->RefreshClient(client);
 
 					// send a response packet with standart informations
 					if (client->GetHashType() == SO_EMULE && !bIsMuleHello)
@@ -361,8 +361,8 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 						if (client->GetInfoPacketsReceived() == IP_BOTH)
 							client->InfoPacketsReceived();
 
-						if( client->GetKadPort() )
-							Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
+						if( client->GetKadPort() && client->GetKadVersion() > 1)
+							Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 					}
 					break;
 				}
@@ -793,7 +793,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 
 					if (size != 16)
 						throw GetResString(IDS_ERR_WRONGHPACKAGESIZE);
-					client->SendHashsetPacket(packet);
+					client->SendHashsetPacket(packet, 16, false);
 					break;
 				}
 				case OP_HASHSETANSWER:
@@ -801,7 +801,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_HashSetAnswer", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadFileRequest(size);
-					client->ProcessHashSet(packet,size);
+					client->ProcessHashSet(packet, size, false);
 					break;
 				}
 				case OP_SENDINGPART:
@@ -955,7 +955,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					}
 					else
 					{
-						AddLogLine(true, GetResString(IDS_REQ_SHAREDFILES), client->GetUserName(), client->GetUserIDHybrid(), GetResString(IDS_DENIED));
+						DebugLog(GetResString(IDS_REQ_SHAREDFILES), client->GetUserName(), client->GetUserIDHybrid(), GetResString(IDS_DENIED));
 					}
 
 					// now create the memfile for the packet
@@ -998,7 +998,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					}
 					else
 					{
-						AddLogLine(true, GetResString(IDS_SHAREDREQ1), client->GetUserName(), client->GetUserIDHybrid(), GetResString(IDS_DENIED));
+						DebugLog(GetResString(IDS_SHAREDREQ1), client->GetUserName(), client->GetUserIDHybrid(), GetResString(IDS_DENIED));
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
 							DebugSend("OP__AskSharedDeniedAnswer", client);
                         Packet* replypacket = new Packet(OP_ASKSHAREDDENIEDANS, 0);
@@ -1103,7 +1103,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					}
                     else
 					{
-						AddLogLine(true, GetResString(IDS_SHAREDREQ2), client->GetUserName(), client->GetUserIDHybrid(), strReqDir, GetResString(IDS_DENIED));
+						DebugLog(GetResString(IDS_SHAREDREQ2), client->GetUserName(), client->GetUserIDHybrid(), strReqDir, GetResString(IDS_DENIED));
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
 							DebugSend("OP__AskSharedDeniedAnswer", client);
                         Packet* replypacket = new Packet(OP_ASKSHAREDDENIEDANS, 0);
@@ -1234,8 +1234,9 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 				ASSERT_VALID(client);
 			switch(opcode)
 			{
-                case OP_MULTIPACKET:
-				case OP_MULTIPACKET_EXT:
+                case OP_MULTIPACKET: // deprecated
+				case OP_MULTIPACKET_EXT: // deprecated
+				case OP_MULTIPACKET_EXT2:
 				{
 					if (thePrefs.GetDebugClientTCPLevel() > 0){
 						if (opcode == OP_MULTIPACKET_EXT)
@@ -1246,50 +1247,70 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode); //morph
 
-					if( client->GetKadPort() )
-						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
+					if( client->GetKadPort() && client->GetKadVersion() > 1)
+						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 
 					CSafeMemFile data_in(packet, size);
-					uchar reqfilehash[16];
-					data_in.ReadHash16(reqfilehash);
 					uint64 nSize = 0;
-					if (opcode == OP_MULTIPACKET_EXT){
-						nSize = data_in.ReadUInt64();
-					}
 					CKnownFile* reqfile;
-					if ( (reqfile = theApp.sharedfiles->GetFileByID(reqfilehash)) == NULL ){
-						if ( !((reqfile = theApp.downloadqueue->GetFileByID(reqfilehash)) != NULL
-								&& reqfile->GetFileSize() > (uint64)PARTSIZE) )
+					bool bNotFound = false;
+					uchar reqfilehash[16];
+					if (opcode == OP_MULTIPACKET_EXT2) // fileidentifier support
+					{
+						CFileIdentifierSA fileIdent;
+						if (!fileIdent.ReadIdentifier(&data_in))
 						{
-							// send file request no such file packet (0x48)
-							if (thePrefs.GetDebugClientTCPLevel() > 0)
-								DebugSend("OP__FileReqAnsNoFil", client, packet);
-							Packet* replypacket = new Packet(OP_FILEREQANSNOFIL, 16);
-							md4cpy(replypacket->pBuffer, packet);
-							theStats.AddUpDataOverheadFileRequest(replypacket->size);
-							SendPacket(replypacket, true);
-							client->CheckFailedFileIdReqs(reqfilehash);
+							DebugLogWarning(_T("Error while reading file identifier from MultiPacket_Ext2 - %s"), client->DbgGetClientInfo());
 							break;
 						}
+						md4cpy(reqfilehash, fileIdent.GetMD4Hash()); // need this in case we want to sent a FNF
+						if ( (reqfile = theApp.sharedfiles->GetFileByID(fileIdent.GetMD4Hash())) == NULL ){
+							if ( !((reqfile = theApp.downloadqueue->GetFileByID(fileIdent.GetMD4Hash())) != NULL
+									&& reqfile->GetFileSize() > (uint64)PARTSIZE) )
+							{
+								bNotFound = true;
+								client->CheckFailedFileIdReqs(fileIdent.GetMD4Hash());
+							}
+						}
+						if (!bNotFound && !reqfile->GetFileIdentifier().CompareRelaxed(fileIdent)){
+							bNotFound = true;
+							DebugLogWarning(_T("FileIdentifier Mismatch on requested file, sending FNF; %s, File=\"%s\", Local Ident: %s, Received Ident: %s"), client->DbgGetClientInfo()
+								, reqfile->GetFileName() , reqfile->GetFileIdentifier().DbgInfo(), fileIdent.DbgInfo());
+						}
 					}
-					if (reqfile->IsLargeFile() && !client->SupportsLargeFiles()){
-						if (thePrefs.GetDebugClientTCPLevel() > 0)
-								DebugSend("OP__FileReqAnsNoFil", client, packet);
-						Packet* replypacket = new Packet(OP_FILEREQANSNOFIL, 16);
-						md4cpy(replypacket->pBuffer, packet);
-						theStats.AddUpDataOverheadFileRequest(replypacket->size);
-						SendPacket(replypacket, true);
+					else // no fileidentifier
+					{
+						data_in.ReadHash16(reqfilehash);
+						if (opcode == OP_MULTIPACKET_EXT){
+							nSize = data_in.ReadUInt64();
+						}
+						if ( (reqfile = theApp.sharedfiles->GetFileByID(reqfilehash)) == NULL ){
+							if ( !((reqfile = theApp.downloadqueue->GetFileByID(reqfilehash)) != NULL
+									&& reqfile->GetFileSize() > (uint64)PARTSIZE) )
+							{
+								bNotFound = true;
+								client->CheckFailedFileIdReqs(reqfilehash);
+							}
+						}
+						if (!bNotFound && nSize != 0 && nSize != reqfile->GetFileSize()){
+							bNotFound = true;
+							DebugLogWarning(_T("Size Mismatch on requested file, sending FNF; %s, File=\"%s\""), client->DbgGetClientInfo(), reqfile->GetFileName());
+						}
+					}
+
+					if (!bNotFound && reqfile->IsLargeFile() && !client->SupportsLargeFiles()){
+						bNotFound = true;
 						DebugLogWarning(_T("Client without 64bit file support requested large file; %s, File=\"%s\""), client->DbgGetClientInfo(), reqfile->GetFileName());
-						break;
 					}
-					if (nSize != 0 && nSize != reqfile->GetFileSize()){
+					if (bNotFound)
+					{
+						// send file request no such file packet (0x48)
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
-								DebugSend("OP__FileReqAnsNoFil", client, packet);
+							DebugSend("OP__FileReqAnsNoFil", client, packet);
 						Packet* replypacket = new Packet(OP_FILEREQANSNOFIL, 16);
-						md4cpy(replypacket->pBuffer, packet);
+						md4cpy(replypacket->pBuffer, reqfilehash);
 						theStats.AddUpDataOverheadFileRequest(replypacket->size);
 						SendPacket(replypacket, true);
-						DebugLogWarning(_T("Size Mismatch on requested file, sending FNF; %s, File=\"%s\""), client->DbgGetClientInfo(), reqfile->GetFileName());
 						break;
 					}
 
@@ -1314,14 +1335,17 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					}
 
 					// check to see if this is a new file they are asking for
-					if (md4cmp(client->GetUploadFileID(), reqfilehash) != 0)
+					if (md4cmp(client->GetUploadFileID(), reqfile->GetFileHash()) != 0)
 						client->SetCommentDirty();
 
 					client->SetUploadFileID(reqfile);
 
 					uint8 opcode_in;
 					CSafeMemFile data_out(128);
-					data_out.WriteHash16(reqfile->GetFileHash());
+					if (opcode == OP_MULTIPACKET_EXT2) // fileidentifier support
+						reqfile->GetFileIdentifierC().WriteIdentifier(&data_out);
+					else
+						data_out.WriteHash16(reqfile->GetFileHash());
 					bool bAnswerFNF = false;
 					while (data_in.GetLength()-data_in.GetPosition() && !bAnswerFNF)
 					{
@@ -1353,11 +1377,15 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 								if (thePrefs.GetDebugClientTCPLevel() > 0)
 									DebugRecv("OP_MPAichFileHashReq", client, packet);
 
-								if (client->IsSupportingAICH() && reqfile->GetAICHHashset()->GetStatus() == AICH_HASHSETCOMPLETE
-									&& reqfile->GetAICHHashset()->HasValidMasterHash())
+								if (client->SupportsFileIdentifiers() || opcode == OP_MULTIPACKET_EXT2)
+								{// not allowed anymore with fileidents supported
+									DebugLogWarning(_T("Client requested AICH Hash packet, but supports FileIdentifiers, ignored - %s"), client->DbgGetClientInfo());
+									break;
+								}
+								if (client->IsSupportingAICH() && reqfile->GetFileIdentifier().HasAICHHash())
 								{
 									data_out.WriteUInt8(OP_AICHFILEHASHANS);
-									reqfile->GetAICHHashset()->GetMasterHash().Write(&data_out);
+									reqfile->GetFileIdentifier().GetAICHHash().Write(&data_out);
 								}
 								break;
 							}
@@ -1449,30 +1477,50 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
 							DebugSend("OP__MultiPacketAns", client, reqfile->GetFileHash());
 						Packet* reply = new Packet(&data_out, OP_EMULEPROT);
-						reply->opcode = OP_MULTIPACKETANSWER;
+						reply->opcode = (opcode == OP_MULTIPACKET_EXT2) ?  OP_MULTIPACKETANSWER_EXT2 : OP_MULTIPACKETANSWER;
 						theStats.AddUpDataOverheadFileRequest(reply->size);
 						SendPacket(reply, true);
 					}
 					break;
 				}
 				case OP_MULTIPACKETANSWER:
+				case OP_MULTIPACKETANSWER_EXT2:
 				{
 					if (thePrefs.GetDebugClientTCPLevel() > 0)
 						DebugRecv("OP_MultiPacketAns", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode); //moprh
 
-					if( client->GetKadPort() )
-						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
+					if( client->GetKadPort() && client->GetKadVersion() > 1)
+						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 
 					CSafeMemFile data_in(packet, size);
-					uchar reqfilehash[16];
-					data_in.ReadHash16(reqfilehash);
-					CPartFile* reqfile = theApp.downloadqueue->GetFileByID(reqfilehash);
-					//Make sure we are downloading this file.
-					if (reqfile==NULL){
-						client->CheckFailedFileIdReqs(reqfilehash);
-						throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (OP_MULTIPACKETANSWER; reqfile==NULL)");
+					
+					CPartFile* reqfile = NULL;
+					if (opcode == OP_MULTIPACKETANSWER_EXT2)
+					{
+						CFileIdentifierSA fileIdent;
+						if (!fileIdent.ReadIdentifier(&data_in))
+							throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (OP_MULTIPACKETANSWER_EXT2; ReadIdentifier() failed)");
+						reqfile = theApp.downloadqueue->GetFileByID(fileIdent.GetMD4Hash());
+						if (reqfile==NULL){
+							client->CheckFailedFileIdReqs(fileIdent.GetMD4Hash());
+							throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (OP_MULTIPACKETANSWER_EXT2; reqfile==NULL)");
+						}
+						if (!reqfile->GetFileIdentifier().CompareRelaxed(fileIdent))
+							throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (OP_MULTIPACKETANSWER_EXT2; FileIdentifier mistmatch)");
+						if (fileIdent.HasAICHHash())
+							client->ProcessAICHFileHash(NULL, reqfile, &fileIdent.GetAICHHash());
+					}
+					else{
+						uchar reqfilehash[16];
+						data_in.ReadHash16(reqfilehash);
+						reqfile = theApp.downloadqueue->GetFileByID(reqfilehash);
+						//Make sure we are downloading this file.
+						if (reqfile==NULL){
+							client->CheckFailedFileIdReqs(reqfilehash);
+							throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (OP_MULTIPACKETANSWER; reqfile==NULL)");
+						}
 					}
 					if (client->GetRequestFile()==NULL)
 						throw GetResString(IDS_ERR_WRONGFILEID) + _T(" (OP_MULTIPACKETANSWER; client->GetRequestFile()==NULL)");
@@ -1513,7 +1561,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 								if (thePrefs.GetDebugClientTCPLevel() > 0)
 									DebugRecv("OP_MPAichFileHashAns", client);
 								
-								client->ProcessAICHFileHash(&data_in, reqfile);
+								client->ProcessAICHFileHash(&data_in, reqfile, NULL);
 								break;
 							}
 							//Morph Start - added by AndCycle, ICS
@@ -1745,7 +1793,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						DebugRecv("OP_RequestPreView", client, (size >= 16) ? packet : NULL);
 					theStats.AddDownDataOverheadOther(uRawSize);
 					client->CheckHandshakeFinished(OP_EMULEPROT, opcode);//MOrph
-
+	
 					if (thePrefs.CanSeeShares()==vsfaEverybody || (thePrefs.CanSeeShares()==vsfaFriends && client->IsFriend()))	
 					{
 						if (thePrefs.GetVerbose())
@@ -2056,7 +2104,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 					theStats.AddDownDataOverheadFileRequest(uRawSize);
 
 					CSafeMemFile data(packet, size);
-					client->ProcessAICHFileHash(&data, NULL);
+					client->ProcessAICHFileHash(&data, NULL, NULL);
 					break;
 				}
 				case OP_AICHFILEHASHREQ:
@@ -2074,14 +2122,13 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						client->CheckFailedFileIdReqs(abyHash);
 						break;
 					}
-					if (client->IsSupportingAICH() && pPartFile->GetAICHHashset()->GetStatus() == AICH_HASHSETCOMPLETE
-						&& pPartFile->GetAICHHashset()->HasValidMasterHash())
+					if (client->IsSupportingAICH() && pPartFile->GetFileIdentifier().HasAICHHash())
 					{
 						if (thePrefs.GetDebugClientTCPLevel() > 0)
 							DebugSend("OP__AichFileHashAns", client, abyHash);
 						CSafeMemFile data_out;
 						data_out.WriteHash16(abyHash);
-						pPartFile->GetAICHHashset()->GetMasterHash().Write(&data_out);
+						pPartFile->GetFileIdentifier().GetAICHHash().Write(&data_out);
 						Packet* response = new Packet(&data_out, OP_EMULEPROT, OP_AICHFILEHASHANS);
 						theStats.AddUpDataOverheadFileRequest(response->size);
 						SendPacket(response);
@@ -2287,7 +2334,23 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 						DebugLogWarning(_T("Unrequested OP_KAD_FWTCPCHECK_ACK packet from client %s"), client->DbgGetClientInfo());
 					break;
 				}
-				
+				case OP_HASHSETANSWER2:
+				{
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_HashSetAnswer2", client);
+					theStats.AddDownDataOverheadFileRequest(size);
+					client->ProcessHashSet(packet, size, true);
+					break;
+				}
+				case OP_HASHSETREQUEST2:
+				{
+					if (thePrefs.GetDebugClientTCPLevel() > 0)
+						DebugRecv("OP_HashSetReq2", client);
+					theStats.AddDownDataOverheadFileRequest(size);
+					client->SendHashsetPacket(packet, size, true);
+					break;
+				}
+
 				//Morph Start - added by AndCycle, ICS
 			    // enkeyDEV: ICS
 			    case OP_FILEINCSTATUS:

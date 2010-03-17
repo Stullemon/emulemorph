@@ -32,6 +32,7 @@ public:
 	virtual ~CED2kLinkDlg(); 
 
 	void SetFiles(const CSimpleArray<CObject*>* paFiles) { m_paFiles = paFiles; m_bDataChanged = true; }
+	void SetReducedDialog()								 { m_bReducedDlg = true; }
 
 // Dialog Data 
 	enum { IDD = IDD_ED2KLINK }; 
@@ -41,6 +42,7 @@ protected:
 	CString m_strCaption;
 	const CSimpleArray<CObject*>* m_paFiles;
 	bool m_bDataChanged;
+	bool m_bReducedDlg;
 
 	void Localize(); 
 	void UpdateLink();

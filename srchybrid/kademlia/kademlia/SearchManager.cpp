@@ -30,6 +30,7 @@ there client on the eMule forum..
 
 #include "stdafx.h"
 #include "./SearchManager.h"
+#include "./Search.h"
 #include "./Tag.h"
 #include "./Defines.h"
 #include "./Kademlia.h"
@@ -53,7 +54,7 @@ static char THIS_FILE[] = __FILE__;
 
 LPCSTR g_aszInvKadKeywordCharsA = INV_KAD_KEYWORD_CHARS;
 LPCTSTR g_aszInvKadKeywordChars = _T(INV_KAD_KEYWORD_CHARS);
-LPCWSTR g_awszInvKadKeywordChars = L" ()[]{}<>,._-!?:;\\/";
+LPCWSTR g_awszInvKadKeywordChars = L" ()[]{}<>,._-!?:;\\/\"";
 
 using namespace Kademlia;
 
@@ -125,7 +126,7 @@ CSearch* CSearchManager::PrepareFindKeywords(LPCTSTR szKeyword, UINT uSearchTerm
 	try
 	{
 		// Set search to a keyword type.
-		pSearch->m_uType = CSearch::KEYWORD;
+		pSearch->SetSearchTypes(CSearch::KEYWORD);
 
 		// Make sure we have a keyword list.
 		GetWords(szKeyword, &pSearch->m_listWords);
@@ -201,7 +202,7 @@ CSearch* CSearchManager::PrepareLookup(uint32 uType, bool bStart, const CUInt128
 	CSearch *pSearch = new CSearch;
 
 	// Set type and target.
-	pSearch->m_uType = uType;
+	pSearch->SetSearchTypes(uType);
 	pSearch->m_uTarget = uID;
 
 	try
@@ -248,9 +249,9 @@ void CSearchManager::FindNode(const CUInt128 &uID, bool bComplete)
 	// Do a node lookup.
 	CSearch *pSearch = new CSearch;
 	if(bComplete)
-		pSearch->m_uType = CSearch::NODECOMPLETE;
+		pSearch->SetSearchTypes(CSearch::NODECOMPLETE);
 	else
-		pSearch->m_uType = CSearch::NODE;
+		pSearch->SetSearchTypes(CSearch::NODE);
 	pSearch->m_uTarget = uID;
 	StartSearch(pSearch);
 }
@@ -591,7 +592,7 @@ void CSearchManager::ProcessResponse(const CUInt128 &uTarget, uint32 uFromIP, ui
 		pSearch->ProcessResponse(uFromIP, uFromPort, plistResults);
 }
 
-void CSearchManager::ProcessResult(const CUInt128 &uTarget, const CUInt128 &uAnswer, TagList *plistInfo)
+void CSearchManager::ProcessResult(const CUInt128 &uTarget, const CUInt128 &uAnswer, TagList *plistInfo, uint32 uFromIP, uint16 uFromPort)
 {
 	// We have results for a request for info.
 	CSearch *pSearch = NULL;
@@ -607,7 +608,7 @@ void CSearchManager::ProcessResult(const CUInt128 &uTarget, const CUInt128 &uAns
 		delete plistInfo;
 	}
 	else
-		pSearch->ProcessResult(uAnswer, plistInfo);
+		pSearch->ProcessResult(uAnswer, plistInfo, uFromIP, uFromPort);
 }
 
 bool CSearchManager::FindNodeSpecial(const CUInt128 &uID, CKadClientSearcher* pRequester){
@@ -616,7 +617,7 @@ bool CSearchManager::FindNodeSpecial(const CUInt128 &uID, CKadClientSearcher* pR
 	uID.ToHexString(&strDbgID);
 	DebugLog(_T("Starting NODESPECIAL Kad Search for %s"), strDbgID);
 	CSearch *pSearch = new CSearch;
-	pSearch->m_uType = CSearch::NODESPECIAL;
+	pSearch->SetSearchTypes(CSearch::NODESPECIAL);
 	pSearch->m_uTarget = uID;
 	pSearch->SetNodeSpecialSearchRequester(pRequester);
 	return StartSearch(pSearch);
@@ -628,7 +629,7 @@ bool CSearchManager::FindNodeFWCheckUDP(){
 	uID.SetValueRandom();
 	DebugLog(_T("Starting NODEFWCHECKUDP Kad Search"));
 	CSearch *pSearch = new CSearch;
-	pSearch->m_uType = CSearch::NODEFWCHECKUDP;
+	pSearch->SetSearchTypes(CSearch::NODEFWCHECKUDP);
 	pSearch->m_uTarget = uID;
 	return StartSearch(pSearch);
 }

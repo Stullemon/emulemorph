@@ -168,6 +168,7 @@ public:
 	EMFileSize	GetRealFileSize() const;
 	void	GetLeftToTransferAndAdditionalNeededSpace(uint64 &ui64LeftToTransfer, uint64 &pui32AdditionalNeededSpace) const;
 	uint64	GetNeededSpace() const;
+	virtual void SetFileSize(EMFileSize nFileSize);
 
 	// last file modification time (NT's version of UTC), to be used for stats only!
 	CTime	GetCFileDate() const { return CTime(m_tLastModified); }
@@ -189,9 +190,9 @@ public:
 
 	bool	SavePartFile(bool bDontOverrideBak = false);
 	void	PartFileHashFinished(CKnownFile* result);
-	bool	HashSinglePart(UINT partnumber); // true = ok , false = corrupted //MORPH - Flush Thread
+	bool	HashSinglePart(UINT partnumber, bool* pbAICHReportedOK = NULL); // true = ok , false = corrupted //MORPH - Flush Thread
 	// SLUGFILLER: SafeHash - replaced old handlers, full hash checker remains for file completion
-	void	PartHashFinished(UINT partnumber, bool corrupt);
+	void	PartHashFinished(UINT partnumber, bool bAICHAgreed, bool corrupt);
 	void	PartHashFinishedAICHRecover(UINT partnumber, bool corrupt);
 	bool	IsPartShareable(UINT partnumber) const;
 	bool	IsRangeShareable(uint64 start, uint64 end) const;
@@ -231,26 +232,26 @@ public:
 	void	SetStatus(EPartFileStatus eStatus);		// set status and update GUI
 	void	_SetStatus(EPartFileStatus eStatus);	// set status and do *not* update GUI
 	void	NotifyStatusChange();
-	bool	IsStopped() const { return stopped; }
-	bool	GetCompletionError() const { return m_bCompletionError;}
-	EMFileSize  GetCompletedSize() const { return completedsize; }
+	bool	IsStopped() const												{ return stopped; }
+	bool	GetCompletionError() const										{ return m_bCompletionError; }
+	EMFileSize  GetCompletedSize() const									{ return completedsize; }
 	CString getPartfileStatus() const;
 	int		getPartfileStatusRang() const;
 	void	SetActive(bool bActive);
-	
-	uint8	GetDownPriority() const { return m_iDownPriority; }
+
+	uint8	GetDownPriority() const											{ return m_iDownPriority; }
 	void	SetDownPriority(uint8 iNewDownPriority, bool resort = true);
-	bool	IsAutoDownPriority(void) const { return m_bAutoDownPriority; }
-	void	SetAutoDownPriority(bool NewAutoDownPriority) { m_bAutoDownPriority = NewAutoDownPriority; }
+	bool	IsAutoDownPriority(void) const									{ return m_bAutoDownPriority; }
+	void	SetAutoDownPriority(bool NewAutoDownPriority)					{ m_bAutoDownPriority = NewAutoDownPriority; }
 	void	UpdateAutoDownPriority();
 
-	UINT	GetSourceCount() const { return srclist.GetCount(); }
-	UINT	GetSrcA4AFCount() const { return A4AFsrclist.GetCount(); }
+	UINT	GetSourceCount() const											{ return srclist.GetCount(); }
+	UINT	GetSrcA4AFCount() const											{ return A4AFsrclist.GetCount(); }
 	UINT	GetSrcStatisticsValue(EDownloadState nDLState) const;
 	UINT	GetTransferringSrcCount() const;
-	uint64	GetTransferred() const { return m_uTransferred; }
-	uint32	GetDatarate() const { return datarate; }
-	float	GetPercentCompleted() const { return percentcompleted; }
+	uint64	GetTransferred() const											{ return m_uTransferred; }
+	uint32	GetDatarate() const												{ return datarate; }
+	float	GetPercentCompleted() const										{ return percentcompleted; }
 	UINT	GetNotCurrentSourcesCount() const;
 	int		GetValidSourcesCount() const;
 	//MORPH START - Added by SiRoB, Source Counts Are Cached derivated from Khaos
@@ -287,6 +288,7 @@ public:
 	bool	CanStopFile() const;
 	bool	CanPauseFile() const;
 	bool	CanResumeFile() const;
+	bool	IsPausingOnPreview() const										{ return m_bPauseOnPreview && IsPreviewableFileType() && CanPauseFile(); }
 
 	void	OpenFile() const;
 	void	PreviewFile();
@@ -296,15 +298,16 @@ public:
 	void	StopPausedFile();
 	void	ResumeFile(bool resort = true);
 	void	ResumeFileInsufficient();
+	void	SetPauseOnPreview(bool bVal)									{ m_bPauseOnPreview = bVal; }
 
 	virtual Packet* CreateSrcInfoPacket(const CUpDownClient* forClient, uint8 byRequestedVersion, uint16 nRequestedOptions) const;
 	void	AddClientSources(CSafeMemFile* sources, uint8 sourceexchangeversion, bool bSourceExchange2, const CUpDownClient* pClient = NULL);
 
-	UINT	GetAvailablePartCount() const { return availablePartsCount; }
+	UINT	GetAvailablePartCount() const									{ return availablePartsCount; }
 	void	UpdateAvailablePartsCount();
 
-	uint32	GetLastAnsweredTime() const	{ return m_ClientSrcAnswered; }
-	void	SetLastAnsweredTime()			{ m_ClientSrcAnswered = ::GetTickCount(); }
+	uint32	GetLastAnsweredTime() const										{ return m_ClientSrcAnswered; }
+	void	SetLastAnsweredTime() { m_ClientSrcAnswered = ::GetTickCount(); }
 	void	SetLastAnsweredTimeTimeout();
 
 	uint64	GetCorruptionLoss() const { return m_uCorruptionLoss; }
@@ -325,10 +328,11 @@ public:
 
 	UINT	GetCategory() const;
 	void	SetCategory(UINT cat);
+	bool	HasDefaultCategory() const;
 	bool	CheckShowItemInGivenCat(int inCategory) /*const*/;
 
 	uint8*	MMCreatePartStatus();
-	
+
 	//preview
 	virtual bool GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth,void* pSender);
 	virtual void GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
@@ -340,12 +344,15 @@ public:
 	void	PerformFileCompleteEnd(DWORD dwResult);
 
 	void	SetFileOp(EPartFileOp eFileOp);
-	EPartFileOp GetFileOp() const { return m_eFileOp; }
+	EPartFileOp GetFileOp() const											{ return m_eFileOp; }
 	void	SetFileOpProgress(UINT uProgress);
-	UINT	GetFileOpProgress() const { return m_uFileOpProgress; }
+	UINT	GetFileOpProgress() const										{ return m_uFileOpProgress; }
 
+	CAICHRecoveryHashSet* GetAICHRecoveryHashSet()							{ return m_pAICHRecoveryHashSet; }
 	void	RequestAICHRecovery(UINT nPart);
 	void	AICHRecoveryDataAvailable(UINT nPart);
+	bool	IsAICHPartHashSetNeeded() const									{ return m_FileIdentifier.HasAICHHash() && !m_FileIdentifier.HasExpectedAICHHashCount() && m_bAICHPartHashsetNeeded; }
+	void	SetAICHHashSetNeeded(bool bVal)									{ m_bAICHPartHashsetNeeded = bVal; }
 
 	uint32	m_LastSearchTime;
 	uint32	m_LastSearchTimeKad;
@@ -361,19 +368,19 @@ public:
 	volatile bool m_bRecoveringArchive; // Is archive recovery in progress
 	bool	m_bLocalSrcReqQueued;
 	bool	srcarevisible;				// used for downloadlistctrl
-	bool	hashsetneeded;
+	bool	m_bMD4HashsetNeeded;
 	uint8	m_TotalSearchesKad;
-    bool    AllowSwapForSourceExchange() { return ::GetTickCount()-lastSwapForSourceExchangeTick > 30*1000; } // ZZ:DownloadManager
-    void    SetSwapForSourceExchangeTick() { lastSwapForSourceExchangeTick = ::GetTickCount(); } // ZZ:DownloadManager
-
-	UINT	SetPrivateMaxSources(uint32 in)	{ return m_uMaxSources = in; } 
-	UINT	GetPrivateMaxSources() const	{ return m_uMaxSources; } 
+    bool    AllowSwapForSourceExchange()					{ return ::GetTickCount()-lastSwapForSourceExchangeTick > 30*1000; } // ZZ:DownloadManager
+    void    SetSwapForSourceExchangeTick()					{ lastSwapForSourceExchangeTick = ::GetTickCount(); } // ZZ:DownloadManager
+	
+	UINT	SetPrivateMaxSources(uint32 in)					{ return m_uMaxSources = in; } 
+	UINT	GetPrivateMaxSources() const					{ return m_uMaxSources; } 
 	UINT	GetMaxSources() const;
 	UINT	GetMaxSourcePerFileSoft() const;
 	UINT	GetMaxSourcePerFileUDP() const;
 
-	bool    GetPreviewPrio() const { return m_bpreviewprio; }
-	void    SetPreviewPrio(bool in) { m_bpreviewprio=in; }
+    bool    GetPreviewPrio() const							{ return m_bpreviewprio; }
+	void    SetPreviewPrio(bool in)							{ m_bpreviewprio=in; }
 
     /*MORPH*/static bool RightFileHasHigherPrio(const CPartFile* left, const CPartFile* right);
 
@@ -419,6 +426,7 @@ protected:
 	// khaos::kmod+ Save/Load Sources
 	CSourceSaver m_sourcesaver; //<<-- enkeyDEV(Ottavio84) -New SLS-
 	// khaos::kmod-
+
 private:
 	BOOL 		PerformFileComplete(); // Lord KiRon
 	static UINT CompleteThreadProc(LPVOID pvParams); // Lord KiRon - Used as separate thread to complete file
@@ -436,19 +444,21 @@ private:
 	UINT	m_anStatesTemp[STATES_COUNT];
 	//MORPH END   - Added by SiRoB, Cached stat
 	uint64	m_uTotalGaps; //MORPH - Optimization, completedsize
-	EMFileSize  completedsize;
+	EMFileSize	completedsize;
 	uint64	m_uCorruptionLoss;
 	uint64	m_uCompressionGain;
 	uint32	m_uPartsSavedDueICH;
 	uint32	datarate;
-	CString	m_fullname;
-	CString	m_partmetfilename;
+	CString m_fullname;
+	CString m_partmetfilename;
 	uint64	m_uTransferred;
-	UINT  m_uMaxSources;
+	UINT	m_uMaxSources;
 	bool	paused;
+	bool	m_bPauseOnPreview;
 	bool	stopped;
 	bool	insufficient;
 	bool	m_bCompletionError;
+	bool	m_bAICHPartHashsetNeeded;
 	uint8	m_iDownPriority;
 	bool	m_bAutoDownPriority;
 	EPartFileStatus	status;
@@ -482,7 +492,7 @@ private:  //morph
 	// Barry - Buffered data to be written
 	CTypedPtrList<CPtrList, PartFileBufferedData*> m_BufferedData_list;
 	uint64	m_nTotalBufferData;
-	uint32 m_nLastBufferFlushTime;
+	uint32	m_nLastBufferFlushTime;
 	UINT	m_category;
 	DWORD	m_dwFileAttributes;
 	time_t	m_tActivated;
@@ -492,6 +502,7 @@ private:  //morph
     uint32	m_random_update_wait;	
 	volatile EPartFileOp m_eFileOp;
 	volatile UINT m_uFileOpProgress;
+	CAICHRecoveryHashSet*	m_pAICHRecoveryHashSet;
 
     DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager
 	

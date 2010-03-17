@@ -7,7 +7,7 @@
 #include "SelCategoryDlg.h"
 #include "OtherFunctions.h"
 #include "emuleDlg.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "DownloadQueue.h"
 #include "ED2KLink.h"
 

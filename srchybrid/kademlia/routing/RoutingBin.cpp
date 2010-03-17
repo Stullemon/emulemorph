@@ -406,6 +406,7 @@ void CRoutingBin::SetAllContactsVerified()
 		(*itContactList)->SetIpVerified(true);
 	}
 }
+
 bool CRoutingBin::CheckGlobalIPLimits(uint32 uIP, uint16 uPort, bool bLog)
 {
 	// no more than 1 KadID per IP
@@ -423,6 +424,16 @@ bool CRoutingBin::CheckGlobalIPLimits(uint32 uIP, uint16 uPort, bool bLog)
 		if (bLog && ::thePrefs.GetLogFilteredIPs())
 			AddDebugLogLine(false, _T("Ignored kad contact (IP=%s:%u) - too many contacts with the same Subnet (global)"), ipstr(ntohl(uIP)), uPort);
 		return false;	
+	}
+	return true;
+}
+
+bool CRoutingBin::HasOnlyLANNodes() const
+{
+	for (ContactList::const_iterator itContactList = m_listEntries.begin(); itContactList != m_listEntries.end(); ++itContactList)
+	{
+		if (!::IsLANIP(ntohl((*itContactList)->GetIPAddress())))
+			return false;
 	}
 	return true;
 }

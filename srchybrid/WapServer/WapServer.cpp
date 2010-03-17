@@ -23,7 +23,7 @@
 #include "ServerWnd.h"
 #include "Sockets.h"
 #include "Server.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "PartFile.h"
 #include "UpDownClient.h"
 #include "StatisticsDlg.h"
@@ -1055,7 +1055,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 	CString Out = _T("");
 
 	if (clcompl && IsSessionAdmin(Data,sSession)) 
-		theApp.emuledlg->transferwnd->downloadlistctrl.ClearCompleted(true);
+		theApp.emuledlg->transferwnd->GetDownloadList()->ClearCompleted(true);
 
 	if (_ParseURL(Data.sURL, _T("c")) != _T("") && IsSessionAdmin(Data,sSession)) 
 	{
@@ -1168,7 +1168,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 		_GetFileHash(_ParseURL(Data.sURL, _T("showfile")), FileHash);
 
 		CArray<CPartFile*,CPartFile*> partlist;
-		theApp.emuledlg->transferwnd->downloadlistctrl.GetDisplayedFiles(&partlist);
+		theApp.emuledlg->transferwnd->GetDownloadList()->GetDisplayedFiles(&partlist);
 		
 		for (int fx=0;fx<partlist.GetCount();fx++)
 		{
@@ -1434,7 +1434,7 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 		CArray<DownloadFiles, DownloadFiles> FilesArray;
 
 		CArray<CPartFile*,CPartFile*> partlist;
-		theApp.emuledlg->transferwnd->downloadlistctrl.GetDisplayedFiles(&partlist);
+		theApp.emuledlg->transferwnd->GetDownloadList()->GetDisplayedFiles(&partlist);
 
 		// Populating array
 		bool completedAv=false;
@@ -4551,7 +4551,7 @@ CString	CWapServer::_GetKadPage(WapThreadData Data)
 		if (pos!=-1) {
 			uint16 port=(uint16)_ttoi(dest.Right( dest.GetLength()-pos-1));
 			CString ip=dest.Left(pos);
-			Kademlia::CKademlia::Bootstrap(ip,port,true);
+			Kademlia::CKademlia::Bootstrap(ip,port);
 		}
 	}
 
@@ -4573,7 +4573,7 @@ CString	CWapServer::_GetKadPage(WapThreadData Data)
 		uint16 bsport=(uint16)_ttoi(_ParseURL(Data.sURL, _T("bsport")));
 
 		if (!bsip.IsEmpty() && bsport>0)
-			Kademlia::CKademlia::Bootstrap(bsip,bsport,true);
+			Kademlia::CKademlia::Bootstrap(bsip,bsport);
 	} else Out.Replace(_T("[BOOTSTRAPLINE]"), _T("") );
 
 	// Infos
