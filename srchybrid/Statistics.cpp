@@ -23,7 +23,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 #ifdef _DEBUG
@@ -95,6 +95,10 @@ DWORD	CStatistics::m_AvarageDDRO_listLastRemovedTimestamp;
 DWORD	CStatistics::m_AvarageUDRO_listLastRemovedTimestamp;
 //MORPH END   - Added by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 
+float	CStatistics::m_fGlobalDone;
+float	CStatistics::m_fGlobalSize;
+DWORD	CStatistics::m_dwOverallStatus;
+
 uint64	CStatistics::sessionReceivedBytes;
 uint64	CStatistics::sessionSentBytes;
 uint64	CStatistics::sessionSentBytesToFriend;
@@ -104,6 +108,7 @@ DWORD	CStatistics::serverConnectTime;
 uint32	CStatistics::filteredclients;
 DWORD	CStatistics::starttime;
 uint32	CStatistics::leecherclients; //Added by SiRoB
+
 
 CStatistics::CStatistics()
 {
@@ -140,21 +145,23 @@ CStatistics::CStatistics()
 	filteredclients=0;
 	leecherclients=0; //MORPH - Added by SiRoB
 	starttime=0;
-	
 
-	m_nDownDataRateMSOverhead = 0;
-	m_nDownDatarateOverhead = 0;
-	m_nDownDataOverheadSourceExchange = 0;
-	m_nDownDataOverheadSourceExchangePackets = 0;
-	m_nDownDataOverheadFileRequest = 0;
-	m_nDownDataOverheadFileRequestPackets = 0;
-	m_nDownDataOverheadServer = 0;
-	m_nDownDataOverheadServerPackets = 0;
-	m_nDownDataOverheadKad = 0;
-	m_nDownDataOverheadKadPackets = 0;
-	m_nDownDataOverheadOther = 0;
-	m_nDownDataOverheadOtherPackets = 0;
-	m_sumavgDDRO = 0;
+	m_fGlobalDone =								0;
+	m_fGlobalSize =								0;
+	m_dwOverallStatus  =						0;
+	m_nDownDataRateMSOverhead =					0;
+	m_nDownDatarateOverhead =					0;
+	m_nDownDataOverheadSourceExchange =			0;
+	m_nDownDataOverheadSourceExchangePackets =	0;
+	m_nDownDataOverheadFileRequest =			0;
+	m_nDownDataOverheadFileRequestPackets =		0;
+	m_nDownDataOverheadServer =					0;
+	m_nDownDataOverheadServerPackets =			0;
+	m_nDownDataOverheadKad =					0;
+	m_nDownDataOverheadKadPackets =				0;
+	m_nDownDataOverheadOther =					0;
+	m_nDownDataOverheadOtherPackets =			0;
+	m_sumavgDDRO =								0;
 
 	m_nUpDataRateMSOverhead = 0;
 	m_nUpDatarateOverhead = 0;

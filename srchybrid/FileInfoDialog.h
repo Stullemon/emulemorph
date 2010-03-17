@@ -32,6 +32,7 @@ public:
 	virtual ~CFileInfoDialog();
 
 	void SetFiles(const CSimpleArray<CObject*>* paFiles) { m_paFiles = paFiles; m_bDataChanged = true; }
+	void SetReducedDialog()								 { m_bReducedDlg = true; }
 
 // Dialog Data
 	enum { IDD = IDD_FILEINFO };
@@ -41,6 +42,7 @@ protected:
 	const CSimpleArray<CObject*>* m_paFiles;
 	bool m_bDataChanged;
 	CRichEditCtrlX m_fi;
+	bool m_bReducedDlg;
 //	CHARFORMAT m_cfDef;
 //	CHARFORMAT m_cfBold;
 //	CHARFORMAT m_cfRed;

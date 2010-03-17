@@ -23,7 +23,7 @@
 #include "DownloadQueue.h"
 #include "Preferences.h"
 #include "OtherFunctions.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "emuledlg.h"
 #include "SharedFilesWnd.h"
 #include "ServerWnd.h"
@@ -38,12 +38,12 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
 #define	DFLT_MAXCONPERFIVE	20
-#define DFLT_MAXHALFOPEN 9
+#define DFLT_MAXHALFOPEN	9
 
 ///////////////////////////////////////////////////////////////////////////////
 // CPPgTweaks dialog
@@ -51,7 +51,7 @@ static char THIS_FILE[]=__FILE__;
 IMPLEMENT_DYNAMIC(CPPgTweaks, CPropertyPage)
 
 BEGIN_MESSAGE_MAP(CPPgTweaks, CPropertyPage)
-	ON_WM_HSCROLL()	
+	ON_WM_HSCROLL()
 	ON_WM_DESTROY()
 	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
 	ON_WM_HELPINFO()
@@ -65,7 +65,7 @@ CPPgTweaks::CPPgTweaks()
 */	
 	: CPPgtooltipped(CPPgTweaks::IDD)
 // MORPH END leuk_he tooltipped
-, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)
+	, m_ctrlTreeOptions(theApp.m_iDfltImageListColorFlags)
 {
 	m_iFileBufferSize = 0;
 	m_iQueueSize = 0;
@@ -105,7 +105,6 @@ CPPgTweaks::CPPgTweaks()
 	*/
 	// End emulEspaña
 	m_iLogLevel = 0;
-	m_bDisablePeerCache = false;
     m_bDynUpEnabled = false;
     m_iDynUpMinUpload = 0;
     m_iDynUpPingTolerance = 0;
@@ -114,7 +113,7 @@ CPPgTweaks::CPPgTweaks()
     m_iDynUpNumberOfPings = 0;
     m_bA4AFSaveCpu = false;
 	m_iExtractMetaData = 0;
-	m_bAutoArchDisable=true;
+	m_bAutoArchDisable = true;
 	m_iShareeMule = 0;
 	m_bResolveShellLinks = false;
 
@@ -159,7 +158,6 @@ CPPgTweaks::CPPgTweaks()
 	*/
 	// End emulEspaña
 	m_htiLogLevel = NULL;
-	m_htiDisablePeerCache = NULL;
     m_htiDynUp = NULL;
 	m_htiDynUpEnabled = NULL;
     m_htiDynUpMinUpload = NULL;
@@ -262,6 +260,11 @@ CPPgTweaks::CPPgTweaks()
     m_htidontcompressavi = NULL;
 	m_htiFileBufferTimeLimit = NULL;
 	m_htiRearrangeKadSearchKeywords = NULL;
+	m_htiUpdateQueue = NULL;
+	m_htiRepaint = NULL;
+	m_htiBeeper = NULL;
+	m_htiMsgOnlySec = NULL;
+	m_htiDisablePeerCache = NULL;
 	//MORPH END  leuk_he Advanced official preferences.
 }
 
@@ -284,11 +287,11 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		int iImgA4AF = 8;
 		int iImgMetaData = 8;
 		int iImgShareeMule = 8;
-		CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
+        CImageList* piml = m_ctrlTreeOptions.GetImageList(TVSIL_NORMAL);
 		if (piml){
-			iImgBackup = piml->Add(CTempIconLoader(_T("Harddisk")));
-			iImgLog = piml->Add(CTempIconLoader(_T("Log")));
-            iImgDynyp = piml->Add(CTempIconLoader(_T("upload")));
+			iImgBackup =	piml->Add(CTempIconLoader(_T("Harddisk")));
+			iImgLog =		piml->Add(CTempIconLoader(_T("Log")));
+			iImgDynyp =		piml->Add(CTempIconLoader(_T("upload")));
 			iImgConnection=	piml->Add(CTempIconLoader(_T("connection")));
             iImgA4AF =		piml->Add(CTempIconLoader(_T("Download")));
             iImgMetaData =	piml->Add(CTempIconLoader(_T("MediaInfo")));
@@ -328,7 +331,6 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiAutoArch  = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLE_AUTOARCHPREV), TVI_ROOT, m_bAutoArchDisable);
 		m_htiYourHostname = m_ctrlTreeOptions.InsertItem(GetResString(IDS_YOURHOSTNAME), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, TVI_ROOT);
 		m_ctrlTreeOptions.AddEditBox(m_htiYourHostname, RUNTIME_CLASS(CTreeOptionsEditEx));
-		m_htiDisablePeerCache = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLEPEERACHE), TVI_ROOT, m_bDisablePeerCache);
 
 		/////////////////////////////////////////////////////////////////////////////
 		// File related group
@@ -379,7 +381,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		/////////////////////////////////////////////////////////////////////////////
 		// USS group
 		//
-		m_htiDynUp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUP), iImgDynyp, TVI_ROOT);
+        m_htiDynUp = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_DYNUP), iImgDynyp, TVI_ROOT);
 		m_htiDynUpEnabled = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DYNUPENABLED), m_htiDynUp, m_bDynUpEnabled);
         m_htiDynUpMinUpload = m_ctrlTreeOptions.InsertItem(GetResString(IDS_DYNUP_MINUPLOAD), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiDynUp);
 		m_ctrlTreeOptions.AddEditBox(m_htiDynUpMinUpload, RUNTIME_CLASS(CNumTreeOptionsEdit));
@@ -401,10 +403,9 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		// eMule Shared User
 		//
 		m_htiShareeMule = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SHAREEMULELABEL), iImgShareeMule, TVI_ROOT);
-		m_htiShareeMuleMultiUser = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SHAREEMULEMULTI), m_htiShareeMule, m_iShareeMule  == 0);
-		m_htiShareeMulePublicUser = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SHAREEMULEPUBLIC), m_htiShareeMule, m_iShareeMule  == 1);
-		m_htiShareeMuleOldStyle = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SHAREEMULEOLD), m_htiShareeMule, m_iShareeMule  == 2);
-
+		m_htiShareeMuleMultiUser = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SHAREEMULEMULTI), m_htiShareeMule, m_iShareeMule == 0);
+		m_htiShareeMulePublicUser = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SHAREEMULEPUBLIC), m_htiShareeMule, m_iShareeMule == 1);
+		m_htiShareeMuleOldStyle = m_ctrlTreeOptions.InsertRadioButton(GetResString(IDS_SHAREEMULEOLD), m_htiShareeMule, m_iShareeMule == 2);
 		
 
 		//MORPH START leuk_he Advanced official preferences.
@@ -499,21 +500,26 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiFileBufferTimeLimit = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_FILE_BUFFER_TIME_LIMIT), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_htiFileBufferTimeLimit, RUNTIME_CLASS(CTreeOptionsEditEx));
 		m_htiRearrangeKadSearchKeywords = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_REARRANGEKADSEARCH), m_hti_advanced, m_bRearrangeKadSearchKeywords);
+		m_htiUpdateQueue = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPDATEQUEUE), m_hti_advanced, m_bUpdateQueue);
+		m_htiRepaint = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_REPAINTGRAPHS), m_hti_advanced, m_bRepaint);
+		m_htiBeeper = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PW_BEEP), m_hti_advanced, m_bBeeper);
+		m_htiMsgOnlySec = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MSGONLYSEC), m_hti_advanced, m_bMsgOnlySec);
+		m_htiDisablePeerCache = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLEPEERACHE), m_hti_advanced, m_bDisablePeerCache);
 
 		if (m_bExtControls) // show more controls --> still possible to manully expand. 
 			m_ctrlTreeOptions.Expand(m_hti_advanced, TVE_EXPAND);
 		// MORPH END  leuk_he Advanced official preferences.
 
 	    m_ctrlTreeOptions.Expand(m_htiTCPGroup, TVE_EXPAND);
-		if (m_htiVerboseGroup)
-			m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
+        if (m_htiVerboseGroup)
+		    m_ctrlTreeOptions.Expand(m_htiVerboseGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCommit, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiCheckDiskspace, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiDynUp, TVE_EXPAND);
         m_ctrlTreeOptions.Expand(m_htiDynUpPingToleranceGroup, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiExtractMetaData, TVE_EXPAND);
 		m_ctrlTreeOptions.Expand(m_htiShareeMule, TVE_EXPAND);
-		m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
+        m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
         m_bInitializedTreeOpts = true;
 	}
 
@@ -544,16 +550,15 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	// End emulEspaña
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFilterLANIPs, m_bFilterLANIPs);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiExtControls, m_bExtControls);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiA4AFSaveCpu, m_bA4AFSaveCpu);
+    DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiA4AFSaveCpu, m_bA4AFSaveCpu);
 	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiYourHostname, m_sYourHostname);
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDisablePeerCache, m_bDisablePeerCache);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAutoArch, m_bAutoArchDisable);
-
+	
 	/////////////////////////////////////////////////////////////////////////////
 	// File related group
 	//
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiSparsePartFiles, m_bSparsePartFiles);
-	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiSparsePartFiles, thePrefs.GetWindowsVersion() != _WINVER_VISTA_);
+	m_ctrlTreeOptions.SetCheckBoxEnable(m_htiSparsePartFiles, thePrefs.GetWindowsVersion() != _WINVER_VISTA_ /*only disable on Vista, not later versions*/);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiFullAlloc, m_bFullAlloc);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCheckDiskspace, m_bCheckDiskspace);
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htiMinFreeDiskSpace, m_fMinFreeDiskSpaceMB);
@@ -570,7 +575,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if (m_htiLogLevel){
 		DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiLogLevel, m_iLogLevel);
 		DDV_MinMaxInt(pDX, m_iLogLevel, 1, 5);
-	}
+	}	
 	if (m_htiVerbose)				DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiVerbose, m_bVerbose);
 	if (m_htiDebug2Disk)			DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDebug2Disk, m_bDebug2Disk);
 	if (m_htiDebug2Disk)			m_ctrlTreeOptions.SetCheckBoxEnable(m_htiDebug2Disk, m_bVerbose);
@@ -600,11 +605,10 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if (m_htiLogUPnP)				m_ctrlTreeOptions.SetCheckBoxEnable(m_htiLogUPnP, m_bVerbose);
 	// End emulEspaña
 
-
 	/////////////////////////////////////////////////////////////////////////////
 	// USS group
 	//
-	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDynUpEnabled, m_bDynUpEnabled);
+    DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDynUpEnabled, m_bDynUpEnabled);
     DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpMinUpload, m_iDynUpMinUpload);
 	DDV_MinMaxInt(pDX, m_iDynUpMinUpload, 1, INT_MAX);
     DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_htiDynUpPingTolerance, m_iDynUpPingTolerance);
@@ -680,13 +684,18 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiIconflashOnNewMessage, m_bIconflashOnNewMessage);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiReBarToolbar, m_bReBarToolbar);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiRearrangeKadSearchKeywords, m_bRearrangeKadSearchKeywords);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiUpdateQueue, m_bUpdateQueue);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiRepaint, m_bRepaint);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiBeeper, m_bBeeper);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiMsgOnlySec, m_bMsgOnlySec);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDisablePeerCache, m_bDisablePeerCache);
     // MORPH END  leuk_he Advanced official preferences.
 
 	/////////////////////////////////////////////////////////////////////////////
 	// eMule Shared User
 	//
 	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiShareeMule, m_iShareeMule);
-	m_ctrlTreeOptions.SetRadioButtonEnable(m_htiShareeMulePublicUser, thePrefs.GetWindowsVersion() == _WINVER_VISTA_);
+	m_ctrlTreeOptions.SetRadioButtonEnable(m_htiShareeMulePublicUser, thePrefs.GetWindowsVersion() >= _WINVER_VISTA_);
 }
 
 BOOL CPPgTweaks::OnInitDialog()
@@ -741,7 +750,6 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bFirewallStartup = ((thePrefs.GetWindowsVersion() == _WINVER_XP_) ? thePrefs.m_bOpenPortsOnStartUp : 0); 
 	*/
 	// End emulEspaña
-	m_bDisablePeerCache = !thePrefs.m_bPeerCacheEnabled;
 	m_bAutoArchDisable = !thePrefs.m_bAutomaticArcPreviewStart;
 
     m_bDynUpEnabled = thePrefs.m_bDynUpEnabled;
@@ -811,6 +819,11 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bReBarToolbar = !thePrefs.m_bReBarToolbar;
 	m_iFileBufferTimeLimit = thePrefs.GetFileBufferTimeLimit()/1000;
 	m_bRearrangeKadSearchKeywords = thePrefs.GetRearrangeKadSearchKeywords();
+	m_bUpdateQueue = thePrefs.m_bupdatequeuelist;
+	m_bRepaint = thePrefs.IsGraphRecreateDisabled();
+	m_bBeeper = thePrefs.beepOnError;
+	m_bMsgOnlySec = thePrefs.msgsecure;
+	m_bDisablePeerCache = !thePrefs.m_bPeerCacheEnabled;
 	// MORPH END  leuk_he Advanced official preferences.
 
 	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
@@ -868,7 +881,7 @@ BOOL CPPgTweaks::OnApply()
 		if (thePrefs.AutoTakeED2KLinks())
 			Ask4RegFix(false, true, false);
 		else
-		RevertReg();
+			RevertReg();
 	}
 
 	if (!thePrefs.log2disk && m_bLog2Disk)
@@ -944,7 +957,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_iQueueSize = m_iQueueSize;
 	if (thePrefs.m_bExtControls != m_bExtControls) {
 		thePrefs.m_bExtControls = m_bExtControls;
-		theApp.emuledlg->transferwnd->downloadlistctrl.CreateMenues();
+		theApp.emuledlg->transferwnd->GetDownloadList()->CreateMenues();
 		theApp.emuledlg->searchwnd->CreateMenus();
 		theApp.emuledlg->sharedfileswnd->sharedfilesctrl.CreateMenues();
 		//MORPH START show less controls
@@ -974,10 +987,9 @@ BOOL CPPgTweaks::OnApply()
 	}
 	// Removed by MoNKi [MoNKi: -Improved ICS-Firewall support-]
 	/* Moved to PPgEmulespana
-	thePrefs.m_bOpenPortsOnStartUp = m_bFirewallStartup; 
+	thePrefs.m_bOpenPortsOnStartUp = m_bFirewallStartup;
 	*/
 	// End emulEspaña
-	thePrefs.m_bPeerCacheEnabled = !m_bDisablePeerCache;
 
     thePrefs.m_bDynUpEnabled = m_bDynUpEnabled;
     thePrefs.minupload = (uint16)m_iDynUpMinUpload;
@@ -1054,13 +1066,16 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bReBarToolbar = !m_bReBarToolbar;
 	thePrefs.m_uFileBufferTimeLimit = SEC2MS(m_iFileBufferTimeLimit);
 	thePrefs.m_bRearrangeKadSearchKeywords = m_bRearrangeKadSearchKeywords;
+	thePrefs.m_bupdatequeuelist = m_bUpdateQueue;
+	thePrefs.dontRecreateGraphs = m_bRepaint;
+	thePrefs.beepOnError = m_bBeeper;
+	thePrefs.msgsecure = m_bMsgOnlySec;
+	thePrefs.m_bPeerCacheEnabled = !m_bDisablePeerCache;
 	//MORPH END  leuk_he Advanced official preferences.
-
-
 
 	if (thePrefs.GetEnableVerboseOptions())
 	{
-    	theApp.emuledlg->serverwnd->ToggleDebugWindow();
+	    theApp.emuledlg->serverwnd->ToggleDebugWindow();
 		theApp.emuledlg->serverwnd->UpdateLogTabSelection();
 	}
 	theApp.downloadqueue->CheckDiskspace();
@@ -1074,7 +1089,7 @@ void CPPgTweaks::OnHScroll(UINT /*nSBCode*/, UINT /*nPos*/, CScrollBar* pScrollB
 	if (pScrollBar->GetSafeHwnd() == m_ctlFileBuffSize.m_hWnd)
 	{
 		m_iFileBufferSize = m_ctlFileBuffSize.GetPos() * 1024;
-	CString temp;
+        CString temp;
 		temp.Format(_T("%s: %s"), GetResString(IDS_FILEBUFFERSIZE), CastItoXBytes(m_iFileBufferSize, false, false));
 		GetDlgItem(IDC_FILEBUFFERSIZE_STATIC)->SetWindowText(temp);
 		SetModified(TRUE);
@@ -1143,15 +1158,14 @@ void CPPgTweaks::Localize(void)
 		if (m_htiFirewallStartup) m_ctrlTreeOptions.SetItemText(m_htiFirewallStartup, GetResString(IDS_FO_PREF_STARTUP));
 		*/
 		// End emulEspaña
-		if (m_htiDisablePeerCache) m_ctrlTreeOptions.SetItemText(m_htiDisablePeerCache, GetResString(IDS_DISABLEPEERACHE));
-		if (m_htiDynUp) m_ctrlTreeOptions.SetItemText(m_htiDynUp, GetResString(IDS_DYNUP));
+        if (m_htiDynUp) m_ctrlTreeOptions.SetItemText(m_htiDynUp, GetResString(IDS_DYNUP));
 		if (m_htiDynUpEnabled) m_ctrlTreeOptions.SetItemText(m_htiDynUpEnabled, GetResString(IDS_DYNUPENABLED));
         if (m_htiDynUpMinUpload) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpMinUpload, GetResString(IDS_DYNUP_MINUPLOAD));
         if (m_htiDynUpPingTolerance) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpPingTolerance, GetResString(IDS_DYNUP_PINGTOLERANCE));
         if (m_htiDynUpGoingUpDivider) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpGoingUpDivider, GetResString(IDS_DYNUP_GOINGUPDIVIDER));
         if (m_htiDynUpGoingDownDivider) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpGoingDownDivider, GetResString(IDS_DYNUP_GOINGDOWNDIVIDER));
         if (m_htiDynUpNumberOfPings) m_ctrlTreeOptions.SetEditLabel(m_htiDynUpNumberOfPings, GetResString(IDS_DYNUP_NUMBEROFPINGS));
-	if (m_htiA4AFSaveCpu) m_ctrlTreeOptions.SetItemText(m_htiA4AFSaveCpu, GetResString(IDS_A4AF_SAVE_CPU));
+        if (m_htiA4AFSaveCpu) m_ctrlTreeOptions.SetItemText(m_htiA4AFSaveCpu, GetResString(IDS_A4AF_SAVE_CPU));
         if (m_htiFullAlloc) m_ctrlTreeOptions.SetItemText(m_htiFullAlloc, GetResString(IDS_FULLALLOC));
 		if (m_htiAutoArch) m_ctrlTreeOptions.SetItemText(m_htiAutoArch, GetResString(IDS_DISABLE_AUTOARCHPREV));
 		if (m_htiShareeMule) m_ctrlTreeOptions.SetItemText(m_htiShareeMule, GetResString(IDS_SHAREEMULELABEL));
@@ -1179,7 +1193,6 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiA4AFSaveCpu,IDS_A4AF_SAVE_CPU_TIP);
 		SetTool(m_htiAutoArch,IDS_AUTO_ARCH_TIP);
 		SetTool(m_htiYourHostname,IDS_YOURHOSTNAME_TIP);
-		SetTool(m_htiDisablePeerCache,IDS_DISABLEPEERACHE_TIP);
 		SetTool(m_htiSparsePartFiles,IDS_SPARSEPARTFILES_TIP);
 		SetTool(m_htiFullAlloc,IDS_FULLALLOC_TIP);
 		SetTool(m_htiCheckDiskspace,IDS_CHECKDISKSPACE_TIP);
@@ -1198,55 +1211,116 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiLogLevel,IDS_LOG_LEVEL_TIP);
 		SetTool(m_htiResolveShellLinks,IDS_RESOLVE_SHARED_SHELL_TIP);
 		// MORPH START leuk_he Advanced official preferences.
+		if (m_hti_advanced) m_ctrlTreeOptions.SetItemText(m_hti_advanced, GetResString(IDS_ADVANCEDPREFS));
 		SetTool(m_hti_advanced,IDS_ADVANCEDPREFS_TIP);
+		if (m_hti_bMiniMuleAutoClose) m_ctrlTreeOptions.SetItemText(m_hti_bMiniMuleAutoClose, GetResString(IDS_MINIMULEAUTOCLOSE));
 		SetTool(m_hti_bMiniMuleAutoClose,IDS_MINIMULEAUTOCLOSE_TIP);
+		if (m_hti_iMiniMuleTransparency) m_ctrlTreeOptions.SetEditLabel(m_hti_iMiniMuleTransparency, GetResString(IDS_MINIMULETRANSPARENCY));
 		SetTool(m_hti_iMiniMuleTransparency,IDS_MINIMULETRANSPARENCY_TIP);
+		if (m_hti_bCreateCrashDump) m_ctrlTreeOptions.SetItemText(m_hti_bCreateCrashDump, GetResString(IDS_CREATECRASHDUMP));
 		SetTool(m_hti_bCreateCrashDump,IDS_CREATECRASHDUMP_TIP);
+		if (m_hti_bCheckComctl32) m_ctrlTreeOptions.SetItemText(m_hti_bCheckComctl32, GetResString(IDS_CHECKCOMCTL32));
 		SetTool(m_hti_bCheckComctl32 ,IDS_CHECKCOMCTL32_TIP);
+		if (m_hti_bCheckShell32) m_ctrlTreeOptions.SetItemText(m_hti_bCheckShell32, GetResString(IDS_CHECKSHELL32));
 		SetTool(m_hti_bCheckShell32,IDS_CHECKSHELL32_TIP);
+		if (m_hti_bIgnoreInstances) m_ctrlTreeOptions.SetItemText(m_hti_bIgnoreInstances, GetResString(IDS_IGNOREINSTANCES));
 		SetTool(m_hti_bIgnoreInstances,IDS_IGNOREINSTANCES_TIP);
+		if (m_hti_sNotifierMailEncryptCertName) m_ctrlTreeOptions.SetEditLabel(m_hti_sNotifierMailEncryptCertName, GetResString(IDS_NOTIFIERMAILENCRYPTCERTNAME));
 		SetTool(m_hti_sNotifierMailEncryptCertName,IDS_NOTIFIERMAILENCRYPTCERTNAME_TIP);
+		if (m_hti_sMediaInfo_MediaInfoDllPath) m_ctrlTreeOptions.SetEditLabel(m_hti_sMediaInfo_MediaInfoDllPath, GetResString(IDS_MEDIAINFO_MEDIAINFODLLPATH));
 		SetTool(m_hti_sMediaInfo_MediaInfoDllPath,IDS_MEDIAINFO_MEDIAINFODLLPATH_TIP);
+		if (m_hti_bMediaInfo_RIFF) m_ctrlTreeOptions.SetItemText(m_hti_bMediaInfo_RIFF, GetResString(IDS_MEDIAINFO_RIFF));
 		SetTool(m_hti_bMediaInfo_RIFF,IDS_MEDIAINFO_RIFF_TIP);
+		if (m_hti_bMediaInfo_ID3LIB) m_ctrlTreeOptions.SetItemText(m_hti_bMediaInfo_ID3LIB, GetResString(IDS_MEDIAINFO_ID3LIB));
 		SetTool(m_hti_bMediaInfo_ID3LIB,IDS_MEDIAINFO_ID3LIB_TIP);
+		if (m_hti_iMaxLogBuff) m_ctrlTreeOptions.SetEditLabel(m_hti_iMaxLogBuff, GetResString(IDS_MAXLOGBUFF));
 		SetTool(m_hti_iMaxLogBuff,IDS_MAXLOGBUFF_TIP);
+		if (m_hti_m_iMaxChatHistory) m_ctrlTreeOptions.SetEditLabel(m_hti_m_iMaxChatHistory, GetResString(IDS_MAXCHATHISTORY));
 		SetTool(m_hti_m_iMaxChatHistory,IDS_MAXCHATHISTORY_TIP);
+		if (m_hti_m_iPreviewSmallBlocks) m_ctrlTreeOptions.SetEditLabel(m_hti_m_iPreviewSmallBlocks, GetResString(IDS_PREVIEWSMALLBLOCKS));
 		SetTool(m_hti_m_iPreviewSmallBlocks,IDS_PREVIEWSMALLBLOCKS_TIP);
+		if (m_hti_m_bRestoreLastMainWndDlg) m_ctrlTreeOptions.SetItemText(m_hti_m_bRestoreLastMainWndDlg, GetResString(IDS_RESTORELASTMAINWNDDLG));
 		SetTool(m_hti_m_bRestoreLastMainWndDlg,IDS_RESTORELASTMAINWNDDLG_TIP);
+		if (m_hti_m_bRestoreLastLogPane) m_ctrlTreeOptions.SetItemText(m_hti_m_bRestoreLastLogPane, GetResString(IDS_RESTORELASTLOGPANE));
 		SetTool(m_hti_m_bRestoreLastLogPane,IDS_RESTORELASTLOGPANE_TIP);
+		if (m_hti_m_bPreviewCopiedArchives) m_ctrlTreeOptions.SetItemText(m_hti_m_bPreviewCopiedArchives, GetResString(IDS_PREVIEWCOPIEDARCHIVES));
 		SetTool(m_hti_m_bPreviewCopiedArchives,IDS_PREVIEWCOPIEDARCHIVES_TIP);
+		if (m_hti_m_iStraightWindowStyles) m_ctrlTreeOptions.SetEditLabel(m_hti_m_iStraightWindowStyles, GetResString(IDS_STRAIGHTWINDOWSTYLES));
 		SetTool(m_hti_m_iStraightWindowStyles,IDS_STRAIGHTWINDOWSTYLES_TIP);
+		if (m_hti_m_iLogFileFormat) m_ctrlTreeOptions.SetEditLabel(m_hti_m_iLogFileFormat, GetResString(IDS_LOGFILEFORMAT));
 		SetTool(m_hti_m_iLogFileFormat,IDS_LOGFILEFORMAT_TIP);
+		if (m_hti_m_bRTLWindowsLayout) m_ctrlTreeOptions.SetItemText(m_hti_m_bRTLWindowsLayout, GetResString(IDS_RTLWINDOWSLAYOUT));
 		SetTool(m_hti_m_bRTLWindowsLayout,IDS_RTLWINDOWSLAYOUT_TIP);
+		if (m_hti_m_bPreviewOnIconDblClk) m_ctrlTreeOptions.SetItemText(m_hti_m_bPreviewOnIconDblClk, GetResString(IDS_PREVIEWONICONDBLCLK));
 		SetTool(m_hti_m_bPreviewOnIconDblClk,IDS_PREVIEWONICONDBLCLK_TIP);
+		if (m_hti_sInternetSecurityZone) m_ctrlTreeOptions.SetEditLabel(m_hti_sInternetSecurityZone, GetResString(IDS_INTERNETSECURITYZONE));
 		SetTool(m_hti_sInternetSecurityZone,IDS_INTERNETSECURITYZONE_TIP);
+		if (m_hti_sTxtEditor) m_ctrlTreeOptions.SetEditLabel(m_hti_sTxtEditor, GetResString(IDS_TXTEDITOR));
 		SetTool(m_hti_sTxtEditor,IDS_TXTEDITOR_TIP);
+		if (m_hti_iServerUDPPort) m_ctrlTreeOptions.SetEditLabel(m_hti_iServerUDPPort, GetResString(IDS_SERVERUDPPORT));
 		SetTool(m_hti_iServerUDPPort,IDS_SERVERUDPPORT_TIP);
+		if (m_hti_m_bRemoveFilesToBin) m_ctrlTreeOptions.SetItemText(m_hti_m_bRemoveFilesToBin, GetResString(IDS_REMOVEFILESTOBIN));
 		SetTool(m_hti_m_bRemoveFilesToBin,IDS_REMOVEFILESTOBIN_TIP);
+		if (m_hti_HighresTimer) m_ctrlTreeOptions.SetItemText(m_hti_HighresTimer, GetResString(IDS_HIGHRESTIMER));
 		SetTool(m_hti_HighresTimer,IDS_HIGHRESTIMER_TIP);
+		if (m_hti_TrustEveryHash) m_ctrlTreeOptions.SetItemText(m_hti_TrustEveryHash, GetResString(IDS_TRUSTEVERYHASH));
 		SetTool(m_hti_TrustEveryHash,IDS_TRUSTEVERYHASH_TIP);
+		if (m_htiICH) m_ctrlTreeOptions.SetItemText(m_htiICH, GetResString(IDS_X_ICH));
+		SetTool(m_htiICH,IDS_X_ICH_TIP);
+		if (m_hti_InspectAllFileTypes) m_ctrlTreeOptions.SetItemText(m_hti_InspectAllFileTypes, GetResString(IDS_INSPECTALLFILETYPES));
 		SetTool(m_hti_InspectAllFileTypes,IDS_INSPECTALLFILETYPES_TIP);
+		if (m_hti_maxmsgsessions) m_ctrlTreeOptions.SetEditLabel(m_hti_maxmsgsessions, GetResString(IDS_MAXMSGSESSIONS));
 		SetTool(m_hti_maxmsgsessions,IDS_MAXMSGSESSIONS_TIP);
-		SetTool(m_hti_UseUserSortedServerList,IDS_USEUSERSORTEDSERVERLIST_TIP);
+		if (m_hti_PreferRestrictedOverUser) m_ctrlTreeOptions.SetItemText(m_hti_PreferRestrictedOverUser, GetResString(IDS_PREFERRESTRICTEDOVERUSER));
 		SetTool(m_hti_PreferRestrictedOverUser,IDS_PREFERRESTRICTEDOVERUSER_TIP);
+		if (m_hti_UseUserSortedServerList) m_ctrlTreeOptions.SetItemText(m_hti_UseUserSortedServerList, GetResString(IDS_USEUSERSORTEDSERVERLIST));
+		SetTool(m_hti_UseUserSortedServerList,IDS_USEUSERSORTEDSERVERLIST_TIP);
+		if (m_hti_WebFileUploadSizeLimitMB) m_ctrlTreeOptions.SetEditLabel(m_hti_WebFileUploadSizeLimitMB, GetResString(IDS_WEBFILEUPLOADSIZELIMITMB));
 		SetTool(m_hti_WebFileUploadSizeLimitMB ,IDS_WEBFILEUPLOADSIZELIMITMB_TIP);
+		if (m_hti_AllowedIPs) m_ctrlTreeOptions.SetEditLabel(m_hti_AllowedIPs, GetResString(IDS_ALLOWEDIPS));
 		SetTool(m_hti_AllowedIPs,IDS_ALLOWEDIPS_TIP);
+		if (m_hti_DebugSearchResultDetailLevel) m_ctrlTreeOptions.SetEditLabel(m_hti_DebugSearchResultDetailLevel, GetResString(IDS_DEBUGSEARCHDETAILLEVEL));
 		SetTool(m_hti_DebugSearchResultDetailLevel,IDS_DEBUGSEARCHRESULTDETAILLEVEL_TIP); 
+		if (m_htiCryptTCPPaddingLength) m_ctrlTreeOptions.SetEditLabel(m_htiCryptTCPPaddingLength, GetResString(IDS_CRYPTTCPPADDINGLENGTH));
 		SetTool(m_htiCryptTCPPaddingLength,IDS_CRYPTTCPPADDINGLENGTH_TIP);
+		if (m_htiAdjustNTFSDaylightFileTime) m_ctrlTreeOptions.SetItemText(m_htiAdjustNTFSDaylightFileTime, GetResString(IDS_X_ADJUSTNTFSDAYLIGHTFILETIME));
 		SetTool(m_htiAdjustNTFSDaylightFileTime, IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP);
+		if (m_htidatetimeformat) m_ctrlTreeOptions.SetEditLabel(m_htidatetimeformat, GetResString(IDS_X_DATETIMEFORMAT));
 		SetTool(m_htidatetimeformat,IDS_DATETIMEFORMAT_TIP);
+		if (m_htidatetimeformat4log) m_ctrlTreeOptions.SetEditLabel(m_htidatetimeformat4log, GetResString(IDS_X_DATETIMEFORMAT4LOG));
 		SetTool(m_htidatetimeformat4log ,IDS_DATETIMEFORMAT_TIP);
+		if (m_htidatetimeformat4list) m_ctrlTreeOptions.SetEditLabel(m_htidatetimeformat4list, GetResString(IDS_X_DATETIMEFORMAT4LIST));
 		SetTool(m_htidatetimeformat4list ,IDS_DATETIMEFORMAT_TIP);
+		if (m_htiLogError) m_ctrlTreeOptions.SetEditLabel(m_htiLogError, GetResString(IDS_X_LOGERROR));
 		SetTool(m_htiLogError  ,  IDS_X_LOGERROR_TIP );
+		if (m_htiLogWarning) m_ctrlTreeOptions.SetEditLabel(m_htiLogWarning, GetResString(IDS_X_LOGWARNING));
 		SetTool(m_htiLogWarning ,IDS_X_LOGERROR_TIP );
+		if (m_htiLogSuccess) m_ctrlTreeOptions.SetEditLabel(m_htiLogSuccess, GetResString(IDS_X_LOGSUCCESS));
 		SetTool(m_htiLogSuccess,IDS_X_LOGERROR_TIP );
+		if (m_htiShowVerticalHourMarkers) m_ctrlTreeOptions.SetItemText(m_htiShowVerticalHourMarkers, GetResString(IDS_X_SHOWVERTICALHOURMARKERS));
 		SetTool(m_htiShowVerticalHourMarkers,IDS_X_SHOWVERTICALHOURMARKERS_TIP);
+		if (m_htiReBarToolbar) m_ctrlTreeOptions.SetItemText(m_htiReBarToolbar, GetResString(IDS_X_REBARTOOLBAR));
 		SetTool(m_htiReBarToolbar ,IDS_X_REBARTOOLBAR_TIP);
+		if (m_htiIconflashOnNewMessage) m_ctrlTreeOptions.SetItemText(m_htiIconflashOnNewMessage, GetResString(IDS_X_ICON_FLASH_ON_NEW_MESSAGE));
 		SetTool(m_htiIconflashOnNewMessage,IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP);
+		if (m_htiShowCopyEd2kLinkCmd) m_ctrlTreeOptions.SetItemText(m_htiShowCopyEd2kLinkCmd, GetResString(IDS_X_SHOWCOPYED2KLINK));
 		SetTool(m_htiShowCopyEd2kLinkCmd, IDS_X_SHOWCOPYED2KLINK_TIP);
+		if (m_htidontcompressavi) m_ctrlTreeOptions.SetItemText(m_htidontcompressavi, GetResString(IDS_X_DONTCOMPRESSAVI));
 		SetTool(m_htidontcompressavi,IDS_X_DONTCOMPRESSAVI_TIP);
+		if (m_htiFileBufferTimeLimit) m_ctrlTreeOptions.SetEditLabel(m_htiFileBufferTimeLimit, GetResString(IDS_X_FILE_BUFFER_TIME_LIMIT));
 		SetTool(m_htiFileBufferTimeLimit,IDS_X_FILE_BUFFER_TIME_LIMIT_TIP);
+		if (m_htiRearrangeKadSearchKeywords) m_ctrlTreeOptions.SetItemText(m_htiRearrangeKadSearchKeywords, GetResString(IDS_X_REARRANGEKADSEARCH));
 		SetTool(m_htiRearrangeKadSearchKeywords,IDS_X_REARRANGEKADSEARCH_TIP);
+		if (m_htiUpdateQueue) m_ctrlTreeOptions.SetItemText(m_htiUpdateQueue, GetResString(IDS_UPDATEQUEUE));
+		SetTool(m_htiUpdateQueue,IDS_UPDATEQUEUE_TIP);
+		if (m_htiRepaint) m_ctrlTreeOptions.SetItemText(m_htiRepaint, GetResString(IDS_REPAINTGRAPHS));
+		SetTool(m_htiRepaint,IDS_REPAINTGRAPHS_TIP);
+		if (m_htiBeeper) m_ctrlTreeOptions.SetItemText(m_htiBeeper, GetResString(IDS_PW_BEEP));
+		SetTool(m_htiBeeper,IDS_PW_BEEP_TIP);
+		if (m_htiMsgOnlySec) m_ctrlTreeOptions.SetItemText(m_htiMsgOnlySec, GetResString(IDS_MSGONLYSEC));
+		SetTool(m_htiMsgOnlySec,IDC_MSGONLYSEC_SEC);
+		if (m_htiDisablePeerCache) m_ctrlTreeOptions.SetItemText(m_htiDisablePeerCache, GetResString(IDS_DISABLEPEERACHE));
+		SetTool(m_htiDisablePeerCache,IDS_DISABLEPEERACHE_TIP);
 		//MORPH END leuk_he tooltipped
 	}
 }
@@ -1297,7 +1371,6 @@ void CPPgTweaks::OnDestroy()
 	m_htiFirewallStartup = NULL;
 	*/
 	// End emulEspaña
-	m_htiDisablePeerCache = NULL;
     m_htiDynUp = NULL;
 	m_htiDynUpEnabled = NULL;
     m_htiDynUpMinUpload = NULL;
@@ -1309,8 +1382,8 @@ void CPPgTweaks::OnDestroy()
     m_htiDynUpGoingUpDivider = NULL;
     m_htiDynUpGoingDownDivider = NULL;
     m_htiDynUpNumberOfPings = NULL;
-	m_htiA4AFSaveCpu = NULL;
-    m_htiExtractMetaData = NULL;
+    m_htiA4AFSaveCpu = NULL;
+	m_htiExtractMetaData = NULL;
 	m_htiExtractMetaDataNever = NULL;
 	m_htiExtractMetaDataID3Lib = NULL;
 	m_htiAutoArch = NULL;
@@ -1320,7 +1393,7 @@ void CPPgTweaks::OnDestroy()
 	m_htiShareeMuleOldStyle = NULL;
 	//m_htiExtractMetaDataMediaDet = NULL;
 	m_htiResolveShellLinks = NULL;
-
+    
 	// continue extra official preferences....
 	m_hti_advanced=NULL;
 	m_hti_bMiniMuleAutoClose=NULL;
@@ -1373,6 +1446,11 @@ void CPPgTweaks::OnDestroy()
     m_htidontcompressavi = NULL;
 	m_htiFileBufferTimeLimit = NULL;
 	m_htiRearrangeKadSearchKeywords = NULL;
+	m_htiUpdateQueue = NULL;
+	m_htiRepaint = NULL;
+	m_htiBeeper = NULL;
+	m_htiMsgOnlySec = NULL;
+	m_htiDisablePeerCache = NULL;
 	//MORPH END  leuk_he Advanced official preferences.
 
     CPropertyPage::OnDestroy();

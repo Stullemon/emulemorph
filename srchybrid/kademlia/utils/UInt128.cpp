@@ -177,7 +177,7 @@ void CUInt128::ToHexString(CString *pstr) const
 	pstr->SetString(_T(""));
 	CString sElement;
 	for (int iIndex=0; iIndex<4; iIndex++)
-	{   
+	{
 		sElement.Format(_T("%08X"), m_uData[iIndex]);
 		pstr->Append(sElement);
 	}
@@ -297,6 +297,27 @@ CUInt128& CUInt128::Subtract(ULONG uValue)
 	Subtract(CUInt128(uValue));
 	return *this;
 }
+
+/* Untested
+CUInt128& CUInt128::Div(ULONG uValue)
+{
+	ULONG uBit, uRemain = 0;
+	for (i = 0; i < 128; i++)
+	{
+		uBit = GetBitNumber(0);
+		uRemain <<= 1;
+		if (uBit)
+			uRemain |= 1;
+		ShiftLeft(1);
+		if (uRemain >= uValue)
+		{
+			uRemain -= uValue;
+			SetBitNumber(127, 1);
+		}
+	}
+	return *this;
+}
+*/
 
 CUInt128& CUInt128::ShiftLeft(UINT uBits)
 {

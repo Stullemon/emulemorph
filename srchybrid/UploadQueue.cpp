@@ -41,7 +41,7 @@
 #include "WebServer.h"
 #include "emuledlg.h"
 #include "ServerWnd.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "SearchDlg.h"
 #include "StatisticsDlg.h"
 #include "Kademlia/Kademlia/Kademlia.h"
@@ -62,9 +62,7 @@ static char THIS_FILE[] = __FILE__;
 
 static uint32 counter, sec, statsave;
 static UINT s_uSaveStatistics = 0;
-// -khaos--+++> Added iupdateconnstats...
-static uint32 igraph, istats, iupdateconnstats;
-// <-----khaos-
+static uint32 igraph, istats, i2Secs;
 
 
 CUploadQueue::CUploadQueue()
@@ -82,9 +80,7 @@ CUploadQueue::CUploadQueue()
 	totaluploadtime = 0;
 	m_nLastStartUpload = 0;
 	statsave=0;
-	// -khaos--+++>
-	iupdateconnstats=0;
-	// <-----khaos-
+	i2Secs=0;
 	//Removed By SiRoB, Not used due to zz Upload System
 	/*
 	m_dwRemovedClientByScore = ::GetTickCount();
@@ -129,6 +125,11 @@ CUploadQueue::CUploadQueue()
 	AvgRespondTime[1]=thePrefs.GetSUCPitch()/2;//Changed by Yun.SF3 (this is too much divided, original is 3)
 	MaxVUR=512*(thePrefs.GetMaxUpload()+thePrefs.GetMinUpload()); //When we start with SUC take the middle range for upload
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
+}
+
+CUploadQueue::~CUploadQueue(){
+	if (h_timer)
+		KillTimer(0,h_timer);
 }
 
 /**
@@ -889,7 +890,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	if (reqfile)
 		reqfile->statistic.AddAccepted();
 
-	theApp.emuledlg->transferwnd->uploadlistctrl.AddClient(newclient);
+	theApp.emuledlg->transferwnd->GetUploadList()->AddClient(newclient);
 
 	return true;
 }
@@ -1185,11 +1186,6 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 }
 //MORPH END - Upload Splitting Class
 
-CUploadQueue::~CUploadQueue(){
-	if (h_timer)
-		KillTimer(0,h_timer);
-}
-
 CUpDownClient* CUploadQueue::GetWaitingClientByIP_UDP(uint32 dwIP, uint16 nUDPPort, bool bIgnorePortOnUniqueIP, bool* pbMultipleIPs){
 	CUpDownClient* pMatchingIPClient = NULL;
 	uint32 cMatches = 0;
@@ -1309,10 +1305,10 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				}
 			}
 			client->SendRankingInfo();
-			theApp.emuledlg->transferwnd->queuelistctrl.RefreshClient(client);
+			theApp.emuledlg->transferwnd->GetQueueList()->RefreshClient(client);
 			return;			
 		}
-		else if ( client->Compare(cur_client) )
+		else if ( client->Compare(cur_client) ) 
 		{
 			theApp.clientlist->AddTrackClient(client); // in any case keep track of this client
 
@@ -1444,11 +1440,12 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 		// EastShare - Added by TAHO, modified SUQWT
 	}
 
+	m_bStatisticsWaitingListDirty = true;
 	waitinglist.AddTail(client);
 	client->SetUploadState(US_ONUPLOADQUEUE);
 
     // Add client to waiting list. If addInFirstPlace is set, client should not have its waiting time resetted
-	theApp.emuledlg->transferwnd->queuelistctrl.AddClient(client, (addInFirstPlace == false));
+	theApp.emuledlg->transferwnd->GetQueueList()->AddClient(client, (addInFirstPlace == false));
 	theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
 	client->SendRankingInfo();
 }
@@ -1511,7 +1508,7 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			client->socket->SendPacket(pCancelTransferPacket,true,true);
         }
 		if (updatewindow)
-			theApp.emuledlg->transferwnd->uploadlistctrl.RemoveClient(client);
+			theApp.emuledlg->transferwnd->GetUploadList()->RemoveClient(client);
 		//MORPH START - Adde by SiRoB, Optimization requpfile
 		/*
 		CKnownFile* requestedFile = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
@@ -1652,10 +1649,11 @@ bool CUploadQueue::RemoveFromWaitingQueue(CUpDownClient* client, bool updatewind
 }
 
 void CUploadQueue::RemoveFromWaitingQueue(POSITION pos, bool updatewindow){	
+	m_bStatisticsWaitingListDirty = true;
 	CUpDownClient* todelete = waitinglist.GetAt(pos);
 	waitinglist.RemoveAt(pos);
 	if (updatewindow) {
-		theApp.emuledlg->transferwnd->queuelistctrl.RemoveClient(todelete);
+		theApp.emuledlg->transferwnd->GetQueueList()->RemoveClient(todelete);
 		theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
 	}
 	//Removed by SiRoB, due to zz way m_dwWouldHaveGottenUploadSlotIfNotLowIdTick
@@ -1867,18 +1865,24 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 			if (theApp.serverconnect->IsConnecting())
 				theApp.serverconnect->CheckForTimeout();
 
-			// -khaos--+++> Update connection stats...
-			iupdateconnstats++;
 			// 2 seconds
-			if (iupdateconnstats>=2) {
-				iupdateconnstats=0;
+			i2Secs++;
+			if (i2Secs>=2) {
+				i2Secs=0;
+				
+				// Update connection stats...
 				//MORPH - Changed by SiRoB, Keep An average datarate value for USS system
 				/*
 				theStats.UpdateConnectionStats((float)theApp.uploadqueue->GetDatarate()/1024, (float)theApp.downloadqueue->GetDatarate()/1024);
 				*/
 				theStats.UpdateConnectionStats((float)theApp.uploadqueue->GetDatarate(true)/1024, (float)theApp.downloadqueue->GetDatarate()/1024);
+
+#ifdef HAVE_WIN7_SDK_H
+				if (thePrefs.IsWin7TaskbarGoodiesEnabled())
+					theApp.emuledlg->UpdateStatusBarProgress();
+#endif
+
 			}
-			// <-----khaos-
 
 			// display graphs
 			if (thePrefs.GetTrafficOMeterInterval()>0) {
@@ -1940,6 +1944,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 				theApp.OnlineSig(); // Added By Bouc7 
 				if (!theApp.emuledlg->IsTrayIconToFlash())
 					theApp.emuledlg->ShowTransferRate();
+
 				thePrefs.EstimateMaxUploadCap(theApp.uploadqueue->GetDatarate()/1024);
 
 
@@ -1962,7 +1967,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 				if (thePrefs.IsSchedulerEnabled())
 					theApp.scheduler->Check();
 
-                theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Uploading, -1);
+                theApp.emuledlg->transferwnd->UpdateListCount(CTransferDlg::wnd2Uploading, -1);
 			}
 
 			//Commander - Moved: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
@@ -2230,8 +2235,42 @@ void CUploadQueue::CheckForHighPrioClient() {
         }
 	}
 }
-
 //MORPH END   - Added by SiRoB, ZZ Upload System 20030818-1923
+
+uint32 CUploadQueue::GetWaitingUserForFileCount(const CSimpleArray<CObject*>& raFiles, bool bOnlyIfChanged)
+{
+	if (bOnlyIfChanged && !m_bStatisticsWaitingListDirty)
+		return (uint32)-1;
+
+	m_bStatisticsWaitingListDirty = false;
+	uint32 nResult = 0;
+	for (POSITION pos = waitinglist.GetHeadPosition(); pos != 0; )
+	{
+		const CUpDownClient* cur_client = waitinglist.GetNext(pos);
+		for (int i = 0; i < raFiles.GetSize(); i++)
+		{
+			if (md4cmp(((CKnownFile*)raFiles[i])->GetFileHash(), cur_client->GetUploadFileID()) == 0)
+				nResult++;
+		}
+	}
+	return nResult;
+}
+
+uint32 CUploadQueue::GetDatarateForFile(const CSimpleArray<CObject*>& raFiles) const
+{
+	uint32 nResult = 0;
+	for (POSITION pos = uploadinglist.GetHeadPosition(); pos != 0; )
+	{
+		const CUpDownClient* cur_client = uploadinglist.GetNext(pos);
+		for (int i = 0; i < raFiles.GetSize(); i++)
+		{
+			if (md4cmp(((CKnownFile*)raFiles[i])->GetFileHash(), cur_client->GetUploadFileID()) == 0)
+				nResult += cur_client->GetDatarate();
+		}
+	}
+	return nResult;
+}
+
 //MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 uint32	CUploadQueue::GetMaxVUR()
 {

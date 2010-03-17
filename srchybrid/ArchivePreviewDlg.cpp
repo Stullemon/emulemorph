@@ -21,6 +21,7 @@
 #include "partfile.h"
 #include "preferences.h"
 #include "UserMsgs.h"
+#include "SplitterControl.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -150,6 +151,7 @@ CArchivePreviewDlg::CArchivePreviewDlg()
 	m_ContentList.m_pParent = this;
 	m_ContentList.SetRegistryKey(PREF_INI_SECTION);
 	m_ContentList.SetRegistryPrefix(_T("ContentList_"));
+	m_bReducedDlg = false;
 	//m_ContentList.m_pfnFindItem = FindItem;
 	//m_ContentList.m_lFindItemParam = (DWORD_PTR)this;
 }
@@ -162,6 +164,7 @@ void CArchivePreviewDlg::DoDataExchange(CDataExchange* pDX)
 {
 	CResizablePage::DoDataExchange(pDX);
 	DDX_Control(pDX, IDC_FILELIST, m_ContentList);
+	DDX_Control(pDX, IDC_ARCHPROGRESS, m_progressbar);
 }
 
 BOOL CArchivePreviewDlg::OnInitDialog()
@@ -171,17 +174,42 @@ BOOL CArchivePreviewDlg::OnInitDialog()
 
 	m_StoredColWidth2=0;
 	m_StoredColWidth5=0;
-
-	AddAnchor(IDC_READARCH, BOTTOM_LEFT);
-	AddAnchor(IDC_RESTOREARCH, BOTTOM_LEFT);
-	AddAnchor(IDC_FILELIST, TOP_LEFT, BOTTOM_RIGHT);
-	AddAnchor(IDC_APV_FILEINFO, TOP_LEFT, TOP_RIGHT);
-	AddAnchor(IDC_ARCP_ATTRIBS, TOP_CENTER);
-	AddAnchor(IDC_INFO_ATTR, TOP_CENTER, TOP_RIGHT);
+	if (!m_bReducedDlg)
+	{
+		AddAnchor(IDC_READARCH, BOTTOM_LEFT);
+		AddAnchor(IDC_RESTOREARCH, BOTTOM_LEFT);
+		AddAnchor(IDC_APV_FILEINFO, TOP_LEFT, TOP_RIGHT);
+		AddAnchor(IDC_ARCP_ATTRIBS, TOP_CENTER);
+		AddAnchor(IDC_INFO_ATTR, TOP_CENTER, TOP_RIGHT);
+		AddAnchor(IDC_AP_EXPLAIN, BOTTOM_LEFT);
+		AddAnchor(IDC_INFO_STATUS, TOP_LEFT, TOP_RIGHT);
+	}
+	else
+	{
+		int nDelta1 = 0, nDelta2 = 0;
+		CRect rc;
+		GetDlgItem(IDC_APV_FILEINFO)->GetWindowRect(rc);
+		nDelta1 += rc.Height();
+		GetDlgItem(IDC_RESTOREARCH)->GetWindowRect(rc);
+		nDelta2 += rc.Height();
+		CSplitterControl::ChangePos(GetDlgItem(IDC_FILELIST), 0, -nDelta1);
+		CSplitterControl::ChangeHeight(GetDlgItem(IDC_FILELIST), nDelta1 + nDelta2);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_ARCHPROGRESS), 0, nDelta2);
+		CSplitterControl::ChangePos(GetDlgItem(IDC_INFO_FILECOUNT), 0, nDelta2);
+		GetDlgItem(IDC_READARCH)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_RESTOREARCH)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_APV_FILEINFO)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_ARCP_ATTRIBS)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_INFO_ATTR)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_AP_EXPLAIN)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_INFO_STATUS)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_INFO_TYPE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_ARCP_TYPE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_ARCP_STATUS)->ShowWindow(SW_HIDE);
+	}
 	AddAnchor(IDC_INFO_FILECOUNT, BOTTOM_RIGHT);
-	AddAnchor(IDC_AP_EXPLAIN, BOTTOM_LEFT);
-	AddAnchor(IDC_INFO_STATUS, TOP_LEFT, TOP_RIGHT);
 	AddAnchor(IDC_ARCHPROGRESS, BOTTOM_LEFT, BOTTOM_RIGHT);
+	AddAnchor(IDC_FILELIST, TOP_LEFT, BOTTOM_RIGHT);
 
 	// Win98: Explicitly set to Unicode to receive Unicode notifications.
 	m_ContentList.SendMessage(CCM_SETUNICODEFORMAT, TRUE);
@@ -204,9 +232,8 @@ BOOL CArchivePreviewDlg::OnInitDialog()
 	CResizablePage::UpdateData(FALSE);
 	Localize();
 
-	m_progressbar=(CProgressCtrl*)GetDlgItem(IDC_ARCHPROGRESS);
-	m_progressbar->SetRange(0,1000);
-	m_progressbar->SetPos(0);
+	m_progressbar.SetRange(0,1000);
+	m_progressbar.SetPos(0);
 
 	return TRUE;
 }
@@ -254,11 +281,14 @@ LRESULT CArchivePreviewDlg::OnDataChanged(WPARAM, LPARAM)
 
 void CArchivePreviewDlg::Localize(void)
 {
-	SetDlgItemText(IDC_READARCH,	GetResString(IDS_SV_UPDATE) );
-	SetDlgItemText(IDC_RESTOREARCH, GetResString(IDS_AP_CREATEPREVCOPY) );
-	SetDlgItemText(IDC_ARCP_TYPE ,	GetResString(IDS_ARCHTYPE)+_T(":") );
-	SetDlgItemText(IDC_ARCP_STATUS,	GetResString(IDS_STATUS)+_T(":") );
-	SetDlgItemText(IDC_ARCP_ATTRIBS,GetResString(IDS_INFO)+_T(":")  );
+	if (!m_bReducedDlg)
+	{
+		SetDlgItemText(IDC_READARCH,	GetResString(IDS_SV_UPDATE) );
+		SetDlgItemText(IDC_RESTOREARCH, GetResString(IDS_AP_CREATEPREVCOPY) );
+		SetDlgItemText(IDC_ARCP_TYPE ,	GetResString(IDS_ARCHTYPE)+_T(":") );
+		SetDlgItemText(IDC_ARCP_STATUS,	GetResString(IDS_STATUS)+_T(":") );
+		SetDlgItemText(IDC_ARCP_ATTRIBS,GetResString(IDS_INFO)+_T(":")  );
+	}
 }
 
 void CArchivePreviewDlg::OnLvnDeleteAllItemsArchiveEntries(NMHDR *, LRESULT *pResult)
@@ -650,6 +680,7 @@ int CArchivePreviewDlg::ShowRarResults(int succ, archiveScannerThreadParams_s* t
 			// file/folder name
 			memcpy(buf, block->FILE_NAME, block->NAME_SIZE_var); // MORPH leuk_he rename to prevent conflict with upnp lib define (dumb...)
 			buf[block->NAME_SIZE_var] = 0; // MORPH leuk_he rename to prevent conflict with upnp lib define (dumb...)
+
 			// read unicode name from namebuffer and decode it
 			if (block->HEAD_FLAGS & 0x0200) {
 				unsigned int asciilen = strlen(buf) + 1;
@@ -987,10 +1018,19 @@ void CArchivePreviewDlg::UpdateArchiveDisplay(bool doscan) {
 		m_activeTParams->m_bIsValid = false;
 		m_activeTParams = NULL; // thread may still run but is not our active one anymore
 	}
-	m_progressbar->SetPos(0);
+	m_progressbar.SetPos(0);
 
 	m_ContentList.DeleteAllItems();
 	m_ContentList.UpdateWindow();
+
+	// set infos
+	SetDlgItemText(IDC_APV_FILEINFO, _T("") );
+	SetDlgItemText(IDC_INFO_ATTR, _T(""));
+	SetDlgItemText(IDC_INFO_STATUS, _T(""));
+	SetDlgItemText(IDC_INFO_FILECOUNT, _T(""));
+	
+	if (m_paFiles == NULL || m_paFiles->GetSize() == 0)
+		return;
 
 	CShareableFile* file=STATIC_DOWNCAST(CShareableFile, (*m_paFiles)[0]);
 
@@ -998,11 +1038,7 @@ void CArchivePreviewDlg::UpdateArchiveDisplay(bool doscan) {
 		(((CPartFile*)file)->IsArchive(true)) && 
 		(((CPartFile*)file)->IsReadyForPreview() )	);
 
-	// set infos
-	SetDlgItemText(IDC_APV_FILEINFO, _T("") );
-	SetDlgItemText(IDC_INFO_ATTR, _T(""));
-	SetDlgItemText(IDC_INFO_STATUS, _T(""));
-	SetDlgItemText(IDC_INFO_FILECOUNT, _T(""));
+
 
 	EFileType type=GetFileTypeEx(file);
 	switch(type) {
@@ -1130,7 +1166,7 @@ LRESULT CArchivePreviewDlg::ShowScanResults(WPARAM wParam, LPARAM lParam)
 	// We may receive 'stopped' archive thread results here, just ignore them (but free the memory)
 	if (tp->m_bIsValid)
 	{
-		m_progressbar->SetPos(0);
+		m_progressbar.SetPos(0);
 		if (ret == -1) {
 			SetDlgItemText(IDC_INFO_STATUS, GetResString(IDS_IMP_ERR_IO));
 		}

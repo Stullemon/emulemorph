@@ -63,6 +63,7 @@ namespace Kademlia
 			CUInt128& ShiftLeft(UINT uBits);
 			CUInt128& Add(const CUInt128 &uValue);
 			CUInt128& Add(ULONG uValue);
+			//CUInt128& Div(ULONG uValue);
 			CUInt128& Subtract(const CUInt128 &uValue);
 			CUInt128& Subtract(ULONG uValue);
 			CUInt128& Xor(const CUInt128 &uValue);
@@ -87,5 +88,5 @@ namespace Kademlia
 			bool operator!= (ULONG uValue) const;
 		private:
 			ULONG		m_uData[4];
-		};
-	}
+	};
+}

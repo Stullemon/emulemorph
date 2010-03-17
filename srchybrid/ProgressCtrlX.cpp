@@ -50,18 +50,19 @@ CProgressCtrlX::CProgressCtrlX()
 	// set gradient colors
 	COLORREF clrStart, clrEnd;
 	clrStart = clrEnd = ::GetSysColor(COLOR_ACTIVECAPTION);
-#if(WINVER >= 0x0500)
+/*#if(WINVER >= 0x0500)
 	BOOL fGradientCaption = FALSE;
 	if(SystemParametersInfo(SPI_GETGRADIENTCAPTIONS, 0, &fGradientCaption, 0) &&
 	   fGradientCaption)
 		clrEnd = ::GetSysColor(COLOR_GRADIENTACTIVECAPTION);
-#endif /* WINVER >= 0x0500 */
+#endif / WINVER >= 0x0500  */
 	SetGradientColors(clrStart, clrEnd);
 
 	m_nStep = 10;	// according msdn
 	m_nTail = 0;
 	m_nTailSize = 40;
 	m_pbrBk = m_pbrBar = NULL;
+	m_bEmpty = false;
 }
 
 BEGIN_MESSAGE_MAP(CProgressCtrlX, CProgressCtrl)
@@ -95,8 +96,21 @@ void CProgressCtrlX::OnPaint()
 	GetClientRect(&info.rcClient);
 
 	// retrieve current position and range
-	info.nCurPos = GetPos();
-	GetRange(info.nLower, info.nUpper);
+	
+	if (!m_bEmpty)
+	{
+		info.nCurPos = GetPos();
+		GetRange(info.nLower, info.nUpper);
+		info.dwStyle = GetStyle();
+	}
+	else
+	{
+		info.nLower = 0;
+		info.nUpper = 0;
+		info.nCurPos = 0;
+		info.dwStyle = 0;
+	}
+
 	
 	// Draw to memory DC
 	CMemDC memDC(&dc);
@@ -115,7 +129,6 @@ void CProgressCtrlX::OnPaint()
 	if (info.nCurPos < info.nLower || info.nCurPos > info.nUpper)
 		return;
 
-	info.dwStyle = GetStyle();
 	BOOL fVert = info.dwStyle&PBS_VERTICAL;
 	BOOL fSnake = info.dwStyle&PBS_SNAKE;
 	BOOL fRubberBar = info.dwStyle&PBS_RUBBER_BAR;

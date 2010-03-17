@@ -1,5 +1,5 @@
 //this file is part of eMule
-//Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+//Copyright (C)2002-2010 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -29,22 +29,88 @@ static char THIS_FILE[] = __FILE__;
 #define IDC_PREV	100
 #define IDC_NEXT	101
 
+// CListViewPropertySheet
+IMPLEMENT_DYNAMIC(CListViewPropertySheet, CResizableSheet)
+
+BEGIN_MESSAGE_MAP(CListViewPropertySheet, CResizableSheet)
+END_MESSAGE_MAP()
+
+CListViewPropertySheet::CListViewPropertySheet(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
+	:CResizableSheet(nIDCaption, pParentWnd, iSelectPage)
+{
+}
+
+CListViewPropertySheet::CListViewPropertySheet(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
+	:CResizableSheet(pszCaption, pParentWnd, iSelectPage)
+{
+}
+
+CListViewPropertySheet::~CListViewPropertySheet()
+{
+}
+
+void CListViewPropertySheet::InsertPage(int iIndex, CPropertyPage* pPage)
+{
+	ASSERT_VALID( this );
+	ASSERT( pPage != NULL );
+	ASSERT_KINDOF( CPropertyPage, pPage );
+	ASSERT_VALID( pPage );
+
+	m_pages.InsertAt(iIndex, pPage);
+	BuildPropPageArray();
+
+	if (m_hWnd != NULL)
+	{
+		PROPSHEETPAGE* ppsp = const_cast<PROPSHEETPAGE*>(m_psh.ppsp);
+		for (UINT i = 0; i < m_psh.nPages; i++) {
+			if (i == (UINT)iIndex)
+				break;
+			(BYTE*&)ppsp += ppsp->dwSize;
+		}
+
+		HPROPSHEETPAGE hPSP = CreatePropertySheetPage(ppsp);
+		if (hPSP == NULL)
+			AfxThrowMemoryException();
+
+		if (!SendMessage(PSM_INSERTPAGE, iIndex, (LPARAM)hPSP)) {
+			DestroyPropertySheetPage(hPSP);
+			AfxThrowMemoryException();
+		}
+	}
+}
+
+void CListViewPropertySheet::ChangedData()
+{
+	SendMessage(UM_DATA_CHANGED);
+
+	for (int iPage = 0; iPage < GetPageCount(); iPage++)
+	{
+		CPropertyPage* pPage = GetPage(iPage);
+		if (pPage && pPage->m_hWnd)
+		{
+			pPage->SendMessage(UM_DATA_CHANGED);
+			pPage->SetModified(FALSE);
+		}
+	}
+	GetActivePage()->OnSetActive();
+}
+
 // CListViewWalkerPropertySheet
 
-IMPLEMENT_DYNAMIC(CListViewWalkerPropertySheet, CResizableSheet)
+IMPLEMENT_DYNAMIC(CListViewWalkerPropertySheet, CListViewPropertySheet)
 
-BEGIN_MESSAGE_MAP(CListViewWalkerPropertySheet, CResizableSheet)
+BEGIN_MESSAGE_MAP(CListViewWalkerPropertySheet, CListViewPropertySheet)
 	ON_BN_CLICKED(IDC_NEXT, OnNext)
 	ON_BN_CLICKED(IDC_PREV, OnPrev)
 END_MESSAGE_MAP()
 
 CListViewWalkerPropertySheet::CListViewWalkerPropertySheet(UINT nIDCaption, CWnd* pParentWnd, UINT iSelectPage)
-	:CResizableSheet(nIDCaption, pParentWnd, iSelectPage)
+	:CListViewPropertySheet(nIDCaption, pParentWnd, iSelectPage)
 {
 }
 
 CListViewWalkerPropertySheet::CListViewWalkerPropertySheet(LPCTSTR pszCaption, CWnd* pParentWnd, UINT iSelectPage)
-	:CResizableSheet(pszCaption, pParentWnd, iSelectPage)
+	:CListViewPropertySheet(pszCaption, pParentWnd, iSelectPage)
 {
 }
 
@@ -54,7 +120,7 @@ CListViewWalkerPropertySheet::~CListViewWalkerPropertySheet()
 
 BOOL CListViewWalkerPropertySheet::OnInitDialog()
 {
-	BOOL bResult = CResizableSheet::OnInitDialog();
+	BOOL bResult = CListViewPropertySheet::OnInitDialog();
 
 	//////////////////////////////////////////////////////////////////////////
 	// Add additional controls
@@ -126,24 +192,6 @@ BOOL CListViewWalkerPropertySheet::OnInitDialog()
 	return bResult;
 }
 
-void CListViewWalkerPropertySheet::ChangeData(CObject* pObj)
-{
-	m_aItems.RemoveAll();
-	m_aItems.Add(pObj);
-	SendMessage(UM_DATA_CHANGED);
-
-	for (int iPage = 0; iPage < GetPageCount(); iPage++)
-	{
-		CPropertyPage* pPage = GetPage(iPage);
-		if (pPage && pPage->m_hWnd)
-		{
-			pPage->SendMessage(UM_DATA_CHANGED);
-			pPage->SetModified(FALSE);
-		}
-	}
-	GetActivePage()->OnSetActive();
-}
-
 void CListViewWalkerPropertySheet::OnPrev()
 {
 	ASSERT( m_pListCtrl != NULL );
@@ -152,7 +200,11 @@ void CListViewWalkerPropertySheet::OnPrev()
 
 	CObject* pObj = m_pListCtrl->GetPrevSelectableItem();
 	if (pObj)
-		ChangeData(pObj);
+	{
+		m_aItems.RemoveAll();
+		m_aItems.Add(pObj);
+		ChangedData();
+	}
 	else
 		MessageBeep(MB_OK);
 }
@@ -165,39 +217,13 @@ void CListViewWalkerPropertySheet::OnNext()
 
 	CObject* pObj = m_pListCtrl->GetNextSelectableItem();
 	if (pObj)
-		ChangeData(pObj);
+	{
+		m_aItems.RemoveAll();
+		m_aItems.Add(pObj);
+		ChangedData();
+	}
 	else
 		MessageBeep(MB_OK);
-}
-
-void CListViewWalkerPropertySheet::InsertPage(int iIndex, CPropertyPage* pPage)
-{
-	ASSERT_VALID( this );
-	ASSERT( pPage != NULL );
-	ASSERT_KINDOF( CPropertyPage, pPage );
-	ASSERT_VALID( pPage );
-
-	m_pages.InsertAt(iIndex, pPage);
-	BuildPropPageArray();
-
-	if (m_hWnd != NULL)
-	{
-		PROPSHEETPAGE* ppsp = const_cast<PROPSHEETPAGE*>(m_psh.ppsp);
-		for (UINT i = 0; i < m_psh.nPages; i++) {
-			if (i == (UINT)iIndex)
-				break;
-			(BYTE*&)ppsp += ppsp->dwSize;
-		}
-
-		HPROPSHEETPAGE hPSP = CreatePropertySheetPage(ppsp);
-		if (hPSP == NULL)
-			AfxThrowMemoryException();
-
-		if (!SendMessage(PSM_INSERTPAGE, iIndex, (LPARAM)hPSP)) {
-			DestroyPropertySheetPage(hPSP);
-			AfxThrowMemoryException();
-		}
-	}
 }
 
 CObject* CListCtrlItemWalk::GetPrevSelectableItem()

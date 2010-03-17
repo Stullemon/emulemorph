@@ -219,7 +219,7 @@ CIndexed::~CIndexed()
 			if (fileKey.Open(m_sKeyFileName, CFile::modeWrite | CFile::modeCreate | CFile::typeBinary | CFile::shareDenyWrite))
 			{
 				setvbuf(fileKey.m_pStream, NULL, _IOFBF, 32768);
-				uint32 uVersion = 3;
+				uint32 uVersion = 4;
 				fileKey.WriteUInt32(uVersion);
 				fileKey.WriteUInt32((uint32) time(NULL)+KADEMLIAREPUBLISHTIMEK); // MOPRH
 				fileKey.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
@@ -693,7 +693,7 @@ bool CIndexed::AddLoad(const CUInt128& uKeyID, uint32 uTime, bool bIgnoreThreadL
 	return true;
 }
 
-void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm* pSearchTerms, uint32 uIP, uint16 uPort, bool bOldClient, bool bKad2, uint16 uStartPosition, CKadUDPKey senderUDPKey)
+void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm* pSearchTerms, uint32 uIP, uint16 uPort, bool bOldClient, uint16 uStartPosition, CKadUDPKey senderUDPKey)
 {
 	// do not access any data while the loading thread is busy;
 	if (!m_bDataLoaded) {
@@ -709,13 +709,8 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 
 		CByteIO byIO(byPacket,sizeof(byPacket));
 		byIO.WriteByte(OP_KADEMLIAHEADER);
-		if(bKad2)
-		{
-			byIO.WriteByte(KADEMLIA2_SEARCH_RES);
-			byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
-		}
-		else
-			byIO.WriteByte(KADEMLIA_SEARCH_RES);
+		byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+		byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
 		byIO.WriteUInt128(uKeyID);
 		
 		byte* pbyCountPos = byPacket + byIO.GetUsed();
@@ -758,10 +753,7 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 								else
 									dbgResultsUntrusted++;
 								byIOTmp.WriteUInt128(pCurrName->m_uSourceID);
-								if (bKad2)
-									pCurrName->WriteTagListWithPublishInfo(&byIOTmp);
-								else
-									pCurrName->WriteTagList(&byIOTmp);
+								pCurrName->WriteTagListWithPublishInfo(&byIOTmp);
 								
 								if( byIO.GetUsed() + byIOTmp.GetUsed() > UDP_KAD_MAXFRAGMENT && iUnsentCount > 0)
 								{
@@ -770,19 +762,10 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 									CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 									byIO.Reset();
 									byIO.WriteByte(OP_KADEMLIAHEADER);
-									if(bKad2)
-									{
-										if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-											DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
-										byIO.WriteByte(KADEMLIA2_SEARCH_RES);
-										byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
-									}
-									else
-									{
-										if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-											DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
-										byIO.WriteByte(KADEMLIA_SEARCH_RES);
-									}
+									if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+										DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+									byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+									byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
 									byIO.WriteUInt128(uKeyID);
 									byIO.WriteUInt16(0);
 									DEBUG_ONLY(DebugLog(_T("Sent %u keyword search results in one packet to avoid fragmentation"), iUnsentCount)); 
@@ -815,12 +798,10 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 		{
 			uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
 			PokeUInt16(pbyCountPos, (uint16)iUnsentCount);
-			if(bKad2&& thePrefs.GetDebugClientKadUDPLevel() > 0)
+			if(thePrefs.GetDebugClientKadUDPLevel() > 0)
 			{
 				DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
 			}
-			else if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-				DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
 			CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 			DEBUG_ONLY(DebugLog(_T("Sent %u keyword search results in last packet to avoid fragmentation"), iUnsentCount));
 		}
@@ -830,7 +811,7 @@ void CIndexed::SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm*
 	Clean();
 }
 
-void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint16 uStartPosition, uint64 uFileSize, CKadUDPKey senderUDPKey)
+void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, uint16 uStartPosition, uint64 uFileSize, CKadUDPKey senderUDPKey)
 {
 	// do not access any data while the loading thread is busy;
 	if (!m_bDataLoaded) {
@@ -845,13 +826,8 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 		byte bySmallBuffer[2048];
 		CByteIO byIO(byPacket,sizeof(byPacket));
 		byIO.WriteByte(OP_KADEMLIAHEADER);
-		if(bKad2)
-		{
-			byIO.WriteByte(KADEMLIA2_SEARCH_RES);
-			byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
-		}
-		else
-			byIO.WriteByte(KADEMLIA_SEARCH_RES);
+		byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+		byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
 
 		byIO.WriteUInt128(uKeyID);
 		byte* pbyCountPos = byPacket + byIO.GetUsed();
@@ -885,19 +861,10 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 							CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 							byIO.Reset();
 							byIO.WriteByte(OP_KADEMLIAHEADER);
-							if(bKad2)
-							{
-								if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-									DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
-								byIO.WriteByte(KADEMLIA2_SEARCH_RES);
-								byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
-							}
-							else
-							{
-								if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-									DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
-								byIO.WriteByte(KADEMLIA_SEARCH_RES);
-							}
+							if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+								DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+							byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+							byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
 							byIO.WriteUInt128(uKeyID);
 							byIO.WriteUInt16(0);
 							//DEBUG_ONLY(DebugLog(_T("Sent %u source search results in one packet to avoid fragmentation"), iUnsentCount)); 
@@ -920,12 +887,10 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 		{
 			uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
 			PokeUInt16(pbyCountPos, (uint16)iUnsentCount);
-			if(bKad2&& thePrefs.GetDebugClientKadUDPLevel() > 0)
+			if(thePrefs.GetDebugClientKadUDPLevel() > 0)
 			{
 				DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
 			}
-			else if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-				DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
 			CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 			//DEBUG_ONLY(DebugLog(_T("Sent %u source search results in last packet to avoid fragmentation"), iUnsentCount));
 		}
@@ -935,7 +900,7 @@ void CIndexed::SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 
 	Clean();
 }
 
-void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint64 uFileSize, CKadUDPKey senderUDPKey)
+void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, uint64 uFileSize, CKadUDPKey senderUDPKey)
 {
 	// do not access any data while the loading thread is busy;
 	if (!m_bDataLoaded) {
@@ -952,13 +917,8 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 			byte bySmallBuffer[2048];
 			CByteIO byIO(byPacket,sizeof(byPacket));
 			byIO.WriteByte(OP_KADEMLIAHEADER);
-			if(bKad2)
-			{
-				byIO.WriteByte(KADEMLIA2_SEARCH_RES);
-				byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
-			}
-			else
-				byIO.WriteByte(KADEMLIA_SEARCH_NOTES_RES);
+			byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+			byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
 			byIO.WriteUInt128(uKeyID);
 
 			byte* pbyCountPos = byPacket + byIO.GetUsed();
@@ -989,19 +949,10 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 								CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 								byIO.Reset();
 								byIO.WriteByte(OP_KADEMLIAHEADER);
-								if(bKad2)
-								{
-									if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-										DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
-									byIO.WriteByte(KADEMLIA2_SEARCH_RES);
-									byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
-								}
-								else
-								{
-									if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-										DebugSend("KADEMLIA_SEARCH_NOTES_RES", uIP, uPort);
-									byIO.WriteByte(KADEMLIA_SEARCH_NOTES_RES);
-								}
+								if (thePrefs.GetDebugClientKadUDPLevel() > 0)
+									DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
+								byIO.WriteByte(KADEMLIA2_SEARCH_RES);
+								byIO.WriteUInt128(Kademlia::CKademlia::GetPrefs()->GetKadID());
 								byIO.WriteUInt128(uKeyID);
 								byIO.WriteUInt16(0);
 								DEBUG_ONLY(DebugLog(_T("Sent %u keyword search results in one packet to avoid fragmentation"), iUnsentCount)); 
@@ -1023,12 +974,10 @@ void CIndexed::SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uP
 			{
 				uint32 uLen = sizeof(byPacket)-byIO.GetAvailable();
 				PokeUInt16(pbyCountPos, (uint16)iUnsentCount);
-				if(bKad2&& thePrefs.GetDebugClientKadUDPLevel() > 0)
+				if(thePrefs.GetDebugClientKadUDPLevel() > 0)
 				{
 					DebugSend("KADEMLIA2_SEARCH_RES", uIP, uPort);
 				}
-				else if (thePrefs.GetDebugClientKadUDPLevel() > 0)
-					DebugSend("KADEMLIA_SEARCH_RES", uIP, uPort);
 				CKademlia::GetUDPListener()->SendPacket(byPacket, uLen, uIP, uPort, senderUDPKey, NULL);
 				DEBUG_ONLY(DebugLog(_T("Sent %u note search results in last packet to avoid fragmentation"), iUnsentCount));
 			}
@@ -1156,7 +1105,7 @@ int CIndexed::CLoadDataThread::Run()
 				setvbuf(fileKey.m_pStream, NULL, _IOFBF, 32768);
 
 				uint32 uVersion = fileKey.ReadUInt32();
-				if( uVersion < 4)
+				if( uVersion < 5)
 				{
 					time_t tSaveTime = fileKey.ReadUInt32();
 					if( tSaveTime > time(NULL) )
@@ -1181,7 +1130,7 @@ int CIndexed::CLoadDataThread::Run()
 										pToAdd->m_bSource = false;
 										pToAdd->m_tLifetime = fileKey.ReadUInt32();
 										if (uVersion >= 3)
-											pToAdd->ReadPublishTrackingDataFromFile(&fileKey);
+											pToAdd->ReadPublishTrackingDataFromFile(&fileKey, uVersion >= 4);
 										uint32 uTotalTags = fileKey.ReadByte();
 										while( uTotalTags )
 										{

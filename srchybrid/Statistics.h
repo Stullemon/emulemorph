@@ -22,13 +22,18 @@
 #define AVG_TOTAL 2
 #define AVG_TIME 1
 
+enum TBPSTATES {
+	STATE_DOWNLOADING = 0x01,
+	STATE_ERROROUS    = 0x10
+};
+
 class CStatistics
 {
 public:
 	CStatistics();   // standard constructor
 
 	void	Init();
-	void RecordRate();
+	void	RecordRate();
 	float	GetAvgDownloadRate(int averageType);
 	float	GetAvgUploadRate(int averageType);
 
@@ -74,14 +79,13 @@ public:
 	uint64	GetDownDataOverheadServerPackets()			{return m_nDownDataOverheadServerPackets;}
 	uint64	GetDownDataOverheadKadPackets()				{return m_nDownDataOverheadKadPackets;}
 	uint64	GetDownDataOverheadOtherPackets()			{return m_nDownDataOverheadOtherPackets;}
-	
+
+
 	///////////////////////////////////////////////////////////////////////////
 	// Up Overhead
 	//
 	void	CompUpDatarateOverhead();
 	void	ResetUpDatarateOverhead();
-
-
 	void	AddUpDataOverheadSourceExchange(uint32 data)	{ m_nUpDataRateMSOverhead += data;
 															  m_nUpDataOverheadSourceExchange += data;
 															  m_nUpDataOverheadSourceExchangePackets++;}
@@ -147,6 +151,9 @@ public:
 	static uint32	time_thisUpload;
 	static uint32	timeServerDuration;
 	static uint32	time_thisServerDuration;
+	static DWORD	m_dwOverallStatus;
+	static float	m_fGlobalDone;
+	static float	m_fGlobalSize;
 
 	static uint64	sessionReceivedBytes;
 	static uint64	sessionSentBytes;
@@ -195,13 +202,12 @@ private:
 
 	static uint32	m_sumavgDDRO;
 	static uint32	m_sumavgUDRO;
-	CList<TransferredData>	m_AvarageDDRO_list;
-	CList<TransferredData>	m_AvarageUDRO_list;
+	CList<TransferredData> m_AvarageDDRO_list;
+	CList<TransferredData> m_AvarageUDRO_list;
 	//MORPH START - Added by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
 	static DWORD	m_AvarageDDRO_listLastRemovedTimestamp;
 	static DWORD	m_AvarageUDRO_listLastRemovedTimestamp;
 	//MORPH END   - Added by SiRoB, Changed by SiRoB, Better datarate mesurement for low and high speed
-
 
 	/*ZZ*/uint64  m_nTotalCompletedBytes;
 };

@@ -26,6 +26,7 @@ there client on the eMule forum..
 
 #pragma once
 #include "./Tag.h"
+#include "../../shahashset.h"
 
 struct SSearchTerm;
 namespace Kademlia
@@ -48,7 +49,7 @@ namespace Kademlia
 			uint64		GetIntTagValue(CKadTagNameString strTagName, bool bIncludeVirtualTags = true) const;
 			bool		GetIntTagValue(CKadTagNameString strTagName, uint64& rValue, bool bIncludeVirtualTags = true) const;
 			CKadTagValueString GetStrTagValue(CKadTagNameString strTagName) const;
-			void		AddTag(CKadTag* pTag)			{ m_listTag.push_back(pTag); }
+			void		AddTag(CKadTag* pTag, uint32 uDbgSourceIP = 0);
 			uint32		GetTagCount() const; // Adds filename and size to the count if not empty, even if they are not stored as tags
 			void		WriteTagList(CDataIO* pData)	{ WriteTagListInc(pData, 0); }
 
@@ -67,7 +68,7 @@ namespace Kademlia
 
 		protected:
 			void		WriteTagListInc(CDataIO* pData, uint32 nIncreaseTagNumber = 0);
-			CList<structFileNameEntry> m_listFileNames;	
+			CList<structFileNameEntry>	m_listFileNames;
 			TagList m_listTag;
 	};
 
@@ -77,6 +78,7 @@ namespace Kademlia
 			struct structPublishingIP{
 				uint32				m_uIP;
 				time_t				m_tLastPublish;
+				uint16				m_byAICHHashIdx;
 			};
 		public:
 			CKeyEntry();
@@ -90,9 +92,11 @@ namespace Kademlia
 			void				CleanUpTrackedPublishers();
 			float				GetTrustValue();
 			void				WritePublishTrackingDataToFile(CDataIO* pData);
-			void				ReadPublishTrackingDataFromFile(CDataIO* pData);
+			void				ReadPublishTrackingDataFromFile(CDataIO* pData, bool bIncludesAICH);
 			void				DirtyDeletePublishData();
 			void				WriteTagListWithPublishInfo(CDataIO* pData);
+			uint16				AddRemoveAICHHash(const CAICHHash& hash, bool bAdd);
+			uint16				GetAICHHashCount() const						{ return (uint16)m_aAICHHashs.GetCount(); }
 			static void			ResetGlobalTrackingMap()						{ s_mapGlobalPublishIPs.RemoveAll(); }
 
 		protected:
@@ -103,6 +107,9 @@ namespace Kademlia
 			float	m_fTrustValue;
 			CList<structPublishingIP> *m_pliPublishingIPs;
 			static CMap<uint32, uint32, uint32, uint32> s_mapGlobalPublishIPs; // tracks count of publishings for each 255.255.255.0/28 subnet
+			
+			CArray<uint8>		m_anAICHHashPopularity;
+			CArray<CAICHHash>	m_aAICHHashs;
 
 			bool SearchTermsMatch(const SSearchTerm* pSearchTerm) const;
 			CKadTagValueString m_strSearchTermCacheCommonFileNameLowerCase; // contains a valid value only while 'SearchTermsMatch' is running.

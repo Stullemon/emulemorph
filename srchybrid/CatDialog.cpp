@@ -21,7 +21,7 @@
 #include "otherfunctions.h"
 #include "SharedFileList.h"
 #include "emuledlg.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "CatDialog.h"
 #include "UserMsgs.h"
 #include "SharedFilesWnd.h"
@@ -111,7 +111,7 @@ void CCatDialog::UpdateData()
 	CheckDlgButton(IDC_REGEXPR,m_myCat->ac_regexpeval);
  end morph */
 
-	newcolor=m_myCat->color;
+	newcolor = m_myCat->color;
 	m_ctlColor.SetColor(m_myCat->color == -1 ? m_ctlColor.GetDefaultColor() : m_myCat->color);
 
 	// HoaX_69: AutoCat
@@ -154,7 +154,6 @@ void CCatDialog::UpdateData()
 	CheckDlgButton(IDC_CHECK_RESUMEFILEONLYINSAMECAT, m_myCat->bResumeFileOnlyInSameCat?1:0); //MORPH - Added by SiRoB, Resume file only in the same category
 	// khaos::categorymod-
 }
-
 
 void CCatDialog::DoDataExchange(CDataExchange* pDX)
 {
@@ -229,17 +228,15 @@ void CCatDialog::Localize()
 	SetWindowText(GetResString(IDS_EDITCAT));
 
 /* morph delete
-SetDlgItemText(IDC_STATIC_REGEXP,GetResString(IDS_STATIC_REGEXP));	
+	SetDlgItemText(IDC_STATIC_REGEXP,GetResString(IDS_STATIC_REGEXP));	
 
 	m_prio.ResetContent();
 	end morph delete*/
 
 	while (m_prio.GetCount()>0) m_prio.DeleteString(0);
-	//m_prio.AddString(GetResString(IDS_DONTCHANGE)); //ZZ:DownloadManager
 	m_prio.AddString(GetResString(IDS_PRIOLOW));
 	m_prio.AddString(GetResString(IDS_PRIONORMAL));
 	m_prio.AddString(GetResString(IDS_PRIOHIGH));
-	//m_prio.AddString(GetResString(IDS_PRIOAUTO)); //ZZ:DownloadManager
 	m_prio.SetCurSel(m_myCat->prio);
 }
 
@@ -247,7 +244,7 @@ void CCatDialog::OnBnClickedBrowse()
 {	
 	TCHAR buffer[MAX_PATH] = {0};
 	GetDlgItemText(IDC_INCOMING, buffer, _countof(buffer));
-	if(SelectDir(GetSafeHwnd(), buffer,GetResString(IDS_SELECT_INCOMINGDIR)))
+	if (SelectDir(GetSafeHwnd(), buffer,GetResString(IDS_SELECT_INCOMINGDIR)))
 		GetDlgItem(IDC_INCOMING)->SetWindowText(buffer);
 }
 
@@ -256,7 +253,7 @@ void CCatDialog::OnBnClickedOk()
 	CString oldpath = m_myCat->strIncomingPath;
 	if (GetDlgItem(IDC_TITLE)->GetWindowTextLength()>0)
 		GetDlgItem(IDC_TITLE)->GetWindowText(m_myCat->strTitle);
-
+	
 	if (GetDlgItem(IDC_INCOMING)->GetWindowTextLength()>2)
 		GetDlgItem(IDC_INCOMING)->GetWindowText(m_myCat->strIncomingPath);
 	
@@ -339,8 +336,8 @@ void CCatDialog::OnBnClickedOk()
 		m_myCat->filter=0;
 	}
    end morph delete */
-	
-	theApp.emuledlg->transferwnd->downloadlistctrl.Invalidate();
+
+	theApp.emuledlg->transferwnd->GetDownloadList()->Invalidate();
 
 	OnOK();
 }

@@ -39,6 +39,7 @@ there client on the eMule forum..
 #include "../routing/RoutingZone.h"
 #include "../routing/contact.h"
 #include "../../emule.h"
+#include "../../preferences.h"
 #include "../../emuledlg.h"
 #include "../../opcodes.h"
 #include "../../Log.h"
@@ -68,7 +69,9 @@ time_t		CKademlia::m_tNextFindBuddy;
 time_t		CKademlia::m_tBootstrap;
 time_t		CKademlia::m_tConsolidate;
 time_t		CKademlia::m_tExternPortLookup;
+time_t		CKademlia::m_tLANModeCheck = 0;
 bool		CKademlia::m_bRunning = false;
+bool		CKademlia::m_bLANMode = false;
 CList<uint32, uint32> CKademlia::m_liStatsEstUsersProbes;
 _ContactList CKademlia::s_liBootstapList;
 
@@ -241,7 +244,12 @@ void CKademlia::Process()
 		CRoutingZone* pZone = itEventMap->first;
 		if( bUpdateUserFile )
 		{
-			uTempUsers = pZone->EstimateCount();
+			// The EstimateCount function is not made for really small networks, if we are in LAN mode, it is actually
+			// better to assume that all users of the network are in our routingtable and use the real count function
+			if (IsRunningInLANMode())
+				uTempUsers = pZone->GetNumContacts();
+			else
+				uTempUsers = pZone->EstimateCount();
 			if( uMaxUsers < uTempUsers )
 				uMaxUsers = uTempUsers;
 		}
@@ -307,7 +315,7 @@ void CKademlia::Process()
 		CContact* pContact = s_liBootstapList.RemoveHead();
 		m_tBootstrap = tNow;
 		DebugLog(_T("Trying to Bootstrap Kad from %s, Distance: %s, Version: %u, %u Contacts left"), ipstr(ntohl(pContact->GetIPAddress())), pContact->GetDistance().ToHexString(),  pContact->GetVersion(), s_liBootstapList.GetCount());
-		m_pInstance->m_pUDPListener->Bootstrap(pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetVersion() > 1, pContact->GetVersion(), &pContact->GetClientID());
+		m_pInstance->m_pUDPListener->Bootstrap(pContact->GetIPAddress(), pContact->GetUDPPort(), pContact->GetVersion(), &pContact->GetClientID());
 		delete pContact;
 	}
 
@@ -335,7 +343,7 @@ bool CKademlia::IsConnected()
 bool CKademlia::IsFirewalled()
 {
 	if( m_pInstance && m_pInstance->m_pPrefs )
-		return m_pInstance->m_pPrefs->GetFirewalled();
+		return m_pInstance->m_pPrefs->GetFirewalled() && !IsRunningInLANMode();
 	return true;
 }
 
@@ -405,25 +413,25 @@ bool CKademlia::GetPublish()
 	return 0;
 }
 
-void CKademlia::Bootstrap(LPCTSTR szHost, uint16 uPort, bool bKad2)
+void CKademlia::Bootstrap(LPCTSTR szHost, uint16 uPort)
 {
 	if( m_pInstance && m_pInstance->m_pUDPListener && !IsConnected() && time(NULL) - m_tBootstrap > 10 ){
 		m_tBootstrap = time(NULL);
-		m_pInstance->m_pUDPListener->Bootstrap( szHost, uPort, bKad2 );
+		m_pInstance->m_pUDPListener->Bootstrap( szHost, uPort );
 	}
 }
 
-void CKademlia::Bootstrap(uint32 uIP, uint16 uPort, bool bKad2)
+void CKademlia::Bootstrap(uint32 uIP, uint16 uPort)
 {
 	if( m_pInstance && m_pInstance->m_pUDPListener && !IsConnected() && time(NULL) - m_tBootstrap > 10 ){
 		m_tBootstrap = time(NULL);
-		m_pInstance->m_pUDPListener->Bootstrap( uIP, uPort, bKad2 );
+		m_pInstance->m_pUDPListener->Bootstrap( uIP, uPort );
 	}
 }
 
 void CKademlia::RecheckFirewalled()
 {
-	if( m_pInstance && m_pInstance->GetPrefs() )
+	if( m_pInstance && m_pInstance->GetPrefs() && !IsRunningInLANMode())
 	{
 		// Something is forcing a new firewall check
 		// Stop any new buddy requests, and tell the client
@@ -620,4 +628,37 @@ uint32 CKademlia::CalculateKadUsersNew(){
 	ASSERT( fFirewalledModifyTotal > 1.0F && fFirewalledModifyTotal < 1.90F );
 
 	return (uint32)((float)nMedian*fFirewalledModifyTotal);
+}
+
+bool CKademlia::IsRunningInLANMode()
+{
+	if (thePrefs.FilterLANIPs() || !IsRunning())
+		return false;
+	if (m_tLANModeCheck + 10 <= time(NULL))
+	{
+		m_tLANModeCheck = time(NULL);
+		uint32 nCount = GetRoutingZone()->GetNumContacts();
+		// Limit to 256 nodes, if we have more we don't want to use the LAN mode which is assuming we use a small home LAN
+		// (otherwise we might need to do firewallcheck, external port requests etc after all)
+		if (nCount == 0 || nCount > 256)
+			m_bLANMode = false;
+		else
+		{
+			if (GetRoutingZone()->HasOnlyLANNodes())
+			{
+				if (!m_bLANMode)
+				{
+					m_bLANMode = true;
+					theApp.emuledlg->ShowConnectionState();
+					DebugLog(_T("Kademlia: Activating LAN Mode"));
+				}
+			}
+			else if(m_bLANMode)
+			{
+				m_bLANMode = false;
+				theApp.emuledlg->ShowConnectionState();
+			}
+		}
+	}
+	return m_bLANMode;
 }

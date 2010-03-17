@@ -31,7 +31,7 @@ there client on the eMule forum..
 #pragma once
 #include "../routing/Maps.h"
 
-#define INV_KAD_KEYWORD_CHARS	" ()[]{}<>,._-!?:;\\/"
+#define INV_KAD_KEYWORD_CHARS	" ()[]{}<>,._-!?:;\\/\""
 extern LPCSTR g_aszInvKadKeywordCharsA;
 extern LPCTSTR g_aszInvKadKeywordChars;
 extern LPCWSTR g_awszInvKadKeywordChars;
@@ -57,7 +57,7 @@ namespace Kademlia
 			static CSearch* PrepareFindKeywords(LPCTSTR szKeyword, UINT uSearchTermsSize, LPBYTE pucSearchTermsData);
 			static bool StartSearch(CSearch* pSearch);
 			static void ProcessResponse(const CUInt128 &uTarget, uint32 uFromIP, uint16 uFromPort, ContactList *plistResults);
-			static void ProcessResult(const CUInt128 &uTarget, const CUInt128 &uAnswer, TagList *plistInfo);
+			static void ProcessResult(const CUInt128 &uTarget, const CUInt128 &uAnswer, TagList *plistInfo, uint32 uFromIP, uint16 uFromPort);
 			static void ProcessPublishResult(const CUInt128 &uTarget, const uint8 uLoad, const bool bLoadResponse);
 			static void GetWords(LPCTSTR sz, WordList *plistWords);
 			static void UpdateStats();

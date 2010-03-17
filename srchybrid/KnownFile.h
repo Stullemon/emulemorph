@@ -25,8 +25,9 @@ class CUpDownClient;
 class Packet;
 class CFileDataIO;
 class CAICHHashTree;
-class CAICHHashSet;
+class CAICHRecoveryHashSet;
 class CCollection;
+class CAICHHashAlgo;
 class CSafeMemFile;	// SLUGFILLER: hideOS
 
 typedef CTypedPtrList<CPtrList, CUpDownClient*> CUpDownClientPtrList;
@@ -35,6 +36,7 @@ class CKnownFile : public CShareableFile
 {
 	DECLARE_DYNAMIC(CKnownFile)
 	friend class CImportPartsFileThread; //MORPH - Added by SiRoB, ImportParts
+
 public:
 	CKnownFile();
 	virtual ~CKnownFile();
@@ -61,18 +63,6 @@ public:
 
 	virtual void	SetFileSize(EMFileSize nFileSize);
 
-	// local available part hashs
-	UINT	GetHashCount() const { return hashlist.GetCount(); }
-	uchar*	GetPartHash(UINT part) const;
-	const CArray<uchar*, uchar*>& GetHashset() const					{ return hashlist; }
-	bool	SetHashset(const CArray<uchar*, uchar*>& aHashset);
-
-	// SLUGFILLER: SafeHash remove - removed unnececery hash counter
-	/*
-	// nr. of part hashs according the file size wrt ED2K protocol
-	uint16	GetED2KPartHashCount() const								{ return m_iED2KPartHashCount; }
-	*/
-
 	// nr. of 9MB parts (file data)
 	__inline uint16 GetPartCount() const								{ return m_iPartCount; }
 
@@ -90,8 +80,6 @@ public:
 	// Right now this number is used for auto priorities..
 	// This may be replaced with total complete source known in the network..
 	uint32	GetQueuedCount() { return m_ClientUploadList.GetCount();}
-
-	bool	LoadHashsetFromFile(CFileDataIO* file, bool checkhash);
 
 	bool	HideOvershares(CSafeMemFile* file, CUpDownClient* client);	// SLUGFILLER: hideOS
 
@@ -135,13 +123,15 @@ public:
 	virtual bool GrabImage(uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	virtual void GrabbingFinished(CxImage** imgResults, uint8 nFramesGrabbed, void* pSender);
 
-	// aich
-	CAICHHashSet*	GetAICHHashset() const							{return m_pAICHHashSet;}
-	void			SetAICHHashset(CAICHHashSet* val)				{m_pAICHHashSet = val;}
-
 	// Display / Info / Strings
 	virtual CString	GetInfoSummary() const;
 	CString			GetUpPriorityDisplayString() const;
+
+	//aich
+	void	SetAICHRecoverHashSetAvailable(bool bVal)			{ m_bAICHRecoverHashSetAvailable = bVal; }
+	bool	IsAICHRecoverHashSetAvailable() const				{ return m_bAICHRecoverHashSetAvailable; }						
+
+	static bool	CreateHash(const uchar* pucData, uint32 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL);
 
 
 
@@ -219,34 +209,23 @@ public:
 	//MORPH START - Added by SiRoB, copy feedback feature
 	CString GetFeedback(bool isUS = false);
 	//MORPH END   - Added by SiRoB, copy feedback feature
-	//MORPH START - Added by SiRoB, Import Parts [SR13]
-	bool	CreateHash(const uchar* pucData, uint32 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
-	//MORPH END   - Added by SiRoB, Import Parts [SR13]
 	
 protected:
 	//preview
 	bool	GrabImage(CString strFileName, uint8 nFramesToGrab, double dStartTime, bool bReduceColor, uint16 nMaxWidth, void* pSender);
 	bool	LoadTagsFromFile(CFileDataIO* file);
 	bool	LoadDateFromFile(CFileDataIO* file);
-	void	CreateHash(CFile* pFile, uint64 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
-	bool	CreateHash(FILE* fp, uint64 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
-	//MORPH - Removed by SiRoB, moved up in public area, Import Parts [SR13]
-	/*
-	bool	CreateHash(const uchar* pucData, uint32 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL) const;
-	*/
+	static void	CreateHash(CFile* pFile, uint64 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL);
+	static bool	CreateHash(FILE* fp, uint64 uSize, uchar* pucHash, CAICHHashTree* pShaHashOut = NULL);
 	virtual void	UpdateFileRatingCommentAvail(bool bForceUpdate = false);
 	//MORPH START - Revisited , we only get static Client PartCount now
 	void	CalcPartSpread(CArray<uint64>& partspread, CUpDownClient* client);	// SLUGFILLER: hideOS
 	//MORPH END   - Revisited , we only get static Client PartCount now
 
-	CArray<uchar*, uchar*>	hashlist;
-	CAICHHashSet*			m_pAICHHashSet;
-
 private:
 	static CBarShader s_ShareStatusBar;
 	uint16	m_iPartCount;
 	uint16	m_iED2KPartCount;
-	uint16	m_iED2KPartHashCount;
 	uint8	m_iUpPriority;
 	bool	m_bAutoUpPriority;
 	bool	m_PublishedED2K;
@@ -257,6 +236,7 @@ private:
 	Kademlia::WordList wordlist;
 	UINT	m_uMetaDataVer;
 	time_t	m_timeLastSeen; // we only "see" files when they are in a shared directory
+	bool	m_bAICHRecoverHashSetAvailable;
 
 	//MORPH START - Added by SiRoB,  SharedStatusBar CPU Optimisation
 	bool	InChangedSharedStatusBar;

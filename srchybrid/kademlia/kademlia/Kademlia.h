@@ -64,14 +64,15 @@ namespace Kademlia
 			static uint32 GetTotalFile();
 			static bool	GetPublish();
 			static uint32 GetIPAddress();
-			static void	Bootstrap(uint32 uIP, uint16 uPort, bool bKad2);
-			static void	Bootstrap(LPCTSTR szHost, uint16 uPort, bool bKad2);
+			static void	Bootstrap(uint32 uIP, uint16 uPort);
+			static void	Bootstrap(LPCTSTR szHost, uint16 uPort);
 			static void	ProcessPacket(const byte* pbyData, uint32 uLenData, uint32 uIP, uint16 uPort, bool bValidReceiverKey, CKadUDPKey senderUDPKey);
 			static void	AddEvent(CRoutingZone *pZone);
 			static void	RemoveEvent(CRoutingZone *pZone);
 			static void	Process();
 			static bool	InitUnicode(HMODULE hInst);
 			static void StatsAddClosestDistance(CUInt128 uDist);
+			static bool IsRunningInLANMode();
 			
 			static bool	FindNodeIDByIP(CKadClientSearcher& rRequester, uint32 dwIP, uint16 nTCPPort, uint16 nUDPPort);
 			static bool FindIPByNodeID(CKadClientSearcher& rRequester, const uchar* pachNodeID);
@@ -94,8 +95,10 @@ namespace Kademlia
 			static time_t m_tBootstrap;
 			static time_t m_tConsolidate;
 			static time_t m_tExternPortLookup;
+			static time_t m_tLANModeCheck;
 			static bool	m_bRunning;
 			static CList<uint32, uint32> m_liStatsEstUsersProbes;
+			static bool m_bLANMode;
 			CPrefs *m_pPrefs;
 			CRoutingZone *m_pRoutingZone;
 			CKademliaUDPListener *m_pUDPListener;

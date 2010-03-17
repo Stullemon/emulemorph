@@ -338,7 +338,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"
 				Description="Inserting Vista application icon..."
-				CommandLine="..\ReplaceVistaIcon\release\ReplaceVistaIcon &quot;$(TargetPath)&quot; &quot;$(ProjectDir)res\MOD\Mule_Vista.ico&quot; AAAEMULEAPP&#x0D;&#x0A;del $(IntDir)\emule.obj"
+				CommandLine="..\ReplaceVistaIcon\release\ReplaceVistaIcon &quot;$(TargetPath)&quot; &quot;$(ProjectDir)res\MOD\Mule_Vista.ico&quot; AAAEMULEAPP&#x0D;&#x0A;del $(IntDir)\emule.obj&#x0D;&#x0A;"
 			/>
 		</Configuration>
 	</Configurations>
@@ -451,6 +451,10 @@
 			</File>
 			<File
 				RelativePath="fakecheck.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\FileIdentifier.cpp"
 				>
 			</File>
 			<File
@@ -989,6 +993,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\kademlia\utils\LookupHistory.cpp"
+					>
+				</File>
+				<File
 					RelativePath="kademlia\utils\MiscUtils.cpp"
 					>
 				</File>
@@ -1160,6 +1168,10 @@
 			</File>
 			<File
 				RelativePath="fakecheck.h"
+				>
+			</File>
+			<File
+				RelativePath=".\FileIdentifier.h"
 				>
 			</File>
 			<File
@@ -1526,6 +1538,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\kademlia\utils\LookupHistory.h"
+					>
+				</File>
+				<File
 					RelativePath="kademlia\routing\Maps.h"
 					>
 				</File>
@@ -1747,6 +1763,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileDetailDlgStatistics.cpp"
+				>
+			</File>
+			<File
 				RelativePath="FileInfoDialog.cpp"
 				>
 			</File>
@@ -1792,6 +1812,10 @@
 			</File>
 			<File
 				RelativePath="KademliaWnd.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\KadLookupGraph.cpp"
 				>
 			</File>
 			<File
@@ -2051,7 +2075,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ToolbarWnd.cpp"
+				>
+			</File>
+			<File
 				RelativePath="ToolTipCtrlX.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\TransferDlg.cpp"
 				>
 			</File>
 			<File
@@ -2371,6 +2403,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\FileDetailDlgStatistics.h"
+				>
+			</File>
+			<File
 				RelativePath="FileInfoDialog.h"
 				>
 			</File>
@@ -2420,6 +2456,10 @@
 			</File>
 			<File
 				RelativePath="KademliaWnd.h"
+				>
+			</File>
+			<File
+				RelativePath=".\KadLookupGraph.h"
 				>
 			</File>
 			<File
@@ -2691,7 +2731,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ToolbarWnd.h"
+				>
+			</File>
+			<File
 				RelativePath="ToolTipCtrlX.h"
+				>
+			</File>
+			<File
+				RelativePath=".\TransferDlg.h"
 				>
 			</File>
 			<File
@@ -3777,11 +3825,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\Mod\queue.ico"
+				RelativePath="res\queue.ico"
 				>
 			</File>
 			<File
-				RelativePath="res\queue.ico"
+				RelativePath=".\res\Mod\queue.ico"
 				>
 			</File>
 			<File
@@ -4093,19 +4141,19 @@
 				>
 			</File>
 			<File
-				RelativePath=".\res\MOD\TrayConnected.ico"
-				>
-			</File>
-			<File
 				RelativePath="res\TrayConnected.ico"
 				>
 			</File>
 			<File
-				RelativePath=".\res\MOD\Traydisconnected.ico"
+				RelativePath=".\res\MOD\TrayConnected.ico"
 				>
 			</File>
 			<File
 				RelativePath="res\TrayDisconnected.ico"
+				>
+			</File>
+			<File
+				RelativePath=".\res\MOD\Traydisconnected.ico"
 				>
 			</File>
 			<File

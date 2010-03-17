@@ -26,7 +26,7 @@
 #include "MenuCmds.h"
 #include "MuleStatusbarCtrl.h"
 #include "ServerWnd.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "SharedFilesWnd.h"
 #include "ChatWnd.h"
 #include "IrcWnd.h"
@@ -960,7 +960,6 @@ void CMuleToolbarCtrl::OnTbnReset(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 	if (thePrefs.IsLessControls())
 		config=strDefaultLessControlsToolbar;
 	// MORPH END  show less controls
-
 
 	for (int i = 0; i <config.GetLength(); i += 2)
 	{

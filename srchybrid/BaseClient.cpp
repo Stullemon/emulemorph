@@ -52,7 +52,7 @@
 #include "Kademlia/Kademlia/Prefs.h"
 #include "emuledlg.h"
 #include "ServerWnd.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "ChatWnd.h"
 #include "CxImage/xImage.h"
 #include "PreviewDlg.h"
@@ -242,7 +242,8 @@ void CUpDownClient::Init()
 	//EastShare Start - added by AndCycle, IP to Country
 	m_structUserCountry = theApp.ip2country->GetCountryFromIP(GetIP());
 	//EastShare End - added by AndCycle, IP to Country
-	m_fHashsetRequesting = 0;
+	m_fHashsetRequestingAICH = 0;
+	m_fHashsetRequestingMD4 = 0;
 	m_fSharedDirectories = 0;
 	m_fSentCancelTransfer = 0;
 	m_nClientVersion = 0;
@@ -327,12 +328,11 @@ void CUpDownClient::Init()
 
 	m_incompletepartVer = 0; //MORPH - Added By SiRoB, ICS merged into partstatus
 
-	m_bSendOldMorph = false; //MORPH - prevent being banned by old MorphXT
-
 	//MORPH START - ReadBlockFromFileThread
 	m_abyfiledata = NULL;
 	m_readblockthread =NULL;
 	//MORPH END   - ReadBlockFromFileThread
+	m_fSupportsFileIdent = 0;
 }
 
 CUpDownClient::~CUpDownClient(){
@@ -344,7 +344,7 @@ CUpDownClient::~CUpDownClient(){
 	//MORPH END   - ReadBlockFromFileThread
 	if (IsAICHReqPending()){
 		m_fAICHRequested = FALSE;
-		CAICHHashSet::ClientAICHRequestFailed(this);
+		CAICHRecoveryHashSet::ClientAICHRequestFailed(this);
 	}
 
 	if (GetFriend() != NULL)
@@ -734,6 +734,7 @@ void CUpDownClient::ClearHelloProperties()
 	m_fSupportsSourceEx2 = 0;
 	m_fSupportsCaptcha = 0;
 	m_fDirectUDPCallback = 0;
+	m_fSupportsFileIdent = 0;
 }
 
 bool CUpDownClient::ProcessHelloPacket(const uchar* pachPacket, uint32 nSize)
@@ -862,7 +863,6 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				if (temptag.IsStr())
 				{
 					m_strModVersion = temptag.GetStr();
-					m_bSendOldMorph = GetOldMorph();//MORPH - prevent being banned by old MorphXT
 					//MOPRH START - Added by Stulle, Mod Icons
 					if(StrStrI(m_strModVersion,_T("MorphXT"))!=0)
 						m_uModClient = MOD_MORPH;
@@ -984,7 +984,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				//  4 Comments
 				//	1 PeerChache supported
 				//	1 No 'View Shared Files' supported
-				//	1 MultiPacket
+				//	1 MultiPacket - deprecated with FileIdentifiers/MultipacketExt2
 				//  1 Preview
 				if (temptag.IsInt()) {
 					m_fSupportsAICH			= (temptag.GetInt() >> 29) & 0x07;
@@ -1023,7 +1023,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 
 			case CT_EMULE_MISCOPTIONS2:
-				//	19 Reserved
+				//	18 Reserved
+				//   1 Supports new FileIdentifiers/MultipacketExt2
 				//   1 Direct UDP Callback supported and available
 				//	 1 Supports ChatCaptchas
 				//	 1 Supports SourceExachnge2 Packets, ignores SX1 Packet Version
@@ -1031,10 +1032,11 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				//	 1 Requests CryptLayer
 				//	 1 Supports CryptLayer
 				//	 1 Reserved (ModBit)
-				//   1 Ext Multipacket (Hash+Size instead of Hash)
+				//   1 Ext Multipacket (Hash+Size instead of Hash) - deprecated with FileIdentifiers/MultipacketExt2
 				//   1 Large Files (includes support for 64bit tags)
 				//   4 Kad Version - will go up to version 15 only (may need to add another field at some point in the future)
 				if (temptag.IsInt()) {
+					m_fSupportsFileIdent	= (temptag.GetInt() >>  13) & 0x01;
 					m_fDirectUDPCallback	= (temptag.GetInt() >>  12) & 0x01;
 					m_fSupportsCaptcha	    = (temptag.GetInt() >>  11) & 0x01;
 					m_fSupportsSourceEx2	= (temptag.GetInt() >>  10) & 0x01;
@@ -1354,18 +1356,8 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 	CTag tag7(ET_FEATURES, dwTagValue);
 	tag7.WriteTagToFile(&data);
 	if (bSendModVersion){ //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-		//MORPH START - prevent being banned by old MorphXT
-		if(m_bSendOldMorph)
-		{
-			CTag tag8(ET_MOD_VERSION, theApp.m_strModVersionOld);
-			tag8.WriteTagToFile(&data);
-		}
-		else
-		{
-			CTag tag8(ET_MOD_VERSION, theApp.m_strModVersion);
-			tag8.WriteTagToFile(&data);
-		}
-		//MORPH END   - prevent being banned by old MorphXT
+		CTag tag8(ET_MOD_VERSION, theApp.m_strModVersion);
+		tag8.WriteTagToFile(&data);
 		//Morph Start - added by AndCycle, ICS
 		// enkeyDev: ICS
 		CTag tag9(ET_INCOMPLETEPARTS,1);
@@ -1393,7 +1385,7 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 	m_byEmuleVersion = data.ReadUInt8();
 	if (bDbgInfo)
 		m_strMuleInfo.AppendFormat(_T("EmuleVer=0x%x"), (UINT)m_byEmuleVersion);
-	if( m_byEmuleVersion == 0x2B )
+	if (m_byEmuleVersion == 0x2B)
 		m_byEmuleVersion = 0x22;
 	uint8 protversion = data.ReadUInt8();
 	if (bDbgInfo)
@@ -1403,19 +1395,19 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 	if (protversion == EMULE_PROTOCOL) {
 		//in the future do not use version to guess about new features
 
-		if(m_byEmuleVersion < 0x25 && m_byEmuleVersion > 0x22)
+		if (m_byEmuleVersion < 0x25 && m_byEmuleVersion > 0x22)
 			m_byUDPVer = 1;
 
-		if(m_byEmuleVersion < 0x25 && m_byEmuleVersion > 0x21)
+		if (m_byEmuleVersion < 0x25 && m_byEmuleVersion > 0x21)
 			m_bySourceExchange1Ver = 1;
 
-		if(m_byEmuleVersion == 0x24)
+		if (m_byEmuleVersion == 0x24)
 			m_byAcceptCommentVer = 1;
 
 		// Shared directories are requested from eMule 0.28+ because eMule 0.27 has a bug in 
 		// the OP_ASKSHAREDFILESDIR handler, which does not return the shared files for a 
 		// directory which has a trailing backslash.
-		if(m_byEmuleVersion >= 0x28 && !m_bIsML) // MLdonkey currently does not support shared directories
+		if (m_byEmuleVersion >= 0x28 && !m_bIsML) // MLdonkey currently does not support shared directories
 			m_fSharedDirectories = 1;
 
 	} else {
@@ -1427,7 +1419,7 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 	if (bDbgInfo)
 		m_strMuleInfo.AppendFormat(_T("  Tags=%u"), (UINT)tagcount);
 	CString strBanReason=NULL; //MORPH - Added by SiRoB, Control mod Tag
-	for (uint32 i = 0;i < tagcount; i++)
+	for (uint32 i = 0; i < tagcount; i++)
 	{
 		CTag temptag(&data, false);
 		switch (temptag.GetNameID())
@@ -1551,8 +1543,8 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 				// Bits  7- 0: compatible client ID
 				if (temptag.IsInt()) {
 					m_byCompatibleClient = (uint8)temptag.GetInt();
-				if (bDbgInfo)
-					m_strMuleInfo.AppendFormat(_T("\n  Comptbl=%u"), (UINT)temptag.GetInt());
+					if (bDbgInfo)
+						m_strMuleInfo.AppendFormat(_T("\n  Comptbl=%u"), (UINT)temptag.GetInt());
 				}
 				else if (bDbgInfo)
 					m_strMuleInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
@@ -1585,13 +1577,12 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
 				break;
-				
- 			case ET_MOD_VERSION:
+			
+			case ET_MOD_VERSION:
 				m_strNotOfficial.AppendFormat(_T(",mid=%s"),temptag.GetFullInfo()); //MOPRH - Added by SiRoB, Control Mod Tag
 				if (temptag.IsStr())
 				{
 					m_strModVersion = temptag.GetStr();
-					m_bSendOldMorph = GetOldMorph();//MORPH - prevent being banned by old MorphXT
 					//MOPRH START - Added by Stulle, Mod Icons
 					if(StrStrI(m_strModVersion,_T("MorphXT"))!=0)
 						m_uModClient = MOD_MORPH;
@@ -1640,6 +1631,7 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 				break;
 			// <--- enkeyDEV: ICS
 			//Morph End - added by AndCycle, ICS
+			
 			default:
 				//<<< [SNAFU_V3] Check unknown tags !
 				if (!((temptag.GetNameID() & 0xF0)==0xF0) || strBanReason.IsEmpty() && thePrefs.GetEnableAntiLeecher())
@@ -1650,7 +1642,7 @@ void CUpDownClient::ProcessMuleInfoPacket(const uchar* pachPacket, uint32 nSize)
 					m_strMuleInfo.AppendFormat(_T("\n  ***UnkTag=%s"), temptag.GetFullInfo());
 		}
 	}
-	if( m_byDataCompVer == 0 ){
+	if (m_byDataCompVer == 0) {
 		m_bySourceExchange1Ver = 0;
 		m_byExtendedRequestsVer = 0;
 		m_byAcceptCommentVer = 0;
@@ -1724,7 +1716,6 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	bool bSendModVersion = (m_strModVersion.GetLength() || m_pszUsername==NULL) && !IsLeecher();
 	if (bSendModVersion) tagcount+=(1/*MOD_VERSION*/+1/*enkeyDev: ICS*/);
 	//MORPH END   - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
-	m_bSendOldMorph = GetOldMorph();//MORPH - prevent being banned by old MorphXT
 
 	data->WriteUInt32(tagcount);
 
@@ -1822,9 +1813,11 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 	// direct callback is only possible if connected to kad, tcp firewalled and verified UDP open (for example on a full cone NAT)
 	const UINT uDirectUDPCallback	= (Kademlia::CKademlia::IsRunning() && Kademlia::CKademlia::IsFirewalled()
 		&& !Kademlia::CUDPFirewallTester::IsFirewalledUDP(true) && Kademlia::CUDPFirewallTester::IsVerified()) ? 1 : 0;
+	const UINT uFileIdentifiers		= 1;
 
 	CTag tagMisOptions2(CT_EMULE_MISCOPTIONS2, 
-//				(RESERVED				     ) 
+//				(RESERVED				     )
+				(uFileIdentifiers		<< 13) |
 				(uDirectUDPCallback		<< 12) |
 				(uSupportsCaptcha		<< 11) |
 				(uSupportsSourceEx2		<< 10) |
@@ -1850,18 +1843,8 @@ void CUpDownClient::SendHelloTypePacket(CSafeMemFile* data)
 
 	if (bSendModVersion) { //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
-		//MORPH START - prevent being banned by old MorphXT
-		if(m_bSendOldMorph)
-		{
-			CTag tagMODVersion(ET_MOD_VERSION, theApp.m_strModVersionOld);
-			tagMODVersion.WriteTagToFile(data);
-		}
-		else
-		{
-			CTag tagMODVersion(ET_MOD_VERSION, theApp.m_strModVersion);
-			tagMODVersion.WriteTagToFile(data);
-		}
-		//MORPH END   - prevent being banned by old MorphXT
+		CTag tagMODVersion(ET_MOD_VERSION, theApp.m_strModVersion);
+		tagMODVersion.WriteTagToFile(data);
 		//MORPH - Added by SiRoB, ET_MOD_VERSION 0x55
 
 		//Morph Start - added by AndCycle, ICS
@@ -2015,14 +1998,16 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	// we had still an AICH request pending, handle it
 	if (IsAICHReqPending()){
 		m_fAICHRequested = FALSE;
-		CAICHHashSet::ClientAICHRequestFailed(this);
+		CAICHRecoveryHashSet::ClientAICHRequestFailed(this);
 	}
 
 	// The remote client does not have to answer with OP_HASHSETANSWER *immediatly* 
 	// after we've sent OP_HASHSETREQUEST. It may occure that a (buggy) remote client 
 	// is sending use another OP_FILESTATUS which would let us change to DL-state to DS_ONQUEUE.
-	if (((GetDownloadState() == DS_REQHASHSET) || m_fHashsetRequesting) && (reqfile != NULL))
-        reqfile->hashsetneeded = true;
+	if (m_fHashsetRequestingMD4 && (reqfile != NULL))
+        reqfile->m_bMD4HashsetNeeded = true;
+	if (m_fHashsetRequestingAICH && (reqfile != NULL))
+        reqfile->SetAICHHashSetNeeded(true);
 
     if (m_iFileListRequested){
 		LogWarning(LOG_STATUSBAR, GetResString(IDS_SHAREDFILES_FAILED), GetUserName());
@@ -2092,7 +2077,7 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	}
 	socket = NULL;
 
-	theApp.emuledlg->transferwnd->clientlistctrl.RefreshClient(this);
+	theApp.emuledlg->transferwnd->GetClientList()->RefreshClient(this);
 
 	// finally, remove the client from the timeouttimer and reset the connecting state
 	m_nConnectingState = CCS_NONE;
@@ -2108,7 +2093,8 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 	{
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
 			Debug(_T("--- Disconnected client       %s; Reason=%s\n"), DbgGetClientInfo(true), pszReason);
-		m_fHashsetRequesting = 0;
+		m_fHashsetRequestingMD4 = 0;
+		m_fHashsetRequestingAICH = 0;
 		SetSentCancelTransfer(0);
 		m_bHelloAnswerPending = false;
 		m_fQueueRankPending = 0;
@@ -4577,6 +4563,7 @@ bool CUpDownClient::IsMorphLeecher()
 			StrStrI(m_strModVersion,_T("MorphXT 7.60")) ||
 			StrStrI(m_strModVersion,_T("MorphXT 7.30")) ||
 			(StrStrI(m_strModVersion,_T("MorphXT 9.7")) && m_nClientVersion < MAKE_CLIENT_VERSION(0, 48, 0)) ||
+			(StrStrI(m_strModVersion,_T("MorphXT 9.7")) && m_nClientVersion > MAKE_CLIENT_VERSION(0, 49, 2)) ||
 			(StrStrI(m_strModVersion,_T("Morph")) && (StrStrI(m_strModVersion,_T("Max")) || StrStrI(m_strModVersion,_T("+")) || StrStrI(m_strModVersion,_T("FF")) || StrStrI(m_strModVersion,_T("\xD7"))))
 			)
 		{
@@ -4587,29 +4574,6 @@ bool CUpDownClient::IsMorphLeecher()
 	return false;
 }
 //MORPH END - Added by Stulle, Morph Leecher Detection
-
-//MORPH START - prevent being banned by old MorphXT
-bool CUpDownClient::GetOldMorph()
-{
-	if(m_pszUsername == NULL)
-		return true; // unknown, always true!
-
-	if(m_clientSoft != SO_EMULE)
-		return false; // no mule, anyways
-
-	if(m_nClientVersion >= MAKE_CLIENT_VERSION(0, 48, 0))
-		return false; // bug fixed from this point on
-
-	if	(// pre 10.0
-			GetModClient() == MOD_MORPH || // MorphXT
-			GetModClient() == MOD_STULLE || // MorphXT based
-			GetModClient() == MOD_EASTSHARE //|| MorphXT based
-		)
-		return true; // it's an old morph
-
-	return false; // it's not an old morph
-}
-//MORPH END   - prevent being banned by old MorphXT
 
 //MOPRH START - Anti ModID Faker [Xman]
 bool CUpDownClient::IsModFaker()

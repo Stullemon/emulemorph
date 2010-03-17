@@ -48,7 +48,7 @@
 #include "MenuCmds.h"
 #include "DropDownButton.h"
 #include "ButtonsTabCtrl.h"
-#include "TransferWnd.h" //MORPH - Added by SiRoB, Selective Category
+#include "TransferDlg.h" //MORPH - Added by SiRoB, Selective Category
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -854,6 +854,23 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 	//  12
 	if (iOpAnd + iOpOr + iOpNot > 10)
 		yyerror(GetResString(IDS_SEARCH_TOOCOMPLEX));
+	
+	// FIXME: When searching on Kad the keyword may not be included into the OR operator in anyway (or into the not part of NAND)
+	// Currently we do not check this properly for all cases but only for the most common ones and more important we
+	// do not try to rearrange keywords, which could make a search valid
+	if (!s_strCurKadKeywordA.IsEmpty() && iOpOr > 0)
+	{
+		if (iOpAnd + iOpNot > 0)
+		{
+			if (pexpr->m_aExpr.GetCount() > 2)
+			{
+				if (pexpr->m_aExpr[0].m_str == SEARCHOPTOK_OR && pexpr->m_aExpr[1].m_str == s_strCurKadKeywordA)
+					yyerror(GetResString(IDS_SEARCH_BADOPERATORCOMBINATION));
+			}
+		}
+		else // if we habe only OR its not going to work out for sure
+			yyerror(GetResString(IDS_SEARCH_BADOPERATORCOMBINATION));
+	}
 
 	s_SearchExpr.m_aExpr.RemoveAll();
 	// optimize search expression, if no OR nor NOT specified
@@ -873,6 +890,7 @@ void ParsedSearchExpression(const CSearchExpr* pexpr)
 				{
 					if (pexpr->m_aExpr[i].m_str != s_strCurKadKeywordA 
 						&& pexpr->m_aExpr[i].m_str.FindOneOf(g_aszInvKadKeywordCharsA) == (-1)
+						&& pexpr->m_aExpr[i].m_str.Find('"') != 0 // no quoted expressions as keyword
 						&& pexpr->m_aExpr[i].m_str.GetLength() >= 3
 						&& s_strCurKadKeywordA.GetLength() < pexpr->m_aExpr[i].m_str.GetLength())
 					{
@@ -1300,7 +1318,7 @@ bool CSearchResultsWnd::StartNewSearch(SSearchParams* pParams)
 			//	Kademlia::CKademlia::Start();
 			return false;
 		}
-
+		
 		try
 		{
 			if (!DoNewKadSearch(pParams)) {
@@ -1419,6 +1437,15 @@ bool CSearchResultsWnd::DoNewKadSearch(SSearchParams* pParams)
 
 	int iPos = 0;
 	pParams->strKeyword = pParams->strExpression.Tokenize(_T(" "), iPos);
+	if (!pParams->strKeyword.IsEmpty() && pParams->strKeyword.GetAt(0) == _T('\"'))
+	{
+		// remove leading and possibly trailing quotes, if they terminate properly (otherwise the keyword is later handled as invalid)
+		// (quotes are still kept in search expr and matched against the result, so everything is fine)
+		if (pParams->strKeyword.GetLength() > 1 && pParams->strKeyword.Right(1).Compare(_T("\"")) == 0)
+			pParams->strKeyword = pParams->strKeyword.Mid(1, pParams->strKeyword.GetLength() - 2);
+		else if (pParams->strExpression.Find(_T('\"'), 1) > pParams->strKeyword.GetLength())
+			pParams->strKeyword = pParams->strKeyword.Mid(1, pParams->strKeyword.GetLength() - 1);
+	}
 	pParams->strKeyword.Trim();
 
 	CSafeMemFile data(100);

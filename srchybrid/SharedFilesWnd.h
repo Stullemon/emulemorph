@@ -17,12 +17,41 @@
 #pragma once
 #include "ResizableLib\ResizableDialog.h"
 #include "SharedFilesCtrl.h"
-#include "ProgressCtrlX.h"
-#include "IconStatic.h"
 #include "SharedDirsTreeCtrl.h"
 #include "SplitterControl.h"
 #include "EditDelayed.h"
+#include "ListViewWalkerPropertySheet.h"
 #include "HistoryListCtrl.h" //MORPH - Added, Downloaded History [Monki/Xman]
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+// CSharedFileDetailsModelessSheet
+class CFileDetailDlgStatistics;
+class CED2kLinkDlg;
+class CArchivePreviewDlg;
+class CFileInfoDialog;
+class CMetaDataDlg;
+class CSharedFileDetailsModelessSheet : public CListViewPropertySheet
+{
+	DECLARE_DYNAMIC(CSharedFileDetailsModelessSheet)
+
+public:
+	CSharedFileDetailsModelessSheet();
+	virtual ~CSharedFileDetailsModelessSheet();
+	void SetFiles(CTypedPtrList<CPtrList, CShareableFile*>& aFiles);
+
+protected:
+	CFileDetailDlgStatistics*	m_wndStatistics;
+	CED2kLinkDlg*				m_wndFileLink;
+	CArchivePreviewDlg*			m_wndArchiveInfo;
+	CFileInfoDialog*			m_wndMediaInfo;
+	CMetaDataDlg*				m_wndMetaData;
+
+	virtual BOOL OnInitDialog();
+
+	DECLARE_MESSAGE_MAP()
+	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+	afx_msg LRESULT OnDataChanged(WPARAM, LPARAM);
+};
 
 class CSharedFilesWnd : public CResizableDialog
 {
@@ -34,17 +63,18 @@ public:
 
 	void Localize();
 	void SetToolTipsDelay(DWORD dwDelay);
-	//MORPH START - Changed, Downloaded History [Monki/Xman]
-#ifdef NO_HISTORY
-	void ShowSelectedFilesSummary();
-#else
-	void ShowSelectedFilesSummary(bool bHistory =false);
-#endif
-	//MORPH END   - Changed, Downloaded History [Monki/Xman]
 	void Reload(bool bForceTreeReload = false);
 	uint32	GetFilterColumn() const				{ return m_nFilterColumn; }
 	void OnVolumesChanged()						{ m_ctlSharedDirTree.OnVolumesChanged(); }
 	void OnSingleFileShareStatusChanged()		{ m_ctlSharedDirTree.FileSystemTreeUpdateBoldState(NULL); }
+	//MORPH START - Changed, Downloaded History [Monki/Xman]
+#ifdef NO_HISTORY
+	void ShowSelectedFilesDetails(bool bForce = false);
+#else
+	void ShowSelectedFilesDetails(bool bForce = false, bool bHistory = false);
+#endif
+	//MORPH END   - Changed, Downloaded History [Monki/Xman]
+	void ShowDetailsPanel(bool bShow);
 
 // Dialog Data
 	enum { IDD = IDD_FILES };
@@ -54,16 +84,15 @@ public:
 	CSharedDirsTreeCtrl m_ctlSharedDirTree;
 
 private:
-	CProgressCtrlX pop_bar;
-	CProgressCtrlX pop_baraccept;
-	CProgressCtrlX pop_bartrans;
+
 	CFont bold;
-	CIconStatic m_ctrlStatisticsFrm;
 	HICON icon_files;
 	CSplitterControl m_wndSplitter;
 	CEditDelayed	m_ctlFilter;
 	CHeaderCtrl		m_ctlSharedListHeader;
 	uint32			m_nFilterColumn;
+	bool			m_bDetailsVisible;
+	CSharedFileDetailsModelessSheet	m_dlgDetails;
 
 protected:
 	void SetAllIcons();
@@ -84,14 +113,17 @@ protected:
 	afx_msg void OnStnDblClickFilesIco();
 	afx_msg void OnSysColorChange();
 	afx_msg void OnTvnSelChangedSharedDirsTree(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnShowWindow(BOOL bShow, UINT nStatus);
+	afx_msg void OnBnClickedSfHideshowdetails();
+	afx_msg void OnLvnItemchangedSflist(NMHDR *pNMHDR, LRESULT *pResult);
 	//MORPH START - Added, Downloaded History [Monki/Xman]
 #ifndef NO_HISTORY
-	afx_msg void OnShowWindow( BOOL bShow,UINT nStatus  );
 public:
 	CHistoryListCtrl historylistctrl;
 protected:
 	afx_msg void OnLvnItemActivateHistorylist(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMClickHistorylist(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnLvnItemchangedHlist(NMHDR *pNMHDR, LRESULT *pResult);
 #endif
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
 };

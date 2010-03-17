@@ -36,7 +36,7 @@ public:
 	void	RemoveAllFakes();
 	int		LoadFromFile();
 	CString GetLastHit() const;
-	bool	IsFake(uchar* Hash2test, uint64 lenght);
+	bool	IsFake(const uchar* Hash2test, uint64 lenght);
 	void	DownloadFakeList();
 	CString GetDefaultFilePath() const;
 private:

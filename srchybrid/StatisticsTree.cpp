@@ -609,6 +609,7 @@ void CStatisticsTree::ExportHTML()
 	CFileDialog saveAsDlg(false, _T("html"), _T("eMule Statistics.html"), OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_EXPLORER, _T("HTML Files (*.html)|*.html|All Files (*.*)|*.*||"), this, 0);
 	if (saveAsDlg.DoModal() == IDOK)
 	{
+		theApp.emuledlg->statisticswnd->ShowStatistics(true);// force update
 		CString		strHTML;
 
 		strHTML.Format( CString("<html>\r\n<header>\r\n<title>eMule %s [%s]</title>\r\n"
@@ -785,6 +786,7 @@ int CStatisticsTree::ApplyExpandedMask(CString theMask, HTREEITEM theItem, int t
 	}
 	return theStringIndex;
 }
+
 //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 //	This is the primary function for generating basic WML output of the statistics tree.
 //	It is recursive.

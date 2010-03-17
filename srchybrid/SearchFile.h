@@ -58,6 +58,8 @@ public:
 	int		GetClientsCount() const			{ return ((GetClientID() && GetClientPort()) ? 1 : 0) + m_aClients.GetSize(); }
 	void	SetKadPublishInfo(uint32 dwVal)	{ m_nKadPublishInfo = dwVal; }
 	uint32	GetKadPublishInfo() const		{ return m_nKadPublishInfo; } // == TAG_PUBLISHINFO
+	bool	DidFoundMultipleAICH() const	{ return m_bMultipleAICHFound; }
+	void	SetFoundMultipleAICH()			{ m_bMultipleAICHFound = true; }
 
 	// Spamfilter
 	void	SetNameWithoutKeyword(CString strName)	{ m_strNameWithoutKeywords = strName; }
@@ -179,6 +181,7 @@ public:
 	void SetKnownType(EKnownType eType) { m_eKnown = eType; }
 
 private:
+	bool	m_bMultipleAICHFound;
 	bool	m_bKademlia;
 	bool	m_bServerUDPAnswer;
 	uint32	m_nClientID;

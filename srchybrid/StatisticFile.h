@@ -15,12 +15,11 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
+class CKnownFile;
 #include "BarShader.h" //Spreadbars
 
 class CStatisticFile
 {
-	friend class CKnownFile;
-	friend class CPartFile;
 public:
 	CStatisticFile()
 	{
@@ -73,6 +72,9 @@ public:
 	UINT	GetAllTimeRequests() const		{return alltimerequested;}
 	UINT	GetAllTimeAccepts() const		{return alltimeaccepted;}
 	uint64	GetAllTimeTransferred() const	{return alltimetransferred;}
+	void	SetAllTimeRequests(uint32 nVal);
+	void	SetAllTimeAccepts(uint32 nVal);
+	void	SetAllTimeTransferred(uint64 nVal);
 	
 	CKnownFile* fileParent;
 	//Morph Start - Added by AndCycle, Equal Chance For Each File
@@ -84,9 +86,9 @@ public:
 	//EastShare	Start - FairPlay by AndCycle
 	bool	GetFairPlay() const;
 	//EastShare	End   - FairPlay by AndCycle
-private:
 	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
 	CRBMap<uint64, uint64> spreadlist;
+private:
 	static CBarShader s_SpreadBar;
 	//MORPH - Added by SiRoB, Reduce SpreadBar CPU consumption
 	bool	InChangedSpreadSortValue;

@@ -22,7 +22,7 @@
 #include "Collection.h"
 #include "CollectionFile.h"
 #include "DownloadQueue.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "CatDialog.h"
 #include "SearchDlg.h"
 #include "Partfile.h"

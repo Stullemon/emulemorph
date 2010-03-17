@@ -16,7 +16,11 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 #include "MuleListCtrl.h"
-#include "kademlia/kademlia/search.h"
+namespace Kademlia
+{
+	class CSearch;
+	class CLookupHistory;
+}
 
 class CIni;
 
@@ -34,9 +38,11 @@ public:
 
 	void	Init();
 	void	Localize();
-	void	Hide() {ShowWindow(SW_HIDE);}
-	void	Visable() {ShowWindow(SW_SHOW);}
+	//void	Hide() {ShowWindow(SW_HIDE);}
+	//void	Visable() {ShowWindow(SW_SHOW);}
 	void	UpdateKadSearchCount();
+
+	Kademlia::CLookupHistory* FetchAndSelectActiveSearch(bool bMark);
 
 protected:
 	void UpdateSearch(int iItem, const Kademlia::CSearch* search);

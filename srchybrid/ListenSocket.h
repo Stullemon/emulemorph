@@ -35,7 +35,7 @@ class CClientReqSocket : public CEMSocket
 	DECLARE_DYNCREATE(CClientReqSocket)
 
 public:
-	CClientReqSocket(CUpDownClient* in_client = NULL);	
+	CClientReqSocket(CUpDownClient* in_client = NULL);
 
 	void	SetClient(CUpDownClient* pClient);
 	void	Disconnect(LPCTSTR pszReason);
@@ -52,14 +52,14 @@ public:
 	virtual void SendPacket(Packet* packet[], uint32 npacket, bool delpacket = true, bool controlpacket = true, uint32 actualPayloadSize = 0, bool bForceImmediateSend = false);
 #endif
 	//MORPH END   - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
-	virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend);
+    virtual SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend);
     virtual SocketSentBytes SendFileAndControlData(uint32 maxNumberOfBytesToSend, uint32 overchargeMaxBytesToSend);
 
 	void	DbgAppendClientInfo(CString& str);
 	CString DbgGetClientInfo();
 
 	CUpDownClient*	client;
-
+	void		 OnReceive(int nErrorCode);
 protected:
 	virtual ~CClientReqSocket();
 	virtual void Close() { CAsyncSocketEx::Close(); }
@@ -68,7 +68,7 @@ protected:
 	virtual void OnConnect(int nErrorCode);
 	void		 OnClose(int nErrorCode);
 	void		 OnSend(int nErrorCode);
-	void		 OnReceive(int nErrorCode);
+
 	void		 OnError(int nErrorCode);
 
 	virtual bool PacketReceived(Packet* packet);

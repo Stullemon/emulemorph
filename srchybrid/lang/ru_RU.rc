@@ -542,7 +542,6 @@ BEGIN
     IDS_PW_USS              "Автообновление серверов при старте"
     IDS_PW_MISC             "Разные"
     IDS_PW_TRAY             "Сворачивать в трей"
-    IDS_PW_BEEP             "Звуковой сигнал при ошибке"
     IDS_PW_PROMPT           "Подтверждение закрытия"
     IDS_PW_SPLASH           "Показывать заставку"
     IDS_PW_DBLCLICK         "Раскрывать список на приём двойным щелчком"
@@ -761,7 +760,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_DOWNLOADMOVIECHUNKS "Пытаться сначала загрузить части для предпросмотра"
-    IDS_UPDATEQUEUE         "Не обновлять очередь в реальном времени"
     IDS_RECOVER_SINGLE      "1 файл восстановлен."
     IDS_RECOVER_MULTIPLE    "%u файл(ов) восстановлено."
     IDS_ATTEMPTING_RECOVERY "Попытка восстановления архива"
@@ -818,7 +816,6 @@ BEGIN
     IDS_FO_PREF_FAILED      "Не удалось настроить встроенный файрвол WinXP для выбранных портов!"
     IDS_FO_PREF_STARTUP     "Открыть/Закрыть порты в файрволе WinXP при вкл./выкл. eMule"
     IDS_LOG_LEVEL           "Уровень лога"
-    IDS_DISABLEPEERACHE     "Отключить загрузку с PeerCache"
     IDS_NEWMSG              "Новое сообщение от '%s' (IP:%s)"
     IDS_PREF_STARTNEXTFILECATONLY "Только в той же категории"
     IDS_LOG_ULDL_EVENTS     "Лог событий отдачи/приёма"
@@ -1134,7 +1131,6 @@ BEGIN
     IDS_WEB_BADLOGINATTEMPT "Web интерфейс: Неудачная попытка входа"
     IDS_ERR_TOOLARGEFILE    "Размер файла превышает допустимый для eDonkey протокола (>=256Гб)"
     IDS_MSGONLYFRIENDS      "Принимать только от друзей"
-    IDS_MSGONLYSEC          "Принимать только от правильных клиентов"
     IDS_DAY_MO_SA           "Пон.-Субб."
     IDS_LIMITSOURCES        "Лимит источников"
     IDS_LIMITCONS5SEC       "Лимит соединений/5 сек."
@@ -1184,7 +1180,6 @@ BEGIN
     IDS_DL_RESUMENEXT       "Продолжить следующий на паузе"
     IDS_STARTPRIO           "Приоритет для данной категории"
     IDS_PREF_STARTNEXTFILECAT "Желательно той же категории"
-    IDS_REPAINTGRAPHS       "Не обновлять график при изменении размера окна"
     IDS_SOFTFILES           "Мягкий лимит файлов"
 END
 
@@ -1678,7 +1673,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_IACHHASH            "AICH хеш"
+    IDS_AICHHASH            "AICH хеш"
     IDS_BYTESPERSEC         "Б/с"
     IDS_KBYTESPERSEC        "Кб/с"
     IDS_MBYTESPERSEC        "Mб/с"
@@ -1971,6 +1966,32 @@ BEGIN
     IDS_WEBUPNPINCLUDE      "Добавить порт в UPnP настройку"
     IDS_ADDEDON             "Добавлен"
     IDS_RESOLVELINKS        "Разрешать shell-ссылки в папках обмена"
+END
+
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNLOADCOMMANDS    "Команды приёма"
+    IDS_CLOSETOOLBAR        "Закрыть панель"
+    IDS_SHOWTOOLBAR         "Показать панель"
+    IDS_SEARCH_BADOPERATORCOMBINATION 
+                            "Вы не можете использовать первое ключевое слово с оператором OR при Kad поиске!\n\nДля примера использование ""Ключ.слово1 OR Ключ.слово2"" невозможно. Попробуйте ""Ключ.слово1 AND (Ключ.слово2 OR Ключ.слово3)"" или же сформируйте несколько поисковых запросов."
+    IDS_DISCOVEREDBY        "Обнаружен"
+    IDS_NODES               "Нод(ы)"
+    IDS_ROUTINGTABLE        "Таблица маршрутизации"
+    IDS_PROTOCOLVERSION     "Версия протокола"
+    IDS_FOUNDNODESUSEFUL    "Найденные ноды (полезные)"
+    IDS_NORESPONSE          "Нет ответа"
+    IDS_NOTASKED            "Не запрошен"
+    IDS_LOOKUPGRAPH         "Детали поиска"
+    IDS_AUTOKADLOOKUPGRAPH  "Автоматически показывать активные поиски"
+    IDS_PAUSEONPREVIEW      "Пауза при возможности предпросмотра"
+    IDS_PREVIEWWITH         "Предпросмотр в"
+    IDS_CLOSEEMULE          "Закрыть eMule"
+    IDS_DONOTASKAGAIN       "Больше не спрашивать"
+    IDS_POPULARITY          "Рейтинг популярности"
+    IDS_SHOWWIN7TASKBARGOODIES "Включить эффекты панели задач Windows 7"
+    IDS_LANMODE             "Режим LAN"
 END
 
 STRINGTABLE 

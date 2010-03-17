@@ -847,11 +847,8 @@ void CSharedFileList::RepublishFile(CKnownFile* pFile)
 
 bool CSharedFileList::AddFile(CKnownFile* pFile)
 {
-	/* morph SafeHash - use GetED2KPartCount
-	ASSERT( pFile->GetHashCount() == pFile->GetED2KPartHashCount() );
-	*/
-	ASSERT( pFile->GetHashCount() == pFile->GetED2KPartCount() );	// SLUGFILLER: SafeHash - use GetED2KPartCount
-	ASSERT( !pFile->IsKindOf(RUNTIME_CLASS(CPartFile)) || !STATIC_DOWNCAST(CPartFile, pFile)->hashsetneeded );
+	ASSERT( pFile->GetFileIdentifier().HasExpectedMD4HashCount() );
+	ASSERT( !pFile->IsKindOf(RUNTIME_CLASS(CPartFile)) || !STATIC_DOWNCAST(CPartFile, pFile)->m_bMD4HashsetNeeded );
 	ASSERT( !pFile->IsShellLinked() || ShouldBeShared(pFile->GetSharedDirectory(), _T(""), false) );
 	CCKey key(pFile->GetFileHash());
 	CKnownFile* pFileInMap;
@@ -908,6 +905,10 @@ bool CSharedFileList::AddFile(CKnownFile* pFile)
 	*/
 	// SLUGFILLER END: mergeKnown - moved up
 
+	theApp.knownfiles->m_nRequestedTotal += pFile->statistic.GetAllTimeRequests();
+	theApp.knownfiles->m_nAcceptedTotal += pFile->statistic.GetAllTimeAccepts();
+	theApp.knownfiles->m_nTransferredTotal += pFile->statistic.GetAllTimeTransferred();
+
 	return true;
 }
 
@@ -961,7 +962,12 @@ bool CSharedFileList::RemoveFile(CKnownFile* pFile, bool bDeleted)
 	output->RemoveFile(pFile, bDeleted);
 	m_keywords->RemoveKeywords(pFile);
 	if (bResult)
+	{
 		m_UnsharedFiles_map.SetAt(CSKey(pFile->GetFileHash()), true);
+		theApp.knownfiles->m_nRequestedTotal -= pFile->statistic.GetAllTimeRequests();
+		theApp.knownfiles->m_nAcceptedTotal -= pFile->statistic.GetAllTimeAccepts();
+		theApp.knownfiles->m_nTransferredTotal -= pFile->statistic.GetAllTimeTransferred();
+	}
 	m_dwFile_map_updated = GetTickCount(); //MOPRH - Added by SiRoB, Optimization requpfile
 	return bResult;
 }
@@ -1447,6 +1453,20 @@ CKnownFile* CSharedFileList::GetFileByID(const uchar* hash) const
 			return found_file;
 	}
 	return NULL;
+}
+
+CKnownFile* CSharedFileList::GetFileByIdentifier(const CFileIdentifierBase& rFileIdent, bool bStrict) const
+{
+	CKnownFile* pResult;
+	if (m_Files_map.Lookup(CCKey(rFileIdent.GetMD4Hash()), pResult))
+	{
+		if (bStrict)
+			return pResult->GetFileIdentifier().CompareStrict(rFileIdent) ? pResult : NULL;
+		else
+			return pResult->GetFileIdentifier().CompareRelaxed(rFileIdent) ? pResult : NULL;
+	}
+	else
+		return NULL;
 }
 
 
@@ -2241,6 +2261,34 @@ CString CSharedFileList::GetDirNameByPseudo(const CString& strPseudoName) const
 	CString strResult;
 	m_mapPseudoDirNames.Lookup(strPseudoName, strResult);
 	return strResult;
+}
+
+bool CSharedFileList::GetPopularityRank(const CKnownFile* pFile, uint32& rnOutSession, uint32& rnOutTotal) const
+{
+	rnOutSession = 0;
+	rnOutTotal = 0;
+	if (GetFileByIdentifier(pFile->GetFileIdentifierC()) == NULL)
+	{
+		ASSERT( false );
+		return false;
+	}
+	// cycle all files, each file which has more request than the given files lowers the rank
+	CKnownFile* cur_file;
+	CCKey bufKey;
+	for (POSITION pos = m_Files_map.GetStartPosition(); pos != 0; )
+	{
+		m_Files_map.GetNextAssoc(pos,bufKey,cur_file);
+		if (cur_file == pFile)
+			continue;
+		if (cur_file->statistic.GetAllTimeRequests() > pFile->statistic.GetAllTimeRequests())
+			rnOutTotal++;
+		if (cur_file->statistic.GetRequests() > pFile->statistic.GetRequests())
+			rnOutSession++;
+	}
+	// we start at rank #1, not 0
+	rnOutSession++;
+	rnOutTotal++;
+	return true;
 }
 
 //MORPH START - Added by SiRoB, POWERSHARE Limit

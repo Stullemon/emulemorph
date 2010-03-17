@@ -50,7 +50,7 @@ bool NeedArchiveInfoPage(const CSimpleArray<CObject*>* paItems)
 	return false;
 }
 
-void UpdateFileDetailsPages(CListViewWalkerPropertySheet *pSheet,
+void UpdateFileDetailsPages(CListViewPropertySheet *pSheet,
 							CResizablePage *pArchiveInfo, CResizablePage *pMediaInfo)
 {
 	if (pSheet->GetItems().GetSize() == 1)

@@ -236,12 +236,17 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, archiveScan
 		if (fullSize && readZipCentralDirectory(zipInput, centralDirectoryEntries, filled))
 		{
 			if (centralDirectoryEntries->GetCount() == 0)
+			{
+				if (aitp == NULL)
+					delete centralDirectoryEntries;
 				return false;
+			}
 			
 			// if only read directory, return now
 			if (zipOutput==NULL) {
 				if (aitp == NULL) {
 					ASSERT(0); // FIXME
+					delete centralDirectoryEntries;
 					return false;
 				}
 				aitp->ai->bZipCentralDir = true;
@@ -312,7 +317,12 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, archiveScan
 				}
 			}
 			if (!zipOutput)
-				return (centralDirectoryEntries->GetCount()>0 );
+			{
+				retVal = (centralDirectoryEntries->GetCount()>0 );
+				if (aitp == NULL)
+					delete centralDirectoryEntries;
+				return retVal;
+			}
 		}
 
 		// Remember offset before CD entries
@@ -374,8 +384,9 @@ bool CArchiveRecovery::recoverZip(CFile *zipInput, CFile *zipOutput, archiveScan
 			zipOutput->Write(ZIP_COMMENT, strlen(ZIP_COMMENT));
 
 			centralDirectoryEntries->RemoveAll();
-			delete centralDirectoryEntries;
 		}
+        if (aitp == NULL)
+			delete centralDirectoryEntries;
 		retVal = true;
 	}
 	catch (CFileException* error){
@@ -1353,6 +1364,12 @@ bool CArchiveRecovery::recoverAce(CFile *aceInput, CFile *aceOutput, archiveScan
 
 		if (aceOutput && !acehdr)
 			return false;
+		if(aitp == NULL && acehdr != NULL)
+		{
+			delete acehdr;
+			acehdr = NULL;
+		}
+
 
 		ACE_BlockFile *block;
 

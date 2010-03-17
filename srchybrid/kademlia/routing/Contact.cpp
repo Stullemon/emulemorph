@@ -112,7 +112,6 @@ void CContact::Copy(const CContact& fromContact){
 	m_byType = fromContact.m_byType;
 	m_uVersion = fromContact.m_uVersion;
 	m_bGuiRefs = false;
-	m_bCheckKad2 = fromContact.m_bCheckKad2;
 	m_bIPVerified = fromContact.m_bIPVerified;
 	m_cUDPKey = fromContact.m_cUDPKey;
 	m_bReceivedHelloPacket = fromContact.m_bReceivedHelloPacket;
@@ -126,7 +125,6 @@ void CContact::InitContact()
 	m_bGuiRefs = false;
 	m_uInUse = 0;
 	m_tCreated = time(NULL);
-	m_bCheckKad2 = true;
 	m_bReceivedHelloPacket = false;
 }
 
@@ -317,16 +315,6 @@ uint8 CContact::GetVersion() const
 void CContact::SetVersion(uint8 uVersion)
 {
 	m_uVersion = uVersion;
-}
-
-bool CContact::CheckIfKad2()
-{
-	if(m_bCheckKad2)
-	{
-		m_bCheckKad2 = false;
-		return true;
-	}
-	return false;
 }
 
 CKadUDPKey CContact::GetUDPKey()	const

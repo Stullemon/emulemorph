@@ -25,7 +25,7 @@
 #include "partfile.h"
 #include "FileDetailDialog.h" // sharesubdir
 #include "emuledlg.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "SharedFileList.h"
 #include "SharedFilesWnd.h"
 
@@ -820,7 +820,7 @@ BOOL CSharedDirsTreeCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 							theApp.sharedfiles->RemoveFile((CKnownFile*)myfile, true);
 						bRemovedItems = true;
 						if (myfile->IsKindOf(RUNTIME_CLASS(CPartFile)))
-							theApp.emuledlg->transferwnd->downloadlistctrl.ClearCompleted(static_cast<CPartFile*>(myfile));
+							theApp.emuledlg->transferwnd->GetDownloadList()->ClearCompleted(static_cast<CPartFile*>(myfile));
 					}
 					else{
 						CString strError;
@@ -834,7 +834,7 @@ BOOL CSharedDirsTreeCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					// Depending on <no-idea> this does not always cause a
 					// LVN_ITEMACTIVATE message sent. So, explicitly redraw
 					// the item.
-					theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+					theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
 					theApp.emuledlg->sharedfileswnd->OnSingleFileShareStatusChanged(); // might have been a single shared file
 				}
 				break; 

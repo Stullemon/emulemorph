@@ -61,6 +61,7 @@ namespace Kademlia
 		CContact* GetRandomContact(uint32 nMaxType, uint32 nMinKadVersion);
 		void SetAllContactsVerified();
 		static bool CheckGlobalIPLimits(uint32 uIP, uint16 uPort, bool bLog);
+		bool HasOnlyLANNodes() const;
 
 		bool m_bDontDeleteContacts;
 

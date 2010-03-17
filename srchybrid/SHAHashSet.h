@@ -59,7 +59,7 @@ Example
                     x       _X_          x 	        0000000000000110
 
 
-Version 2 of AICH also supports 32bit identifiers to support large files, check CAICHHashSet::CreatePartRecoveryData
+Version 2 of AICH also supports 32bit identifiers to support large files, check CAICHRecoveryHashSet::CreatePartRecoveryData
 
 
 */
@@ -134,7 +134,7 @@ public:
 class CAICHHashTree
 {
 	friend class CAICHHashTree;
-	friend class CAICHHashSet;
+	friend class CAICHRecoveryHashSet;
 public:
 	CAICHHashTree(uint64 nDataSize, bool bLeftBranch, uint64 nBaseSize);
 	~CAICHHashTree();
@@ -142,11 +142,13 @@ public:
 	bool			ReCalculateHash(CAICHHashAlgo* hashalg, bool bDontReplace );
 	bool			VerifyHashTree(CAICHHashAlgo* hashalg, bool bDeleteBadTrees);
 	CAICHHashTree*	FindHash(uint64 nStartPos, uint64 nSize)					{uint8 buffer = 0; return FindHash(nStartPos, nSize, &buffer);}
+	const CAICHHashTree* FindExistingHash(uint64 nStartPos, uint64 nSize) const		{uint8 buffer = 0; return FindExistingHash(nStartPos, nSize, &buffer);}
 	uint64			GetBaseSize() const;		
 	void			SetBaseSize(uint64 uValue);
 
 protected:
 	CAICHHashTree*	FindHash(uint64 nStartPos, uint64 nSize, uint8* nLevel);
+	const CAICHHashTree* FindExistingHash(uint64 nStartPos, uint64 nSize, uint8* nLevel) const;
 	bool			CreatePartRecoveryData(uint64 nStartPos, uint64 nSize, CFileDataIO* fileDataOut, uint32 wHashIdent, bool b32BitIdent);
 	void			WriteHash(CFileDataIO* fileDataOut, uint32 wHashIdent, bool b32BitIdent) const;
 	bool			WriteLowestLevelHashs(CFileDataIO* fileDataOut, uint32 wHashIdent, bool bNoIdent, bool b32BitIdent) const;
@@ -192,12 +194,12 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////////////////////////
-///CAICHHashSet
-class CAICHHashSet
+///CAICHRecoveryHashSet
+class CAICHRecoveryHashSet
 {
 public:
-	CAICHHashSet(CKnownFile*	pOwner);
-	~CAICHHashSet(void);
+	CAICHRecoveryHashSet(CKnownFile* pOwner, EMFileSize nSize = (uint64)0);
+	~CAICHRecoveryHashSet(void);
 	bool			CreatePartRecoveryData(uint64 nPartStartPos, CFileDataIO* fileDataOut, bool bDbgDontLoad = false);
 	bool			ReadRecoveryData(uint64 nPartStartPos, CSafeMemFile* fileDataIn);
 	bool			ReCalculateHash(bool bDontReplace = false);
@@ -209,27 +211,30 @@ public:
 	void			SetOwner(CKnownFile* val)					{m_pOwner = val;}
 	
 	void			FreeHashSet();
-	void			ReduceToPartHashs();
 	void			SetFileSize(EMFileSize nSize);
 	
-	CAICHHash&		GetMasterHash()						{return m_pHashTree.m_Hash;} 
+	const CAICHHash& GetMasterHash() const						{return m_pHashTree.m_Hash;} 
 	void			SetMasterHash(const CAICHHash& Hash, EAICHStatus eNewStatus);
 	bool			HasValidMasterHash()				{return m_pHashTree.m_bHashValid;}
+	bool			GetPartHashs(CArray<CAICHHash>& rResult) const;
+	const CAICHHashTree*	FindPartHash(uint16 nPart);
 
 	bool			SaveHashSet();
-	bool			LoadHashSet(); // only call directly when debugging
+	bool			LoadHashSet(); // Loading from known2.met
 
-	CAICHHashAlgo*	GetNewHashAlgo();
+	static CAICHHashAlgo*	GetNewHashAlgo();
 	static void		ClientAICHRequestFailed(CUpDownClient* pClient);
 	static void		RemoveClientAICHRequest(const CUpDownClient* pClient);
 	static bool		IsClientRequestPending(const CPartFile* pForFile, uint16 nPart);
 	static CAICHRequestedData GetAICHReqDetails(const  CUpDownClient* pClient);
+	static void		AddStoredAICHHash(CAICHHash Hash);
 	void			DbgTest();
 
 	CAICHHashTree	m_pHashTree;
 	static CList<CAICHRequestedData>	m_liRequestedData;
 	static CMutex						m_mutKnown2File;
 private:
+	static CList<CAICHHash>				m_liAICHHashsStored; // contains all AICH hahses stored in known2*.met
 	CKnownFile*		m_pOwner;
 	EAICHStatus		m_eStatus;
 	CArray<CAICHUntrustedHash> m_aUntrustedHashs;

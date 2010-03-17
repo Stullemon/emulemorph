@@ -40,7 +40,6 @@ BEGIN_MESSAGE_MAP(CPPgMessages, CPropertyPage)
 	ON_EN_CHANGE(IDC_FILTER, OnSettingsChange)
 	ON_EN_CHANGE(IDC_COMMENTFILTER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_MSGONLYFRIENDS , OnSettingsChange) 
-	ON_BN_CLICKED(IDC_MSGONLYSEC, OnSettingsChange)
 	ON_BN_CLICKED(IDC_ADVSPAMFILTER , OnSpamFilterChange)
 	ON_BN_CLICKED(IDC_INDICATERATINGS , OnSettingsChange)
 	ON_BN_CLICKED(IDC_MSHOWSMILEYS, OnSettingsChange)
@@ -76,11 +75,6 @@ void CPPgMessages::LoadSettings(void)
 		CheckDlgButton(IDC_MSGONLYFRIENDS,1);
 	else
 		CheckDlgButton(IDC_MSGONLYFRIENDS,0);
-
-	if (thePrefs.msgsecure)
-		CheckDlgButton(IDC_MSGONLYSEC,1);
-	else
-		CheckDlgButton(IDC_MSGONLYSEC,0);
 
 	if (thePrefs.m_bAdvancedSpamfilter)
 		CheckDlgButton(IDC_ADVSPAMFILTER,1);
@@ -124,11 +118,10 @@ BOOL CPPgMessages::OnApply()
 {
 
 	thePrefs.msgonlyfriends = IsDlgButtonChecked(IDC_MSGONLYFRIENDS)!=0;
-	thePrefs.msgsecure = IsDlgButtonChecked(IDC_MSGONLYSEC)!=0;
 	thePrefs.m_bAdvancedSpamfilter = IsDlgButtonChecked(IDC_ADVSPAMFILTER)!=0;
 	thePrefs.indicateratings = IsDlgButtonChecked(IDC_INDICATERATINGS)!=0;
 	thePrefs.m_bUseChatCaptchas = IsDlgButtonChecked(IDC_USECAPTCHAS) != 0;
-
+	
 	bool bOldSmileys = thePrefs.GetMessageEnableSmileys();
 	thePrefs.m_bMessageEnableSmileys = IsDlgButtonChecked(IDC_MSHOWSMILEYS) != 0;
 	if (bOldSmileys != thePrefs.GetMessageEnableSmileys())
@@ -164,7 +157,7 @@ void CPPgMessages::Localize(void)
 	if (m_hWnd)
 	{
 		SetWindowText(GetResString(IDS_MESSAGESCOMMENTS));
-					 
+
 		GetDlgItem(IDC_FILTERCOMMENTSLABEL)->SetWindowText(GetResString(IDS_FILTERCOMMENTSLABEL));
 		GetDlgItem(IDC_STATIC_COMMENTS)->SetWindowText(GetResString(IDS_COMMENT));
 		GetDlgItem(IDC_INDICATERATINGS)->SetWindowText(GetResString(IDS_INDICATERATINGS));
@@ -173,28 +166,22 @@ void CPPgMessages::Localize(void)
 		GetDlgItem(IDC_MSG)->SetWindowText(GetResString(IDS_CW_MESSAGES));
 
 		GetDlgItem(IDC_MSGONLYFRIENDS)->SetWindowText(GetResString(IDS_MSGONLYFRIENDS));
-		GetDlgItem(IDC_MSGONLYSEC)->SetWindowText(GetResString(IDS_MSGONLYSEC));
 		GetDlgItem(IDC_USECAPTCHAS)->SetWindowText(GetResString(IDS_USECAPTCHAS));	
 
 		GetDlgItem(IDC_ADVSPAMFILTER)->SetWindowText(GetResString(IDS_ADVSPAMFILTER));
-	
-		GetDlgItem(IDC_MSHOWSMILEYS)->SetWindowText(GetResString(IDS_SHOWSMILEYS));		
 
-	// MORPH START leuk_he tooltipped
-		
-        SetTool(IDC_FILTERCOMMENTSLABEL,IDC_COMMENTFILTE_TIP); 
+		GetDlgItem(IDC_MSHOWSMILEYS)->SetWindowText(GetResString(IDS_SHOWSMILEYS));
+
+		// MORPH START leuk_he tooltipped
+		SetTool(IDC_FILTERCOMMENTSLABEL,IDC_COMMENTFILTE_TIP); 
 		SetTool(IDC_COMMENTFILTER      ,IDC_COMMENTFILTE_TIP); 
 		SetTool(IDC_STATIC_COMMENTS,    IDC_COMMENTFILTE_TIP);
-
-		
-    	SetTool(IDC_FILTER,IDC_FILTE_TIP); 
+		SetTool(IDC_FILTER,IDC_FILTE_TIP); 
 		SetTool(IDC_MSGONLYFRIENDS,IDC_MSGONLYFRIEND_TIP);
 		SetTool(IDC_FILTERCOMMENTSLABEL,IDC_COMMENTFILTE_TIP);
-		SetTool(IDC_MSGONLYSEC,IDC_MSGONLYSEC_SEC);
 		SetTool(IDC_ADVSPAMFILTER,IDC_ADVSPAMFILTER_TIP);
 		SetTool(IDC_MSG,IDC_COMMENTFILTE_TIP);
 		//SetTool(IDC_SEC_MISC,IDC_SEC_MIS_TIP);
-	
 		// MORPH END leuk_he tooltipped
 	}
 }

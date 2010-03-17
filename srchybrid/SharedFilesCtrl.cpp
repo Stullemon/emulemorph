@@ -39,7 +39,7 @@
 #include "Opcodes.h"
 #include "InputBox.h"
 #include "WebServices.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "ClientList.h"
 #include "UpDownClient.h"
 #include "Collection.h"
@@ -68,7 +68,7 @@ static char THIS_FILE[] = __FILE__;
 #endif
 
 bool NeedArchiveInfoPage(const CSimpleArray<CObject*>* paItems);
-void UpdateFileDetailsPages(CListViewWalkerPropertySheet *pSheet,
+void UpdateFileDetailsPages(CListViewPropertySheet *pSheet,
 							CResizablePage *pArchiveInfo, CResizablePage *pMediaInfo);
 
 
@@ -666,7 +666,7 @@ void CSharedFilesCtrl::UpdateFile(const CShareableFile* file, bool bUpdateFileSu
 	{
 		Update(iItem);
 		if (bUpdateFileSummary && GetItemState(iItem, LVIS_SELECTED))
-			theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+			theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
 	}
 }
 */
@@ -684,7 +684,7 @@ void CSharedFilesCtrl::UpdateFile(const CShareableFile* file, bool bUpdateFileSu
 
 	m_updatethread->AddItemToUpdate((LPARAM)file);
 	if(bUpdateFileSummary)
-		theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+		theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
 }
 //MORPH END - UpdateItemThread
 
@@ -703,7 +703,7 @@ void CSharedFilesCtrl::ReloadFileList()
 #ifdef NO_HISTORY
 	//theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
 #else
-	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
 #endif
 	//MORPH END   - Changed, Downloaded History [Monki/Xman]
 	
@@ -1752,7 +1752,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 							RemoveFile(myfile, true);
 						bRemovedItems = true;
 						if (myfile->IsKindOf(RUNTIME_CLASS(CPartFile)))
-							theApp.emuledlg->transferwnd->downloadlistctrl.ClearCompleted(static_cast<CPartFile*>(myfile));
+							theApp.emuledlg->transferwnd->GetDownloadList()->ClearCompleted(static_cast<CPartFile*>(myfile));
 						//MORPH START - Changed, Downloaded History [Monki/Xman]
 						theApp.emuledlg->sharedfileswnd->historylistctrl.Reload();
 						//MORPH END   - Changed, Downloaded History [Monki/Xman]
@@ -1769,7 +1769,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					// Depending on <no-idea> this does not always cause a
 					// LVN_ITEMACTIVATE message sent. So, explicitly redraw
 					// the item.
-					theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+					theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
 					theApp.emuledlg->sharedfileswnd->OnSingleFileShareStatusChanged(); // might have been a single shared file
 				}
 				break; 
@@ -1792,7 +1792,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				}
 				SetRedraw(TRUE);
 				if (bUnsharedItems) {
-					theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+					theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
 					theApp.emuledlg->sharedfileswnd->OnSingleFileShareStatusChanged();
 					if (GetFirstSelectedItemPosition() == NULL)
 						AutoSelectItem();
@@ -2363,9 +2363,9 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 						//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
 						}
 					}
+				}
 				// xMule_MOD: showSharePermissions
 				break;
-				}
 		}
 	}
 	return TRUE;
@@ -2474,30 +2474,18 @@ int CSharedFilesCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort
 			break;
 
 		case 2: //filetype
-		{
-			int iResult = item1->GetFileTypeDisplayStr().Compare(item2->GetFileTypeDisplayStr());
+			iResult = item1->GetFileTypeDisplayStr().Compare(item2->GetFileTypeDisplayStr());
 			// if the type is equal, subsort by extension
 			if (iResult == 0)
 			{
 				LPCTSTR pszExt1 = PathFindExtension(item1->GetFileName());
 				LPCTSTR pszExt2 = PathFindExtension(item2->GetFileName());
-			//MORPH START - Changed by Stulle, sorting fix [moloko+]
-			/*
-				if ((pszExt1 == NULL) ^ (pszExt2 == NULL))
-					return pszExt1 == NULL ? 1 : (-1);
-				else
-					return  pszExt1 != NULL ? _tcsicmp(pszExt1, pszExt2) : 0;
-			}
-			else
-				return iResult;
-			*/
 				if ((pszExt1 == NULL) ^ (pszExt2 == NULL))
 					iResult = pszExt1 == NULL ? 1 : (-1);
 				else
 					iResult = pszExt1 != NULL ? _tcsicmp(pszExt1, pszExt2) : 0;
 			}
-			//MORPH   END - Changed by Stulle, sorting fix [moloko+]
-		}
+			break;
 
 		case 9: //folder
 			iResult = CompareLocaleStringNoCase(item1->GetPath(), item2->GetPath());
@@ -3271,7 +3259,7 @@ void CSharedFilesCtrl::CheckBoxClicked(int iItem)
 		VERIFY( theApp.sharedfiles->ExcludeFile(pFile->GetFilePath()) );
 		// update GUI stuff
 		ShowFilesCount();
-		theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+		theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
 		theApp.emuledlg->sharedfileswnd->OnSingleFileShareStatusChanged();
 		// no need to update the list itself, will be handled in the RemoveFile function
 	}
@@ -3285,7 +3273,7 @@ void CSharedFilesCtrl::CheckBoxClicked(int iItem)
 		// SLUGFILLER: SafeHash remove - removed installation dir unsharing
 		VERIFY( theApp.sharedfiles->AddSingleSharedFile(pFile->GetFilePath()) );
 		ShowFilesCount();
-		theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
+		theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
 		theApp.emuledlg->sharedfileswnd->OnSingleFileShareStatusChanged();
 		UpdateFile(pFile);
 	}

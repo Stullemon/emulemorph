@@ -40,7 +40,6 @@ IMPLEMENT_DYNAMIC(CED2kLinkDlg, CResizablePage)
 BEGIN_MESSAGE_MAP(CED2kLinkDlg, CResizablePage) 
 	ON_BN_CLICKED(IDC_LD_CLIPBOARDBUT, OnBnClickedClipboard)
 	ON_BN_CLICKED(IDC_LD_SOURCECHE, OnSettingsChange)
-	ON_BN_CLICKED(IDC_LD_EMULEHASHCHE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_LD_HTMLCHE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_LD_HOSTNAMECHE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_LD_HASHSETCHE, OnSettingsChange)
@@ -64,6 +63,7 @@ CED2kLinkDlg::CED2kLinkDlg()
 	m_strCaption = GetResString(IDS_SW_LINK);
 	m_psp.pszTitle = m_strCaption;
 	m_psp.dwFlags |= PSP_USETITLE;
+	m_bReducedDlg = false;
 } 
 
 CED2kLinkDlg::~CED2kLinkDlg() 
@@ -81,45 +81,69 @@ BOOL CED2kLinkDlg::OnInitDialog()
 	CResizablePage::OnInitDialog(); 
 	InitWindowStyles(this);
 
+
+
+	if (!m_bReducedDlg)
+	{
+		AddAnchor(IDC_LD_BASICGROUP,BOTTOM_LEFT,BOTTOM_RIGHT);
+		AddAnchor(IDC_LD_SOURCECHE,BOTTOM_LEFT,BOTTOM_LEFT);
+		AddAnchor(IDC_LD_ADVANCEDGROUP,BOTTOM_LEFT,BOTTOM_RIGHT);
+		AddAnchor(IDC_LD_HTMLCHE,BOTTOM_LEFT,BOTTOM_LEFT);
+		AddAnchor(IDC_LD_HASHSETCHE,BOTTOM_LEFT,BOTTOM_LEFT);
+		AddAnchor(IDC_LD_HOSTNAMECHE,BOTTOM_LEFT,BOTTOM_LEFT);
+
+		//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+		AddAnchor(IDC_LD_PHPBBCHE,BOTTOM_LEFT,BOTTOM_LEFT);
+		//EastShare End - added by AndCycle, phpBB URL-Tags style link
+		//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+		AddAnchor(IDC_HTTP_SRC,BOTTOM_LEFT,BOTTOM_RIGHT);
+		AddAnchor(IDC_EDIT_HTTP,BOTTOM_LEFT,BOTTOM_RIGHT);
+		AddAnchor(IDC_BTN_HTTP_ADD,BOTTOM_RIGHT,BOTTOM_RIGHT);
+		AddAnchor(IDC_LIST_HTTP,BOTTOM_LEFT,BOTTOM_RIGHT);
+		AddAnchor(IDC_BTN_HTTP_REMOVE,BOTTOM_RIGHT,BOTTOM_RIGHT);
+		AddAnchor(IDC_BTN_HTTP_CLEAR,BOTTOM_RIGHT,BOTTOM_RIGHT);
+		if(m_paFiles->GetSize() > 1){
+			GetDlgItem(IDC_HTTP_SRC)->EnableWindow(FALSE);
+		}
+		//End emulEspaña
+
+		// enabled/disable checkbox depending on situation
+		if (theApp.IsConnected() && !theApp.IsFirewalled())
+			GetDlgItem(IDC_LD_SOURCECHE)->EnableWindow(TRUE);
+		else{
+			GetDlgItem(IDC_LD_SOURCECHE)->EnableWindow(FALSE);
+			((CButton*)GetDlgItem(IDC_LD_SOURCECHE))->SetCheck(BST_UNCHECKED);
+		}
+		if (theApp.IsConnected() && !theApp.IsFirewalled() && !thePrefs.GetYourHostname().IsEmpty() && thePrefs.GetYourHostname().Find(_T('.')) != -1)
+			GetDlgItem(IDC_LD_HOSTNAMECHE)->EnableWindow(TRUE);
+		else{
+			GetDlgItem(IDC_LD_HOSTNAMECHE)->EnableWindow(FALSE);
+			((CButton*)GetDlgItem(IDC_LD_HOSTNAMECHE))->SetCheck(BST_UNCHECKED);
+		}
+	}
+	else
+	{
+		CRect rcDefault, rcNew;
+		GetDlgItem(IDC_LD_LINKGROUP)->GetWindowRect(rcDefault);
+		GetDlgItem(IDC_LD_ADVANCEDGROUP)->GetWindowRect(rcNew);
+		int nDeltaY = rcNew.bottom - rcDefault.bottom;
+		GetDlgItem(IDC_LD_LINKGROUP)->SetWindowPos(NULL, 0, 0, rcDefault.Width(), rcDefault.Height() + nDeltaY, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOACTIVATE);
+		GetDlgItem(IDC_LD_LINKEDI)->GetWindowRect(rcDefault);
+		GetDlgItem(IDC_LD_LINKEDI)->SetWindowPos(NULL, 0, 0, rcDefault.Width(), rcDefault.Height() + nDeltaY, SWP_NOMOVE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOACTIVATE);
+		GetDlgItem(IDC_LD_CLIPBOARDBUT)->GetWindowRect(rcDefault);
+		ScreenToClient(rcDefault);
+		GetDlgItem(IDC_LD_CLIPBOARDBUT)->SetWindowPos(NULL, rcDefault.left, rcDefault.top + nDeltaY, 0, 0, SWP_NOSIZE | SWP_NOOWNERZORDER | SWP_NOZORDER | SWP_NOACTIVATE);
+		
+		GetDlgItem(IDC_LD_BASICGROUP)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_LD_SOURCECHE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_LD_ADVANCEDGROUP)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_LD_HTMLCHE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_LD_HASHSETCHE)->ShowWindow(SW_HIDE);
+		GetDlgItem(IDC_LD_HOSTNAMECHE)->ShowWindow(SW_HIDE);
+	}
 	AddAnchor(IDC_LD_LINKGROUP,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_LD_LINKEDI,TOP_LEFT,BOTTOM_RIGHT);
 	AddAnchor(IDC_LD_CLIPBOARDBUT,BOTTOM_RIGHT);
-	AddAnchor(IDC_LD_BASICGROUP,BOTTOM_LEFT,BOTTOM_RIGHT);
-	AddAnchor(IDC_LD_SOURCECHE,BOTTOM_LEFT,BOTTOM_LEFT);
-	AddAnchor(IDC_LD_EMULEHASHCHE,BOTTOM_LEFT,BOTTOM_LEFT);
-	AddAnchor(IDC_LD_ADVANCEDGROUP,BOTTOM_LEFT,BOTTOM_RIGHT);
-	AddAnchor(IDC_LD_HTMLCHE,BOTTOM_LEFT,BOTTOM_LEFT);
-	AddAnchor(IDC_LD_HASHSETCHE,BOTTOM_LEFT,BOTTOM_LEFT);
-	AddAnchor(IDC_LD_HOSTNAMECHE,BOTTOM_LEFT,BOTTOM_LEFT);
-	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
-	AddAnchor(IDC_LD_PHPBBCHE,BOTTOM_LEFT,BOTTOM_LEFT);
-	//EastShare End - added by AndCycle, phpBB URL-Tags style link
-	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
-	AddAnchor(IDC_HTTP_SRC,BOTTOM_LEFT,BOTTOM_RIGHT);
-	AddAnchor(IDC_EDIT_HTTP,BOTTOM_LEFT,BOTTOM_RIGHT);
-	AddAnchor(IDC_BTN_HTTP_ADD,BOTTOM_RIGHT,BOTTOM_RIGHT);
-	AddAnchor(IDC_LIST_HTTP,BOTTOM_LEFT,BOTTOM_RIGHT);
-	AddAnchor(IDC_BTN_HTTP_REMOVE,BOTTOM_RIGHT,BOTTOM_RIGHT);
-	AddAnchor(IDC_BTN_HTTP_CLEAR,BOTTOM_RIGHT,BOTTOM_RIGHT);
-	if(m_paFiles->GetSize() > 1){
-		GetDlgItem(IDC_HTTP_SRC)->EnableWindow(FALSE);
-	}
-	//End emulEspaña
-
-	// enabled/disable checkbox depending on situation
-	if (theApp.IsConnected() && !theApp.IsFirewalled())
-		GetDlgItem(IDC_LD_SOURCECHE)->EnableWindow(TRUE);
-	else{
-		GetDlgItem(IDC_LD_SOURCECHE)->EnableWindow(FALSE);
-		((CButton*)GetDlgItem(IDC_LD_SOURCECHE))->SetCheck(BST_UNCHECKED);
-	}
-	if (theApp.IsConnected() && !theApp.IsFirewalled() && !thePrefs.GetYourHostname().IsEmpty() && thePrefs.GetYourHostname().Find(_T('.')) != -1)
-		GetDlgItem(IDC_LD_HOSTNAMECHE)->EnableWindow(TRUE);
-	else{
-		GetDlgItem(IDC_LD_HOSTNAMECHE)->EnableWindow(FALSE);
-		((CButton*)GetDlgItem(IDC_LD_HOSTNAMECHE))->SetCheck(BST_UNCHECKED);
-	}
-
 	Localize(); 
 
 	return TRUE; 
@@ -140,13 +164,12 @@ BOOL CED2kLinkDlg::OnSetActive()
 			if (!(*m_paFiles)[i]->IsKindOf(RUNTIME_CLASS(CKnownFile)))
 				continue;
 			bShowHTML = TRUE;
-			const CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
-			if (file->GetHashCount() > 0 && file->GetHashCount() == file->GetED2KPartCount()) // SLUGFILLER: SafeHash - use GetED2KPartCount
+			CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
+			if (file->GetFileIdentifier().GetAvailableMD4PartHashCount() > 0 && file->GetFileIdentifier().HasExpectedMD4HashCount())
 			{
 				bShowHashset = TRUE;
 			}
-			if (file->GetAICHHashset()->HasValidMasterHash() 
-				&& (file->GetAICHHashset()->GetStatus() == AICH_VERIFIED || file->GetAICHHashset()->GetStatus() == AICH_HASHSETCOMPLETE))
+			if (file->GetFileIdentifier().HasAICHHash())
 			{	
 				bShowAICH = TRUE;
 			}
@@ -156,12 +179,6 @@ BOOL CED2kLinkDlg::OnSetActive()
 		GetDlgItem(IDC_LD_HASHSETCHE)->EnableWindow(bShowHashset);
 		if (!bShowHashset)
 			((CButton*)GetDlgItem(IDC_LD_HASHSETCHE))->SetCheck(BST_UNCHECKED);
-
-		GetDlgItem(IDC_LD_EMULEHASHCHE)->EnableWindow(bShowAICH);
-		if (!bShowAICH)
-			((CButton*)GetDlgItem(IDC_LD_EMULEHASHCHE))->SetCheck(BST_UNCHECKED);
-		else
-			((CButton*)GetDlgItem(IDC_LD_EMULEHASHCHE))->SetCheck(BST_CHECKED);
 
 		GetDlgItem(IDC_LD_HTMLCHE)->EnableWindow(bShowHTML);
 
@@ -184,25 +201,27 @@ LRESULT CED2kLinkDlg::OnDataChanged(WPARAM, LPARAM)
 }
 
 void CED2kLinkDlg::Localize(void)
-{ 
-	GetDlgItem(IDC_LD_BASICGROUP)->SetWindowText(GetResString(IDS_LD_BASICOPT));
-	GetDlgItem(IDC_LD_SOURCECHE)->SetWindowText(GetResString(IDS_LD_ADDSOURCE)); 
-	GetDlgItem(IDC_LD_EMULEHASHCHE)->SetWindowText(GetResString(IDS_LD_EMULEHASH)); 
-	GetDlgItem(IDC_LD_ADVANCEDGROUP)->SetWindowText(GetResString(IDS_LD_ADVANCEDOPT)); 
-	GetDlgItem(IDC_LD_HTMLCHE)->SetWindowText(GetResString(IDS_LD_ADDHTML)); 
-	GetDlgItem(IDC_LD_HASHSETCHE)->SetWindowText(GetResString(IDS_LD_ADDHASHSET)); 
+{ 	
 	GetDlgItem(IDC_LD_LINKGROUP)->SetWindowText(GetResString(IDS_SW_LINK)); 
 	GetDlgItem(IDC_LD_CLIPBOARDBUT)->SetWindowText(GetResString(IDS_LD_COPYCLIPBOARD));
-	GetDlgItem(IDC_LD_HOSTNAMECHE)->SetWindowText(GetResString(IDS_LD_HOSTNAME)); 
-	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
-	GetDlgItem(IDC_LD_PHPBBCHE)->SetWindowText(GetResString(IDS_LD_ADDPHPBB));
-	//EastShare End - added by AndCycle, phpBB URL-Tags style link
-	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
-	GetDlgItem(IDC_HTTP_SRC)->SetWindowText(GetResString(IDS_HTTP_SRC)); 
-	GetDlgItem(IDC_BTN_HTTP_ADD)->SetWindowText(GetResString(IDS_ADD)); 
-	GetDlgItem(IDC_BTN_HTTP_REMOVE)->SetWindowText(GetResString(IDS_REMOVE)); 
-	GetDlgItem(IDC_BTN_HTTP_CLEAR)->SetWindowText(GetResString(IDS_CLEAR)); 
-	//End emulEspaña
+	if (!m_bReducedDlg)
+	{
+		GetDlgItem(IDC_LD_BASICGROUP)->SetWindowText(GetResString(IDS_LD_BASICOPT));
+		GetDlgItem(IDC_LD_SOURCECHE)->SetWindowText(GetResString(IDS_LD_ADDSOURCE)); 
+		GetDlgItem(IDC_LD_ADVANCEDGROUP)->SetWindowText(GetResString(IDS_LD_ADVANCEDOPT)); 
+		GetDlgItem(IDC_LD_HTMLCHE)->SetWindowText(GetResString(IDS_LD_ADDHTML)); 
+		GetDlgItem(IDC_LD_HASHSETCHE)->SetWindowText(GetResString(IDS_LD_ADDHASHSET)); 
+		GetDlgItem(IDC_LD_HOSTNAMECHE)->SetWindowText(GetResString(IDS_LD_HOSTNAME));
+		//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+		GetDlgItem(IDC_LD_PHPBBCHE)->SetWindowText(GetResString(IDS_LD_ADDPHPBB));
+		//EastShare End - added by AndCycle, phpBB URL-Tags style link
+		//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+		GetDlgItem(IDC_HTTP_SRC)->SetWindowText(GetResString(IDS_HTTP_SRC)); 
+		GetDlgItem(IDC_BTN_HTTP_ADD)->SetWindowText(GetResString(IDS_ADD)); 
+		GetDlgItem(IDC_BTN_HTTP_REMOVE)->SetWindowText(GetResString(IDS_REMOVE)); 
+		GetDlgItem(IDC_BTN_HTTP_CLEAR)->SetWindowText(GetResString(IDS_CLEAR)); 
+		//End emulEspaña
+	}
 }
 
 void CED2kLinkDlg::UpdateLink()
@@ -214,7 +233,6 @@ void CED2kLinkDlg::UpdateLink()
 	const bool bSource = ((CButton*)GetDlgItem(IDC_LD_SOURCECHE))->GetCheck() == BST_CHECKED && theApp.IsConnected() && !theApp.IsFirewalled();
 	const bool bHostname = ((CButton*)GetDlgItem(IDC_LD_HOSTNAMECHE))->GetCheck() == BST_CHECKED && theApp.IsConnected() && !theApp.IsFirewalled()
 		&& !thePrefs.GetYourHostname().IsEmpty() && thePrefs.GetYourHostname().Find(_T('.')) != -1;
-	const bool bEMHash = ((CButton*)GetDlgItem(IDC_LD_EMULEHASHCHE))->GetCheck() == BST_CHECKED;
 	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
 	const bool bPHPBB = ((CButton*)GetDlgItem(IDC_LD_PHPBBCHE))->GetCheck() == BST_CHECKED && !bHTML;
 	//EastShare End - added by AndCycle, phpBB URL-Tags style link
@@ -230,7 +248,7 @@ void CED2kLinkDlg::UpdateLink()
 		if (bHTML)
 			strLinks += _T("<a href=\"");
 	
-		const CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
+		CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
 		//EastShare Start - added by AndCycle, phpBB URL-Tags style link
 		if (bPHPBB) {
 			strLinks += _T("[url=");
@@ -238,28 +256,27 @@ void CED2kLinkDlg::UpdateLink()
 
 			//for compatible with phpBB, phpBB using "[" "]" to identify tag
 			tempED2kLink.Replace(_T("["), _T("%5B"));
-            tempED2kLink.Replace(_T("]"), _T("%5D")); //Quezl
+			tempED2kLink.Replace(_T("]"), _T("%5D")); //Quezl
 			strLinks += tempED2kLink;
 		}
 		else //  *!!! beware of this ELSE !!!*
 		//EastShare End - added by AndCycle, phpBB URL-Tags style link
 		strLinks += CreateED2kLink(file, false);
 		
-		if (bHashset && file->GetHashCount() > 0 && file->GetHashCount() == file->GetED2KPartCount()){	// SLUGFILLER: SafeHash - use GetED2KPartCount
+		if (bHashset && file->GetFileIdentifier().GetAvailableMD4PartHashCount() > 0 && file->GetFileIdentifier().HasExpectedMD4HashCount()){
 			strLinks += _T("p=");
-			for (UINT j = 0; j < file->GetHashCount(); j++)
+			for (UINT j = 0; j < file->GetFileIdentifier().GetAvailableMD4PartHashCount(); j++)
 			{
 				if (j > 0)
 					strLinks += _T(':');
-				strLinks += EncodeBase16(file->GetPartHash(j), 16);
+				strLinks += EncodeBase16(file->GetFileIdentifier().GetMD4PartHash(j), 16);
 			}
 			strLinks += _T('|');
 		}
 
-		if (bEMHash && file->GetAICHHashset()->HasValidMasterHash() && 
-			(file->GetAICHHashset()->GetStatus() == AICH_VERIFIED || file->GetAICHHashset()->GetStatus() == AICH_HASHSETCOMPLETE))
+		if (file->GetFileIdentifier().HasAICHHash())
 		{
-			strBuffer.Format(_T("h=%s|"), file->GetAICHHashset()->GetMasterHash().GetString() );
+			strBuffer.Format(_T("h=%s|"), file->GetFileIdentifier().GetAICHHash().GetString() );
 			strLinks += strBuffer;			
 		}
 
@@ -272,7 +289,7 @@ void CED2kLinkDlg::UpdateLink()
 					CString httpSrc;
 					httpList->GetText(j, httpSrc);
 					if(httpSrc.Right(1) == _T("/")){
-						httpSrc += StripInvalidFilenameChars(file->GetFileName(), false);
+						httpSrc += StripInvalidFilenameChars(file->GetFileName());
 					}
 					strLinks += _T("s=") + EncodeUrlUtf8(httpSrc) + _T("|");
 				}
@@ -292,11 +309,11 @@ void CED2kLinkDlg::UpdateLink()
 		}
 
 		if (bHTML)
-			strLinks += _T("\">") + StripInvalidFilenameChars(file->GetFileName(), true) + _T("</a>");
+			strLinks += _T("\">") + StripInvalidFilenameChars(file->GetFileName()) + _T("</a>");
 
 		//EastShare Start - added by AndCycle, phpBB URL-Tags style link
 		if (bPHPBB) {
-			CString tempFileName = StripInvalidFilenameChars(file->GetFileName(), true);
+			CString tempFileName = StripInvalidFilenameChars(file->GetFileName());
 
 			//like before, just show up #for compatible with phpBB, phpBB using "[" "]" to identify tag#
 			//tempFileName.Replace(_T("["), _T("("));
@@ -389,4 +406,3 @@ void CED2kLinkDlg::OnBtnClearHttp()
 		UpdateLink();
 	}
 }
-

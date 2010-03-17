@@ -83,9 +83,9 @@ namespace Kademlia
 			bool AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kademlia::CEntry* pEntry, uint8& uLoad, bool bIgnoreThreadLock = false);
 			bool AddLoad(const CUInt128& uKeyID, uint32 uTime, bool bIgnoreThreadLock = false);
 			uint32 GetFileKeyCount();
-			void SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm* pSearchTerms, uint32 uIP, uint16 uPort, bool bOldClient, bool bKad2, uint16 uStartPosition, CKadUDPKey senderUDPKey);
-			void SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint16 uStartPosition, uint64 uFileSize, CKadUDPKey senderUDPKey);
-			void SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, bool bKad2, uint64 uFileSize, CKadUDPKey senderUDPKey);
+			void SendValidKeywordResult(const CUInt128& uKeyID, const SSearchTerm* pSearchTerms, uint32 uIP, uint16 uPort, bool bOldClient, uint16 uStartPosition, CKadUDPKey senderUDPKey);
+			void SendValidSourceResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, uint16 uStartPosition, uint64 uFileSize, CKadUDPKey senderUDPKey);
+			void SendValidNoteResult(const CUInt128& uKeyID, uint32 uIP, uint16 uPort, uint64 uFileSize, CKadUDPKey senderUDPKey);
 			bool SendStoreRequest(const CUInt128& uKeyID);
 			uint32 m_uTotalIndexSource;
 			uint32 m_uTotalIndexKeyword;

@@ -110,7 +110,7 @@ CString URLEncode(const CString& sIn);
 CString EncodeURLQueryParam(const CString& rstrQuery);
 CString MakeStringEscaped(CString in);
 CString RemoveAmbersand(const CString& rstr);
-CString	StripInvalidFilenameChars(const CString& strText, bool bKeepSpaces = true);
+CString	StripInvalidFilenameChars(const CString& strText);
 CString	CreateED2kLink(const CAbstractFile* f, bool bEscapeLink = true);
 CString	CreateHTMLED2kLink(const CAbstractFile* f);
 
@@ -234,7 +234,6 @@ void DebugHttpHeaders(const CStringAArray& astrHeaders);
 ///////////////////////////////////////////////////////////////////////////////
 // Win32 specifics
 //
-bool DoRegFixElevated();
 bool Ask4RegFix(bool checkOnly, bool dontAsk = false, bool bAutoTakeCollections = false); // Barry - Allow forced update without prompt
 void BackupReg(void); // Barry - Store previous values
 void RevertReg(void); // Barry - Restore previous values
@@ -254,6 +253,8 @@ int GetMaxWindowsTCPConnections();
 #define _WINVER_XP_		0x0501	// 5.1
 #define _WINVER_2003_	0x0502	// 5.2
 #define _WINVER_VISTA_	0x0600	// 6.0
+#define _WINVER_7_		0x0601	// 6.1
+#define	_WINVER_S2008_	0x0601	// 6.1
 
 WORD		DetectWinVersion();
 int			IsRunningXPSP2();
@@ -398,7 +399,7 @@ CString GetFileTypeDisplayStrFromED2KFileType(LPCTSTR pszED2KFileType);
 LPCSTR GetED2KFileTypeSearchTerm(EED2KFileType iFileID);
 EED2KFileType GetED2KFileTypeSearchID(EED2KFileType iFileID);
 EED2KFileType GetED2KFileTypeID(LPCTSTR pszFileName);
-bool gotostring(CFile &file, uchar *find, LONGLONG plen);
+bool gotostring(CFile &file, const uchar *find, LONGLONG plen);
 
 ///////////////////////////////////////////////////////////////////////////////
 // IP/UserID

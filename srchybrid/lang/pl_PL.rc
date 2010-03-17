@@ -579,7 +579,6 @@ BEGIN
     IDS_PW_USS              "Aktualizuj listê serwerów podczas uruchamiania"
     IDS_PW_MISC             "Inne opcje"
     IDS_PW_TRAY             "Minimalizuj do ikonki"
-    IDS_PW_BEEP             "Sygnalizuj b³êdy dŸwiêkiem"
     IDS_PW_PROMPT           "Pytaj przy zamkniêciu"
 END
 
@@ -846,7 +845,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPDATEQUEUE         "Nie odœwie¿aj kolejki w czasie rzeczywistym"
     IDS_RECOVER_SINGLE      "odzyskano 1 plik."
     IDS_RECOVER_MULTIPLE    "odzyskano %u plików."
     IDS_ATTEMPTING_RECOVERY "Próba odzyskania archiwum..."
@@ -930,7 +928,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_LOG_LEVEL           "Poziom logowania"
-    IDS_DISABLEPEERACHE     "Wy³¹cz pobieranie z PeerCache"
     IDS_NEWMSG              "Nowa wiadomoœæ od '%s' (IP:%s)"
     IDS_PREF_STARTNEXTFILECATONLY "Tylko w tej samej kategorii"
     IDS_LOG_ULDL_EVENTS     "Loguj zdarzenia pobierania/wysy³ania"
@@ -1179,7 +1176,6 @@ STRINGTABLE
 BEGIN
     IDS_ERR_TOOLARGEFILE    "Plik jest wiêkszy ni¿ maksymalny rozmiar wspierany przez protokó³ edonkey (>=4GB)"
     IDS_MSGONLYFRIENDS      "Akceptuj tylko od znajomych"
-    IDS_MSGONLYSEC          "Akceptuj tylko od prawid³owych klientów"
     IDS_DAY_MO_SA           "Pon-Sob"
     IDS_LIMITSOURCES        "Limituj Ÿród³a"
     IDS_LIMITCONS5SEC       "Limituj po³¹czenia na 5 sekund"
@@ -1228,7 +1224,6 @@ BEGIN
     IDS_DL_RESUMENEXT       "Podejmij nastêpny wstrzymany"
     IDS_STARTPRIO           "Priorytet dla tej kategorii"
     IDS_PREF_STARTNEXTFILECAT "Preferuj t¹ sam¹ kategorie"
-    IDS_REPAINTGRAPHS       "Nie odtwarzaj wykresów statystyk po zmianie rozmiaru"
     IDS_SOFTFILES           "Miêkki limit plików"
     IDS_HARDFILES           "Twardy limit plików"
     IDS_FILTER              "Filtr"
@@ -1699,7 +1694,7 @@ BEGIN
     IDS_LD_COPYCLIPBOARD    "Kopiuj do schowka"
     IDS_LD_HOSTNAME         "U¿yj nazwy hosta (z ustawieñ) zamiast IP przy ³¹czeniu ze Ÿród³em"
     IDS_SAVEACFAILED        "B³¹d przy zapisie hashetu AICH!"
-    IDS_IACHHASH            "Hash AICH"
+    IDS_AICHHASH            "Hash AICH"
     IDS_BYTESPERSEC         "B/s" //!
     IDS_KBYTESPERSEC        "KB/s" //!
     IDS_MBYTESPERSEC        "MB/s" //!
@@ -1955,17 +1950,43 @@ BEGIN
     IDS_ERR_SHARED_DIR      "Nie mo¿na odczytaæ katalogu udostêpnionego ""%s"" - %s"
     IDS_FILE_WARNING_DRM    "Plik ""%s"" wydaje siê byæ chroniony przez Digital Rights Management.\r\n\r\nPrawdopodobnie nie bêdziesz móg³ u¿yæ tego pliku bez licencji od twórcy. Powinieneœ wiedzieæ, ¿e otworzenie tego pliku w media playerze prawdopodobnie otwiera przegl¹darkê internetow¹, która automatycznie przenosi do witryny z autorem tego pliku, gdzie mo¿na nabyæ licencjê.\r\n\r\nCzy na pewno chcesz otworzyæ ten plik?"
     IDS_CHECK_FILE_OPEN     "Ostrzegaj przy otwieraniu plików niewiadomego pochodzenia"
-    IDS_BOOTABLE            "bootable"
-    IDS_UNSUPPORTEDIMAGE    "unsupported image"
+    IDS_BOOTABLE            "uruchamialny"
+    IDS_UNSUPPORTEDIMAGE    "nieobs³ugiwany obraz"
 END
 
 
 STRINGTABLE 
 BEGIN
-    IDS_UNSHARE             "Unshare"
-    IDS_WEBUPNPINCLUDE      "Include port into UPnP setup"
-    IDS_ADDEDON             "Added On"
-    IDS_RESOLVELINKS        "Resolve shell links in shared directories"
+    IDS_UNSHARE             "Anuluj udostêpnienie"
+    IDS_WEBUPNPINCLUDE      "Do³¹cz port do konfiguracji UPnP"
+    IDS_ADDEDON             "dodane"
+    IDS_RESOLVELINKS        "Rozwi¹¿ linki shellu w udostêpnionych folderach"
+END
+
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNLOADCOMMANDS    "Download Commands"
+    IDS_CLOSETOOLBAR        "Close Toolbar"
+    IDS_SHOWTOOLBAR         "Show Toolbar"
+    IDS_SEARCH_BADOPERATORCOMBINATION 
+                            "You cannot use the first keyword with an OR operator when searching on Kad!\n\nFor example ""Keyword1 OR Keyword2"" is not possible. Try ""Keyword1 AND (Keyword2 OR Keyword3)"" or do multiple searches instead."
+    IDS_DISCOVEREDBY        "Discovered by"
+    IDS_NODES               "Node(s)"
+    IDS_ROUTINGTABLE        "Routing Table"
+    IDS_PROTOCOLVERSION     "Protocol Version"
+    IDS_FOUNDNODESUSEFUL    "Found Nodes (useful)"
+    IDS_NORESPONSE          "No Response"
+    IDS_NOTASKED            "Not Asked"
+    IDS_LOOKUPGRAPH         "Search Details"
+    IDS_AUTOKADLOOKUPGRAPH  "Automatically show active searches"
+    IDS_PAUSEONPREVIEW      "Pause when preview possible"
+    IDS_PREVIEWWITH         "Preview with"
+    IDS_CLOSEEMULE          "Close eMule"
+    IDS_DONOTASKAGAIN       "Don't ask me again"
+    IDS_POPULARITY          "Popularity Rank"
+    IDS_SHOWWIN7TASKBARGOODIES "Enable Windows 7 taskbar effects"
+    IDS_LANMODE             "LAN Mode"
 END
 
 STRINGTABLE 
@@ -3574,7 +3595,7 @@ END
 //
 // Generated from the TEXTINCLUDE 3 resource.
 //
-#include "../version.h"
+#include "..\version.h"
 #include "lang.rc2"
 
 /////////////////////////////////////////////////////////////////////////////

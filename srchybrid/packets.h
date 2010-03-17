@@ -95,7 +95,8 @@ public:
 	CTag(LPCSTR pszName, const CString& rstrVal);
 	CTag(uint8 uName, const CString& rstrVal);
 	CTag(uint8 uName, const BYTE* pucHash);
-	CTag(uint8 uName, uint32 nSize, const BYTE* pucData);
+	CTag(uint8 uName, uint32 nSize, const BYTE* pucData); // data gets copied
+	CTag(uint8 uName, BYTE* pucAttachData, uint32 nSize); // data gets attached (and deleted lateron)
 	CTag(const CTag& rTag);
 	CTag(CFileDataIO* data, bool bOptUTF8);
 	~CTag();
@@ -113,11 +114,11 @@ public:
 	
 	UINT	GetInt() const			{ ASSERT(IsInt());		return (UINT)m_uVal; }
 	uint64	GetInt64() const		{ ASSERT(IsInt64(true));return m_uVal; }
-	const CString& GetStr() const	{ ASSERT(IsStr());		return *m_pstrVal; }
-	float GetFloat() const			{ ASSERT(IsFloat());	return m_fVal; }
-	const BYTE* GetHash() const		{ ASSERT(IsHash());		return m_pData; }
-	uint32 GetBlobSize() const		{ ASSERT(IsBlob());		return m_nBlobSize; }
-	const BYTE* GetBlob() const		{ ASSERT(IsBlob());		return m_pData; }
+	const	CString& GetStr() const	{ ASSERT(IsStr());		return *m_pstrVal; }
+	float	GetFloat() const		{ ASSERT(IsFloat());	return m_fVal; }
+	const	BYTE* GetHash() const	{ ASSERT(IsHash());		return m_pData; }
+	uint32	GetBlobSize() const		{ ASSERT(IsBlob());		return m_nBlobSize; }
+	const	BYTE* GetBlob() const	{ ASSERT(IsBlob());		return m_pData; }
 
 	void SetInt(UINT uVal);
 	void SetInt64(uint64 uVal);

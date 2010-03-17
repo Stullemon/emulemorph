@@ -82,6 +82,7 @@ namespace Kademlia
 			// In practice: returns the contacts from the top (2^{logBase+1}) buckets.
 			UINT		GetBootstrapContacts(ContactList *plistResult, UINT uMaxRequired);
 			uint32		EstimateCount();
+			bool		HasOnlyLANNodes() const;
 			time_t m_tNextBigTimer;
 			time_t m_tNextSmallTimer;
 		private:

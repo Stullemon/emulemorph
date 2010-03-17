@@ -1,4 +1,4 @@
-// XMessageBox.h  Version 1.4
+// XMessageBox.h  Version 1.10
 //
 // This software is released into the public domain.  You are free to use it
 // in any way you like, except that you may not sell this source code.
@@ -41,6 +41,7 @@
 
 #define MB_DEFBUTTON5				0x00000400L
 #define MB_DEFBUTTON6				0x00000500L
+
 // Dialog Box Command IDs
 /*
 #define IDOK                1
@@ -79,6 +80,7 @@
 
 #define ID_XMESSAGEBOX_LAST_ID	26
 
+
 ///////////////////////////////////////////////////////////////////////////////
 // 
 // Report Callback Function
@@ -98,26 +100,30 @@ struct XMSGBOXPARAMS
 {
 	XMSGBOXPARAMS()
 	{
-		nTimeoutSeconds        = 0;
-		nDisabledSeconds       = 0;
-		hInstanceIcon          = NULL;
-		hInstanceStrings       = NULL;
-		lpReportFunc           = NULL;
-		dwReportUserData       = 0;
-		nIdHelp                = 0;
-		nIdIcon                = 0;
-		nIdCustomButtons       = 0;
-		nIdReportButtonCaption = 0;
-		x                      = 0;
-		y                      = 0;
-		dwOptions              = 0;
-		lpszModule             = NULL;
-		nLine                  = 0;
+		nTimeoutSeconds               = 0;
+		nDisabledSeconds              = 0;
+		hInstanceIcon                 = NULL;
+		hInstanceStrings              = NULL;
+		lpReportFunc                  = NULL;
+		dwReportUserData              = 0;
+		nIdHelp                       = 0;
+		nIdIcon                       = 0;
+		nIdCustomButtons              = 0;
+		nIdReportButtonCaption        = 0;
+		x                             = 0;
+		y                             = 0;
+		dwOptions                     = 0;
+		lpszModule                    = NULL;
+		nLine                         = 0;
+		bUseUserDefinedButtonCaptions = FALSE;			//+++1.5
+		crText                        = CLR_INVALID;	//+++1.8
+		crBackground                  = CLR_INVALID;	//+++1.8
 
 		memset(szIcon, 0, sizeof(szIcon));
 		memset(szCustomButtons, 0, sizeof(szCustomButtons));
 		memset(szReportButtonCaption, 0, sizeof(szReportButtonCaption));
 		memset(szCompanyName, 0, sizeof(szCompanyName));
+		memset(&UserDefinedButtonCaptions, 0, sizeof(UserDefinedButtonCaptions));	//+++1.5
 	}
 
 	UINT		nIdHelp;						// help context ID for message;
@@ -131,10 +137,18 @@ struct XMSGBOXPARAMS
 												// nDisabledSeconds, all buttons
 												// will be enabled
 	int			x, y;							// initial x,y screen coordinates
-	enum
+	enum										// these are bit flags for dwOptions
 	{
-		None                = 0x0000,
-		RightJustifyButtons = 0x0001,
+		None				= 0x0000,
+		RightJustifyButtons	= 0x0001,			// causes buttons to be right-justified
+		VistaStyle			= 0x0002,			// setting this option bit will cause the 
+												// message background to be painted with 
+												// the current window color (typically 
+												// white), and the buttons to be 
+												// right-justified.    +++1.8
+		Narrow				= 0x0004			// uses a narrow width for message box -
+												// SM_CXSCREEN / 3
+
 	};
 	DWORD		dwOptions;						// options flags
 	HINSTANCE	hInstanceStrings;				// if specified, will be used to
@@ -152,6 +166,37 @@ struct XMSGBOXPARAMS
 	int			nLine;							// line number (for saving DoNotAsk state)
 	DWORD		dwReportUserData;				// data sent to report callback function
 	XMESSAGEBOX_REPORT_FUNCTION lpReportFunc;	// report function
+	COLORREF	crText;							// message text color		+++1.8
+	COLORREF	crBackground;					// message background color	+++1.8
+
+	//-[UK
+	// For not loading from resource but passing directly,
+	// Use the following code.
+	struct CUserDefinedButtonCaptions
+	{
+		TCHAR	szAbort				[MAX_PATH];
+		TCHAR	szCancel			[MAX_PATH];
+		TCHAR	szContinue			[MAX_PATH];
+		TCHAR	szDoNotAskAgain		[MAX_PATH];
+		TCHAR	szDoNotTellAgain	[MAX_PATH];
+		TCHAR	szDoNotShowAgain	[MAX_PATH];
+		TCHAR	szHelp				[MAX_PATH];
+		TCHAR	szIgnore			[MAX_PATH];
+		TCHAR	szIgnoreAll			[MAX_PATH];
+		TCHAR	szNo				[MAX_PATH];
+		TCHAR	szNoToAll			[MAX_PATH];
+		TCHAR	szOK				[MAX_PATH];
+		TCHAR	szReport			[MAX_PATH];
+		TCHAR	szRetry				[MAX_PATH];
+		TCHAR	szSkip				[MAX_PATH];
+		TCHAR	szSkipAll			[MAX_PATH];
+		TCHAR	szTryAgain			[MAX_PATH];
+		TCHAR	szYes				[MAX_PATH];
+		TCHAR	szYesToAll			[MAX_PATH];
+	};
+	BOOL						bUseUserDefinedButtonCaptions;	//+++1.5
+	CUserDefinedButtonCaptions	UserDefinedButtonCaptions;		//+++1.5
+	//-]UK
 };
 
 int XMessageBox(HWND hwnd, 
@@ -159,6 +204,11 @@ int XMessageBox(HWND hwnd,
 				LPCTSTR lpszCaption = NULL, 
 				UINT nStyle = MB_OK | MB_ICONEXCLAMATION,
 				XMSGBOXPARAMS * pXMB = NULL);
+
+
+DWORD XMessageBoxGetCheckBox(LPCTSTR lpszCompanyName, LPCTSTR lpszModule, int nLine);
+
+DWORD XMessageBoxGetCheckBox(XMSGBOXPARAMS& xmb);
 
 
 #endif //XMESSAGEBOX_H

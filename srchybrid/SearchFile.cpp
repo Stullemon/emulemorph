@@ -145,6 +145,7 @@ CSearchFile::CSearchFile(const CSearchFile* copyfrom)
 // end vs2008
 	for (int i = 0; i < clients.GetSize(); i++)
 		AddClient(clients[i]);
+	
 /*  vs2008 needs a helper to compare Strcuts in simplearray 
 	const CSimpleArray<SServer>& servers = copyfrom->GetServers();
 */
@@ -162,15 +163,17 @@ CSearchFile::CSearchFile(const CSearchFile* copyfrom)
 	m_bServerUDPAnswer = copyfrom->m_bServerUDPAnswer;
 	m_nSpamRating = copyfrom->GetSpamRating();
 	m_nKadPublishInfo = copyfrom->GetKadPublishInfo();
+	m_bMultipleAICHFound = copyfrom->m_bMultipleAICHFound;
 }
 
 CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8, 
 						 uint32 nSearchID, uint32 nServerIP, uint16 nServerPort, LPCTSTR pszDirectory, bool bKademlia, bool bServerUDPAnswer)
 {
+	m_bMultipleAICHFound = false;
 	m_bKademlia = bKademlia;
 	m_bServerUDPAnswer = bServerUDPAnswer;
 	m_nSearchID = nSearchID;
-	in_data->ReadHash16(m_abyFileHash);
+	m_FileIdentifier.SetMD4Hash(in_data);
 	m_nClientID = in_data->ReadUInt32();
 	m_nClientPort = in_data->ReadUInt16();
 	if ((m_nClientID || m_nClientPort) && !IsValidSearchResultClientIPPort(m_nClientID, m_nClientPort)){
@@ -188,7 +191,7 @@ CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8,
 	//  *) if the OP_OFFERFILES packet does contain our HighID and Port the server returns that data at least when
 	//     returning search results via TCP.
 	if (thePrefs.GetDebugServerSearchesLevel() > 1)
-		Debug(_T("Search Result: %s  Client=%u.%u.%u.%u:%u  Tags=%u\n"), md4str(m_abyFileHash), (uint8)m_nClientID,(uint8)(m_nClientID>>8),(uint8)(m_nClientID>>16),(uint8)(m_nClientID>>24), m_nClientPort, tagcount);
+		Debug(_T("Search Result: %s  Client=%u.%u.%u.%u:%u  Tags=%u\n"), md4str(m_FileIdentifier.GetMD4Hash()), (uint8)m_nClientID,(uint8)(m_nClientID>>8),(uint8)(m_nClientID>>16),(uint8)(m_nClientID>>24), m_nClientPort, tagcount);
 
 	// Copy/Convert ED2K-server tags to local tags
 	//
@@ -220,6 +223,17 @@ CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8,
 				m_uUserRating = uAvgRating / (255/5/*RatingExcellent*/);
 
 				tag->SetInt(m_uUserRating);
+			}
+			else if (tag->GetNameID() == FT_AICH_HASH && tag->IsStr())
+			{
+				CAICHHash hash;
+				if (DecodeBase32(tag->GetStr(),hash) == (UINT)CAICHHash::GetHashSize())
+					m_FileIdentifier.SetAICHHash(hash);
+				else
+					ASSERT( false );
+				delete tag;
+				tag = NULL;
+				continue;
 			}
 			taglist.Add(tag);
 		}
@@ -282,8 +296,8 @@ CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8,
 		AddServer(server);
 	}
 	m_pszDirectory = pszDirectory ? _tcsdup(pszDirectory) : NULL;
-
-	m_pszIsFake = theApp.FakeCheck->IsFake(m_abyFileHash,GetFileSize()) ? _tcsdup(theApp.FakeCheck->GetLastHit()) : NULL;; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
+	
+	m_pszIsFake = theApp.FakeCheck->IsFake(m_FileIdentifier.GetMD4Hash(),GetFileSize()) ? _tcsdup(theApp.FakeCheck->GetLastHit()) : NULL; //MORPH - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	m_list_bExpanded = false;
 	m_list_parent = NULL;
 	m_list_childcount = 0;
@@ -295,7 +309,7 @@ CSearchFile::CSearchFile(CFileDataIO* in_data, bool bOptUTF8,
 
 CSearchFile::~CSearchFile()
 {
-		free(m_pszDirectory);
+	free(m_pszDirectory);
 	//MORPH START - Added by SiRoB, FakeCheck, FakeReport, Auto-updating
 	if (m_pszIsFake)
 		free(m_pszIsFake);
@@ -306,10 +320,13 @@ CSearchFile::~CSearchFile()
 
 void CSearchFile::StoreToFile(CFileDataIO& rFile) const
 {
-	rFile.WriteHash16(m_abyFileHash);
+	rFile.WriteHash16(m_FileIdentifier.GetMD4Hash());
 	rFile.WriteUInt32(m_nClientID);
 	rFile.WriteUInt16(m_nClientPort);
-	rFile.WriteUInt32(taglist.GetCount());
+	uint32 nTagCount = taglist.GetCount();
+	if (m_FileIdentifier.HasAICHHash())
+		nTagCount++;
+	rFile.WriteUInt32(nTagCount);
 	INT_PTR pos;
 	for (pos = 0; pos < taglist.GetCount(); pos++){
 		CTag* tag = taglist.GetAt(pos);
@@ -320,6 +337,11 @@ void CSearchFile::StoreToFile(CFileDataIO& rFile) const
 			continue;
 		}
 		tag->WriteNewEd2kTag(&rFile, utf8strRaw);
+	}
+	if (m_FileIdentifier.HasAICHHash())
+	{
+		CTag aichtag(FT_AICH_HASH, m_FileIdentifier.GetAICHHash().GetString());
+		aichtag.WriteNewEd2kTag(&rFile);
 	}
 }
 
@@ -338,16 +360,16 @@ void CSearchFile::UpdateFileRatingCommentAvail(bool bForceUpdate)
 		if (!m_bHasComment && !entry->GetStrTagValue(TAG_DESCRIPTION).IsEmpty())
 			m_bHasComment = true;
 		UINT rating = (UINT)entry->GetIntTagValue(TAG_FILERATING);
-		if(rating!=0)
+		if (rating != 0)
 		{
 			uRatings++;
 			uUserRatings += rating;
 		}
 	}
-
+	
 	// searchfile specific
 	// the file might have had a serverrating, don't change the rating if no kad ratings were found
-	if(uRatings)
+	if (uRatings)
 		m_uUserRating = (uint32)ROUND((float)uUserRatings / uRatings);
 
 	if (bOldHasComment != m_bHasComment || uOldUserRatings != m_uUserRating || bForceUpdate)
@@ -433,7 +455,7 @@ int CSearchFile::IsComplete(UINT uSources, UINT uCompleteSources) const
 	}
 	else {
 		return 0;		// not complete
-}
+	}
 }
 
 time_t CSearchFile::GetLastSeenComplete() const

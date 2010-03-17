@@ -57,7 +57,6 @@ protected:
 	bool m_bFirewallStartup;
 	*/
 	int m_iLogLevel;
-	bool m_bDisablePeerCache;
     bool m_bDynUpEnabled;
     int m_iDynUpMinUpload;
     int m_iDynUpPingTolerance;
@@ -72,6 +71,7 @@ protected:
 	int m_iShareeMule;
 	bool bShowedWarning;
 	bool m_bResolveShellLinks;
+
 	// MORPH START leuk_he Advanced official preferences.
 	bool bMiniMuleAutoClose;
 	int iMiniMuleTransparency;
@@ -122,6 +122,11 @@ protected:
 	bool m_ICH;
 	int m_iFileBufferTimeLimit;
 	bool m_bRearrangeKadSearchKeywords;
+	bool m_bUpdateQueue;
+	bool m_bRepaint;
+	bool m_bBeeper;
+	bool m_bMsgOnlySec;
+	bool m_bDisablePeerCache;
 
     // continue extra official preferences....
 	HTREEITEM m_hti_advanced;
@@ -174,6 +179,11 @@ protected:
 	HTREEITEM m_htiICH;
 	HTREEITEM m_htiFileBufferTimeLimit;
 	HTREEITEM m_htiRearrangeKadSearchKeywords;
+	HTREEITEM m_htiUpdateQueue;
+	HTREEITEM m_htiRepaint;
+	HTREEITEM m_htiBeeper;
+	HTREEITEM m_htiMsgOnlySec;
+	HTREEITEM m_htiDisablePeerCache;
 	// MORPH END  leuk_he Advanced official preferences. 
 	
 
@@ -223,8 +233,7 @@ protected:
 	*/
 	// End emulEspaña
 	HTREEITEM m_htiLogLevel;
-	HTREEITEM m_htiDisablePeerCache;
-	HTREEITEM m_htiDynUp;
+    HTREEITEM m_htiDynUp;
 	HTREEITEM m_htiDynUpEnabled;
     HTREEITEM m_htiDynUpMinUpload;
     HTREEITEM m_htiDynUpPingTolerance;
@@ -235,7 +244,7 @@ protected:
     HTREEITEM m_htiDynUpGoingUpDivider;
     HTREEITEM m_htiDynUpGoingDownDivider;
     HTREEITEM m_htiDynUpNumberOfPings;
-	HTREEITEM m_htiA4AFSaveCpu;
+    HTREEITEM m_htiA4AFSaveCpu;
 	HTREEITEM m_htiExtractMetaData;
 	HTREEITEM m_htiExtractMetaDataNever;
 	HTREEITEM m_htiExtractMetaDataID3Lib;

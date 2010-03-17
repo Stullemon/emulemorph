@@ -25,7 +25,7 @@
 #include "emuledlg.h"
 #include "StatisticsDlg.h"
 #include "ServerWnd.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "ChatWnd.h"
 #include "SharedFilesWnd.h"
 #include "KademliaWnd.h"
@@ -38,7 +38,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -48,7 +48,6 @@ BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_STARTMIN, OnSettingsChange)
 	ON_BN_CLICKED(IDC_STARTWIN, OnSettingsChange)
 	ON_EN_CHANGE(IDC_NICK, OnSettingsChange)
-	ON_BN_CLICKED(IDC_BEEPER, OnSettingsChange)
 	ON_BN_CLICKED(IDC_EXIT, OnSettingsChange)
 	ON_BN_CLICKED(IDC_SPLASHON, OnSettingsChange)
 	ON_BN_CLICKED(IDC_STARTUPSOUNDON, OnSettingsChange)//Commander - Added: Enable/Disable Startupsound
@@ -58,7 +57,7 @@ BEGIN_MESSAGE_MAP(CPPgGeneral, CPropertyPage)
 	ON_BN_CLICKED(IDC_WEBSVEDIT , OnBnClickedEditWebservices)
 	ON_BN_CLICKED(IDC_ONLINESIG, OnSettingsChange)
 	ON_BN_CLICKED(IDC_CHECK4UPDATE, OnBnClickedCheck4Update)
-    ON_BN_CLICKED(IDC_MINIMULE, OnSettingsChange)
+	ON_BN_CLICKED(IDC_MINIMULE, OnSettingsChange)
 	ON_BN_CLICKED(IDC_PREVENTSTANDBY, OnSettingsChange)
 	//Commander - Added: Invisible Mode [TPT] - Start
 	ON_CBN_SELCHANGE(IDC_INVISIBLE_MODE_SELECT_COMBO, OnSettingsChange)
@@ -125,11 +124,6 @@ void CPPgGeneral::LoadSettings(void)
 		CheckDlgButton(IDC_ONLINESIG,1);
 	else
 		CheckDlgButton(IDC_ONLINESIG,0);
-	
-	if(thePrefs.beepOnError)
-		CheckDlgButton(IDC_BEEPER,1);
-	else
-		CheckDlgButton(IDC_BEEPER,0);
 
 	if(thePrefs.confirmExit)
 		CheckDlgButton(IDC_EXIT,1);
@@ -243,7 +237,7 @@ BOOL CPPgGeneral::OnInitDialog()
 	GetDlgItem(IDC_DAYS)->ShowWindow( IsDlgButtonChecked(IDC_CHECK4UPDATE) ? SW_SHOW : SW_HIDE );
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 void ModifyAllWindowStyles(CWnd* pWnd, DWORD dwRemove, DWORD dwAdd)
@@ -327,18 +321,16 @@ BOOL CPPgGeneral::OnApply()
 		AddAutoStart();
 	else
 		RemAutoStart();
-	thePrefs.beepOnError= IsDlgButtonChecked(IDC_BEEPER)!=0;
-	thePrefs.confirmExit= IsDlgButtonChecked(IDC_EXIT)!=0;
+	thePrefs.confirmExit = IsDlgButtonChecked(IDC_EXIT)!=0;
 	thePrefs.splashscreen = IsDlgButtonChecked(IDC_SPLASHON)!=0;
 	thePrefs.bringtoforeground = IsDlgButtonChecked(IDC_BRINGTOFOREGROUND)!=0;
 	thePrefs.updatenotify = IsDlgButtonChecked(IDC_CHECK4UPDATE)!=0;
-	thePrefs.onlineSig= IsDlgButtonChecked(IDC_ONLINESIG)!=0;
+	thePrefs.onlineSig = IsDlgButtonChecked(IDC_ONLINESIG)!=0;
 	thePrefs.versioncheckdays = ((CSliderCtrl*)GetDlgItem(IDC_CHECKDAYS))->GetPos();
 	thePrefs.m_bEnableMiniMule = IsDlgButtonChecked(IDC_MINIMULE) != 0;
 	thePrefs.m_bPreventStandby = IsDlgButtonChecked(IDC_PREVENTSTANDBY) != 0;
 	thePrefs.startupsound = IsDlgButtonChecked(IDC_STARTUPSOUNDON)!=0;//Commander - Added: Enable/Disable Startupsound
 
-	theApp.emuledlg->transferwnd->downloadlistctrl.SetStyle();
 	LoadSettings();
 
 	SetModified(FALSE);
@@ -370,7 +362,6 @@ void CPPgGeneral::Localize(void)
 		GetDlgItem(IDC_NICK_FRM)->SetWindowText(GetResString(IDS_QL_USERNAME));
 		GetDlgItem(IDC_LANG_FRM)->SetWindowText(GetResString(IDS_PW_LANG));
 		GetDlgItem(IDC_MISC_FRM)->SetWindowText(GetResString(IDS_PW_MISC));
-		GetDlgItem(IDC_BEEPER)->SetWindowText(GetResString(IDS_PW_BEEP));
 		GetDlgItem(IDC_EXIT)->SetWindowText(GetResString(IDS_PW_PROMPT));
 		GetDlgItem(IDC_SPLASHON)->SetWindowText(GetResString(IDS_PW_SPLASH));
 		GetDlgItem(IDC_BRINGTOFOREGROUND)->SetWindowText(GetResString(IDS_PW_FRONT));
@@ -414,17 +405,18 @@ void CPPgGeneral::Localize(void)
 		GetDlgItem(IDC_INVISIBLE_MODE_MODIFIER_STATIC)->SetWindowText(GetResString(IDS_INVMODE_MODKEY));
 		GetDlgItem(IDC_INVISIBLE_MODE_KEY_STATIC)->SetWindowText(GetResString(IDS_INVMODE_VKEY));
 		//Commander - Added: Invisible Mode [TPT] - End
-         //MORPH START leuk_he tooltipped
+		//MORPH START leuk_he tooltipped
 		SetTool(IDC_NICK_FRM,IDS_QL_USERNAME_TIP);
 		SetTool(IDC_NICK,IDS_QL_USERNAME_TIP);
 		SetTool(IDC_LANG_FRM,IDS_PW_LANG_TIP);
 		SetTool(IDC_LANGS,IDS_PW_LANG_TIP);
 		//SetTool(IDC_MISC_FRM,IDS_PW_MISC_TIP);
-		SetTool(IDC_BEEPER,IDS_PW_BEEP_TIP);
 		SetTool(IDC_EXIT,IDS_PW_PROMPT_TIP);
 		SetTool(IDC_SPLASHON,IDS_PW_SPLASH_TIP);
 		SetTool(IDC_BRINGTOFOREGROUND,IDS_PW_FRONT_TIP);
-		SetTool(IDC_ONLINESIG,IDS_PREF_ONLINESIG_TIP);	
+		SetTool(IDC_ONLINESIG,IDS_PREF_ONLINESIG_TIP);
+		SetTool(IDC_MINIMULE,IDS_ENABLEMINIMULE_TIP);
+		SetTool(IDC_PREVENTSTANDBY,IDS_PREVENTSTANDBY_TIP);
 		SetTool(IDC_STARTMIN,IDS_PREF_STARTMIN_TIP);	
 		SetTool(IDC_WEBSVEDIT,IDS_WEBSVEDIT_TIP);
 		SetTool(IDC_ED2KFIX,IDS_ED2KLINKFIX_TIP);
@@ -433,7 +425,7 @@ void CPPgGeneral::Localize(void)
 		SetTool(IDC_STARTUP,IDS_STARTUP_TIP);
 		SetTool(IDC_STARTWIN,IDS_STARTWITHWINDOWS_TIP);
 		SetTool(IDC_STARTUPSOUNDON,IDS_PW_STARTUPSOUND_TIP);
-        SetTool(IDC_INVISIBLE_MODE_KEY_COMBO,IDC_INVISIBLE_MODE_KEY_COMBO_TIP);
+		SetTool(IDC_INVISIBLE_MODE_KEY_COMBO,IDC_INVISIBLE_MODE_KEY_COMBO_TIP);
 		SetTool(IDC_INVISIBLE_MODE_GROUP_BOX,IDS_INVMODE_GROUP_TIP);
 		SetTool(IDC_INVISIBLE_MODE,IDS_INVMODE_TIP);
 		SetTool(IDC_INVISIBLE_MODE_SELECT_STATIC,IDS_INVMODE_HOTKEY_TIP);

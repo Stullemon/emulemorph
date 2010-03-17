@@ -27,7 +27,8 @@
 #define KADEMLIA_VERSION6_49aBETA		0x06 // -0.49aBETA1, needs to support: OP_FWCHECKUDPREQ (!), obfuscation, direct callbacks, source type 6, UDP firewallcheck
 #define KADEMLIA_VERSION7_49a			0x07 // -0.49a needs to support OP_KAD_FWTCPCHECK_ACK, KADEMLIA_FIREWALLED2_REQ
 #define KADEMLIA_VERSION8_49b			0x08 // TAG_KADMISCOPTIONS, KADEMLIA2_HELLO_RES_ACK
-#define KADEMLIA_VERSION				0x08 // Change CT_EMULE_MISCOPTIONS2 if Kadversion becomes >= 15
+#define KADEMLIA_VERSION9_50a			0x09 // handling AICH hashes on keyword storage
+#define KADEMLIA_VERSION				0x09 // Change CT_EMULE_MISCOPTIONS2 if Kadversion becomes >= 15 (0x0F)
 #define PREFFILE_VERSION				0x14	//<<-- last change: reduced .dat, by using .ini
 #define PARTFILE_VERSION				0xe0
 #define PARTFILE_SPLITTEDVERSION		0xe1
@@ -120,7 +121,7 @@
 #define MAXCON5WIN9X			10
 #define	UPLOAD_CHECK_CLIENT_DR	2048
 #define	UPLOAD_CLIENT_DATARATE	3072		// uploadspeed per client in bytes - you may want to adjust this if you have a slow connection or T1-T3 ;)
-#define	MAX_UP_CLIENTS_ALLOWED	250			// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
+#define	MAX_UP_CLIENTS_ALLOWED	100			// max. clients allowed regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too low, use DATARATE to adjust uploadspeed per client
 #define	MIN_UP_CLIENTS_ALLOWED	3			// min. clients per class allowed to download regardless UPLOAD_CLIENT_DATARATE or any other factors. Don't set this too high
 #define MINNUMBEROFTRICKLEUPLOADS 1			//MORPH  - Added By AndCycle, ZZUL_20050212-0200
 #define DOWNLOADTIMEOUT			SEC2MS(100)
@@ -139,7 +140,7 @@
 #define LOCALSERVERREQUESTS		20000		// only one local src request during this timespan (WHERE IS THIS USED?)
 #define DISKSPACERECHECKTIME	MIN2MS(15)
 #define CLIENTLIST_CLEANUP_TIME	MIN2MS(34)	// 34 min
-#define MAXPRIORITYCOLL_SIZE	10*1024		// max file size for collection file which are allowed to bypass the queue
+#define MAXPRIORITYCOLL_SIZE	50*1024		// max file size for collection file which are allowed to bypass the queue
 #define SEARCH_SPAM_THRESHOLD	60
 #define OLDFILES_PARTIALLYPURGE DAY2S(31)	// time after which some data about a know file in the known.met and known2.met is deleted
 
@@ -233,8 +234,8 @@
 #define	OP_MESSAGE				0x4E	// <len 2><Message len>
 #define OP_SETREQFILEID			0x4F	// <HASH 16>
 #define	OP_FILESTATUS			0x50	// <HASH 16><count 2><status(bit array) len:((count+7)/8)>
-#define OP_HASHSETREQUEST		0x51	// <HASH 16>
-#define OP_HASHSETANSWER		0x52	// <count 2><HASH[count] 16*count>
+#define OP_HASHSETREQUEST		0x51	// *DEPRECATED* <HASH 16>
+#define OP_HASHSETANSWER		0x52	// *DEPRECATED* <count 2><HASH[count] 16*count>
 #define	OP_STARTUPLOADREQ		0x54	// <HASH 16>
 #define	OP_ACCEPTUPLOADREQ		0x55	// (null)
 #define	OP_CANCELTRANSFER		0x56	// (null)	
@@ -264,8 +265,8 @@
 #define OP_COMPRESSEDPART		0x40	// <HASH 16><von 4><size 4><Daten len:size>
 #define OP_QUEUERANKING			0x60	// <RANG 2>
 #define OP_FILEDESC				0x61	// <len 2><NAME len>
-#define OP_REQUESTSOURCES		0x81	// <HASH 16>
-#define OP_ANSWERSOURCES		0x82	//
+#define OP_REQUESTSOURCES		0x81	// *DEPRECATED* <HASH 16>
+#define OP_ANSWERSOURCES		0x82	// *DEPRECATED*
 #define OP_REQUESTSOURCES2		0x83	// <HASH 16><Version 1><Options 2>
 #define OP_ANSWERSOURCES2		0x84	// <Version 1>[content]
 #define OP_PUBLICKEY			0x85	// <len 1><pubkey len>
@@ -276,17 +277,17 @@
 
 #define OP_REQUESTPREVIEW		0x90	// <HASH 16>
 #define OP_PREVIEWANSWER		0x91	// <HASH 16><frames 1>{frames * <len 4><frame len>}
-#define OP_MULTIPACKET			0x92
-#define OP_MULTIPACKETANSWER	0x93
-#define	OP_PEERCACHE_QUERY		0x94
-#define	OP_PEERCACHE_ANSWER		0x95
-#define	OP_PEERCACHE_ACK		0x96
+#define OP_MULTIPACKET			0x92	// *DEPRECATED*
+#define OP_MULTIPACKETANSWER	0x93	// *DEPRECATED*
+#define	OP_PEERCACHE_QUERY		0x94	// *DEPRECATED*
+#define	OP_PEERCACHE_ANSWER		0x95	// *DEPRECATED*
+#define	OP_PEERCACHE_ACK		0x96	// *DEPRECATED*
 #define	OP_PUBLICIP_REQ			0x97
 #define	OP_PUBLICIP_ANSWER		0x98
 #define OP_CALLBACK				0x99	// <HASH 16><HASH 16><uint 16>
 #define OP_REASKCALLBACKTCP		0x9A
-#define OP_AICHREQUEST			0x9B	// <HASH 16><uint16><HASH aichhashlen>
-#define OP_AICHANSWER			0x9C	// <HASH 16><uint16><HASH aichhashlen> <data>
+#define OP_AICHREQUEST			0x9B	// *DEPRECATED* <HASH 16><uint16><HASH aichhashlen>
+#define OP_AICHANSWER			0x9C	// *DEPRECATED* <HASH 16><uint16><HASH aichhashlen> <data>
 #define OP_AICHFILEHASHANS		0x9D	  
 #define OP_AICHFILEHASHREQ		0x9E
 #define OP_BUDDYPING			0x9F
@@ -294,12 +295,15 @@
 #define OP_COMPRESSEDPART_I64	0xA1	// <HASH 16><von 8><size 4><Daten len:size>
 #define OP_SENDINGPART_I64		0xA2	// <HASH 16><von 8><bis 8><Daten len:(von-bis)>
 #define	OP_REQUESTPARTS_I64		0xA3	// <HASH 16><von[3] 8*3><bis[3] 8*3>
-#define OP_MULTIPACKET_EXT		0xA4
+#define OP_MULTIPACKET_EXT		0xA4	// *DEPRECATED*
 #define OP_CHATCAPTCHAREQ		0xA5	// <tags 1>[tags]<Captcha BITMAP>
 #define OP_CHATCAPTCHARES		0xA6	// <status 1>
 #define OP_FWCHECKUDPREQ		0xA7	// <Inter_Port 2><Extern_Port 2><KadUDPKey 4> *Support required for Kadversion >= 6
 #define OP_KAD_FWTCPCHECK_ACK	0xA8	// (null/reserved), replaces KADEMLIA_FIREWALLED_ACK_RES, *Support required for Kadversion >= 7
-
+#define OP_MULTIPACKET_EXT2		0xA9	// <FileIdentifier> ...
+#define OP_MULTIPACKETANSWER_EXT2 0xB0	// <FileIdentifier> ...
+#define OP_HASHSETREQUEST2		0xB1	// <FileIdentifier><Options 1>
+#define OP_HASHSETANSWER2		0xB2	// <FileIdentifier><Options 1>[<HashSets> Options]
 // extened prot client <-> extened prot client UDP
 #define OP_REASKFILEPING		0x90	// <HASH 16>
 #define OP_REASKACK				0x91	// <RANG 2>
@@ -393,6 +397,9 @@
 #define  FT_PUBLISHINFO			 0x33	// <uint32>
 #define TAG_PUBLISHINFO			"\x33"	// <uint32>
 #define  FT_LASTSHARED			 0x34	// <uint32>
+#define  FT_AICHHASHSET			 0x35	// <uint32>
+#define	TAG_KADAICHHASHPUB		"\x36"	// <AICH Hash>
+#define TAG_KADAICHHASHRESULT	"\x37"	// <Count 1>{<Publishers 1><AICH Hash> Count}
 // statistic
 #define  FT_ATTRANSFERRED		 0x50	// <uint32>
 #define  FT_ATREQUESTED			 0x51	// <uint32>
@@ -608,24 +615,24 @@
 #define	PCTAG_FILEID			0x06
 
 // KADEMLIA (opcodes) (udp)
-#define KADEMLIA_BOOTSTRAP_REQ			0x00	// <PEER (sender) [25]>
+#define KADEMLIA_BOOTSTRAP_REQ_DEPRECATED		0x00	// <PEER (sender) [25]>
 #define KADEMLIA2_BOOTSTRAP_REQ			0x01	//
 
-#define KADEMLIA_BOOTSTRAP_RES			0x08	// <CNT [2]> <PEER [25]>*(CNT)
+#define KADEMLIA_BOOTSTRAP_RES_DEPRECATED		0x08	// <CNT [2]> <PEER [25]>*(CNT)
 #define KADEMLIA2_BOOTSTRAP_RES			0x09	//
 
-#define KADEMLIA_HELLO_REQ	 			0x10	// <PEER (sender) [25]>
+#define KADEMLIA_HELLO_REQ_DEPRECATED	 		0x10	// <PEER (sender) [25]>
 #define KADEMLIA2_HELLO_REQ				0x11	//
 
-#define KADEMLIA_HELLO_RES     			0x18	// <PEER (receiver) [25]>
+#define KADEMLIA_HELLO_RES_DEPRECATED     		0x18	// <PEER (receiver) [25]>
 #define KADEMLIA2_HELLO_RES				0x19	//
 
-#define KADEMLIA_REQ		   			0x20	// <TYPE [1]> <HASH (target) [16]> <HASH (receiver) 16>
+#define KADEMLIA_REQ_DEPRECATED		   			0x20	// <TYPE [1]> <HASH (target) [16]> <HASH (receiver) 16>
 #define KADEMLIA2_REQ					0x21	//
 
 #define KADEMLIA2_HELLO_RES_ACK			0x22	// <NodeID><uint8 tags>
 
-#define KADEMLIA_RES					0x28	// <HASH (target) [16]> <CNT> <PEER [25]>*(CNT)
+#define KADEMLIA_RES_DEPRECATED					0x28	// <HASH (target) [16]> <CNT> <PEER [25]>*(CNT)
 #define KADEMLIA2_RES					0x29	//
 
 #define KADEMLIA_SEARCH_REQ				0x30	// <HASH (key) [16]> <ext 0/1 [1]> <SEARCH_TREE>[ext]
@@ -642,14 +649,14 @@
 
 #define KADEMLIA_PUBLISH_REQ			0x40	// <HASH (key) [16]> <CNT1 [2]> (<HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
 //#define UNUSED						0x41	// Old Opcode, don't use.
-#define KADEMLIA_PUBLISH_NOTES_REQ		0x42	// <HASH (key) [16]> <HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
+#define KADEMLIA_PUBLISH_NOTES_REQ_DEPRECATED		0x42	// <HASH (key) [16]> <HASH (target) [16]> <CNT2 [2]> <META>*(CNT2))*(CNT1)
 #define	KADEMLIA2_PUBLISH_KEY_REQ		0x43	//
 #define	KADEMLIA2_PUBLISH_SOURCE_REQ	0x44	//
 #define KADEMLIA2_PUBLISH_NOTES_REQ		0x45	//
 
 #define KADEMLIA_PUBLISH_RES			0x48	// <HASH (key) [16]>
 //#define UNUSED						0x49	// Old Opcode, don't use.
-#define KADEMLIA_PUBLISH_NOTES_RES		0x4A	// <HASH (key) [16]>
+#define KADEMLIA_PUBLISH_NOTES_RES_DEPRECATED		0x4A	// <HASH (key) [16]>
 #define	KADEMLIA2_PUBLISH_RES			0x4B	//
 #define	KADEMLIA2_PUBLISH_RES_ACK		0x4C	// null
 
@@ -671,6 +678,7 @@
 #define KADEMLIA_FIND_VALUE				0x02
 #define KADEMLIA_STORE					0x04
 #define KADEMLIA_FIND_NODE				0x0B
+#define KADEMLIA_FIND_VALUE_MORE		KADEMLIA_FIND_NODE
 
 // searchspam.met Tags
 #define SP_FILEFULLNAME					0x01

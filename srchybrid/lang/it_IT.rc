@@ -558,7 +558,6 @@ BEGIN
     IDS_PW_USS              "Scarica automaticamente la Lista Server all'avvio"
     IDS_PW_MISC             "Opzioni varie"
     IDS_PW_TRAY             "Minimizza in Trayicon"
-    IDS_PW_BEEP             "Beep in caso di errore"
     IDS_PW_PROMPT           "Chiedi Conferma prima di Uscire"
 END
 
@@ -765,7 +764,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_LOG_FILE_SAVING     "Registra i salvataggi dei File"
-    IDS_DELETEIPFILTERS     "Vuoi veramente eliminare i filtri IP selezionati?"
+    IDS_DELETEIPFILTERS     "Vuoi veramente eliminare i Filtri IP selezionati?"
     IDS_TOTAL_IPFILTER_LABEL "Filtri IP Totali:"
     IDS_TOTAL_IPS_LABEL     "IP Totali:"
     IDS_RAU_WARNING         "Questa impostazione darà ad eMule una maggiore sicurezza contro gli attacchi ed è consigliabile usarla.\nÈ tuttavia caldamente consigliato di leggere il manuale prima di attivarla!\n\nLe modifiche avranno effetto al prossimo avvio di eMule."
@@ -824,7 +823,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPDATEQUEUE         "Non aggiornare la coda in tempo reale"
     IDS_RECOVER_SINGLE      "Recupero Archivio: 1 File recuperato."
     IDS_RECOVER_MULTIPLE    "Recupero Archivio: %u File recuperati."
     IDS_ATTEMPTING_RECOVERY "Recupero Archivio: iniziato..."
@@ -907,7 +905,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_LOG_LEVEL           "Livello del Registro Eventi"
-    IDS_DISABLEPEERACHE     "Disattiva il Download dalla PeerCache"
     IDS_NEWMSG              "Nuovo Messaggio da ""%s"" (IP:%s)"
     IDS_PREF_STARTNEXTFILECATONLY "Solo nella stessa categoria"
     IDS_LOG_ULDL_EVENTS     "Registra gli eventi di Upload/Download"
@@ -1154,7 +1151,6 @@ STRINGTABLE
 BEGIN
     IDS_ERR_TOOLARGEFILE    "File di dimensioni troppo grandi per il protocollo di eDonkey (>=256GB)"
     IDS_MSGONLYFRIENDS      "Accetta solo dagli Amici"
-    IDS_MSGONLYSEC          "Accetta solo da Client Validi"
     IDS_DAY_MO_SA           "Lun-Sab"
     IDS_LIMITSOURCES        "Limite Fonti"
     IDS_LIMITCONS5SEC       "Connessioni Massime in 5 secondi"
@@ -1204,7 +1200,6 @@ BEGIN
     IDS_DL_RESUMENEXT       "Ripristina il successivo Download in pausa"
     IDS_STARTPRIO           "Priorità per questa categoria"
     IDS_PREF_STARTNEXTFILECAT "Preferisci la stessa categoria"
-    IDS_REPAINTGRAPHS       "Non ricreare i grafici al ridimensionamento"
     IDS_SOFTFILES           "Limite File Soft"
     IDS_HARDFILES           "Limite File Hard"
     IDS_FILTER              "Filtro"
@@ -1334,12 +1329,12 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_DWL_IPFILTERFILE    "IP Filter: File in Download"
-    IDS_DWLIPFILTERFAILED   "IP Filter: Download fallito"
+    IDS_DWL_IPFILTERFILE    "Filtri-IP: File in Download"
+    IDS_DWLIPFILTERFAILED   "Filtri-IP: Download fallito"
     IDS_FINDBUDDY           "Trova Compagno"
-    IDS_ERR_IPFILTERZIPEXTR "Si è verificato un errore nell'estrarre il File dei filtri IP dal File Zip ""%s"" scaricato."
+    IDS_ERR_IPFILTERZIPEXTR "Si è verificato un errore nell'estrarre il File dei Filtri IP dal File Zip ""%s"" scaricato."
     IDS_ERR_IPFILTERCONTENTERR 
-                            "Il File dei filtri IP scaricato ""%s"" è un File ZIP con un contenuto non valido."
+                            "Il File dei Filtri IP scaricato ""%s"" è un File ZIP con un contenuto non valido."
     IDS_STORENOTES          "Memorizza Note"
     IDS_NOTES               "Note"
     IDS_KADSEARCHALREADY    "È già in corso un'altra ricerca. Riprovare più tardi!"
@@ -1676,7 +1671,7 @@ BEGIN
     IDS_LD_COPYCLIPBOARD    "Copia negli appunti"
     IDS_LD_HOSTNAME         "Usa il Nome Host (dalle Opzioni) al posto dell'IP quando si crea un Link eD2K con fonti"
     IDS_SAVEACFAILED        "Errore nel salvare l'HashSet AICH!"
-    IDS_IACHHASH            "Hash AICH"
+    IDS_AICHHASH            "Hash AICH"
     IDS_BYTESPERSEC         "B/s" //!
     IDS_KBYTESPERSEC        "KB/s" //!
     IDS_MBYTESPERSEC        "MB/s" //!
@@ -1927,12 +1922,38 @@ BEGIN
     IDS_UNSUPPORTEDIMAGE    "immagine non supportata"
 END
 
+
 STRINGTABLE 
 BEGIN
     IDS_UNSHARE             "Non condividere"
     IDS_WEBUPNPINCLUDE      "Includi la porta nelle impostazioni dell'UPnP"
     IDS_ADDEDON             "Aggiunto"
     IDS_RESOLVELINKS        "Risolvi i Link nelle cartelle condivise"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNLOADCOMMANDS    "Comandi di Download"
+    IDS_CLOSETOOLBAR        "Chiudi Barra degli Strumenti"
+    IDS_SHOWTOOLBAR         "Mostra Barra degli Strumenti"
+    IDS_SEARCH_BADOPERATORCOMBINATION 
+                            "Non è possibile utilizzare la prima parola con un operatore 'OR' mentre ricerchi sulla rete Kad!\n\nPer esempio ""Parola1 OR Parola2"" non è possibile. Provare ""Parola1 AND (Parola2 OR Parola3)"" altrimenti effettuare ricerche multiple."
+    IDS_DISCOVEREDBY        "Scoperto da"
+    IDS_NODES               "Nodo(i)"
+    IDS_ROUTINGTABLE        "Tabella di Routing"
+    IDS_PROTOCOLVERSION     "Versione di Protocollo"
+    IDS_FOUNDNODESUSEFUL    "Nodi Trovati (utili)"
+    IDS_NORESPONSE          "Nessuna Risposta"
+    IDS_NOTASKED            "Non Chiesto"
+    IDS_LOOKUPGRAPH         "Dettagli di Ricerca"
+    IDS_AUTOKADLOOKUPGRAPH  "Visualizza automaticamente le ricerche attive"
+    IDS_PAUSEONPREVIEW      "Metti in pausa quando è possibile l'anteprima"
+    IDS_PREVIEWWITH         "Anteprima con"
+    IDS_CLOSEEMULE          "Chiudi eMule"
+    IDS_DONOTASKAGAIN       "Non chiedermelo nuovamente"
+    IDS_POPULARITY          "Livello di Popolarità"
+    IDS_SHOWWIN7TASKBARGOODIES "Abilita effetti della barra strumenti di Windows 7"
+    IDS_LANMODE             "Modalità LAN"
 END
 
 //////////////////////////// MorphXT strings //////////////////////////////////
@@ -3689,11 +3710,6 @@ BEGIN
    IDS_REMOVE_AICH_TIP      "Attivato: se l'hash AICH rileva files non condivisi\no risulta inutilizzato per un qualsiasi motivo\nverrà cancellato immediatamente.\nPredefinito: Disabilitato"
    IDS_WSUPNP_TIP           "Abilita l'UPnP anche per le porte utilizzate da Webserver."
    IDS_CHECK_FILE_OPEN_TIP  "Attiva prompt prima di aprire un file tramite eMule."
-   //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
-   IDS_FILTER_CLIENTFAILEDDOWN "Elimina i clienti con download fallito"
-   IDS_FILTER_CLIENTFAILEDDOWN_TIP "Elimina i client che hanno un upload inferiore a 12kB\nin e media di download tripla dell'upload.\nDefault: attivo"
-   //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
-   IDS_TCP_CONS "Connessioni TCP"
 END
 
 #endif    // Italian (Italy) resources

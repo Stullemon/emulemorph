@@ -33,7 +33,7 @@
 #include "ClientCredits.h"
 #include "MemDC.h"
 #include "ChatWnd.h"
-#include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "Kademlia/Kademlia/Kademlia.h"
 #include "Kademlia/Kademlia/Prefs.h"
 #include "Kademlia/net/KademliaUDPListener.h"
@@ -45,6 +45,7 @@
 #include "CollectionViewDialog.h"
 #include "SearchDlg.h"
 #include "SharedFileList.h"
+#include "ToolbarWnd.h"
 #include "MassRename.h" //SLAHAM: ADDED MassRename DownloadList
 #include "log.h" //MassRename DownloadList
 #include "SR13-ImportParts.h"//MORPH - Added by SiRoB, Import Parts [SR13]
@@ -89,10 +90,14 @@ CDownloadListCtrl::CDownloadListCtrl()
 		m_tooltip = new CToolTipCtrlX;
 	SetGeneralPurposeFind(true);
 	SetSkinKey(L"DownloadsLv");
+	m_pRelatedToolbar = NULL;
+	m_dwLastAvailableCommandsCheck = 0;
 }
 
 CDownloadListCtrl::~CDownloadListCtrl()
 {
+	if (m_PreviewMenu)
+		VERIFY( m_PreviewMenu.DestroyMenu() );
 	if (m_PrioMenu)
 		VERIFY( m_PrioMenu.DestroyMenu() );
     if (m_SourcesMenu)
@@ -398,7 +403,6 @@ void CDownloadListCtrl::Localize()
 void CDownloadListCtrl::AddFile(CPartFile* toadd)
 {
 	//if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
-	// Stullemon: Why was this removed?
 
 	// Create new Item
     CtrlItem_Struct* newitem = new CtrlItem_Struct;
@@ -576,6 +580,7 @@ void CDownloadListCtrl::UpdateItem(void* toupdate)
 		m_updatethread->AddItemToUpdate((LPARAM)updateItem);
 		//MORPH END - UpdateItemThread
 	}
+	ReportAvailableCommands();
 }
 
 void CDownloadListCtrl::GetFileItemDisplayText(CPartFile *lpPartFile, int iSubItem, LPTSTR pszText, int cchTextMax)
@@ -1877,6 +1882,9 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
             int iFilesPreviewType = 0;
 			int iFilesToPreview = 0;
 			int iFilesToCancel = 0;
+			int iFilesCanPauseOnPreview = 0;
+			int iFilesDoPauseOnPreview = 0;
+			int iFilesInCats = 0;
 			int iFileForceA4AF = 0; //MORPH - Added by SiRoB, A4AF
 			int iFileForceAllA4AF = 0; //MORPH - Added by SiRoB, A4AF
 			int iFileForceA4AFOff = 0; //MORPH - Added by SiRoB, A4AF
@@ -1911,6 +1919,9 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
                 iFilesGetPreviewParts += pFile->GetPreviewPrio() ? 1 : 0;
                 iFilesPreviewType += pFile->IsPreviewableFileType() ? 1 : 0;
 				iFilesToPreview += pFile->IsReadyForPreview() ? 1 : 0;
+				iFilesCanPauseOnPreview += (pFile->IsPreviewableFileType() && !pFile->IsReadyForPreview() && pFile->CanPauseFile()) ? 1 : 0;
+				iFilesDoPauseOnPreview += (pFile->IsPausingOnPreview()) ? 1 : 0;
+				iFilesInCats += (!pFile->HasDefaultCategory()) ? 1 : 0; 
 				//MORPH START - Added by SiRoB, Only download complete files v2.1 (shadow)
 				iFileNotSeenCompleteSource += pFile->notSeenCompleteSource() && pFile->GetStatus() != PS_ERROR && !bFileDone;
 				//MORPH END   - Added by SiRoB, Only download complete files v2.1 (shadow)
@@ -2005,16 +2016,28 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 
 			bool bOpenEnabled = (iSelectedItems == 1 && iFilesToOpen == 1);
 			m_FileMenu.EnableMenuItem(MP_OPEN, bOpenEnabled ? MF_ENABLED : MF_GRAYED);
-            if(thePrefs.IsExtControlsEnabled() && !thePrefs.GetPreviewPrio()) {
-			    m_FileMenu.EnableMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, (iSelectedItems == 1 && iFilesPreviewType == 1 && iFilesToPreview == 0 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
-			    m_FileMenu.CheckMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, (iSelectedItems == 1 && iFilesGetPreviewParts == 1) ? MF_CHECKED : MF_UNCHECKED);
+            
+			CMenu PreviewWithMenu;
+			PreviewWithMenu.CreateMenu();
+			int iPreviewMenuEntries = thePreviewApps.GetAllMenuEntries(PreviewWithMenu, (iSelectedItems == 1) ? file1 : NULL);
+			if(thePrefs.IsExtControlsEnabled())
+			{
+				if (!thePrefs.GetPreviewPrio())
+				{
+					m_PreviewMenu.EnableMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, (iSelectedItems == 1 && iFilesPreviewType == 1 && iFilesToPreview == 0 && iFilesNotDone == 1) ? MF_ENABLED : MF_GRAYED);
+					m_PreviewMenu.CheckMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, (iSelectedItems == 1 && iFilesGetPreviewParts == 1) ? MF_CHECKED : MF_UNCHECKED);
+				}
+				m_PreviewMenu.EnableMenuItem(MP_PREVIEW, (iSelectedItems == 1 && iFilesToPreview == 1) ? MF_ENABLED : MF_GRAYED);
+				m_PreviewMenu.EnableMenuItem(MP_PAUSEONPREVIEW, iFilesCanPauseOnPreview > 0 ? MF_ENABLED : MF_GRAYED);
+				m_PreviewMenu.CheckMenuItem(MP_PAUSEONPREVIEW, (iSelectedItems > 0 && iFilesDoPauseOnPreview == iSelectedItems) ? MF_CHECKED : MF_UNCHECKED);
+				if (iPreviewMenuEntries)
+					m_PreviewMenu.InsertMenu(1, MF_POPUP | MF_BYPOSITION | (iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED), (UINT_PTR)PreviewWithMenu.m_hMenu, GetResString(IDS_PREVIEWWITH));
             }
-			m_FileMenu.EnableMenuItem(MP_PREVIEW, (iSelectedItems == 1 && iFilesToPreview == 1) ? MF_ENABLED : MF_GRAYED);
-			CMenu PreviewMenu;
-			PreviewMenu.CreateMenu();
-			int iPreviewMenuEntries = thePreviewApps.GetAllMenuEntries(PreviewMenu, (iSelectedItems == 1) ? file1 : NULL);
-			if (iPreviewMenuEntries)
-				m_FileMenu.InsertMenu(MP_METINFO, MF_POPUP | (iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED), (UINT_PTR)PreviewMenu.m_hMenu, GetResString(IDS_DL_PREVIEW));
+			else {
+				m_FileMenu.EnableMenuItem(MP_PREVIEW, (iSelectedItems == 1 && iFilesToPreview == 1) ? MF_ENABLED : MF_GRAYED);
+				if (iPreviewMenuEntries)
+					m_FileMenu.InsertMenu(MP_METINFO, MF_POPUP | MF_BYCOMMAND | (iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED), (UINT_PTR)PreviewWithMenu.m_hMenu, GetResString(IDS_PREVIEWWITH));
+			}
 
 			bool bDetailsEnabled = (iSelectedItems > 0);
 			m_FileMenu.EnableMenuItem(MP_METINFO, bDetailsEnabled ? MF_ENABLED : MF_GRAYED);
@@ -2102,27 +2125,10 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			// create cat-submenue
 			CMenu CatsMenu;
 			CatsMenu.CreateMenu();
-			flag = (thePrefs.GetCatCount() == 1) ? MF_GRAYED : MF_ENABLED;
-			CString label;
-			if (thePrefs.GetCatCount()>1) {
-				for (int i = 0; i < thePrefs.GetCatCount(); i++){
-					//MORPH START - Changed By SiRoB, Khaos Category
-					/*
-					if (i>0) {
-						label=thePrefs.GetCategory(i)->strTitle;
-						label.Replace(_T("&"), _T("&&") );
-					}
-					CatsMenu.AppendMenu(MF_STRING,MP_ASSIGNCAT+i, (i==0)?GetResString(IDS_CAT_UNASSIGN):label);
-					*/
-					label=thePrefs.GetCategory(i)->strTitle;
-					label.Replace(_T("&"), _T("&&") );
-					CatsMenu.AppendMenu(MF_STRING,MP_ASSIGNCAT+i,label);
-					//MORPH END   - Changed By SiRoB, Khaos Category
-				}
-			}
-			m_FileMenu.AppendMenu(MF_POPUP | flag, (UINT_PTR)CatsMenu.m_hMenu, GetResString(IDS_TOCAT), _T("CATEGORY"));
-			
-			// khaos::categorymod+			
+			FillCatsMenu(CatsMenu, iFilesInCats);
+			m_FileMenu.AppendMenu(MF_POPUP, (UINT_PTR)CatsMenu.m_hMenu, GetResString(IDS_TOCAT), _T("CATEGORY"));
+
+			//MORPH START - Added by SiRoB, Khaos Category
 			CTitleMenu mnuOrder;
 			if (this->GetSelectedCount() > 1) {
 				mnuOrder.CreatePopupMenu();
@@ -2135,22 +2141,36 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			else {
 				m_FileMenu.AppendMenu(MF_STRING, MP_CAT_SETRESUMEORDER, GetResString(IDS_CAT_SETORDER), _T("FILELINEARPRIO"));
 			}
-			// khaos::categorymod-
+			//MORPH END   - Added by SiRoB, Khaos Category
+
+			bool bToolbarItem = !thePrefs.IsDownloadToolbarEnabled();
+			if (bToolbarItem)
+			{
+				m_FileMenu.AppendMenu(MF_SEPARATOR);
+				m_FileMenu.AppendMenu(MF_STRING, MP_TOGGLEDTOOLBAR, GetResString(IDS_SHOWTOOLBAR));
+			}
 
 			GetPopupMenuPos(*this, point);
 			m_FileMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
-			VERIFY( m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION) );
-			VERIFY( m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION) );
-			if (iPreviewMenuEntries)
-				VERIFY( m_FileMenu.RemoveMenu((UINT)PreviewMenu.m_hMenu, MF_BYCOMMAND) );
+			if (bToolbarItem)
+			{
+				VERIFY( m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION) );
+				VERIFY( m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION) );
+			}
 			//MORPH START - Added by SiRoB, Khaos Category
 			m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount()-1,MF_BYPOSITION);
 			if (mnuOrder) VERIFY( mnuOrder.DestroyMenu() );
 			//MORPH END   - Added by SiRoB, Khaos Category
 
+			VERIFY( m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION) );
+			VERIFY( m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION) );
+			if (iPreviewMenuEntries && thePrefs.IsExtControlsEnabled())
+				VERIFY( m_PreviewMenu.RemoveMenu((UINT)PreviewWithMenu.m_hMenu, MF_BYCOMMAND) );
+			else if (iPreviewMenuEntries)
+				VERIFY( m_FileMenu.RemoveMenu((UINT)PreviewWithMenu.m_hMenu, MF_BYCOMMAND) );
 			VERIFY( WebMenu.DestroyMenu() );
 			VERIFY( CatsMenu.DestroyMenu() );
-			VERIFY( PreviewMenu.DestroyMenu() );
+			VERIFY( PreviewWithMenu.DestroyMenu() );
 		}
 		else{
 			const CUpDownClient* client = (CUpDownClient*)content->value;
@@ -2169,7 +2189,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
 			ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES), _T("VIEWFILES"));
 			if (Kademlia::CKademlia::IsRunning() && !Kademlia::CKademlia::IsConnected())
-				ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
+				ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0 && client->GetKadVersion() > 1) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 			ClientMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND), _T("Search"));
 
 			CMenu A4AFMenu;
@@ -2212,10 +2232,18 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 		m_FileMenu.EnableMenuItem(MP_RESUME, MF_GRAYED);
 		m_FileMenu.EnableMenuItem(MP_OPEN, MF_GRAYED);
 
-		if (thePrefs.IsExtControlsEnabled() && !thePrefs.GetPreviewPrio()) {
-			m_FileMenu.EnableMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, MF_GRAYED);
-			m_FileMenu.CheckMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, MF_UNCHECKED);
+		if (thePrefs.IsExtControlsEnabled()) {
+			if (!thePrefs.GetPreviewPrio())
+			{
+				m_PreviewMenu.EnableMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, MF_GRAYED);
+				m_PreviewMenu.CheckMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, MF_UNCHECKED);
+			}
+			m_PreviewMenu.EnableMenuItem(MP_PREVIEW, MF_GRAYED);
+			m_PreviewMenu.EnableMenuItem(MP_PAUSEONPREVIEW, MF_GRAYED);
         }
+		else {
+			m_FileMenu.EnableMenuItem(MP_PREVIEW, MF_GRAYED);
+		}
 		//EastShare Start - Added by AndCycle, Only download complete files v2.1 (shadow)
 		m_FileMenu.EnableMenuItem(MP_FORCE,MF_GRAYED);//shadow#(onlydownloadcompletefiles)
 		//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
@@ -2260,11 +2288,122 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 		theWebServices.GetFileMenuEntries(&WebMenu);
 		m_FileMenu.AppendMenu(MF_POPUP | MF_GRAYED, (UINT_PTR)WebMenu.m_hMenu, GetResString(IDS_WEBSERVICES), _T("WEB"));
 
+		bool bToolbarItem = !thePrefs.IsDownloadToolbarEnabled();
+		if (bToolbarItem)
+		{
+			m_FileMenu.AppendMenu(MF_SEPARATOR);
+			m_FileMenu.AppendMenu(MF_STRING, MP_TOGGLEDTOOLBAR, GetResString(IDS_SHOWTOOLBAR));
+		}
+
 		GetPopupMenuPos(*this, point);
 		m_FileMenu.TrackPopupMenu(TPM_LEFTALIGN |TPM_RIGHTBUTTON, point.x, point.y, this);
+		if (bToolbarItem)
+		{
+			VERIFY( m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION) );
+			VERIFY( m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION) );
+		}
 		m_FileMenu.RemoveMenu(m_FileMenu.GetMenuItemCount() - 1, MF_BYPOSITION);
 		VERIFY( WebMenu.DestroyMenu() );
 	}
+}
+
+void CDownloadListCtrl::FillCatsMenu(CMenu& rCatsMenu, int iFilesInCats)
+{
+	ASSERT(rCatsMenu.m_hMenu);
+	if (iFilesInCats == (-1))
+	{
+		iFilesInCats = 0;
+		int iSel = GetNextItem(-1, LVIS_SELECTED);
+		if (iSel != -1)
+		{
+			const CtrlItem_Struct* content = (CtrlItem_Struct*)GetItemData(iSel);
+			if (content->type == FILE_TYPE)
+			{
+				POSITION pos = GetFirstSelectedItemPosition();
+				while (pos)
+				{
+					const CtrlItem_Struct* pItemData = (CtrlItem_Struct*)GetItemData(GetNextSelectedItem(pos));
+					if (pItemData->type != FILE_TYPE)
+						continue;
+					const CPartFile* pFile = (CPartFile*)pItemData->value;
+					iFilesInCats += (!pFile->HasDefaultCategory()) ? 1 : 0; 
+				}
+			}
+		}
+	}
+	rCatsMenu.AppendMenu(MF_STRING, MP_NEWCAT, GetResString(IDS_NEW) + _T("..."));	
+	//MORPH START - Changed By SiRoB, Khaos Category
+	// We don't use the Unassign menu item, we use the default cat
+	/*
+	CString label = GetResString(IDS_CAT_UNASSIGN);
+	label.Remove('(');
+	label.Remove(')'); // Remove brackets without having to put a new/changed ressource string in
+	rCatsMenu.AppendMenu(MF_STRING | ((iFilesInCats == 0) ? MF_GRAYED : MF_ENABLED), MP_ASSIGNCAT, label);
+	*/
+	// MORPH END   - Changed By SiRoB, Khaos Category
+	if (thePrefs.GetCatCount() > 1)
+	{
+		rCatsMenu.AppendMenu(MF_SEPARATOR);
+		//MORPH START - Changed By SiRoB, Khaos Category
+		/*
+		for (int i = 1; i < thePrefs.GetCatCount(); i++){
+			label = thePrefs.GetCategory(i)->strTitle;
+			label.Replace(_T("&"), _T("&&") );
+			rCatsMenu.AppendMenu(MF_STRING, MP_ASSIGNCAT + i, label);
+		}
+			*/
+		CString label;
+		for (int i = 0; i < thePrefs.GetCatCount(); i++){
+			label = thePrefs.GetCategory(i)->strTitle;
+			label.Replace(_T("&"), _T("&&") );
+			rCatsMenu.AppendMenu(MF_STRING, MP_ASSIGNCAT + i, label);
+		}
+		//MORPH END   - Changed By SiRoB, Khaos Category
+	}
+}
+
+CTitleMenu* CDownloadListCtrl::GetPrioMenu()
+{
+	UINT uPrioMenuItem = 0;
+	int iSel = GetNextItem(-1, LVIS_SELECTED);
+	if (iSel != -1)
+	{
+		const CtrlItem_Struct* content = (CtrlItem_Struct*)GetItemData(iSel);
+		if (content->type == FILE_TYPE)
+		{
+			bool bFirstItem = true;	
+			POSITION pos = GetFirstSelectedItemPosition();
+			while (pos)
+			{
+				const CtrlItem_Struct* pItemData = (CtrlItem_Struct*)GetItemData(GetNextSelectedItem(pos));
+				if (pItemData->type != FILE_TYPE)
+					continue;
+				const CPartFile* pFile = (CPartFile*)pItemData->value;
+				UINT uCurPrioMenuItem = 0;
+				if (pFile->IsAutoDownPriority())
+					uCurPrioMenuItem = MP_PRIOAUTO;
+				else if (pFile->GetDownPriority() == PR_HIGH)
+					uCurPrioMenuItem = MP_PRIOHIGH;
+				else if (pFile->GetDownPriority() == PR_NORMAL)
+					uCurPrioMenuItem = MP_PRIONORMAL;
+				else if (pFile->GetDownPriority() == PR_LOW)
+					uCurPrioMenuItem = MP_PRIOLOW;
+				else
+					ASSERT(0);
+
+				if (bFirstItem)
+					uPrioMenuItem = uCurPrioMenuItem;
+				else if (uPrioMenuItem != uCurPrioMenuItem)
+				{
+					uPrioMenuItem = 0;
+					break;
+				}
+				bFirstItem = false;
+			}
+		}
+	}
+	m_PrioMenu.CheckMenuRadioItem(MP_PRIOLOW, MP_PRIOAUTO, uPrioMenuItem, 0);
+	return &m_PrioMenu;
 }
 
 BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
@@ -2279,6 +2418,10 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			return TRUE;
 		case MP_FIND:
 			OnFindStart();
+			return TRUE;
+		case MP_TOGGLEDTOOLBAR:
+			thePrefs.SetDownloadToolbar(true);
+			theApp.emuledlg->transferwnd->ShowToolbar(true);
 			return TRUE;
 	}
 
@@ -2358,7 +2501,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 										if (wParam == MP_CANCEL){
 											bool delsucc = ShellDeleteFile(selectedList.GetHead()->GetFilePath());
 											if (delsucc){
-												theApp.sharedfiles->RemoveFile(selectedList.GetHead());
+												theApp.sharedfiles->RemoveFile(selectedList.GetHead(), true);
 											}
 											else{
 												CString strError;
@@ -2627,6 +2770,19 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 						break;
 					file->PreviewFile();
 					break;
+				case MP_PAUSEONPREVIEW:
+				{
+					bool bAllPausedOnPreview = true;
+					for (pos = selectedList.GetHeadPosition(); pos != 0; )
+						bAllPausedOnPreview = ((CPartFile*)selectedList.GetNext(pos))->IsPausingOnPreview() && bAllPausedOnPreview;
+					while (!selectedList.IsEmpty()){
+						CPartFile* pPartFile = selectedList.RemoveHead();
+						if (pPartFile->IsPreviewableFileType() && !pPartFile->IsReadyForPreview())
+							pPartFile->SetPauseOnPreview(!bAllPausedOnPreview);
+						
+					}					
+					break;
+				}		
 				case MP_VIEWFILECOMMENTS:
 					ShowFileDialog(IDD_COMMENTLST);
 					break;
@@ -2872,11 +3028,20 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					if (wParam>=MP_WEBURL && wParam<=MP_WEBURL+99){
 						theWebServices.RunURL(file, wParam);
 					}
-					else if (wParam>=MP_ASSIGNCAT && wParam<=MP_ASSIGNCAT+99){
+					else if ((wParam >= MP_ASSIGNCAT && wParam<=MP_ASSIGNCAT+99) || wParam == MP_NEWCAT){
+						int nCatNumber;
+						if (wParam == MP_NEWCAT)
+						{
+							nCatNumber = theApp.emuledlg->transferwnd->AddCategoryInteractive();
+							if (nCatNumber == 0) // Creation canceled
+								break;
+						}
+						else
+							nCatNumber = wParam - MP_ASSIGNCAT;
 						SetRedraw(FALSE);
 						while (!selectedList.IsEmpty()){
 							CPartFile *partfile = selectedList.GetHead();
-							partfile->SetCategory(wParam - MP_ASSIGNCAT);
+							partfile->SetCategory(nCatNumber);
 							partfile->UpdateDisplayedInfo(true);
 							selectedList.RemoveHead();
 						}
@@ -2939,8 +3104,8 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					ShowClientDialog(client);
 					break;
 				case MP_BOOT:
-					if (client->GetKadPort())
-						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
+					if (client->GetKadPort() && client->GetKadVersion() > 1)
+						Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 					break;
 // ZZ:DownloadManager -->
 #ifdef _DEBUG
@@ -2976,7 +3141,7 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				break;
 		}
 	}
-
+	ReportAvailableCommands(true);
 	return TRUE;
 }
 
@@ -3122,10 +3287,10 @@ int CDownloadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSor
 	/*
 	//call secondary sortorder, if this one results in equal
 	int dwNextSort;
-	if (comp == 0 && (dwNextSort = theApp.emuledlg->transferwnd->downloadlistctrl.GetNextSortOrder(dwOrgSort)) != -1)
+	if (comp == 0 && (dwNextSort = theApp.emuledlg->transferwnd->GetDownloadList()->GetNextSortOrder(dwOrgSort)) != -1)
 		return SortProc(lParam1, lParam2, dwNextSort);
 	*/
-	if (comp == 0 && dwOrgSort != 99 && theApp.emuledlg->transferwnd->downloadlistctrl.GetNextSortOrder(dwOrgSort) == -1)
+	if (comp == 0 && dwOrgSort != 99 && theApp.emuledlg->transferwnd->GetDownloadList()->GetNextSortOrder(dwOrgSort) == -1)
 		return SortProc(lParam1, lParam2, 99);	// Perhaps a bit hackity, but we only have one last-chance, and this beats saving it in the preferences
 	// SLUGFILLER: DLsortFix
 	
@@ -3189,6 +3354,7 @@ void CDownloadListCtrl::OnListModified(NMHDR *pNMHDR, LRESULT * /*pResult*/)
 	BOOL notLast = pNMListView->iItem + 1 != GetItemCount();
 	BOOL notFirst = pNMListView->iItem != 0;
 	RedrawItems(pNMListView->iItem - (int)notFirst, pNMListView->iItem + (int)notLast);
+	ReportAvailableCommands(true);
 }
 
 int CDownloadListCtrl::Compare(const CPartFile *file1, const CPartFile *file2, LPARAM lParamSort)
@@ -3602,6 +3768,8 @@ void CDownloadListCtrl::OnNmDblClk(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 void CDownloadListCtrl::CreateMenues()
 {
+	if (m_PreviewMenu)
+		VERIFY( m_PreviewMenu.DestroyMenu() );
 	if (m_PrioMenu)
 		VERIFY( m_PrioMenu.DestroyMenu() );
 	if (m_SourcesMenu)
@@ -3658,14 +3826,28 @@ void CDownloadListCtrl::CreateMenues()
 	//EastShare End - Added by AndCycle, Only download complete files v2.1 (shadow)
 	m_FileMenu.AppendMenu(MF_SEPARATOR);
 	m_FileMenu.AppendMenu(MF_STRING, MP_OPEN, GetResString(IDS_DL_OPEN), _T("OPENFILE"));
-	if (thePrefs.IsExtControlsEnabled() && !thePrefs.GetPreviewPrio())
+	
+	// Extended: Submenu with Preview options, Normal: Preview and possibly 'Preview with' item 
+	if (thePrefs.IsExtControlsEnabled())
+	{
+		m_PreviewMenu.CreateMenu();
+		m_PreviewMenu.AddMenuTitle(NULL, true);
+		m_PreviewMenu.AppendMenu(MF_STRING, MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
     	//MORPH START - Added icon
     	/*
-    	m_FileMenu.AppendMenu(MF_STRING, MP_TRY_TO_GET_PREVIEW_PARTS, GetResString(IDS_DL_TRY_TO_GET_PREVIEW_PARTS));
+		m_PreviewMenu.AppendMenu(MF_STRING, MP_PAUSEONPREVIEW, GetResString(IDS_PAUSEONPREVIEW));
+		if (!thePrefs.GetPreviewPrio())
+    		m_PreviewMenu.AppendMenu(MF_STRING, MP_TRY_TO_GET_PREVIEW_PARTS, GetResString(IDS_DL_TRY_TO_GET_PREVIEW_PARTS));
     	*/
-    	m_FileMenu.AppendMenu(MF_STRING, MP_TRY_TO_GET_PREVIEW_PARTS, GetResString(IDS_DL_TRY_TO_GET_PREVIEW_PARTS), _T("FILEDOWNLOADPREVIEWFIRST"));
+		m_PreviewMenu.AppendMenu(MF_STRING, MP_PAUSEONPREVIEW, GetResString(IDS_PAUSEONPREVIEW), _T("FILEDOWNLOADPREVIEWPAUSE"));
+		if (!thePrefs.GetPreviewPrio())
+	    	m_PreviewMenu.AppendMenu(MF_STRING, MP_TRY_TO_GET_PREVIEW_PARTS, GetResString(IDS_DL_TRY_TO_GET_PREVIEW_PARTS), _T("FILEDOWNLOADPREVIEWFIRST"));
     	//MORPH END   - Added icon
-	m_FileMenu.AppendMenu(MF_STRING, MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
+		m_FileMenu.AppendMenu(MF_STRING|MF_POPUP, (UINT_PTR)m_PreviewMenu.m_hMenu, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
+	}
+	else
+		m_FileMenu.AppendMenu(MF_STRING, MP_PREVIEW, GetResString(IDS_DL_PREVIEW), _T("PREVIEW"));
+	
 	m_FileMenu.AppendMenu(MF_STRING, MP_METINFO, GetResString(IDS_DL_INFO), _T("FILEINFO"));
 	m_FileMenu.AppendMenu(MF_STRING, MP_VIEWFILECOMMENTS, GetResString(IDS_CMT_SHOWALL), _T("FILECOMMENTS"));
 	//MORPH START show less controls
@@ -3753,6 +3935,24 @@ CString CDownloadListCtrl::getTextList()
 	}
 
 	return out;
+}
+
+float CDownloadListCtrl::GetFinishedSize()
+{
+	float fsize = 0;
+
+	for (ListItems::const_iterator it = m_ListItems.begin(); it != m_ListItems.end(); it++)
+	{
+		CtrlItem_Struct* cur_item = it->second;
+		if (cur_item->type == FILE_TYPE)
+		{
+			CPartFile* file = (CPartFile*)cur_item->value;
+			if (file->GetStatus() == PS_COMPLETE) {
+				fsize += (uint64)file->GetFileSize();
+			}
+		}
+	}
+	return fsize;
 }
 
 int CDownloadListCtrl::GetFilesCountInCurCat()
@@ -4294,4 +4494,83 @@ CImageList *CDownloadListCtrl::CreateDragImage(int /*iItem*/, LPPOINT lpPoint)
 	}
 
 	return pimlDrag;
+}
+
+void CDownloadListCtrl::ReportAvailableCommands(bool bForce)
+{
+	if (m_pRelatedToolbar == NULL || (m_dwLastAvailableCommandsCheck > ::GetTickCount() - SEC2MS(3) && !bForce))
+		return;
+	m_dwLastAvailableCommandsCheck = ::GetTickCount();
+
+	CList<int> liAvailableCommands;
+	int iSel = GetNextItem(-1, LVIS_SELECTED);
+	if (iSel != -1)
+	{
+		const CtrlItem_Struct* content = (CtrlItem_Struct*)GetItemData(iSel);
+		if (content->type == FILE_TYPE)
+		{
+			// get merged settings
+			int iSelectedItems = 0;
+			int iFilesNotDone = 0;
+			int iFilesToPause = 0;
+			int iFilesToStop = 0;
+			int iFilesToResume = 0;
+			int iFilesToOpen = 0;
+            int iFilesGetPreviewParts = 0;
+            int iFilesPreviewType = 0;
+			int iFilesToPreview = 0;
+			int iFilesToCancel = 0;
+			POSITION pos = GetFirstSelectedItemPosition();
+			while (pos)
+			{
+				const CtrlItem_Struct* pItemData = (CtrlItem_Struct*)GetItemData(GetNextSelectedItem(pos));
+				if (pItemData->type != FILE_TYPE)
+					continue;
+				const CPartFile* pFile = (CPartFile*)pItemData->value;
+				iSelectedItems++;
+
+				bool bFileDone = (pFile->GetStatus()==PS_COMPLETE || pFile->GetStatus()==PS_COMPLETING);
+				iFilesToCancel += pFile->GetStatus() != PS_COMPLETING ? 1 : 0;
+				iFilesNotDone += !bFileDone ? 1 : 0;
+				iFilesToStop += pFile->CanStopFile() ? 1 : 0;
+				iFilesToPause += pFile->CanPauseFile() ? 1 : 0;
+				iFilesToResume += pFile->CanResumeFile() ? 1 : 0;
+				iFilesToOpen += pFile->CanOpenFile() ? 1 : 0;
+                iFilesGetPreviewParts += pFile->GetPreviewPrio() ? 1 : 0;
+                iFilesPreviewType += pFile->IsPreviewableFileType() ? 1 : 0;
+				iFilesToPreview += pFile->IsReadyForPreview() ? 1 : 0;
+			}
+
+
+			// enable commands if there is at least one item which can be used for the action
+			if (iFilesToCancel > 0)
+				liAvailableCommands.AddTail(MP_CANCEL);
+			if (iFilesToStop > 0)
+				liAvailableCommands.AddTail(MP_STOP);
+			if (iFilesToPause > 0)
+				liAvailableCommands.AddTail(MP_PAUSE);
+			if (iFilesToResume > 0)
+				liAvailableCommands.AddTail(MP_RESUME);
+			if (iSelectedItems == 1 && iFilesToOpen == 1)
+				liAvailableCommands.AddTail(MP_OPEN);
+			if (iSelectedItems == 1 && iFilesToPreview == 1)
+				liAvailableCommands.AddTail(MP_PREVIEW);
+			if (iSelectedItems > 0)
+			{
+				liAvailableCommands.AddTail(MP_METINFO);
+				liAvailableCommands.AddTail(MP_VIEWFILECOMMENTS);
+				liAvailableCommands.AddTail(MP_SHOWED2KLINK);
+				liAvailableCommands.AddTail(MP_NEWCAT);
+				liAvailableCommands.AddTail(MP_PRIOLOW);
+				if (theApp.emuledlg->searchwnd->CanSearchRelatedFiles())
+					liAvailableCommands.AddTail(MP_SEARCHRELATED);
+			}
+		}
+	}
+	int total;
+	if (GetCompleteDownloads(curTab, total) > 0)
+		liAvailableCommands.AddTail(MP_CLEARCOMPLETED);
+	if (GetItemCount() > 0)
+		liAvailableCommands.AddTail(MP_FIND);
+	m_pRelatedToolbar->OnAvailableCommandsChanged(&liAvailableCommands);
 }

@@ -48,7 +48,6 @@ namespace Kademlia
 			CContact();
 			CContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, uint8 uVersion, CKadUDPKey cUDPKey, bool bIPVerified);
 			CContact(const CUInt128 &uClientID, uint32 uIp, uint16 uUdpPort, uint16 uTcpPort, const CUInt128 &uTarget, uint8 uVersion, CKadUDPKey cUDPKey, bool bIPVerified);	
-
 			CContact& operator=(const CContact& k1)				{ Copy(k1); return *this; }	
 
 			void GetClientID(CUInt128 *puId) const;
@@ -81,7 +80,6 @@ namespace Kademlia
 			time_t GetExpireTime() const;
 			time_t GetLastTypeSet() const;
 			time_t GetLastSeen() const;
-			bool CheckIfKad2();
 			
 			bool		GetReceivedHelloPacket() const					{return m_bReceivedHelloPacket;}
 			void		SetReceivedHelloPacket()						{m_bReceivedHelloPacket = true;}
@@ -107,7 +105,6 @@ namespace Kademlia
 			byte m_byType;
 			uint8 m_uVersion;
 			bool m_bGuiRefs;
-			bool m_bCheckKad2;
 			bool m_bIPVerified;
 			bool m_bReceivedHelloPacket;
 			CKadUDPKey	m_cUDPKey;

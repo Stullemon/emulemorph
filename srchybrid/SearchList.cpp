@@ -511,6 +511,7 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse, uint32 dwF
 		if (   parent->GetListParent() == NULL
 			&& md4cmp(parent->GetFileHash(), toadd->GetFileHash()) == 0)
 		{
+
 			// if this parent does not yet have any child entries, create one child entry 
 			// which is equal to the current parent entry (needed for GUI when expanding the child list).
 			if (parent->GetListChildCount() == 0)
@@ -570,6 +571,25 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse, uint32 dwF
 						if (bHasCompleteSources)
 							child->AddCompleteSources(uCompleteSources);
 
+						// Check AICH Hash - if they differ, clear it (see KademliaSearchKeyword)
+						//					 if we didn't have a hash yet, take it over
+						if (toadd->GetFileIdentifier().HasAICHHash())
+						{
+							if (child->GetFileIdentifier().HasAICHHash())
+							{
+								if (parent->GetFileIdentifier().GetAICHHash() != toadd->GetFileIdentifier().GetAICHHash())
+								{
+									DEBUG_ONLY(DebugLogWarning(_T("Kad: SearchList: AddToList: Received searchresult with different AICH hash than existing one, ignoring AICH for result %s"), child->GetFileName()) );
+									child->SetFoundMultipleAICH();
+									child->GetFileIdentifier().ClearAICHHash();
+								}
+							}
+							else if (!child->DidFoundMultipleAICH())
+							{
+								DEBUG_ONLY(DebugLog(_T("Kad: SearchList: AddToList: Received searchresult with new AICH hash %s, taking over to existing result. Entry: %s"), toadd->GetFileIdentifier().GetAICHHash().GetString(), child->GetFileName()) );
+								child->GetFileIdentifier().SetAICHHash(toadd->GetFileIdentifier().GetAICHHash());
+							}
+						}
 						break;
 					}
 				}
@@ -630,11 +650,28 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse, uint32 dwF
 			UINT uTrustValue = 0; // average trust value (might be changed to median)
 			uint32 nPublishInfoTags = 0;
 			const CSearchFile* bestEntry = NULL;
+			bool bHasMultipleAICHHashs = false;
+			CAICHHash aichHash;
+			bool bAICHHashValid = false;
 			for (POSITION pos2 = list->GetHeadPosition(); pos2 != NULL; )
 			{
 				const CSearchFile* child = list->GetNext(pos2);
 				if (child->GetListParent() == parent)
 				{
+					// figure out if the childs of different AICH hashs
+					if (child->GetFileIdentifierC().HasAICHHash())
+					{
+						if (bAICHHashValid && aichHash != child->GetFileIdentifierC().GetAICHHash())
+							 bHasMultipleAICHHashs = true;
+						else if (!bAICHHashValid)
+						{
+							aichHash = child->GetFileIdentifierC().GetAICHHash();
+							bAICHHashValid = true;
+						}
+					}
+					else if (child->DidFoundMultipleAICH())
+						 bHasMultipleAICHHashs = true;
+
 					if (parent->IsKademlia())
 					{
 						if (child->GetListChildCount() > uAllChildsSourceCount)
@@ -672,6 +709,11 @@ bool CSearchList::AddToList(CSearchFile* toadd, bool bClientResponse, uint32 dwF
 				if (uTrustValue > 0 && nPublishInfoTags > 0)
 					uTrustValue = uTrustValue / nPublishInfoTags;
 				parent->SetKadPublishInfo(((uDifferentNames & 0xFF) << 24) | ((uPublishersKnown & 0xFF) << 16) | ((uTrustValue & 0xFFFF) << 0));
+				// if all childs have the same AICH hash (or none), set the parent hash to it, otherwise clear it (see KademliaSearchKeyword)
+				if (bHasMultipleAICHHashs || !bAICHHashValid)
+					parent->GetFileIdentifier().ClearAICHHash();
+				else if (bAICHHashValid)
+					parent->GetFileIdentifier().SetAICHHash(aichHash);
 			}
 			// recalculate spamrating
 			DoSpamRating(parent, bClientResponse, false, false, false, dwFromUDPServerIP);
@@ -791,6 +833,7 @@ void CSearchList::AddResultCount(uint32 nSearchID, const uchar* hash, UINT nCoun
 // FIXME LARGE FILES
 void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt128* fileID, LPCTSTR name,
 										uint64 size, LPCTSTR type, UINT uKadPublishInfo
+										, CArray<CAICHHash>& raAICHHashs, CArray<uint8>& raAICHHashPopularity
 										, SSearchTerm* pQueriedSearchTerm,  UINT numProperties, ...)
 {
 	va_list args;
@@ -881,6 +924,31 @@ void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt12
 	{
 		CSearchFile* tempFile = new CSearchFile(temp, eStrEncode == utf8strRaw, searchID, 0, 0, 0, true);
 		tempFile->SetKadPublishInfo(uKadPublishInfo);
+		// About the AICH hash: We received a list of possible AICH Hashs for this file and now have to deceide what to do
+		// If it wasn't for backwards compability, the choice would be easy: Each different md4+aich+size is its own result,
+		// but we can'T do this alone for the fact that for the next years we will always have publishers which don'T report
+		// the AICH hash at all (which would mean ahving a different entry, which leads to double files in searchresults). So here is what we do for now:
+		// If we have excactly 1 AICH hash and more than 1/3 of the publishers reported it, we set it as verified AICH hash for
+		// the file (which is as good as using a ed2k link with an AICH hash attached). If less publishers reported it or if we
+		// have multiple AICH hashes, we ignore them and use the MD4 only.
+		// This isn't a perfect solution, but it makes sure not to open any new attack vectors (a wrong AICH hash means we cannot
+		// download the file sucessfully) nor to confuse users by requiering them to select an entry out of several equal looking results.
+		// Once the majority of nodes in the network publishes AICH hashes, this might get reworked to make the AICH hash more sticky
+		if (raAICHHashs.GetCount() == 1 && raAICHHashPopularity.GetCount() == 1)
+		{
+			uint8 byPublishers = (uint8)((uKadPublishInfo & 0x00FF0000) >> 16);
+			if ( byPublishers > 0 && raAICHHashPopularity[0] > 0 && byPublishers / raAICHHashPopularity[0] <= 3)
+			{
+				DEBUG_ONLY( DebugLog(_T("Received accepted AICH Hash for search result %s, %u out of %u Publishers, Hash: %s")
+								, tempFile->GetFileName(), raAICHHashPopularity[0], byPublishers, raAICHHashs[0].GetString()) );
+				tempFile->GetFileIdentifier().SetAICHHash(raAICHHashs[0]);
+			}
+			else
+				DEBUG_ONLY( DebugLog(_T("Received unaccepted AICH Hash for search result %s, %u out of %u Publishers, Hash: %s")
+								, tempFile->GetFileName(), raAICHHashPopularity[0], byPublishers, raAICHHashs[0].GetString()) );
+		}
+		else if (raAICHHashs.GetCount() > 1)
+			DEBUG_ONLY( DebugLog(_T("Received multiple (%u) AICH Hashs for search result %s, ignoring AICH"), raAICHHashs.GetCount()) );
 		AddToList(tempFile);
 	}
 	else

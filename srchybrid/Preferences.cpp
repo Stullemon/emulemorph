@@ -652,11 +652,17 @@ char	CPreferences::m_cInvisibleModeHotKey;
 //Commander - Added: Invisible Mode [TPT] - End
 
 bool    CPreferences::m_bAllocFull;
+bool	CPreferences::m_bShowSharedFilesDetails;
+bool	CPreferences::m_bShowUpDownIconInTaskbar;
+bool	CPreferences::m_bShowWin7TaskbarGoodies;
+bool	CPreferences::m_bForceSpeedsToKB;
+
 // ZZ:DownloadManager -->
 bool    CPreferences::m_bA4AFSaveCpu;
 // ZZ:DownloadManager <--
 bool    CPreferences::m_bHighresTimer;
 bool	CPreferences::m_bResolveSharedShellLinks;
+bool	CPreferences::m_bKeepUnavailableFixedSharedDirs;
 CStringList CPreferences::shareddir_list;
 CStringList CPreferences::sharedsubdir_list;	// SLUGFILLER: shareSubdir
 CStringList CPreferences::inactive_shareddir_list;	  // inactive sharesubdier
@@ -690,6 +696,7 @@ CString	CPreferences::m_strNotifierMailSender;
 CString	CPreferences::m_strNotifierMailReceiver;
 
 bool	CPreferences::m_bWinaTransToolbar;
+bool	CPreferences::m_bShowDownloadToolbar;
 
 bool	CPreferences::m_bCryptLayerRequested;
 bool	CPreferences::m_bCryptLayerSupported;
@@ -918,7 +925,7 @@ void CPreferences::Init()
 				if (iDrive >= 0 && iDrive <= 25) {
 					WCHAR szRootPath[4] = L" :\\";
 					szRootPath[0] = (WCHAR)(L'A' + iDrive);
-					if (GetDriveType(szRootPath) == DRIVE_FIXED) {
+					if (GetDriveType(szRootPath) == DRIVE_FIXED && !m_bKeepUnavailableFixedSharedDirs) {
 						if (_taccess(toadd, 0) != 0)
 						// MORPH START sharesubdir 
 						{
@@ -1070,7 +1077,7 @@ void CPreferences::Init()
 	}
 
 
-	if (((int*)userhash)[0] == 0 && ((int*)userhash)[1] == 0 && ((int*)userhash)[2] == 0 && ((int*)userhash)[3] == 0) //Xman Bugfix by ilmira
+	if (isnulmd4(userhash))
 		CreateUserHash();
 }
 
@@ -1095,6 +1102,7 @@ void CPreferences::SetStandartValues()
 	defaultWPM.showCmd=0;
 	EmuleWindowPlacement=defaultWPM;
 	versioncheckLastAutomatic=0;
+
 	//MORPH START - Added by SiRoB, New Version check
 	mversioncheckLastAutomatic=0;
 	//MORPH END   - Added by SiRoB, New Version check
@@ -1155,17 +1163,17 @@ UINT CPreferences::GetMaxDownload(){	 //MORPH  uint16 is not enough
 }
 
 uint64 CPreferences::GetMaxDownloadInBytesPerSec(bool dynamic){
-//dont be a Lam3r :)
+	//dont be a Lam3r :)
 	//MORPH START - Added by SiRoB, ZZ Upload system
 	if (IsZZRatioDoesWork() || (dynamic && (thePrefs.IsDynUpEnabled() || thePrefs.IsSUCDoesWork())))
 		return maxdownload*1024;
 	//MORPH END   - Added by SiRoB, ZZ Upload system
-    UINT maxup;
-    if(dynamic && thePrefs.IsDynUpEnabled() && theApp.uploadqueue->GetWaitingUserCount() != 0 && theApp.uploadqueue->GetDatarate() != 0) {
-        maxup = theApp.uploadqueue->GetDatarate();
-    } else {
-        maxup = GetMaxUpload()*1024;
-    }
+	UINT maxup;
+	if (dynamic && thePrefs.IsDynUpEnabled() && theApp.uploadqueue->GetWaitingUserCount() != 0 && theApp.uploadqueue->GetDatarate() != 0) {
+		maxup = theApp.uploadqueue->GetDatarate();
+	} else {
+		maxup = GetMaxUpload()*1024;
+	}
 
 	if (maxup < 4*1024)
 		return (((maxup < 10*1024) && ((uint64)maxup*3 < maxdownload*1024)) ? (uint64)maxup*3 : maxdownload*1024);
@@ -2053,7 +2061,6 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(L"Port",port);
 	ini.WriteInt(L"UDPPort",udpport);
 	ini.WriteInt(L"ServerUDPPort", nServerUDPPort);
-    //ini.WriteBool(L"UseCompression",m_bUseCompression);	// xman use compression, not saved you must manualy edit to disable it to prevent misuse
 	ini.WriteInt(L"MaxSourcesPerFile",maxsourceperfile );
 	ini.WriteWORD(L"Language",m_wLanguageID);
 	ini.WriteInt(L"SeeShare",m_iSeeShares);
@@ -2106,7 +2113,6 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"Sidebanner",sidebanner);//Commander - Added: Side Banner
 	ini.WriteBool(L"BringToFront",bringtoforeground);
 	ini.WriteBool(L"TransferDoubleClick",transferDoubleclick);
-	ini.WriteBool(L"BeepOnError",beepOnError);
 	ini.WriteBool(L"ConfirmExit",confirmExit);
 	ini.WriteBool(L"FilterBadIPs",filterLANIPs);
     ini.WriteBool(L"Autoconnect",autoconnect);
@@ -2126,6 +2132,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"ResolveSharedShellLinks",m_bResolveSharedShellLinks);
 	ini.WriteString(L"YourHostname",m_strYourHostname);
 	ini.WriteBool(L"CheckFileOpen",m_bCheckFileOpen);
+	ini.WriteBool(L"ShowWin7TaskbarGoodies", m_bShowWin7TaskbarGoodies );
 
 	// Barry - New properties...
     ini.WriteBool(L"AutoConnectStaticOnly", m_bAutoConnectToStaticServersOnly);
@@ -2204,7 +2211,6 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(L"DebugClientKadUDP",m_iDebugClientKadUDPLevel);
 #endif
 	ini.WriteBool(L"PreviewPrio", m_bpreviewprio);
-	ini.WriteBool(L"UpdateQueueListPref", m_bupdatequeuelist);
 	ini.WriteBool(L"ManualHighPrio", m_bManualAddedServersHighPriority);
 	ini.WriteBool(L"FullChunkTransfers", m_btransferfullchunks);
 	ini.WriteBool(L"ShowOverhead", m_bshowoverhead);
@@ -2228,10 +2234,8 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"SaveDebugToDisk",debug2disk);
 	ini.WriteBool(L"EnableScheduler",scheduler);
 	ini.WriteBool(L"MessagesFromFriendsOnly",msgonlyfriends);
-	ini.WriteBool(L"MessageFromValidSourcesOnly",msgsecure);
 	ini.WriteBool(L"MessageUseCaptchas", m_bUseChatCaptchas);
 	ini.WriteBool(L"ShowInfoOnCatTabs",showCatTabInfos);
-	ini.WriteBool(L"DontRecreateStatGraphsOnResize",dontRecreateGraphs);
 	ini.WriteBool(L"AutoFilenameCleanup",autofilenamecleanup);
 	ini.WriteBool(L"ShowExtControls",m_bExtControls);
 	// MORPH START show less controls
@@ -2244,6 +2248,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"TransflstRemainOrder",m_bTransflstRemain);
 	ini.WriteBool(L"UseSimpleTimeRemainingcomputation",m_bUseOldTimeRemaining);
 	ini.WriteBool(L"AllocateFullFile",m_bAllocFull);
+	ini.WriteBool(L"ShowSharedFilesDetails", m_bShowSharedFilesDetails);
 
 	ini.WriteInt(L"VersionCheckLastAutomatic", versioncheckLastAutomatic);
 	//MORPH START - Added by SiRoB, New Version check
@@ -2296,6 +2301,7 @@ void CPreferences::SavePreferences()
 	ini.WriteString(L"NotifierMailRecipient", m_strNotifierMailReceiver);
 
 	ini.WriteBool(L"WinaTransToolbar", m_bWinaTransToolbar);
+	ini.WriteBool(L"ShowDownloadToolbar", m_bShowDownloadToolbar);
 
 	ini.WriteBool(L"CryptLayerRequested", m_bCryptLayerRequested);
 	ini.WriteBool(L"CryptLayerRequired", m_bCryptLayerRequired);
@@ -2303,8 +2309,8 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(L"KadUDPKey", m_dwKadUDPKey);
 
 	ini.WriteBool(L"EnableSearchResultSpamFilter", m_bEnableSearchResultFilter);
+	
 	ini.WriteBool(L"CryptLayerRequiredStrictServer",IsServerCryptLayerRequiredStrict()); // MORPH lh require obfuscated server connection 
-
 
 	// ==> Slot Limit - Stulle
 	ini.WriteBool(_T("SlotLimitThree"), m_bSlotLimitThree);
@@ -2352,6 +2358,10 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"ICH",IsICHEnabled());	// 10.5
 	ini.WriteInt(L"FileBufferTimeLimit", m_uFileBufferTimeLimit/1000);
 	ini.WriteBool(L"RearrangeKadSearchKeywords",m_bRearrangeKadSearchKeywords);
+	ini.WriteBool(L"UpdateQueueListPref", m_bupdatequeuelist);
+	ini.WriteBool(L"DontRecreateStatGraphsOnResize",dontRecreateGraphs);
+	ini.WriteBool(L"BeepOnError",beepOnError);
+	ini.WriteBool(L"MessageFromValidSourcesOnly",msgsecure);
 
 	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
 	CString WriteAllowedIPs ;
@@ -2360,8 +2370,8 @@ void CPreferences::SavePreferences()
            WriteAllowedIPs = WriteAllowedIPs  + _T(";") + ipstr(GetAllowedRemoteAccessIPs()[i]);
     ini.WriteString(L"AllowedIPs",WriteAllowedIPs);  // End Seciotn Webserver
     ini.WriteBool(L"ShowVerticalHourMarkers",m_bShowVerticalHourMarkers,L"Statistics");
+	ini.WriteBool(L"EnabledDeprecated", m_bPeerCacheEnabled, L"PeerCache");
 	// MORPH END  leuk_he Advanced official preferences. 
-
 
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "Proxy"
@@ -2422,7 +2432,6 @@ void CPreferences::SavePreferences()
 	//
 	ini.WriteInt(L"LastSearch", m_uPeerCacheLastSearch, L"PeerCache");
 	ini.WriteBool(L"Found", m_bPeerCacheWasFound);
-	ini.WriteBool(L"EnabledDeprecated", m_bPeerCacheEnabled);
 	ini.WriteInt(L"PCPort", m_nPeerCachePort);
 
 #ifdef USE_OFFICIAL_UPNP
@@ -2435,7 +2444,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"CloseUPnPOnExit", m_bCloseUPnPOnExit);
 	ini.WriteInt(L"LastWorkingImplementation", m_nLastWorkingImpl);
 #endif
-
+	
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 	ini.WriteBool(_T("UPnPNAT"), m_bUPnPNat, _T("eMule"));
 	ini.WriteBool(_T("UPnPNAT_Web"), m_bUPnPNatWeb);
@@ -2453,7 +2462,7 @@ void CPreferences::SavePreferences()
 	ini.WriteInt(_T("MaxRandomPort"), m_iMaxRndPort, _T("eMule"));
 	ini.WriteBool(_T("RandomPortsReset"), m_bRndPortsResetOnRestart, _T("eMule"));
 	ini.WriteInt(_T("RandomPortsSafeResetOnRestartTime"), m_iRndPortsSafeResetOnRestartTime, _T("eMule"));
-	
+
 	ini.WriteInt(_T("OldTCPRandomPort"), m_iCurrentTCPRndPort, _T("eMule"));
 	ini.WriteInt(_T("OldUDPRandomPort"), m_iCurrentUDPRndPort, _T("eMule"));
 	ini.WriteUInt64(_T("RandomPortsLastRun"), CTime::GetCurrentTime().GetTime() , _T("eMule"));
@@ -2692,7 +2701,6 @@ void CPreferences::SavePreferences()
 	// ==> [MoNKi: -USS initial TTL-] - Stulle
 	ini.WriteInt(_T("USSInitialTTL"), m_iUSSinitialTTL, _T("StulleMule"));
 	// <== [MoNKi: -USS initial TTL-] - Stulle
-
 }
 
 void CPreferences::ResetStatsColor(int index)
@@ -2770,7 +2778,7 @@ void CPreferences::LoadPreferences()
 
 	m_bFirstStart = false;
 
-	if (strCurrVersion != strPrefsVersion){
+	if (strPrefsVersion.IsEmpty()){
 		m_bFirstStart = true;
 	}
 
@@ -2986,6 +2994,7 @@ void CPreferences::LoadPreferences()
 	m_uMinFreeDiskSpace=ini.GetInt(L"MinFreeDiskSpace",20*1024*1024);
 	m_bSparsePartFiles=ini.GetBool(L"SparsePartFiles",false);
 	m_bResolveSharedShellLinks=ini.GetBool(L"ResolveSharedShellLinks",false);
+	m_bKeepUnavailableFixedSharedDirs = ini.GetBool(L"KeepUnavailableFixedSharedDirs", false);
 	m_strYourHostname=ini.GetString(L"YourHostname", L"");
 
 	// Barry - New properties...
@@ -3102,7 +3111,11 @@ void CPreferences::LoadPreferences()
 	m_bPreviewCopiedArchives=ini.GetBool(L"PreviewCopiedArchives", true);
 	m_iInspectAllFileTypes=ini.GetInt(L"InspectAllFileTypes", 0);
 	m_bAllocFull=ini.GetBool(L"AllocateFullFile",0);
-	m_bAutomaticArcPreviewStart=ini.GetBool(L"AutoArchivePreviewStart", true );
+	m_bAutomaticArcPreviewStart=ini.GetBool(L"AutoArchivePreviewStart", true);
+	m_bShowSharedFilesDetails = ini.GetBool(L"ShowSharedFilesDetails", true);
+	m_bShowUpDownIconInTaskbar = ini.GetBool(L"ShowUpDownIconInTaskbar", false );
+	m_bShowWin7TaskbarGoodies  = ini.GetBool(L"ShowWin7TaskbarGoodies", true);
+	m_bForceSpeedsToKB = ini.GetBool(L"ForceSpeedsToKB", false);
 
 	// read file buffer size (with backward compatibility)
 	m_iFileBufferSize=ini.GetInt(L"FileBufferSizePref",0); // old setting
@@ -3483,6 +3496,7 @@ void CPreferences::LoadPreferences()
 	m_strNotifierMailReceiver = ini.GetString(L"NotifierMailRecipient", L"");
 
 	m_bWinaTransToolbar = ini.GetBool(L"WinaTransToolbar", true);
+	m_bShowDownloadToolbar = ini.GetBool(L"ShowDownloadToolbar", true);
 
 	m_bCryptLayerRequested = ini.GetBool(L"CryptLayerRequested", false);
 	m_bCryptLayerRequired = ini.GetBool(L"CryptLayerRequired", false);
@@ -4239,7 +4253,7 @@ bool CPreferences::IsDynUpEnabled()	{
 	return m_bDynUpEnabled || maxGraphUploadRate == UNLIMITED;
 }
 
-bool CPreferences::CanFSHandleLargeFiles()	{
+bool CPreferences::CanFSHandleLargeFiles(int nForCat)	{
 	bool bResult = false;
 	for (int i = 0; i != tempdir.GetCount(); i++){
 		if (!IsFileOnFATVolume(tempdir.GetAt(i))){
@@ -4247,7 +4261,7 @@ bool CPreferences::CanFSHandleLargeFiles()	{
 			break;
 		}
 	}
-	return bResult && !IsFileOnFATVolume(GetMuleDirectory(EMULE_INCOMINGDIR));
+	return bResult && !IsFileOnFATVolume((nForCat > 0) ? GetCatPath(nForCat) : GetMuleDirectory(EMULE_INCOMINGDIR));
 }
 
 uint16 CPreferences::GetRandomTCPPort()
@@ -4435,12 +4449,12 @@ CString CPreferences::GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCr
 
 		// Do we need to get SystemFolders or do we use our old Default anyway? (Executable Dir)
 		if (   nRegistrySetting == 0
-			|| (nRegistrySetting == 1 && GetWindowsVersion() == _WINVER_VISTA_)
-			|| (nRegistrySetting == -1 && (!bConfigAvailableExecuteable || GetWindowsVersion() == _WINVER_VISTA_)))
+			|| (nRegistrySetting == 1 && GetWindowsVersion() >= _WINVER_VISTA_)
+			|| (nRegistrySetting == -1 && (!bConfigAvailableExecuteable || GetWindowsVersion() >= _WINVER_VISTA_)))
 		{
 			HMODULE hShell32 = LoadLibrary(_T("shell32.dll"));
 			if (hShell32){
-				if (GetWindowsVersion() == _WINVER_VISTA_){
+				if (GetWindowsVersion() >= _WINVER_VISTA_){
 					
 					PWSTR pszLocalAppData = NULL;
 					PWSTR pszPersonalDownloads = NULL;
@@ -4520,7 +4534,7 @@ CString CPreferences::GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCr
 						CoTaskMemFree(pszPublicDownloads);
 						CoTaskMemFree(pszProgrammData);
 				}
-				else { // GetWindowsVersion() == _WINVER_VISTA_
+				else { // GetWindowsVersion() >= _WINVER_VISTA_
 
 					CString strAppData = ShellGetFolderPath(CSIDL_APPDATA);
 					CString strPersonal = ShellGetFolderPath(CSIDL_PERSONAL);
@@ -4641,7 +4655,7 @@ void CPreferences::SetMuleDirectory(EDefaultDirectory eDirectory, CString strNew
 void CPreferences::ChangeUserDirMode(int nNewMode){
 	if (m_nCurrentUserDirMode == nNewMode)
 		return;
-	if (nNewMode == 1 && GetWindowsVersion() != _WINVER_VISTA_)
+	if (nNewMode == 1 && GetWindowsVersion() < _WINVER_VISTA_)
 	{
 		ASSERT( false );
 		return;
@@ -4668,6 +4682,8 @@ bool CPreferences::GetSparsePartFiles()	{
 	// make much sense for a sparse file implementation nevertheless.
 	// Due to the fact that eMule wirtes a lot small blocks into sparse files and flushs them every 6 seconds,
 	// this problem pops up sooner or later for all big files. I don't see any way to walk arround this for now
+	// Update: This problem seems to be fixed on Win7, possibly on earlier Vista ServicePacks too
+	//		   In any case, we allow sparse files for vesions earlier and later than Vista
 	return m_bSparsePartFiles && (GetWindowsVersion() != _WINVER_VISTA_);
 }
 
@@ -4680,7 +4696,7 @@ bool CPreferences::IsRunningAeroGlassTheme(){
 	if (!bAeroAlreadyDetected){
 		bAeroAlreadyDetected = true;
 		m_bIsRunningAeroGlass = FALSE;
-		if (GetWindowsVersion() == _WINVER_VISTA_){
+		if (GetWindowsVersion() >= _WINVER_VISTA_){
 			HMODULE hDWMAPI = LoadLibrary(_T("dwmapi.dll"));
 			if (hDWMAPI){
 				HRESULT (WINAPI *pfnDwmIsCompositionEnabled)(BOOL*);

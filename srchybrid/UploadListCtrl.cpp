@@ -18,6 +18,7 @@
 #include "emule.h"
 #include "UploadListCtrl.h"
 #include "TransferWnd.h"
+#include "TransferDlg.h"
 #include "otherfunctions.h"
 #include "MenuCmds.h"
 #include "ClientDetailDialog.h"
@@ -417,7 +418,6 @@ void CUploadListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							cur_rec.top++;
 							client->DrawUpStatusBar(dc, &cur_rec, false, thePrefs.UseFlatBar());
 							// MORPH START
-							// Stullemon: I don't actually like this...
 							//MORPH START - Adde by SiRoB, Optimization requpfile
 							/*
 							const CKnownFile *file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
@@ -959,7 +959,7 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 	/*
 	//call secondary sortorder, if this one results in equal
 	int dwNextSort;
-	if (iResult == 0 && (dwNextSort = theApp.emuledlg->transferwnd->uploadlistctrl.GetNextSortOrder(lParamSort)) != -1)
+	if (iResult == 0 && (dwNextSort = theApp.emuledlg->transferwnd->m_pwndTransfer->uploadlistctrl.GetNextSortOrder(lParamSort)) != -1)
 		iResult = SortProc(lParam1, lParam2, dwNextSort);
 	*/
 	// SLUGFILLER: multiSort remove - handled in parent class
@@ -999,7 +999,7 @@ void CUploadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient()) ? MF_ENABLED : MF_GRAYED), MP_MESSAGE, GetResString(IDS_SEND_MSG), _T("SENDMESSAGE"));
 	ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetViewSharedFilesSupport()) ? MF_ENABLED : MF_GRAYED), MP_SHOWLIST, GetResString(IDS_VIEWFILES), _T("VIEWFILES"));
 	if (Kademlia::CKademlia::IsRunning() && !Kademlia::CKademlia::IsConnected())
-		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
+		ClientMenu.AppendMenu(MF_STRING | ((client && client->IsEd2kClient() && client->GetKadPort()!=0 && client->GetKadVersion() > 1) ? MF_ENABLED : MF_GRAYED), MP_BOOT, GetResString(IDS_BOOTSTRAP));
 	ClientMenu.AppendMenu(MF_STRING | (GetItemCount() > 0 ? MF_ENABLED : MF_GRAYED), MP_FIND, GetResString(IDS_FIND), _T("Search"));
 	
 	//MORPH START - Added by Yun.SF3, List Requested Files
@@ -1053,8 +1053,8 @@ BOOL CUploadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				break;
 			}
 			case MP_BOOT:
-				if (client->GetKadPort())
-					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort(), (client->GetKadVersion() > 1));
+				if (client->GetKadPort() && client->GetKadVersion() > 1)
+					Kademlia::CKademlia::Bootstrap(ntohl(client->GetIP()), client->GetKadPort());
 				break;
 			//MORPH START - Addded by SiRoB, Friend Addon
 			case MP_REMOVEFRIEND:{//LSD
@@ -1108,7 +1108,7 @@ void CUploadListCtrl::AddClient(const CUpDownClient *client)
 	int iItemCount = GetItemCount();
 	int iItem = InsertItem(LVIF_TEXT | LVIF_PARAM, iItemCount, LPSTR_TEXTCALLBACK, 0, 0, 0, (LPARAM)client);
 	Update(iItem);
-	theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Uploading, iItemCount + 1);
+	theApp.emuledlg->transferwnd->m_pwndTransfer->UpdateListCount(CTransferWnd::wnd2Uploading, iItemCount + 1);
 }
 
 void CUploadListCtrl::RemoveClient(const CUpDownClient *client)
@@ -1122,7 +1122,7 @@ void CUploadListCtrl::RemoveClient(const CUpDownClient *client)
 	int result = FindItem(&find);
 	if (result != -1) {
 		DeleteItem(result);
-		theApp.emuledlg->transferwnd->UpdateListCount(CTransferWnd::wnd2Uploading);
+		theApp.emuledlg->transferwnd->m_pwndTransfer->UpdateListCount(CTransferWnd::wnd2Uploading);
 	}
 }
 
@@ -1133,7 +1133,7 @@ void CUploadListCtrl::RefreshClient(const CUpDownClient *client)
 	if (!theApp.emuledlg->IsRunning())
 		return;
 
-	if (theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || !theApp.emuledlg->transferwnd->uploadlistctrl.IsWindowVisible())
+	if (theApp.emuledlg->activewnd != theApp.emuledlg->transferwnd || !theApp.emuledlg->transferwnd->m_pwndTransfer->uploadlistctrl.IsWindowVisible())
 		return;
 
 	//MORPH START- UpdateItemThread

@@ -127,9 +127,12 @@
 #define MP_VIEW1_ONQUEUE		10258
 #define MP_VIEW1_DOWNLOADING	10259
 #define MP_VIEW1_CLIENTS		10260
-#define MP_VIEW1_DOWNLOADCLIENT	10261 //MORPH - Added by SiRoB, DownloadClientList
-#define MP_VIEW2_DOWNLOADCLIENT	10262 //MORPH - Added by SiRoB, DownloadClientList
-#define MP_FOLLOW_THE_MAJORITY  10263 // EastShare       - FollowTheMajority by AndCycle
+#define MP_PAUSEONPREVIEW		10261
+#define MP_VIEW_KADCONTACTS		10262
+#define MP_VIEW_KADLOOKUP		10263
+#define MP_VIEW1_DOWNLOADCLIENT	10264 //MORPH - Added by SiRoB, DownloadClientList
+#define MP_VIEW2_DOWNLOADCLIENT	10265 //MORPH - Added by SiRoB, DownloadClientList
+#define MP_FOLLOW_THE_MAJORITY  10266 // EastShare       - FollowTheMajority by AndCycle
 
 #define MP_PRIOVERYLOW			10300
 #define MP_PRIOLOW				10301
@@ -195,46 +198,49 @@
 #define	MP_SHOW_FILESIZE_MBYTE	10358
 #define MP_MARKASSPAM			10359
 #define MP_UNSHAREFILE			10360
+#define MP_NEWCAT				10361
+#define MP_TOGGLEDTOOLBAR		10362
+#define MP_AUTOKADLOOKUPGRAPH	10363
 
 // khaos::categorymod+
-#define MP_CAT_SHOWHIDEPAUSED	10360
-#define MP_CAT_SETRESUMEORDER	10361
-#define	MP_CAT_ORDERAUTOINC		10362
-#define MP_CAT_ORDERSTEPTHRU	10363
-#define MP_CAT_ORDERALLSAME		10364
-//#define MP_CAT_RESUMENEXT		10365 see MP_RESUMENEXT
-#define	MP_CAT_PAUSELAST		10366
-#define MP_CAT_STOPLAST			10367
-#define MP_CAT_MERGE			10368
+#define MP_CAT_SHOWHIDEPAUSED	10370
+#define MP_CAT_SETRESUMEORDER	10371
+#define	MP_CAT_ORDERAUTOINC		10372
+#define MP_CAT_ORDERSTEPTHRU	10373
+#define MP_CAT_ORDERALLSAME		10374
+//#define MP_CAT_RESUMENEXT		10375 see MP_RESUMENEXT
+#define	MP_CAT_PAUSELAST		10376
+#define MP_CAT_STOPLAST			10377
+#define MP_CAT_MERGE			10378
 
 // For the downloadlist menu
-#define MP_FORCEA4AF			10370
-#define	MP_FORCEA4AFONFLAG		10371
-#define MP_FORCEA4AFOFFFLAG		10372
+#define MP_FORCEA4AF			10380
+#define	MP_FORCEA4AFONFLAG		10381
+#define MP_FORCEA4AFOFFFLAG		10382
 
 // 10373 to 10375 reserved for A4AF menu items.
-#define MP_CAT_A4AF			10373
+#define MP_CAT_A4AF			10383
 // khaos::categorymod-
 
 // Mighty Knife: CRC32-Tag
-#define MP_CRC32_CALCULATE	 10380
-#define MP_CRC32_TAG         10381
-#define MP_CRC32_ABORT		 10382
-#define MP_CRC32_RECALCULATE 10383
+#define MP_CRC32_CALCULATE	 10390
+#define MP_CRC32_TAG         10391
+#define MP_CRC32_ABORT		 10392
+#define MP_CRC32_RECALCULATE 10393
 // [end] Mighty Knife
 
 // Mighty Knife: Mass Rename
-#define MP_MASSRENAME    		10385
+#define MP_MASSRENAME    		10395
 // [end] Mighty Knife
 
 // Mighty Knife: Context menu for editing news feeds
-#define MP_NEWFEED				10390
-#define MP_EDITFEED				10391
-#define MP_DELETEFEED           10392
-#define MP_DELETEALLFEEDS		10393
+#define MP_NEWFEED				10396
+#define MP_EDITFEED				10397
+#define MP_DELETEFEED           10398
+#define MP_DELETEALLFEEDS		10399
 // [end] Mighty Knife
 
-#define MP_DOWNLOADALLFEEDS		10394 //Commander - Added: Update All Feeds at once
+#define MP_DOWNLOADALLFEEDS		10400 //Commander - Added: Update All Feeds at once
 
 // quick-speed changer
 #define MP_QS_U10				10501

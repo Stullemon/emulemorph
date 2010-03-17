@@ -54,7 +54,7 @@ CIPFilter::CIPFilter()
 CIPFilter::~CIPFilter()
 {
 	if (m_bModified)
-{
+	{
 		try{
 			SaveToDefaultFile();
 		}
@@ -366,6 +366,7 @@ void CIPFilter::SaveToDefaultFile()
 
 			if (fprintf(fp, "%-15s - %-15s , %3u , %s\n", szStart, szEnd, flt->level, flt->desc) == 0 || ferror(fp))
 			{
+				fclose(fp);
 				CString strError;
 				strError.Format(GetResString(IDS_IPFILTER_SAVERR), strFilePath, _tcserror(errno));
 				throw strError;

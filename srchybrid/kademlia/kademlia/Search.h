@@ -41,6 +41,7 @@ namespace Kademlia
 	void deleteTagListEntries(TagList* plistTag);
 	class CByteIO;
 	class CKadClientSearcher;
+	class CLookupHistory;
 	class CSearch
 	{
 			friend class CSearchManager;
@@ -61,13 +62,14 @@ namespace Kademlia
 			void		SetSearchTermData( uint32 uSearchTermDataSize, LPBYTE pucSearchTermsData );
 
 			void		AddFileID(const CUInt128& uID);
-			void		PreparePacketForTags( CByteIO* pbyPacket, CKnownFile* pFile );
+			void		PreparePacketForTags( CByteIO* pbyPacket, CKnownFile* pFile, uint8 byTargetKadVersion );
 			bool		Stoping() const;
 			void		UpdateNodeLoad( uint8 uLoad );
 			
 			CKadClientSearcher*	GetNodeSpecialSearchRequester() const						{ return pNodeSpecialSearchRequester; }
 			void				SetNodeSpecialSearchRequester(CKadClientSearcher* pNew)		{ pNodeSpecialSearchRequester = pNew; } 
 			
+			CLookupHistory* GetLookupHistory() const			{ return m_pLookupHistory; }
 			enum {
 			    NODE,
 			    NODECOMPLETE,
@@ -89,12 +91,12 @@ namespace Kademlia
 		private:
 			void Go();
 			void ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *plistResults);
-			void ProcessResult(const CUInt128 &uAnswer, TagList *listInfo);
+			void ProcessResult(const CUInt128 &uAnswer, TagList *listInfo, uint32 uFromIP, uint16 uFromPort);
 			void ProcessResultFile(const CUInt128 &uAnswer, TagList *listInfo);
-			void ProcessResultKeyword(const CUInt128 &uAnswer, TagList *listInfo);
+			void ProcessResultKeyword(const CUInt128 &uAnswer, TagList *listInfo, uint32 uFromIP, uint16 uFromPort);
 			void ProcessResultNotes(const CUInt128 &uAnswer, TagList *listInfo);
 			void JumpStart();
-			void SendFindValue(CContact* pContact);
+			void SendFindValue(CContact* pContact, bool bReAskMore = false);
 			void PrepareToStop();
 			void StorePacket();
 			uint8 GetRequestContactCount() const;
@@ -115,15 +117,16 @@ namespace Kademlia
 			CKadClientSearcher* pNodeSpecialSearchRequester; // used to callback on result for NODESPECIAL searches
 			CUInt128 m_uTarget;
 			WordList m_listWords;
-			CKadTagValueString m_sGUIName;
 			UIntList m_listFileIDs;
 			ContactMap m_mapPossible;
 			ContactMap m_mapTried;
-			ContactMap m_mapResponded;
+			std::map<Kademlia::CUInt128, bool> m_mapResponded;
 			ContactMap m_mapBest;
 			ContactList m_listDelete;
 			ContactMap m_mapInUse;
 			CUInt128 m_uClosestDistantFound; // not used for the search itself, but for statistical data collecting
+			CLookupHistory* m_pLookupHistory;
+			CContact* pRequestedMoreNodesContact;
 	};
 }
 void KadGetKeywordHash(const Kademlia::CKadTagValueString& rstrKeywordW, Kademlia::CUInt128* puKadID);

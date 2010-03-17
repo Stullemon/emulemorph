@@ -36,9 +36,9 @@ void CStatisticFile::MergeFileStats( CStatisticFile *toMerge )
 	requested += toMerge->GetRequests();
 	accepted += toMerge->GetAccepts();
 	transferred += toMerge->GetTransferred();
-	alltimerequested += toMerge->GetAllTimeRequests();
-	alltimetransferred += toMerge->GetAllTimeTransferred();
-	alltimeaccepted += toMerge->GetAllTimeAccepts();
+	SetAllTimeRequests(alltimerequested + toMerge->GetAllTimeRequests());
+	SetAllTimeTransferred(alltimetransferred + toMerge->GetAllTimeTransferred());
+	SetAllTimeAccepts(alltimeaccepted + toMerge->GetAllTimeAccepts());
 
 	// SLUGFILLER: Spreadbars
 	if (!toMerge->spreadlist.IsEmpty()) {
@@ -79,6 +79,21 @@ void CStatisticFile::AddTransferred(uint64 start, uint64 bytes){	//MORPH - Added
 	AddBlockTransferred(start, start+bytes/*FIX?+1*/, 1);	//MORPH - Added by IceCream, SLUGFILLER: Spreadbars
 	theApp.sharedfiles->UpdateFile(fileParent);
 	m_bInChangedEqualChanceValue = false;	//Morph - added by AndCycle, Equal Chance For Each File
+}
+
+void CStatisticFile::SetAllTimeRequests(uint32 nVal)
+{
+	alltimerequested = nVal;
+}
+
+void CStatisticFile::SetAllTimeAccepts(uint32 nVal)
+{
+	alltimeaccepted = nVal;
+}
+
+void CStatisticFile::SetAllTimeTransferred(uint64 nVal)
+{
+	alltimetransferred = nVal;
 }
 
 //MORPH START - Added by IceCream, SLUGFILLER: Spreadbars
