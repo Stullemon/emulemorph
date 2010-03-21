@@ -2867,7 +2867,13 @@ CString CreateED2kLink(const CAbstractFile* pFile, bool bEscapeLink)
 		pFile->GetFileSize(),
 		EncodeBase16(pFile->GetFileHash(),16));
 	if (bEscapeLink)
+	//MORPH START - Added by Stulle, Always add AICH hash when creating eD2k link [Avi-3k]
+	{
+		if (pFile->GetFileIdentifierC().HasAICHHash())
+			strLink += _T("h=") + pFile->GetFileIdentifierC().GetAICHHash().GetString() + _T('|');
+	//MORPH END   - Added by Stulle, Always add AICH hash when creating eD2k link [Avi-3k]
 		strLink += _T("/");
+	} //MORPH - Added by Stulle, Always add AICH hash when creating eD2k link [Avi-3k]
 	return strLink;
 }
 
