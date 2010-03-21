@@ -129,6 +129,7 @@ bool	CPreferences::beepOnError;
 bool	CPreferences::m_bIconflashOnNewMessage;
 bool	CPreferences::confirmExit;
 DWORD	CPreferences::m_adwStatsColors[16]; //MORPH - Changed by SiRoB, Powershare display
+bool	CPreferences::bHasCustomTaskIconColor;
 bool	CPreferences::splashscreen;
 bool	CPreferences::startupsound;//Commander - Added: Enable/Disable Startupsound
 bool	CPreferences::sidebanner;//Commander - Added: Side Banner
@@ -656,6 +657,7 @@ bool	CPreferences::m_bShowSharedFilesDetails;
 bool	CPreferences::m_bShowUpDownIconInTaskbar;
 bool	CPreferences::m_bShowWin7TaskbarGoodies;
 bool	CPreferences::m_bForceSpeedsToKB;
+bool	CPreferences::m_bAutoShowLookups;
 
 // ZZ:DownloadManager -->
 bool    CPreferences::m_bA4AFSaveCpu;
@@ -2249,6 +2251,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"UseSimpleTimeRemainingcomputation",m_bUseOldTimeRemaining);
 	ini.WriteBool(L"AllocateFullFile",m_bAllocFull);
 	ini.WriteBool(L"ShowSharedFilesDetails", m_bShowSharedFilesDetails);
+	ini.WriteBool(L"AutoShowLookups", m_bAutoShowLookups);
 
 	ini.WriteInt(L"VersionCheckLastAutomatic", versioncheckLastAutomatic);
 	//MORPH START - Added by SiRoB, New Version check
@@ -2396,6 +2399,7 @@ void CPreferences::SavePreferences()
 		buffer2.Format(L"StatColor%i",i);
 		ini.WriteString(buffer2,buffer,L"Statistics" );
 	}
+	ini.WriteBool(L"HasCustomTaskIconColor", bHasCustomTaskIconColor, L"Statistics");
 
 
 	///////////////////////////////////////////////////////////////////////////
@@ -2718,7 +2722,7 @@ void CPreferences::ResetStatsColor(int index)
 		case 8 : m_adwStatsColors[8]=RGB(150, 150, 255);break;
 		case 9 : m_adwStatsColors[9]=RGB(255, 255, 128);break; //MORPH - Added by Yun.SF3, ZZ Upload System
 		case 10 : m_adwStatsColors[10]=RGB(0, 255, 0);break;
-		case 11 : m_adwStatsColors[11]=RGB(0, 0, 0);break; //MORPH - HotFix by SiRoB & IceCream, Default Black color for SystrayBar
+		case 11 : m_adwStatsColors[11]=RGB(0, 0, 0); bHasCustomTaskIconColor = false; break; //MORPH - HotFix by SiRoB & IceCream, Default Black color for SystrayBar
 		case 12 : m_adwStatsColors[12]=RGB(192,   0, 192);break; //MORPH - Added by Yun.SF3, ZZ Upload System
 		case 13 : m_adwStatsColors[13]=RGB(128, 128, 255);break; //MORPH - Added by Yun.SF3, ZZ Upload System
 		case 14 : m_adwStatsColors[14]=RGB(192, 192, 0);break;
@@ -2742,6 +2746,8 @@ bool CPreferences::SetAllStatsColors(int iCount, const DWORD* pdwColors)
 		{
 			m_adwStatsColors[i] = pdwColors[i];
 			bModified = true;
+			if (i == 11)
+				bHasCustomTaskIconColor = true;
 		}
 	}
 	return bModified;
@@ -3113,6 +3119,7 @@ void CPreferences::LoadPreferences()
 	m_bAllocFull=ini.GetBool(L"AllocateFullFile",0);
 	m_bAutomaticArcPreviewStart=ini.GetBool(L"AutoArchivePreviewStart", true);
 	m_bShowSharedFilesDetails = ini.GetBool(L"ShowSharedFilesDetails", true);
+	m_bAutoShowLookups = ini.GetBool(L"AutoShowLookups", true);
 	m_bShowUpDownIconInTaskbar = ini.GetBool(L"ShowUpDownIconInTaskbar", false );
 	m_bShowWin7TaskbarGoodies  = ini.GetBool(L"ShowWin7TaskbarGoodies", true);
 	m_bForceSpeedsToKB = ini.GetBool(L"ForceSpeedsToKB", false);
@@ -3568,6 +3575,7 @@ void CPreferences::LoadPreferences()
 		if (_stscanf(ini.GetString(buffer2, L"", L"Statistics"), L"%i", &m_adwStatsColors[i]) != 1)
 			ResetStatsColor(i);
 	}
+	bHasCustomTaskIconColor = ini.GetBool(L"HasCustomTaskIconColor",false, L"Statistics");
 	m_bShowVerticalHourMarkers = ini.GetBool(L"ShowVerticalHourMarkers", true, L"Statistics");
 
 	// -khaos--+++> Load Stats

@@ -453,7 +453,7 @@ BEGIN
     IDS_SW_START            "Inizia"
     IDS_SCHEDULER           "Operazioni Pianificate"
     IDS_IRC                 "&IRC" //!
-    IDS_SW_RESULT           "Risultati Ricerca"
+    IDS_SW_RESULT           "Risultati Ricerche"
     IDS_SW_DOWNLOAD         "Scarica i File selezionati"
     IDS_SV_SERVERLIST       "Lista Server"
     IDS_SV_SERVERINFO       "Informazioni sul Server"
@@ -1116,7 +1116,7 @@ BEGIN
     IDS_ENTERUSERNAME       "Inserisci il tuo Nick eMule (max 50 car):"
     IDS_STATIC_CPUMEM       "Risparmio CPU e Memoria"
     IDS_KAD_SEARCH_KEYWORD_TOO_SHORT 
-                            "Parola chiave troppo corta.\r\n\r\nLe parole chiave per la ricerca sulla rete Kad devono avere un minimo di 3 caratteri."
+                            "Parola chiave troppo corta!\r\n\r\nLe parole chiave per la ricerca sulla rete Kad devono avere un minimo di 3 caratteri."
     IDS_LOG2DISK            "Salva il Registro su Disco"
     IDS_KAD_SEARCH_KEYWORD_ALREADY_SEARCHING 
                             "C'è già una ricerca nella rete Kad per la parola chiave ""%s"".\r\n\r\nPer effettuare un'altra ricerca sulla stessa parola chiave, attendi che sia terminata quella in corso o chiudi il pannello di ricerca."
@@ -1394,7 +1394,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_SEARCH_MISSINGCLOSINGPARANT "Parentesi chiusa ')' mancante"
-    IDS_SEARCH_EXPRERROR    "Impossibile analizzare l'espressione di ricerca"
+    IDS_SEARCH_EXPRERROR    "Impossibile analizzare l'espressione di ricerca!"
     IDS_SEARCH_TOOCOMPLEX   "Espressione troppo complessa"
     IDS_VERSION             "Versione"
     IDS_OPTIONS             "Opzioni"
@@ -1544,7 +1544,7 @@ BEGIN
     IDS_MINBITRATE          "Bitrate Min. [kBit/s]"
     IDS_KAD_RECHECKFW       "Ricontrolla Firewall"
     IDS_SHAREDTITLE         "File eD2K | Kad"
-    IDS_FIREWALLED          "Firewalled" //!
+    IDS_FIREWALLED          "Dietro Firewall"
     IDS_KADEMLIA            "Kad" //!
     IDS_KADCONTACTLAB       "Contatti"
     IDS_KADDISTANCE         "Distanza"
@@ -1892,7 +1892,7 @@ BEGIN
     IDS_CAPTCHAFAILED       "La tua risposta al 'Captcha' è errata e il tuo messaggio è stato ignorato. Puoi richiedere un nuovo 'Captcha' inviando un nuovo messaggio."
     IDS_CAPTCHASOLVED       "Hai superato il controllo 'Captcha' e l'utente ha ricevuto il tuo messaggio."
     IDS_USECAPTCHAS         "Richiedi un'autenticazione 'Captcha'"
-    IDS_BOOTSRAPNODESDAT    "'nodes.dat' dall'URL:"
+    IDS_BOOTSRAPNODESDAT    "Carica 'nodes.dat' dall'URL:"
     IDS_DOWNLOADING_NODESDAT_FROM "Scaricamento del File 'nodes.dat' da %s"
     IDS_DOWNLOADING_NODESDAT "Scaricamento del File 'nodes.dat' in corso..."
     IDS_ERR_FAILEDDOWNLOADNODES "Si è verificato un errore nello scaricare il File 'nodes.dat' da %s"
@@ -1905,7 +1905,7 @@ BEGIN
     IDS_SEARCHINGFRIENDKAD  "Ricerca di amici nella rete Kad in corso..."
     IDS_FOUND               "trovato"
     IDS_EXTERNUDPPORT       "Porta UDP Esterna"
-    IDS_STORESEARCHES       "Ricorda le ricerche aperte tra i riavvii"
+    IDS_STORESEARCHES       "Ricorda le ricerche aperte tra i riavvii di eMule"
     IDS_WRN_INCFILE_EXISTS  "Hai selezionato una nuova cartella per i tuoi File scaricati che non è vuota. Tutti i File esistenti in questa cartella verranno automaticamente condivisi da eMule."
     IDS_EDITSPAMFILTER      "Modifica il filtro Anti-Spam..."
     IDS_EDITSPAMFILTERCOMMENTS "Modifica il filtro Anti-Spam per i commenti"
@@ -1947,12 +1947,12 @@ BEGIN
     IDS_NOTASKED            "Non Chiesto"
     IDS_LOOKUPGRAPH         "Dettagli di Ricerca"
     IDS_AUTOKADLOOKUPGRAPH  "Visualizza automaticamente le ricerche attive"
-    IDS_PAUSEONPREVIEW      "Metti in pausa quando è possibile l'anteprima"
+    IDS_PAUSEONPREVIEW      "Metti in Pausa quando è possibile l'Anteprima"
     IDS_PREVIEWWITH         "Anteprima con"
     IDS_CLOSEEMULE          "Chiudi eMule"
     IDS_DONOTASKAGAIN       "Non chiedermelo nuovamente"
     IDS_POPULARITY          "Livello di Popolarità"
-    IDS_SHOWWIN7TASKBARGOODIES "Abilita effetti della barra strumenti di Windows 7"
+    IDS_SHOWWIN7TASKBARGOODIES "Abilita gli effetti della barra strumenti di Windows 7"
     IDS_LANMODE             "Modalità LAN"
 END
 

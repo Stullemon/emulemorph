@@ -46,8 +46,10 @@ protected:
 	CWnd* m_pCommandTargetWnd;
 
 	void SetAllIcons();
+	void FillToolbar();
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
+	virtual void DelayShow(BOOL bShow);
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg LRESULT OnInitDialog(WPARAM, LPARAM);

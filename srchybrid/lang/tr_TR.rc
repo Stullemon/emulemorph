@@ -1989,9 +1989,9 @@ BEGIN
     IDS_PREVIEWWITH         "Þununla önizle"
     IDS_CLOSEEMULE          "eMule'u Kapat"
     IDS_DONOTASKAGAIN       "Bana tekrar sorma"
-    IDS_POPULARITY          "Popularity Rank"
-    IDS_SHOWWIN7TASKBARGOODIES "Enable Windows 7 taskbar effects"
-    IDS_LANMODE             "LAN Mode"
+    IDS_POPULARITY          "Popülerlik Derecesi"
+    IDS_SHOWWIN7TASKBARGOODIES "Windows 7 görev çubuðu efektleri etkin"
+    IDS_LANMODE             "LAN Modu"
 END
 
 STRINGTABLE 

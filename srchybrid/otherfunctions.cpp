@@ -49,6 +49,7 @@
 #include "Kademlia/Kademlia/kademlia.h"
 #include "kademlia/kademlia/UDPFirewallTester.h"
 #include "Log.h"
+#include "CxImage/xImage.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -4045,6 +4046,26 @@ uint8 GetMyConnectOptions(bool bEncryption, bool bCallback){
 	
 	const uint8 byCryptOptions = (uDirectUDPCallback << 3) | (uRequiresCryptLayer << 2) | (uRequestsCryptLayer << 1) | (uSupportsCryptLayer << 0);
 	return byCryptOptions;
+}
+
+bool AddIconGrayscaledToImageList(CImageList& rList, HICON hIcon)
+{
+	// Use to create grayscaled alpha using icons on WinXP and lower
+	// Only works with edited CxImage lib, not 6.0 standard
+	bool bResult = false;
+	ICONINFO iinfo;
+	if (GetIconInfo(hIcon, &iinfo))
+	{
+		CxImage cxGray;
+		if (cxGray.CreateFromHBITMAP(iinfo.hbmColor))
+		{
+			cxGray.GrayScale();
+			bResult = rList.Add(CBitmap::FromHandle(cxGray.MakeBitmap(NULL, true)), CBitmap::FromHandle(iinfo.hbmMask)) != (-1);
+		}
+		DeleteObject(iinfo.hbmColor);
+		DeleteObject(iinfo.hbmMask);
+	}
+	return bResult;
 }
 
 // khaos::kmod+ Functions to return a random number within a given range.

@@ -22,6 +22,7 @@
 #include "preferences.h"
 #include "UserMsgs.h"
 #include "SplitterControl.h"
+#include "MenuCmds.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -137,6 +138,9 @@ BEGIN_MESSAGE_MAP(CArchivePreviewDlg, CResizablePage)
 	ON_WM_DESTROY()
 	ON_NOTIFY(LVN_DELETEALLITEMS, IDC_FILELIST, OnLvnDeleteAllItemsArchiveEntries)
 	ON_NOTIFY(NM_CUSTOMDRAW, IDC_FILELIST, OnNMCustomDrawArchiveEntries)
+	ON_WM_CONTEXTMENU()
+	ON_COMMAND(MP_UPDATE, OnBnClickedRead)
+	ON_COMMAND(MP_HM_HELP, OnBnExplain)
 END_MESSAGE_MAP()
 
 CArchivePreviewDlg::CArchivePreviewDlg()
@@ -1215,4 +1219,18 @@ LRESULT CArchivePreviewDlg::ShowScanResults(WPARAM wParam, LPARAM lParam)
 
 	FreeMemory(tp);
 	return 1;
+}
+
+void CArchivePreviewDlg::OnContextMenu(CWnd* pWnd, CPoint point)
+{
+	if (m_bReducedDlg)
+	{
+		CMenu menu;
+		menu.CreatePopupMenu();
+		menu.AppendMenu(MF_STRING, MP_UPDATE, GetResString(IDS_SV_UPDATE));
+		menu.AppendMenu(MF_STRING, MP_HM_HELP, GetResString(IDS_EM_HELP));
+		menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+	}
+	else
+		__super::OnContextMenu(pWnd, point);
 }

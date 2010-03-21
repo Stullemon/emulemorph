@@ -4,6 +4,7 @@ Changelog for eMule 0.50a MorphXT v12.0
 XX-XX-2010
 
 Merged to 0.50a [Stulle]
+ADD: Visual Studio 2008 project files and solution [Stulle]
 ADD: Settings removed from official eMule to Advanced Preferences [Officials/Stulle]
 ADD: Some more Tooltips for the preferences [Stulle]
 ADD: Icon for "Pause when preview possible" menu entry [Stulle]

@@ -554,6 +554,7 @@ void CKeyEntry::MergeIPsAndFilenames(CKeyEntry* pFromEntry){
 		// since we added a new publisher, we want to (re)calcualte the trust value for this entry		
 		RecalcualteTrustValue();
 	}
+	delete pNewAICHHash;
 	/*//DEBUG_ONLY( 
 		DebugLog(_T("Kad: EntryTrack: Indexed Keyword, Refresh: %s, Current Publisher: %s, Total Publishers: %u, Total different Names: %u,TrustValue: %.2f, file: %s"),
 			(bRefresh ? _T("Yes") : _T("No")), ipstr(ntohl(m_uIP)), m_pliPublishingIPs->GetCount(), m_listFileNames.GetCount(), m_fTrustValue, m_uSourceID.ToHexString());

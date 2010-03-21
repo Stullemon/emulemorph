@@ -452,7 +452,7 @@ void CCreditsThread::InitText()
     //Commander - Added: MorphTeam - Start
 	m_arCredits.Add(_T("02:04:Morph Developers"));
 	m_arCredits.Add(_T("S:5"));
-	m_arCredits.Add(_T("01:06:AndCycle (inactive)"));
+	m_arCredits.Add(_T("01:06:AndCycle (semi-inactive)"));
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Commander (inactive)"));
 	m_arCredits.Add(_T("S:5"));
@@ -472,9 +472,9 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Yun.SF3 (inactive)"));
 	m_arCredits.Add(_T("S:5"));
-	m_arCredits.Add(_T("01:06:Stulle"));
+	m_arCredits.Add(_T("01:06:leuk_he (inactive)"));
 	m_arCredits.Add(_T("S:5"));
-	m_arCredits.Add(_T("01:06:leuk_he"));
+	m_arCredits.Add(_T("01:06:Stulle"));
 	m_arCredits.Add(_T("S:5"));
 			// as required by the upnp library licence:
 	m_arCredits.Add(_T("01:06:morph contains some code that is "));

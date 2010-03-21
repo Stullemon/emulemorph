@@ -265,6 +265,7 @@ int			GetAppImageListColorFlag();
 int			GetDesktopColorDepth();
 bool		IsFileOnFATVolume(LPCTSTR pszFilePath);
 void		ClearVolumeInfoCache(int iDrive = -1);
+bool		AddIconGrayscaledToImageList(CImageList& rList, HICON hIcon);
 
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -85,7 +85,6 @@ public:
 
 private:
 
-	CFont bold;
 	HICON icon_files;
 	CSplitterControl m_wndSplitter;
 	CEditDelayed	m_ctlFilter;

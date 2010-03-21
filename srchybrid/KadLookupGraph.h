@@ -36,8 +36,7 @@ public:
 	CString GetCurrentLookupTitle() const;
 	bool	HasLookup() const										{ return m_pLookupHistory != NULL; }
 	bool	HasActiveLookup() const;
-	bool	GetAutoShowLookups() const								{ return m_bAutoShowLookups; }
-	void	SetAutoShowLookups(bool bVal)							{ m_bAutoShowLookups = bVal; }
+	bool	GetAutoShowLookups() const;
 
 protected:
 	afx_msg void OnPaint();
@@ -66,7 +65,4 @@ private:
 	int m_iHotItemIdx;
 	CToolTipCtrlX* m_pToolTip;
 	bool m_bDbgLog;
-	bool m_bAutoShowLookups;
-
-
 };

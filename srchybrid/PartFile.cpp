@@ -359,7 +359,7 @@ CPartFile::~CPartFile()
        	}
 
 		if (m_hpartfile.m_hFile != INVALID_HANDLE_VALUE)
-			FlushBuffer(true);
+			FlushBuffer(true, false, true);
 	}
 	catch(CFileException* e){
 		e->Delete();
@@ -1940,6 +1940,44 @@ bool CPartFile::SavePartFile(bool bDontOverrideBak)
 			
 			i_pos++;
 		}
+		// Add buffered data as gap too - at the time of writing this file, this data does not exists on
+		// the disk, so not addding it as gaps leads to inconsistencies which causes problems in case of
+		// failing to write the buffered data (for example on disk full errors)
+		// don't bother with best merging too much, we do this on the next loading
+		uint32 dbgMerged = 0;
+		for (POSITION pos = m_BufferedData_list.GetHeadPosition(); pos != 0; )
+		{
+			PartFileBufferedData* gap = m_BufferedData_list.GetNext(pos);
+			const uint64 nStart = gap->start;
+			uint64 nEnd = gap->end;
+			while (pos != 0) // merge if obvious
+			{
+				gap = m_BufferedData_list.GetAt(pos);
+				if (gap->start == (nEnd + 1))
+				{
+					dbgMerged++;
+					nEnd = gap->end;
+					m_BufferedData_list.GetNext(pos);
+				}
+				else
+					break;
+			}
+
+			_itoa(i_pos, number, 10);
+			namebuffer[0] = FT_GAPSTART;
+			CTag gapstarttag(namebuffer,nStart, IsLargeFile());
+			gapstarttag.WriteTagToFile(&file);
+			uTagCount++;
+
+			// gap start = first missing byte but gap ends = first non-missing byte in edonkey
+			// but I think its easier to user the real limits
+			namebuffer[0] = FT_GAPEND;
+			CTag gapendtag(namebuffer,nEnd+1, IsLargeFile());
+			gapendtag.WriteTagToFile(&file);
+			uTagCount++;
+			i_pos++;
+		}
+		//DEBUG_ONLY( DebugLog(_T("Wrote %u buffered gaps (%u merged) for file %s"), m_BufferedData_list.GetCount(), dbgMerged, GetFileName()) );
 
 		file.Seek(uTagCountFilePos, CFile::begin);
 		file.WriteUInt32(uTagCount);
@@ -4342,13 +4380,11 @@ public:
 };
 #endif //__IZoneIdentifier_INTERFACE_DEFINED__
 
-//#ifdef HAVE_VISTA_SDK
-//EXTERN_C const IID CLSID_PersistentZoneIdentifier;
-//#else
-//#if _MSC_VER<=1310 // MORPH
+#ifdef CLSID_PersistentZoneIdentifier
+EXTERN_C const IID CLSID_PersistentZoneIdentifier;
+#else
 const GUID CLSID_PersistentZoneIdentifier = { 0x0968E258, 0x16C7, 0x4DBA, { 0xAA, 0x86, 0x46, 0x2D, 0xD6, 0x1E, 0x31, 0xA3 } };
-//#endif //MORPH
-//#endif
+#endif
 
 void SetZoneIdentifier(LPCTSTR pszFilePath)
 {
@@ -7491,6 +7527,8 @@ AllcatTypes:
 // Rewritten.
 bool CPartFile::CheckShowItemInGivenCat(int inCategory)
 {
+	if (inCategory>=thePrefs.GetCatCount())
+		return false;
 
 	Category_Struct* curCat = thePrefs.GetCategory(inCategory);
 	if (curCat == NULL)
