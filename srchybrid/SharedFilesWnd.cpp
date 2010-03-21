@@ -302,7 +302,12 @@ BOOL CSharedFilesWnd::PreTranslateMessage(MSG* pMsg)
 		sharedfilesctrl.SetItemState(-1, 0, LVIS_SELECTED);
 		sharedfilesctrl.SetItemState(it, LVIS_SELECTED | LVIS_FOCUSED, LVIS_SELECTED | LVIS_FOCUSED);
 		sharedfilesctrl.SetSelectionMark(it);   // display selection mark correctly!
+		//MORPH START - Changed by Stulle, Possibly crash fix on ShowComment [WiZaRd]
+		/*
 		sharedfilesctrl.ShowComments((CKnownFile*)sharedfilesctrl.GetItemData(it));
+		*/
+		sharedfilesctrl.ShowComments((CShareableFile*)sharedfilesctrl.GetItemData(it));
+		//MORPH END   - Changed by Stulle, Possibly crash fix on ShowComment [WiZaRd]
 		return TRUE;
 	}
 

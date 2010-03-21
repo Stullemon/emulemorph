@@ -444,12 +444,25 @@ void CDownloadQueue::AddFileLinkToDownload(CED2KFileLink* pLink, int theCat, boo
 				partfile->GetAICHRecoveryHashSet()->FreeHashSet();
 
 			}
+			//MORPH START - Added by Stulle, Only resolve hostnames for downloads if partfile found [WiZaRd]
+			if (pLink->HasHostnameSources())
+			{
+				POSITION pos = pLink->m_HostnameSourcesList.GetHeadPosition();
+				while (pos != NULL)
+				{
+					const SUnresolvedHostname* pUnresHost = pLink->m_HostnameSourcesList.GetNext(pos);
+					m_srcwnd.AddToResolve(pLink->GetHashKey(), pUnresHost->strHostname, pUnresHost->nPort, pUnresHost->strURL);
+				}
+			}
+			//MORPH END   - Added by Stulle, Only resolve hostnames for downloads if partfile found [WiZaRd]
 		}
 		else
 			DebugLogWarning(_T("FileIdentifier mismatch when trying to add ed2k link to existing download - AICH Hash or Size might differ, no sources added. File: %s"),
 				partfile->GetFileName());
 	}
 
+	//MORPH START - Removed by Stulle, Only resolve hostnames for downloads if partfile found [WiZaRd]
+	/*
 	if (pLink->HasHostnameSources())
 	{
 		POSITION pos = pLink->m_HostnameSourcesList.GetHeadPosition();
@@ -459,6 +472,8 @@ void CDownloadQueue::AddFileLinkToDownload(CED2KFileLink* pLink, int theCat, boo
 			m_srcwnd.AddToResolve(pLink->GetHashKey(), pUnresHost->strHostname, pUnresHost->nPort, pUnresHost->strURL);
 		}
 	}
+	*/
+	//MORPH END   - Removed by Stulle, Only resolve hostnames for downloads if partfile found [WiZaRd]
 
 	// khaos::categorymod+ Deallocate memory, because if we've gotten here,
 	// this link wasn't added to the queue and therefore there's no reason to
