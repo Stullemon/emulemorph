@@ -6,7 +6,7 @@
 #define	HAVE_SAPI_H
 #define HAVE_QEDIT_H
 #define HAVE_WMSDK_H
-#define HAVE_WIN7_SDK_H // Stullemon: this is disabled just for a while
+#define HAVE_WIN7_SDK_H
 #define HAVE_VISTA_SDK	
 
 //////////////////////////////////////////////////////////////////////////////
@@ -39,6 +39,8 @@
 //
 // Uncomment the following line if you get compile errors due to missing 'wmsdk.h'
 //#undef HAVE_WMSDK_H
+
+#undef HAVE_WIN7_SDK_H //MORPH - Added by Stulle, We only use VS03 for compatibility builds (Win2k)
 
 #endif
 

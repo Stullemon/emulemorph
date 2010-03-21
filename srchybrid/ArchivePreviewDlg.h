@@ -74,4 +74,5 @@ protected:
 	afx_msg void OnDestroy();
 	afx_msg void OnLvnDeleteAllItemsArchiveEntries(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnNMCustomDrawArchiveEntries(NMHDR *pNMHDR, LRESULT *pResult);
+	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 };

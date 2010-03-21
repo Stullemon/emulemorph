@@ -26,7 +26,7 @@ class CFileIdentifierBase
 public:
 	virtual ~CFileIdentifierBase();
 
-	virtual EMFileSize GetFileSize() const = 0;
+	virtual EMFileSize GetFileSize() const;
 
 	void			WriteIdentifier(CFileDataIO* pFile, bool bKadExcludeMD4 = false) const;
 	bool			CompareRelaxed(const CFileIdentifierBase& rFileIdentifier) const;

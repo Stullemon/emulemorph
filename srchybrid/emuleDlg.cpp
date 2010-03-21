@@ -326,6 +326,7 @@ CemuleDlg::CemuleDlg(CWnd* pParent /*=NULL*/)
 #endif
 	m_bEd2kSuspendDisconnect = false;
 	m_bKadSuspendDisconnect = false;
+	m_bInitedCOM = false;
 	b_HideApp = false; //MORPH - Added by SiRoB, Toggle Show Hide window
 	m_hwndClipChainNext=NULL; // MORPH leuk_he clipboard chain instead of timer
 	m_bChained=false; // MORPH leuk_he clipboard chain instead of timer
@@ -357,9 +358,12 @@ CemuleDlg::~CemuleDlg()
 	if (m_pTaskbarList != NULL)
 	{
 		m_pTaskbarList.Release();
-		CoUninitialize();
+		ASSERT( m_bInitedCOM );
 	}
+	if (m_bInitedCOM)
+		CoUninitialize();
 #endif
+
 	// already destroyed by windows?
 	//VERIFY( m_menuUploadCtrl.DestroyMenu() );
 	//VERIFY( m_menuDownloadCtrl.DestroyMenu() );
@@ -386,7 +390,7 @@ void CemuleDlg::DoDataExchange(CDataExchange* pDX)
 LRESULT CemuleDlg::OnAreYouEmule(WPARAM, LPARAM)
 {
 	return UWM_ARE_YOU_EMULE;
-} 
+}
 
 void DialogCreateIndirect(CDialog *pWnd, UINT uID)
 {
@@ -413,14 +417,21 @@ BOOL CemuleDlg::OnInitDialog()
 	// allow the TaskbarButtonCreated- & (tbb-)WM_COMMAND message to be sent to our window if our app is running elevated
 	if (thePrefs.GetWindowsVersion() >= _WINVER_7_)
 	{
-		typedef BOOL (WINAPI* PChangeWindowMessageFilter)(UINT message, DWORD dwFlag);
-		PChangeWindowMessageFilter ChangeWindowMessageFilter = 
-		(PChangeWindowMessageFilter )(GetProcAddress(
-			GetModuleHandle(TEXT("user32.dll")), "ChangeWindowMessageFilter"));
-		if (ChangeWindowMessageFilter) {
-			ChangeWindowMessageFilter(UWM_TASK_BUTTON_CREATED,1);
-			ChangeWindowMessageFilter(WM_COMMAND, 1);
+		int res = CoInitialize(NULL);
+		if (res == S_OK || res == S_FALSE)
+		{
+			m_bInitedCOM = true;
+			typedef BOOL (WINAPI* PChangeWindowMessageFilter)(UINT message, DWORD dwFlag);
+			PChangeWindowMessageFilter ChangeWindowMessageFilter = 
+			(PChangeWindowMessageFilter )(GetProcAddress(
+				GetModuleHandle(TEXT("user32.dll")), "ChangeWindowMessageFilter"));
+			if (ChangeWindowMessageFilter) {
+				ChangeWindowMessageFilter(UWM_TASK_BUTTON_CREATED,1);
+				ChangeWindowMessageFilter(WM_COMMAND, 1);
+			}
 		}
+		else
+			ASSERT( false );
 	}
 #endif
 
@@ -431,7 +442,7 @@ BOOL CemuleDlg::OnInitDialog()
 	if (RunningAsService() || (thePrefs.GetInvisibleMode() && theApp.DidWeAutoStart()))
 		m_bStartMinimized = true;
 	//MORPH - Added by SiRoB, Invisible Mode
-	
+
 	// temporary disable the 'startup minimized' option, otherwise no window will be shown at all
 	if (thePrefs.IsFirstStart())
 		m_bStartMinimized = false;
@@ -476,7 +487,7 @@ BOOL CemuleDlg::OnInitDialog()
 		ASSERT( (MP_MVERSIONCHECK & 0xFFF0) == MP_MVERSIONCHECK && MP_MVERSIONCHECK < 0xF000);
 		pSysMenu->AppendMenu(MF_STRING, MP_MVERSIONCHECK, GetResString(IDS_MVERSIONCHECK));
 		//MORPH END   - Added by SiRoB, New Version check
-		
+
 		// remaining system menu entries are created later...
 	}
 
@@ -736,16 +747,21 @@ BOOL CemuleDlg::OnInitDialog()
 
 	// initalize PeerCache
 	theApp.m_pPeerCache->Init(thePrefs.GetPeerCacheLastSearch(), thePrefs.WasPeerCacheFound(), thePrefs.IsPeerCacheDownloadEnabled(), thePrefs.GetPeerCachePort());
-
+	
 	//MORPH START - Moved by SiRoB, SafeHash fix (see StartupTimer)
-	/*// start aichsyncthread
+	/*
+	// start aichsyncthread
 	AfxBeginThread(RUNTIME_CLASS(CAICHSyncThread), THREAD_PRIORITY_BELOW_NORMAL,0);
 	*/
 
 	SetClipboardWatch(thePrefs.WatchClipboard4ED2KLinks());  // MORPH leuk_he clipboard chain instead of timer
 
 	// debug info
-	DebugLog(_T("Using '%s' as config directory"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)); 
+	DebugLog(_T("Using '%s' as config directory"), thePrefs.GetMuleDirectory(EMULE_CONFIGDIR));
+	
+	if (!thePrefs.HasCustomTaskIconColor())
+		SetTaskbarIconColor();
+
 	return TRUE;
 }
 
@@ -1418,6 +1434,7 @@ void CemuleDlg::ShowTransferRate(bool bForceAll)
 		int iDownRateProcent = (int)ceil((m_uDownDatarate/10.24) / thePrefs.GetMaxGraphDownloadRate());
 		if (iDownRateProcent > 100)
 			iDownRateProcent = 100;
+		iDownRateProcent = 90;
 		UpdateTrayIcon(iDownRateProcent);
 
 		//MORPH START - Added by IceCream, Correct the bug of the download speed shown in the systray
@@ -4535,17 +4552,24 @@ void CemuleDlg::OnTBBPressed(UINT id)
 LRESULT CemuleDlg::OnTaskbarBtnCreated ( WPARAM , LPARAM  )
 {
 	// Sanity check that the OS is Win 7 or later
-	if (thePrefs.GetWindowsVersion() >= _WINVER_7_ && m_pTaskbarList == NULL)
+	if (thePrefs.GetWindowsVersion() >= _WINVER_7_ )
 	{
-		CoInitialize(NULL);
-		m_pTaskbarList.CoCreateInstance ( CLSID_TaskbarList );
-		m_pTaskbarList->SetProgressState ( m_hWnd, TBPF_NOPROGRESS );
+		if (m_pTaskbarList)
+			m_pTaskbarList.Release();
 		
-		m_currentTBP_state = TBPF_NOPROGRESS;
-		m_prevProgress=0;
-		m_ovlIcon = NULL;
-		
-		UpdateThumbBarButtons(true);
+		if (m_pTaskbarList.CoCreateInstance ( CLSID_TaskbarList ) == S_OK)
+		{
+			m_pTaskbarList->SetProgressState ( m_hWnd, TBPF_NOPROGRESS );
+			
+			m_currentTBP_state = TBPF_NOPROGRESS;
+			m_prevProgress=0;
+			m_ovlIcon = NULL;
+			
+			UpdateThumbBarButtons(true);
+			UpdateStatusBarProgress();
+		}
+		else
+			ASSERT( false );
 	}
 	return 0;
 }
@@ -4626,12 +4650,81 @@ void CemuleDlg::UpdateStatusBarProgress()
 			if (m_ovlIcon!=newicon) {
 				m_ovlIcon=newicon;
 				m_pTaskbarList->SetOverlayIcon ( m_hWnd, m_ovlIcon, _T("eMule Up/Down Indicator") );
-
 			}
 		}
 	}
 }
 #endif
+
+void CemuleDlg::SetTaskbarIconColor()
+{
+	bool bBrightTaskbarIconSpeed = false;
+	bool bTransparent = false;
+	COLORREF cr = RGB(0, 0, 0);
+	if (thePrefs.IsRunningAeroGlassTheme())
+	{
+		HMODULE hDWMAPI = LoadLibrary(_T("dwmapi.dll"));
+		if (hDWMAPI){
+			HRESULT (WINAPI *pfnDwmGetColorizationColor)(DWORD*, BOOL*);
+			(FARPROC&)pfnDwmGetColorizationColor = GetProcAddress(hDWMAPI, "DwmGetColorizationColor");
+			DWORD dwGlassColor = 0;
+			BOOL bOpaque;
+			if (pfnDwmGetColorizationColor != NULL)
+			{
+				if (pfnDwmGetColorizationColor(&dwGlassColor, &bOpaque) == S_OK)
+				{
+					uint8 byAlpha = (uint8)(dwGlassColor >> 24);
+					cr = 0xFFFFFF & dwGlassColor;
+					if (byAlpha < 200 && bOpaque == FALSE)
+					{
+						// on transparent themes we can never figure out which excact color is shown (may we could in real time?)
+						// but given that a color is blended against the background, it is a good guess that a bright speedbar will
+						// be the best solution in most cases
+						bTransparent = true;
+					}							
+				}
+			}
+			FreeLibrary(hDWMAPI);
+		}
+	}
+	else
+	{
+		if (g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed())
+		{
+			CWnd* ptmpWnd = new CWnd();
+			VERIFY( ptmpWnd->Create(_T("STATIC"), _T("Tmp"), 0, CRect(0, 0, 10, 10), this, 1235) );
+			VERIFY( g_xpStyle.SetWindowTheme(ptmpWnd->GetSafeHwnd(), L"TrayNotifyHoriz", NULL) == S_OK );
+			HTHEME hTheme = g_xpStyle.OpenThemeData(ptmpWnd->GetSafeHwnd(), L"TrayNotify");
+			if (hTheme != NULL)
+			{
+
+				if (!g_xpStyle.GetThemeColor(hTheme, TNP_BACKGROUND, 0, TMT_FILLCOLORHINT, &cr) == S_OK)
+					ASSERT( false );
+				g_xpStyle.CloseThemeData(hTheme);
+			}
+			else
+				ASSERT( false );
+			ptmpWnd->DestroyWindow();
+			delete ptmpWnd;
+		}
+		else
+		{
+			DEBUG_ONLY(DebugLog(_T("Taskbar Notifier Color: GetSysColor() used")));
+			cr = GetSysColor(COLOR_3DFACE);
+		}
+	}
+	uint8 iRed = GetRValue(cr);
+	uint8 iBlue = GetBValue(cr);
+	uint8 iGreen = GetGValue(cr);
+	uint16 iBrightness = (uint16)sqrt(((iRed * iRed * 0.241f) + (iGreen * iGreen * 0.691f) + (iBlue * iBlue * 0.068f)));
+	ASSERT( iBrightness <= 255 );
+	bBrightTaskbarIconSpeed = iBrightness < 132;
+	DebugLog(_T("Taskbar Notifier Color: R:%u G:%u B:%u, Brightness: %u, Transparent: %s"), iRed, iGreen, iBlue, iBrightness, bTransparent ? _T("Yes") : _T("No"));
+	if (bBrightTaskbarIconSpeed || bTransparent)
+		thePrefs.SetStatsColor(11, RGB(255, 255, 255));
+	else
+		thePrefs.SetStatsColor(11, RGB(0, 0, 0));
+}
 
 //Commander - Added: Invisible Mode [TPT] - Start
 LRESULT CemuleDlg::OnHotKey(WPARAM wParam, LPARAM /*lParam*/)

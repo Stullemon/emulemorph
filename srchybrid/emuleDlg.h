@@ -184,6 +184,7 @@ protected:
 #endif
 	bool			m_bKadSuspendDisconnect;
 	bool			m_bEd2kSuspendDisconnect;
+	bool			m_bInitedCOM;
 #ifdef HAVE_WIN7_SDK_H
 	CComPtr<ITaskbarList3>	m_pTaskbarList;
 	THUMBBUTTON		m_thbButtons[TBB_LAST+1];
@@ -245,6 +246,7 @@ protected:
 	CWnd* MapToolbarButtonToWindow(int iButtonID) const;
 	int GetNextWindowToolbarButton(int iButtonID, int iDirection = 1) const;
 	bool IsWindowToolbarButton(int iButtonID) const;
+	void SetTaskbarIconColor();
 
 	virtual void DoDataExchange(CDataExchange* pDX);
 	virtual BOOL OnInitDialog();

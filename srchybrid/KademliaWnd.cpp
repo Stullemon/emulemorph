@@ -367,17 +367,15 @@ void CKademliaWnd::Localize()
 	GetDlgItem(IDC_NODESDATLABEL)->SetWindowText(GetResString(IDS_BOOTSRAPNODESDAT));
 	GetDlgItem(IDC_FIREWALLCHECKBUTTON)->SetWindowText(GetResString(IDS_KAD_RECHECKFW));
 	
-	SetDlgItemText(IDC_KADSEARCHLAB,GetResString(IDS_KADSEARCHLAB));
-
 	SetDlgItemText(IDC_RADCLIENTS,GetResString(IDS_RADCLIENTS));
 
 	UpdateControlsState();
+	UpdateButtonTitle( m_pbtnWnd->IsButtonChecked(MP_VIEW_KADLOOKUP)==TRUE);
 	m_contactHistogramCtrl->Localize();
 	m_contactListCtrl->Localize();
 	searchList->Localize();
 	m_kadLookupGraph->Localize();
 
-	m_pbtnWnd->SetWindowText(GetResString(IDS_KADCONTACTLAB));
 	m_pbtnWnd->SetBtnText(MP_VIEW_KADCONTACTS, GetResString(IDS_KADCONTACTLAB));
 	m_pbtnWnd->SetBtnText(MP_VIEW_KADLOOKUP, GetResString(IDS_LOOKUPGRAPH));
 }
@@ -529,7 +527,7 @@ void CKademliaWnd::OnNMDblclkSearchlist(NMHDR *pNMHDR, LRESULT *pResult)
 		if (pSearch != NULL)
 		{
 			SetSearchGraph(pSearch->GetLookupHistory(), true);
-			m_kadLookupGraph->SetAutoShowLookups(false);
+			thePrefs.SetAutoShowLookups(false);
 		}
 	}
 	*pResult = 0;

@@ -496,11 +496,67 @@ bool CxImage::CreateFromHANDLE(HANDLE hMem)
  * \param hdc: target device context (the screen, usually)
  * \return bitmap handle, or NULL if an error occurs.
  */
-HBITMAP CxImage::MakeBitmap(HDC hdc)
+// extened version posted by brunom on cximage forum
+HBITMAP CxImage::MakeBitmap(HDC hdc /* = NULL */, bool bTransparency /*= false */)
 {
 	if (!pDib)
 		return NULL;
 
+	// Create HBITMAP with Trancparency
+	if( AlphaIsValid() && bTransparency )
+	{
+		HDC hMemDC;
+		if (hdc)
+			hMemDC = hdc;
+		else
+			hMemDC = CreateCompatibleDC(NULL);
+
+		BITMAPINFO bi;
+
+		// Fill in the BITMAPINFOHEADER
+		bi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+		bi.bmiHeader.biWidth = GetWidth();
+		bi.bmiHeader.biHeight = GetHeight();
+		bi.bmiHeader.biPlanes = 1;
+		bi.bmiHeader.biBitCount = 32;
+		bi.bmiHeader.biCompression = BI_RGB;
+		bi.bmiHeader.biSizeImage = 4 * GetWidth() * GetHeight();
+		bi.bmiHeader.biXPelsPerMeter = 0;
+		bi.bmiHeader.biYPelsPerMeter = 0;
+		bi.bmiHeader.biClrUsed = 0;
+		bi.bmiHeader.biClrImportant = 0;
+
+		COLORREF* pCrBits = NULL;
+		HBITMAP hbmp = CreateDIBSection (
+			hMemDC, &bi, DIB_RGB_COLORS, (void **)&pCrBits,
+			NULL, NULL);
+
+		if (!hdc)
+			DeleteDC(hMemDC);
+
+		DIBSECTION ds;
+		if (::GetObject (hbmp, sizeof (DIBSECTION), &ds) == 0)
+		{
+			return 0;
+		}
+
+		// transfer Pixels from CxImage to Bitmap
+		RGBQUAD* pBit = (RGBQUAD*) ds.dsBm.bmBits;
+		int lPx,lPy;
+		for( lPy=0 ; lPy < bi.bmiHeader.biHeight ; ++lPy )
+		{
+			for( lPx=0 ; lPx < bi.bmiHeader.biWidth ; ++lPx )
+			{
+				RGBQUAD lPixel = GetPixelColor(lPx,lPy,true);
+				*pBit = lPixel;
+				pBit++;
+			}
+		}
+
+		return hbmp;
+	}
+
+	// Create HBITMAP without Trancparency
 	if (!hdc){
 		// this call to CreateBitmap doesn't create a DIB <jaslet>
 		// // Create a device-independent bitmap <CSC>
@@ -524,6 +580,41 @@ HBITMAP CxImage::MakeBitmap(HDC hdc)
 
 	return bmp;
 }
+
+
+////////////////////////////////////////////////////////////////////////////////
+/**
+* Transfer the image in a icon handle, with transparency.
+* \param hdc: target device context (the screen, usually)
+* \return icon handle, or NULL if an error occurs.
+* \author [brunom]
+*/
+HICON CxImage::MakeIcon(HDC hdc /* = NULL */)
+{
+	HICON hDestIcon	= 0;
+
+	ICONINFO csDest;
+
+	csDest.fIcon = TRUE;
+	csDest.xHotspot = 0;
+	csDest.yHotspot = 0;
+
+	// Assign HBITMAP with Transparency to ICON Info structure
+	csDest.hbmColor = MakeBitmap( hdc, true );
+
+	// Create Mask just in case we need a Mask for the Icons
+	CxImage a_Mask;
+	GetTransparentMask(&a_Mask);
+
+	// Assign Mask
+	csDest.hbmMask  = a_Mask.MakeBitmap();
+
+	// Create Icon
+	hDestIcon = ::CreateIconIndirect(&csDest);
+
+	return hDestIcon;
+} 
+
 ////////////////////////////////////////////////////////////////////////////////
 /**
  * Bitmap resource constructor
@@ -531,6 +622,7 @@ HBITMAP CxImage::MakeBitmap(HDC hdc)
  * \param hpal : (optional) palette, useful for 8bpp DC 
  * \return true if everything is ok
  */
+// extened version posted by brunom on cximage forum
 bool CxImage::CreateFromHBITMAP(HBITMAP hbmp, HPALETTE hpal)
 {
 	if (!Destroy())
@@ -540,28 +632,66 @@ bool CxImage::CreateFromHBITMAP(HBITMAP hbmp, HPALETTE hpal)
         BITMAP bm;
 		// get informations about the bitmap
         GetObject(hbmp, sizeof(BITMAP), (LPSTR) &bm);
-		// create the image
-        if (!Create(bm.bmWidth, bm.bmHeight, bm.bmBitsPixel, 0))
-			return false;
-		// create a device context for the bitmap
-        HDC dc = ::GetDC(NULL);
-		if (!dc)
-			return false;
 
-		if (hpal){
-			SelectObject(dc,hpal); //the palette you should get from the user or have a stock one
-			RealizePalette(dc);
+		// Transparency in HBITMAP
+		if(bm.bmBitsPixel == 32)
+		{
+			bool l_bResult = true;
+
+			BITMAPINFO l_BitmapInfo;
+			l_BitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
+			l_BitmapInfo.bmiHeader.biWidth = bm.bmWidth;
+			l_BitmapInfo.bmiHeader.biHeight = bm.bmHeight;
+			l_BitmapInfo.bmiHeader.biPlanes = bm.bmPlanes;
+			l_BitmapInfo.bmiHeader.biBitCount = bm.bmBitsPixel;
+			l_BitmapInfo.bmiHeader.biCompression = BI_RGB;
+
+			RGBQUAD *l_pRawBytes = new RGBQUAD[bm.bmWidth * bm.bmHeight];
+
+			HDC dc = ::GetDC(NULL);
+
+			if(dc)
+			{
+				if(GetDIBits(dc, hbmp, 0, bm.bmHeight, l_pRawBytes, &l_BitmapInfo, DIB_RGB_COLORS))
+					l_bResult = CreateFromArray((BYTE*)l_pRawBytes, bm.bmWidth, bm.bmHeight, bm.bmBitsPixel, bm.bmWidthBytes, false);
+				else
+					l_bResult = false;
+
+				::ReleaseDC(NULL, dc);
+			}
+			else
+				l_bResult = false;
+
+			delete [] l_pRawBytes;
+
+			return l_bResult;
 		}
+		else
+		{
+			// create the image
+			if (!Create(bm.bmWidth, bm.bmHeight, bm.bmBitsPixel, 0))
+				return false;
+			// create a device context for the bitmap
+			HDC dc = ::GetDC(NULL);
+			if (!dc)
+				return false;
 
-		// copy the pixels
-        if (GetDIBits(dc, hbmp, 0, head.biHeight, info.pImage,
-			(LPBITMAPINFO)pDib, DIB_RGB_COLORS) == 0){ //replace &head with pDib <Wil Stark>
-            strcpy(info.szLastError,"GetDIBits failed");
+			if (hpal){
+				SelectObject(dc,hpal); //the palette you should get from the user or have a stock one
+				RealizePalette(dc);
+			}
+
+			// copy the pixels
+			if (GetDIBits(dc, hbmp, 0, head.biHeight, info.pImage,
+				(LPBITMAPINFO)pDib, DIB_RGB_COLORS) == 0){ //replace &head with pDib <Wil Stark>
+					strcpy(info.szLastError,"GetDIBits failed");
+					::ReleaseDC(NULL, dc);
+					return false;
+			}
 			::ReleaseDC(NULL, dc);
-			return false;
-        }
-        ::ReleaseDC(NULL, dc);
-		return true;
+			return true;
+
+		}
     }
 	return false;
 }
@@ -586,48 +716,18 @@ bool CxImage::CreateFromHICON(HICON hico)
 	BITMAP l_Bitmap;
 	GetObject(iinfo.hbmColor, sizeof(BITMAP), &l_Bitmap);
 
-	if(l_Bitmap.bmBitsPixel == 32)
-	{
-		BITMAPINFO l_BitmapInfo;
-		l_BitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-		l_BitmapInfo.bmiHeader.biWidth = l_Bitmap.bmWidth;
-		l_BitmapInfo.bmiHeader.biHeight = l_Bitmap.bmHeight;
-		l_BitmapInfo.bmiHeader.biPlanes = l_Bitmap.bmPlanes;
-		l_BitmapInfo.bmiHeader.biBitCount = l_Bitmap.bmBitsPixel;
-		l_BitmapInfo.bmiHeader.biCompression = BI_RGB;
+	l_bResult =  CreateFromHBITMAP( iinfo.hbmColor );
 
-		RGBQUAD *l_pRawBytes = new RGBQUAD[l_Bitmap.bmWidth * l_Bitmap.bmHeight];
-
-		HDC dc = ::GetDC(NULL);
-
-		if(dc)
-		{
-			if(GetDIBits(dc, iinfo.hbmColor, 0, l_Bitmap.bmHeight, l_pRawBytes, &l_BitmapInfo, DIB_RGB_COLORS))
-				l_bResult = CreateFromArray((BYTE*)l_pRawBytes, l_Bitmap.bmWidth, l_Bitmap.bmHeight, l_Bitmap.bmBitsPixel, l_Bitmap.bmWidthBytes, false);
-			else
-				l_bResult = false;
-
-			::ReleaseDC(NULL, dc);
-		}
-		else
-			l_bResult = false;
-
-		delete [] l_pRawBytes;
-	}
-	else
-	{
-		l_bResult = CreateFromHBITMAP(iinfo.hbmColor);
 #if CXIMAGE_SUPPORT_ALPHA
-		if(l_bResult)
-		{
-			CxImage mask;
-			mask.CreateFromHBITMAP(iinfo.hbmMask);
-			mask.GrayScale();
-			mask.Negative();
-			AlphaSet(mask);
-		}
-#endif
+	if(l_bResult && (l_Bitmap.bmBitsPixel != 32) )
+	{
+		CxImage mask;
+		mask.CreateFromHBITMAP(iinfo.hbmMask);
+		mask.GrayScale();
+		mask.Negative();
+		AlphaSet(mask);
 	}
+#endif
 
 	DeleteObject(iinfo.hbmColor); //<Sims>
 	DeleteObject(iinfo.hbmMask);  //<Sims>

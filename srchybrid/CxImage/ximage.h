@@ -425,7 +425,8 @@ public:
 /** \addtogroup Painting */ //@{
 #if CXIMAGE_SUPPORT_WINDOWS
 	long	Blt(HDC pDC, long x=0, long y=0);
-	HBITMAP MakeBitmap(HDC hdc = NULL);
+	HBITMAP MakeBitmap(HDC hdc = NULL, bool bTransparency = false);
+	HICON   MakeIcon(HDC hdc = NULL);
 	HANDLE	CopyToHandle();
 	bool	CreateFromHANDLE(HANDLE hMem);		//Windows objects (clipboard)
 	bool	CreateFromHBITMAP(HBITMAP hbmp, HPALETTE hpal=0);	//Windows resource

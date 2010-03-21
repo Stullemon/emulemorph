@@ -3157,9 +3157,7 @@ void CUpDownClient::ProcessAICHAnswer(const uchar* packet, UINT size)
 				return;
 			}
 			else
-// WebCache ////////////////////////////////////////////////////////////////////////////////////
-				if(thePrefs.GetLogICHEvents()) //JP log ICH events
-				AddDebugLogLine(DLP_DEFAULT, false, _T("AICH Packet Answer: Succeeded to read and validate received recoverydata"));
+				DebugLogError(_T("AICH Packet Answer: Failed to read and validate received recoverydata"));
 		}
 		else
 // WebCache ////////////////////////////////////////////////////////////////////////////////////

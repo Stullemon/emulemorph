@@ -188,10 +188,13 @@ void CSharedFilesWnd::DoResize(int iDelta)
 	CSplitterControl::ChangeWidth(GetDlgItem(IDC_DOWNHISTORYLIST), -iDelta);
 #endif
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
-	m_dlgDetails.SetRedraw(FALSE);
+	bool bAntiFlicker = m_dlgDetails.IsWindowVisible() == TRUE;
+	if (bAntiFlicker)
+		m_dlgDetails.SetRedraw(FALSE);
 	CSplitterControl::ChangePos(&m_dlgDetails, -iDelta, 0);
 	CSplitterControl::ChangeWidth(&m_dlgDetails, -iDelta);
-	m_dlgDetails.SetRedraw(TRUE);
+	if (bAntiFlicker)
+		m_dlgDetails.SetRedraw(TRUE);
 
 	CRect rcSpl;
 	m_wndSplitter.GetWindowRect(rcSpl);
@@ -347,11 +350,6 @@ void CSharedFilesWnd::Localize()
 	m_ctlFilter.ShowColumnText(true);
 	sharedfilesctrl.SetDirectoryFilter(NULL,true);
 
-	//MORPH START - Added, Downloaded History [Monki/Xman]
-#ifdef NO_HISTORY
-	GetDlgItem(IDC_TRAFFIC_TEXT)->SetWindowText(GetResString(IDS_SF_FILES));
-#endif
-	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	GetDlgItem(IDC_RELOADSHAREDFILES)->SetWindowText(GetResString(IDS_SF_RELOAD));
 }
 

@@ -201,6 +201,7 @@
 #define MP_NEWCAT				10361
 #define MP_TOGGLEDTOOLBAR		10362
 #define MP_AUTOKADLOOKUPGRAPH	10363
+#define MP_UPDATE				10364
 
 // khaos::categorymod+
 #define MP_CAT_SHOWHIDEPAUSED	10370

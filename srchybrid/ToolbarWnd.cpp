@@ -26,6 +26,7 @@
 #include "DownloadListCtrl.h"
 #include "TransferDlg.h"
 #include "Preferences.h"
+#include "Otherfunctions.h"
 
 
 #ifdef _DEBUG
@@ -71,45 +72,9 @@ void CToolbarWnd::DoDataExchange(CDataExchange* pDX)
 }
 
 #define DTOOLBAR_NUM_BUTTONS 17
-LRESULT CToolbarWnd::OnInitDialog(WPARAM /*wParam*/, LPARAM /*lParam*/)
+void CToolbarWnd::FillToolbar()
 {
-	Default();
-	InitWindowStyles(this);
-
-	//(void)m_sizeDefault; // not yet set
-	CRect sizeDefault;
-	GetWindowRect(&sizeDefault);
-	CRect rcBorders(4, 4, 4, 4);
-	SetBorders(&rcBorders);
-	m_szFloat.cx = sizeDefault.Width() + rcBorders.left + rcBorders.right + GetSystemMetrics(SM_CXEDGE) * 2;
-	m_szFloat.cy = sizeDefault.Height() + rcBorders.top + rcBorders.bottom + GetSystemMetrics(SM_CYEDGE) * 2;
-	m_szMRU = m_szFloat;
-	UpdateData(FALSE);
-
-	// Initalize the toolbar
-	CImageList iml;
-	iml.Create(16, 16, theApp.m_iDfltImageListColorFlags | ILC_MASK, 1, 1);
-	iml.Add(CTempIconLoader(_T("FILEPRIORITY")));
-	iml.Add(CTempIconLoader(_T("PAUSE")));
-	iml.Add(CTempIconLoader(_T("STOP")));
-	iml.Add(CTempIconLoader(_T("RESUME")));
-	iml.Add(CTempIconLoader(_T("DELETE")));
-	iml.Add(CTempIconLoader(_T("OPENFILE")));
-	iml.Add(CTempIconLoader(_T("PREVIEW")));
-	iml.Add(CTempIconLoader(_T("FILEINFO")));
-	iml.Add(CTempIconLoader(_T("FILECOMMENTS")));
-	iml.Add(CTempIconLoader(_T("ED2KLINK")));
-	iml.Add(CTempIconLoader(_T("CATEGORY")));
-	iml.Add(CTempIconLoader(_T("CLEARCOMPLETE")));
-	iml.Add(CTempIconLoader(_T("KadFileSearch")));
-	iml.Add(CTempIconLoader(_T("Search")));
-
-	CImageList* pImlOld = m_btnBar->SetImageList(&iml);
-	iml.Detach();
-	if (pImlOld)
-		pImlOld->DeleteImageList();
-	m_btnBar->ModifyStyle((theApp.m_ullComCtrlVer >= MAKEDLLVERULL(6, 16, 0, 0)) ? TBSTYLE_TRANSPARENT : 0, 0);
-	m_btnBar->SetMaxTextRows(0);
+	m_btnBar->DeleteAllButtons();
 
 	TBBUTTON atb1[DTOOLBAR_NUM_BUTTONS] = {0};
 
@@ -218,6 +183,81 @@ LRESULT CToolbarWnd::OnInitDialog(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	atb1[16].iString = m_btnBar->AddStrings(GetResString(IDS_FIND));
 
 	m_btnBar->AddButtons(_countof(atb1), atb1);
+}
+
+LRESULT CToolbarWnd::OnInitDialog(WPARAM /*wParam*/, LPARAM /*lParam*/)
+{
+	Default();
+	InitWindowStyles(this);
+
+	//(void)m_sizeDefault; // not yet set
+	CRect sizeDefault;
+	GetWindowRect(&sizeDefault);
+	CRect rcBorders(4, 4, 4, 4);
+	SetBorders(&rcBorders);
+	m_szFloat.cx = sizeDefault.Width() + rcBorders.left + rcBorders.right + GetSystemMetrics(SM_CXEDGE) * 2;
+	m_szFloat.cy = sizeDefault.Height() + rcBorders.top + rcBorders.bottom + GetSystemMetrics(SM_CYEDGE) * 2;
+	m_szMRU = m_szFloat;
+	UpdateData(FALSE);
+
+	// Initalize the toolbar
+	CImageList iml;
+	int nFlags= theApp.m_iDfltImageListColorFlags;
+	// older Windows versions imageslists cannot create monochrome (disabled) icons which have alpha support
+	// so we have to take care of this ourself
+	bool bNeedMonoIcons = thePrefs.GetWindowsVersion() < _WINVER_VISTA_ && nFlags != ILC_COLOR4 && nFlags != ILC_COLOR8;
+	nFlags |= ILC_MASK;
+	iml.Create(16, 16, nFlags, 1, 1);
+	iml.Add(CTempIconLoader(_T("FILEPRIORITY")));
+	iml.Add(CTempIconLoader(_T("PAUSE")));
+	iml.Add(CTempIconLoader(_T("STOP")));
+	iml.Add(CTempIconLoader(_T("RESUME")));
+	iml.Add(CTempIconLoader(_T("DELETE")));
+	iml.Add(CTempIconLoader(_T("OPENFILE")));
+	iml.Add(CTempIconLoader(_T("PREVIEW")));
+	iml.Add(CTempIconLoader(_T("FILEINFO")));
+	iml.Add(CTempIconLoader(_T("FILECOMMENTS")));
+	iml.Add(CTempIconLoader(_T("ED2KLINK")));
+	iml.Add(CTempIconLoader(_T("CATEGORY")));
+	iml.Add(CTempIconLoader(_T("CLEARCOMPLETE")));
+	iml.Add(CTempIconLoader(_T("KadFileSearch")));
+	iml.Add(CTempIconLoader(_T("Search")));
+
+	if (bNeedMonoIcons)
+	{
+		CImageList iml2;
+		iml2.Create(16, 16, nFlags, 1, 1);
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("FILEPRIORITY"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("PAUSE"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("STOP"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("RESUME"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("DELETE"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("OPENFILE"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("PREVIEW"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("FILEINFO"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("FILECOMMENTS"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("ED2KLINK"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("CATEGORY"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("CLEARCOMPLETE"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("KadFileSearch"))));
+		VERIFY(AddIconGrayscaledToImageList(iml2, CTempIconLoader(_T("Search"))));
+		CImageList* pImlOld = m_btnBar->SetDisabledImageList(&iml2);
+		iml2.Detach();
+		if (pImlOld)
+			pImlOld->DeleteImageList();
+	}
+	CImageList* pImlOld = m_btnBar->SetImageList(&iml);
+	iml.Detach();
+	if (pImlOld)
+		pImlOld->DeleteImageList();
+
+
+
+
+	m_btnBar->ModifyStyle((theApp.m_ullComCtrlVer >= MAKEDLLVERULL(6, 16, 0, 0)) ? TBSTYLE_TRANSPARENT : 0, 0);
+	m_btnBar->SetMaxTextRows(0);
+
+	FillToolbar();
 
 	return TRUE;
 }
@@ -379,6 +419,7 @@ void CToolbarWnd::OnSysColorChange()
 void CToolbarWnd::Localize()
 {
 	SetWindowText(GetResString(IDS_DOWNLOADCOMMANDS));
+	FillToolbar();
 }
 
 BOOL CToolbarWnd::PreTranslateMessage(MSG* pMsg)
@@ -459,4 +500,27 @@ void CToolbarWnd::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	menu.CreatePopupMenu();
 	menu.AppendMenu(MF_STRING, MP_TOGGLEDTOOLBAR, GetResString(IDS_CLOSETOOLBAR));
 	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
+}
+
+void CToolbarWnd::DelayShow(BOOL bShow)
+{
+	// Yes, it is somewhat ugly but still the best way (without partially rewriting 3 MFC classes) to determine
+	// if the user clicked on the Close-Button of our floating Bar
+	if (bShow == FALSE && m_pDockSite != NULL && m_pDockBar != NULL)
+	{
+		if (m_pDockBar->m_bFloating)
+		{
+			CWnd* pDockFrame = m_pDockBar->GetParent();
+			ASSERT(pDockFrame != NULL);
+			if (pDockFrame != NULL)
+			{
+				CPoint point;
+				::GetCursorPos(&point);
+				LRESULT res = pDockFrame->SendMessage(WM_NCHITTEST, 0, MAKELONG(point.x, point.y));
+				if (res == HTCLOSE)
+					thePrefs.SetDownloadToolbar(false);
+			}
+		}
+	}
+	__super::DelayShow(bShow);
 }

@@ -2143,7 +2143,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			}
 			//MORPH END   - Added by SiRoB, Khaos Category
 
-			bool bToolbarItem = !thePrefs.IsDownloadToolbarEnabled();
+			bool bToolbarItem = !thePrefs.IsDownloadToolbarEnabled() || (m_pRelatedToolbar != NULL && m_pRelatedToolbar->IsWindowVisible() == FALSE);
 			if (bToolbarItem)
 			{
 				m_FileMenu.AppendMenu(MF_SEPARATOR);
@@ -4507,7 +4507,7 @@ void CDownloadListCtrl::ReportAvailableCommands(bool bForce)
 	if (iSel != -1)
 	{
 		const CtrlItem_Struct* content = (CtrlItem_Struct*)GetItemData(iSel);
-		if (content->type == FILE_TYPE)
+		if (content != NULL && content->type == FILE_TYPE)
 		{
 			// get merged settings
 			int iSelectedItems = 0;

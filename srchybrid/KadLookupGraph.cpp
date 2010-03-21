@@ -28,6 +28,7 @@
 #include "ToolTipCtrlX.h"
 #include "MenuCmds.h"
 #include "VisualStylesXP.h"
+#include "preferences.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -63,7 +64,6 @@ CKadLookupGraph::CKadLookupGraph()
 	m_iHotItemIdx = (-1);
 	m_bDbgLog = true;
 	m_pToolTip = NULL;
-	m_bAutoShowLookups = false;
 }
 
 CKadLookupGraph::~CKadLookupGraph()
@@ -148,7 +148,6 @@ void CKadLookupGraph::OnPaint()
 		return;
 
 	CMemDC dc(&pdc, rcClnt);
-	//dc.FillSolidRect(rcClnt, GetSysColor(COLOR_WINDOW));
 	CPen* pOldPen = dc.SelectObject(&m_penAxis);
 	if (g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed())
 	{
@@ -163,7 +162,9 @@ void CKadLookupGraph::OnPaint()
 	{
 		dc.Rectangle(&rcClnt);
 	}
-	rcClnt.DeflateRect(2, 2, 2, 2);
+	rcClnt.DeflateRect(1, 1, 1, 1);
+	dc.FillSolidRect(rcClnt, GetSysColor(COLOR_WINDOW));
+	rcClnt.DeflateRect(1, 1, 1, 1);
 	COLORREF crOldTextColor = dc.SetTextColor(GetSysColor(COLOR_WINDOWTEXT));
 
 	CFont* pOldFont = dc.SelectObject(AfxGetMainWnd()->GetFont());
@@ -637,7 +638,7 @@ void CKadLookupGraph::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 	CMenu menu;
 	menu.CreatePopupMenu();
 	menu.AppendMenu(MF_STRING, MP_AUTOKADLOOKUPGRAPH, GetResString(IDS_AUTOKADLOOKUPGRAPH));
-	menu.CheckMenuItem(MP_AUTOKADLOOKUPGRAPH , m_bAutoShowLookups ? MF_CHECKED : MF_UNCHECKED);
+	menu.CheckMenuItem(MP_AUTOKADLOOKUPGRAPH , thePrefs.GetAutoShowLookups() ? MF_CHECKED : MF_UNCHECKED);
 	menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, point.x, point.y, this);
 }
 
@@ -648,5 +649,10 @@ bool CKadLookupGraph::HasActiveLookup() const
 
 void CKadLookupGraph::OnSwitchAutoLookup()
 {
-	SetAutoShowLookups(!m_bAutoShowLookups);
+	thePrefs.SetAutoShowLookups(!thePrefs.GetAutoShowLookups());
+}
+
+bool CKadLookupGraph::GetAutoShowLookups() const
+{ 
+	return thePrefs.GetAutoShowLookups(); 
 }

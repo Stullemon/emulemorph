@@ -1274,7 +1274,7 @@ void CKademliaUDPListener::Process_KADEMLIA2_PUBLISH_KEY_REQ (const byte *pbyPac
 	uDistance.Xor(uFile);
 
 	// Shouldn't LAN IPs already be filtered?
-	if( thePrefs.FilterLANIPs() && uDistance.Get32BitChunk(0) > SEARCHTOLERANCE)
+	if(uDistance.Get32BitChunk(0) > SEARCHTOLERANCE && !::IsLANIP(ntohl(uIP)))
 		return;
 
 	bool bDbgInfo = (thePrefs.GetDebugClientKadUDPLevel() > 0);

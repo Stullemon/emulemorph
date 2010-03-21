@@ -533,6 +533,8 @@ void CSharedFilesCtrl::Localize()
 	int iItems = GetItemCount();
 	for (int i = 0; i < iItems; i++)
 		Update(i);
+
+	ShowFilesCount();
 }
 
 void CSharedFilesCtrl::AddFile(const CShareableFile* file)

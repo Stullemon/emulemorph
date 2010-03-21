@@ -143,6 +143,8 @@ void CKadSearchListCtrl::Localize()
 	int iItems = GetItemCount();
 	for (int i = 0; i < iItems; i++)
 		SearchRef((Kademlia::CSearch *)GetItemData(i));
+
+	UpdateKadSearchCount();
 }
 
 void CKadSearchListCtrl::UpdateSearch(int iItem, const Kademlia::CSearch *search)

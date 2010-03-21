@@ -208,6 +208,7 @@ public:
 	static	bool	beepOnError;
 	static	bool	confirmExit;
 	static	DWORD	m_adwStatsColors[16]; //MORPH - Changed by SiRoB, Powershare display
+	static	bool	bHasCustomTaskIconColor;
 	static  bool	m_bIconflashOnNewMessage;
 
 	static	bool	splashscreen;
@@ -561,6 +562,7 @@ public:
 	static  bool	m_bShowWin7TaskbarGoodies;
 	static  bool	m_bShowUpDownIconInTaskbar;
 	static	bool	m_bForceSpeedsToKB;
+	static	bool	m_bAutoShowLookups;
 
 
 	// Web Server [kuchin]
@@ -1500,6 +1502,7 @@ public:
 	static	void	GetAllStatsColors(int iCount, LPDWORD pdwColors);
 	static	bool	SetAllStatsColors(int iCount, const DWORD* pdwColors);
 	static	void	ResetStatsColor(int index);
+	static	bool	HasCustomTaskIconColor()			{return bHasCustomTaskIconColor;}
 
 	static	void	SetMaxConsPerFive(UINT in)			{MaxConperFive=in;}
 	static	LPLOGFONT GetHyperTextLogFont()				{return &m_lfHyperText;}
@@ -1678,6 +1681,8 @@ public:
 	static	bool	GetShowActiveDownloadsBold()		{return m_bShowActiveDownloadsBold;}
 	static	bool	GetShowSharedFilesDetails()			{return m_bShowSharedFilesDetails;}
 	static	void	SetShowSharedFilesDetails(bool bIn) {m_bShowSharedFilesDetails = bIn;}
+	static	bool	GetAutoShowLookups()				{return m_bAutoShowLookups;}
+	static	void	SetAutoShowLookups(bool bIn)		{m_bAutoShowLookups = bIn;}
 	static	bool	GetForceSpeedsToKB()				{return m_bForceSpeedsToKB;}
 
     //Commander - Added: Client Percentage - Start
