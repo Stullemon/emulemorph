@@ -600,15 +600,27 @@ void CClientList::Process()
 	//If connected, remove them from the list and send a message back to Kad so we can send a ACK.
 	//If we don't connect, we need to remove the client..
 	//The sockets timeout should delete this object.
+	//MORPH START - Removed by Stulle, Optimize Process Kad client list [WiZaRd]
+	/*
 	POSITION pos1, pos2;
+	*/
+	//MORPH END   - Removed by Stulle, Optimize Process Kad client list [WiZaRd]
 
 	// buddy is just a flag that is used to make sure we are still connected or connecting to a buddy.
 	buddyState buddy = Disconnected;
 
+	//MORPH START - Changed by Stulle, Optimize Process Kad client list [WiZaRd]
+	/*
 	for (pos1 = m_KadList.GetHeadPosition(); (pos2 = pos1) != NULL; )
 	{
 		m_KadList.GetNext(pos1);
 		CUpDownClient* cur_client =	m_KadList.GetAt(pos2);
+	*/
+	for (POSITION pos = m_KadList.GetHeadPosition(); pos != NULL; )
+	{
+		POSITION posLast = pos;
+		CUpDownClient* cur_client =     m_KadList.GetNext(pos);
+	//MORPH END   - Changed by Stulle, Optimize Process Kad client list [WiZaRd]
 		if( !Kademlia::CKademlia::IsRunning() )
 		{
 			//Clear out this list if we stop running Kad.
@@ -717,7 +729,22 @@ void CClientList::Process()
 				break;
 
 			default:
+				//MORPH START - Changed by Stulle, Optimize Process Kad client list [WiZaRd]
+				/*
 				RemoveFromKadList(cur_client);
+				*/
+				//removed function overhead
+				if(cur_client == m_pBuddy)
+				{
+					//MORPH START - Added by Stulle, Fix for setting buddy state on removing buddy [WiZaRd]
+					buddy = Disconnected;
+					m_nBuddyStatus = Disconnected;
+					//MORPH END   - Added by Stulle, Fix for setting buddy state on removing buddy [WiZaRd]
+					m_pBuddy = NULL;
+					theApp.emuledlg->serverwnd->UpdateMyInfo();
+				}
+				m_KadList.RemoveAt(posLast);
+				//MORPH END   - Changed by Stulle, Optimize Process Kad client list [WiZaRd]
 		}
 	}
 	
@@ -947,6 +974,9 @@ void CClientList::RemoveFromKadList(CUpDownClient* torem){
 	{
 		if(torem == m_pBuddy)
 		{
+			//MORPH START - Added by Stulle, Fix for setting buddy state on removing buddy [WiZaRd]
+			m_nBuddyStatus = Disconnected;
+			//MORPH END   - Added by Stulle, Fix for setting buddy state on removing buddy [WiZaRd]
 			m_pBuddy = NULL;
 			theApp.emuledlg->serverwnd->UpdateMyInfo();
 		}
