@@ -23,6 +23,7 @@ FIX: Prevent crash when shutting down in CAICHSyncThread::Run [Xman]
 FIX: Fix for setting buddy state on removing buddy [WiZaRd]
 FIX: Initialization fix for COScopeCtrl::m_nXPartial [WiZaRd]
 REMOVED: Official changes for high upload speed in favor for more advanced MorphXT code [Stulle]
+REMOVED: New official Ask-On-Exit Dialog in favor of Morph's one (NTService) [Stulle]
 REMOVED: "MorphXT 9.7" workaround [Stulle]
 
 

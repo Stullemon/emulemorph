@@ -4712,7 +4712,7 @@ BEGIN
     IDS_NOTASKED            "Not Asked"
     IDS_LOOKUPGRAPH         "Search Details"
     IDS_AUTOKADLOOKUPGRAPH  "Automatically show active searches"
-    IDS_CLOSEEMULE          "Close eMule"
+//    IDS_CLOSEEMULE          "Close eMule"
     IDS_DONOTASKAGAIN       "Don't ask me again"
     IDS_POPULARITY          "Popularity Rank"
     IDS_SHOWWIN7TASKBARGOODIES "Enable Windows 7 taskbar effects"
