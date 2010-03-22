@@ -317,6 +317,10 @@ int CAICHSyncThread::Run()
 		CSingleLock sLock1(&theApp.hashing_mut); // only one filehash at a time
 		while (theApp.sharedfiles->GetHashingCount() != 0){
 			Sleep(100);
+			//MORPH START - Added by Stulle, Prevent crash when shutting down in CAICHSyncThread::Run [Xman]
+			if (theApp.emuledlg==NULL || !theApp.emuledlg->IsRunning()) // in case of shutdown while still hashing
+				return 0;
+			//MORPH END   - Added by Stulle, Prevent crash when shutting down in CAICHSyncThread::Run [Xman]
 		}
 		sLock1.Lock();
 		uint32 cDone = 0;
