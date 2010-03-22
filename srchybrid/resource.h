@@ -1539,7 +1539,7 @@
 #define IDS_NOTASKED                    1584
 #define IDS_LOOKUPGRAPH                 1585
 #define IDS_AUTOKADLOOKUPGRAPH          1586
-#define IDS_CLOSEEMULE                  1587
+//#define IDS_CLOSEEMULE                  1587
 #define IDS_DONOTASKAGAIN               1588
 #define IDS_POPULARITY                  1589
 #define IDS_SHOWWIN7TASKBARGOODIES      1590
