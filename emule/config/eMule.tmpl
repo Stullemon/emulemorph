@@ -188,7 +188,7 @@ function preload_images()
        log failed [eMuleAppName] [version] - [WebControl]
     </title>
   </head>
-  <body background="main_bg1.gif" text=white link=white vlink=white alink=white onload="javascript:document.login.p.focus();">
+  <body background="main_bg.gif" text=white link=white vlink=white alink=white onload="javascript:document.login.p.focus();">
     <table align=center border=0 cellpadding=4 cellspacing=0 width="100%" height="100%">
       <tr>
         <td align=center valign=middle>
@@ -204,7 +204,7 @@ function preload_images()
                 <table align=center border=0 cellpadding=0 cellspacing=0 width="100%" height="100%">
                   <tr>
                     <td width="4" background="./login_lefttop.gif">
-                      <img src="./blank1x1.gif" alt="" border="0" />
+                      <img src="./transparent.gif" alt="" border="0" />
                     </td>
                     <td background="./login_topdown.gif" align="center">
 
@@ -223,7 +223,7 @@ function preload_images()
     
                     </td>
                     <td width="5" background="./login_righttop.gif">
-                      <img src="./blank1x1.gif" alt="" border="0" />
+                      <img src="./transparent.gif" alt="" border="0" />
                     </td>
                   </tr>
                 </table>
@@ -240,7 +240,7 @@ function preload_images()
                 <table align=center border=0 cellpadding=0 cellspacing=0 width="100%" height="100%">
                   <tr>
                     <td width="4" background="./login_lefttop.gif">
-                      <img src="./blank1x1.gif" alt="" border="0" />
+                      <img src="./transparent.gif" alt="" border="0" />
                     </td>
                     <td background="./login_downmain.gif" align="center">
                       <form action="" method="POST" name="login">
@@ -253,7 +253,7 @@ function preload_images()
                         </font>
                     </td>
                     <td width="5" background="./login_righttop.gif">
-                      <img src="./blank1x1.gif" alt="" border="0" />
+                      <img src="./transparent.gif" alt="" border="0" />
                     </td>
                   </tr>
                 </table>
@@ -646,7 +646,7 @@ function showmenu(e,code,downstate)
 
 function contains_ns6(a, b)
 {
-	if (b = null)
+	if (b == null)
 		return false;
 	//Determines if 1 element in contained in another- by Brainjar.com
 	while (b.parentNode)
@@ -912,6 +912,10 @@ else
     <td style="font-size: 8pt">
 	<img src="l_users.gif" align="left" hspace="3" vspace="4"> [Users]: [CurUsers] ([MaxUsers])
 	<table width="125" border=1 class="percent_table" cellpadding=0 cellspacing=0 bordercolor="#005784" bgcolor="#99CCFF"><tr><td><img src="qs_user.jpg" width="[UserValue]%" height="8"></td></td></tr></table>
+    </td>
+    <td style="font-size: 8pt">
+	<img src="arrow_up_q.gif" align="left" hspace="3" vspace="4"> [Queue]: [CurQueue] ([MaxQueue])
+	<table width="125" border=1 class="percent_table" cellpadding=0 cellspacing=0 bordercolor="#005784" bgcolor="#99CCFF"><tr><td><img src="qs_que.jpg" width="[QueueValue]%" height="8"></td></td></tr></table>
    </td>
    <td></td>
    </tr>
@@ -1671,12 +1675,12 @@ function searchange3() {
 
 
 <--PROGRESSBARIMGS-->
-<img src="[PROGRESSGIFNAME]" height=13 width=[PROGRESSGIFINTERNAL]>
+<img src="[PROGRESSGIFNAME]" height=13 width=[PROGRESSGIFINTERNAL] title=[FilePercentage]>
 <--PROGRESSBARIMGS_END-->
 
 
 <--PROGRESSBARPERCENTIMG-->
-<img src="[PROGRESSGIFNAME]" height=3 width=[PROGRESSGIFINTERNAL]>
+<img src="[PROGRESSGIFNAME]" height=3 width=[PROGRESSGIFINTERNAL] title=[FilePercentage]>
 <--PROGRESSBARPERCENTIMG_END-->
 
 <--TMPL_CATARROW-->
@@ -2215,7 +2219,7 @@ function searchange2() {
 </table>
 <div align="center">
 <br />
-<form><input type="button" name="queue" value="[Reload]" onClick="self.location.href='?ses=[Session]&w=shared&reload=true'"></form>
+<form><input type="button" name="queue" value="[Reload]" onClick="self.location.href='/?ses=[Session]&w=shared&reload=true'"></form>
 <br />
 </div>
 <--TMPL_SHARED_LIST_END-->
