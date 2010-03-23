@@ -700,14 +700,17 @@ int CSharedFilesCtrl::FindFile(const CShareableFile* pFile)
 
 void CSharedFilesCtrl::ReloadFileList()
 {
-	DeleteAllItems();
 	//MORPH START - Changed, Downloaded History [Monki/Xman]
-#ifdef NO_HISTORY
-	//theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary();
-#else
-	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
+#ifndef NO_HISTORY
+	if(theApp.emuledlg->sharedfileswnd->historylistctrl.IsWindowVisible())
+	{
+		theApp.emuledlg->sharedfileswnd->historylistctrl.Reload();
+		return;
+	}
 #endif
 	//MORPH END   - Changed, Downloaded History [Monki/Xman]
+	DeleteAllItems();
+	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails();
 	
 	CCKey bufKey;
 	CKnownFile* cur_file;
