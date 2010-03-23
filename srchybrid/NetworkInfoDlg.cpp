@@ -430,7 +430,7 @@ void CreateNetworkInfo(CRichEditCtrlX& rCtrl, CHARFORMAT& rcfDef, CHARFORMAT& rc
 	{
 		CString upnpStatusString;
 		theApp.m_UPnP_IGDControlPoint-> GetStatusString(upnpStatusString,bFullInfo);
-		rCtrl  << upnpStatusString;
+		rCtrl  << upnpStatusString << _T("\r\n");
 	}
 	else
 		rCtrl << GetResString(IDS_DISABLED) << _T("\r\n");

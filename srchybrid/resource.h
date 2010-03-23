@@ -3843,6 +3843,10 @@
 #define IDS_PREVENTSTANDBY_TIP          31340
 #define IDS_STATIC_ICON_TIP             31341
 #define IDS_MORPHWIZ_SHOWLESS_TIP       31342
+#define IDS_WS_FAILED_LOGIN             31343
+#define IDC_ADVADMIN_DFILES             31344
+#define IDS_ADVADMIN_DFILES             31345
+#define IDS_ADVADMIN_DFILES_TIP         31346
 
 // Next default values for new objects
 // 

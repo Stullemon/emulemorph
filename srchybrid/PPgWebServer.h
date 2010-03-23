@@ -46,14 +46,15 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual BOOL OnApply();
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
-	virtual BOOL OnSetActive(); //>>> [ionix] - iONiX::Advanced WebInterface Account Management
 	void SetModified(BOOL bChanged = TRUE){
 		m_bModified = bChanged;
 		CPropertyPage::SetModified(bChanged);
 	}
 
 	DECLARE_MESSAGE_MAP()
+public: //MORPH [ionix] - iONiX::Advanced WebInterface Account Management
 	afx_msg void OnEnChangeWSEnabled();
+protected: //MORPH [ionix] - iONiX::Advanced WebInterface Account Management
 	afx_msg void OnEnChangeMMEnabled();
 	afx_msg void OnReloadTemplates();
 	afx_msg void OnBnClickedTmplbrowse();

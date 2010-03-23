@@ -1434,7 +1434,6 @@ void CemuleDlg::ShowTransferRate(bool bForceAll)
 		int iDownRateProcent = (int)ceil((m_uDownDatarate/10.24) / thePrefs.GetMaxGraphDownloadRate());
 		if (iDownRateProcent > 100)
 			iDownRateProcent = 100;
-		iDownRateProcent = 90;
 		UpdateTrayIcon(iDownRateProcent);
 
 		//MORPH START - Added by IceCream, Correct the bug of the download speed shown in the systray

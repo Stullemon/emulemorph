@@ -293,7 +293,6 @@ typedef struct
 	//MORPH START - Added by SiRoB, Login Failed from eMule+
 	CString sFailedLogin;
  	//MORPH END   - Added by SiRoB, Login Failed from eMule+
-	CString	sConnectedServer;
 	CString	sAddServerBox;
 	CString	sSearch;
 	CString	sProgressbarImgs;
@@ -327,6 +326,7 @@ struct WebServDef{
 	bool RightsToSharedList;
 	bool RightsToStats;
 	bool RightsToTransfered;
+	bool RightsToDownloadFiles;
 };
 //<<< [ionix] - iONiX::Advanced WebInterface Account Management
 
@@ -385,7 +385,7 @@ private:
 	static CString	_ParseCookie(const CString& Cookie, const CString& Cookiename); // [ionix] - Aireoreion: Cookie settings
 	static void		_ConnectToServer(CString sIP, int nPort);
 	static bool		_IsLoggedIn(ThreadData Data, long lSession);
-	static void		_RemoveTimeOuts(ThreadData Data, long lSession);
+	static void		_RemoveTimeOuts(ThreadData Data);
 	static bool		_RemoveSession(ThreadData Data, long lSession);
 	static CString	_SpecialChars(CString str, bool noquote = true);
 	static CString	_GetPlainResString(UINT nID, bool noquote = true);
@@ -437,6 +437,7 @@ private:
 public:
 	int iMultiUserversion; // multiuser version of template [leuk_he]
 	static	bool	GetWebServLogin(const CString& user, const CString& pass, WebServDef& Def);
+	static	bool	GetWebServDefByName(const CString& user, WebServDef& Def);
 	static	void	SaveWebServConf();
 	static	void	LoadWebServConf();
 	static	CRBMap<uint32, WebServDef>	AdvLogins; //unlimited logs
