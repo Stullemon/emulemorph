@@ -26,6 +26,7 @@
 <html>
 <meta http-equiv="content-type" content="text/html; charset=[CharSet]">
 <head>
+<META NAME="ROBOTS" CONTENT="NOINDEX,NOFOLLOW">
 <link rel="SHORTCUT ICON" href="favicon.ico">
 <title>[eMuleAppName] [version] - [WebControl]</title>
 <script type="text/javascript">
@@ -200,6 +201,131 @@ function preload_images()
 </body>
 </html>
 <--TMPL_LOGIN_END-->
+
+
+
+
+<-- ################################################################# -->
+<-- ############################ FAILEDLOGIN ######################## -->
+<-- ################################################################# -->
+
+<--TMPL_FAILEDLOGIN-->
+<html>
+<meta http-equiv="content-type" content="text/html; charset=[CharSet]">
+<head>
+    <META NAME="ROBOTS" CONTENT="NOINDEX,NOFOLLOW">
+    <title>
+       log failed [eMuleAppName] [version] - [WebControl]
+    </title>
+</head>
+<body background="main_bg.gif" text=white link=white vlink=white alink=white onload="javascript:document.login.p.focus();">
+<table align=center border=0 cellpadding=4 cellspacing=0 width="100%" height="100%">
+<tr>
+        <td align=center valign=middle>
+
+          <table align=center border=0 cellpadding=0 cellspacing=0 width="407">
+            <tr>
+              <td style="height: 12px" background="./login_top.gif" height="12">
+              </td>
+            </tr>
+            <tr>
+              <td height="320">
+
+                <table align=center border=0 cellpadding=0 cellspacing=0 width="100%" height="100%">
+                  <tr>
+                    <td width="4" background="./login_lefttop.gif">
+                      <img src="./transparent.gif" alt="" border="0" />
+                    </td>
+                    <td background="./login_topdown.gif" align="center">
+
+                      <table align=center border=0 cellpadding=0 cellspacing=0 width="100%" height="100%">
+                        <tr>
+                          <td align="center">
+                            <a href="http://emule-project.net" target="_blank"><img src="logo.jpg"></a>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" height="70">
+                            <font face=Tahoma style="font-size:10pt;"><p><b>[WebControl]</b> | [Login]</p>
+                            [BanMessage]</font>
+                          </td>
+                        </tr>
+                      </table>
+
+                    </td>
+                    <td width="5" background="./login_righttop.gif">
+                      <img src="./transparent.gif" alt="" border="0" />
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+            <tr>
+              <td style="height: 3px" background="./login_topseperator.gif" height="3">
+              </td>
+            </tr>
+            <tr>
+              <td height="130">
+
+                <table align=center border=0 cellpadding=0 cellspacing=0 width="100%" height="100%">
+                  <tr>
+                    <td width="4" background="./login_lefttop.gif">
+                      <img src="./transparent.gif" alt="" border="0" />
+                    </td>
+                    <td background="./login_downmain.gif" align="center">
+                      <form action="" method="POST" name="login">
+                <!-- [iONiX] - Aireoreion: Advanced Webinterface //-->
+                <table border=0 cellspacing=4>
+                  <tr>
+                    <td colspan=2>&nbsp;</td>
+                  </tr>
+                  <tr>
+                    <td align="left"><font face=Tahoma style="font-size:10pt;">[Username]  </font></td>
+                    <td align="left"><font face=Tahoma style="font-size:10pt;"><input disabled type="text" name=u maxlength=12 size=30 style="border-width: 1px; border-color: black; border-style:none;" value=""></font>
+                    <input type="hidden" name=w value="password" disabled></td>
+                  </tr>
+                  <tr>
+                    <td align="left"><font face=Tahoma style="font-size:10pt;">[Password]  </font></td>
+                    <td align="left"><font face=Tahoma style="font-size:10pt;"><input disabled type="password" name=p maxlength=12 size=30 style="border-width: 1px; border-color: black; border-style:none;" value=""></font>
+                    <input type="hidden" name=v value="username" disabled></td>
+                  </tr>
+                  <tr>
+                    <td align="left"><font face=Tahoma style="font-size:10pt;">[RemainLoggedIn] </font></td>
+                    <td align="left"><font face=Tahoma style="font-size:10pt;"><input disabled type="checkbox" name=RemainLoggedIn style="border-width: 1px; border-color: black; border-style:none;"></font></td>
+                  </tr>
+                  <tr>
+                    <td align="left"><font face=Tahoma style="font-size:10pt;">[MemLastUser] </font></td>
+                    <td align="left"><font face=Tahoma style="font-size:10pt;"><input disabled type="checkbox" [MemLastUserChecked] name=MemLastUser style="border-width: 1px; border-color: black; border-style:none;"></font></td>
+                  </tr>
+                  <tr>
+                    <td align="center" colspan=2><input disabled type="submit" value="[LoginNow]"></td>
+                  </tr>
+                  </table>
+                <!-- [iONiX] - Aireoreion: Advanced Webinterface //-->
+                    </td>
+                    <td width="5" background="./login_righttop.gif">
+                      <img src="./transparent.gif" alt="" border="0" />
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+            <tr>
+              <td style="height: 12px" background="./login_bottom.gif" height="12">
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+    </form>
+</body>
+</html>
+<--TMPL_FAILEDLOGIN_END-->
+
+
 
 
 
@@ -577,7 +703,7 @@ function showmenu(e,code,downstate)
 
 function contains_ns6(a, b)
 {
-	if (b = null)
+	if (b == null)
 		return false;
 	//Determines if 1 element in contained in another- by Brainjar.com
 	while (b.parentNode)
@@ -843,6 +969,10 @@ else
     <td style="font-size: 8pt">
 	<img src="l_users.gif" align="left" hspace="3" vspace="4"> [Users]: [CurUsers] ([MaxUsers])
 	<table width="125" border=1 class="percent_table" cellpadding=0 cellspacing=0 bordercolor="#005784" bgcolor="#99CCFF"><tr><td><img src="qs_user.jpg" width="[UserValue]%" height="8"></td></td></tr></table>
+    </td>
+    <td style="font-size: 8pt">
+	<img src="arrow_up_q.gif" align="left" hspace="3" vspace="4"> [Queue]: [CurQueue] ([MaxQueue])
+	<table width="125" border=1 class="percent_table" cellpadding=0 cellspacing=0 bordercolor="#005784" bgcolor="#99CCFF"><tr><td><img src="qs_que.jpg" width="[QueueValue]%" height="8"></td></td></tr></table>
    </td>
    <td></td>
    </tr>
@@ -1602,12 +1732,12 @@ function searchange3() {
 
 
 <--PROGRESSBARIMGS-->
-<img src="[PROGRESSGIFNAME]" height=13 width=[PROGRESSGIFINTERNAL]>
+<img src="[PROGRESSGIFNAME]" height=13 width=[PROGRESSGIFINTERNAL] title=[FilePercentage]>
 <--PROGRESSBARIMGS_END-->
 
 
 <--PROGRESSBARPERCENTIMG-->
-<img src="[PROGRESSGIFNAME]" height=3 width=[PROGRESSGIFINTERNAL]>
+<img src="[PROGRESSGIFNAME]" height=3 width=[PROGRESSGIFINTERNAL] title=[FilePercentage]>
 <--PROGRESSBARPERCENTIMG_END-->
 
 <--TMPL_CATARROW-->

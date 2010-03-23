@@ -3,12 +3,16 @@
 <-- ##                                                             ## -->
 <-- ##                BASED ON MODIFIED VERSION BY eMule+          ## -->
 <-- ##                BASED ON TEMPLATE BY Chicane                 ## -->
+<-- ## Added tMPL_FAILEDLOGIN--> and noindex nofollow
 <-- ################################################################# -->
 
 <--TMPL_VERSION-->
 7
 <--TMPL_VERSION_END-->
 
+<--TMPL_MULTIUSERVERSION-->
+0
+<--TMPL_MULTIUSERVERSION_END-->
 
 
 
@@ -104,7 +108,7 @@ display: inline;
        log failed [eMuleAppName] [version] - [WebControl]
     </title>
   </head>
-  <body background="main_bg1.gif" text=white link=white vlink=white alink=white onload="javascript:document.login.p.focus();">
+  <body background="main_bg.gif" text=white link=white vlink=white alink=white onload="javascript:document.login.p.focus();">
     <table align=center border=0 cellpadding=4 cellspacing=0 width="100%" height="100%">
       <tr>
         <td align=center valign=middle>
@@ -120,7 +124,7 @@ display: inline;
                 <table align=center border=0 cellpadding=0 cellspacing=0 width="100%" height="100%">
                   <tr>
                     <td width="4" background="./login_lefttop.gif">
-                      <img src="./blank1x1.gif" alt="" border="0" />
+                      <img src="./transparent.gif" alt="" border="0" />
                     </td>
                     <td background="./login_topdown.gif" align="center">
 
@@ -139,7 +143,7 @@ display: inline;
     
                     </td>
                     <td width="5" background="./login_righttop.gif">
-                      <img src="./blank1x1.gif" alt="" border="0" />
+                      <img src="./transparent.gif" alt="" border="0" />
                     </td>
                   </tr>
                 </table>
@@ -156,7 +160,7 @@ display: inline;
                 <table align=center border=0 cellpadding=0 cellspacing=0 width="100%" height="100%">
                   <tr>
                     <td width="4" background="./login_lefttop.gif">
-                      <img src="./blank1x1.gif" alt="" border="0" />
+                      <img src="./transparent.gif" alt="" border="0" />
                     </td>
                     <td background="./login_downmain.gif" align="center">
                       <form action="" method="POST" name="login">
@@ -169,7 +173,7 @@ display: inline;
                         </font>
                     </td>
                     <td width="5" background="./login_righttop.gif">
-                      <img src="./blank1x1.gif" alt="" border="0" />
+                      <img src="./transparent.gif" alt="" border="0" />
                     </td>
                   </tr>
                 </table>
@@ -827,12 +831,12 @@ color:#FFFFFF; font-size:8pt; line-height:1.2;
 
 
 <--PROGRESSBARIMGS-->
-<img src="[PROGRESSGIFNAME]" height=13 width=[PROGRESSGIFINTERNAL]>
+<img src="[PROGRESSGIFNAME]" height=13 width=[PROGRESSGIFINTERNAL] title=[FilePercentage]>
 <--PROGRESSBARIMGS_END-->
 
 
 <--PROGRESSBARPERCENTIMG-->
-<img src="[PROGRESSGIFNAME]" height=3 width=[PROGRESSGIFINTERNAL]>
+<img src="[PROGRESSGIFNAME]" height=3 width=[PROGRESSGIFINTERNAL] title=[FilePercentage]>
 <--PROGRESSBARPERCENTIMG_END-->
 
 <--TMPL_CATARROW-->
@@ -1327,7 +1331,7 @@ function GotoCat(cat) {
 
 <--TMPL_SEARCH_RESULT_LINE-->
 <tr>
-<td class="search-line-left"><table cellspacing="0" cellpadding="0" border="0" valign=middle class="search-line"><tr><td background="l_sources_%s.gif" width="16" height="16" style="background-position:center;background-repeat:no-repeat"><img src="is_%s.gif"></td><td>&nbsp;<img src="filetype_%s.gif" align="middle"></td><td>&nbsp;</td>
+<td class="search-line-left"><table cellspacing="0" cellpadding="0" border="0" valign=middle class="search-line"><tr><td background="l_sources_%s.gif" width="16" height="16" style="background-position:center;background-repeat:no-repeat"><!-- %s --><img src="is_%s.gif"></td><td>&nbsp;<img src="filetype_%s.gif" align="middle"></td><td>&nbsp;</td>
 <td>%s</td>
 </tr></table></td>
 <td class="search-line-right">%s</td>
