@@ -35,9 +35,6 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
-
-#define HIDDEN_PASSWORD _T("*****")
-
 IMPLEMENT_DYNAMIC(CPPgNTService, CPropertyPage)
 CPPgNTService::CPPgNTService()
 	:  CPPgtooltipped(CPPgNTService::IDD)

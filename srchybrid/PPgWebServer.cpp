@@ -320,6 +320,8 @@ void CPPgWebServer::Localize(void)
 
 void CPPgWebServer::OnEnChangeWSEnabled()
 {
+//>>> [ionix] - iONiX::Advanced WebInterface Account Management
+/*
 	UINT bIsWIEnabled=IsDlgButtonChecked(IDC_WSENABLED);
 	GetDlgItem(IDC_WSPASS)->EnableWindow(bIsWIEnabled);	
 	GetDlgItem(IDC_WSPORT)->EnableWindow(bIsWIEnabled);	
@@ -337,7 +339,39 @@ void CPPgWebServer::OnEnChangeWSEnabled()
 	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPNat() && bIsWIEnabled);
 #endif
 	//MORPH END   - UPnP
-	
+*/
+	bool bSingleWSEnalbed = IsDlgButtonChecked(IDC_WSENABLED) && theApp.webserver->iMultiUserversion <= 0;
+
+	if(bSingleWSEnalbed)
+	{
+		GetDlgItem(IDC_WSPASS)->EnableWindow(TRUE);
+		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(TRUE);
+		GetDlgItem(IDC_WSPASSLOW)->EnableWindow(TRUE);
+		GetDlgItem(IDC_WSENABLEDLOW)->EnableWindow(TRUE);
+	}
+	else
+	{	
+		GetDlgItem(IDC_WSPASS)->EnableWindow(FALSE);
+		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(FALSE);
+		GetDlgItem(IDC_WSPASSLOW)->EnableWindow(FALSE);
+		GetDlgItem(IDC_WSENABLEDLOW)->EnableWindow(FALSE);
+	}
+
+	UINT bIsWIEnabled=IsDlgButtonChecked(IDC_WSENABLED);
+	GetDlgItem(IDC_WSPORT)->EnableWindow(bIsWIEnabled);	
+	GetDlgItem(IDC_TMPLPATH)->EnableWindow(bIsWIEnabled);
+	GetDlgItem(IDC_TMPLBROWSE)->EnableWindow(bIsWIEnabled);
+	GetDlgItem(IDC_WS_GZIP)->EnableWindow(bIsWIEnabled);
+	GetDlgItem(IDC_WSTIMEOUT)->EnableWindow(bIsWIEnabled);
+	//MORPH START - UPnP
+#ifdef USE_OFFICIAL_UPNP
+	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPEnabled() && bIsWIEnabled);
+#else
+	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPNat() && bIsWIEnabled);
+#endif
+	//MORPH END   - UPnP
+//<<< [ionix] - iONiX::Advanced WebInterface Account Management
+
 	//GetDlgItem(IDC_WSRELOADTMPL)->EnableWindow(bIsWIEnabled);
 	SetTmplButtonState();
 
@@ -408,30 +442,6 @@ void CPPgWebServer::OnDestroy()
 		m_icoBrowse = NULL;
 	}
 }
-
-//>>> [ionix] - iONiX::Advanced WebInterface Account Management
-BOOL CPPgWebServer::OnSetActive()
-{
-	if ((theApp.emuledlg->preferenceswnd->m_wndIonixWebServer.GetSafeHwnd()== NULL
-	     &&	 (thePrefs.UseIonixWebsrv()) 
-	   ||(theApp.emuledlg->preferenceswnd->m_wndIonixWebServer.GetSafeHwnd()!= NULL
-	   && theApp.emuledlg->preferenceswnd->m_wndIonixWebServer.IsDlgButtonChecked(IDC_ADVADMINENABLED)!=0)))
-	{
-		GetDlgItem(IDC_WSPASS)->EnableWindow(FALSE);	
-		GetDlgItem(IDC_WSENABLEDLOW)->EnableWindow(FALSE);	
-//		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(FALSE);	
-		GetDlgItem(IDC_WSPASSLOW)->EnableWindow(FALSE);	
-	}
-	else
-	{
-		GetDlgItem(IDC_WSPASS)->EnableWindow(TRUE);	
-		GetDlgItem(IDC_WSENABLEDLOW)->EnableWindow(TRUE);	
-//		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(TRUE);	
-		GetDlgItem(IDC_WSPASSLOW)->EnableWindow(TRUE);	
-	}
-	return TRUE;
-}
-//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 
 // MORPH start tabbed option [leuk_he]
 void CPPgWebServer::InitTab(bool firstinit, int Page)

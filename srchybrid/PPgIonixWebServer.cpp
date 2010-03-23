@@ -61,14 +61,12 @@ BEGIN_MESSAGE_MAP(CPPgIonixWebServer, CPropertyPage)
 	ON_BN_CLICKED(IDC_ADVADMIN_SHARED, OnSettingsChange)
 	ON_BN_CLICKED(IDC_ADVADMIN_STATS, OnSettingsChange)
 	ON_BN_CLICKED(IDC_ADVADMIN_PREFS, OnSettingsChange)
+	ON_BN_CLICKED(IDC_ADVADMIN_DFILES, OnSettingsChange)
 	ON_CBN_SELCHANGE(IDC_ADVADMIN_USERLEVEL, OnSettingsChange)	
 	ON_BN_CLICKED(IDC_ADVADMIN_DELETE, OnBnClickedDel)
 	ON_BN_CLICKED(IDC_ADVADMIN_NEW, OnBnClickedNew)	
-	ON_EN_CHANGE(IDC_ADVADMIN_PASS, OnSettingsChange)
-	ON_EN_CHANGE(IDC_ADVADMIN_CATS, OnSettingsChange)
-    
-
-
+	ON_EN_CHANGE(IDC_ADVADMIN_PASS, OnMultiPWChange)
+	ON_EN_CHANGE(IDC_ADVADMIN_CATS, OnMultiCatsChange)
 //	ON_EN_CHANGE(IDC_ADVADMIN_USER, OnSettingsChange)
 //<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	// MORPH start tabbed option [leuk_he]
@@ -109,7 +107,6 @@ void CPPgIonixWebServer::LoadSettings(void)
 		m_bIsInit = true;
 	}
 }
-
 
 void CPPgIonixWebServer::OnEnableChange() {
 	thePrefs.m_bIonixWebsrv= (IsDlgButtonChecked(IDC_ADVADMINENABLED)!=0);
@@ -154,6 +151,7 @@ void CPPgIonixWebServer::Localize(void)
 		GetDlgItem(IDC_ADVADMIN_SHARED)->SetWindowText(GetResString(IDS_ADVADMIN_SHARED));
 		GetDlgItem(IDC_ADVADMIN_STATS)->SetWindowText(GetResString(IDS_ADVADMIN_STATS));
 		GetDlgItem(IDC_ADVADMIN_PREFS)->SetWindowText(GetResString(IDS_ADVADMIN_PREFS));
+		GetDlgItem(IDC_ADVADMIN_DFILES)->SetWindowText(GetResString(IDS_ADVADMIN_DFILES));
 		GetDlgItem(IDC_STATIC_ADVADMIN_USERLEVEL)->SetWindowText(GetResString(IDS_ADVADMIN_USERLEVEL));
 		GetDlgItem(IDC_STATIC_ADVADMIN_PASS)->SetWindowText(GetResString(IDS_ADVADMIN_PASS));
 		GetDlgItem(IDC_STATIC_ADVADMIN_USER)->SetWindowText(GetResString(IDS_ADVADMIN_USER));
@@ -170,6 +168,7 @@ void CPPgIonixWebServer::Localize(void)
 		SetTool(IDC_ADVADMIN_SHARED,IDS_ADVADMIN_SHARED_TIP);
 		SetTool(IDC_ADVADMIN_STATS,IDS_ADVADMIN_STATS_TIP);
 		SetTool(IDC_ADVADMIN_PREFS,IDS_ADVADMIN_PREFS_TIP);
+		SetTool(IDC_ADVADMIN_DFILES,IDS_ADVADMIN_DFILES_TIP);
 		SetTool(IDC_ADVADMIN_USERLEVEL,IDS_ADVADMIN_USERLEVEL_TIP);
 		SetTool(IDC_ADVADMIN_CATS,IDS_ADVADMIN_CATS_TIP);
 		SetTool(IDC_ADVADMIN_DELETE,IDS_ADVADMIN_DELETE_TIP);
@@ -236,6 +235,7 @@ afx_msg void CPPgIonixWebServer::SetBoxes()
 		GetDlgItem(IDC_ADVADMIN_SHARED)->EnableWindow(TRUE);
 		GetDlgItem(IDC_ADVADMIN_STATS)->EnableWindow(TRUE);
 		GetDlgItem(IDC_ADVADMIN_PREFS)->EnableWindow(TRUE);
+		GetDlgItem(IDC_ADVADMIN_DFILES)->EnableWindow(TRUE);
 		m_cbUserlevel.EnableWindow(TRUE);
 		GetDlgItem(IDC_ADVADMIN_PASS)->EnableWindow(TRUE);
 		GetDlgItem(IDC_ADVADMIN_USER)->EnableWindow(TRUE);
@@ -258,6 +258,7 @@ afx_msg void CPPgIonixWebServer::SetBoxes()
 		GetDlgItem(IDC_ADVADMIN_SHARED)->EnableWindow(FALSE);
 		GetDlgItem(IDC_ADVADMIN_STATS)->EnableWindow(FALSE);
 		GetDlgItem(IDC_ADVADMIN_PREFS)->EnableWindow(FALSE);
+		GetDlgItem(IDC_ADVADMIN_DFILES)->EnableWindow(FALSE);
 		m_cbUserlevel.EnableWindow(FALSE);
 		GetDlgItem(IDC_ADVADMIN_PASS)->EnableWindow(FALSE);
 		GetDlgItem(IDC_ADVADMIN_USER)->EnableWindow(FALSE);
@@ -282,6 +283,7 @@ void CPPgIonixWebServer::UpdateSelection()
 		CheckDlgButton(IDC_ADVADMIN_SHARED, BST_UNCHECKED);
 		CheckDlgButton(IDC_ADVADMIN_STATS, BST_UNCHECKED);
 		CheckDlgButton(IDC_ADVADMIN_PREFS, BST_UNCHECKED);
+		CheckDlgButton(IDC_ADVADMIN_DFILES, BST_UNCHECKED);
 		m_cbUserlevel.SetCurSel(0);
 		GetDlgItem(IDC_ADVADMIN_PASS)->SetWindowText(_T(""));
 		GetDlgItem(IDC_ADVADMIN_USER)->SetWindowText(_T(""));
@@ -299,6 +301,7 @@ void CPPgIonixWebServer::UpdateSelection()
 		CheckDlgButton(IDC_ADVADMIN_SHARED, tmp.RightsToSharedList);
 		CheckDlgButton(IDC_ADVADMIN_STATS, tmp.RightsToStats);
 		CheckDlgButton(IDC_ADVADMIN_PREFS, tmp.RightsToPrefs);
+		CheckDlgButton(IDC_ADVADMIN_DFILES, tmp.RightsToDownloadFiles);
 		m_cbUserlevel.SetCurSel(tmp.RightsToAddRemove);
 		GetDlgItem(IDC_ADVADMIN_PASS)->SetWindowText(HIDDEN_PASSWORD);
 		GetDlgItem(IDC_ADVADMIN_USER)->SetWindowText(tmp.User);
@@ -326,6 +329,33 @@ void CPPgIonixWebServer::FillUserlevelBox()
 }
 
 
+afx_msg void CPPgIonixWebServer::OnMultiPWChange()
+{
+	int accountsel  = m_cbAccountSelector.GetCurSel();
+	WebServDef tmp;
+	if(accountsel  == -1 || !theApp.webserver->AdvLogins.Lookup(accountsel , tmp))
+		return;
+
+	CString buffer;
+	GetDlgItem(IDC_ADVADMIN_PASS)->GetWindowText(buffer);
+	if(buffer != HIDDEN_PASSWORD && MD5Sum(buffer).GetHash() != tmp.Pass)
+		OnSettingsChange();
+}
+
+afx_msg void CPPgIonixWebServer::OnMultiCatsChange()
+{
+	int accountsel  = m_cbAccountSelector.GetCurSel();
+	WebServDef tmp;
+	if(accountsel  == -1 || !theApp.webserver->AdvLogins.Lookup(accountsel , tmp))
+		return;
+
+	CString buffer;
+
+	GetDlgItem(IDC_ADVADMIN_CATS)->GetWindowText(buffer);
+	if(buffer != HIDDEN_PASSWORD && buffer != tmp.RightsToCategories)
+		OnSettingsChange();
+}
+
 #define SET_TCHAR_TO_STRING(t, s) {_stprintf(t, _T("%s"), s);}
 
 void CPPgIonixWebServer::OnSettingsChange()
@@ -344,6 +374,7 @@ void CPPgIonixWebServer::OnSettingsChange()
 	tmp.RightsToSharedList = IsDlgButtonChecked(IDC_ADVADMIN_SHARED)!=0;
 	tmp.RightsToStats = IsDlgButtonChecked(IDC_ADVADMIN_STATS)!=0;
 	tmp.RightsToPrefs = IsDlgButtonChecked(IDC_ADVADMIN_PREFS)!=0;
+	tmp.RightsToDownloadFiles = IsDlgButtonChecked(IDC_ADVADMIN_DFILES)!=0;
 	//tmp.RightsToAddRemove = IsDlgButtonChecked(IDC_ADVADMIN_ADMIN)!=0;
 	int j = m_cbUserlevel.GetCurSel();
 	ASSERT(j <= 3); //only 0,1,2,3 allowed
@@ -387,6 +418,7 @@ void CPPgIonixWebServer::OnBnClickedNew()
 	tmp.RightsToSharedList = IsDlgButtonChecked(IDC_ADVADMIN_SHARED)!=0;
 	tmp.RightsToStats = IsDlgButtonChecked(IDC_ADVADMIN_STATS)!=0;
 	tmp.RightsToPrefs = IsDlgButtonChecked(IDC_ADVADMIN_PREFS)!=0;
+	tmp.RightsToDownloadFiles = IsDlgButtonChecked(IDC_ADVADMIN_DFILES)!=0;
 	//tmp.RightsToAddRemove = IsDlgButtonChecked(IDC_ADVADMIN_ADMIN)!=0;
 	int j = m_cbUserlevel.GetCurSel();
 	ASSERT(j <= 3); //only 0,1,2,3 allowed

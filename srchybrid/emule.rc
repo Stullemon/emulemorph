@@ -1695,6 +1695,8 @@ BEGIN
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,123,90,100,8
     CONTROL         "Access - Prefs?",IDC_ADVADMIN_PREFS,"Button",
                     BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,123,102,100,8
+    CONTROL         "Access - Download files?",IDC_ADVADMIN_DFILES,"Button",
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,123,113,100,8
     COMBOBOX        IDC_ADVADMIN_USERLEVEL,89,126,72,110,CBS_DROPDOWNLIST | 
                     CBS_SORT | WS_VSCROLL | WS_TABSTOP
     EDITTEXT        IDC_ADVADMIN_CATS,89,145,120,13,ES_AUTOHSCROLL
@@ -6461,6 +6463,9 @@ BEGIN
    IDS_PREVENTSTANDBY_TIP   "Windows frequently is configured to go into standby mode after a while.\nEnabling this option will prevent Windows from going into standby when\neMule is running so file sharing continues."
    IDS_STATIC_ICON_TIP      "Usually the eMule Tray Icon is only shown when the program is minimized to tray.\nThis option will cause eMule to always show the Tray Icon, regardless if minimized or not."
    IDS_MORPHWIZ_SHOWLESS_TIP "eMule MorphXT includes a lot of features and extra information unexperienced\nusers might not need. This option will hide some information and features to\nsimplify the GUI."
+   IDS_WS_FAILED_LOGIN      "You have been banned for 15 min due to failed login attempts!"
+   IDS_ADVADMIN_DFILES      "Acces - Download files?"
+   IDS_ADVADMIN_DFILES_TIP  "Allow user to download complete shared files."
 END
 
 #endif    // English (U.S.) resources

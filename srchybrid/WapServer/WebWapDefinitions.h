@@ -35,6 +35,8 @@ typedef struct
 	bool RightsToSharedList;
 	bool RightsToStats;
 	bool RightsToTransfered;
+	bool RightsToDownloadFiles;
+	CString username;
 //<<< [ionix] - iONiX::Advanced WebInterface Account Management
 } Session;
 

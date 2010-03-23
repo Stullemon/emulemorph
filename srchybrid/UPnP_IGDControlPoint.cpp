@@ -351,7 +351,7 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMapping(CUPn
 			//If we do not have this mapping, add it to our list when enabled
 		   //TODO use getresstring.
 		   if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("Upnp:queuing port for when upnpis enabled: %s"), mapping->description);
+					theApp.QueueDebugLogLine(false, _T("Upnp:queuing port for when upnp is enabled: %s"), mapping->description);
 		    m_Mappings.AddTail(*mapping);
 		}
 	   m_MappingsLock.Unlock();
@@ -1049,12 +1049,12 @@ CUPnP_IGDControlPoint::UPNPNAT_RETURN CUPnP_IGDControlPoint::AddPortMappingToSer
 				if(fullMapping.enabled == TRUE && fullMapping.leaseDuration == 0){
 					if(bIsUpdating){
 						if(thePrefs.GetUPnPVerboseLog()) {
-							theApp.QueueDebugLogLine(false, _T("UPnP: The port mapping \"%s\" don't need an update. [%s]"), desc, srv->ServiceType);
+							theApp.QueueDebugLogLine(false, _T("UPnP: The port mapping \"%s\" doesn't need an update. [%s]"), desc, srv->ServiceType);
 						}
 					}
 					else 
 						if(thePrefs.GetUPnPVerboseLog()) {
-							theApp.QueueDebugLogLine(false,_T("UPnP: The port mapping \"%s\" don't need to be recreated. [%s]"), desc, srv->ServiceType);
+							theApp.QueueDebugLogLine(false,_T("UPnP: The port mapping \"%s\" doesn't need to be recreated. [%s]"), desc, srv->ServiceType);
 						};
 					//Mapping is already OK
 					return UNAT_OK;
@@ -1636,7 +1636,11 @@ int  CUPnP_IGDControlPoint::GetStatusString(CString & displaystring,bool verbose
 				if (verbose)
 					displaystring +=  port + ((mapping.protocol == UNAT_UDP)?_T(":UDP\t"): _T(":TCP\t")) +  mapping.description +_T("\r\n");
 				else
-					displaystring +=  port + ((mapping.protocol == UNAT_UDP)?_T(":UDP"): _T(":TCP")) + _T(", ");
+				{
+					displaystring +=  port + ((mapping.protocol == UNAT_UDP)?_T(":UDP"): _T(":TCP"));
+					if(map_pos)
+						displaystring += _T(", ");
+				}
 		}
 	}
 	else 
