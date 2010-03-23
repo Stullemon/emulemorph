@@ -280,6 +280,8 @@ void CHistoryListCtrl::Reload(void)
 
 	DeleteAllItems();
 
+	theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails(false, true);
+
 	//Xman 4.8
 	//don't know exactly what happend, but a few users (with old known.met) had a crash
 	if(theApp.knownfiles->GetKnownFiles().IsEmpty()==false)
@@ -955,7 +957,7 @@ void CHistoryListCtrl::UpdateFile(const CKnownFile* file)
 	{
 		Update(iItem);
 		if (GetItemState(iItem, LVIS_SELECTED))
-			theApp.emuledlg->sharedfileswnd->ShowSelectedFilesSummary(false,true);
+			theApp.emuledlg->sharedfileswnd->ShowSelectedFilesDetails(false,true);
 	}
 }
 int CHistoryListCtrl::FindFile(const CKnownFile* pFile)
