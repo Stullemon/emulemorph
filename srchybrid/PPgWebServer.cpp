@@ -101,11 +101,6 @@ BOOL CPPgWebServer::OnInitDialog()
 	((CEdit*)GetDlgItem(IDC_WSPASS))->SetLimitText(12);
 	((CEdit*)GetDlgItem(IDC_WSPORT))->SetLimitText(6);
 
-  // MORPH start tabbed options [leuk_he]
-	InitTab(true);
-	m_tabCtr.SetCurSel(0);
-  // MORPH end tabbed options [leuk_he]
-
 	LoadSettings();
 	InitTooltips(); // MORPH leuk_he tooltipped
 	Localize();
@@ -271,6 +266,12 @@ void CPPgWebServer::Localize(void)
 {
 	if(m_hWnd){
 		SetWindowText(GetResString(IDS_PW_WS));
+
+		// MORPH start tabbed options [leuk_he]
+		InitTab(true);
+		m_tabCtr.SetCurSel(theApp.emuledlg->preferenceswnd->StartPageWebServer);
+		// MORPH end tabbed options [leuk_he]
+
 		GetDlgItem(IDC_WSPASS_LBL)->SetWindowText(GetResString(IDS_WS_PASS));
 		GetDlgItem(IDC_WSPORT_LBL)->SetWindowText(GetResString(IDS_PORT));
 		GetDlgItem(IDC_WSENABLED)->SetWindowText(GetResString(IDS_ENABLED));

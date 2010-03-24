@@ -25,6 +25,7 @@ bool RunningAsService();
 void OnStartAsService();
 int	NTServiceGet(int  &b_installed,	int	&i_startupmode,	int	&i_enoughrights);
 int NTServiceSetStartupMode(int i_startupmode);
+int NTServiceChangeDisplayStrings(CString strDisplayName, CString strServiceDescr);
 
 int CmdInstallService(bool b_autostart=false);
 int CmdRemoveService();

@@ -203,7 +203,16 @@ CSearchListCtrl::CSearchListCtrl()
 	searchlist = NULL;
 	m_nResultsID = 0;
 	SetGeneralPurposeFind(true);
+	//MORPH START leuk_he:run as ntservice v1..
+	/*
 	m_tooltip = new CToolTipCtrlX;
+	*/
+	// workaround running MFC as service
+	if (!theApp.IsRunningAsService())
+		m_tooltip = new CToolTipCtrlX;
+	else
+		m_tooltip = NULL;
+	//MORPH END leuk_he:run as ntservice v1..
 	m_eFileSizeFormat = (EFileSizeFormat)theApp.GetProfileInt(_T("eMule"), _T("SearchResultsFileSizeFormat"), fsizeDefault);
 	SetSkinKey(L"SearchResultsLv");
 }
@@ -249,14 +258,20 @@ void CSearchListCtrl::Init(CSearchList* in_searchlist)
 	ASSERT( (GetStyle() & LVS_SINGLESEL) == 0 );
 	SetStyle();
 
-	CToolTipCtrl* tooltip = GetToolTips();
-	if (tooltip){
-		m_tooltip->SetFileIconToolTip(true);
-		m_tooltip->SubclassWindow(*tooltip);
-		tooltip->ModifyStyle(0, TTS_NOPREFIX);
-		tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
-		//tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
-	}
+	//MORPH START leuk_he:run as ntservice v1..
+	// workaround running MFC as service
+	if (!theApp.IsRunningAsService())
+	{
+	//MORPH END leuk_he:run as ntservice v1..
+		CToolTipCtrl* tooltip = GetToolTips();
+		if (tooltip){
+			m_tooltip->SetFileIconToolTip(true);
+			m_tooltip->SubclassWindow(*tooltip);
+			tooltip->ModifyStyle(0, TTS_NOPREFIX);
+			tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
+			//tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
+		}
+	} //MORPH leuk_he:run as ntservice v1..
 	searchlist = in_searchlist;
 
 	InsertColumn(0, GetResString(IDS_DL_FILENAME),	LVCFMT_LEFT,  DFLT_FILENAME_COL_WIDTH);
@@ -315,9 +330,8 @@ CSearchListCtrl::~CSearchListCtrl()
 		delete pValue;
 	}
 	m_mapSortSelectionStates.RemoveAll();
-    if (!RunningAsService()) { // MORPH leuk_he:run as ntservice v1.. workarround.
+    if (!RunningAsService()) // MORPH leuk_he:run as ntservice v1.. workarround.
 		delete m_tooltip;
-	}
 }
 
 void CSearchListCtrl::Localize()
@@ -645,7 +659,11 @@ int CSearchListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 {
 	const CSearchFile *item1 = (CSearchFile *)lParam1;
 	const CSearchFile *item2 = (CSearchFile *)lParam2;
+	// SLUGFILLER: multiSort remove - handled in parent class
+	/*
 	int orgSort = lParamSort;
+	*/
+
 	int sortMod = 1;
 	if (lParamSort >= 100) {
 		sortMod = -1;
@@ -680,10 +698,14 @@ int CSearchListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		comp = CompareChild(item1, item2, lParamSort);
 	}
 
+	// SLUGFILLER: multiSort remove - handled in parent class
+	/*
 	//call secondary sortorder, if this one results in equal
 	int dwNextSort;
 	if (comp == 0 && (dwNextSort = theApp.emuledlg->searchwnd->m_pwndResults->searchlistctrl.GetNextSortOrder(orgSort)) != -1)
 		comp = SortProc(lParam1, lParam2, dwNextSort);
+	*/
+	// SLUGFILLER: multiSort remove - handled in parent class
 
 	return comp;
 }

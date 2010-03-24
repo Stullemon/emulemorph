@@ -3609,6 +3609,7 @@ void CemuleDlg::DestroySplash()
 		m_pSplashWnd = NULL;
 	}
 #ifdef _BETA
+	if (!RunningAsService()) //MORPH leuk_he:run as ntservice v1..
 	if (!thePrefs.IsFirstStart())
 		AfxMessageBox(GetResString(IDS_BETANAG), MB_ICONINFORMATION | MB_OK, 0);
 #endif
