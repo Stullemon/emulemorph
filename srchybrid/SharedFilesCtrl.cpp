@@ -251,7 +251,16 @@ CSharedFilesCtrl::CSharedFilesCtrl()
 	nAICHHashing = 0;
 	m_pDirectoryFilter = NULL;
 	SetGeneralPurposeFind(true);
+	//MORPH START leuk_he:run as ntservice v1..
+	/*
 	m_pToolTip = new CToolTipCtrlX;
+	*/
+	// workaround running MFC as service
+	if (!theApp.IsRunningAsService())
+		m_pToolTip = new CToolTipCtrlX;
+	else
+		m_pToolTip = NULL;
+	//MORPH END leuk_he:run as ntservice v1..
 	SetSkinKey(L"SharedFilesLv");
 	m_pHighlightedItem = NULL;
 }
@@ -260,7 +269,11 @@ CSharedFilesCtrl::~CSharedFilesCtrl()
 {
 	while (!liTempShareableFilesInDir.IsEmpty())	// delete shareble files
 		delete liTempShareableFilesInDir.RemoveHead();
-	delete m_pToolTip;
+	//MORPH START leuk_he:run as ntservice v1..
+	// workaround running MFC as service
+	if (!theApp.IsRunningAsService())
+	//MORPH END leuk_he:run as ntservice v1..
+		delete m_pToolTip;
 	if (m_PrioMenu) VERIFY( m_PrioMenu.DestroyMenu() );
 	//MORPH START - Added by SiRoB, Keep Prermission Flag
 	if (m_PermMenu) VERIFY( m_PermMenu.DestroyMenu() );
@@ -355,14 +368,20 @@ void CSharedFilesCtrl::Init()
 	SortItems(SortProc, GetSortItem() + (GetSortAscending() ? 0 : 30) + (GetSortSecondValue() ? 100 : 0));
 	// [end] Mighty Knife
 
-	CToolTipCtrl* tooltip = GetToolTips();
-	if (tooltip){
-		m_pToolTip->SetFileIconToolTip(true);
-		m_pToolTip->SubclassWindow(*tooltip);
-		tooltip->ModifyStyle(0, TTS_NOPREFIX);
-		tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
-		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
-	}
+	//MORPH START leuk_he:run as ntservice v1..
+	// workaround running MFC as service
+	if (!theApp.IsRunningAsService())
+	{
+	//MORPH END leuk_he:run as ntservice v1..
+		CToolTipCtrl* tooltip = GetToolTips();
+		if (tooltip){
+			m_pToolTip->SetFileIconToolTip(true);
+			m_pToolTip->SubclassWindow(*tooltip);
+			tooltip->ModifyStyle(0, TTS_NOPREFIX);
+			tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
+			tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
+		}
+	} //MORPH leuk_he:run as ntservice v1..
 
 	m_ShareDropTarget.SetParent(this);
 	VERIFY( m_ShareDropTarget.Register(this) );

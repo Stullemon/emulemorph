@@ -56,6 +56,7 @@ void CPPgNTService::DoDataExchange(CDataExchange* pDX)
 {
 	CPropertyPage::DoDataExchange(pDX);
 
+	DDX_Control(pDX, IDC_SERVICE_OPT_BOX, m_cbOptLvl);
   // MORPH start tabbed options [leuk_he]
    DDX_Control(pDX, IDC_TAB_SERVICE3 , m_tabCtr);
   // MORPH end tabbed options [leuk_he]
@@ -71,6 +72,12 @@ BEGIN_MESSAGE_MAP(CPPgNTService, CPropertyPage)
 	ON_BN_CLICKED(IDC_SVC_SETTINGS ,   OnBnAllSettings)	
 	ON_BN_CLICKED(IDC_SVC_RUNBROWSER , OnBnRunBRowser)	
 	ON_BN_CLICKED(IDC_SVC_REPLACESERVICE , OnBnReplaceStart)	
+	ON_CBN_SELCHANGE(IDC_SERVICE_OPT_BOX, OnCbnSelChangeOptLvl)
+	//MORPH START - Added by Stulle, Adjustable NT Service Strings
+	ON_EN_CHANGE(IDC_SERVICE_NAME, OnCbnSelChangeOptLvl)
+	ON_EN_CHANGE(IDC_SERVICE_DISP_NAME, OnCbnSelChangeOptLvl)
+	ON_EN_CHANGE(IDC_SERVICE_DESCR, OnCbnSelChangeOptLvl)
+	//MORPH END   - Added by Stulle, Adjustable NT Service Strings
 	ON_NOTIFY(TCN_SELCHANGE, IDC_TAB_SERVICE3, OnTcnSelchangeTab)
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
@@ -81,10 +88,7 @@ BOOL CPPgNTService::OnInitDialog()
 	CPropertyPage::OnInitDialog();
 	InitWindowStyles(this);
  
-    // MORPH start tabbed options [leuk_he]
-	InitTab(true,1);
-	m_tabCtr.SetCurSel(theApp.emuledlg->preferenceswnd->StartPageWebServer);
-    // MORPH end tabbed options [leuk_he]
+	InitOptLvlCbn(true);
 
 	LoadSettings();
     InitTooltips(); //MORPH leuk_he tolltipped
@@ -100,14 +104,20 @@ void CPPgNTService::LoadSettings(void)
 	{
 		if(thePrefs.GetServiceStartupMode()==2) 
 		{
-				CheckDlgButton(IDC_SVC_RUNBROWSER   ,BST_UNCHECKED );
-				CheckDlgButton(IDC_SVC_REPLACESERVICE, BST_CHECKED);
+			CheckDlgButton(IDC_SVC_RUNBROWSER   ,BST_UNCHECKED );
+			CheckDlgButton(IDC_SVC_REPLACESERVICE, BST_CHECKED);
 		}
 		else
 		{
-				CheckDlgButton(IDC_SVC_RUNBROWSER   ,BST_CHECKED );
-                CheckDlgButton(IDC_SVC_REPLACESERVICE, BST_UNCHECKED);
+			CheckDlgButton(IDC_SVC_RUNBROWSER   ,BST_CHECKED );
+			CheckDlgButton(IDC_SVC_REPLACESERVICE, BST_UNCHECKED);
 		}
+
+		//MORPH START - Added by Stulle, Adjustable NT Service Strings
+		GetDlgItem(IDC_SERVICE_NAME)->SetWindowText(thePrefs.GetServiceName());
+		GetDlgItem(IDC_SERVICE_DISP_NAME)->SetWindowText(thePrefs.GetServiceDispName());
+		GetDlgItem(IDC_SERVICE_DESCR)->SetWindowText(thePrefs.GetServiceDescr());
+		//MORPH END   - Added by Stulle, Adjustable NT Service Strings
 
 
     	FillStatus();
@@ -118,32 +128,119 @@ void CPPgNTService::LoadSettings(void)
 
 
 BOOL CPPgNTService::OnApply()
-{	
+{
+	if(m_bModified)
+	{
+		int b_installed;
+		int  i_startupmode;
+		int rights;
+		// Startup with system, store in service.
+		NTServiceGet(b_installed,i_startupmode,	rights);
 
-    int b_installed;
-	int  i_startupmode;
-	int rights;
-	// Startup with system, store in service.
-	NTServiceGet(b_installed,i_startupmode,	rights);
-    if (b_installed==1 && 
-		  (i_startupmode ==0 && (IsDlgButtonChecked(IDC_SVC_STARTWITHSYSTEM)==BST_CHECKED))||
-		  (i_startupmode ==1 && (IsDlgButtonChecked(IDC_SVC_MANUALSTART)==BST_CHECKED)))
+		//MORPH START - Added by Stulle, Adjustable NT Service Strings
+		CString strServiceName, strServiceDispName, strServiceDescr;
+		GetDlgItem(IDC_SERVICE_NAME)->GetWindowText(strServiceName);
+		GetDlgItem(IDC_SERVICE_DISP_NAME)->GetWindowText(strServiceDispName);
+		GetDlgItem(IDC_SERVICE_DESCR)->GetWindowText(strServiceDescr);
+
+		int iChangedStr = 0; // nothing changed
+		if(strServiceName.Compare(thePrefs.GetServiceName()) != 0)
+			iChangedStr = 1; // name under which we install changed, this is important!
+		else if((strServiceDispName.Compare(thePrefs.GetServiceDispName()) != 0) || (strServiceDescr.Compare(thePrefs.GetServiceDescr()) != 0))
+			iChangedStr = 2; // only visual strings changed, not so important...
+
+		if(iChangedStr>0)
+		{
+			if(b_installed == 0)
+			{
+				thePrefs.SetServiceName(strServiceName);
+				thePrefs.SetServiceDispName(strServiceDispName);
+				thePrefs.SetServiceDescr(strServiceDescr);
+				FillStatus();
+			}
+			else
+			{
+				int iResult = IDCANCEL;
+				if(iChangedStr == 1)
+					iResult = MessageBox(GetResString(IDS_SERVICE_NAME_CHANGED),GetResString(IDS_SERVICE_STR_CHANGED),MB_YESNOCANCEL|MB_ICONQUESTION|MB_DEFBUTTON3);
+				else if(iChangedStr == 2)
+				{
+					if(NTServiceChangeDisplayStrings(strServiceDispName,strServiceDescr) != 0)
+					{
+						if(MessageBox(GetResString(IDS_SERVICE_DISP_CHANGE_FAIL),GetResString(IDS_SERVICE_STR_CHANGE_FAIL),MB_YESNO|MB_ICONQUESTION|MB_DEFBUTTON2) == IDYES)
+						{
+							iChangedStr = 1;
+							iResult = IDYES;
+						}
+					}
+					else
+						iResult = IDNO;
+				}
+
+				if(iChangedStr == 1 && iResult == IDYES) // reinstall service
+				{
+					if(CmdRemoveService()==0)
+					{
+						thePrefs.SetServiceName(strServiceName);
+						thePrefs.SetServiceDispName(strServiceDispName);
+						thePrefs.SetServiceDescr(strServiceDescr);
+						if(CmdInstallService(i_startupmode == 1) != 0)
+							MessageBox(GetResString(IDS_SERVICE_INSTALL_FAIL), GetResString(IDS_SERVICE_INSTALL_TITLE), MB_OK|MB_ICONWARNING);
+					}
+					else
+					{
+						MessageBox(GetResString(IDS_SERVICE_UNINSTALL_FAIL),GetResString(IDS_SERVICE_UNINSTALL_TITLE),MB_OK|MB_ICONWARNING);
+						GetDlgItem(IDC_SERVICE_NAME)->SetWindowText(thePrefs.GetServiceName());
+						GetDlgItem(IDC_SERVICE_DISP_NAME)->SetWindowText(thePrefs.GetServiceDispName());
+						GetDlgItem(IDC_SERVICE_DESCR)->SetWindowText(thePrefs.GetServiceDescr());
+					}
+					FillStatus();
+				}
+				else if(iResult == IDNO) // just save settings
+				{
+					thePrefs.SetServiceName(strServiceName);
+					thePrefs.SetServiceDispName(strServiceDispName);
+					thePrefs.SetServiceDescr(strServiceDescr);
+					FillStatus();
+				}
+				else // revert settings
+				{
+					GetDlgItem(IDC_SERVICE_NAME)->SetWindowText(thePrefs.GetServiceName());
+					GetDlgItem(IDC_SERVICE_DISP_NAME)->SetWindowText(thePrefs.GetServiceDispName());
+					GetDlgItem(IDC_SERVICE_DESCR)->SetWindowText(thePrefs.GetServiceDescr());
+				}
+			}
+		}
+		//MORPH END   - Added by Stulle, Adjustable NT Service Strings
+
+		if (b_installed==1 && 
+				(i_startupmode ==0 && (IsDlgButtonChecked(IDC_SVC_STARTWITHSYSTEM)==BST_CHECKED))||
+				(i_startupmode ==1 && (IsDlgButtonChecked(IDC_SVC_MANUALSTART)==BST_CHECKED)))
 			NTServiceSetStartupMode(IsDlgButtonChecked(IDC_SVC_STARTWITHSYSTEM)==BST_CHECKED);
-   // TODO: Appy setting 
-	if ( IsDlgButtonChecked(IDC_SVC_RUNBROWSER)==BST_CHECKED)
-	   thePrefs.m_iServiceStartupMode=1;
-	else 
-	   thePrefs.m_iServiceStartupMode=2;
+	   // TODO: Apply setting 
+		if ( IsDlgButtonChecked(IDC_SVC_RUNBROWSER)==BST_CHECKED)
+		   thePrefs.m_iServiceStartupMode=1;
+		else 
+		   thePrefs.m_iServiceStartupMode=2;
 
-	SetModified(FALSE);
-	LoadSettings();
+		int iSel = m_cbOptLvl.GetCurSel();
+		thePrefs.m_iServiceOptLvl = m_cbOptLvl.GetItemData(iSel);
+
+		SetModified(FALSE);
+		LoadSettings();
+	}
 	return CPropertyPage::OnApply();
 }
 
 void CPPgNTService::Localize(void)
 {
 	if(m_hWnd){
-		SetWindowText(_T("NT Service")  );
+		SetWindowText(GetResString(IDS_TAB_NT_SERVICE));
+		// MORPH start tabbed options [leuk_he]
+		InitTab(true,2);
+		m_tabCtr.SetCurSel(theApp.emuledlg->preferenceswnd->StartPageWebServer);
+		// MORPH end tabbed options [leuk_he]
+
 		GetDlgItem(IDC_SVC_INSTALLSERVICE)->SetWindowText(GetResString(IDS_SVC_INSTALLSERVICE));
 		GetDlgItem(IDC_SVC_SERVERUNINSTALL)->SetWindowText(GetResString(IDS_SVC_SERVERUNINSTALL));
 		GetDlgItem(IDC_SVC_STARTWITHSYSTEM)->SetWindowText(GetResString(IDS_SVC_STARTWITHSYSTEM));
@@ -152,9 +249,18 @@ void CPPgNTService::Localize(void)
 		GetDlgItem(IDC_SVC_RUNBROWSER)->SetWindowText(GetResString(IDS_SVC_RUNBROWSER));
 		GetDlgItem(IDC_SVC_REPLACESERVICE )->SetWindowText(GetResString(IDS_SVC_REPLACESERVICE));
 		GetDlgItem(IDC_SVC_ONSTARTBOX)->SetWindowText(GetResString(IDS_SVC_ONSTARTBOX));
-		GetDlgItem(IDS_SVC_STARTUPBOX)->SetWindowText(GetResString(IDS_SVC_STARTUPBOX));
+		GetDlgItem(IDC_SVC_STARTUPBOX)->SetWindowText(GetResString(IDS_SVC_STARTUPBOX));
 		GetDlgItem(IDC_SVC_CURRENT_STATUS_LABEL)->SetWindowText(GetResString(IDS_SVC_CURRENT_STATUS_LABEL));
-		
+		GetDlgItem(IDC_SERVICE_OPT_GROUP)->SetWindowText(GetResString(IDS_SERVICE_OPT_GROUP));
+		GetDlgItem(IDC_SERVICE_OPT_LABEL)->SetWindowText(GetResString(IDS_SERVICE_OPT_LABEL));
+		InitOptLvlCbn();
+
+		//MORPH START - Added by Stulle, Adjustable NT Service Strings
+		GetDlgItem(IDC_SERVICE_STR_GROUP)->SetWindowText(GetResString(IDS_SERVICE_STR_GROUP));
+		GetDlgItem(IDC_SERVICE_NAME_LABEL)->SetWindowText(GetResString(IDS_SERVICE_NAME));
+		GetDlgItem(IDC_SERVICE_DISP_NAME_LABEL)->SetWindowText(GetResString(IDS_SERVICE_DISP_NAME));
+		GetDlgItem(IDC_SERVICE_DESCR_LABEL)->SetWindowText(GetResString(IDS_SERVICE_DESCR));
+		//MORPH END   - Added by Stulle, Adjustable NT Service Strings
 
 		SetTool(IDC_SVC_INSTALLSERVICE,IDS_SVC_INSTALLSERVICE_TIP);
 		SetTool(IDC_SVC_SERVERUNINSTALL,IDS_SVC_SERVERUNINSTALL_TIP);
@@ -164,6 +270,12 @@ void CPPgNTService::Localize(void)
 		SetTool(IDC_SVC_RUNBROWSER,IDS_SVC_RUNBROWSER_TIP);
 		SetTool(IDC_SVC_REPLACESERVICE ,IDS_SVC_REPLACESERVICE_TIP);
 		SetTool(IDC_SVC_CURRENT_STATUS,IDS_SVC_CURRENT_STATUS_TIP);
+		SetTool(IDC_SERVICE_OPT_BOX,IDS_SERVICE_OPT_BOX_TIP);
+		//MORPH START - Added by Stulle, Adjustable NT Service Strings
+		SetTool(IDC_SERVICE_NAME,IDS_SERVICE_NAME_TIP);
+		SetTool(IDC_SERVICE_DISP_NAME,IDS_SERVICE_DISP_NAME_TIP);
+		SetTool(IDC_SERVICE_DESCR,IDS_SERVICE_DESCR_TIP);
+		//MORPH END   - Added by Stulle, Adjustable NT Service Strings
 	}
 }
 
@@ -252,6 +364,7 @@ int  CPPgNTService::FillStatus(){
 
 void CPPgNTService::OnBnClickedInstall()
 {
+	OnApply(); // MORPH - Added by Stulle, Adjustable NT Service Strings
 	if (CmdInstallService((IsDlgButtonChecked(IDC_SVC_STARTWITHSYSTEM))==BST_CHECKED )==0)
 	{
 		FillStatus();
@@ -318,11 +431,42 @@ void CPPgNTService::OnBnRunBRowser(){
 	SetModified();
 };	
 
+void CPPgNTService::InitOptLvlCbn(bool bFirstInit)
+{
+	int iSel = m_cbOptLvl.GetCurSel();
+	int iItem;
+	m_cbOptLvl.ResetContent();
+	iItem = m_cbOptLvl.AddString(_T("0: ") + GetResString(IDS_SERVICE_OPT_NONE));		m_cbOptLvl.SetItemData(iItem, SVC_NO_OPT);
+	iItem = m_cbOptLvl.AddString(_T("4: ") + GetResString(IDS_SERVICE_OPT_BASIC));		m_cbOptLvl.SetItemData(iItem, SVC_LIST_OPT);
+	iItem = m_cbOptLvl.AddString(_T("6: ") + GetResString(IDS_SERVICE_OPT_LISTS));		m_cbOptLvl.SetItemData(iItem, SVC_SVR_OPT);
+	iItem = m_cbOptLvl.AddString(_T("10: ") + GetResString(IDS_SERVICE_OPT_FULL));		m_cbOptLvl.SetItemData(iItem, SVC_FULL_OPT);
+
+	if(bFirstInit)
+	{
+		switch(thePrefs.GetServiceOptLvl())
+		{
+			case SVC_NO_OPT:
+				m_cbOptLvl.SetCurSel(0);
+				break;
+			case SVC_LIST_OPT:
+				m_cbOptLvl.SetCurSel(1);
+				break;
+			case SVC_SVR_OPT:
+				m_cbOptLvl.SetCurSel(2);
+				break;
+			case SVC_FULL_OPT:
+				m_cbOptLvl.SetCurSel(3);
+				break;
+		}
+	}
+	else
+		m_cbOptLvl.SetCurSel(iSel != CB_ERR ? iSel : 0);
+}
 
 // MORPH start tabbed option [leuk_he]
 void CPPgNTService::InitTab(bool firstinit, int Page)
 {
-	if (m_tabCtr.GetSafeHwnd() != NULL  && firstinit ) {
+	if (m_tabCtr.GetSafeHwnd() != NULL  && firstinit) {
 		m_tabCtr.DeleteAllItems();
 		m_tabCtr.SetImageList(&m_imageList);
 		m_tabCtr.InsertItem(TCIF_TEXT | TCIF_IMAGE | TCIF_PARAM, WEBSERVER, GetResString(IDS_TAB_WEB_SERVER), 0, (LPARAM)WEBSERVER); 

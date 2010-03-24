@@ -16,8 +16,6 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-//#include "HypertextCtrl.h"
-
 class CPPgNTService : public CPPgtooltipped  
 {
 	DECLARE_DYNAMIC(CPPgNTService )
@@ -56,7 +54,7 @@ protected:
 		CPropertyPage::SetModified(bChanged);
 	}
 
-	DECLARE_MESSAGE_MAP()	
+	DECLARE_MESSAGE_MAP()
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 
@@ -66,6 +64,9 @@ protected:
 	afx_msg void OnBnManualStart();	
 	afx_msg void OnBnAllSettings();	
 	afx_msg void OnBnRunBRowser();	
-	afx_msg void OnBnReplaceStart();	
-	afx_msg void OnTcnSelchangeTab();
+	afx_msg void OnBnReplaceStart();
+	afx_msg void OnCbnSelChangeOptLvl()		{SetModified();}
+	CComboBox	m_cbOptLvl;
+
+	void InitOptLvlCbn(bool bFirstInit = false);
 };

@@ -1981,7 +1981,7 @@ BEGIN
     IDS_AUTOKADLOOKUPGRAPH  "automatisch aktive Suchen anzeigen"
     IDS_PAUSEONPREVIEW      "Pausiere wenn Vorschau möglich"
     IDS_PREVIEWWITH         "Vorschau mit"
-    IDS_CLOSEEMULE          "eMule beenden"
+//    IDS_CLOSEEMULE          "eMule beenden"
     IDS_DONOTASKAGAIN       "nicht erneut nachfragen"
     IDS_POPULARITY          "Popularitätsrang"
     IDS_SHOWWIN7TASKBARGOODIES "Aktiviere Windows7 Taskbareffekte"
@@ -2616,16 +2616,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED "DynDNS aktivieren"
-    IDS_STATIC_DYNDNS_USERNAME "Benutzername"
-    IDS_STATIC_DYNDNS_PASSWORD "Passwort"
-    IDS_STATIC_DYNDNS_HOSTNAME "DynDNS Hostname"
-    IDS_BUTTON_DYNDNS_UPDATE "Update"
-    IDS_BUTTON_DYNDNS_RESET "Reset"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_AUTOUPIP2COUNTRY    "Ip-to-country.csv bei eMule Start aktualisieren"
     IDS_UPDATEIPCURL        "Update"
     IDS_CLIENTQUEUEPROGRESSBAR "Zeige Fortschrittsbalken der Client-Warteliste an"
@@ -2803,7 +2793,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CONTINUE            "&Weiter"
-    IDS_DONOTASKAGAIN       "Nicht wieder nachfragen"
+//    IDS_DONOTASKAGAIN       "Nicht wieder nachfragen"
     IDS_DONOTTELLAGAIN      "Nicht wieder benachrichtigen"
     IDS_DONOTSHOWAGAIN      "Nicht wieder anzeigen"
     IDS_YESTOALL            "J&a zu allen"

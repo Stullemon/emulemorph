@@ -959,10 +959,21 @@ public:
 
 	static bool m_bStaticIcon; //MORPH - Added, Static Tray Icon
 
-	static int m_iServiceStartupMode; // MORPH leuk_he:run as ntservice v1..
+	//MORPH START leuk_he:run as ntservice v1..
+	static int		m_iServiceStartupMode;
+	static int		m_iServiceOptLvl;
+	//MORPH END leuk_he:run as ntservice v1..
+
 	// ==> [MoNKi: -USS initial TTL-] - Stulle
 	static uint8	m_iUSSinitialTTL;
 	// <== [MoNKi: -USS initial TTL-] - Stulle
+
+	//MORPH START - Added by Stulle, Adjustable NT Service Strings
+	static CString	m_strServiceName;
+	static CString	m_strServiceDispName;
+	static CString	m_strServiceDescr;
+	static bool		m_bServiceStringsLoaded;
+	//MORPH END   - Added by Stulle, Adjustable NT Service Strings
 
 	enum Table
 	{
@@ -1594,7 +1605,18 @@ public:
 	static	UINT	GetMaxLogFileSize()					{return uMaxLogFileSize;}
 	static	ELogFileFormat GetLogFileFormat()			{return m_iLogFileFormat;}
 
-	static int      GetServiceStartupMode(); // MORPH leuk_he:run as ntservice v1..
+	//MORPH START leuk_he:run as ntservice v1..
+	static int      GetServiceStartupMode();
+	static int		GetServiceOptLvl()		{ return m_iServiceOptLvl; }
+	//MORPH END leuk_he:run as ntservice v1..
+	//MORPH START - Added by Stulle, Adjustable NT Service Strings
+	static	CString	GetServiceName();
+	static	void	SetServiceName(CString in)		{ m_strServiceName = in; }
+	static	CString	GetServiceDispName()			{ return m_strServiceDispName; }
+	static	void	SetServiceDispName(CString in)	{ m_strServiceDispName = in; }
+	static	CString	GetServiceDescr()				{ return m_strServiceDescr; }
+	static	void	SetServiceDescr(CString in)		{ m_strServiceDescr = in; }
+	//MORPH END   - Added by Stulle, Adjustable NT Service Strings
 
 	// WebServer
 	/*

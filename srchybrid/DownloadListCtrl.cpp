@@ -86,8 +86,16 @@ CDownloadListCtrl::CDownloadListCtrl()
 	: CDownloadListListCtrlItemWalk(this)
 {
 	m_pFontBold = NULL;
-	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
+	//MORPH START leuk_he:run as ntservice v1..
+	/*
+	m_tooltip = new CToolTipCtrlX;
+	*/
+	// workaround running MFC as service
+	if (!theApp.IsRunningAsService())
 		m_tooltip = new CToolTipCtrlX;
+	else
+		m_tooltip = NULL;
+	//MORPH END leuk_he:run as ntservice v1..
 	SetGeneralPurposeFind(true);
 	SetSkinKey(L"DownloadsLv");
 	m_pRelatedToolbar = NULL;

@@ -2612,7 +2612,8 @@ bool CemuleApp::IsEd2kFriendLinkInClipboard()
 
 // MORPH START leuk_he:run as ntservice v1..
 bool CemuleApp::IsRunningAsService(int OptimizeLevel ){
-   if (OptimizeLevel < 5)	// 5: all optmization except server list : need an option for preferneces. 
+//   if (OptimizeLevel < 5)	// 5: all optmization except server list : need an option for preferneces. 
+   if(OptimizeLevel < thePrefs.GetServiceOptLvl())
 		return RunningAsService();
    else
 	   return false;  // disable optimizations

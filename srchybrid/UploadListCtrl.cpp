@@ -58,7 +58,16 @@ END_MESSAGE_MAP()
 CUploadListCtrl::CUploadListCtrl()
 	: CListCtrlItemWalk(this)
 {
+	//MORPH START leuk_he:run as ntservice v1..
+	/*
 	m_tooltip = new CToolTipCtrlX;
+	*/
+	// workaround running MFC as service
+	if (!theApp.IsRunningAsService())
+		m_tooltip = new CToolTipCtrlX;
+	else
+		m_tooltip = NULL;
+	//MORPH END leuk_he:run as ntservice v1..
 	SetGeneralPurposeFind(true);
 	SetSkinKey(L"UploadsLv");
 }
@@ -74,13 +83,19 @@ void CUploadListCtrl::Init()
 	SetPrefsKey(_T("UploadListCtrl"));
 	SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
-	CToolTipCtrl* tooltip = GetToolTips();
-	if (tooltip) {
-		m_tooltip->SubclassWindow(tooltip->m_hWnd);
-		tooltip->ModifyStyle(0, TTS_NOPREFIX);
-		tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
-		tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
-	}
+	//MORPH START leuk_he:run as ntservice v1..
+	// workaround running MFC as service
+	if (!theApp.IsRunningAsService())
+	{
+	//MORPH END leuk_he:run as ntservice v1..
+		CToolTipCtrl* tooltip = GetToolTips();
+		if (tooltip) {
+			m_tooltip->SubclassWindow(tooltip->m_hWnd);
+			tooltip->ModifyStyle(0, TTS_NOPREFIX);
+			tooltip->SetDelayTime(TTDT_AUTOPOP, 20000);
+			tooltip->SetDelayTime(TTDT_INITIAL, thePrefs.GetToolTipDelay()*1000);
+		}
+	} //MORPH leuk_he:run as ntservice v1..
 
 	InsertColumn(0, GetResString(IDS_QL_USERNAME),	LVCFMT_LEFT,  DFLT_CLIENTNAME_COL_WIDTH);
 	InsertColumn(1, GetResString(IDS_FILE),			LVCFMT_LEFT,  DFLT_FILENAME_COL_WIDTH);

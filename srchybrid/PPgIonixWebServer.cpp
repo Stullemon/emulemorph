@@ -86,10 +86,6 @@ BOOL CPPgIonixWebServer::OnInitDialog()
 	FillUserlevelBox();
 	m_cbAccountSelector.SetCurSel(0); // new account
 	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
-    // MORPH start tabbed options [leuk_he]
-	InitTab(true,1);
-	m_tabCtr.SetCurSel(theApp.emuledlg->preferenceswnd->StartPageWebServer);
-    // MORPH end tabbed options [leuk_he]
 
 	LoadSettings();
     InitTooltips(); //MORPH leuk_he tolltipped
@@ -135,7 +131,12 @@ BOOL CPPgIonixWebServer::OnApply()
 void CPPgIonixWebServer::Localize(void)
 {
 	if(m_hWnd){
-		SetWindowText(_T("Multi user ") + GetResString(IDS_PW_WS));
+		SetWindowText(GetResString(IDS_TAB_MULTI_USER) + _T(" ") + GetResString(IDS_PW_WS));
+
+		// MORPH start tabbed options [leuk_he]
+		InitTab(true,1);
+		m_tabCtr.SetCurSel(theApp.emuledlg->preferenceswnd->StartPageWebServer);
+		// MORPH end tabbed options [leuk_he]
 
 		GetDlgItem(IDC_ADVADMINENABLED)->SetWindowText(GetResString(IDS_ADVADMINENABLED));
 		GetDlgItem(IDC_ADVADMIN_NOTE)->SetWindowText(GetResString(IDS_ADVADMIN_NOTE));

@@ -2148,12 +2148,13 @@ BEGIN
     PUSHBUTTON      "Yes, and start service.",IDYESSERVICE,18,102,100,14
 END
 
-IDD_PPG_NTSERVER DIALOGEX 0, 0, 230, 241
+IDD_PPG_NTSERVER DIALOGEX 0, 0, 230, 250
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "NT Service"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_TAB_SERVICE3,"SysTabControl32",0x0,0,0,229,250
+/*
     LTEXT           "Current status:",IDC_SVC_CURRENT_STATUS_LABEL,19,26,168,
                     14
     EDITTEXT        IDC_SVC_CURRENT_STATUS,20,44,167,14,ES_AUTOHSCROLL | 
@@ -2174,6 +2175,47 @@ BEGIN
                     BS_AUTORADIOBUTTON | WS_GROUP,26,172,160,10
     CONTROL         "Stop service and start gui",IDC_SVC_REPLACESERVICE,
                     "Button",BS_AUTORADIOBUTTON | WS_GROUP,26,190,160,10
+*/
+    LTEXT           "Current status:",IDC_SVC_CURRENT_STATUS_LABEL,9,14,213,
+                    9
+    EDITTEXT        IDC_SVC_CURRENT_STATUS,9,24,213,14,ES_AUTOHSCROLL | 
+                    WS_DISABLED | NOT WS_TABSTOP,WS_EX_CLIENTEDGE
+    PUSHBUTTON      "Install",IDC_SVC_INSTALLSERVICE,9,40,103,14
+    PUSHBUTTON      "Unnistall",IDC_SVC_SERVERUNINSTALL,119,40,103,14
+    GROUPBOX        "Startup",IDC_SVC_STARTUPBOX,9,57,213,37
+    CONTROL         "Start with system startup",IDC_SVC_STARTWITHSYSTEM,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,
+                    14,67,203,10
+    CONTROL         "Manual start",IDC_SVC_MANUALSTART,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP | WS_TABSTOP,
+                    14,79,203,10
+    PUSHBUTTON      "Set settings appropriate for service use ",IDC_SVC_SETTINGS,
+                    9,97,213,14, WS_TABSTOP
+    GROUPBOX        "On start of eMule",IDC_SVC_ONSTARTBOX,9,114,213,37
+    CONTROL         "Browse to webservice",IDC_SVC_RUNBROWSER,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,14,124,203,10
+    CONTROL         "Stop service and start gui",IDC_SVC_REPLACESERVICE,
+                    "Button",BS_AUTORADIOBUTTON | WS_GROUP, 14,136,203,10
+    GROUPBOX        "NT Service strings (empty = default)",IDC_SERVICE_STR_GROUP,
+                    9,154,213,61
+    LTEXT           "Name (for install):",IDC_SERVICE_NAME_LABEL,14,166,80,
+                    9
+    EDITTEXT        IDC_SERVICE_NAME,96,164,121,14,ES_AUTOHSCROLL,
+                    WS_EX_CLIENTEDGE
+    LTEXT           "Displayed name:",IDC_SERVICE_DISP_NAME_LABEL,14,182,80,
+                    9
+    EDITTEXT        IDC_SERVICE_DISP_NAME,96,180,121,14,ES_AUTOHSCROLL,
+                    WS_EX_CLIENTEDGE
+    LTEXT           "Displayed discription:",IDC_SERVICE_DESCR_LABEL,14,198,80,
+                    9
+    EDITTEXT        IDC_SERVICE_DESCR,96,196,121,14,ES_AUTOHSCROLL,
+                    WS_EX_CLIENTEDGE
+    GROUPBOX        "NT Service optimizations",IDC_SERVICE_OPT_GROUP,
+                    9,218,213,26
+    LTEXT           "Optimization level:",IDC_SERVICE_OPT_LABEL,14,229,80,
+                    9
+    COMBOBOX        IDC_SERVICE_OPT_BOX,96,227,121,110,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
 END
 
 IDD_ADDSHAREDIR DIALOGEX 0, 0, 277, 70
@@ -5346,16 +5388,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED "Enable DynDNS"
-    IDS_STATIC_DYNDNS_USERNAME "Username"
-    IDS_STATIC_DYNDNS_PASSWORD "Password"
-    IDS_STATIC_DYNDNS_HOSTNAME "DynDNS Hostname"
-    IDS_BUTTON_DYNDNS_UPDATE "Update"
-    IDS_BUTTON_DYNDNS_RESET "Reset"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_AUTOUPIP2COUNTRY    "Update Ip-to-country.csv on startup"
     IDS_UPDATEIPCURL        "Update"
     IDS_CLIENTQUEUEPROGRESSBAR "Show progress of client queue"
@@ -6313,159 +6345,203 @@ END
 
 STRINGTABLE 
 BEGIN
-   IDS_ADDSHAREDIR    "Add share or UNC manually"
-   IDS_TEXTSHRETOADD  "Share to add"
-   IDS_SHAREWITHSUBDIR	 "Share with subdirectories"
-   IDS_SUBDIRS "Subdirs"
-   IDS_UNCLIST_INACTIVE  "Inactive shares"
-   IDS_SCHED_RELOAD "Scheduler:Reload shared files"
-   IDS_SCHED_WARNENDTIME   "End time should be equal to start time for one time events"
-   IDS_SCHED_WARN_APPLY "Press Ok or Apply before selecting an other schedule"
-   IDS_SCHED_WARN_APPLY_TITLE "Warning"
+    IDS_ADDSHAREDIR         "Add share or UNC manually"
+    IDS_TEXTSHRETOADD       "Share to add"
+    IDS_SHAREWITHSUBDIR	    "Share with subdirectories"
+    IDS_SUBDIRS             "Subdirs"
+    IDS_UNCLIST_INACTIVE    "Inactive shares"
+    IDS_SCHED_RELOAD        "Scheduler:Reload shared files"
+    IDS_SCHED_WARNENDTIME   "End time should be equal to start time for one time events"
+    IDS_SCHED_WARN_APPLY    "Press Ok or Apply before selecting an other schedule"
+    IDS_SCHED_WARN_APPLY_TITLE "Warning"
 END
 
 STRINGTABLE 
 BEGIN
-    IDS_DISABLECATCOLORS	   "Disable category colors"
-    IDS_DISABLECATCOLOR_TIP    "Disable category colors in text tab of the transfer window"
-	IDS_CHANGEUSERASSERVICE    "You will have to change the user login of the service manually, or save config files in a program directory"   
+    IDS_DISABLECATCOLORS	"Disable category colors"
+    IDS_DISABLECATCOLOR_TIP "Disable category colors in text tab of the transfer window"
+	IDS_CHANGEUSERASSERVICE "You will have to change the user login of the service manually, or save config files in a program directory"   
 END
 
 STRINGTABLE 
 BEGIN
-   IDS_USSPINGDATASIZE		"ICMP data size (0=default 0..64 allowed)" 
-   IDS_PINGDATASIZE_TIP            "Some firewalls/routers do not reply proper to icmp ping\nrequest with datasize 0. THis option allows you to set a\nsmall data size to work arround these buggy router"
+    IDS_USSPINGDATASIZE		"ICMP data size (0=default 0..64 allowed)" 
+    IDS_PINGDATASIZE_TIP    "Some firewalls/routers do not reply proper to icmp ping\nrequest with datasize 0. THis option allows you to set a\nsmall data size to work arround these buggy router"
 END
 
 STRINGTABLE 
 BEGIN
-  IDS_INCFILES_TIP "Specifies the directory to which completed downloads are moved.\nif the default path is changed an existing folder  that you can \nwrite into must be entered. eMule will not create this directory.\nYou can override this setting per category in the transfer window\nby choosing a different	Incoming Files category folder.\nYour Incoming Files folder will be shared."
-  IDS_TEMPFILES_TIP "This option specifies the directory, or directories, where the\ndownloads in progress are stored. Because of the concurrent \ndownload system, eMule creates dummy files (*.part) of the\nsize the finished download will have. You can configure eMule\nto use only the size the file currently has by enabling the 'Sparse'\noption in Extended (only works on NTFS filesystems, under \nwindows 2000 and XP, not vista).   You can add multiple \ndirectories by clicking the [+] button, next to the browse button \n(visible only with 'show more controls'). \nThe tempdir for a file is selected as follows:\n1. On same drive as incoming and enough space for all downloading\n2. Enough space for all downloading\n3. Most actual free space \nNote that it does not make sense to put multiple temp dir on\nthe same drive letter.\n"
-  IDS_SHARESELECTOR_TIP "Select Additional shared directories and shared network paths here. \nIf you press the control key while selecting a directory it is shared including\nit (future) subdirectories."
-  IDS_UNCLIST_TIP "Shares that were once shared but were not readable when eMule was started.\nThey will be tried again when pressing apply. This can be shares or network drives.\nNote that shares that time-out share can increase the startup time"
-  IDS_UNCADD_TIP "Manually add shares. Useful for network shares that are not yet listed in the shareselector"
-  IDS_UNCREM_TIP "remove the current selected inactive share"
-
-  IDS_ENABLE_SCHED_TIP "Enable the scheduler.\nWhen disabled no of the events defined here will happen\n(default: disabled , dont forget to enable)"
-  IDS_REMOVE_SCHED_TIP "Remove the current selected starttime event"
-  IDS_NEW_SCHED_TIP "Create a new action event"
-  IDS_SCHEDLIST_TIP "Displays the defined action profile. \nUse NEW to add events and REMOVE button to delete lines\nyou will have to apply after each line or else selection of an other item might fail"
-  IDS_S_ENABLE_TIP "Enable this current profile action"
-  IDS_S_TITLE_TIP "Edit the name of the current profile action"
-  IDS_TIMESEL_SCHED_TIP "Select how often a event happens"
-  IDS_DATETIMEPICKER1_TIP "Start time"
-  IDS_DATETIMEPICKER2_TIP "End time. Note that of event that happen once like\nupdate of ipfilter the endtime should be equal to the start time"
-  IDS_CHECKNOENDTIME_SCHED_TIP "event has no end"
-  IDS_SCHEDACTION_TIP "Right-click this window to add/remove actions from the current profile\nSome actions have parameters that can be edited"
-
-  IDS_OVERWRITE1          "File %s Already Exists. OverWrite It?"
-  IDS_OVERWRITE2          "OverWrite?"    
-  IDS_BACKUPERROR         "Error encountered during backup"
-  IDS_BACKUP_PART         "Because of their size, backing up *.part files may take a few minutes.\nAre you sure you want to do this?"
-  IDS_BACKUP_PART_W       "Are you sure?"
-  IDS_BACKUP_COMPLETE     "File(s) Copied Successfully."
-
-  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME "Adjust NTFS daylight file time"
-  IDS_X_PEERCACHESHOW     "Show PeerCache informations"
-  IDS_X_DATETIMEFORMAT    "Date&Time format"
-  IDS_X_DATETIMEFORMAT4LOG "Date&Time format for log"
-  IDS_X_LOGWARNING        "Log warning color"
-  IDS_X_LOGSUCCESS        "Log success color"
-  IDS_X_LOGERROR          "Log error color"
-  IDS_X_ICH               "Intelligent Corruption Handing (ICH)"
-  IDS_X_DONTCOMPRESSAVI   "Don't compress avi"
-  IDS_X_SHOWCOPYED2KLINK  "Show 'copy ed2k link' command"
-  IDS_X_ICON_FLASH_ON_NEW_MESSAGE "Flash tray icon on new message"
-  IDS_X_SHOWVERTICALHOURMARKERS "Stats- Show vertical hour markers"
-  IDS_X_REBARTOOLBAR      "disable some Toolbar options"
+    IDS_INCFILES_TIP        "Specifies the directory to which completed downloads are moved.\nif the default path is changed an existing folder  that you can \nwrite into must be entered. eMule will not create this directory.\nYou can override this setting per category in the transfer window\nby choosing a different	Incoming Files category folder.\nYour Incoming Files folder will be shared."
+    IDS_TEMPFILES_TIP       "This option specifies the directory, or directories, where the\ndownloads in progress are stored. Because of the concurrent \ndownload system, eMule creates dummy files (*.part) of the\nsize the finished download will have. You can configure eMule\nto use only the size the file currently has by enabling the 'Sparse'\noption in Extended (only works on NTFS filesystems, under \nwindows 2000 and XP, not vista).   You can add multiple \ndirectories by clicking the [+] button, next to the browse button \n(visible only with 'show more controls'). \nThe tempdir for a file is selected as follows:\n1. On same drive as incoming and enough space for all downloading\n2. Enough space for all downloading\n3. Most actual free space \nNote that it does not make sense to put multiple temp dir on\nthe same drive letter.\n"
+    IDS_SHARESELECTOR_TIP   "Select Additional shared directories and shared network paths here. \nIf you press the control key while selecting a directory it is shared including\nit (future) subdirectories."
+    IDS_UNCLIST_TIP         "Shares that were once shared but were not readable when eMule was started.\nThey will be tried again when pressing apply. This can be shares or network drives.\nNote that shares that time-out share can increase the startup time"
+    IDS_UNCADD_TIP          "Manually add shares. Useful for network shares that are not yet listed in the shareselector"
+    IDS_UNCREM_TIP          "remove the current selected inactive share"
+    IDS_ENABLE_SCHED_TIP    "Enable the scheduler.\nWhen disabled no of the events defined here will happen\n(default: disabled , dont forget to enable)"
+    IDS_REMOVE_SCHED_TIP    "Remove the current selected starttime event"
+    IDS_NEW_SCHED_TIP       "Create a new action event"
+    IDS_SCHEDLIST_TIP       "Displays the defined action profile. \nUse NEW to add events and REMOVE button to delete lines\nyou will have to apply after each line or else selection of an other item might fail"
+    IDS_S_ENABLE_TIP        "Enable this current profile action"
+    IDS_S_TITLE_TIP         "Edit the name of the current profile action"
+    IDS_TIMESEL_SCHED_TIP   "Select how often a event happens"
+    IDS_DATETIMEPICKER1_TIP "Start time"
+    IDS_DATETIMEPICKER2_TIP "End time. Note that of event that happen once like\nupdate of ipfilter the endtime should be equal to the start time"
+    IDS_CHECKNOENDTIME_SCHED_TIP "event has no end"
+    IDS_SCHEDACTION_TIP     "Right-click this window to add/remove actions from the current profile\nSome actions have parameters that can be edited"
+    IDS_OVERWRITE1          "File %s Already Exists. OverWrite It?"
+    IDS_OVERWRITE2          "OverWrite?"    
+    IDS_BACKUPERROR         "Error encountered during backup"
+    IDS_BACKUP_PART         "Because of their size, backing up *.part files may take a few minutes.\nAre you sure you want to do this?"
+    IDS_BACKUP_PART_W       "Are you sure?"
+    IDS_BACKUP_COMPLETE     "File(s) Copied Successfully."
+    IDS_X_ADJUSTNTFSDAYLIGHTFILETIME "Adjust NTFS daylight file time"
+    IDS_X_PEERCACHESHOW     "Show PeerCache informations"
+    IDS_X_DATETIMEFORMAT    "Date&Time format"
+    IDS_X_DATETIMEFORMAT4LOG "Date&Time format for log"
+    IDS_X_LOGWARNING        "Log warning color"
+    IDS_X_LOGSUCCESS        "Log success color"
+    IDS_X_LOGERROR          "Log error color"
+    IDS_X_ICH               "Intelligent Corruption Handing (ICH)"
+    IDS_X_DONTCOMPRESSAVI   "Don't compress avi"
+    IDS_X_SHOWCOPYED2KLINK  "Show 'copy ed2k link' command"
+    IDS_X_ICON_FLASH_ON_NEW_MESSAGE "Flash tray icon on new message"
+    IDS_X_SHOWVERTICALHOURMARKERS "Stats- Show vertical hour markers"
+    IDS_X_REBARTOOLBAR      "disable some Toolbar options"
 
 
 END
 
 STRINGTABLE 
 BEGIN
-  IDS_OUTOFSERVERS_O "Failed to connect obfuscated to  servers with obfuscation key. Making another pass."
-  IDS_NO_OBFUSCATION_KEY "Server has no obfuscation key."
-  IDS_URL_FOR_UPDATING_IP2COUNTRY "File-URL for updating"
-
-  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP "if the a file is located on a NTFS fs\nthe time on the file is  modified by 1 hour\nif daylightsaving is active.  See KB 129574\ndefault=enabled"
-	IDS_X_LOGERROR_TIP "Color of the log lines in the server pane log."
+    IDS_OUTOFSERVERS_O      "Failed to connect obfuscated to  servers with obfuscation key. Making another pass."
+    IDS_NO_OBFUSCATION_KEY  "Server has no obfuscation key."
+    IDS_URL_FOR_UPDATING_IP2COUNTRY "File-URL for updating"
+    IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP "if the a file is located on a NTFS fs\nthe time on the file is  modified by 1 hour\nif daylightsaving is active.  See KB 129574\ndefault=enabled"
+    IDS_X_LOGERROR_TIP      "Color of the log lines in the server pane log."
     IDS_X_SHOWVERTICALHOURMARKERS_TIP "Show an vertical line in the statics window every hour.\nResize statistics window to see effect (default: enabled)"
-	IDS_X_REBARTOOLBAR_TIP      "option to disable toolbar options like i.e.:\nAdded chevron support: If toolbar is too small to display all buttons a\nchevron ('>>' icon) is shown at the very right side which opens a menu \nwith the remaining button commands.\nTooltips for truncated button titles and in 'No Labels' mode of toolbar.\nButtons can be moved and/or removed from the toolbar by holding down \nCtrl+Alt key while draging a button with the mouse.\nButton sizes more similar to Windows Explorer.\n(default: checked)"
-	IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "Flash the system tray icon when a new message is received. (default=on)"
-	IDS_X_SHOWCOPYED2KLINK_TIP "In the shared files windows,  Show Copy link to clipboard menu option\ninstead of the 'ed2k links....' context menu. (default = off)"
-	IDS_X_DONTCOMPRESSAVI_TIP   "normally all file data is compressed before transfering,\nexcept for rar, zip and some other archive formats\nThis options disables compressing avi files like rar files\nFOr high speed upload links this increases performance, but\nfor some avi file some possible compression is lost.\n(default= false). Note that morph has the option to\ndisable/decrease compression  for all files."
-
+    IDS_X_REBARTOOLBAR_TIP  "option to disable toolbar options like i.e.:\nAdded chevron support: If toolbar is too small to display all buttons a\nchevron ('>>' icon) is shown at the very right side which opens a menu \nwith the remaining button commands.\nTooltips for truncated button titles and in 'No Labels' mode of toolbar.\nButtons can be moved and/or removed from the toolbar by holding down \nCtrl+Alt key while draging a button with the mouse.\nButton sizes more similar to Windows Explorer.\n(default: checked)"
+    IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "Flash the system tray icon when a new message is received. (default=on)"
+    IDS_X_SHOWCOPYED2KLINK_TIP "In the shared files windows,  Show Copy link to clipboard menu option\ninstead of the 'ed2k links....' context menu. (default = off)"
+    IDS_X_DONTCOMPRESSAVI_TIP "normally all file data is compressed before transfering,\nexcept for rar, zip and some other archive formats\nThis options disables compressing avi files like rar files\nFOr high speed upload links this increases performance, but\nfor some avi file some possible compression is lost.\n(default= false). Note that morph has the option to\ndisable/decrease compression  for all files."
 END
 STRINGTABLE 
 BEGIN
-  IDS_UPNPDETECTSTATUS "wizard auto detect status"
-  IDS_DETECTUPNP_TIP  "Current status of automatic upnp detection in startup wizard\n2: ReDetect upnp on next start(only usefule value to set to 2)\n0: upnp gateway detected.\n-1: Not detected.\n-2:Detection disabled on non local lan address\n-10:Not needed.(other values ignored)"
-  IDS_UPNPPORT_TIP  "Port upnp uses. DO NOT FORWARD THIS PORT (default 0=automatic)"
-  IDS_UPNPCLEARONCLOSE_TIP "enabled=create static portmapping and close on exit\ndisabled=create dynamic portmapping and do not close on exit"
-  IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "Forward only ports on the first device found\nNote that some windows installations return\na Residential gateway device that is NOT a\ninternet device. Defaut: disabled"
-  IDS_UPNPCLOSEONEXIT "Close Ports on exit"
-  IDS_UPNPLIMITTOFIRSTCONNECTION "Forward ports only on first connection"
-  IDS_UPNFORCEUPDATE "Force periodic updates"
-  IDS_UPNFORCEUPDATE_TIP "Instead of checking on the internet gateway device\nif a portmapping rule still  exists, just add a \nmapping every 10 minutes (default = disabled!)"
+    IDS_UPNPDETECTSTATUS    "wizard auto detect status"
+    IDS_DETECTUPNP_TIP      "Current status of automatic upnp detection in startup wizard\n2: ReDetect upnp on next start(only usefule value to set to 2)\n0: upnp gateway detected.\n-1: Not detected.\n-2:Detection disabled on non local lan address\n-10:Not needed.(other values ignored)"
+    IDS_UPNPPORT_TIP        "Port upnp uses. DO NOT FORWARD THIS PORT (default 0=automatic)"
+    IDS_UPNPCLEARONCLOSE_TIP "enabled=create static portmapping and close on exit\ndisabled=create dynamic portmapping and do not close on exit"
+    IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "Forward only ports on the first device found\nNote that some windows installations return\na Residential gateway device that is NOT a\ninternet device. Defaut: disabled"
+    IDS_UPNPCLOSEONEXIT     "Close Ports on exit"
+    IDS_UPNPLIMITTOFIRSTCONNECTION "Forward ports only on first connection"
+    IDS_UPNFORCEUPDATE      "Force periodic updates"
+    IDS_UPNFORCEUPDATE_TIP  "Instead of checking on the internet gateway device\nif a portmapping rule still  exists, just add a \nmapping every 10 minutes (default = disabled!)"
 END
 
 STRINGTABLE 
 BEGIN
-   IDS_DONOTWATCHCLIP "Stop watching clipboard"
-   IDS_DONOTWATCHCLIP_TIP "One or more of the links that is copied from the clipboard.\nCheck this option to disable watching of the clipboard.\npress cancel to not paste the link. \nEnter or select a catagory and press ok to insert the links"
-   IDS_USS_INITIAL_TTL     "Initial TTL" // [MoNKi: -USS initial TTL-] - Stulle
-   IDS_USS_INITIAL_TTL_TIP	"In finding the last common router Skip the first n routers\nThis might be usefule if the providers blocks pings at the\ninternel routers. Test this with the 'tracert' command. Default =0, \nIf you go higher than 8 you have a strange ISP network. max = 20\n20 is not recommended. Setting a too high value will cause\n'Network topology has changed.' verbose messages. Loosing the \neffectiveness  of the USS"
-   IDS_SELFILES_TIP "Filesname that were in the link queue at the first display \nof this category selection. More may be added during \n the category selection but are not displayed here"
-   IDS_USEDOWNLOADOVERHEAD "Use download overhead"
-   IDS_USEDOWNLOADOVERHEAD_TIP "Use the ack traffic coming from the download session\nIn the upload statistics, allowing to set your upload\nslightly higher when downloading a lot(default=on)"
-   IDS_APPLY_SETTINGS       "Should the necessary settings be applied now?"
-   IDS_TAB_WEB_SERVER       "Web Server"
-   IDS_TAB_MULTI_USER       "Multi User"
-   IDS_TAB_NT_SERVICE       "NT Service"
-   IDS_PURGE_DONT           "Don't purge entries"
-   IDS_PURGE_PARTIALLY      "Partially purge entries (Original)"
-   IDS_PURGE_COMPLETLY      "Completely purge entries (MorphXT)"
-   IDS_REMOVE_AICH_IMMEDIATLY "Remove unused AICH hashes immediately"
-   IDS_IPFILTERWHITELOADED  "%u IPs loaded to the IP Filter White List" //MORPH - Added by Stulle, IP Filter White List [Stulle]
-   //MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
-   IDS_AUTOIPFILTERFAILED   "Failed to check IPFilter version."
-   IDS_DL_NONE              "None"
-   //MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
-   IDS_X_FILE_BUFFER_TIME_LIMIT "File Buffer Time Limit (in sec)"
-   IDS_X_FILE_BUFFER_TIME_LIMIT_TIP "Maximum time until data is flushed from download\ncache to harddisk"
-   IDS_X_DATETIMEFORMAT4LIST "Date&Time format for lists"
-   IDS_X_REARRANGEKADSEARCH "Rearrange KAD search keywords"
-   IDS_X_REARRANGEKADSEARCH_TIP "If enabled eMule will automatically rearrange\nsearch keywords to avoid limitations by KAD.\nDefault: enabled"
-   IDS_RESOLVE_SHARED_SHELL_TIP "Resolve shell links which lets eMule share 'linked'\nfiles (Windows Explorer shortcuts). This way one\ncan also share single files within unshared directories."
-   IDS_AUTO_ARCH_TIP        "When you check the file details for an archive eMule creates\na preview to show you which files are within this archive.\nYou can disable this behaviour to avoid having to wait (a short\ntime on slow PCs) when walking through the file details. In\nthis case you can still start the preview manually for each archive."
-   IDS_MET_PURGE_DONT_TIP   "Old entries in the known.met file will never be purged."
-   IDS_MET_PURGE_PART_TIP   "Parts of old entries in the known.met file will be purged.\nThis is the way the official does it."
-   IDS_MET_PURGE_COMPL_TIP  "Old entries in the known.met file will be purged completly.\nThis is the way Morph did it in the past."
-   IDS_REMOVE_AICH_TIP      "Enable if AICH hash of unshared files should\nbe deleted immediatly.\nDefault: disabled"
-   IDS_WSUPNP_TIP           "Includes Webserver port into UPnP port forwarding."
-   IDS_CHECK_FILE_OPEN_TIP  "Enables prompt before opening a file via eMule."
-   //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
-   IDS_FILTER_CLIENTFAILEDDOWN        "Filter clients with failed downlads"
-   IDS_FILTER_CLIENTFAILEDDOWN_TIP    "Filter clients that transfer less than 12kB\nin a download session more than thrice.\nDefault: enabled"
-   //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
-   IDS_TCP_CONS             "TCP-connections"
-   IDS_X_ICH_TIP            "Intelligent Corruption Handing (ICH) helps\nrecovering corrupted data downloaded\nfrom other clients."
-   IDS_UPDATEQUEUE          "Don't update Queue list in real time"
-   IDS_REPAINTGRAPHS        "Don't recreate statistic graphs on resize"
-   IDS_PW_BEEP              "Beep on errors"
-   IDS_MSGONLYSEC           "Accept messages from valid clients only"
-   IDS_DISABLEPEERACHE      "Disable downloading from PeerCache"
-   IDS_SHOWWIN7TASKBARGOODIES_TIP "Windows 7 comes with some new features\nfor the Aero Glass taskbar which can be\nused with this."
-   IDS_STORESEARCHES_TIP    "eMule can store searches between sessions so they\nwill be loaded upon startup to reset the old state."
-   IDS_SEARCHSPAMFILTER_TIP "Sometimes users or servers publish fake files. To protect yourself\nenable this option which will cause eMule to filter the search\nresults using two different approaches."
-   IDS_ENABLEMINIMULE_TIP   "MiniMule is a small window that can be displayed to show basic information\nof eMule when eMule is minimized to tray. It will hover on top and can be\nmade transparent (see Advanced Preferences in Extended)."
-   IDS_PREVENTSTANDBY_TIP   "Windows frequently is configured to go into standby mode after a while.\nEnabling this option will prevent Windows from going into standby when\neMule is running so file sharing continues."
-   IDS_STATIC_ICON_TIP      "Usually the eMule Tray Icon is only shown when the program is minimized to tray.\nThis option will cause eMule to always show the Tray Icon, regardless if minimized or not."
-   IDS_MORPHWIZ_SHOWLESS_TIP "eMule MorphXT includes a lot of features and extra information unexperienced\nusers might not need. This option will hide some information and features to\nsimplify the GUI."
-   IDS_WS_FAILED_LOGIN      "You have been banned for 15 min due to failed login attempts!"
-   IDS_ADVADMIN_DFILES      "Acces - Download files?"
-   IDS_ADVADMIN_DFILES_TIP  "Allow user to download complete shared files."
+    IDS_DONOTWATCHCLIP      "Stop watching clipboard"
+    IDS_DONOTWATCHCLIP_TIP  "One or more of the links that is copied from the clipboard.\nCheck this option to disable watching of the clipboard.\npress cancel to not paste the link. \nEnter or select a catagory and press ok to insert the links"
+    IDS_USS_INITIAL_TTL     "Initial TTL" // [MoNKi: -USS initial TTL-] - Stulle
+    IDS_USS_INITIAL_TTL_TIP	"In finding the last common router Skip the first n routers\nThis might be usefule if the providers blocks pings at the\ninternel routers. Test this with the 'tracert' command. Default =0, \nIf you go higher than 8 you have a strange ISP network. max = 20\n20 is not recommended. Setting a too high value will cause\n'Network topology has changed.' verbose messages. Loosing the \neffectiveness  of the USS"
+    IDS_SELFILES_TIP        "Filesname that were in the link queue at the first display \nof this category selection. More may be added during \n the category selection but are not displayed here"
+    IDS_USEDOWNLOADOVERHEAD "Use download overhead"
+    IDS_USEDOWNLOADOVERHEAD_TIP "Use the ack traffic coming from the download session\nIn the upload statistics, allowing to set your upload\nslightly higher when downloading a lot(default=on)"
+    IDS_APPLY_SETTINGS      "Should the necessary settings be applied now?"
+    IDS_TAB_WEB_SERVER      "Web Server"
+    IDS_TAB_MULTI_USER      "Multi User"
+    IDS_TAB_NT_SERVICE      "NT Service"
+    IDS_PURGE_DONT          "Don't purge entries"
+    IDS_PURGE_PARTIALLY     "Partially purge entries (Original)"
+    IDS_PURGE_COMPLETLY     "Completely purge entries (MorphXT)"
+    IDS_REMOVE_AICH_IMMEDIATLY "Remove unused AICH hashes immediately"
+    IDS_IPFILTERWHITELOADED "%u IPs loaded to the IP Filter White List" //MORPH - Added by Stulle, IP Filter White List [Stulle]
+    //MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+    IDS_AUTOIPFILTERFAILED  "Failed to check IPFilter version."
+    IDS_DL_NONE             "None"
+    //MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+    IDS_X_FILE_BUFFER_TIME_LIMIT "File Buffer Time Limit (in sec)"
+    IDS_X_FILE_BUFFER_TIME_LIMIT_TIP "Maximum time until data is flushed from download\ncache to harddisk"
+    IDS_X_DATETIMEFORMAT4LIST "Date&Time format for lists"
+    IDS_X_REARRANGEKADSEARCH "Rearrange KAD search keywords"
+    IDS_X_REARRANGEKADSEARCH_TIP "If enabled eMule will automatically rearrange\nsearch keywords to avoid limitations by KAD.\nDefault: enabled"
+    IDS_RESOLVE_SHARED_SHELL_TIP "Resolve shell links which lets eMule share 'linked'\nfiles (Windows Explorer shortcuts). This way one\ncan also share single files within unshared directories."
+    IDS_AUTO_ARCH_TIP       "When you check the file details for an archive eMule creates\na preview to show you which files are within this archive.\nYou can disable this behaviour to avoid having to wait (a short\ntime on slow PCs) when walking through the file details. In\nthis case you can still start the preview manually for each archive."
+    IDS_MET_PURGE_DONT_TIP  "Old entries in the known.met file will never be purged."
+    IDS_MET_PURGE_PART_TIP  "Parts of old entries in the known.met file will be purged.\nThis is the way the official does it."
+    IDS_MET_PURGE_COMPL_TIP "Old entries in the known.met file will be purged completly.\nThis is the way Morph did it in the past."
+    IDS_REMOVE_AICH_TIP     "Enable if AICH hash of unshared files should\nbe deleted immediatly.\nDefault: disabled"
+    IDS_WSUPNP_TIP          "Includes Webserver port into UPnP port forwarding."
+    IDS_CHECK_FILE_OPEN_TIP "Enables prompt before opening a file via eMule."
+    //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+    IDS_FILTER_CLIENTFAILEDDOWN "Filter clients with failed downlads"
+    IDS_FILTER_CLIENTFAILEDDOWN_TIP "Filter clients that transfer less than 12kB\nin a download session more than thrice.\nDefault: enabled"
+    //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
+    IDS_TCP_CONS            "TCP-connections"
+    IDS_X_ICH_TIP           "Intelligent Corruption Handing (ICH) helps\nrecovering corrupted data downloaded\nfrom other clients."
+    IDS_UPDATEQUEUE         "Don't update Queue list in real time"
+    IDS_REPAINTGRAPHS       "Don't recreate statistic graphs on resize"
+    IDS_PW_BEEP             "Beep on errors"
+    IDS_MSGONLYSEC          "Accept messages from valid clients only"
+    IDS_DISABLEPEERACHE     "Disable downloading from PeerCache"
+    IDS_SHOWWIN7TASKBARGOODIES_TIP "Windows 7 comes with some new features\nfor the Aero Glass taskbar which can be\nused with this."
+    IDS_STORESEARCHES_TIP   "eMule can store searches between sessions so they\nwill be loaded upon startup to reset the old state."
+    IDS_SEARCHSPAMFILTER_TIP "Sometimes users or servers publish fake files. To protect yourself\nenable this option which will cause eMule to filter the search\nresults using two different approaches."
+    IDS_ENABLEMINIMULE_TIP  "MiniMule is a small window that can be displayed to show basic information\nof eMule when eMule is minimized to tray. It will hover on top and can be\nmade transparent (see Advanced Preferences in Extended)."
+    IDS_PREVENTSTANDBY_TIP  "Windows frequently is configured to go into standby mode after a while.\nEnabling this option will prevent Windows from going into standby when\neMule is running so file sharing continues."
+    IDS_STATIC_ICON_TIP     "Usually the eMule Tray Icon is only shown when the program is minimized to tray.\nThis option will cause eMule to always show the Tray Icon, regardless if minimized or not."
+    IDS_MORPHWIZ_SHOWLESS_TIP "eMule MorphXT includes a lot of features and extra information unexperienced\nusers might not need. This option will hide some information and features to\nsimplify the GUI."
+    IDS_WS_FAILED_LOGIN     "You have been banned for 15 min due to failed login attempts!"
+    IDS_ADVADMIN_DFILES     "Acces - Download files?"
+    IDS_ADVADMIN_DFILES_TIP "Allow user to download complete shared files."
+    IDS_SERVICE_OPT_GROUP   "NT Service optimizations"
+    IDS_SERVICE_OPT_LABEL   "Optimization level:"
+    IDS_SERVICE_OPT_NONE    "None"
+    IDS_SERVICE_OPT_BASIC   "Basic"
+    IDS_SERVICE_OPT_LISTS   "Lists except Server"
+    IDS_SERVICE_OPT_FULL    "Full"
+    IDS_SVC_STRT_MGR_FAIL   "Service started succesfully but failed to tell servicemanger. Quitting."
+    IDS_SVC_PAUSE_MGR_FAIL  "Service paused succesfully but failed to tell servicemanger. Quitting."
+    IDS_SVC_INST_PATH_FAIL  "Unable to install service, no valid path. %s"
+    IDS_SVC_INST_SUCCESS    "Installed as service."
+    IDS_SVC_INST_FAIL       "Failed to install as a service: %s"
+    IDS_SVC_SVCCTRL_FAIL    "Failed to connect to Service control: %s"
+    IDS_SVC_STOPPING        "Stopping service"
+    IDS_SVC_STOP_PNDNG      "Service stop pending"
+    IDS_SVC_STOPPED         "Stopped sevice"
+    IDS_SVC_STOP_FAIL       "Failed to stop sevice: %s"
+    IDS_SVC_DELETED         "Service deleted"
+    IDS_SVC_DELETE_FAIL     "Service deletion failed: %s"
+    IDS_SVC_OPEN_FAIL       "Failed to open service: %s"
+    IDS_SVC_TERMINATE       "Terminate service. Error code %d:%s"
+    IDS_SVC_STRTUP_SUCCESS  "Succesfully changed startup mode of service."
+    IDS_SVC_STRTUP_FAIL     "Unable to change startup mode of service: %s"
+    IDS_SVC_STRTUP_OPN_FAIL "Failed to open service to change startup mode: %s"
+    IDS_SVC_STRTUP_CTRL_FAIL "Failed to connect to service control to change startup mode: %s"
+    IDS_SVC_LINK_PASS_FAIL  "Pass link to webservice: Internetopen error"
+    IDS_SERVICE_OPT_BOX_TIP "Using eMule in NT Service mode enables you to set a number of optimizations\nthat will reduce the CPU and memory usage for the unneeded GUI.\n\nAvailable levels:\n0: None = No optimizations\n4: Basic = Disables some GUI items (like Tooltips)\n6: Lists except Server = Disables most functions of the lists except Server list\n10: Full = Also disables most functions for Server list"
+    //MORPH START - Added by Stulle, Adjustable NT Service Strings
+    IDS_SERVICE_STR_GROUP   "NT Service strings (empty = default)"
+    IDS_SERVICE_NAME        "Name (for install)"
+    IDS_SERVICE_DISP_NAME   "Displayed name"
+    IDS_SERVICE_DESCR       "Displayed discription"
+    IDS_SERVICE_NAME_CHANGED "You changed the name under which the NT Service is installed.\nTo enable the changes you made eMule will have to reinstall the service.\n\nPress 'Yes' to reinstall the service.\nPress 'No' to just change the install name.\nPress 'Cancel' to revert changes."
+    IDS_SERVICE_STR_CHANGED "NT Service string changed"
+    IDS_SERVICE_DISP_CHANGE_FAIL "Changing the service display name or service description failed.\nDo you want to try reinstalling the service to change these strings?"
+    IDS_SERVICE_STR_CHANGE_FAIL "NT Service string change failed"
+    IDS_SERVICE_UNINSTALL_FAIL "NT Service failed to uninstall.\nPlease check your log.\nAll changes have been reset."
+    IDS_SERVICE_UNINSTALL_TITLE "Uninstall failed"
+    IDS_SERVICE_INSTALL_FAIL "NT Service failed to install.\nPlease check your log and try to reinstall the service again in the NT Service panel."
+    IDS_SERVICE_INSTALL_TITLE "Install failed"
+    IDS_SVC_DISP_SUCCESS    "Succesfully changed display name of service."
+    IDS_SVC_DISP_FAIL       "Unable to change display name of service: %s"
+    IDS_SVC_DESCR_SUCCESS   "Succesfully changed displayed description of service."
+    IDS_SVC_DESCR_FAIL      "Unable to change displayed description of service: %s"
+    IDS_SVC_STR_OPN_FAIL    "Failed to open service to change displayed strings mode: %s"
+    IDS_SVC_STR_CTRL_FAIL   "Failed to connect to service control to change displayed strings: %s"
+    IDS_SERVICE_NAME_TIP    "Internal name under which eMules service will be installed. This name must\nbe unique (case insensitive) and is used for manipulating the service via the\ncommand prompt.\n\nDefault: eMule"
+    IDS_SERVICE_DISP_NAME_TIP "Name that is displayed in the Windows Services list. This name must\nbe unique (case insensitive).\n\nDefault: eMule MorphXT as a service"
+    IDS_SERVICE_DESCR_TIP   "Description that is displayed in the Windows Services list.\n\nDefault: Provides capability to let eMule run as a NT system service."
+    //MORPH END   - Added by Stulle, Adjustable NT Service Strings
 END
 
 #endif    // English (U.S.) resources

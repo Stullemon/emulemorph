@@ -501,6 +501,10 @@ void CPreferencesDlg::SwitchTab(int Page)
 	if(m_hWnd && IsWindowVisible()){
 		CPropertyPage* activepage = GetActivePage();
 								   
+		CString strTitle = GetResString(IDS_EM_PREFS);
+		strTitle.Remove('&');
+		CString strGroupTitle = GetResString(IDS_PREF_GROUPEXTENDED);
+		strGroupTitle.Remove('&');
 		// webServer 1-2 -3
 		if (activepage == &m_wndWebServer || activepage == &m_wndIonixWebServer || activepage == &m_wndNTService){
 			if (Page == 0) {
@@ -508,12 +512,14 @@ void CPreferencesDlg::SwitchTab(int Page)
 				ActivePageWebServer = 0;
 				StartPageWebServer = 0;
 				m_wndWebServer.InitTab(false,0);
+				SetWindowText(strTitle + _T(" -> ") + strGroupTitle + _T(" -> ") + GetResString(IDS_TAB_WEB_SERVER));
 			}
 			if (Page == 1) {
 				SetActivePage(&m_wndIonixWebServer);
 				ActivePageWebServer = Multiwebserver;
 				StartPageWebServer = 1;
 				m_wndIonixWebServer.InitTab(false,1);
+				SetWindowText(strTitle + _T(" -> ") + strGroupTitle + _T(" -> ") + GetResString(IDS_TAB_MULTI_USER) + _T(" ") + GetResString(IDS_PW_WS));
 			}			
 			// MORPH leuk_he:run as ntservice v1..
 			if (Page == 2) {
@@ -521,6 +527,7 @@ void CPreferencesDlg::SwitchTab(int Page)
 				ActivePageWebServer = NTService;
 				StartPageWebServer = 2;
 				m_wndNTService.InitTab(false,2);
+				SetWindowText(strTitle + _T(" -> ") + strGroupTitle + _T(" -> ") + GetResString(IDS_TAB_NT_SERVICE));
 			}		
 			// MORPH leuk_he:run as ntservice v1..
 		}
@@ -532,14 +539,21 @@ void CPreferencesDlg::SwitchTab(int Page)
 LRESULT CPreferencesDlg::OnSlideBarSelChanged(WPARAM /*wParam*/, LPARAM /*lParam*/)
 {
 	int iCurrentGlobalSel	= m_slideBar.GetGlobalSelectedItem();
+	CString strCurrentItemText;
 
 	// MORPH start tabbed option [leuk_he]
 	if(iCurrentGlobalSel == Webserver)
 	{
 		if(ActivePageWebServer == Multiwebserver)
+		{
 			SetActivePage(&m_wndIonixWebServer);
+			strCurrentItemText = GetResString(IDS_TAB_MULTI_USER) + _T(" ") + GetResString(IDS_PW_WS);
+		}
 		else if(ActivePageWebServer == NTService)
+		{
 			SetActivePage(&m_wndNTService);
+			strCurrentItemText = GetResString(IDS_TAB_NT_SERVICE);
+		}
 		else
 			SetActivePage(&m_wndWebServer);
 	}
@@ -550,8 +564,8 @@ LRESULT CPreferencesDlg::OnSlideBarSelChanged(WPARAM /*wParam*/, LPARAM /*lParam
 	CListBoxST* pListBox = m_slideBar.GetGroupListBox(m_slideBar.GetSelectedGroupIndex());
 	ASSERT_VALID(pListBox);
 
-	CString strCurrentItemText;
-	pListBox->GetText(pListBox->GetCurSel(), strCurrentItemText);
+	if(strCurrentItemText.IsEmpty())
+		pListBox->GetText(pListBox->GetCurSel(), strCurrentItemText);
 
 	CString strCurrentGroupText = m_slideBar.GetGroupName(m_slideBar.GetSelectedGroupIndex());
 	strCurrentGroupText.Remove('&');

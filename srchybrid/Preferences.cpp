@@ -802,7 +802,16 @@ CString CPreferences::sInternetSecurityZone;
 bool	CPreferences::m_bHistoryShowShared;
 //MORPH END   - Added, Downloaded History [Monki/Xman]
 
-int CPreferences::m_iServiceStartupMode; // MORPH leuk_he:run as ntservice v1..
+//MORPH START leuk_he:run as ntservice v1..
+int		CPreferences::m_iServiceStartupMode;
+int		CPreferences::m_iServiceOptLvl;
+//MORPH END leuk_he:run as ntservice v1..
+//MORPH START - Added by Stulle, Adjustable NT Service Strings
+bool	CPreferences::m_bServiceStringsLoaded = false;
+CString	CPreferences::m_strServiceName;
+CString	CPreferences::m_strServiceDispName;
+CString	CPreferences::m_strServiceDescr;
+//MORPH END   - Added by Stulle, Adjustable NT Service Strings
 
 bool CPreferences::m_bStaticIcon; //MORPH - Added, Static Tray Icon
 
@@ -2700,11 +2709,19 @@ void CPreferences::SavePreferences()
 	//MORPH START - Added, Downloaded History [Monki/Xman]
 	ini.WriteBool(_T("ShowSharedInHistory"), m_bHistoryShowShared);
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
-	ini.WriteInt(_T("ServiceStartupMode"),m_iServiceStartupMode); // MORPH leuk_he:run as ntservice v1..
+	//MORPH START leuk_he:run as ntservice v1..
+	ini.WriteInt(_T("ServiceStartupMode"),m_iServiceStartupMode);
+	ini.WriteInt(_T("ServiceOptLvl"),m_iServiceOptLvl);
+	//MORPH END leuk_he:run as ntservice v1..
 	ini.WriteBool(_T("StaticIcon"),m_bStaticIcon); //MORPH - Added, Static Tray Icon
 	// ==> [MoNKi: -USS initial TTL-] - Stulle
 	ini.WriteInt(_T("USSInitialTTL"), m_iUSSinitialTTL, _T("StulleMule"));
 	// <== [MoNKi: -USS initial TTL-] - Stulle
+	//MORPH START - Added by Stulle, Adjustable NT Service Strings
+	ini.WriteString(L"ServiceName", m_strServiceName);
+	ini.WriteString(L"ServiceDispName", m_strServiceDispName);
+	ini.WriteString(L"ServiceDescr", m_strServiceDescr);
+	//MORPH END   - Added by Stulle, Adjustable NT Service Strings
 }
 
 void CPreferences::ResetStatsColor(int index)
@@ -3744,12 +3761,21 @@ void CPreferences::LoadPreferences()
 	m_bHistoryShowShared = ini.GetBool(_T("ShowSharedInHistory"), false);
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
    	m_bUseCompression=ini.GetBool(L"UseCompression",true);//Xman disable compression
-	GetServiceStartupMode(); //inistialize m_iServiceStartupMode  MORPH run as a service v1 
+	//MORPH START leuk_he:run as ntservice v1..
+	GetServiceName();
+	m_iServiceOptLvl = ini.GetInt(L"ServiceOptLvl",SVC_SVR_OPT);
+	//MORPH END leuk_he:run as ntservice v1..
 	m_bStaticIcon=ini.GetBool(L"StaticIcon",false); //MORPH - Added, Static Tray Icon
 
 	// ==> [MoNKi: -USS initial TTL-] - Stulle
 	m_iUSSinitialTTL = (uint8)ini.GetInt(_T("USSInitialTTL"), 1,_T("StulleMule"));
 	// <== [MoNKi: -USS initial TTL-] - Stulle
+	//MORPH START - Added by Stulle, Adjustable NT Service Strings
+	m_strServiceName = ini.GetString(L"ServiceName",NULL);
+	m_strServiceDispName = ini.GetString(L"ServiceDispName",NULL);
+	m_strServiceDescr = ini.GetString(L"ServiceDescr",NULL);
+	m_bServiceStringsLoaded = true;
+	//MORPH END   - Added by Stulle, Adjustable NT Service Strings
 
 	LoadCats();
 	SetLanguage();
@@ -4938,3 +4964,13 @@ bool CPreferences::IsIPFilterViaDynDNS(CString strURL)
 	return false;
 }
 //MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+
+//MORPH START - Added by Stulle, Adjustable NT Service Strings
+CString CPreferences::GetServiceName()
+{
+	// if the strings have not been loaded yet we need to load the name directly from the .ini
+	if (!m_bServiceStringsLoaded)
+		m_strServiceName = theApp.GetProfileString(_T("StulleMule"), _T("ServiceName"), NULL);
+	return m_strServiceName;
+}
+//MORPH END   - Added by Stulle, Adjustable NT Service Strings
