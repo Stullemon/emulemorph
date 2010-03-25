@@ -714,7 +714,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 				Out += _GetLoginScreen(Data);
 				Data.pSocket->SendContent(CT2CA(HTTPInit), Out);
 
-				//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management - added ,3
+				//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
 				/*
 				SendMessage(theApp.emuledlg->m_hWnd,WEB_GUI_INTERACTION, WEBGUIIA_WINFUNC,1);
 				*/
@@ -732,7 +732,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 			*/
 			else if (_ParseURL(Data.sURL, _T("w")) == _T("reboot") && IsSessionAdmin(Data,sSession,3) )
 			{
-				LPARAM lParam = 1;
+				LPARAM lParam = 2;
 				if (thePrefs.UseIonixWebsrv())
 				{
 					//long lSession = _tstol(sSession);
@@ -749,7 +749,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 				Out += _GetLoginScreen(Data);
 				Data.pSocket->SendContent(CT2CA(HTTPInit), Out);
 
-				//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management - added ,3
+				//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
 				/*
 				SendMessage(theApp.emuledlg->m_hWnd,WEB_GUI_INTERACTION, WEBGUIIA_WINFUNC,2);
 				*/
