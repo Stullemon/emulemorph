@@ -2778,11 +2778,11 @@ BEGIN
     GROUPBOX        "Session",IDC_STATISTICS_GB_SESSION,4,1,393,45,BS_FLAT
     GROUPBOX        "Total",IDC_STATISTICS_GB_TOTAL,4,50,393,45,BS_FLAT
     LTEXT           "Popularity Rank:",IDC_FS_POPULARITY_LBL,259,11,90,8
-    LTEXT           "-",IDC_FS_POPULARITY_VAL,356,11,34,8
+    LTEXT           "-",IDC_FS_POPULARITY_VAL,353,11,40,8
     LTEXT           "On Queue:",IDC_FS_ONQUEUE_LBL,259,22,90,8
-    LTEXT           "-",IDC_FS_ONQUEUE_VAL,356,22,34,8
+    LTEXT           "-",IDC_FS_ONQUEUE_VAL,353,22,40,8
     LTEXT           "Uploading:",IDC_FS_UPLOADING_LBL,259,33,35,8
-    LTEXT           "-",IDC_FS_UPLOADING_VAL,356,33,34,8
+    LTEXT           "-",IDC_FS_UPLOADING_VAL,353,33,40,8
     CONTROL         "",IDC_POPBAR4,"msctls_progress32",0x1,127,60,121,9,
                     WS_EX_TRANSPARENT
     CONTROL         "",IDC_POPBAR5,"msctls_progress32",0x1,127,71,121,9,
@@ -2790,7 +2790,7 @@ BEGIN
     CONTROL         "",IDC_POPBAR6,"msctls_progress32",0x1,127,82,121,9,
                     WS_EX_TRANSPARENT
     LTEXT           "Popularity Rank:",IDC_FS_POPULARITY2_LBL,259,60,90,8
-    LTEXT           "-",IDC_FS_POPULARITY2_VAL,356,60,34,8
+    LTEXT           "-",IDC_FS_POPULARITY2_VAL,353,60,40,8
 END
 
 
