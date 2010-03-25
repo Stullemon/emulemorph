@@ -4126,7 +4126,24 @@ LRESULT CemuleDlg::OnWebGUIInteraction(WPARAM wParam, LPARAM lParam) {
 			serverwnd->UpdateMyInfo();
 			break;
 		case WEBGUIIA_WINFUNC:{
+			//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management - added
+			// There should be no need for this as we check before sending the message.
+			// However, we do this all a little complicated to be sure that settings did not change
+			// during the webserver session and we allow something that should not be allowed.
+			/*
 			if (thePrefs.GetWebAdminAllowedHiLevFunc())
+			*/
+			bool bIsHiAdmin = false;
+			if (thePrefs.UseIonixWebsrv())
+			{
+				bIsHiAdmin = (lParam&4) ? true : false;
+				lParam &= 3;
+			}
+			else if (thePrefs.GetWebAdminAllowedHiLevFunc())
+				bIsHiAdmin = true;
+
+			if (bIsHiAdmin)
+			//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management - added
 			{
 				try {
 					HANDLE hToken;
