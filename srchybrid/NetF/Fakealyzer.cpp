@@ -5,7 +5,7 @@
 #include "Fakealyzer.h"
 
 bool
-CFakealyzer::IsFakeKadNode(uchar* kad_id, uint32 ip, uint16 udp_port)
+CFakealyzer::IsFakeKadNode(const uchar* kad_id, uint32 /*ip*/, uint16 /*udp_port*/)
 {
 	// Check for MediaDefender fake contact ID's (This is quite useless, but is kept for reference)
 	if (kad_id[5] == 14 && kad_id[14] == 111 && kad_id[6] < 240 && kad_id[7] == (kad_id[6] + 7) && kad_id[8] == (kad_id[6] + 13))
@@ -17,7 +17,7 @@ CFakealyzer::IsFakeKadNode(uchar* kad_id, uint32 ip, uint16 udp_port)
 }
 
 bool
-CFakealyzer::IsFakeClient(uchar* client_hash, uint32 ip, uint16 tcp_port)
+CFakealyzer::IsFakeClient(const uchar* client_hash, uint32 /*ip*/, uint16 /*tcp_port*/)
 {
 	// Check for MediaDefender fake contact ID's (This is quite useless, but is kept for reference)
 	if (client_hash[5] == 14 && client_hash[14] == 111 && client_hash[6] < 240 && client_hash[7] == (client_hash[6] + 7) && client_hash[8] == (client_hash[6] + 13))
@@ -81,21 +81,43 @@ CFakealyzer::CheckSearchResult(CSearchFile* content)
 		{
 			++nNegatives;
 		}
-
-		// common fake file identifier
-		if (((uint64) content->GetFileSize() % 137ULL) == 0)
-		{
-			++nNegatives;
-		}
 	}
 
-	if (nNegatives >= 2)
+	// common fake file identifier (not used very much anymore and will give a false positive on approx. 1 file out of 137)
+	//if (((uint64) content->GetFileSize() % 137ULL) == 0)
+	//{
+	//	++nNegatives;
+	//}
+
+	// reasonable availability (KAD only!)
+	if (content->IsKademlia())
+	{
+		uint32 nAvailability = content->GetSourceCount();
+		uint32 nKnownPublisher = (content->GetKadPublishInfo() & 0x00FF0000) >> 16;
+		if ((10 * nKnownPublisher < nAvailability) && (nKnownPublisher > 0) && (nKnownPublisher < 100))
+			++nNegatives;
+		else if ((2 * nKnownPublisher > nAvailability) || (nKnownPublisher >= 100))
+			++nPositives;
+	}
+
+	// merge positives and negatives into a score 
+	int nScore;
+	if (nNegatives > 0)
+	{
+		nScore = (nNegatives > 0 ? (nPositives - 1) : 0) - nNegatives;
+	}
+	else
+	{
+		nScore = nPositives;
+	}
+
+	if (nScore <= -2)
 		return FAKE;
-	else if (nNegatives >= 1)
+	else if (nScore <= -1)
 		return SUSPECT;
-	else if (nPositives >= 2)
+	else if (nScore >= 2)
 		return GOOD;
-	else if (nPositives >= 1)
+	else if (nScore >= 1)
 		return OK;
 	else
 		return UNKNOWN;
