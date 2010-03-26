@@ -52,6 +52,7 @@
 #include "MediaInfo.h"
 #include "fakecheck.h" //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
 #include "NTService.h" // MORPH leuk_he:run as ntservice v1..
+#include "NetF/Fakealyzer.h" //MORPH - Added by Stulle, Fakealyzer [netfinity]
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1490,6 +1491,24 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CSearchFile *content = (CSearchFile *)lpDrawItemStruct->itemData;
 	if (!g_bLowColorDesktop || (lpDrawItemStruct->itemState & ODS_SELECTED) == 0)
 		dc.SetTextColor(GetSearchItemColor(content));
+
+	//MORPH START - Added by Stulle, Fakealyzer [netfinity]
+	// View files with different colours depending if tags match the filetype
+	{
+		COLORREF cr = dc->GetBkColor();
+		int	eFakeState = CFakealyzer::CheckSearchResult(content);
+		if (eFakeState == CFakealyzer::GOOD)
+			dc->SetBkColor(RGB(GetRValue(cr)*0.85,GetGValue(cr),GetBValue(cr)*0.85));
+		else if (eFakeState == CFakealyzer::OK)
+			dc->SetBkColor(RGB(GetRValue(cr)*0.85,GetGValue(cr)*0.85,GetBValue(cr)));
+		else if (eFakeState == CFakealyzer::SUSPECT)
+			dc->SetBkColor(RGB(GetRValue(cr),GetGValue(cr),GetBValue(cr)*0.85));
+		else if (eFakeState == CFakealyzer::FAKE)
+			dc->SetBkColor(RGB(GetRValue(cr),GetGValue(cr)*0.85,GetBValue(cr)*0.85));
+	}
+	dc.FillRect(&cur_rec, &CBrush(dc.GetBkColor()));
+	dc.SetBkMode(TRANSPARENT);
+	//MORPH END   - Added by Stulle, Fakealyzer [netfinity]
 
 	BOOL notLast = lpDrawItemStruct->itemID + 1 != (UINT)GetItemCount();
 	BOOL notFirst = lpDrawItemStruct->itemID != 0;

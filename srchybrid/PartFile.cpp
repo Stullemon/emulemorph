@@ -62,6 +62,7 @@
 #include "CollectionViewDialog.h"
 #include "Collection.h"
 #include "SharedFilesWnd.h" //MORPH - Added, Downloaded History [Monki/Xman]
+#include "NetF/Fakealyzer.h" //MORPH - Added by Stulle, Fakealyzer [netfinity]
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -3611,7 +3612,18 @@ void CPartFile::AddSources(CSafeMemFile* sources, uint32 serverip, uint16 server
 		if (bWithObfuscationAndHash){
 			byCryptOptions = sources->ReadUInt8();
 			if ((byCryptOptions & 0x80) > 0)
+			{ //MORPH - Added by Stulle, Fakealyzer [netfinity]
 				sources->ReadHash16(achUserHash);
+			//MORPH START - Added by Stulle, Fakealyzer [netfinity]
+			// We should have enought data to do an early check here
+				if (CFakealyzer::IsFakeClient(achUserHash, userid, port))
+				{
+					if (thePrefs.GetLogFilteredIPs())
+						AddDebugLogLine(false, _T("Ignored source (IP=%s) received from server - Fake client"), ipstr(userid));
+					continue;
+				}
+			}
+			//MORPH END   - Added by Stulle, Fakealyzer [netfinity]
 
 			if ((thePrefs.IsClientCryptLayerRequested() && (byCryptOptions & 0x01/*supported*/) > 0 && (byCryptOptions & 0x80) == 0)
 				|| (thePrefs.IsClientCryptLayerSupported() && (byCryptOptions & 0x02/*requested*/) > 0 && (byCryptOptions & 0x80) == 0))
@@ -5753,6 +5765,19 @@ void CPartFile::AddClientSources(CSafeMemFile* sources, uint8 uClientSXVersion, 
 		if (uPacketSXVersion >= 4)
 			byCryptOptions = sources->ReadUInt8();
 
+		//MORPH START - Added by Stulle, Fakealyzer [netfinity]
+		// We should have enought data to do an early check here
+		if (uPacketSXVersion >= 2)
+		{
+			if (CFakealyzer::IsFakeClient(achUserHash, dwID, nPort))
+			{
+				if (thePrefs.GetLogFilteredIPs())
+					AddDebugLogLine(false, _T("Ignored source (IP=%s) received via source exchange - Fake client"), ipstr(dwID));
+				continue;
+			}
+		}
+		//MORPH END   - Added by Stulle, Fakealyzer [netfinity]
+
 		// Clients send ID's in the Hyrbid format so highID clients with *.*.*.0 won't be falsely switched to a lowID..
 		if (uPacketSXVersion >= 3)
 		{
@@ -6334,12 +6359,14 @@ void CPartFile::FlushDone()
 		{
 			if (!m_FlushSetting->changedPart[partNumber])
 				continue;
+			/*
 			// Any parts other than last must be full size
 			if (!GetFileIdentifier().GetMD4PartHash(partNumber)) {
 				LogError(LOG_STATUSBAR, GetResString(IDS_ERR_INCOMPLETEHASH), GetFileName());
 				m_bMD4HashsetNeeded = true;
 				ASSERT(FALSE);	// If this fails, something was seriously wrong with the hashset loading or the check above
 			}
+			*/
 
 			// Is this 9MB part complete
 			//MORPH - Changed by SiRoB, As we are using flushed data check asynchronously we need to check if all data have been written into the file buffer
@@ -6386,6 +6413,7 @@ void CPartFile::FlushDone()
 		ASSERT(GetED2KPartCount() > 1);	// Files with only 1 chunk should have a forced hashset
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_HASHERRORWARNING), GetFileName());
 		m_bMD4HashsetNeeded = true;
+		m_bAICHPartHashsetNeeded = true;
 	}
 	// SLUGFILLER: SafeHash
 	
@@ -8266,7 +8294,19 @@ int CPartHashThread::SetFirstHash(CPartFile* pOwner)
 		*/
 		if (pOwner->IsComplete((uint64)i*PARTSIZE,(uint64)(i+1)*PARTSIZE-1, true)){
 			uchar* cur_hash = new uchar[16];
+			// The following change in code should probably be unnessessary but I'll take the safe part here
+			/*
 			md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4PartHash(i));
+			*/
+			if (pOwner->GetPartCount() > 1 || pOwner->GetFileSize()== (uint64)PARTSIZE)
+			{
+				if (pOwner->GetFileIdentifier().GetAvailableMD4PartHashCount() > i)
+					md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4PartHash(i));
+				else
+					ASSERT( false );
+			}
+			else
+				md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4Hash());
 
 			m_PartsToHash.Add(i);
 			m_DesiredHashes.Add(cur_hash);
@@ -8294,7 +8334,15 @@ void CPartHashThread::SetSinglePartHash(CPartFile* pOwner, UINT part, bool ICHus
 	}
 
 	uchar* cur_hash = new uchar[16];
-	md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4PartHash(part));
+	if (pOwner->GetPartCount() > 1 || pOwner->GetFileSize()== (uint64)PARTSIZE)
+	{
+		if (pOwner->GetFileIdentifier().GetAvailableMD4PartHashCount() > part)
+			md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4PartHash(part));
+		else
+			ASSERT( false );
+	}
+	else
+		md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4Hash());
 
 	m_PartsToHash.Add(part);
 	m_DesiredHashes.Add(cur_hash);
@@ -8302,6 +8350,7 @@ void CPartHashThread::SetSinglePartHash(CPartFile* pOwner, UINT part, bool ICHus
 
 int CPartHashThread::Run()
 {
+	DbgSetThreadName("PartHashThread");
 	//InitThreadLocale(); //Performance killer
 
 	// SLUGFILLER: SafeHash
@@ -8340,8 +8389,8 @@ int CPartHashThread::Run()
 					break;
 				continue;
 			}
-			
-			
+
+
 			if (md4cmp(hashresult,m_DesiredHashes[i])){
 				if (m_AICHRecover)
 					PostMessage(theApp.emuledlg->m_hWnd,TM_PARTHASHEDCORRUPTAICHRECOVER,partnumber,(LPARAM)m_pOwner);
