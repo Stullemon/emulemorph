@@ -35,6 +35,7 @@
 // emulEspaña: added by Announ [Maella: -Allow Bandwidth Settings in <1KB Incremements-]
 #include "opcodes.h"
 // End emulEspaña
+#include "Scheduler.h" //MORPH - Added by Stulle, Don't reset Connection Settings without reason
 
 #ifdef _DEBUG
 #undef THIS_FILE
