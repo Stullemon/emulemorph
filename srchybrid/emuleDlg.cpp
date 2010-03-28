@@ -1803,6 +1803,8 @@ LRESULT CemuleDlg::OnWMData(WPARAM /*wParam*/, LPARAM lParam)
 			if (down.GetLength()>0) thePrefs.SetMaxDownload(_tstoi(down));
 			if (up.GetLength()>0) thePrefs.SetMaxUpload(_tstoi(up));
 
+			theApp.scheduler->SaveOriginals(); //MORPH - Added by Stulle, Don't reset Connection Settings without reason
+
 			return true;
 		}
 
@@ -2484,6 +2486,11 @@ void CemuleDlg::OnTrayRButtonUp(CPoint pt)
 										thePrefs.GetMaxUpload(), thePrefs.GetMaxDownload());
 	if (m_pSystrayDlg)
 	{
+		//MORPH START - Added by Stulle, Don't reset Connection Settings without reason
+		UINT uMaxUploadOld = thePrefs.GetMaxUpload();
+		UINT uMaxDownloadOld = thePrefs.GetMaxDownload();
+		//MORPH END   - Added by Stulle, Don't reset Connection Settings without reason
+
 		UINT nResult = m_pSystrayDlg->DoModal();
 		delete m_pSystrayDlg;
 		m_pSystrayDlg = NULL;
@@ -2519,6 +2526,11 @@ void CemuleDlg::OnTrayRButtonUp(CPoint pt)
 				ShowPreferences();
 				break;
 		}
+		//MORPH START - Added by Stulle, Don't reset Connection Settings without reason
+		if (nResult != IDC_PREFERENCES && 
+			(uMaxUploadOld != thePrefs.GetMaxUpload() || uMaxDownloadOld != thePrefs.GetMaxDownload()))
+			theApp.scheduler->SaveOriginals();
+		//MORPH END   - Added by Stulle, Don't reset Connection Settings without reason
 	}
 }
 
@@ -3084,6 +3096,7 @@ void CemuleDlg::QuickSpeedUpload(UINT nID)
 //		case MP_QS_UPC: thePrefs.SetMaxUpload(UNLIMITED); break ;
 		case MP_QS_UP10: thePrefs.SetMaxUpload(GetRecMaxUpload()); break ;
 	}
+	theApp.scheduler->SaveOriginals(); //MORPH - Added by Stulle, Don't reset Connection Settings without reason
 }
 
 void CemuleDlg::QuickSpeedDownload(UINT nID)
@@ -3101,6 +3114,7 @@ void CemuleDlg::QuickSpeedDownload(UINT nID)
 		case MP_QS_D100: thePrefs.SetMaxDownload((UINT)thePrefs.GetMaxGraphDownloadRate()); break ;
 //		case MP_QS_DC: thePrefs.SetMaxDownload(UNLIMITED); break ;
 	}
+	theApp.scheduler->SaveOriginals(); //MORPH - Added by Stulle, Don't reset Connection Settings without reason
 }
 // quick-speed changer -- based on xrmb
 
@@ -4546,6 +4560,11 @@ void CemuleDlg::UpdateThumbBarButtons(bool initialAddToDlg) {
 // Handle pressed thumbbar button
 void CemuleDlg::OnTBBPressed(UINT id)
 {
+	//MORPH START - Added by Stulle, Don't reset Connection Settings without reason
+	UINT uMaxUploadOld = thePrefs.GetMaxUpload();
+	UINT uMaxDownloadOld = thePrefs.GetMaxDownload();
+	//MORPH END   - Added by Stulle, Don't reset Connection Settings without reason
+
 	switch (id) {
 		case TBB_CONNECT:
 			OnBnClickedConnect();
@@ -4563,6 +4582,11 @@ void CemuleDlg::OnTBBPressed(UINT id)
 			ShowPreferences();
 			break;
 	}
+	//MORPH START - Added by Stulle, Don't reset Connection Settings without reason
+	if (id != IDC_PREFERENCES && 
+		(uMaxUploadOld != thePrefs.GetMaxUpload() || uMaxDownloadOld != thePrefs.GetMaxDownload()))
+		theApp.scheduler->SaveOriginals();
+	//MORPH END   - Added by Stulle, Don't reset Connection Settings without reason
 }
 
 // When Windows tells us, the taskbarbutton was created, it is safe to initialize our taskbar stuff

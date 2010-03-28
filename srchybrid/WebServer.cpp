@@ -36,6 +36,7 @@
 #include "UploadQueue.h"
 #include "UpDownClient.h"
 #include "UserMsgs.h"
+#include "Scheduler.h" //MORPH - Added by Stulle, Don't reset Connection Settings without reason
 //MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
 #include "PreferencesDlg.h"
 #include "PPgWebserver.h"
@@ -4478,6 +4479,8 @@ CString CWebServer::_GetPreferences(ThreadData Data)
 			thePrefs.SetMaxConnections(_tstoi(_ParseURL(Data.sURL, _T("maxconnections"))));
 		if(!_ParseURL(Data.sURL, _T("maxconnectionsperfive")).IsEmpty())
 			thePrefs.SetMaxConsPerFive(_tstoi(_ParseURL(Data.sURL, _T("maxconnectionsperfive"))));
+
+		theApp.scheduler->SaveOriginals(); //MORPH - Added by Stulle, Don't reset Connection Settings without reason
 	}
 
 	// Fill form
