@@ -3020,6 +3020,8 @@ CString CWapServer::_GetPreferences(WapThreadData Data)
 
 		thePrefs.SetNetworkED2K((_ParseURL(Data.sURL, _T("neted2k")).MakeLower() == _T("on")));
 		thePrefs.SetNetworkKademlia((_ParseURL(Data.sURL, _T("netkad")).MakeLower() == _T("on")));
+
+		theApp.scheduler->SaveOriginals(); //MORPH - Added by Stulle, Don't reset Connection Settings without reason
 	}
 
 	// Fill form
