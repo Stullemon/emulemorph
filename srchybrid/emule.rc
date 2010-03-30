@@ -81,13 +81,13 @@ BEGIN
                     515,18
 END
 
-IDD_TRANSFER DIALOGEX 0, 0, 257, 190
+IDD_TRANSFER DIALOGEX 0, 0, 347, 190
 STYLE DS_LOCALEDIT | DS_SETFONT | DS_FIXEDSYS | WS_CHILD
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     CONTROL         "",IDC_DOWNLOADLIST,"SysListView32",LVS_REPORT | 
                     LVS_SHAREIMAGELISTS | LVS_OWNERDRAWFIXED | LVS_ALIGNLEFT | 
-                    WS_BORDER | WS_TABSTOP,5,17,250,32
+                    WS_BORDER | WS_TABSTOP,5,17,340,32
     CONTROL         "Wnd1Toolbar",IDC_DOWNLOAD_ICO,"ToolbarWindow32",
                     WS_TABSTOP | 0x994e,5,5,74,12
     CONTROL         "",IDC_DLTAB,"SysTabControl32",TCS_RAGGEDRIGHT | 
@@ -99,24 +99,24 @@ BEGIN
     CONTROL         "",IDC_CLIENTLIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHAREIMAGELISTS | LVS_OWNERDRAWFIXED | 
                     LVS_ALIGNLEFT | NOT WS_VISIBLE | WS_BORDER | WS_TABSTOP,
-                    4,119,251,36
+                    4,119,341,36
     CONTROL         "",IDC_QUEUELIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHAREIMAGELISTS | LVS_OWNERDRAWFIXED | 
                     LVS_ALIGNLEFT | NOT WS_VISIBLE | WS_BORDER | WS_TABSTOP,
-                    4,119,251,36
+                    4,119,341,36
     CONTROL         "",IDC_UPLOADLIST,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHAREIMAGELISTS | LVS_OWNERDRAWFIXED | 
-                    LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,4,119,251,36
+                    LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,4,119,341,36
     LTEXT           "Clients on queue:",IDC_QUEUECOUNT_LABEL,5,180,87,8
-    LTEXT           "0",IDC_QUEUECOUNT,99,180,78,8
-    PUSHBUTTON      "Refresh",IDC_QUEUE_REFRESH_BUTTON,187,179,68,11,NOT 
+    LTEXT           "0",IDC_QUEUECOUNT,99,180,90,8
+    PUSHBUTTON      "Refresh",IDC_QUEUE_REFRESH_BUTTON,277,179,68,11,NOT 
                     WS_VISIBLE
     CONTROL         "",IDC_DOWNLOADCLIENTS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHAREIMAGELISTS | LVS_OWNERDRAWFIXED | 
                     LVS_ALIGNLEFT | NOT WS_VISIBLE | WS_BORDER | WS_TABSTOP,
-                    4,119,251,36
-    CONTROL         "",IDC_QUEUE,"msctls_progress32",0x1,193,180,180,7
-    CONTROL         "",IDC_QUEUE2,"msctls_progress32",0x1,375,180,60,7
+                    4,119,341,36
+    CONTROL         "",IDC_QUEUE,"msctls_progress32",0x1,193,180,60,7
+    CONTROL         "",IDC_QUEUE2,"msctls_progress32",0x1,255,180,20,7
 END
 
 IDD_SERVER DIALOGEX 0, 35, 511, 289

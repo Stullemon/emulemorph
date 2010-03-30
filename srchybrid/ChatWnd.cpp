@@ -698,6 +698,7 @@ HBRUSH CChatWnd::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 		return hbr;
 	return __super::OnCtlColor(pDC, pWnd, nCtlColor);
 }
+
 // MORPH START - Added by Commander, Friendlinks [emulEspaña]
 bool CChatWnd::UpdateEmfriendsMetFromURL(const CString& strURL)
 {
