@@ -700,6 +700,10 @@ public:
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
 	void	SetReadBlockFromFileBuffer(byte* pdata) {m_abyfiledata = pdata;};
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
+
+	//MORPH START - Added by Stulle, Improved upload state sorting for additional information
+	uint32	GetUploadStateExtended() const;
+	//MORPH END   - Added by Stulle, Improved upload state sorting for additional information
 protected:
 	int		m_iHttpSendState;
 	uint32	m_uPeerCacheDownloadPushId;

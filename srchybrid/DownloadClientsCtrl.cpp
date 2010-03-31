@@ -729,12 +729,14 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 			/*
 			iResult = CompareUnsigned(item1->GetPartCount(), item2->GetPartCount());
 			*/
+		{
 			float percent1 = (float)item1->GetAvailablePartCount() / (float)item1->GetPartCount()* 100.0f;
 			float percent2 = (float)item2->GetAvailablePartCount() / (float)item2->GetPartCount()* 100.0f;
 			if (percent1 == percent2)
 				iResult=0;
 			else
 				iResult=percent1 > percent2?1:-1;
+		}
 			//MORPH END   - Changed by Stulle, Sort by percentage
 			break;
 

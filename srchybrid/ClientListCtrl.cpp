@@ -503,7 +503,12 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 
 		case 1:
+			//MORPH START - Added by Stulle, Improved upload state sorting for additional information
+			/*
 		    iResult = item1->GetUploadState() - item2->GetUploadState();
+			*/
+			iResult = CompareUnsigned(item1->GetUploadStateExtended() ,item2->GetUploadStateExtended());
+			//MORPH END   - Added by Stulle, Improved upload state sorting for additional information
 			break;
 
 		case 2:
@@ -516,6 +521,8 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 
 		case 3:
+			//MORPH START - Changed by Stulle, Improved sorting for Download State in ClientListCtrl [TAHO]
+			/*
 		    if (item1->GetDownloadState() == item2->GetDownloadState())
 			{
 			    if (item1->IsRemoteQueueFull() && item2->IsRemoteQueueFull())
@@ -527,6 +534,61 @@ int CClientListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		    }
 			else
 				iResult = item1->GetDownloadState() - item2->GetDownloadState();
+			*/
+		{
+			EDownloadState clientState1 = item1->GetDownloadState();
+			EDownloadState clientState2 = item2->GetDownloadState();
+
+			if ( clientState1 == DS_DOWNLOADING ){
+				if ( clientState2 == DS_DOWNLOADING) {
+					iResult = CompareUnsigned(item1->GetDownloadDatarate(), item2->GetDownloadDatarate());
+					break;
+				}
+				iResult = 1;
+				break;
+			} else if ( clientState2 == DS_DOWNLOADING) {
+				iResult = -1;
+				break;
+			}
+
+			if ( clientState1 == DS_ONQUEUE ){
+				if ( clientState2 == DS_ONQUEUE ) {
+					if ( item1->IsRemoteQueueFull() ){
+						iResult = (item2->IsRemoteQueueFull()) ? 0 : -1;
+						break;
+					}
+					else if ( item2->IsRemoteQueueFull() ){
+						iResult = 1;
+						break;
+					}
+
+					if ( item1->GetRemoteQueueRank() ){
+						iResult = (item2->GetRemoteQueueRank()) ? item2->GetRemoteQueueRank() - item1->GetRemoteQueueRank() : 1;
+						break;
+					}
+					iResult = (item2->GetRemoteQueueRank()) ? -1 : 0;
+					break;
+				}
+				iResult = 1;
+				break;
+			} else if ( clientState2 == DS_ONQUEUE ){
+				iResult = -1;
+				break;
+			}
+
+			if ( clientState1 == DS_NONEEDEDPARTS && clientState2 != DS_NONEEDEDPARTS){
+				iResult = 1;
+				break;
+			}
+
+			if ( clientState1 == DS_TOOMANYCONNS && clientState2 != DS_TOOMANYCONNS){
+				iResult = -1;
+				break;
+			}
+
+			iResult = 0;
+		}
+			//MORPH START - Changed by Stulle, Improved sorting for Download State in ClientListCtrl [TAHO]
 			break;
 
 		case 4:
