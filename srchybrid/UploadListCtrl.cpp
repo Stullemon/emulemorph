@@ -899,7 +899,12 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 
 		case 6:
+			//MORPH START - Added by Stulle, Improved upload state sorting for additional information
+			/*
 			iResult = item1->GetUploadState() - item2->GetUploadState();
+			*/
+			iResult = CompareUnsigned(item1->GetUploadStateExtended() ,item2->GetUploadStateExtended());
+			//MORPH END   - Added by Stulle, Improved upload state sorting for additional information
 			break;
 
 		case 7:

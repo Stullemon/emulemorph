@@ -3678,6 +3678,26 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 	return strState;
 }
 
+//MORPH START - Added by Stulle, Improved upload state sorting for additional information
+uint32	CUpDownClient::GetUploadStateExtended() const
+{
+	if(GetUploadState() != US_UPLOADING)
+		return (uint32)GetUploadState() + 4;
+
+    if(IsScheduledForRemoval()) {
+		return 4;
+	} else if(GetPayloadInBuffer() == 0 && GetNumberOfRequestedBlocksInQueue() == 0 && thePrefs.IsExtControlsEnabled()) {
+		return 1;
+    } else if(GetPayloadInBuffer() == 0 && thePrefs.IsExtControlsEnabled()) {
+		return 2;
+    } else if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount(m_classID)) {
+		return 0;
+    } else {
+        return 3;
+    }
+}
+//MORPH END   - Added by Stulle, Improved upload state sorting for additional information
+
 void CUpDownClient::SendPublicIPRequest(){
 	if (socket && socket->IsConnected()){
 		if (thePrefs.GetDebugClientTCPLevel() > 0)
