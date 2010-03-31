@@ -70,15 +70,18 @@ void CDownloadClientsCtrl::Init()
 	InsertColumn(6,	GetResString(IDS_CL_TRANSFUP),		LVCFMT_RIGHT, DFLT_SIZE_COL_WIDTH);
 	InsertColumn(7,	GetResString(IDS_META_SRCTYPE),		LVCFMT_LEFT,  100);
 	InsertColumn(8,	GetResString(IDS_DL_ULDL),		LVCFMT_LEFT, 60);
-	InsertColumn(9, GetResString(IDS_LAST_ASKED),		LVCFMT_LEFT, 100); //SLAHAM: ADDED Last Asked 
-	InsertColumn(10, GetResString(IDS_DOWNL_TIME),		LVCFMT_LEFT, 100); //SLAHAM: ADDED Downloading Time
-	InsertColumn(11, GetResString(IDS_KNOWN_SINCE),		LVCFMT_LEFT, 100); //SLAHAM: ADDED Known Since
+	//MORPH START - Added by SiRoB, Display current uploading chunk
+	InsertColumn(9,	GetResString(IDS_CHUNK),			LVCFMT_LEFT, 100);
+	//MORPH END   - Added by SiRoB, Display current uploading chunk
+	InsertColumn(10, GetResString(IDS_LAST_ASKED),		LVCFMT_LEFT, 100); //SLAHAM: ADDED Last Asked 
+	InsertColumn(11, GetResString(IDS_DOWNL_TIME),		LVCFMT_LEFT, 100); //SLAHAM: ADDED Downloading Time
+	InsertColumn(12, GetResString(IDS_KNOWN_SINCE),		LVCFMT_LEFT, 100); //SLAHAM: ADDED Known Since
 
 	// EastShare - Added by Pretender: IP2Country column
 	if (thePrefs.GetIP2CountryNameMode() == IP2CountryName_DISABLE)
-		InsertColumn(12,GetResString(IDS_COUNTRY),		LVCFMT_LEFT, 50, -1, true);
+		InsertColumn(13,GetResString(IDS_COUNTRY),		LVCFMT_LEFT, 50, -1, true);
 	else
-		InsertColumn(12,GetResString(IDS_COUNTRY),		LVCFMT_LEFT, 50);
+		InsertColumn(13,GetResString(IDS_COUNTRY),		LVCFMT_LEFT, 50);
 	// EastShare - Added by Pretender: IP2Country column
 
 	SetAllIcons();
@@ -131,28 +134,34 @@ void CDownloadClientsCtrl::Localize()
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(8, &hdi);
 
+	//MORPH START - Added by SiRoB, Display current uploading chunk
+	strRes = GetResString(IDS_CHUNK);
+	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
+	pHeaderCtrl->SetItem(9, &hdi);
+	//MORPH START - Added by SiRoB, Display current uploading chunk
+
 	//SLAHAM: ADDED Last Asked =>
 	strRes = GetResString(IDS_LAST_ASKED);
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
-	pHeaderCtrl->SetItem(9, &hdi);
+	pHeaderCtrl->SetItem(10, &hdi);
 	//SLAHAM: ADDED Last Asked <=
 
 	//SLAHAM: ADDED Downloading Time =>
 	strRes = GetResString(IDS_DOWNL_TIME);
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
-	pHeaderCtrl->SetItem(10, &hdi);
+	pHeaderCtrl->SetItem(11, &hdi);
 	//SLAHAM: ADDED Downloading Time <=
 
 	//SLAHAM: ADDED Known Since =>
 	strRes = GetResString(IDS_KNOWN_SINCE);
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
-	pHeaderCtrl->SetItem(11, &hdi);
+	pHeaderCtrl->SetItem(12, &hdi);
 	//SLAHAM: ADDED Known Since <=
 
 	//MORPH START - Added by SiRoB, IP2Country column
 	strRes = GetResString(IDS_COUNTRY);
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
-	pHeaderCtrl->SetItem(12, &hdi);
+	pHeaderCtrl->SetItem(13, &hdi);
 	//MORPH END   - Added by SiRoB, IP2Country column
 }
 
@@ -392,8 +401,64 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					}	
 
+					//MORPH START - Added by SiRoB, Display current uploading chunk
+					case 9:
+					{
+						cur_rec.bottom--;
+						cur_rec.top++;
+						client->DrawStatusBarChunk(dc,&cur_rec,client->GetRequestFile(),thePrefs.UseFlatBar());
+						CString buffer;
+						COLORREF oldclr = dc.SetTextColor(RGB(0,0,0));
+						int iOMode = dc.SetBkMode(TRANSPARENT);
+						if (client->GetCurrentDownloadingChunk()==(UINT)-1) {
+							if (client->m_lastPartAsked==(uint16)-1)
+								buffer = _T("?");
+							else
+								buffer.Format(_T("%u"), client->m_lastPartAsked);
+						} else
+							buffer.Format(_T("%u"), client->GetCurrentDownloadingChunk());
+						buffer.AppendFormat(_T(" @ %.1f%%"), client->GetDownChunkProgressPercent());
+						CFont *pOldFont = dc.SelectObject(&theApp.emuledlg->transferwnd->GetDownloadList()->m_fontSmaller);
+#define	DrawClientPercentTextLeft		dc.DrawText(buffer, buffer.GetLength(),&cur_rec, MLC_DT_TEXT)
+						cur_rec.top-=1;cur_rec.bottom-=1;
+						cur_rec.left+=1;cur_rec.right-=3;
+						DrawClientPercentTextLeft;cur_rec.left+=1;cur_rec.right+=1;
+						DrawClientPercentTextLeft;cur_rec.left+=1;cur_rec.right+=1;
+						DrawClientPercentTextLeft;cur_rec.top+=1;cur_rec.bottom+=1;
+						DrawClientPercentTextLeft;cur_rec.top+=1;cur_rec.bottom+=1;
+						DrawClientPercentTextLeft;cur_rec.left-=1;cur_rec.right-=1;
+						DrawClientPercentTextLeft;cur_rec.left-=1;cur_rec.right-=1;
+						DrawClientPercentTextLeft;cur_rec.top-=1;cur_rec.bottom-=1;
+						DrawClientPercentTextLeft;cur_rec.left++;cur_rec.right++;
+						dc.SetTextColor(RGB(255,255,255));
+						DrawClientPercentTextLeft;
+						
+						dc.SetTextColor(RGB(0,0,0));
+						buffer.Format(_T("%s"), CastItoXBytes(client->GetSessionPayloadDown(), false, false));
+#define	DrawClientPercentTextRight		dc.DrawText(buffer, buffer.GetLength(),&cur_rec, MLC_DT_TEXT | DT_RIGHT)
+						cur_rec.top-=1;cur_rec.bottom-=1;
+						DrawClientPercentTextRight;cur_rec.left+=1;cur_rec.right+=1;
+						DrawClientPercentTextRight;cur_rec.left+=1;cur_rec.right+=1;
+						DrawClientPercentTextRight;cur_rec.top+=1;cur_rec.bottom+=1;
+						DrawClientPercentTextRight;cur_rec.top+=1;cur_rec.bottom+=1;
+						DrawClientPercentTextRight;cur_rec.left-=1;cur_rec.right-=1;
+						DrawClientPercentTextRight;cur_rec.left-=1;cur_rec.right-=1;
+						DrawClientPercentTextRight;cur_rec.top-=1;cur_rec.bottom-=1;
+						DrawClientPercentTextRight;cur_rec.left++;cur_rec.right++;
+						dc.SetTextColor(RGB(255,255,255));
+						DrawClientPercentTextRight;
+
+						dc.SelectObject(pOldFont);
+						dc.SetBkMode(iOMode);
+						dc.SetTextColor(oldclr);
+						cur_rec.bottom++;
+						cur_rec.top--;
+					}
+					break;
+					//MORPH END   - Added by SiRoB, Display current uploading chunk
+
 					// EastShare - Added by Pretender: IP2Country column
-					case 12:
+					case 13:
 						if(theApp.ip2country->ShowCountryFlag()){
 							POINT point2= {cur_rec.left,cur_rec.top+1};
 							int index = client->GetCountryFlagIndex();
@@ -511,8 +576,14 @@ void CDownloadClientsCtrl::GetItemDisplayText(const CUpDownClient *client, int i
 				_tcsncpy(pszText, _T(""), cchTextMax);
 			break;
 
-			//SLAHAM: ADDED Last Asked Counter =>
+			//MORPH START - Display Chunk Detail
 		case 9:
+			_tcsncpy(pszText, GetResString(IDS_CHUNK), cchTextMax);
+			break;
+			//MORPH END - Display Chunk Detail
+
+			//SLAHAM: ADDED Last Asked Counter =>
+		case 10:
 			if( client->GetLastAskedTime() )
 				_sntprintf(pszText, cchTextMax, _T(" %s [%u]"), CastSecondsToHM((::GetTickCount()-client->GetLastAskedTime())/1000), client->uiDLAskingCounter);
 			else
@@ -521,13 +592,13 @@ void CDownloadClientsCtrl::GetItemDisplayText(const CUpDownClient *client, int i
 			//SLAHAM: ADDED Last Asked Counter <=
 
 			//SLAHAM: ADDED Show Downloading Time =>
-		case 10:	
+		case 11:	
 			_sntprintf(pszText, cchTextMax, _T(" %s (%s)[%u]"), CastSecondsToHM(client->dwSessionDLTime/1000), CastSecondsToHM(client->dwTotalDLTime/1000), client->uiStartDLCount);
 			break;
 			//SLAHAM: ADDED Show Downloading Time <=
 
 			//SLAHAM: ADDED Known Since =>
-		case 11: 
+		case 12: 
 			if( client->dwThisClientIsKnownSince )
 				_sntprintf(pszText, cchTextMax, _T(" %s"), CastSecondsToHM((::GetTickCount()-client->dwThisClientIsKnownSince)/1000));
 			else
@@ -536,7 +607,7 @@ void CDownloadClientsCtrl::GetItemDisplayText(const CUpDownClient *client, int i
 			//SLAHAM: ADDED Known Since <=
 
 			// EastShare - Added by Pretender: IP2Country column
-		case 12:
+		case 13:
 			_tcsncpy(pszText, client->GetCountryName(), cchTextMax);
 			break;
 			// EastShare - Added by Pretender: IP2Country column
@@ -654,7 +725,17 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 			break;
 
 		case 4:
+			//MORPH START - Changed by Stulle, Sort by percentage
+			/*
 			iResult = CompareUnsigned(item1->GetPartCount(), item2->GetPartCount());
+			*/
+			float percent1 = (float)item1->GetAvailablePartCount() / (float)item1->GetPartCount()* 100.0f;
+			float percent2 = (float)item2->GetAvailablePartCount() / (float)item2->GetPartCount()* 100.0f;
+			if (percent1 == percent2)
+				iResult=0;
+			else
+				iResult=percent1 > percent2?1:-1;
+			//MORPH END   - Changed by Stulle, Sort by percentage
 			break;
 
 		case 5:
@@ -686,8 +767,17 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 				break;
 			}
 
+		//MORPH START - Display Chunk Detail
+		case 9:
+			if (item1->GetDownChunkProgressPercent() == item2->GetDownChunkProgressPercent())
+				iResult=0;
+			else
+				iResult=item1->GetDownChunkProgressPercent() > item2->GetDownChunkProgressPercent()?1:-1;
+			break;
+		//MORPH END - Display Chunk Detail
+
 		//SLAHAM: ADDED Last Asked =>
-		case 9: 
+		case 10: 
 			{
 				uint32 lastAskedTime1 = item2->GetLastAskedTime();
 				uint32 lastAskedTime2 = item1->GetLastAskedTime();
@@ -697,13 +787,13 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 		//SLAHAM: ADDED Last Asked <=
 
 		//SLAHAM: ADDED Show Downloading Time =>
-		case 10:
+		case 11:
 			iResult=CompareUnsigned(item2->dwSessionDLTime, item1->dwSessionDLTime);
 			break;
 		//SLAHAM: ADDED Show Downloading Time <=
 
 		//SLAHAM: ADDED Known Since =>
-		case 11:
+		case 12:
 			{
 				uint32 known1 = item2->dwThisClientIsKnownSince;
 				uint32 known2 = item1->dwThisClientIsKnownSince;
@@ -713,7 +803,7 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 			//SLAHAM: ADDED Known Since <=
 
 		// EastShare - Added by Pretender: IP2Country column
-		case 12:
+		case 13:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
 				iResult=CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
 			else if(item1->GetCountryName(true))

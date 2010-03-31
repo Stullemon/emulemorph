@@ -903,7 +903,14 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 
 		case 7:
+			//Fafner: client percentage - 080325
+			/*
 			iResult = CompareUnsigned(item1->GetUpPartCount(), item2->GetUpPartCount());
+			*/
+			if (item1->GetCompletedPercent() == item2->GetCompletedPercent())
+				iResult=0;
+			else
+				iResult=item1->GetCompletedPercent() > item2->GetCompletedPercent()?1:-1;
 			break;
 		//MORPH START - Modified by SiRoB, Client Software	
 		case 8:
@@ -956,7 +963,7 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 		// EastShare - Added by Pretender, Friend Tab
 
 		// Commander - Added: IP2Country column - Start
-	        case 15:
+		case 15:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
 				iResult=CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
 			else if(item1->GetCountryName(true))
@@ -965,6 +972,15 @@ int CUploadListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 				iResult=-1;
 			break;
 		// Commander - Added: IP2Country column - End
+
+		//MORPH START - Display current uploading chunk
+		case 16:
+			if (item1->GetUpChunkProgressPercent() == item2->GetUpChunkProgressPercent())
+				iResult=0;
+			else
+				iResult=item1->GetUpChunkProgressPercent() > item2->GetUpChunkProgressPercent()?1:-1;
+			break;
+		//MORPH END   - Display current uploading chunk
 	}
 
 	if (lParamSort >= 100)
