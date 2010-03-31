@@ -1458,11 +1458,11 @@ CString CWapServer::_GetTransferDownList(WapThreadData Data)
 				dFile.lSourceCount = cur_file->GetSourceCount();
 				dFile.lNotCurrentSourceCount = cur_file->GetNotCurrentSourcesCount();
 				dFile.lTransferringSourceCount = cur_file->GetTransferringSrcCount();
-				if (theApp.serverconnect->IsConnected() && !theApp.serverconnect->IsLowID())
-					dFile.sED2kLink = theApp.CreateED2kSourceLink(cur_file);
+				if (theApp.GetPublicIP() != 0 && !theApp.IsFirewalled())
+					dFile.sED2kLink = cur_file->GetED2kLink(false, false, false, true, theApp.GetPublicIP());
 				else
-					dFile.sED2kLink = CreateED2kLink(cur_file);
-				dFile.sFileInfo = _SpecialChars(cur_file->GetInfoSummary());
+					dFile.sED2kLink = cur_file->GetED2kLink();
+				dFile.sFileInfo = _SpecialChars(cur_file->GetInfoSummary(true));
 
 				if (cat>0 && cur_file->GetCategory() != (UINT)cat) continue;
 				if (cat<0) {
@@ -2303,10 +2303,10 @@ CString CWapServer::_GetSharedFilesList(WapThreadData Data)
 		SharedFiles dFile;
 		dFile.sFileName = _SpecialChars(cur_file->GetFileName());
 		dFile.m_qwFileSize = cur_file->GetFileSize();
-		if (theApp.IsConnected() && !theApp.IsFirewalled()) 
-			dFile.sED2kLink = theApp.CreateED2kSourceLink(cur_file);
+		if (theApp.GetPublicIP() != 0 && !theApp.IsFirewalled())
+			dFile.sED2kLink = cur_file->GetED2kLink(false, false, false, true, theApp.GetPublicIP());
 		else
-            dFile.sED2kLink = CreateED2kLink(cur_file);
+			dFile.sED2kLink = cur_file->GetED2kLink();
 
 		dFile.nFileTransferred = cur_file->statistic.GetTransferred();
 		dFile.nFileAllTimeTransferred = cur_file->statistic.GetAllTimeTransferred();

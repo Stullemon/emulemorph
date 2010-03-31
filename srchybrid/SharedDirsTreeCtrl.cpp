@@ -793,7 +793,7 @@ BOOL CSharedDirsTreeCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					if (file->IsKindOf(RUNTIME_CLASS(CKnownFile))){
 						if (!str.IsEmpty())
 							str += _T("\r\n");
-						str += CreateED2kLink((CKnownFile*)file);
+						str += ((CKnownFile*)file)->GetED2kLink();
 					}
 				}
 				theApp.CopyTextToClipboard(str);

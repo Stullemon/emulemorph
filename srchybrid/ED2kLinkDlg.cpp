@@ -19,7 +19,6 @@
 #include "ED2kLinkDlg.h"
 #include "KnownFile.h"
 #include "partfile.h"
-#include "OtherFunctions.h"
 #include "preferences.h"
 #include "shahashset.h"
 #include "UserMsgs.h"
@@ -230,12 +229,15 @@ void CED2kLinkDlg::UpdateLink()
 	CString strBuffer;
 	const bool bHashset = ((CButton*)GetDlgItem(IDC_LD_HASHSETCHE))->GetCheck() == BST_CHECKED;
 	const bool bHTML = ((CButton*)GetDlgItem(IDC_LD_HTMLCHE))->GetCheck() == BST_CHECKED;
-	const bool bSource = ((CButton*)GetDlgItem(IDC_LD_SOURCECHE))->GetCheck() == BST_CHECKED && theApp.IsConnected() && !theApp.IsFirewalled();
+	const bool bSource = ((CButton*)GetDlgItem(IDC_LD_SOURCECHE))->GetCheck() == BST_CHECKED && theApp.IsConnected() && theApp.GetPublicIP() != 0 && !theApp.IsFirewalled();
 	const bool bHostname = ((CButton*)GetDlgItem(IDC_LD_HOSTNAMECHE))->GetCheck() == BST_CHECKED && theApp.IsConnected() && !theApp.IsFirewalled()
 		&& !thePrefs.GetYourHostname().IsEmpty() && thePrefs.GetYourHostname().Find(_T('.')) != -1;
 	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
 	const bool bPHPBB = ((CButton*)GetDlgItem(IDC_LD_PHPBBCHE))->GetCheck() == BST_CHECKED && !bHTML;
 	//EastShare End - added by AndCycle, phpBB URL-Tags style link
+	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+	const bool bHTTP = ((CButton*)GetDlgItem(IDC_HTTP_SRC))->GetCheck() == BST_CHECKED;
+	//End emulEspaña
 
 	for (int i = 0; i != m_paFiles->GetSize(); i++)
 	{
@@ -244,83 +246,21 @@ void CED2kLinkDlg::UpdateLink()
 
 		if (!strLinks.IsEmpty())
 			strLinks += _T("\r\n\r\n");
-
-		if (bHTML)
-			strLinks += _T("<a href=\"");
 	
-		CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
-		//EastShare Start - added by AndCycle, phpBB URL-Tags style link
-		if (bPHPBB) {
-			strLinks += _T("[url=");
-			CString tempED2kLink = CreateED2kLink(file, false);
-
-			//for compatible with phpBB, phpBB using "[" "]" to identify tag
-			tempED2kLink.Replace(_T("["), _T("%5B"));
-			tempED2kLink.Replace(_T("]"), _T("%5D")); //Quezl
-			strLinks += tempED2kLink;
-		}
-		else //  *!!! beware of this ELSE !!!*
-		//EastShare End - added by AndCycle, phpBB URL-Tags style link
-		strLinks += CreateED2kLink(file, false);
-		
-		if (bHashset && file->GetFileIdentifier().GetAvailableMD4PartHashCount() > 0 && file->GetFileIdentifier().HasExpectedMD4HashCount()){
-			strLinks += _T("p=");
-			for (UINT j = 0; j < file->GetFileIdentifier().GetAvailableMD4PartHashCount(); j++)
-			{
-				if (j > 0)
-					strLinks += _T(':');
-				strLinks += EncodeBase16(file->GetFileIdentifier().GetMD4PartHash(j), 16);
-			}
-			strLinks += _T('|');
-		}
-
-		if (file->GetFileIdentifier().HasAICHHash())
-		{
-			strBuffer.Format(_T("h=%s|"), file->GetFileIdentifier().GetAICHHash().GetString() );
-			strLinks += strBuffer;			
-		}
-
 		//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
-		const bool bHTTP = ((CButton*)GetDlgItem(IDC_HTTP_SRC))->GetCheck() == BST_CHECKED;
-		if(bHTTP){
-			CListBox *httpList = (CListBox *) GetDlgItem(IDC_LIST_HTTP);
-			if(httpList){
-				for(int j=0; j < httpList->GetCount(); j++){
-					CString httpSrc;
-					httpList->GetText(j, httpSrc);
-					if(httpSrc.Right(1) == _T("/")){
-						httpSrc += StripInvalidFilenameChars(file->GetFileName());
-					}
-					strLinks += _T("s=") + EncodeUrlUtf8(httpSrc) + _T("|");
-				}
-			}
-		}			
+		CListBox *httpList = NULL;
+		if(bHTTP)
+			httpList = (CListBox *) GetDlgItem(IDC_LIST_HTTP);
 		//End emulEspaña
 
-		strLinks += _T('/');
-		if (bHostname){
-			strBuffer.Format(_T("|sources,%s:%i|/"), thePrefs.GetYourHostname(), thePrefs.GetPort() );
-			strLinks += strBuffer;
-		}
-		else if(bSource){
-			uint32 dwID = theApp.GetID();
-			strBuffer.Format(_T("|sources,%i.%i.%i.%i:%i|/"),(uint8)dwID,(uint8)(dwID>>8),(uint8)(dwID>>16),(uint8)(dwID>>24), thePrefs.GetPort() );
-			strLinks += strBuffer;
-		}
-
-		if (bHTML)
-			strLinks += _T("\">") + StripInvalidFilenameChars(file->GetFileName()) + _T("</a>");
-
+		CKnownFile* file = STATIC_DOWNCAST(CKnownFile, (*m_paFiles)[i]);
 		//EastShare Start - added by AndCycle, phpBB URL-Tags style link
-		if (bPHPBB) {
-			CString tempFileName = StripInvalidFilenameChars(file->GetFileName());
-
-			//like before, just show up #for compatible with phpBB, phpBB using "[" "]" to identify tag#
-			//tempFileName.Replace(_T("["), _T("("));
-			//tempFileName.Replace(_T("]"), _T(")")); not needed see http://forum.emule-project.net/index.php?s=&showtopic=22612&view=findpost&p=862768
-
-			strLinks += _T("]") + tempFileName + _T("[/url]");
-		}
+		//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+		/*
+		strLinks += file->GetED2kLink(bHashset, bHTML, bHostname, bSource, theApp.GetPublicIP());
+		*/
+		strLinks += file->GetED2kLink(bHashset, bHTML, bHostname, bSource, theApp.GetPublicIP(),bPHPBB, httpList);
+		//End emulEspaña
 		//EastShare End - added by AndCycle, phpBB URL-Tags style link
 	}
 	m_ctrlLinkEdit.SetWindowText(strLinks);
@@ -340,11 +280,18 @@ void CED2kLinkDlg::OnSettingsChange()
 	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
 	//hide up if using html checked
 	if (((CButton*)GetDlgItem(IDC_LD_HTMLCHE))->GetCheck() == BST_CHECKED) {
-		((CButton*)GetDlgItem(IDC_LD_PHPBBCHE))->SetCheck(BST_UNCHECKED);
+		//((CButton*)GetDlgItem(IDC_LD_PHPBBCHE))->SetCheck(BST_UNCHECKED);
 		GetDlgItem(IDC_LD_PHPBBCHE)->EnableWindow(FALSE);
 	}
 	else 
 		GetDlgItem(IDC_LD_PHPBBCHE)->EnableWindow(TRUE);
+
+	if (((CButton*)GetDlgItem(IDC_LD_PHPBBCHE))->GetCheck() == BST_CHECKED) {
+		//((CButton*)GetDlgItem(IDC_LD_HTMLCHE))->SetCheck(BST_UNCHECKED);
+		GetDlgItem(IDC_LD_HTMLCHE)->EnableWindow(FALSE);
+	}
+	else 
+		GetDlgItem(IDC_LD_HTMLCHE)->EnableWindow(TRUE);
 	//EastShare End - added by AndCycle, phpBB URL-Tags style link
 	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
 	const bool bHTTP = ((CButton*)GetDlgItem(IDC_HTTP_SRC))->GetCheck() == BST_CHECKED;
@@ -391,7 +338,6 @@ void CED2kLinkDlg::OnBtnRemoveHttp()
 	if(httpList){
 		httpList->DeleteString(httpList->GetCurSel());
 	}	
-//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
 	UpdateLink();
 }
 
@@ -406,3 +352,4 @@ void CED2kLinkDlg::OnBtnClearHttp()
 		UpdateLink();
 	}
 }
+//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]

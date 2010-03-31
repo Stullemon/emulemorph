@@ -18,6 +18,7 @@
 #pragma once
 
 class CToolBarCtrlX;
+class CDownloadListCtrl;
 
 class CToolbarWnd: public CDialogBar
 {
@@ -32,7 +33,7 @@ public:
 
 	void Localize();
 	void OnAvailableCommandsChanged(CList<int>* liCommands);
-	void SetCommandTargetWnd(CWnd* pWnd)					{ m_pCommandTargetWnd = pWnd; }
+	void SetCommandTargetWnd(CDownloadListCtrl* pWnd)					{ m_pCommandTargetWnd = pWnd; }
 
 	virtual CSize CalcDynamicLayout(int, DWORD nMode);
 	virtual void OnUpdateCmdUI(CFrameWnd* pTarget, BOOL bDisableIfNoHndler);
@@ -43,7 +44,7 @@ protected:
 	CSize m_szMRU;
 	CSize m_szFloat;
 	CToolBarCtrlX* m_btnBar;
-	CWnd* m_pCommandTargetWnd;
+	CDownloadListCtrl* m_pCommandTargetWnd;
 
 	void SetAllIcons();
 	void FillToolbar();
@@ -60,4 +61,5 @@ protected:
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
 	afx_msg void OnBtnDropDown(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 };

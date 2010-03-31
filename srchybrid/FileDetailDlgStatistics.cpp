@@ -319,6 +319,9 @@ void CFileDetailDlgStatistics::OnSysColorChange()
 	pop_bar.SetBkColor(GetSysColor(COLOR_3DFACE));
 	pop_baraccept.SetBkColor(GetSysColor(COLOR_3DFACE));
 	pop_bartrans.SetBkColor(GetSysColor(COLOR_3DFACE));
+	pop_bar2.SetBkColor(GetSysColor(COLOR_3DFACE));
+	pop_baraccept2.SetBkColor(GetSysColor(COLOR_3DFACE));
+	pop_bartrans2.SetBkColor(GetSysColor(COLOR_3DFACE));
 	CResizablePage::OnSysColorChange();
 }
 

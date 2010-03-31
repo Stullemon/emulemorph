@@ -284,7 +284,7 @@ void CSourceSaver::SaveSources(CPartFile* file, SourceList* prevsources, LPCTSTR
 	if (!f.Open(slsfile, CFile::modeCreate | CFile::modeWrite | CFile::typeText))
 		return;
 	f.WriteString(_T("#format: a.b.c.d:port,expirationdate(yymmddhhmm);\r\n"));
-	f.WriteString(_T("#") + CreateED2kLink(file) + _T("\r\n")); //MORPH - Added by IceCream, Storing ED2K link in Save Source files, To recover corrupted met by skynetman
+	f.WriteString(_T("#") + file->GetED2kLink() + _T("\r\n")); //MORPH - Added by IceCream, Storing ED2K link in Save Source files, To recover corrupted met by skynetman
 	while (!srcstosave.IsEmpty()) {
 		CSourceData* cur_src = srcstosave.RemoveHead();
 		uint32 dwID = cur_src->sourceID;

@@ -933,16 +933,14 @@ int eMuleAllocHook(int mode, void* pUserData, size_t nSize, int nBlockUse, long 
 bool CemuleApp::ProcessCommandline()
 {
 	bool bIgnoreRunningInstances = (GetProfileInt(_T("eMule"), _T("IgnoreInstances"), 0) != 0);
-   bool bExitParam=false; //MORPH leuk_he:run as ntservice v1..
-
 	for (int i = 1; i < __argc; i++){
 		LPCTSTR pszParam = __targv[i];
 		if (pszParam[0] == _T('-') || pszParam[0] == _T('/')){
 			pszParam++;
 		}
-    	//MORPH START leuk_he:run as ntservice v1..
-		if (_tcscmp(pszParam, _T("install"))==0)  {CmdInstallService();bExitParam = true; }
-        if (_tcscmp(pszParam, _T("uninstall"))==0){CmdRemoveService();bExitParam = true; }
+		//MORPH START leuk_he:run as ntservice v1..
+		if (_tcscmp(pszParam, _T("install"))==0)  {CmdInstallService(); }
+		if (_tcscmp(pszParam, _T("uninstall"))==0){CmdRemoveService(); }
 		if (_tcscmp(pszParam, _T("AsAService"))==0){OnStartAsService();} // NTservice entry point registation.
 		//MORPH END leuk_he:run as ntservice v1..
 #ifdef _DEBUG
@@ -978,6 +976,16 @@ bool CemuleApp::ProcessCommandline()
 	
 	HWND maininst = NULL;
 	bool bAlreadyRunning = false;
+
+	//this codepart is to determine special cases when we do add a link to our eMule
+	//because in this case it would be nonsense to start another instance!
+	if(bIgnoreRunningInstances)
+	{       
+		if (cmdInfo.m_nShellCommand == CCommandLineInfo::FileOpen
+			&& (cmdInfo.m_strFileName.Find(_T("://")) > 0
+			|| CCollection::HasCollectionExtention(cmdInfo.m_strFileName)) )
+			bIgnoreRunningInstances = false;
+	}
 	if (!bIgnoreRunningInstances){
 		bAlreadyRunning = (::GetLastError() == ERROR_ALREADY_EXISTS ||::GetLastError() == ERROR_ACCESS_DENIED);
     	if (bAlreadyRunning) EnumWindows(SearchEmuleWindow, (LPARAM)&maininst);
@@ -1092,23 +1100,6 @@ void CemuleApp::SetTimeOnTransfer() {
 	if (theStats.transferStarttime>0) return;
 	
 	theStats.transferStarttime=GetTickCount();
-}
-
-CString CemuleApp::CreateED2kSourceLink(const CAbstractFile* f)
-{
-	if (!IsConnected() || IsFirewalled()){
-		LogWarning(LOG_STATUSBAR, GetResString(IDS_SOURCELINKFAILED));
-		return _T("");
-	}
-	uint32 dwID = GetID();
-
-	CString strLink;
-	strLink.Format(_T("ed2k://|file|%s|%I64u|%s|/|sources,%i.%i.%i.%i:%i|/"),
-		EncodeUrlUtf8(StripInvalidFilenameChars(f->GetFileName())),
-		f->GetFileSize(),
-		EncodeBase16(f->GetFileHash(),16),
-		(uint8)dwID,(uint8)(dwID>>8),(uint8)(dwID>>16),(uint8)(dwID>>24), thePrefs.GetPort() );
-	return strLink;
 }
 
 CString CemuleApp::CreateKadSourceLink(const CAbstractFile* f)

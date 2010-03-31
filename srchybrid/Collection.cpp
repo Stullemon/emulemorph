@@ -325,7 +325,7 @@ void CCollection::WriteToFileAddShared(CryptoPP::RSASSA_PKCS1v15_SHA_Signer* pSi
 				{
 					m_CollectionFilesMap.GetNextAssoc( pos, key, pCollectionFile );
 					CString sLink;
-					sLink.Format(_T("%s\n"), ::CreateED2kLink(pCollectionFile, true)); 
+					sLink.Format(_T("%s\n"), pCollectionFile->GetED2kLink()); 
 					data.WriteString(sLink);
 				}
 				data.Close();

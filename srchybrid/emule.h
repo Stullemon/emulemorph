@@ -171,8 +171,6 @@ public:
 	bool		IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen);
 	LPCTSTR		GetProfileFile()		{ return m_pszProfileName; }
 
-	CString		CreateED2kSourceLink(const CAbstractFile* f);
-//	CString		CreateED2kHostnameSourceLink(const CAbstractFile* f);
 	CString		CreateKadSourceLink(const CAbstractFile* f);
 
 	// clipboard (text)

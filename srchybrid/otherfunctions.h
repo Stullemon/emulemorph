@@ -111,8 +111,6 @@ CString EncodeURLQueryParam(const CString& rstrQuery);
 CString MakeStringEscaped(CString in);
 CString RemoveAmbersand(const CString& rstr);
 CString	StripInvalidFilenameChars(const CString& strText);
-CString	CreateED2kLink(const CAbstractFile* f, bool bEscapeLink = true);
-CString	CreateHTMLED2kLink(const CAbstractFile* f);
 
 
 ///////////////////////////////////////////////////////////////////////////////

@@ -176,7 +176,7 @@ private:
 class CAICHUntrustedHash {
 public:
 	CAICHUntrustedHash&	operator=(const CAICHUntrustedHash& k1)		{ m_adwIpsSigning.Copy(k1.m_adwIpsSigning); m_Hash = k1.m_Hash ; return *this; }
-	bool	AddSigningIP(uint32 dwIP);	
+	bool	AddSigningIP(uint32 dwIP, bool bTestOnly);
 
 	CAICHHash				m_Hash;
 	CArray<uint32, uint32>	m_adwIpsSigning;

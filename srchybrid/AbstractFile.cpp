@@ -23,6 +23,7 @@
 #include "Preferences.h"
 #include "opcodes.h"
 #include "Packets.h"
+#include "StringConversion.h"
 #ifdef _DEBUG
 #include "DebugHelpers.h"
 #endif
@@ -438,4 +439,93 @@ void CAbstractFile::RefilterKadNotes(bool bUpdate){
 	}
 	if (bUpdate) // untill updated rating and m_bHasComment might be wrong
 		UpdateFileRatingCommentAvail();
+}
+
+//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+/*
+CString CAbstractFile::GetED2kLink(bool bHashset, bool bHTML, bool bHostname, bool bSource, uint32 dwSourceIP) const
+*/
+CString CAbstractFile::GetED2kLink(bool bHashset, bool bHTML, bool bHostname, bool bSource, uint32 dwSourceIP, bool bPHPBB, CListBox *httpList) const
+//End emulEspaña
+//EastShare End - added by AndCycle, phpBB URL-Tags style link
+{
+	if (this == NULL)
+	{
+		ASSERT( false );
+		return _T("");
+	}
+	CString strLink, strBuffer;
+	strLink.Format(_T("ed2k://|file|%s|%I64u|%s|"),
+		EncodeUrlUtf8(StripInvalidFilenameChars(GetFileName())),
+		GetFileSize(),
+		EncodeBase16(GetFileHash(),16));
+
+	if (bHTML)
+		strLink = _T("<a href=\"") + strLink;	
+	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+	if (bPHPBB) {
+		//for compatible with phpBB, phpBB using "[" "]" to identify tag
+		strLink.Replace(_T("["), _T("%5B"));
+		strLink.Replace(_T("]"), _T("%5D")); //Quezl
+
+		strLink = _T("[url=")  + strLink;
+	}
+	//EastShare End - added by AndCycle, phpBB URL-Tags style link
+	if (bHashset && GetFileIdentifierC().GetAvailableMD4PartHashCount() > 0 && GetFileIdentifierC().HasExpectedMD4HashCount()){
+		strLink += _T("p=");
+		for (UINT j = 0; j < GetFileIdentifierC().GetAvailableMD4PartHashCount(); j++)
+		{
+			if (j > 0)
+				strLink += _T(':');
+			strLink += EncodeBase16(GetFileIdentifierC().GetMD4PartHash(j), 16);
+		}
+		strLink += _T('|');
+	}
+
+	if (GetFileIdentifierC().HasAICHHash())
+	{
+		strBuffer.Format(_T("h=%s|"), GetFileIdentifierC().GetAICHHash().GetString() );
+		strLink += strBuffer;			
+	}
+
+	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+	if(httpList){
+		for(int j=0; j < httpList->GetCount(); j++){
+			CString httpSrc;
+			httpList->GetText(j, httpSrc);
+			if(httpSrc.Right(1) == _T("/")){
+				httpSrc += StripInvalidFilenameChars(GetFileName());
+			}
+			strLink += _T("s=") + EncodeUrlUtf8(httpSrc) + _T("|");
+		}
+	}
+	//End emulEspaña
+
+	strLink += _T('/');
+	if (bHostname && !thePrefs.GetYourHostname().IsEmpty() && thePrefs.GetYourHostname().Find(_T('.')) != -1)
+	{
+		strBuffer.Format(_T("|sources,%s:%i|/"), thePrefs.GetYourHostname(), thePrefs.GetPort() );
+		strLink += strBuffer;
+	}
+	else if(bSource && dwSourceIP != 0)
+	{
+		strBuffer.Format(_T("|sources,%i.%i.%i.%i:%i|/"),(uint8)dwSourceIP,(uint8)(dwSourceIP>>8),(uint8)(dwSourceIP>>16),(uint8)(dwSourceIP>>24), thePrefs.GetPort() );
+		strLink += strBuffer;
+	}
+	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+	if (bPHPBB) {
+		CString tempFileName = StripInvalidFilenameChars(GetFileName());
+
+		//like before, just show up #for compatible with phpBB, phpBB using "[" "]" to identify tag#
+		//tempFileName.Replace(_T("["), _T("("));
+		//tempFileName.Replace(_T("]"), _T(")")); not needed see http://forum.emule-project.net/index.php?s=&showtopic=22612&view=findpost&p=862768
+
+		strLink += _T("]") + tempFileName + _T("[/url]");
+	}
+	//EastShare End - added by AndCycle, phpBB URL-Tags style link
+	if (bHTML)
+		strLink += _T("\">") + StripInvalidFilenameChars(GetFileName()) + _T("</a>");
+	
+	return strLink;
 }

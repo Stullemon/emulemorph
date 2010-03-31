@@ -1658,7 +1658,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		switch (wParam){
 			case Irc_SetSendLink:
 				if (pKnownFile != NULL)
-					theApp.emuledlg->ircwnd->SetSendFileString(CreateED2kLink(pKnownFile));
+					theApp.emuledlg->ircwnd->SetSendFileString(pKnownFile->GetED2kLink());
 				break;
 			case MP_GETED2KLINK:{
 				CString str;
@@ -1666,10 +1666,10 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				while (pos != NULL)
 				{
 					CShareableFile* file = selectedList.GetNext(pos);
-					if (file->IsKindOf(RUNTIME_CLASS(CKnownFile))){
+					if (file != NULL && file->IsKindOf(RUNTIME_CLASS(CKnownFile))){
 						if (!str.IsEmpty())
 							str += _T("\r\n");
-						str += CreateED2kLink((CKnownFile*)file);
+						str += ((CKnownFile*)file)->GetED2kLink();
 					}
 				}
 				theApp.CopyTextToClipboard(str);

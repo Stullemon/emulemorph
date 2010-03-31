@@ -26,7 +26,7 @@ CShareableFile::CShareableFile()
 	m_verifiedFileType=FILETYPE_UNKNOWN; 
 }
 
-CString	CShareableFile::GetInfoSummary() const
+CString	CShareableFile::GetInfoSummary(bool bNoFormatCommands) const
 {
 	CString strFolder = GetPath();
 	PathRemoveBackslash(strFolder.GetBuffer());
@@ -36,9 +36,10 @@ CString	CShareableFile::GetInfoSummary() const
 	if (strType.IsEmpty())
 		strType = _T("-");
 
+	CString strHeadFormatCommand = bNoFormatCommands ? _T("") : _T("<br_head>");
 	CString info;
 	info.Format(_T("%s\n")
-		+ GetResString(IDS_FD_SIZE) + _T(" %s\n<br_head>\n")
+		+ GetResString(IDS_FD_SIZE) + _T(" %s\n") + strHeadFormatCommand + _T("\n")
 		+ GetResString(IDS_TYPE) + _T(": %s\n")
 		+ GetResString(IDS_FOLDER) + _T(": %s"),
 		GetFileName(),

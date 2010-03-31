@@ -1808,8 +1808,8 @@ bool CPreferences::LoadStats(int loadBackUp)
 		CString sINIBackUp;
 		sINIBackUp.Format(L"%sstatbkuptmp.ini", GetMuleDirectory(EMULE_CONFIGDIR));
 		if (findBackUp.FindFile(sINIBackUp)){
-			CFile::Remove(sINI);				// Remove the backup that we just restored from
-			CFile::Rename(sINIBackUp, sINI);	// Rename our temporary backup to the normal statbkup.ini filename.
+			::DeleteFile(sINI);				// Remove the backup that we just restored from
+			::MoveFile(sINIBackUp, sINI);	// Rename our temporary backup to the normal statbkup.ini filename.
 		}
 
 		// Since we know this is a restore, now we should call ShowStatistics to update the data items to the new ones we just loaded.

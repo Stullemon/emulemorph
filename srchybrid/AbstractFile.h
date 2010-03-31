@@ -67,6 +67,15 @@ public:
 	const uchar* GetFileHash() const					{ return m_FileIdentifier.GetMD4Hash(); }
 	void SetFileHash(const uchar* pucFileHash)			{ m_FileIdentifier.SetMD4Hash(pucFileHash); }
 	bool HasNullHash() const;
+	//EastShare Start - added by AndCycle, phpBB URL-Tags style link
+	//emulEspaña. Added by MoNKi [MoNKi: -HTTP Sources in eLinks-]
+	/*
+	CString GetED2kLink(bool bHashset = false, bool bHTML = false, bool bHostname = false, bool bSource = false, uint32 dwSourceIP = 0) const;
+	*/
+	CString GetED2kLink(bool bHashset = false, bool bHTML = false, bool bHostname = false, bool bSource = false, uint32 dwSourceIP = 0, bool bPHPBB = false, CListBox *httpList = NULL) const;
+	//End emulEspaña
+	//EastShare End - added by AndCycle, phpBB URL-Tags style link
+
 
 	EMFileSize		GetFileSize() const					{ return m_nFileSize; }
 	virtual void	SetFileSize(EMFileSize nFileSize)	{ m_nFileSize = nFileSize; }

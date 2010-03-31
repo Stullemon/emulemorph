@@ -2563,9 +2563,9 @@ void CDownloadQueue::ExportPartMetFilesOverview() const
 				TCHAR szExt[_MAX_EXT];
 				_tsplitpath(strPartFilePath, NULL, NULL, szNam, szExt);
 				if (thePrefs.GetTempDirCount()==1)
-					file.printf(_T("%s%s\t%s\r\n"), szNam, szExt, CreateED2kLink(pPartFile));
+					file.printf(_T("%s%s\t%s\r\n"), szNam, szExt, pPartFile->GetED2kLink());
 				else
-					file.printf(_T("%s\t%s\r\n"), pPartFile->GetFullName(), CreateED2kLink(pPartFile));
+					file.printf(_T("%s\t%s\r\n"), pPartFile->GetFullName(), pPartFile->GetED2kLink());
 			}
 		}
 
