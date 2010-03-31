@@ -40,6 +40,8 @@ public:
 	DWORD AddBtnStyle(int id, DWORD dwStyle);
 	DWORD RemoveBtnStyle(int id, DWORD dwStyle);
 
+	int AddString(const CString& strToAdd);
+
 protected:
 	DECLARE_MESSAGE_MAP()
 };

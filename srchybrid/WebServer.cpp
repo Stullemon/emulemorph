@@ -2610,12 +2610,12 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 			dFile.bIsPreview = pPartFile->IsReadyForPreview();
 			dFile.bIsGetFLC =  pPartFile->GetPreviewPrio();
 
-			if (theApp.serverconnect->IsConnected() && !theApp.serverconnect->IsLowID())
-			dFile.sED2kLink = theApp.CreateED2kSourceLink(pPartFile);
+			if (theApp.GetPublicIP() != 0 && !theApp.IsFirewalled())
+			dFile.sED2kLink = pPartFile->GetED2kLink(false, false, false, true, theApp.GetPublicIP());
 			else
-				dFile.sED2kLink = CreateED2kLink(pPartFile);
+				dFile.sED2kLink = pPartFile->GetED2kLink();
 			
-			dFile.sFileInfo = _SpecialChars(pPartFile->GetInfoSummary(),false);
+			dFile.sFileInfo = _SpecialChars(pPartFile->GetInfoSummary(true),false);
 
 			FilesArray.Add(dFile);
 		}
@@ -3825,10 +3825,10 @@ CString CWebServer::_GetSharedFilesList(ThreadData Data)
 
 		dFile.m_qwFileSize = cur_file->GetFileSize();
 		
-		if (theApp.serverconnect->IsConnected())
-			dFile.sED2kLink = theApp.CreateED2kSourceLink(cur_file);
+		if (theApp.GetPublicIP() != 0 && !theApp.IsFirewalled())
+			dFile.sED2kLink = cur_file->GetED2kLink(false, false, false, true, theApp.GetPublicIP());
 		else
-			dFile.sED2kLink = CreateED2kLink(cur_file);
+			dFile.sED2kLink = cur_file->GetED2kLink();
 
 		dFile.nFileTransferred = cur_file->statistic.GetTransferred();
 		dFile.nFileAllTimeTransferred = cur_file->statistic.GetAllTimeTransferred();

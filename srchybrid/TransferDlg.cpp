@@ -98,7 +98,6 @@ int CTransferDlg::OnCreate(LPCREATESTRUCT lpCreateStruct)
 	LoadBarState(DOWNLOAD_TOOLBAR_PROFILE);
 	DockToolbarWnd(); // Too much bug reports about vanished search parameters window. Force to dock.
 	ShowToolbar(thePrefs.IsDownloadToolbarEnabled());
-	GetDownloadList()->SetRelatedToolbarWnd(m_pwndToolbar);
 	m_pwndToolbar->SetCommandTargetWnd(GetDownloadList());
 	Localize();
 

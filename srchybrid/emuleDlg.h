@@ -64,7 +64,7 @@ public:
 
 	enum { IDD = IDD_EMULE_DIALOG };
 
-	bool IsRunning();
+	static bool IsRunning();
 	void ShowConnectionState();
 	void ShowNotifier(LPCTSTR pszText, int iMsgType, LPCTSTR pszLink = NULL, bool bForceSoundOFF = false);
 	void SendNotificationMail(int iMsgType, LPCTSTR pszText);

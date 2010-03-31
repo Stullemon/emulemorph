@@ -27,6 +27,7 @@
 #include "updownclient.h"
 #include "DownloadQueue.h"
 #include "partfile.h"
+#include "Log.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -531,13 +532,14 @@ bool CAICHHashTree::ReduceToBaseSize(uint64 nBaseSize) {
 
 /////////////////////////////////////////////////////////////////////////////////////////
 ///CAICHUntrustedHash
-bool CAICHUntrustedHash::AddSigningIP(uint32 dwIP){
+bool CAICHUntrustedHash::AddSigningIP(uint32 dwIP, bool bTestOnly){
 	dwIP &= 0x00F0FFFF; // we use only the 20 most significant bytes for unique IPs
 	for (int i=0; i < m_adwIpsSigning.GetCount(); i++){
 		if (m_adwIpsSigning[i] == dwIP)
 			return false;
 	}
-	m_adwIpsSigning.Add(dwIP);
+	if (!bTestOnly)
+		m_adwIpsSigning.Add(dwIP);
 	return true;
 }
 
@@ -1013,16 +1015,26 @@ void CAICHRecoveryHashSet::UntrustedHashReceived(const CAICHHash& Hash, uint32 d
 	bool bAdded = false;
 	for (int i = 0; i < m_aUntrustedHashs.GetCount(); i++){
 		if (m_aUntrustedHashs[i].m_Hash == Hash){
-			bAdded = m_aUntrustedHashs[i].AddSigningIP(dwFromIP);
+			bAdded = m_aUntrustedHashs[i].AddSigningIP(dwFromIP, false);
 			bFound = true;
 			break;
 		}
 	}
-	if (!bFound){
+	if (!bFound)
+	{
+		for (int i = 0; i < m_aUntrustedHashs.GetCount(); i++)
+		{
+			if (!m_aUntrustedHashs[i].AddSigningIP(dwFromIP, true))
+			{
+				AddDebugLogLine(DLP_LOW, false, _T("Received different AICH hashs for file %s from IP/20 %s, ignored"), (m_pOwner != NULL) ? m_pOwner->GetFileName() : _T(""), dwFromIP); 
+				// nothing changed, so we can return early without any rechecks
+				return;
+			}
+		}
 		bAdded = true;
 		CAICHUntrustedHash uhToAdd;
 		uhToAdd.m_Hash = Hash;
-		uhToAdd.AddSigningIP(dwFromIP);
+		uhToAdd.AddSigningIP(dwFromIP, false);
 		m_aUntrustedHashs.Add(uhToAdd);
 	}
 

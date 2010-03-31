@@ -194,7 +194,7 @@ void CCollectionViewDialog::DownloadSelected(void)
 	{
 		CCollectionFile* pCollectionFile = collectionFileList.RemoveHead();
 		if (pCollectionFile)
-			theApp.downloadqueue->AddSearchToDownload(::CreateED2kLink(pCollectionFile, true), thePrefs.AddNewFilesPaused(), iNewIndex);
+			theApp.downloadqueue->AddSearchToDownload(pCollectionFile->GetED2kLink(), thePrefs.AddNewFilesPaused(), iNewIndex);
 	}
 }
 

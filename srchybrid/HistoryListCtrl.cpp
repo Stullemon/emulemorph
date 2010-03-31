@@ -801,7 +801,7 @@ BOOL CHistoryListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		switch (wParam){
 			case Irc_SetSendLink:
 			{
-				theApp.emuledlg->ircwnd->SetSendFileString(CreateED2kLink(file));
+				theApp.emuledlg->ircwnd->SetSendFileString(file->GetED2kLink());
 				break;
 			}
 			case MP_SHOWED2KLINK:
@@ -826,7 +826,7 @@ BOOL CHistoryListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 				while (!selectedList.IsEmpty()){
 					if (!str.IsEmpty())
 						str += _T("\r\n");
-					str += CreateED2kLink(selectedList.GetHead());
+					str += selectedList.GetHead()->GetED2kLink();
 					selectedList.RemoveHead();
 				}
 				theApp.CopyTextToClipboard(str);

@@ -2,6 +2,23 @@
         http://emule-project.net
         ========================
 
+eMule 0.50a BETA3
+-----------------------
+- Mar, 28. 2010       -
+-----------------------
+.: Keyboard shortcuts to switch the dialog work again in the transfer dialog
+.: Fixed a small visual glitch in the tooltips of the webinterface
+.: Fixed a issue regarding eMule deceiding if to trust an AICH hash on files which have no verified AICH has [tHeWiZaRdOfDoS]
+.: Fixed minor issues with the exit commandline command and the multiple instances option [tHeWiZaRdOfDoS, leuk_he]
+
+-----------------------
+- Mar, 23. 2010       -
+-----------------------
+.: Fixed ed2k links not containing the AICH hash on several locations (ctrl+c, webserver, etc)
+.: Fixed further bugs leading to crashes or glitches in the new toolbar
+.: Fixed a possible crash problem with the new Win7 features
+.: The Beta versioncheck will now point to a seperate website instead the standard versioncheck (which doesn't works for betas)
+
 eMule 0.50a BETA2
 -----------------------
 - Mar, 19. 2010       -

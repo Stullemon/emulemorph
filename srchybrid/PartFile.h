@@ -38,7 +38,7 @@ enum EPartFileStatus{
 #define PR_VERYLOW			4 // I Had to change this because it didn't save negative number correctly.. Had to modify the sort function for this change..
 #define PR_LOW				0 //*
 #define PR_NORMAL			1 // Don't change this - needed for edonkey clients and server!
-#define	PR_HIGH				2 //*
+#define PR_HIGH				2 //*
 #define PR_VERYHIGH			3
 #define PR_AUTO				5 //UAP Hunter
 
@@ -178,7 +178,7 @@ public:
 	CTime	GetCrCFileDate() const { return CTime(m_tCreated); }
 	uint32	GetCrFileDate() const { return m_tCreated; }
 
-	void	InitializeFromLink(CED2KFileLink* fileLink, UINT cat=0);
+	void	InitializeFromLink(CED2KFileLink* fileLink, UINT cat = 0);
 	//MORPH START - Changed by Stulle, No zz ratio for http traffic
 	/*
 	uint32	Process(uint32 reducedownload, UINT icounter, uint32 friendReduceddownload);
@@ -321,7 +321,7 @@ public:
 	void	RemoveDownloadingSource(CUpDownClient* client);
 
 	CString GetProgressString(uint16 size) const;
-	CString GetInfoSummary() const;
+	CString GetInfoSummary(bool bNoFormatCommands = false) const;
 
 //	int		GetCommonFilePenalty() const;
 	void	UpdateDisplayedInfo(bool force = false);
@@ -477,7 +477,7 @@ private:  //morph
 	CArray<bool,bool> m_PartsShareable;
 	int	m_PartsHashing;
 	CMutex	ICH_mut;	// ICH locks the file
-	CList<uint16,uint16>	m_ICHPartsComplete;
+	CList<UINT,UINT>	m_ICHPartsComplete;
 	// SLUGFILLER: SafeHash
 	float	percentcompleted;
 	CList<UINT,UINT>	corrupted_list;
@@ -592,7 +592,7 @@ private:
 	bool					m_AICHRecover;
 	CString					directory;
 	CString					filename;
-	CArray<uint16,uint16>	m_PartsToHash;
+	CArray<UINT,UINT>	m_PartsToHash;
 	CArray<uchar*,uchar*>	m_DesiredHashes;
 };
 // SLUGFILLER: SafeHash

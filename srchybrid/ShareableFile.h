@@ -45,7 +45,7 @@ public:
 
 	const CString& GetFilePath() const				{ return m_strFilePath; }
 	void SetFilePath(LPCTSTR pszFilePath)			{ m_strFilePath = pszFilePath; }
-	virtual CString	GetInfoSummary() const;
+	virtual CString	GetInfoSummary(bool bNoFormatCommands = false) const;
 
 protected:
 	CString					m_strDirectory;

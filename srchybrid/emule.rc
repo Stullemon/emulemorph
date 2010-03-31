@@ -746,9 +746,9 @@ BEGIN
     RTEXT           "Codec:",IDC_FD_XI5,7,53,77,8
     EDITTEXT        IDC_VCODEC,85,53,109,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP
-    RTEXT           "Bitrate:",IDC_FD_XI7,7,64,77,8
+    RTEXT           "Bitrate:",IDC_FD_XI7,7,63,77,8
     CONTROL         "-",IDC_VBITRATE,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,87,65,107,8
+                    SS_NOPREFIX | WS_GROUP,87,63,107,8
     RTEXT           "Width x Height:",IDC_FD_XI9,7,73,77,8
     CONTROL         "-",IDC_VWIDTH,"Static",SS_LEFTNOWORDWRAP | SS_NOPREFIX | 
                     WS_GROUP,87,73,107,8
@@ -762,9 +762,9 @@ BEGIN
     RTEXT           "Codec:",IDC_FD_XI6,210,53,65,8
     EDITTEXT        IDC_ACODEC,277,53,114,12,ES_AUTOHSCROLL | ES_READONLY | 
                     NOT WS_BORDER | NOT WS_TABSTOP
-    RTEXT           "Bitrate:",IDC_FD_XI8,210,64,65,8
+    RTEXT           "Bitrate:",IDC_FD_XI8,210,63,65,8
     CONTROL         "-",IDC_ABITRATE,"Static",SS_LEFTNOWORDWRAP | 
-                    SS_NOPREFIX | WS_GROUP,279,67,112,8
+                    SS_NOPREFIX | WS_GROUP,279,63,112,8
     RTEXT           "Channel:",IDC_FD_XI10,210,73,65,8
     CONTROL         "-",IDC_ACHANNEL,"Static",SS_LEFTNOWORDWRAP | 
                     SS_NOPREFIX | WS_GROUP,279,73,112,8
@@ -2662,6 +2662,7 @@ BEGIN
     IDD_PPG_GENERAL, DIALOG
     BEGIN
         VERTGUIDE, 11
+        VERTGUIDE, 169
     END
 
     IDD_PPG_CONNECTION, DIALOG

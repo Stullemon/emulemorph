@@ -188,3 +188,15 @@ void CToolBarCtrlX::RecalcLayout()
 	SetMaxTextRows(iTextRows);
 	SetRedraw(TRUE);
 }
+
+int CToolBarCtrlX::AddString(const CString& strToAdd)
+{
+	int nLen = strToAdd.GetLength();
+	TCHAR* apChar = new TCHAR[nLen + 2];
+	_tcsncpy(apChar, strToAdd, nLen);
+	apChar[nLen] = _T('\0');
+	apChar[nLen + 1] = _T('\0');
+	nLen = AddStrings(apChar);
+	delete[] apChar;
+	return nLen;
+}

@@ -80,94 +80,94 @@ void CToolbarWnd::FillToolbar()
 
 	atb1[0].iBitmap = 0;
 	atb1[0].idCommand = MP_PRIOLOW;
-	atb1[0].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[0].fsState = TBSTATE_WRAP;
 	atb1[0].fsStyle = BTNS_DROPDOWN  | BTNS_AUTOSIZE;
-	atb1[0].iString = m_btnBar->AddStrings(GetResString(IDS_PRIORITY) + _T(" (") + GetResString(IDS_DOWNLOAD) + _T(")"));
+	atb1[0].iString = m_btnBar->AddString(GetResString(IDS_PRIORITY) + _T(" (") + GetResString(IDS_DOWNLOAD) + _T(")"));
 
 	atb1[1].iBitmap = 1;
 	atb1[1].idCommand = MP_PAUSE;
-	atb1[1].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[1].fsState = TBSTATE_WRAP;
 	atb1[1].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[1].iString = m_btnBar->AddStrings(GetResString(IDS_DL_PAUSE));
+	atb1[1].iString = m_btnBar->AddString(GetResString(IDS_DL_PAUSE));
 
 	atb1[2].iBitmap = 2;
 	atb1[2].idCommand = MP_STOP;
-	atb1[2].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[2].fsState = TBSTATE_WRAP;
 	atb1[2].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[2].iString = m_btnBar->AddStrings(GetResString(IDS_DL_STOP));
+	atb1[2].iString = m_btnBar->AddString(GetResString(IDS_DL_STOP));
 
 	atb1[3].iBitmap = 3;
 	atb1[3].idCommand = MP_RESUME;
-	atb1[3].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[3].fsState = TBSTATE_WRAP;
 	atb1[3].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[3].iString = m_btnBar->AddStrings(GetResString(IDS_DL_RESUME));
+	atb1[3].iString = m_btnBar->AddString(GetResString(IDS_DL_RESUME));
 
 	atb1[4].iBitmap = 4;
 	atb1[4].idCommand = MP_CANCEL;
-	atb1[4].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[4].fsState = TBSTATE_WRAP;
 	atb1[4].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[4].iString = m_btnBar->AddStrings(GetResString(IDS_MAIN_BTN_CANCEL));
+	atb1[4].iString = m_btnBar->AddString(GetResString(IDS_MAIN_BTN_CANCEL));
 	/////////////
 	atb1[5].iBitmap = -1;
 	atb1[5].idCommand = 0;
-	atb1[5].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[5].fsState = TBSTATE_WRAP;
 	atb1[5].fsStyle = BTNS_SEP;
 	atb1[5].iString = -1;
 
 	atb1[6].iBitmap = 5;
 	atb1[6].idCommand = MP_OPEN;
-	atb1[6].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[6].fsState = TBSTATE_WRAP;
 	atb1[6].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[6].iString = m_btnBar->AddStrings(GetResString(IDS_DL_OPEN));
+	atb1[6].iString = m_btnBar->AddString(GetResString(IDS_DL_OPEN));
 
 	atb1[7].iBitmap = 6;
 	atb1[7].idCommand = MP_PREVIEW;
-	atb1[7].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[7].fsState = TBSTATE_WRAP;
 	atb1[7].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[7].iString = m_btnBar->AddStrings(GetResString(IDS_DL_PREVIEW));
+	atb1[7].iString = m_btnBar->AddString(GetResString(IDS_DL_PREVIEW));
 
 	atb1[8].iBitmap = 7;
 	atb1[8].idCommand = MP_METINFO;
-	atb1[8].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[8].fsState = TBSTATE_WRAP;
 	atb1[8].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[8].iString = m_btnBar->AddStrings(GetResString(IDS_DL_INFO));
+	atb1[8].iString = m_btnBar->AddString(GetResString(IDS_DL_INFO));
 
 	atb1[9].iBitmap = 8;
 	atb1[9].idCommand = MP_VIEWFILECOMMENTS;
-	atb1[9].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[9].fsState = TBSTATE_WRAP;
 	atb1[9].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[9].iString = m_btnBar->AddStrings(GetResString(IDS_CMT_SHOWALL));
+	atb1[9].iString = m_btnBar->AddString(GetResString(IDS_CMT_SHOWALL));
 
 	atb1[10].iBitmap = 9;
 	atb1[10].idCommand = MP_SHOWED2KLINK;
-	atb1[10].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[10].fsState = TBSTATE_WRAP;
 	atb1[10].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[10].iString = m_btnBar->AddStrings(GetResString(IDS_DL_SHOWED2KLINK));
+	atb1[10].iString = m_btnBar->AddString(GetResString(IDS_DL_SHOWED2KLINK));
 	
 	/////////////
 	atb1[11].iBitmap = -1;
 	atb1[11].idCommand = 0;
-	atb1[11].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[11].fsState = TBSTATE_WRAP;
 	atb1[11].fsStyle = BTNS_SEP;
 	atb1[11].iString = -1;
 
 	atb1[12].iBitmap = 10;
 	atb1[12].idCommand = MP_NEWCAT;
-	atb1[12].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[12].fsState = TBSTATE_WRAP;
 	atb1[12].fsStyle = BTNS_DROPDOWN  | BTNS_AUTOSIZE;
-	atb1[12].iString = m_btnBar->AddStrings(GetResString(IDS_TOCAT));
+	atb1[12].iString = m_btnBar->AddString(GetResString(IDS_TOCAT));
 
 	atb1[13].iBitmap = 11;
 	atb1[13].idCommand = MP_CLEARCOMPLETED;
-	atb1[13].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[13].fsState = TBSTATE_WRAP;
 	atb1[13].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[13].iString = m_btnBar->AddStrings(GetResString(IDS_DL_CLEAR));
+	atb1[13].iString = m_btnBar->AddString(GetResString(IDS_DL_CLEAR));
 
 	atb1[14].iBitmap = 12;
 	atb1[14].idCommand = MP_SEARCHRELATED;
-	atb1[14].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
+	atb1[14].fsState = TBSTATE_WRAP;
 	atb1[14].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[14].iString = m_btnBar->AddStrings(GetResString(IDS_SEARCHRELATED));
+	atb1[14].iString = m_btnBar->AddString(GetResString(IDS_SEARCHRELATED));
 
 	/////////////
 	atb1[15].iBitmap = -1;
@@ -180,7 +180,7 @@ void CToolbarWnd::FillToolbar()
 	atb1[16].idCommand = MP_FIND;
 	atb1[16].fsState = TBSTATE_ENABLED | TBSTATE_WRAP;
 	atb1[16].fsStyle = BTNS_BUTTON  | BTNS_AUTOSIZE;
-	atb1[16].iString = m_btnBar->AddStrings(GetResString(IDS_FIND));
+	atb1[16].iString = m_btnBar->AddString(GetResString(IDS_FIND));
 
 	m_btnBar->AddButtons(_countof(atb1), atb1);
 }
@@ -205,7 +205,7 @@ LRESULT CToolbarWnd::OnInitDialog(WPARAM /*wParam*/, LPARAM /*lParam*/)
 	int nFlags= theApp.m_iDfltImageListColorFlags;
 	// older Windows versions imageslists cannot create monochrome (disabled) icons which have alpha support
 	// so we have to take care of this ourself
-	bool bNeedMonoIcons = thePrefs.GetWindowsVersion() < _WINVER_VISTA_ && nFlags != ILC_COLOR4 && nFlags != ILC_COLOR8;
+	bool bNeedMonoIcons = thePrefs.GetWindowsVersion() < _WINVER_VISTA_ && nFlags != ILC_COLOR4;
 	nFlags |= ILC_MASK;
 	iml.Create(16, 16, nFlags, 1, 1);
 	iml.Add(CTempIconLoader(_T("FILEPRIORITY")));
@@ -402,6 +402,13 @@ void CToolbarWnd::OnSize(UINT nType, int cx, int cy)
 
 void CToolbarWnd::OnUpdateCmdUI(CFrameWnd* /*pTarget*/, BOOL /*bDisableIfNoHndler*/)
 {
+	CList<int> liCommands;
+	bool bUpdate = true;
+	if (m_pCommandTargetWnd != NULL && theApp.m_app_state == APP_STATE_RUNNING)
+		bUpdate = m_pCommandTargetWnd->ReportAvailableCommands(liCommands);
+	if (bUpdate)
+		OnAvailableCommandsChanged(&liCommands);
+
 	// Disable MFC's command routing by not passing the process flow to base class
 }
 
@@ -477,7 +484,7 @@ void CToolbarWnd::OnBtnDropDown(NMHDR *pNMHDR, LRESULT *pResult)
 		CRect rc;
 		m_btnBar->GetItemRect(m_btnBar->CommandToIndex(MP_PRIOLOW), rc);
 		m_btnBar->ClientToScreen(rc);
-		theApp.emuledlg->transferwnd->GetDownloadList()->GetPrioMenu()->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, rc.left, rc.bottom, this);
+		m_pCommandTargetWnd->GetPrioMenu()->TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, rc.left, rc.bottom, this);
 	}
 	else if (tbn->iItem == MP_NEWCAT)
 	{
@@ -486,7 +493,7 @@ void CToolbarWnd::OnBtnDropDown(NMHDR *pNMHDR, LRESULT *pResult)
 		m_btnBar->ClientToScreen(rc);
 		CMenu menu;
 		menu.CreatePopupMenu();
-		theApp.emuledlg->transferwnd->GetDownloadList()->FillCatsMenu(menu);
+		m_pCommandTargetWnd->FillCatsMenu(menu);
 		menu.TrackPopupMenu(TPM_LEFTALIGN | TPM_RIGHTBUTTON, rc.left, rc.bottom, this);
 	}
 	else
@@ -523,4 +530,17 @@ void CToolbarWnd::DelayShow(BOOL bShow)
 		}
 	}
 	__super::DelayShow(bShow);
+}
+
+void CToolbarWnd::OnSysCommand(UINT nID, LPARAM lParam)
+{
+	if (nID == SC_KEYMENU)
+	{
+		if (lParam == EMULE_HOTMENU_ACCEL)
+			theApp.emuledlg->SendMessage(WM_COMMAND, IDC_HOTMENU);
+		else
+			theApp.emuledlg->SendMessage(WM_SYSCOMMAND, nID, lParam);
+		return;
+	}
+	__super::OnSysCommand(nID, lParam);
 }
