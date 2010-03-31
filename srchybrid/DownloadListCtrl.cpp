@@ -1349,6 +1349,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, UIN
 							buffer.Format(_T("%u"), pClient->m_lastPartAsked);
 					} else
 						buffer.Format(_T("%u"), pClient->GetCurrentDownloadingChunk());
+					buffer.AppendFormat(_T(" @ %.1f%%"), pClient->GetDownChunkProgressPercent());
 					CFont *pOldFont = cdcStatus.SelectObject(&m_fontSmaller);
 #define	DrawClientPercentTextLeft		cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, MLC_DT_TEXT)
 					rec_status.top-=1;rec_status.bottom-=1;
@@ -3565,7 +3566,15 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			/*
 			return CompareUnsigned(client1->GetTransferredDown(), client2->GetTransferredDown());
 			*/
-			return CompareUnsigned(client1->GetSessionPayloadDown(), client2->GetSessionPayloadDown());
+			if (client1->GetDownloadState() == DS_DOWNLOADING && client2->GetDownloadState() == DS_DOWNLOADING)
+			{
+				if (client1->GetDownChunkProgressPercent() == client2->GetDownChunkProgressPercent())
+					return 0;
+				else
+					return (client1->GetDownChunkProgressPercent() > client2->GetDownChunkProgressPercent()?1:-1);
+			}
+			else
+				return CompareUnsigned(client1->GetSessionPayloadDown(), client2->GetSessionPayloadDown());
 			//MORPH END - Display Chunk Detail
 
 		case 4: //speed asc

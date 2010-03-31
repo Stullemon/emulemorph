@@ -856,7 +856,14 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			break;
 		
 		case 9: 
+			//Fafner: client percentage - 080325
+			/*
 			iResult = CompareUnsigned(item1->GetUpPartCount(), item2->GetUpPartCount());
+			*/
+			if (item1->GetCompletedPercent() == item2->GetCompletedPercent())
+				iResult=0;
+			else
+				iResult=item1->GetCompletedPercent() > item2->GetCompletedPercent()?1:-1;
 			break;
 
 		//MORPH START - Modified by SiRoB, Client Software
@@ -886,7 +893,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			iResult=item1->IsFriend() - item2->IsFriend();
 			break;
 		// EastShare - Added by Pretender, Friend Tab
-               // Commander - Added: IP2Country column - Start
+		// Commander - Added: IP2Country column - Start
 		case 13:
 			if(item1->GetCountryName(true) && item2->GetCountryName(true))
 				iResult=CompareLocaleStringNoCase(item1->GetCountryName(true), item2->GetCountryName(true));
@@ -895,7 +902,7 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			else
 				iResult=-1;
 			break;
-                // Commander - Added: IP2Country column - End
+		// Commander - Added: IP2Country column - End
 	}
 
 	if (lParamSort >= 100)
