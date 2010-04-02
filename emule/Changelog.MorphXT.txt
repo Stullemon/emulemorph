@@ -40,6 +40,8 @@ CHANGE: Sort client progressbars by percentage finished [Stulle]
 CHANGE: Stretch chunk always to column width for chunk details [Stulle]
 CHANGE: Improved upload state sorting for additional information [Stulle]
 CHANGE: Improved sorting for Download State in ClientListCtrl [TAHO]
+CHANGE: Allow searching for client name via key strokes in DownloadListCtrl [Stulle]
+	+ started searching at A4AF info until now
 FIX: Properly localize some Advanced Preferences (official) [Stulle]
 FIX: (Official) Only resolve hostnames for downloads if partfile found [WiZaRd]
 FIX: (Official) Remove client from DownloadClientsList on RemoveSource [WiZaRd]
@@ -56,6 +58,7 @@ REMOVED: Official changes for high upload speed in favor for more advanced Morph
 REMOVED: New official Ask-On-Exit Dialog in favor of Morph's one (NTService) [Stulle]
 REMOVED: "MorphXT 9.7" workaround [Stulle]
 REMOVED: Unusued ressource strings [Stulle]
+REMOVED: AppleJuice detection [Xman/Anonymous Anti-Leecher]
 
 
 --------------------------------------

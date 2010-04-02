@@ -998,18 +998,10 @@ void CDownloadListCtrl::GetSourceItemDisplayText(const CtrlItem_Struct *pCtrlIte
 	switch (iSubItem)
 	{
 		case 0: 	// icon, name, status
-			//MORPH START - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
-			/*
 			if (pClient->GetUserName() == NULL)
 				_sntprintf(pszText, cchTextMax, _T("(%s)"), GetResString(IDS_UNKNOWN));
 			else
 				_tcsncpy(pszText, pClient->GetUserName(), cchTextMax);
-			*/
-			if (pClient->GetUserName() == NULL)
-				_sntprintf(pszText, cchTextMax, _T("(%i) (%s)"),pClient->m_OtherRequests_list.GetCount()+1+pClient->m_OtherNoNeeded_list.GetCount(), GetResString(IDS_UNKNOWN));
-			else
-				_sntprintf(pszText, cchTextMax, _T("(%i) %s"),pClient->m_OtherRequests_list.GetCount()+1+pClient->m_OtherNoNeeded_list.GetCount(), pClient->GetUserName());
-			//MORPH END   - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 			break;
 	
 		case 1:		// size
@@ -1299,6 +1291,13 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, UIN
 				cur_rec.left+=20;
 			}
 			//Morph End - added by AndCycle, IP to Country
+
+			//MORPH START - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
+			CString buffer;
+			buffer.Format(_T("(%i) "),pClient->m_OtherRequests_list.GetCount()+1+pClient->m_OtherNoNeeded_list.GetCount());
+			dc->DrawText(buffer, buffer.GetLength(), &cur_rec, MLC_DT_TEXT);
+			cur_rec.left += dc->GetTextExtent(buffer).cx;
+			//MORPH END   - Added by IceCream, [sivka: -A4AF counter, ahead of user nickname-]
 
 			dc->DrawText(szItem, -1, &cur_rec, MLC_DT_TEXT | uDrawTextAlignment);
 			break;

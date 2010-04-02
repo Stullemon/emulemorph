@@ -66,7 +66,7 @@
 				ForceConformanceInForLoopScope="false"
 				UsePrecompiledHeader="2"
 				WarningLevel="4"
-				DebugInformationFormat="3"
+				DebugInformationFormat="4"
 			/>
 			<Tool
 				Name="VCManagedResourceCompilerTool"
@@ -85,7 +85,7 @@
 				AdditionalOptions="/nxcompat"
 				AdditionalDependencies="unicows.lib kernel32.lib advapi32.lib user32.lib gdi32.lib shell32.lib comdlg32.lib version.lib mpr.lib rasapi32.lib winmm.lib winspool.lib vfw32.lib secur32.lib oleacc.lib oledlg.lib sensapi.lib ws2_32.lib gdiplus.lib ADSIId.lib crypt32.lib wmvcore.lib"
 				OutputFile="$(OutDir)\eMule.exe"
-				LinkIncremental="1"
+				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				IgnoreDefaultLibraryNames=""
 				DelayLoadDLLs="oleacc.dll;gdiplus.dll"
@@ -575,10 +575,6 @@
 						WarningLevel="2"
 					/>
 				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\MD5_CAPI.cpp"
-				>
 			</File>
 			<File
 				RelativePath="MD5Sum.cpp"
@@ -1254,10 +1250,6 @@
 			</File>
 			<File
 				RelativePath="LastCommonRouteFinder.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libald.h"
 				>
 			</File>
 			<File
