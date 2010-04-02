@@ -650,6 +650,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if (m_hti_sInternetSecurityZone) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_sInternetSecurityZone, sInternetSecurityZone);}
 									  //TODO only allow  Untrusted|Internet|Intranet|Trusted|LocalMachine 
 	if (m_hti_sNotifierMailEncryptCertName) DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_sNotifierMailEncryptCertName, sNotifierMailEncryptCertName);
+	if (m_hti_sTxtEditor)	DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_sTxtEditor, sTxtEditor);
 	if (m_hti_iServerUDPPort) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_iServerUDPPort, iServerUDPPort);
 										 DDV_MinMaxInt(pDX, iServerUDPPort, 0,65535);}
 	if(m_hti_m_bRemoveFilesToBin) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_m_bRemoveFilesToBin,m_bRemoveFilesToBin);

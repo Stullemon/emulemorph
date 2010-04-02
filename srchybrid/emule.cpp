@@ -2509,10 +2509,11 @@ void CemuleApp::AddIncomingFolderIcon(){
 	CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
 	
 	desktopIni.WriteString(_T("IconFile"),exePath);
-	desktopIni.WriteInt(_T("IconIndex"),1);
+	desktopIni.WriteInt(_T("IconIndex"),2);
 
 	SetFileAttributes(desktopFile, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN);
-	PathMakeSystemFolder(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR));
+	SetFileAttributes(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR), FILE_ATTRIBUTE_READONLY);
+	//PathMakeSystemFolder(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR));
 }
 
 void CemuleApp::RemoveIncomingFolderIcon()
@@ -2531,19 +2532,21 @@ void CemuleApp::RemoveIncomingFolderIcon()
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - End
 
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start
-void CemuleApp::AddTempFolderIcon(){
- CString desktopFile, exePath;
+void CemuleApp::AddTempFolderIcon()
+{
+	CString desktopFile, exePath;
 
-  exePath = thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR) + CString(theApp.m_pszExeName) + _T(".exe");
-  for (int i=0;i<thePrefs.tempdir.GetCount();i++) { // leuk_he: multiple temp dirs
-
-        desktopFile = CString(thePrefs.GetTempDir(i)) + _T("\\Desktop.ini");
-        CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
-        desktopIni.WriteString(_T("IconFile"),exePath);
-        desktopIni.WriteInt(_T("IconIndex"),1);
-        SetFileAttributes(desktopFile, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN);
-	    PathMakeSystemFolder(thePrefs.GetTempDir(i));
-   }
+	exePath = thePrefs.GetMuleDirectory(EMULE_EXECUTEABLEDIR) + CString(theApp.m_pszExeName) + _T(".exe");
+	for (int i=0;i<thePrefs.tempdir.GetCount();i++) // leuk_he: multiple temp dirs
+	{
+		desktopFile = CString(thePrefs.GetTempDir(i)) + _T("\\Desktop.ini");
+		CIni desktopIni(desktopFile, _T(".ShellClassInfo"));
+		desktopIni.WriteString(_T("IconFile"),exePath);
+		desktopIni.WriteInt(_T("IconIndex"),2);
+		SetFileAttributes(desktopFile, FILE_ATTRIBUTE_SYSTEM | FILE_ATTRIBUTE_HIDDEN);
+		SetFileAttributes(thePrefs.GetTempDir(i), FILE_ATTRIBUTE_READONLY);
+		//PathMakeSystemFolder(thePrefs.GetTempDir(i));
+	}
 }
 
 void CemuleApp::RemoveTempFolderIcon(){
@@ -2577,7 +2580,7 @@ BOOL CemuleApp::IsCustomIncomingFolderIcon(){
 		iconFile.MakeLower();
 		exePath.MakeLower();
 		if (iconFile == exePath){
-			if(iconIndex == 1)
+			if(iconIndex == 2)
 				return false;
 			else
 				return true;
