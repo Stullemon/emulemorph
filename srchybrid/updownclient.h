@@ -1028,10 +1028,6 @@ EModClient	GetModClient() const	{ return (EModClient)m_uModClient; }
 	float GetModVersion(CString modversion) const;
 //MORPH END   - Anti ModID Faker [Xman]
 
-//MORPH START - Added by Stulle, AppleJuice Detection [Xman]
-	bool CheckUserHash();
-//MORPH END   - Added by Stulle, AppleJuice Detection [Xman]
-
 	//MORPH START - Added by schnulli900, count failed TCP/IP connections [Xman]
 	uint8	m_cFailed;
 	//MORPH End   - Added by schnulli900, count failed TCP/IP connections [Xman]
