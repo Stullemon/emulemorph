@@ -1949,7 +1949,7 @@ BEGIN
     IDS_AUTOKADLOOKUPGRAPH  "Visualizza automaticamente le ricerche attive"
     IDS_PAUSEONPREVIEW      "Metti in Pausa quando è possibile l'Anteprima"
     IDS_PREVIEWWITH         "Anteprima con"
-    IDS_CLOSEEMULE          "Chiudi eMule"
+    //IDS_CLOSEEMULE          "Chiudi eMule"
     IDS_DONOTASKAGAIN       "Non chiedermelo nuovamente"
     IDS_POPULARITY          "Livello di Popolarità"
     IDS_SHOWWIN7TASKBARGOODIES "Abilita gli effetti della barra strumenti di Windows 7"
@@ -2604,16 +2604,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED "Attiva DynDNS"
-    IDS_STATIC_DYNDNS_USERNAME "Nome Utente"
-    IDS_STATIC_DYNDNS_PASSWORD "Password"
-    IDS_STATIC_DYNDNS_HOSTNAME "Nome Host DynDNS"
-    IDS_BUTTON_DYNDNS_UPDATE "Aggiorna"
-    IDS_BUTTON_DYNDNS_RESET "Resetta"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_AUTOUPIP2COUNTRY    "Aggiorna ip-to-country.csv all'avvio"
     IDS_UPDATEIPCURL        "Aggiorna"
     IDS_CLIENTQUEUEPROGRESSBAR "Mostra Barra di Progresso per la coda di Upload"
@@ -2791,7 +2781,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CONTINUE            "&Continua"
-    IDS_DONOTASKAGAIN       "Non chiedermelo ancora"
+    //IDS_DONOTASKAGAIN       "Non chiedermelo ancora"
     IDS_DONOTTELLAGAIN      "Non ricordamelo più"
     IDS_DONOTSHOWAGAIN      "Non mostrarlo più"
     IDS_YESTOALL            "&si a Tutti"

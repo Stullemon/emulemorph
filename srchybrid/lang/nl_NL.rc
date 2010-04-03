@@ -1991,7 +1991,7 @@ BEGIN
     IDS_AUTOKADLOOKUPGRAPH  "Automatisch actieve zoekopdrachten tonen"
     IDS_PAUSEONPREVIEW      "Pauzeren indien voorvertoning mogelijk is"
     IDS_PREVIEWWITH         "Voorvertonen met"
-    IDS_CLOSEEMULE          "eMule sluiten"
+    //IDS_CLOSEEMULE          "eMule sluiten"
     IDS_DONOTASKAGAIN       "Niet opnieuw vragen"
     IDS_POPULARITY          "Populariteitsrang"
     IDS_SHOWWIN7TASKBARGOODIES "Taakbalkeffecten van Windows 7 inschakelen"
@@ -2639,16 +2639,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED "Activeer DynDNS"
-    IDS_STATIC_DYNDNS_USERNAME "gebruikersnaam"
-    IDS_STATIC_DYNDNS_PASSWORD "Wachtwoord"
-    IDS_STATIC_DYNDNS_HOSTNAME "DynDNS Hostnaam"
-    IDS_BUTTON_DYNDNS_UPDATE "Update"
-    IDS_BUTTON_DYNDNS_RESET "Reset"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_AUTOUPIP2COUNTRY    "Update Ip-to-country.csv bij opstarten"
     IDS_UPDATEIPCURL        "Update"
     IDS_CLIENTQUEUEPROGRESSBAR "Toon vorderingen van client wachtlijst"
@@ -2815,7 +2805,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CONTINUE            "&Hervat"
-    IDS_DONOTASKAGAIN       "Vraag niet opnieuw"
+    //IDS_DONOTASKAGAIN       "Vraag niet opnieuw"
     IDS_DONOTTELLAGAIN      "Vertel dit niet opnieuw"
     IDS_DONOTSHOWAGAIN      "Toon dit niet weer"
     IDS_YESTOALL            "&Ja op Alles"

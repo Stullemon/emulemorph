@@ -1987,7 +1987,7 @@ BEGIN
     IDS_AUTOKADLOOKUPGRAPH  "Aktif aramalarý otomatik olarak göster"
     IDS_PAUSEONPREVIEW      "Önizlemek mümkün olduðunda duraklat"
     IDS_PREVIEWWITH         "Þununla önizle"
-    IDS_CLOSEEMULE          "eMule'u Kapat"
+    //IDS_CLOSEEMULE          "eMule'u Kapat"
     IDS_DONOTASKAGAIN       "Bana tekrar sorma"
     IDS_POPULARITY          "Popülerlik Derecesi"
     IDS_SHOWWIN7TASKBARGOODIES "Windows 7 görev çubuðu efektleri etkin"
@@ -2639,16 +2639,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED "Enable DynDNS"
-    IDS_STATIC_DYNDNS_USERNAME "Username"
-    IDS_STATIC_DYNDNS_PASSWORD "Password"
-    IDS_STATIC_DYNDNS_HOSTNAME "DynDNS Hostname"
-    IDS_BUTTON_DYNDNS_UPDATE "Update"
-    IDS_BUTTON_DYNDNS_RESET "Reset"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_AUTOUPIP2COUNTRY    "Baþlangýçta Ip-to-country.csv güncelle"
     IDS_UPDATEIPCURL        "Güncelle"
     IDS_CLIENTQUEUEPROGRESSBAR "Ýstemci sýrasý hakkýnda bilgi göster"
@@ -2826,7 +2816,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CONTINUE            "&Continue"
-    IDS_DONOTASKAGAIN       "Bir daha sorma"
+    //IDS_DONOTASKAGAIN       "Bir daha sorma"
     IDS_DONOTTELLAGAIN      "Don't tell me again"
     IDS_DONOTSHOWAGAIN      "Bir daha gösterme"
     IDS_YESTOALL            "Y&es to All"

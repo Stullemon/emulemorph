@@ -1911,18 +1911,8 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPNPSTART           "Utilizar UPnP para redirigir puertos"
-    IDS_UPNPSETUP           "Intentando redirigir los puertos mediante UPnP"
-    IDS_UPNPFAILED          "No se han podido redirigir los puertos mediante UPnP, por favor, ¡abre estos puertos manualmente si es necesario!"
-    IDS_UPNPSUCCESS         "Se han redirigido correctamente los puertos %u (TCP) y %u (UDP) mediante UPnP"
     IDS_FO_PREFBUTTON_NEW   "Abrir los puertos en el cortafuegos de WinXP SP1"
-    IDS_UPNP_NOSERVICE      "El servicio Host de Dispositivo Plug and Play universal no está ejecutándose, no se llevará a cabo la configuración de UPnP"
-    IDS_DELAYEDBYUPNP       "La conexión a la red aún no se ha realizado porque UPnP todavía está redirigiendo los puertos"
-    IDS_DELAYEDBYUPNP2      "Por favor, espera unos segundos, eMule se conectará a la red cuando UPnP termine."
-    IDS_UPNP                "UPnP"//!
-    IDS_UPNPCLOSEONEXIT     "Eliminar las redirecciones de puertos de UPnP al salir"
-    IDS_UPNPSKIPWANIP       "No configurar la IP de la WAN"
-    IDS_UPNPSKIPWANPPP      "No configurar el PPP de la WAN"
+    IDS_UPNP                "Universal Plug and Play (UPnP)"
     IDS_SHAREEMULELABEL     "Compartiendo eMule con otros usuarios"
     IDS_SHAREEMULEMULTI     "Cada usuario tiene su propia configuración y descargas"
     IDS_SHAREEMULEPUBLIC    "Todos tienen la misma configuración y descargas"
@@ -1995,7 +1985,7 @@ BEGIN
     IDS_AUTOKADLOOKUPGRAPH  "Mostrar automáticamente búsquedas activas"
     IDS_PAUSEONPREVIEW      "Pausar si se puede previsualizar"
     IDS_PREVIEWWITH         "Previsualizar con"
-    IDS_CLOSEEMULE          "Cerrar eMule"
+    //IDS_CLOSEEMULE          "Cerrar eMule"
     IDS_DONOTASKAGAIN       "No preguntar de nuevo"
     IDS_POPULARITY          "Popularidad"
     IDS_SHOWWIN7TASKBARGOODIES "Activar efectos de la barra de tareas de Windows 7"
@@ -2631,16 +2621,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED "Activar DynDNS (DNS dinámico)"
-    IDS_STATIC_DYNDNS_USERNAME "Usuario"
-    IDS_STATIC_DYNDNS_PASSWORD "Contraseña"
-    IDS_STATIC_DYNDNS_HOSTNAME "Nombre del Host DynDNS"
-    IDS_BUTTON_DYNDNS_UPDATE "Actualizar"
-    IDS_BUTTON_DYNDNS_RESET "Reset"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_AUTOUPIP2COUNTRY    "Actualizar IP_to_country.csv al inicio"
     IDS_UPDATEIPCURL        "Actualizar"
     IDS_CLIENTQUEUEPROGRESSBAR "Ver progreso de la lista de espera del usuario"
@@ -2810,7 +2790,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CONTINUE            "&Continuar"
-    IDS_DONOTASKAGAIN       "No volver a preguntar"
+    //IDS_DONOTASKAGAIN       "No volver a preguntar"
     IDS_DONOTTELLAGAIN      "No volver a notificar"
     IDS_DONOTSHOWAGAIN      "No volver a mostrar"
     IDS_YESTOALL            "&Sí a todo"
@@ -3492,13 +3472,6 @@ BEGIN
 	IDS_FAIR_PLAY_TIP       "Al menos se sube una copia del fichero descargado con mayor prioridad"
 END
 
-STRINGTABLE
-BEGIN
-	IDS_PW_EMAILNOTIFICATIONS "Notificaciones via Email"
-	IDS_PW_SENDERADDRESS    "Dirección remitente:"
-	IDS_PW_SMTPSERVER       "Servidor SMTP:"
-END
-
 STRINGTABLE 
 BEGIN
     IDS_DISABLECATCOLORS      "Desactivar los colores de categorías"
@@ -3612,46 +3585,12 @@ END
 
 STRINGTABLE
 BEGIN
-	IDS_CAPTCHAREQUEST      "Con el fin de evitar mensajes del tipo spam, este usuario requiere una comprobación del tipo captcha antes de poder enviarle un mensaje. Por fevor, introduzca las letras que vea en la imágen como respuesta:"
-	IDS_CAPTCHAFAILED       "Tu respuesta del captcha es incorrecta y tu mensaje ha sido ignorado. Puedes solicitar un nuevo captcha enviando otro mensaje nuevo."
-	IDS_CAPTCHASOLVED       "Ha pasado la comprobación del captcha y el usuario ha recibido tu mensaje."
-	IDS_USECAPTCHAS         "Requerir autentificación por captcha"
-	IDS_BOOTSRAPNODESDAT    "URL del archivo de nodos de KAD (nodes.dat):"
-	IDS_DOWNLOADING_NODESDAT_FROM "Descargando archivo de nodos de KAD (nodes.dat) de %s"
-	IDS_DOWNLOADING_NODESDAT "Descargando archivo de nodos de KAD (nodes.dat)..."
-	IDS_ERR_FAILEDDOWNLOADNODES "Descarga fallida del archivo de nodos de KAD (nodes.dat) de %s"
-	IDS_PREVENTSTANDBY      "Prevenir el modo Suspender mientras eMule está encendido"
-	IDS_KADID               "IDKAD"
-	IDS_SEARCHINGFRIENDKAD  "Buscando amigo en la red KAD"
-	IDS_FOUND               "encontrado"
-END
-
-STRINGTABLE
-BEGIN
-	IDS_EXTERNUDPPORT       "Puerto UDP Externo"
-	IDS_STORESEARCHES       "Recordar las búsquedas aunque se reinicie"
-	IDS_WRN_INCFILE_EXISTS  "Has seleccionado un nuevo directorio para tus archivos entrantes, que no está vacío. Todos los archivos de este directorio serán compartidos automáticamente por el eMule."
-	IDS_EDITSPAMFILTER      "Editar el filtro de Spam"
-	IDS_EDITSPAMFILTERCOMMENTS "Editar el filtro de Spam de los Comentarios"
-	IDS_WIZZARDOBFUSCATION  "Activa esta opción si quieres usar el protocolo ofuscado\n\nSi tu ISP intenta bloquear el eMule, activar la ofuscación ayudará a eludir esas restricciones."
-	IDS_BETANAG             "Esta es una versión Beta de eMule. Por favor, reporta los problemas y comprueba regularmente las actualizaciones en nuestro foro (http://spanishmorphxt.activoforo.com)."
-	IDS_CONFIRMNODESDOWNLOAD "¿Quieres descargar y usar los contactos de KAD (nodes.dat) de esta dirección:\n%s ?"
-	IDS_NOTCONNECTEDANY     "¡No estás conectado a nigún servidor eD2K o a la red KAD!"
 	IDS_USEDOWNLOADOVERHEAD "Usar el excedente de la Descarga"
 	IDS_USEDOWNLOADOVERHEAD_TIP "Usa el ACK del tráfico entrante de las sesiones de descarga\nen las estadísticas de las sesiones de subida, permitiendo ajustar tu subida\nligeramente mayor cuando descargas a gran velocidad (Por defecto: Activado)"
 	IDS_APPLY_SETTINGS       "¿Se deben aplicar los cambios necesarios ahora?"
 	IDS_TAB_WEB_SERVER       "Servidor Web"
 	IDS_TAB_MULTI_USER       "Multi Usuario"
 	IDS_TAB_NT_SERVICE       "Servicio NT"
-END
-
-STRINGTABLE
-BEGIN
-    IDS_ERR_SHARED_DIR      "Fallo al leer el directorio compartido ""%s"" - %s"
-    IDS_FILE_WARNING_DRM    "El archivo ""%s"" parece estar protegido con DRM (Digital Rights Management - Gestión Digital de Derechos).\r\n\r\nLo más probable es que no podrá utilizar ese fichero sin una licencia del autor. Debe de ser cosciente que abriendo este archivo con un reproductor multimedia, éste le redigirá su navegador, abriendo una página Web del creador de dicho archivo para preguntarle si quiere adquirir una licencia.\r\n\r\n¿Quiere seguir con el proceso de apertura de éste archivo?"
-    IDS_CHECK_FILE_OPEN     "Avisar cuando se abra archivos no seguros"
-    IDS_BOOTABLE            "bootable"
-    IDS_UNSUPPORTEDIMAGE    "imagen no soportada"
 END
 
 STRINGTABLE 
