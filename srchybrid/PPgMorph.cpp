@@ -104,6 +104,7 @@ CPPgMorph::CPPgMorph()
 	m_htiSmallFileDLPush = NULL;
 	m_htiResumeFileInNewCat = NULL;
 	m_htiUseAutoCat = NULL;
+	m_htiAddRemovedInc = NULL;
 	m_htiUseSLS = NULL;
 	// khaos::accuratetimerem+
 	m_htiTimeRemainingMode = NULL;
@@ -219,6 +220,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		m_htiSmallFileDLPush = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_CAT_SMALLFILEDLPUSH), m_htiSCC, m_bSmallFileDLPush);
 		m_htiResumeFileInNewCat = m_ctrlTreeOptions.InsertItem(GetResString(IDS_CAT_STARTFILESONADD), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_htiSCC);
 		m_ctrlTreeOptions.AddEditBox(m_htiResumeFileInNewCat, RUNTIME_CLASS(CNumTreeOptionsEdit));
+		m_htiAddRemovedInc = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ADD_REMOVED_INC), m_htiSCC, m_bAddRemovedInc);
 
 		m_htiSAC = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_SAC), iImgSAC, m_htiDM);
 		m_htiShowA4AFDebugOutput  = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_A4AF_SHOWDEBUG), m_htiSAC, m_bShowA4AFDebugOutput);
@@ -476,6 +478,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiSmartA4AFSwapping, m_bSmartA4AFSwapping);
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiAdvA4AFMode, m_iAdvA4AFMode);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseAutoCat, m_bUseAutoCat);
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiAddRemovedInc, m_bAddRemovedInc);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseSLS, m_bUseSLS);
 	// khaos::accuratetimerem+
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiTimeRemainingMode, m_iTimeRemainingMode);
@@ -580,6 +583,7 @@ BOOL CPPgMorph::OnInitDialog()
 	m_bSmallFileDLPush = thePrefs.SmallFileDLPush();
 	m_iResumeFileInNewCat = thePrefs.StartDLInEmptyCats();
 	m_bUseAutoCat = thePrefs.UseAutoCat();
+	m_bAddRemovedInc = thePrefs.UseAddRemoveInc();
 	m_bUseSLS = thePrefs.UseSaveLoadSources();
 	// khaos::accuratetimerem+
 	m_iTimeRemainingMode = thePrefs.GetTimeRemainingMode();
@@ -733,6 +737,7 @@ BOOL CPPgMorph::OnApply()
 	thePrefs.m_bSmallFileDLPush = m_bSmallFileDLPush;
 	thePrefs.m_iStartDLInEmptyCats = (uint8)m_iResumeFileInNewCat;
 	thePrefs.m_bUseAutoCat = m_bUseAutoCat;
+	thePrefs.m_bAddRemovedInc = m_bAddRemovedInc;
 	thePrefs.m_bUseSaveLoadSources = m_bUseSLS;
 	// khaos::accuratetimerem+
 	thePrefs.m_iTimeRemainingMode = (uint8)m_iTimeRemainingMode;
@@ -971,6 +976,9 @@ void CPPgMorph::Localize(void)
 		if (m_htiResumeFileInNewCat) {m_ctrlTreeOptions.SetEditLabel(m_htiResumeFileInNewCat, GetResString(IDS_CAT_STARTFILESONADD));
 		                              SetTool(m_htiResumeFileInNewCat,IDS_CAT_STARTFILESONADD_TIP);
 		}
+		if (m_bAddRemovedInc) {m_ctrlTreeOptions.SetItemText(m_htiAddRemovedInc, GetResString(IDS_ADD_REMOVED_INC));
+								SetTool(m_htiAddRemovedInc,IDS_ADD_REMOVED_INC_TIP);
+		}
 		if (m_htiSmartA4AFSwapping) {m_ctrlTreeOptions.SetItemText(m_htiSmartA4AFSwapping, GetResString(IDS_A4AF_SMARTSWAP));
 									 SetTool(m_htiSmartA4AFSwapping,IDS_A4AF_SMARTSWAP_TIP);
 		}
@@ -1138,6 +1146,7 @@ void CPPgMorph::OnDestroy()
 	m_htiSmallFileDLPush = NULL;
 	m_htiResumeFileInNewCat = NULL;
 	m_htiUseAutoCat = NULL;
+	m_htiAddRemovedInc = NULL;
 	m_htiUseSLS = NULL;
 	// khaos::accuratetimerem+
 	m_htiTimeRemainingMode = NULL;

@@ -591,6 +591,7 @@ bool	CPreferences::m_bSmallFileDLPush;
 uint8	CPreferences::m_iStartDLInEmptyCats;
 bool	CPreferences::m_bRespectMaxSources;
 bool	CPreferences::m_bUseAutoCat;
+bool	CPreferences::m_bAddRemovedInc;
 // khaos::categorymod-
 
 // MORPH START leuk_he disable catcolor
@@ -2615,6 +2616,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(_T("SmallFileDLPush"), m_bSmallFileDLPush,_T("eMule"));
 	ini.WriteInt(_T("StartDLInEmptyCats"), m_iStartDLInEmptyCats,_T("eMule"));
 	ini.WriteBool(_T("UseAutoCat"), m_bUseAutoCat,_T("eMule"));
+	ini.WriteBool(_T("AddRemovedInc"), m_bAddRemovedInc,_T("eMule"));
 	// khaos::categorymod-
 	// MORPH START leuk_he disable catcolor
 	ini.WriteBool(_T("DisableCatColors"), m_bDisableCatColors,_T("eMule"));
@@ -3434,6 +3436,7 @@ void CPreferences::LoadPreferences()
 	m_bSmallFileDLPush=ini.GetBool(_T("SmallFileDLPush"), true);
 	m_iStartDLInEmptyCats=(uint8)ini.GetInt(_T("StartDLInEmptyCats"), 0);
 	m_bUseAutoCat=ini.GetBool(_T("UseAutoCat"), true);
+	m_bAddRemovedInc=ini.GetBool(_T("AddRemovedInc"),true);
 	// khaos::categorymod-
 	// MORPH START leuk_he disable catcolor
 	m_bDisableCatColors=ini.GetBool(_T("DisableCatColors"), false);

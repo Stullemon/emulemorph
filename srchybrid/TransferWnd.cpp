@@ -34,6 +34,7 @@
 #include "ToolTipCtrlX.h"
 #include "SharedFilesWnd.h"
 #include "HelpIDs.h"
+#include "XMessageBox.h" // khaos::categorymod
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -1174,6 +1175,22 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 			delete getCatDlg;
 
 			if (useCat == rightclickindex) break;
+			// khaos::categorymod+
+			if( thePrefs.UseAddRemoveInc() &&
+				_tcsicmp(thePrefs.GetCatPath(useCat), thePrefs.GetCatPath(rightclickindex))!=0 &&
+				_tcsicmp(thePrefs.GetCatPath(rightclickindex), thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR))!=0)
+			{
+				int nResult = XMessageBox(GetSafeHwnd(), GetResString(IDS_KEEPCATINCSHARED), GetResString(IDS_KEEPCATINCSHARED_TITLE), MB_YESNO | MB_DEFBUTTON2 | MB_DONOTASKAGAIN | MB_ICONQUESTION);
+				if ((nResult & MB_DONOTASKAGAIN) > 0)
+					thePrefs.m_bAddRemovedInc = false;
+				if ((nResult & 0xFF) == IDYES)
+				{
+					CDirectoryItem* newDir = new CDirectoryItem(thePrefs.GetCatPath(rightclickindex));
+					theApp.emuledlg->sharedfileswnd->m_ctlSharedDirTree.EditSharedDirectories(newDir, true, false);
+					delete newDir;
+				}
+			}
+			// khaos::categorymod-
 			m_nLastCatTT=-1;
 
 			if (useCat > rightclickindex) useCat--;
@@ -1193,6 +1210,20 @@ BOOL CTransferWnd::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 		case MP_CAT_REMOVE: {
 			m_nLastCatTT=-1;
 			bool toreload=( _tcsicmp(thePrefs.GetCatPath(rightclickindex), thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR))!=0);
+			// khaos::categorymod+
+			if(toreload && thePrefs.UseAddRemoveInc())
+			{
+				int nResult = XMessageBox(GetSafeHwnd(), GetResString(IDS_KEEPCATINCSHARED), GetResString(IDS_KEEPCATINCSHARED_TITLE), MB_YESNO | MB_DEFBUTTON2 | MB_DONOTASKAGAIN | MB_ICONQUESTION);
+				if ((nResult & MB_DONOTASKAGAIN) > 0)
+					thePrefs.m_bAddRemovedInc = false;
+				if ((nResult & 0xFF) == IDYES)
+				{
+					CDirectoryItem* newDir = new CDirectoryItem(thePrefs.GetCatPath(rightclickindex));
+					theApp.emuledlg->sharedfileswnd->m_ctlSharedDirTree.EditSharedDirectories(newDir, true, false);
+					delete newDir;
+				}
+			}
+			// khaos::categorymod-
 			theApp.downloadqueue->ResetCatParts(rightclickindex);
 			thePrefs.RemoveCat(rightclickindex);
 			m_dlTab.DeleteItem(rightclickindex);

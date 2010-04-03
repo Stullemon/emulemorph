@@ -1571,7 +1571,7 @@ void CSharedFilesCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 		//MORPH END   - Added by SiRoB, Avoid misusing of powershare
 		//MORPH START - Added by SiRoB, POWERSHARE Limit
 		m_PowershareMenu.EnableMenuItem((UINT_PTR)m_PowerShareLimitMenu.m_hMenu, iSelectedItems > 0 ? MF_ENABLED : MF_GRAYED);
-		if (iPowerShareLimit==0)
+		if (thePrefs.GetPowerShareLimit()==0)
 			buffer.Format(_T(" (%s)"),GetResString(IDS_DISABLED));
 		else
 			buffer.Format(_T(" (%u)"),thePrefs.GetPowerShareLimit());
@@ -2139,7 +2139,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					if (!file->IsKindOf(RUNTIME_CLASS(CKnownFile)))
 						continue;
 					if  (newHideOS == ((CKnownFile*)file)->GetHideOS())
-						break;
+						continue;
 					((CKnownFile*)file)->SetHideOS(newHideOS);
 					UpdateFile(file);
 				}
@@ -2202,7 +2202,7 @@ BOOL CSharedFilesCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 							continue;
 						((CKnownFile*)file)->SetLastCalculatedCRC32(_T(""));
 						//UpdateFile(file);
-						selectedList.GetNext (pos);
+						//selectedList.GetNext (pos);
 					}
 				}
 				// Repaint the list 

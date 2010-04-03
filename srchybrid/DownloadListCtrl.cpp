@@ -2356,18 +2356,14 @@ void CDownloadListCtrl::FillCatsMenu(CMenu& rCatsMenu, int iFilesInCats)
 		//MORPH START - Changed By SiRoB, Khaos Category
 		/*
 		for (int i = 1; i < thePrefs.GetCatCount(); i++){
-			label = thePrefs.GetCategory(i)->strTitle;
-			label.Replace(_T("&"), _T("&&") );
-			rCatsMenu.AppendMenu(MF_STRING, MP_ASSIGNCAT + i, label);
-		}
-			*/
+		*/
 		CString label;
 		for (int i = 0; i < thePrefs.GetCatCount(); i++){
+		//MORPH END   - Changed By SiRoB, Khaos Category
 			label = thePrefs.GetCategory(i)->strTitle;
 			label.Replace(_T("&"), _T("&&") );
 			rCatsMenu.AppendMenu(MF_STRING, MP_ASSIGNCAT + i, label);
 		}
-		//MORPH END   - Changed By SiRoB, Khaos Category
 	}
 }
 

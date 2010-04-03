@@ -84,8 +84,8 @@ BOOL CPPgDirectories::OnInitDialog()
 /* old version: on column
 	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCFOLDERS), LVCFMT_LEFT, 280); 
 */
-	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCLIST_INACTIVE  ), LVCFMT_LEFT, 270);  // sharesubdir ==> this can be better
-	m_ctlUncPaths.InsertColumn(1,GetResString(IDS_SUBDIRS), LVCFMT_LEFT); // sharesubdir + column for inactive shares
+	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCLIST_INACTIVE  ), LVCFMT_LEFT, 250);  // sharesubdir ==> this can be better
+	m_ctlUncPaths.InsertColumn(1,GetResString(IDS_SUBDIRS), LVCFMT_LEFT,30); // sharesubdir + column for inactive shares
 	m_ctlUncPaths.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
 
 	GetDlgItem(IDC_SELTEMPDIRADD)->ShowWindow(thePrefs.IsExtControlsEnabled()?SW_SHOW:SW_HIDE);
@@ -336,10 +336,17 @@ BOOL CPPgDirectories::OnApply()
 
 	// on changing incoming dir, update incoming dirs of category of the same path
 	if (testincdirchanged.CompareNoCase(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR)) != 0) {
+		//khaos::categorymod+
+		/*
 		thePrefs.GetCategory(0)->strIncomingPath = thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR);
 		CString oldpath;
 		bool dontaskagain=false;
 		for (int cat=1; cat<=thePrefs.GetCatCount()-1;cat++){
+		*/
+		CString oldpath;
+		bool dontaskagain=false;
+		for (int cat=0; cat<=thePrefs.GetCatCount()-1;cat++){
+		//khaos::categorymod-
 			oldpath=CString(thePrefs.GetCatPath(cat));
 			if (oldpath.Left(testincdirchanged.GetLength()).CompareNoCase(testincdirchanged)==0) {
 
@@ -531,10 +538,24 @@ void CPPgDirectories::OnBnClickedAddUNC()
 
 void CPPgDirectories::OnBnClickedRemUNC()
 {
+	//MORPH START - Changed by Stulle, Allow multi selection in inactive share list
+	/*
 	int index = m_ctlUncPaths.GetSelectionMark();
 	if (index == -1 || m_ctlUncPaths.GetSelectedCount() == 0)
 		return;
 	m_ctlUncPaths.DeleteItem(index);
+	*/
+	POSITION pos = m_ctlUncPaths.GetFirstSelectedItemPosition();
+	if (pos != NULL)
+	{
+		while (pos)
+		{
+			int index = m_ctlUncPaths.GetNextSelectedItem(pos);
+			m_ctlUncPaths.DeleteItem(index);
+			pos = m_ctlUncPaths.GetFirstSelectedItemPosition();
+		}
+	}
+	//MORPH END   - Changed by Stulle, Allow multi selection in inactive share list
 	SetModified();
 }
 

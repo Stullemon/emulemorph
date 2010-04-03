@@ -3880,6 +3880,10 @@
 #define IDS_SERVICE_DISP_NAME_TIP       31402
 #define IDS_SERVICE_DESCR_TIP           31403
 //MORPH END   - Added by Stulle, Adjustable NT Service Strings
+#define IDS_KEEPCATINCSHARED            31404
+#define IDS_KEEPCATINCSHARED_TITLE      31405
+#define IDS_ADD_REMOVED_INC             31406
+#define IDS_ADD_REMOVED_INC_TIP         31407
 
 // Next default values for new objects
 // 
