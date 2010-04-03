@@ -748,6 +748,7 @@ public:
 	static uint8		m_iStartDLInEmptyCats;
 	static bool		m_bRespectMaxSources;
 	static bool		m_bUseAutoCat;
+	static bool		m_bAddRemovedInc;
 	// khaos::categorymod-
 	// khaos::kmod+
 	static bool		m_bShowA4AFDebugOutput;
@@ -2034,6 +2035,7 @@ public:
 	static	bool	SmallFileDLPush()		{ return m_bSmallFileDLPush; }
 	static	uint8	StartDLInEmptyCats()	{ return m_iStartDLInEmptyCats; } // 0 = disabled, otherwise num to resume
 	static	bool	UseAutoCat()			{ return m_bUseAutoCat; }
+	static	bool	UseAddRemoveInc()		{ return m_bAddRemovedInc; }
 	// khaos::categorymod-
 	// khaos::kmod+
 	static	bool	UseSmartA4AFSwapping()	{ return m_bSmartA4AFSwapping; } // only for NNP swaps and file completes, stops, cancels, etc.

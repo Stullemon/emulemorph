@@ -560,7 +560,12 @@ void CDirectoryTreeCtrl::SetSharedDirectories(CStringList* list, CStringList* li
 	}
 
 	DelShare(thePrefs.GetMuleDirectory(EMULE_INCOMINGDIR));
+	//khaos::categorymod+
+	/*
 	for (int ix=1;ix<thePrefs.GetCatCount();ix++)
+	*/
+	for (int ix=0;ix<thePrefs.GetCatCount();ix++)
+	//khaos::categorymod-
 		DelShare(thePrefs.GetCatPath(ix));
 	for (POSITION pos = listsubdir->GetHeadPosition(); pos != NULL; )
 	{
@@ -595,7 +600,12 @@ bool CDirectoryTreeCtrl::HasSharedSubdirectory(CString strDir)
 	istr.MakeLower();
 	if (istr.Find(strDir) == 0 && strDir != istr)
 		return true;
+	//khaos::categorymod+
+	/*
 	for (int ix=1;ix<thePrefs.GetCatCount();ix++)
+	*/
+	for (int ix=0;ix<thePrefs.GetCatCount();ix++)
+	//khaos::categorymod-
 	{
 		istr = thePrefs.GetCatPath(ix);
 		if (istr.Right(1) != _T("\\"))
@@ -647,7 +657,12 @@ void CDirectoryTreeCtrl::CheckChanged(HTREEITEM hItem, bool bChecked, bool bWith
 		if (!str.CompareNoCase(strDir))
 			bWithSubdir = true;
 		else {
+			//khaos::categorymod+
+			/*
 			for (int ix=1;ix<thePrefs.GetCatCount();ix++)
+			*/
+			for (int ix=0;ix<thePrefs.GetCatCount();ix++)
+			//khaos::categorymod-
 			{
 				str = thePrefs.GetCatPath(ix);
 				if (str.Right(1) != _T("\\"))

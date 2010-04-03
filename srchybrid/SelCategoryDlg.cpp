@@ -97,12 +97,17 @@ BOOL CSelCategoryDlg::OnInitDialog()
 
 
 	// 'All' is always an option.
+	//khaos::categorymod+
+	/*
 	((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(GetResString(IDS_ALL) + _T("/") + GetResString(IDS_CAT_UNASSIGN));
 
 	// If there are more categories, add them to the list.
 	if (thePrefs.GetCatCount() > 1)
 		for (int i=1; i < thePrefs.GetCatCount(); i++)
-					((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(thePrefs.GetCategory(i)->strTitle);
+	*/
+		for (int i=0; i < thePrefs.GetCatCount(); i++)
+	//khaos::categorymod-
+			((CComboBox*)GetDlgItem(IDC_CATCOMBO))->AddString(thePrefs.GetCategory(i)->strTitle);
 
 	// Select the category that is currently visible in the transfer dialog as default, or 0 if they are
 	// not using "New Downloads Default To Active Category"

@@ -104,7 +104,12 @@ void CDirectDownloadDlg::OnOK()
 					theApp.downloadqueue->AddFileLinkToDownload(pLink->GetFileLink(), (thePrefs.GetCatCount() == 0) ? 0 : m_cattabs.GetCurSel());
 					*/
 					CED2KFileLink* pFileLink = (CED2KFileLink*)CED2KLink::CreateLinkFromUrl(strTok.Trim());
+					//khaos::categorymod+
+					/*
 					theApp.downloadqueue->AddFileLinkToDownload(pFileLink, (thePrefs.GetCatCount()==0)?-1 : m_cattabs.GetCurSel(), true);
+					*/
+					theApp.downloadqueue->AddFileLinkToDownload(pFileLink, (thePrefs.GetCatCount()==1)?-1 : m_cattabs.GetCurSel(), true);
+					//khaos::categorymod-
 					//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod-
 				}
 				else

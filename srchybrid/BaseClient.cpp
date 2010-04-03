@@ -606,22 +606,39 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion, _T("TYRANUS"))|| //MyTh
 			StrStrI(m_strClientSoftware,_T("eMule v2.0")) || //6/2007 fake Xtreme / GPL-breaker
 			// added in 6.1
-			StrStrI(m_strModVersion, _T("xunlei")) ||//xunlei v5.7.1
-			StrStrI(m_strModVersion, _T("20071122")) ||//xunlei 5.7.5
-			StrStrI(m_strModVersion, _T("20080228")) ||//xunlei 5.7.9.463
-			StrStrI(m_strModVersion, _T("080620")) ||//xunlei 5.8
-			StrStrI(m_strModVersion, _T("080509")) ||
-			StrStrI(m_strModVersion, _T("20080505")) || //xunlei 6
-			StrStrI(m_strModVersion, _T("PlayMule")) || //PlayMule
-			( !m_strModVersion.IsEmpty() && m_strModVersion.Trim().IsEmpty() ) || //pruma, korean leecher, modversion is a space
+			//modstring of XL
+			_tcsstr(m_strModVersion, _T("20071122")) || _tcsstr(m_strModVersion, _T("20080228")) ||
+			_tcsstr(m_strModVersion, _T("080620")) || _tcsstr(m_strModVersion, _T("080307")) || 
+			_tcsstr(m_strModVersion, _T("080509")) || _tcsstr(m_strModVersion, _T("20080505")) || 
+			_tcsstr(m_strModVersion, _T("v 080828")) || _tcsstr(m_strModVersion, _T("XL8828")) ||
+			_tcsstr(m_strModVersion, _T("build 11230")) || _tcsstr(m_strModVersion, _T("20080923")) ||
+			_tcsstr(m_strModVersion, _T("ZZULL")) || _tcsstr(m_strModVersion, _T("XunaLei")) || 
+			_tcsstr(m_strModVersion, _T("XunL")) || _tcsstr(m_strModVersion, _T("Xthunder")) ||
+			_tcsstr(m_strModVersion, _T("xl build")) ||
+			//end
+			((_tcsstr(m_strModVersion, _T("MorphXT v9.6")) || _tcsstr(m_strModVersion, _T("Xtreme 7")) || _tcsstr(m_strModVersion, _T("ZZUL Plus 1"))) && _tcsstr(m_strClientSoftware, _T("0.48a"))) || //should not 0.48a
+			_tcsstr(m_strModVersion, _T("NetF WARP 9")) || //should be NetF WARP 0.3a.9
+			_tcsstr(m_strModVersion, _T("VeryCD 080730")) || //Fake VeryCD
+			_tcsstr(m_strModVersion, _T("VeryCD 080509")) || //Fake VeryCD
+			_tcsstr(m_strModVersion, _T("VeryCD 080606")) || //Fake VeryCD
+			_tcsstr(m_strModVersion, _T("VeryCD 080624")) || //Fake VeryCD
+			_tcsstr(m_strModVersion, _T("VeryCD 080630")) || //Fake VeryCD
+			_tcsstr(m_strModVersion, _T("FreeCD")) || //BitComet, changed to hardban
+			_tcsstr(m_strModVersion, _T("PlayMule")) || //PlayMule
+			( !CString(m_strModVersion).IsEmpty() && CString(m_strModVersion).Trim().IsEmpty() ) || //pruma, korean leecher, modversion is a space
+			_tcsstr(m_strModVersion,_T("VMULE")) || //israel
+			StrStrI(m_strModVersion,_T("Goop.co.il")) ||
+			StrStrI(m_strModVersion,_T("Razorback")) ||
+			StrStrI(m_strModVersion,_T("UlTiMaTiC ")) || //based on MA 3.5
+			StrStrI(m_strModVersion,_T("Peizheng")) || //gpl-breaker
+			_tcsstr(m_strModVersion,_T("amule")) || //fake version, amule never write a modstring here
+			_tcsstr(m_strModVersion,_T("Amule")) ||
+			//_tcsstr(modversion,_T("miniMule")) || //it must be a leecher // Stulle: i can't find nothing about this!
 			StrStrI(m_strModVersion, L"Angelmule") || // JvA: no sources, no changelog, community username,...
 			StrStrI(m_strModVersion, L"TR-P2P-MoD") || // JvA: bad client
 			StrStrI(m_strModVersion, L"Esekci") || // JvA: no sources, no changelog, ...
 			StrStrI(m_strClientSoftware,_T("eMule v0.95g")) || //korea
 			StrStrI(m_strClientSoftware,_T("eMule v0.47f")) ||
-			StrStrI(m_strClientSoftware,_T("eMule v2.4")) ||
-			StrStrI(m_strClientSoftware,_T("eMule v2.5")) ||
-			StrStrI(m_strClientSoftware,_T("eMule v3.1")) ||
 			StrStrI(m_strModVersion,_T("VMULE 2007")) || //israel
 			StrStrI(m_strModVersion,_T("Goop.co.il")) ||
 			StrStrI(m_strModVersion,_T("L!()Netw0rk")) ||

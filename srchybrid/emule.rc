@@ -483,11 +483,11 @@ BEGIN
     CONTROL         "",IDC_SHARESELECTOR,"SysTreeView32",TVS_HASBUTTONS | 
                     TVS_HASLINES | TVS_LINESATROOT | TVS_SHOWSELALWAYS | 
                     TVS_CHECKBOXES | WS_BORDER | WS_TABSTOP | 0x800,10,76,
-                    211,160
+                    211,150
     CONTROL         "",IDC_UNCLIST,"SysListView32",LVS_REPORT | 
-                    LVS_SINGLESEL | LVS_ALIGNLEFT | LVS_NOSORTHEADER | 
-                    WS_BORDER | WS_TABSTOP,10,240,195,43
-    PUSHBUTTON      "+",IDC_UNCADD,208,240,14,13,BS_CENTER
+                    /*LVS_SINGLESEL | */LVS_ALIGNLEFT | LVS_NOSORTHEADER | 
+                    WS_BORDER | WS_TABSTOP,10,230,195,53
+    PUSHBUTTON      "+",IDC_UNCADD,208,230,14,13,BS_CENTER
     PUSHBUTTON      "-",IDC_UNCREM,208,270,14,13,BS_CENTER
     GROUPBOX        "Incoming Files",IDC_INCOMING_FRM,4,2,223,30
     GROUPBOX        "Temporary Files",IDC_TEMP_FRM,4,34,223,29
@@ -6543,6 +6543,10 @@ BEGIN
     IDS_SERVICE_DISP_NAME_TIP "Name that is displayed in the Windows Services list. This name must\nbe unique (case insensitive).\n\nDefault: eMule MorphXT as a service"
     IDS_SERVICE_DESCR_TIP   "Description that is displayed in the Windows Services list.\n\nDefault: Provides capability to let eMule run as a NT system service."
     //MORPH END   - Added by Stulle, Adjustable NT Service Strings
+    IDS_KEEPCATINCSHARED    "Should incoming directory of removed category be added as share?"
+    IDS_KEEPCATINCSHARED_TITLE "Category removed"
+    IDS_ADD_REMOVED_INC     "Ask if incoming dir of removed cat should be added as share"
+    IDS_ADD_REMOVED_INC_TIP "When a category is removed or merged an incoming folder might be removed.\nUnsharing downloaded files is not always good so with this option enabled\neMule will ask you if the incoming directory of a removed category should be\nadded as a shared directory. Disable this option if you do not want to be asked."
 END
 
 #endif    // English (U.S.) resources
