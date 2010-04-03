@@ -1963,7 +1963,7 @@ BEGIN
     IDS_AUTOKADLOOKUPGRAPH  "自动显示活跃搜索"
     IDS_PAUSEONPREVIEW      "当可预览时暂停"
     IDS_PREVIEWWITH         "预览用"
-    IDS_CLOSEEMULE          "关闭电驴"
+    //IDS_CLOSEEMULE          "关闭电驴"
     IDS_DONOTASKAGAIN       "不再提示"
     IDS_POPULARITY          "流行热度"
     IDS_SHOWWIN7TASKBARGOODIES "启用Win 7任务栏效果"
@@ -2144,9 +2144,6 @@ BEGIN
     IDS_BOTH                "二者都显示"
     IDS_REALTIME            "实时"
     IDS_ANTI_CREDITHACK     "启用反窃取信用控制"
-    IDS_FILLGRAPHS          "绘制实心图表" //"Draw filled graphs"
-    IDS_PARAMETER           "参数" //"Parameter"
-    IDS_TEST                "测试" //"Test"
 END
 
 STRINGTABLE 
@@ -2625,16 +2622,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED "启用动态服务器"
-    IDS_STATIC_DYNDNS_USERNAME "用户名"
-    IDS_STATIC_DYNDNS_PASSWORD "密码"
-    IDS_STATIC_DYNDNS_HOSTNAME "动态服务器域名"
-    IDS_BUTTON_DYNDNS_UPDATE "更新"
-    IDS_BUTTON_DYNDNS_RESET "还原"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_AUTOUPIP2COUNTRY    "启动时更新Ip-to-country.csv"
     IDS_UPDATEIPCURL        "更新"
     IDS_CLIENTQUEUEPROGRESSBAR "显示客户排队进程"
@@ -2802,7 +2789,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CONTINUE            "继续"
-    IDS_DONOTASKAGAIN       "不要再次询问"
+    //IDS_DONOTASKAGAIN       "不要再次询问"
     IDS_DONOTTELLAGAIN      "不要再次告知"
     IDS_DONOTSHOWAGAIN      "不要再次显示"
     IDS_YESTOALL            "全部确认"

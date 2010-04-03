@@ -1982,7 +1982,7 @@ BEGIN
     IDS_AUTOKADLOOKUPGRAPH  "Automatically show active searches"
     IDS_PAUSEONPREVIEW      "Pause when preview possible"
     IDS_PREVIEWWITH         "Preview with"
-    IDS_CLOSEEMULE          "Close eMule"
+    //IDS_CLOSEEMULE          "Close eMule"
     IDS_DONOTASKAGAIN       "Don't ask me again"
     IDS_POPULARITY          "Popularity Rank"
     IDS_SHOWWIN7TASKBARGOODIES "Enable Windows 7 taskbar effects"
@@ -2617,16 +2617,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED "W³¹cz DynDNS"
-    IDS_STATIC_DYNDNS_USERNAME "U¿ytkownik"
-    IDS_STATIC_DYNDNS_PASSWORD "Has³o"
-    IDS_STATIC_DYNDNS_HOSTNAME "Nazwa hosta DynDNS"
-    IDS_BUTTON_DYNDNS_UPDATE "Aktualizuj"
-    IDS_BUTTON_DYNDNS_RESET "Reset"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_AUTOUPIP2COUNTRY    "Aktualizuj przy starcie"
     IDS_UPDATEIPCURL        "Aktualizuj"
     IDS_CLIENTQUEUEPROGRESSBAR "Pokazuj postêp kolejki klientów"
@@ -2806,7 +2796,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CONTINUE            "&Kontyntuuj"
-    IDS_DONOTASKAGAIN       "Nie pytaj mnie wiêcej"
+    //IDS_DONOTASKAGAIN       "Nie pytaj mnie wiêcej"
     IDS_DONOTTELLAGAIN      "Nie mów mi wiêcej"
     IDS_DONOTSHOWAGAIN      "Nie pokazuj tego wiêcej"
     IDS_YESTOALL            "T&ak dla Wszystkiego"

@@ -2603,16 +2603,6 @@ END
 
 STRINGTABLE
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED       "Activer DynDNS"
-    IDS_STATIC_DYNDNS_USERNAME       "Nom d'utilisateur"
-    IDS_STATIC_DYNDNS_PASSWORD       "Mot de passe"
-    IDS_STATIC_DYNDNS_HOSTNAME       "Nom d'hôte DynDNS"
-    IDS_BUTTON_DYNDNS_UPDATE       "Mise à jour"
-    IDS_BUTTON_DYNDNS_RESET       "Mise à 0"
-END
-
-STRINGTABLE
-BEGIN
     IDS_AUTOUPIP2COUNTRY       "Mise à jour des drapeaux de pays au démarrage"
     IDS_UPDATEIPCURL       "Mise à Jour"
     IDS_CLIENTQUEUEPROGRESSBAR       "Afficher la progression de la file d'attente"

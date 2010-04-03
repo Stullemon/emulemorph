@@ -1695,7 +1695,7 @@ BEGIN
     IDS_LD_COPYCLIPBOARD    "Copiar"
     IDS_LD_HOSTNAME         "Usar nome do host (das opções) invés do IP quando criando link de fonte"
     IDS_SAVEACFAILED        "Falha ao salvar Hashset AICH!"
-    IDS_IACHHASH            "AICH Hash"
+    IDS_AICHHASH            "AICH Hash"
     IDS_BYTESPERSEC         "B/s"
     IDS_KBYTESPERSEC        "KB/s"
     IDS_MBYTESPERSEC        "MB/s"
@@ -2578,16 +2578,6 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_CHECK_DYNDNS_ENABLED "Ligar DynDNS"
-    IDS_STATIC_DYNDNS_USERNAME "Username"
-    IDS_STATIC_DYNDNS_PASSWORD "Password"
-    IDS_STATIC_DYNDNS_HOSTNAME "DynDNS Hostname"
-    IDS_BUTTON_DYNDNS_UPDATE "Atualizar"
-    IDS_BUTTON_DYNDNS_RESET "Resetar"
-END
-
-STRINGTABLE 
-BEGIN
     IDS_AUTOUPIP2COUNTRY    "Atualizar Ip-to-country.csv ao Iniciar"
     IDS_UPDATEIPCURL        "Atualizar"
     IDS_CLIENTQUEUEPROGRESSBAR "Mostrar progresso da fila de espera"
@@ -2765,7 +2755,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CONTINUE            "&Continuar"
-    IDS_DONOTASKAGAIN       "Não me pergunte novamente"
+    //IDS_DONOTASKAGAIN       "Não me pergunte novamente"
     IDS_DONOTTELLAGAIN      "Não me diga novamente"
     IDS_DONOTSHOWAGAIN      "Não me mostre novamente"
     IDS_YESTOALL            "&Sim para tudo"
