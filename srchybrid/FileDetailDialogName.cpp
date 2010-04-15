@@ -260,6 +260,8 @@ void CFileDetailDialogName::OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult)
 	else
 		sortAscending = !m_listFileNames.GetSortAscending();
 
+	m_listFileNames.UpdateSortHistory(pNMListView->iSubItem + (sortAscending ? 0 : 10), 10); // SLUGFILLER: multiSort - forgot something?
+
 	m_listFileNames.SetSortArrow(pNMListView->iSubItem, sortAscending);
 	m_listFileNames.SortItems(&CompareListNameItems, pNMListView->iSubItem + (sortAscending ? 0 : 10));
 
