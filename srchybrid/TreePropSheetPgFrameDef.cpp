@@ -92,7 +92,7 @@ void CPropPageFrameDefault::SetCaption(LPCTSTR lpszCaption, HICON hIcon /*= NULL
 		BITMAP	bm;
 		bmMask.GetBitmap(&bm);
 
-		if (!m_Images.Create(bm.bmWidth, bm.bmHeight, theApp.m_iDfltImageListColorFlags | ILC_MASK, 0, 1))
+		if (!m_Images.Create(bm.bmWidth, bm.bmHeight, theApp.m_iDfltImageListColorFlags|ILC_MASK, 0, 1))
 			return;
 
 		if (m_Images.Add(hIcon) == -1)

@@ -489,7 +489,7 @@ void CKeyEntry::MergeIPsAndFilenames(CKeyEntry* pFromEntry){
 				{
 					if (Cur.m_byAICHHashIdx != _UI16_MAX && m_aAICHHashs[Cur.m_byAICHHashIdx] != *pNewAICHHash)
 					{
-						DEBUG_ONLY( DebugLogWarning(_T("KadEntryTracking: AICH Hash changed, publisher ip: %s"), ipstr(ntohl(m_uIP))) );
+						DebugLogWarning(_T("KadEntryTracking: AICH Hash changed, publisher ip: %s"), ipstr(ntohl(m_uIP)));
 						AddRemoveAICHHash(m_aAICHHashs[Cur.m_byAICHHashIdx], false);
 						Cur.m_byAICHHashIdx = AddRemoveAICHHash(*pNewAICHHash, true);
 					}
@@ -501,7 +501,7 @@ void CKeyEntry::MergeIPsAndFilenames(CKeyEntry* pFromEntry){
 				}
 				else if (Cur.m_byAICHHashIdx != _UI16_MAX)
 				{
-					DEBUG_ONLY( DebugLogWarning(_T("KadEntryTracking: AICH Hash removed, publisher ip: %s"), ipstr(ntohl(m_uIP))) );
+					DebugLogWarning(_T("KadEntryTracking: AICH Hash removed, publisher ip: %s"), ipstr(ntohl(m_uIP)));
 					AddRemoveAICHHash(m_aAICHHashs[Cur.m_byAICHHashIdx], false);
 					Cur.m_byAICHHashIdx = _UI16_MAX;
 				}
@@ -549,7 +549,9 @@ void CKeyEntry::MergeIPsAndFilenames(CKeyEntry* pFromEntry){
 		// we keep track of max 100 IPs, in order to avoid too much time for calculation/storing/loading.
 		if (m_pliPublishingIPs->GetCount() > 100){
 			structPublishingIP curEntry = m_pliPublishingIPs->RemoveHead();
-			AdjustGlobalPublishTracking(curEntry.m_uIP, false, _T("more than 200 publishers purge"));
+			if (curEntry.m_byAICHHashIdx != _UI16_MAX)
+				VERIFY( AddRemoveAICHHash(m_aAICHHashs[curEntry.m_byAICHHashIdx], false) == curEntry.m_byAICHHashIdx );
+			AdjustGlobalPublishTracking(curEntry.m_uIP, false, _T("more than 100 publishers purge"));
 		}
 		// since we added a new publisher, we want to (re)calcualte the trust value for this entry		
 		RecalcualteTrustValue();
@@ -559,6 +561,20 @@ void CKeyEntry::MergeIPsAndFilenames(CKeyEntry* pFromEntry){
 		DebugLog(_T("Kad: EntryTrack: Indexed Keyword, Refresh: %s, Current Publisher: %s, Total Publishers: %u, Total different Names: %u,TrustValue: %.2f, file: %s"),
 			(bRefresh ? _T("Yes") : _T("No")), ipstr(ntohl(m_uIP)), m_pliPublishingIPs->GetCount(), m_listFileNames.GetCount(), m_fTrustValue, m_uSourceID.ToHexString());
 		//);*/
+	/*if (m_aAICHHashs.GetCount() == 1)
+	{
+			DebugLog(_T("Kad: EntryTrack: Indexed Keyword, Refresh: %s, Current Publisher: %s, Total Publishers: %u, Total different Names: %u,TrustValue: %.2f, file: %s, AICH Hash: %s, Popularity: %u"),
+			(bRefresh ? _T("Yes") : _T("No")), ipstr(ntohl(m_uIP)), m_pliPublishingIPs->GetCount(), m_listFileNames.GetCount(), m_fTrustValue, m_uSourceID.ToHexString(), m_aAICHHashs[0].GetString(), m_anAICHHashPopularity[0]);
+	}
+	else if (m_aAICHHashs.GetCount() > 1)
+	{
+			DebugLog(_T("Kad: EntryTrack: Indexed Keyword, Refresh: %s, Current Publisher: %s, Total Publishers: %u, Total different Names: %u,TrustValue: %.2f, file: %s, AICH Hash: %u - dumping"),
+			(bRefresh ? _T("Yes") : _T("No")), ipstr(ntohl(m_uIP)), m_pliPublishingIPs->GetCount(), m_listFileNames.GetCount(), m_fTrustValue, m_uSourceID.ToHexString(), m_aAICHHashs.GetCount());
+			for (int i = 0; i < m_aAICHHashs.GetCount(); i++)
+			{
+				DebugLog(_T("Hash: %s, Populalrity: %u"),  m_aAICHHashs[i].GetString(), m_anAICHHashPopularity[i]);
+			}
+	}*/
 }
 
 void CKeyEntry::RecalcualteTrustValue(){
@@ -809,13 +825,20 @@ void CKeyEntry::WriteTagListWithPublishInfo(CDataIO* pData){
 			}
 						
 		}
-		// wirte tag even on 0 count now
+		// write tag even on 0 count now
 		fileAICHTag.WriteUInt8(byCount);
-		for (uint8 i = 0; i < byCount; i++)
+		uint8 nWritten = 0;
+		uint8 j;
+		for (j = 0; nWritten < byCount && j < m_aAICHHashs.GetCount(); j++)
 		{
-			fileAICHTag.WriteUInt8(m_anAICHHashPopularity[i]);
-			m_aAICHHashs[i].Write(&fileAICHTag);
+			if (m_anAICHHashPopularity[j] > 0)
+			{
+				fileAICHTag.WriteUInt8(m_anAICHHashPopularity[j]);
+				m_aAICHHashs[j].Write(&fileAICHTag);
+				nWritten++;
+			}
 		}
+		ASSERT( nWritten == byCount && nWritten <= j );
 		ASSERT(fileAICHTag.GetLength() <= 255 );
 		uint8 nSize = (uint8)fileAICHTag.GetLength();
 		BYTE* byBuffer = fileAICHTag.Detach();
@@ -839,13 +862,23 @@ uint16 CKeyEntry::AddRemoveAICHHash(const CAICHHash& hash, bool bAdd)
 			}
 			else
 			{
-				ASSERT( m_anAICHHashPopularity[i] >= 1 );
-				m_anAICHHashPopularity[i] -= 1;
+				if (m_anAICHHashPopularity[i] >= 1)
+					m_anAICHHashPopularity[i] -= 1;
+				else
+					ASSERT( false );
 				return (uint16)i;
 			}
 		}
 	}
-	m_aAICHHashs.Add(hash);
-	m_anAICHHashPopularity.Add(1);
-	return (uint16)m_aAICHHashs.GetCount() - 1;
+	if (bAdd)
+	{
+		m_aAICHHashs.Add(hash);
+		m_anAICHHashPopularity.Add(1);
+		return (uint16)m_aAICHHashs.GetCount() - 1;
+	}
+	else
+	{
+		ASSERT( false );
+		return _UI16_MAX;
+	}
 }

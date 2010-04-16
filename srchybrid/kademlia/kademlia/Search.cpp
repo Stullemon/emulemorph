@@ -1347,8 +1347,12 @@ void CSearch::ProcessResultKeyword(const CUInt128 &uAnswer, TagList *plistInfo, 
 					uint8 byCount = fileAICHTag.ReadUInt8();
 					for (uint8 i = 0; i < byCount; i++)
 					{
-						aAICHHashPopularity.Add(fileAICHTag.ReadUInt8());
-						aAICHHashs.Add(CAICHHash(&fileAICHTag));
+						uint8 byPopularity = fileAICHTag.ReadUInt8();
+						if (byPopularity > 0)
+						{
+							aAICHHashPopularity.Add(byPopularity);
+							aAICHHashs.Add(CAICHHash(&fileAICHTag));
+						}
 					}
 				}
 				catch (CFileException* pError)

@@ -1987,6 +1987,7 @@ BEGIN
     IDS_POPULARITY          "Popularity Rank"
     IDS_SHOWWIN7TASKBARGOODIES "Enable Windows 7 taskbar effects"
     IDS_LANMODE             "LAN Mode"
+    IDS_OPENPREFINI         "Open preferences.ini"
 END
 
 STRINGTABLE 

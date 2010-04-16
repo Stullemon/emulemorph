@@ -38,7 +38,7 @@ namespace Kademlia
 			uint32			m_uIP;
 			uint16			m_uPort;
 			bool			m_bForcedInteresting;
-			bool			IsInteresting() const			{ return m_dwAskedContactsTime != 0 || m_dwAskedSearchItemTime != 0; }
+			bool			IsInteresting() const			{ return m_dwAskedContactsTime != 0 || m_dwAskedSearchItemTime != 0 || m_bForcedInteresting; }
 		};
 
 			CLookupHistory();

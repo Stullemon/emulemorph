@@ -1138,3 +1138,26 @@ BOOL CSearchParamsWnd::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 	theApp.ShowHelp(eMule_FAQ_GUI_Search);
 	return TRUE;
 }
+
+void CSearchParamsWnd::ProcessEd2kSearchLinkRequest(CString strSearchTerm)
+{
+	// We have a ed2k search link, asking us to search for stuff
+	// For now we handle this very basic: Put the search term into the params window (so the users can also see it)
+	// And if we are connected, start the search otherwise not.
+	if (strSearchTerm.IsEmpty())
+	{
+		ASSERT( false );
+		return;
+	}
+	OnBnClickedSearchReset();
+	m_ctlName.SetWindowText(strSearchTerm);
+	if (theApp.IsConnected())
+	{
+		if ((!theApp.IsConnected(true, false) && (ESearchType)m_ctlMethod.GetCurSel() == SearchTypeKademlia)
+			|| (!theApp.IsConnected(false, true) && ((ESearchType)m_ctlMethod.GetCurSel() == SearchTypeEd2kServer || (ESearchType)m_ctlMethod.GetCurSel() == SearchTypeEd2kGlobal)))
+		{
+			m_ctlMethod.SetCurSel(0);
+		}
+		OnBnClickedStart();
+	}
+}

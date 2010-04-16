@@ -55,6 +55,7 @@ BEGIN_MESSAGE_MAP(CPPgTweaks, CPropertyPage)
 	ON_WM_DESTROY()
 	ON_MESSAGE(UM_TREEOPTSCTRL_NOTIFY, OnTreeOptsCtrlNotify)
 	ON_WM_HELPINFO()
+	ON_BN_CLICKED(IDC_OPENPREFINI, OnBnClickedOpenprefini)
 END_MESSAGE_MAP()
 
 CPPgTweaks::CPPgTweaks()
@@ -265,6 +266,10 @@ CPPgTweaks::CPPgTweaks()
 	m_htiBeeper = NULL;
 	m_htiMsgOnlySec = NULL;
 	m_htiDisablePeerCache = NULL;
+	m_htiExtraPreviewWithMenu = NULL;
+	m_htiShowUpDownIconInTaskbar = NULL;
+	m_htiKeepUnavailableFixedSharedDirs = NULL;
+	m_htiForceSpeedsToKB = NULL;
 	//MORPH END  leuk_he Advanced official preferences.
 }
 
@@ -505,6 +510,10 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiBeeper = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_PW_BEEP), m_hti_advanced, m_bBeeper);
 		m_htiMsgOnlySec = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MSGONLYSEC), m_hti_advanced, m_bMsgOnlySec);
 		m_htiDisablePeerCache = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLEPEERACHE), m_hti_advanced, m_bDisablePeerCache);
+		m_htiExtraPreviewWithMenu = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_EXTRAPREVIEWWITHMENU), m_hti_advanced, m_bExtraPreviewWithMenu);
+		m_htiShowUpDownIconInTaskbar = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_SHOWUPDOWNICONINTASKBAR), m_hti_advanced, m_bShowUpDownIconInTaskbar);
+		m_htiKeepUnavailableFixedSharedDirs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS), m_hti_advanced, m_bKeepUnavailableFixedSharedDirs);
+		m_htiForceSpeedsToKB = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FORCESPEEDSTOKB), m_hti_advanced, m_bForceSpeedsToKB);
 
 		if (m_bExtControls) // show more controls --> still possible to manully expand. 
 			m_ctrlTreeOptions.Expand(m_hti_advanced, TVE_EXPAND);
@@ -690,6 +699,10 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiBeeper, m_bBeeper);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiMsgOnlySec, m_bMsgOnlySec);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDisablePeerCache, m_bDisablePeerCache);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiExtraPreviewWithMenu, m_bExtraPreviewWithMenu);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiShowUpDownIconInTaskbar, m_bShowUpDownIconInTaskbar);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiKeepUnavailableFixedSharedDirs, m_bKeepUnavailableFixedSharedDirs);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiForceSpeedsToKB, m_bForceSpeedsToKB);
     // MORPH END  leuk_he Advanced official preferences.
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -825,6 +838,10 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bBeeper = thePrefs.beepOnError;
 	m_bMsgOnlySec = thePrefs.msgsecure;
 	m_bDisablePeerCache = !thePrefs.m_bPeerCacheEnabled;
+	m_bExtraPreviewWithMenu = thePrefs.GetExtraPreviewWithMenu();
+	m_bShowUpDownIconInTaskbar = thePrefs.IsShowUpDownIconInTaskbar();
+	m_bKeepUnavailableFixedSharedDirs = thePrefs.m_bKeepUnavailableFixedSharedDirs;
+	m_bForceSpeedsToKB = thePrefs.GetForceSpeedsToKB();
 	// MORPH END  leuk_he Advanced official preferences.
 
 	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
@@ -1072,6 +1089,10 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.beepOnError = m_bBeeper;
 	thePrefs.msgsecure = m_bMsgOnlySec;
 	thePrefs.m_bPeerCacheEnabled = !m_bDisablePeerCache;
+	thePrefs.m_bExtraPreviewWithMenu = m_bExtraPreviewWithMenu;
+	thePrefs.m_bShowUpDownIconInTaskbar = m_bShowUpDownIconInTaskbar;
+	thePrefs.m_bKeepUnavailableFixedSharedDirs = m_bKeepUnavailableFixedSharedDirs;
+	thePrefs.m_bForceSpeedsToKB = m_bForceSpeedsToKB;
 	//MORPH END  leuk_he Advanced official preferences.
 
 	if (thePrefs.GetEnableVerboseOptions())
@@ -1111,6 +1132,8 @@ void CPPgTweaks::Localize(void)
 	{
 		SetWindowText(GetResString(IDS_PW_TWEAK));
 		GetDlgItem(IDC_WARNING)->SetWindowText(GetResString(IDS_TWEAKS_WARNING));
+		GetDlgItem(IDC_PREFINI_STATIC)->SetWindowText(GetResString(IDS_PW_TWEAK));
+		GetDlgItem(IDC_OPENPREFINI)->SetWindowText(GetResString(IDS_OPENPREFINI));
 
 		if (m_htiTCPGroup) m_ctrlTreeOptions.SetItemText(m_htiTCPGroup, GetResString(IDS_TCPIP_CONNS));
 		if (m_htiMaxCon5Sec) m_ctrlTreeOptions.SetEditLabel(m_htiMaxCon5Sec, GetResString(IDS_MAXCON5SECLABEL));
@@ -1181,6 +1204,9 @@ void CPPgTweaks::Localize(void)
 		temp.Format(_T("%s: %s"), GetResString(IDS_QUEUESIZE), GetFormatedUInt(m_iQueueSize));
 		GetDlgItem(IDC_QUEUESIZE_STATIC)->SetWindowText(temp);
         //MORPH START leuk_he tooltipped
+		SetTool(IDC_FILEBUFFERSIZE,IDS_FILEBUFFERSIZE_TIP);
+		SetTool(IDC_QUEUESIZE,IDS_QUEUESIZE_TIP);
+		SetTool(IDC_OPENPREFINI,IDS_OPENPREFINI_TIP);
 		SetTool(m_htiTCPGroup,IDS_TCPIP_CONNS_TIP);
 		SetTool(m_htiMaxCon5Sec,IDS_MAXCON5SECLABEL_TIP);
 		SetTool(m_htiMaxHalfOpen,IDS_MAXHALFOPENCONS_TIP);
@@ -1322,6 +1348,14 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiMsgOnlySec,IDC_MSGONLYSEC_SEC);
 		if (m_htiDisablePeerCache) m_ctrlTreeOptions.SetItemText(m_htiDisablePeerCache, GetResString(IDS_DISABLEPEERACHE));
 		SetTool(m_htiDisablePeerCache,IDS_DISABLEPEERACHE_TIP);
+		if (m_htiExtraPreviewWithMenu) m_ctrlTreeOptions.SetItemText(m_htiExtraPreviewWithMenu, GetResString(IDS_EXTRAPREVIEWWITHMENU));
+		SetTool(m_htiExtraPreviewWithMenu,IDS_EXTRAPREVIEWWITHMENU_TIP);
+		if (m_htiShowUpDownIconInTaskbar) m_ctrlTreeOptions.SetItemText(m_htiShowUpDownIconInTaskbar, GetResString(IDS_SHOWUPDOWNICONINTASKBAR));
+		SetTool(m_htiShowUpDownIconInTaskbar,IDS_SHOWUPDOWNICONINTASKBAR_TIP);
+		if (m_htiKeepUnavailableFixedSharedDirs) m_ctrlTreeOptions.SetItemText(m_htiKeepUnavailableFixedSharedDirs, GetResString(IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS));
+		SetTool(m_htiKeepUnavailableFixedSharedDirs,IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP);
+		if (m_htiForceSpeedsToKB) m_ctrlTreeOptions.SetItemText(m_htiForceSpeedsToKB, GetResString(IDS_FORCESPEEDSTOKB));
+		SetTool(m_htiForceSpeedsToKB,IDS_FORCESPEEDSTOKB_TIP);
 		//MORPH END leuk_he tooltipped
 	}
 }
@@ -1452,6 +1486,10 @@ void CPPgTweaks::OnDestroy()
 	m_htiBeeper = NULL;
 	m_htiMsgOnlySec = NULL;
 	m_htiDisablePeerCache = NULL;
+	m_htiExtraPreviewWithMenu = NULL;
+	m_htiShowUpDownIconInTaskbar = NULL;
+	m_htiKeepUnavailableFixedSharedDirs = NULL;
+	m_htiForceSpeedsToKB = NULL;
 	//MORPH END  leuk_he Advanced official preferences.
 
     CPropertyPage::OnDestroy();
@@ -1520,4 +1558,9 @@ BOOL CPPgTweaks::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();
 	return TRUE;
+}
+
+void CPPgTweaks::OnBnClickedOpenprefini()
+{
+	ShellOpenFile(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("preferences.ini"));
 }

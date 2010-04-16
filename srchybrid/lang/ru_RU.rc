@@ -1977,21 +1977,22 @@ BEGIN
     IDS_SEARCH_BADOPERATORCOMBINATION 
                             "Вы не можете использовать первое ключевое слово с оператором OR при Kad поиске!\n\nДля примера использование ""Ключ.слово1 OR Ключ.слово2"" невозможно. Попробуйте ""Ключ.слово1 AND (Ключ.слово2 OR Ключ.слово3)"" или же сформируйте несколько поисковых запросов."
     IDS_DISCOVEREDBY        "Обнаружен"
-    IDS_NODES               "Нод(ы)"
-    IDS_ROUTINGTABLE        "Таблица маршрутизации"
+    IDS_NODES               "Нодами"
+    IDS_ROUTINGTABLE        "В таблице маршрутизации"
     IDS_PROTOCOLVERSION     "Версия протокола"
     IDS_FOUNDNODESUSEFUL    "Найденные ноды (полезные)"
     IDS_NORESPONSE          "Нет ответа"
     IDS_NOTASKED            "Не запрошен"
     IDS_LOOKUPGRAPH         "Детали поиска"
     IDS_AUTOKADLOOKUPGRAPH  "Автоматически показывать активные поиски"
-    IDS_PAUSEONPREVIEW      "Пауза при возможности предпросмотра"
+    IDS_PAUSEONPREVIEW      "Режим 'Пауза' при возможности предпросмотра"
     IDS_PREVIEWWITH         "Предпросмотр в"
     IDS_CLOSEEMULE          "Закрыть eMule"
     IDS_DONOTASKAGAIN       "Больше не спрашивать"
     IDS_POPULARITY          "Рейтинг популярности"
     IDS_SHOWWIN7TASKBARGOODIES "Включить эффекты панели задач Windows 7"
     IDS_LANMODE             "Режим LAN"
+    IDS_OPENPREFINI         "Open preferences.ini"
 END
 
 STRINGTABLE 

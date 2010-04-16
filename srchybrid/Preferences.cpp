@@ -659,6 +659,7 @@ bool	CPreferences::m_bShowUpDownIconInTaskbar;
 bool	CPreferences::m_bShowWin7TaskbarGoodies;
 bool	CPreferences::m_bForceSpeedsToKB;
 bool	CPreferences::m_bAutoShowLookups;
+bool	CPreferences::m_bExtraPreviewWithMenu;
 
 // ZZ:DownloadManager -->
 bool    CPreferences::m_bA4AFSaveCpu;
@@ -2089,11 +2090,7 @@ void CPreferences::SavePreferences()
 	ini.WriteString(L"UpnpBindAddr", ipstr(htonl(GetUpnpBindAddr())));
 	ini.WriteBool(L"UpnpBindAddrDhcp",GetUpnpBindDhcp());
     // MORPH END leuk_he upnp bindaddr
-	// Mighty Knife: What's the reason for this line ?!?!?
-	// Why is 2 added here ?!?
-	 ini.WriteInt(L"SplitterbarPosition",splitterbarPosition+2);
-	//ini.WriteInt(L"SplitterbarPosition",splitterbarPosition);
-	// [end] Mighty Knife
+	ini.WriteInt(L"SplitterbarPosition",splitterbarPosition);
 	ini.WriteInt(L"SplitterbarPositionServer",splitterbarPositionSvr);
 	ini.WriteInt(L"SplitterbarPositionStat",splitterbarPositionStat+1);
 	ini.WriteInt(L"SplitterbarPositionStat_HL",splitterbarPositionStat_HL/*+1 BSB prevent moving bars down*/);
@@ -2375,6 +2372,10 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"DontRecreateStatGraphsOnResize",dontRecreateGraphs);
 	ini.WriteBool(L"BeepOnError",beepOnError);
 	ini.WriteBool(L"MessageFromValidSourcesOnly",msgsecure);
+	ini.WriteBool(L"ShowUpDownIconInTaskbar",m_bShowUpDownIconInTaskbar);
+	ini.WriteBool(L"ForceSpeedsToKB",m_bForceSpeedsToKB);
+	ini.WriteBool(L"ExtraPreviewWithMenu",m_bExtraPreviewWithMenu);
+	ini.WriteBool(L"KeepUnavailableFixedSharedDirs",m_bKeepUnavailableFixedSharedDirs);
 
 	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
 	CString WriteAllowedIPs ;
@@ -3142,6 +3143,7 @@ void CPreferences::LoadPreferences()
 	m_bShowUpDownIconInTaskbar = ini.GetBool(L"ShowUpDownIconInTaskbar", false );
 	m_bShowWin7TaskbarGoodies  = ini.GetBool(L"ShowWin7TaskbarGoodies", true);
 	m_bForceSpeedsToKB = ini.GetBool(L"ForceSpeedsToKB", false);
+	m_bExtraPreviewWithMenu = ini.GetBool(L"ExtraPreviewWithMenu", false);
 
 	// read file buffer size (with backward compatibility)
 	m_iFileBufferSize=ini.GetInt(L"FileBufferSizePref",0); // old setting

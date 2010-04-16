@@ -1954,6 +1954,7 @@ BEGIN
     IDS_POPULARITY          "Livello di Popolarità"
     IDS_SHOWWIN7TASKBARGOODIES "Abilita gli effetti della barra strumenti di Windows 7"
     IDS_LANMODE             "Modalità LAN"
+    IDS_OPENPREFINI         "Open preferences.ini"
 END
 
 //////////////////////////// MorphXT strings //////////////////////////////////

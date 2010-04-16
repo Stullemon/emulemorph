@@ -62,7 +62,7 @@ to tim.kosse@gmx.de
 */
 #pragma once
 
-#define FD_FORCEREAD (1 << 15)
+#define FD_FORCEREAD (1<<15)
 
 #if defined(_AFXDLL) && (_MFC_VER==0x0700)
 // See also: KB article Q316312 - BUG: Mfc70.lib Does Not Export AfxGetModuleThreadState
@@ -75,10 +75,10 @@ to tim.kosse@gmx.de
 
 class CAsyncSocketExHelperWindow;
 
-#define WM_SOCKETEX_TRIGGER		(WM_USER + 0x101 + 0)				// 0x0501
-#define WM_SOCKETEX_GETHOST		(WM_USER + 0x101 + 1)				// 0x0502
-#define WM_SOCKETEX_NOTIFY		(WM_USER + 0x101 + 2)				// 0x0503
-#define MAX_SOCKETS				(0xBFFF - WM_SOCKETEX_NOTIFY + 1)	// 0xBAFD 47869d
+#define WM_SOCKETEX_TRIGGER		(WM_USER+0x101+0)				// 0x0501
+#define WM_SOCKETEX_GETHOST		(WM_USER+0x101+1)				// 0x0502
+#define WM_SOCKETEX_NOTIFY		(WM_USER+0x101+2)				// 0x0503
+#define MAX_SOCKETS				(0xBFFF-WM_SOCKETEX_NOTIFY+1)	// 0xBAFD 47869d
 
 
 #ifndef NOLAYERS
@@ -113,22 +113,22 @@ public:
 	BOOL Attach(SOCKET hSocket, long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE);
 
 	//Detaches a socket handle from a CAsyncSocketEx object.
-	SOCKET Detach();
+	SOCKET Detach( );
 
 	//Gets the error status for the last operation that failed.
 	static int GetLastError();
 
 	//Gets the address of the peer socket to which the socket is connected.
 #ifdef _AFX
-	BOOL GetPeerName(CString& rPeerAddress, UINT& rPeerPort);
+	BOOL GetPeerName( CString& rPeerAddress, UINT& rPeerPort );
 #endif
-	BOOL GetPeerName(SOCKADDR* lpSockAddr, int* lpSockAddrLen);
+	BOOL GetPeerName( SOCKADDR* lpSockAddr, int* lpSockAddrLen );
 
 	//Gets the local name for a socket.
 #ifdef _AFX
-	BOOL GetSockName(CString& rSocketAddress, UINT& rSocketPort);
+	BOOL GetSockName( CString& rSocketAddress, UINT& rSocketPort );
 #endif
-	BOOL GetSockName(SOCKADDR* lpSockAddr, int* lpSockAddrLen);
+	BOOL GetSockName( SOCKADDR* lpSockAddr, int* lpSockAddrLen );
 
 	//Retrieves a socket option.
 	BOOL GetSockOpt(int nOptionName, void* lpOptionValue, int* lpOptionLen, int nLevel = SOL_SOCKET);
@@ -141,10 +141,10 @@ public:
 	//----------
 
 	//Accepts a connection on the socket.
-	virtual BOOL Accept(CAsyncSocketEx& rConnectedSocket, SOCKADDR* lpSockAddr = NULL, int* lpSockAddrLen = NULL);
+	virtual BOOL Accept( CAsyncSocketEx& rConnectedSocket, SOCKADDR* lpSockAddr = NULL, int* lpSockAddrLen = NULL );
 
 	//Requests event notification for the socket.
-	BOOL AsyncSelect(long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE);
+	BOOL AsyncSelect( long lEvent = FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE );
 
 	//Associates a local address with the socket.
 	BOOL Bind(UINT nSocketPort, LPCSTR lpszSocketAddress);
@@ -155,13 +155,13 @@ public:
 
 	//Establishes a connection to a peer socket.
 	virtual BOOL Connect(LPCSTR lpszHostAddress, UINT nHostPort);
-	virtual BOOL Connect(const SOCKADDR* lpSockAddr, int nSockAddrLen);
+	virtual BOOL Connect( const SOCKADDR* lpSockAddr, int nSockAddrLen );
 
 	//Controls the mode of the socket.
-	BOOL IOCtl(long lCommand, DWORD* lpArgument);
+	BOOL IOCtl( long lCommand, DWORD* lpArgument );
 
 	//Establishes a socket to listen for incoming connection requests.
-	BOOL Listen(int nConnectionBacklog = SOMAXCONN ); //morph
+	BOOL Listen( int nConnectionBacklog = SOMAXCONN ); //morph
 
 	//Receives data from the socket.
 	virtual int Receive(void* lpBuf, int nBufLen, int nFlags = 0);
@@ -170,7 +170,7 @@ public:
 	virtual int Send(const void* lpBuf, int nBufLen, int nFlags = 0);
 
 	//Disables Send and/or Receive calls on the socket.
-	BOOL ShutDown(int nHow = sends);
+	BOOL ShutDown( int nHow = sends );
 	enum { receives = 0, sends = 1, both = 2 };
 
 	//Overridable Notification Functions
@@ -282,6 +282,6 @@ protected:
 };
 
 #ifndef NOLAYERS
-#define LAYERCALLBACK_STATECHANGE	0
-#define LAYERCALLBACK_LAYERSPECIFIC	1
+#define LAYERCALLBACK_STATECHANGE 0
+#define LAYERCALLBACK_LAYERSPECIFIC 1
 #endif //NOLAYERS

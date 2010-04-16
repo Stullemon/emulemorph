@@ -1992,6 +1992,7 @@ BEGIN
     IDS_POPULARITY          "Popülerlik Derecesi"
     IDS_SHOWWIN7TASKBARGOODIES "Windows 7 görev çubuðu efektleri etkin"
     IDS_LANMODE             "LAN Modu"
+    IDS_OPENPREFINI         "Open preferences.ini"
 END
 
 STRINGTABLE 

@@ -31,6 +31,7 @@ public:
 	void CancelEd2kSearch();
 	void CancelKadSearch(UINT uSearchID);
 	void SetNextSearchID(uint32 uNextID);
+	void ProcessEd2kSearchLinkRequest(CString strSearchTerm);
 
 	bool CanSearchRelatedFiles() const;
 	void SearchRelatedFiles(CPtrList& listFiles);

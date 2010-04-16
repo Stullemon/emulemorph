@@ -54,6 +54,16 @@ CCollectionFile::CCollectionFile(CFileDataIO* in_data)
 		SetFileHash(pTagHash->GetHash());
 	else
 		ASSERT(0);
+
+	pTagHash = GetTag(FT_AICH_HASH);
+	if (pTagHash != NULL && pTagHash->IsStr())
+	{
+		CAICHHash hash;
+		if (DecodeBase32(pTagHash->GetStr(), hash) == (UINT)CAICHHash::GetHashSize())
+			m_FileIdentifier.SetAICHHash(hash);
+		else
+			ASSERT( false );
+	}
 	
 	// here we have two choices
 	//	- if the server/client sent us a filetype, we could use it (though it could be wrong)
@@ -93,6 +103,9 @@ CCollectionFile::CCollectionFile(CAbstractFile* pAbstractFile) : CAbstractFile(p
 	taglist.Add(new CTag(FT_FILESIZE, pAbstractFile->GetFileSize(), true));
 	taglist.Add(new CTag(FT_FILENAME, pAbstractFile->GetFileName()));
 
+	if (m_FileIdentifier.HasAICHHash())
+		taglist.Add(new CTag(FT_AICH_HASH, m_FileIdentifier.GetAICHHash().GetString()));
+
 	if(!pAbstractFile->GetFileComment().IsEmpty())
 		taglist.Add(new CTag(FT_FILECOMMENT, pAbstractFile->GetFileComment()));
 
@@ -124,13 +137,19 @@ bool CCollectionFile::InitFromLink(CString sLink)
 	}
 
 	taglist.Add(new CTag(FT_FILEHASH, pFileLink->GetHashKey()));
-	m_FileIdentifier.SetMD4Hash(pFileLink->GetHashKey()); //TODO fileident
+	m_FileIdentifier.SetMD4Hash(pFileLink->GetHashKey());
 
 	taglist.Add(new CTag(FT_FILESIZE, pFileLink->GetSize(), true));
 	SetFileSize(pFileLink->GetSize());
 
 	taglist.Add(new CTag(FT_FILENAME, pFileLink->GetName()));
 	SetFileName(pFileLink->GetName(), false, false);
+
+	if (pFileLink->HasValidAICHHash())
+	{
+		taglist.Add(new CTag(FT_AICH_HASH, pFileLink->GetAICHHash().GetString()));
+		m_FileIdentifier.SetAICHHash(pFileLink->GetAICHHash());
+	}
 
 	delete pLink;
 	return true;

@@ -127,6 +127,10 @@ protected:
 	bool m_bBeeper;
 	bool m_bMsgOnlySec;
 	bool m_bDisablePeerCache;
+	bool m_bExtraPreviewWithMenu;
+	bool m_bShowUpDownIconInTaskbar;
+	bool m_bKeepUnavailableFixedSharedDirs;
+	bool m_bForceSpeedsToKB;
 
     // continue extra official preferences....
 	HTREEITEM m_hti_advanced;
@@ -184,6 +188,10 @@ protected:
 	HTREEITEM m_htiBeeper;
 	HTREEITEM m_htiMsgOnlySec;
 	HTREEITEM m_htiDisablePeerCache;
+	HTREEITEM m_htiExtraPreviewWithMenu;
+	HTREEITEM m_htiShowUpDownIconInTaskbar;
+	HTREEITEM m_htiKeepUnavailableFixedSharedDirs;
+	HTREEITEM m_htiForceSpeedsToKB;
 	// MORPH END  leuk_he Advanced official preferences. 
 	
 
@@ -268,6 +276,7 @@ protected:
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);
 	afx_msg void OnHelp();
 	afx_msg BOOL OnHelpInfo(HELPINFO* pHelpInfo);
+	afx_msg void OnBnClickedOpenprefini();
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 protected:
 	bool			m_bLogUPnP;

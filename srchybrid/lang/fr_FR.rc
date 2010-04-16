@@ -1969,6 +1969,33 @@ BEGIN
     IDS_RESOLVELINKS        "Résoudre les liens de ligne de commande dans les dossiers partagés"
 END
 
+
+STRINGTABLE 
+BEGIN
+    IDS_DOWNLOADCOMMANDS    "Commandes de téléchargement"
+    IDS_CLOSETOOLBAR        "Fermer la barre d'outils"
+    IDS_SHOWTOOLBAR         "Montrer la barre d'outils"
+    IDS_SEARCH_BADOPERATORCOMBINATION 
+                            "Vous ne pouvez pas utiliser l'opérateur OR comme premier mot-clé lors d'une recherche KAD!\n\nPar exemple ""mot-clé1 OR mot-clé2"" n'est pas possible. Essayez ""mot-clé1 AND (mot-clé2 OR mot-clé3)"" ou bien faites une recherche multiple."
+    IDS_DISCOVEREDBY        "Découvert par"
+    IDS_NODES               "Noeud(s)"
+    IDS_ROUTINGTABLE        "Table de routage"
+    IDS_PROTOCOLVERSION     "Version du Protocole"
+    IDS_FOUNDNODESUSEFUL    "Noeuds trouvés (utiles)"
+    IDS_NORESPONSE          "Pas de réponse"
+    IDS_NOTASKED            "Non demandé"
+    IDS_LOOKUPGRAPH         "Détails de la recherche"
+    IDS_AUTOKADLOOKUPGRAPH  "Montrer automatiquement les recherches en cours"
+    IDS_PAUSEONPREVIEW      "Mettre en pause lorsque la prévisualisation est possible"
+    IDS_PREVIEWWITH         "Prévisualiser avec"
+    IDS_CLOSEEMULE          "Quitter eMule"
+    IDS_DONOTASKAGAIN       "Ne pas me le redemander"
+    IDS_POPULARITY          "Rang de popularité"
+    IDS_SHOWWIN7TASKBARGOODIES "Activer les effets Windows 7 de la barre des tâches"
+    IDS_LANMODE             "LAN Mode"
+    IDS_OPENPREFINI         "Open preferences.ini"
+END
+
 STRINGTABLE
 BEGIN
     IDS_VIEW3       " (partagés avec des sous-dossiers)"

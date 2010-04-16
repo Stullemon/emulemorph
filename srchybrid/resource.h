@@ -659,6 +659,7 @@
 #define IDS_AUTOTAKEED2KLINKS           733
 #define IDS_ADDNEWFILESPAUSED           734
 #define IDS_DOWNLOADMOVIECHUNKS         735
+#define IDS_OPENPREFINI                 736
 #define IDS_RECOVER_SINGLE              737
 #define IDS_RECOVER_MULTIPLE            738
 #define IDS_ATTEMPTING_RECOVERY         739
@@ -1981,6 +1982,7 @@
 #define IDC_QUEUESIZE_STATIC            2611
 #define IDC_QUEUESIZE                   2612
 #define IDC_CHECKDAYS                   2613
+#define IDC_PREFINI_STATIC              2613
 #define IDC_MSG                         2614
 #define IDC_FILTERLABEL                 2615
 #define IDC_DAP                         2616
@@ -2335,6 +2337,7 @@
 #define IDC_FS_POPLULARITY2_LBL         3010
 #define IDC_FS_POPULARITY2_LBL          3010
 #define IDC_FS_POPULARITY2_VAL          3011
+#define IDC_OPENPREFINI                 3012
 #define IDA_ENTER                       32771
 #define IDC_STATIC_PORT                 4000
 #define IDC_STATIC_CONTROLS             4001
@@ -3884,6 +3887,17 @@
 #define IDS_KEEPCATINCSHARED_TITLE      31405
 #define IDS_ADD_REMOVED_INC             31406
 #define IDS_ADD_REMOVED_INC_TIP         31407
+#define IDS_OPENPREFINI_TIP             31408
+#define IDS_EXTRAPREVIEWWITHMENU        31409
+#define IDS_EXTRAPREVIEWWITHMENU_TIP    31410
+#define IDS_FILEBUFFERSIZE_TIP          31411
+#define IDS_QUEUESIZE_TIP               31412
+#define IDS_SHOWUPDOWNICONINTASKBAR     31413
+#define IDS_SHOWUPDOWNICONINTASKBAR_TIP 31414
+#define IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS 31415
+#define IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP 31416
+#define IDS_FORCESPEEDSTOKB             31417
+#define IDS_FORCESPEEDSTOKB_TIP         31418
 
 // Next default values for new objects
 // 
