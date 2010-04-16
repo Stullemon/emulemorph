@@ -162,6 +162,7 @@ protected:
 	afx_msg void OnWnd1BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnWnd2BtnDropDown(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnPaint();
+	afx_msg void OnSysCommand(UINT nID, LPARAM lParam);
 
 	// khaos::categorymod+
 	void		CreateCategoryMenus();

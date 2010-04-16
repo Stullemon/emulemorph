@@ -780,20 +780,22 @@ BEGIN
     GROUPBOX        "General",IDC_GENERAL,4,2,394,41
 END
 
-IDD_PPG_TWEAKS DIALOGEX 0, 0, 231, 241
+IDD_PPG_TWEAKS DIALOGEX 0, 0, 231, 291
 STYLE DS_SETFONT | DS_FIXEDSYS | WS_CHILD | WS_DISABLED | WS_CAPTION
 CAPTION "Tweaks"
 FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     LTEXT           "Static",IDC_WARNING,4,2,213,39
     CONTROL         "",IDC_EXT_OPTS,"SysTreeView32",TVS_SHOWSELALWAYS | 
-                    WS_BORDER | WS_TABSTOP | 0x800,4,42,223,184
-    LTEXT           "File buffer size",IDC_FILEBUFFERSIZE_STATIC,4,235,213,8
+                    WS_BORDER | WS_TABSTOP | 0x800,4,46,223,192
+    LTEXT           "File buffer size",IDC_FILEBUFFERSIZE_STATIC,4,242,213,8
     CONTROL         "",IDC_FILEBUFFERSIZE,"msctls_trackbar32",WS_TABSTOP,9,
-                    245,211,11
-    LTEXT           "Queue size",IDC_QUEUESIZE_STATIC,4,258,213,8
+                    252,211,11
+    LTEXT           "Queue size",IDC_QUEUESIZE_STATIC,4,265,103,8
     CONTROL         "",IDC_QUEUESIZE,"msctls_trackbar32",TBS_AUTOTICKS | 
-                    WS_TABSTOP,9,268,211,11
+                    WS_TABSTOP,9,275,107,11
+    PUSHBUTTON      "Open preferences.ini",IDC_OPENPREFINI,125,275,102,14
+    LTEXT           "Extended:",IDC_PREFINI_STATIC,118,265,109,8
 END
 
 IDD_ADDFRIEND DIALOGEX 0, 0, 271, 190
@@ -2685,6 +2687,11 @@ BEGIN
         VERTGUIDE, 398
     END
 
+    IDD_PPG_TWEAKS, DIALOG
+    BEGIN
+        VERTGUIDE, 227
+    END
+
     IDD_ADDFRIEND, DIALOG
     BEGIN
         RIGHTMARGIN, 269
@@ -3633,6 +3640,7 @@ END
 
 STRINGTABLE 
 BEGIN
+    IDS_OPENPREFINI         "Open preferences.ini"
     IDS_RECOVER_SINGLE      "Archive recovery: 1 file recovered."
     IDS_RECOVER_MULTIPLE    "Archive recovery: %u files recovered."
     IDS_ATTEMPTING_RECOVERY "Archive recovery: Started"
@@ -4687,7 +4695,7 @@ BEGIN
     IDS_SHAREEMULELABEL     "Sharing eMule with other computer users"
     IDS_SHAREEMULEMULTI     "Each user has its own configuration and downloads"
     IDS_SHAREEMULEPUBLIC    "Everyone has the same configuration and downloads"
-    IDS_SHAREEMULEOLD       "Store config and downloads in the programm directory"
+    IDS_SHAREEMULEOLD       "Store config and downloads in the program directory"
 END
 
 STRINGTABLE 
@@ -5582,7 +5590,7 @@ STRINGTABLE
 BEGIN
     IDS_SLOT_LIMIT_GROUP    "Slot Limiter"
     IDS_SLOT_LIMIT_NONE     "No limit"
-    IDS_SLOT_LIMIT_THREE    "Upload speed/3kbps"
+    IDS_SLOT_LIMIT_THREE    "Upload speed/3kBps"
     IDS_SLOT_LIMIT_NUM_B    "Limit to x slots"
 END
 
@@ -6547,6 +6555,17 @@ BEGIN
     IDS_KEEPCATINCSHARED_TITLE "Category removed"
     IDS_ADD_REMOVED_INC     "Ask if incoming dir of removed cat should be added as share"
     IDS_ADD_REMOVED_INC_TIP "When a category is removed or merged an incoming folder might be removed.\nUnsharing downloaded files is not always good so with this option enabled\neMule will ask you if the incoming directory of a removed category should be\nadded as a shared directory. Disable this option if you do not want to be asked."
+    IDS_OPENPREFINI_TIP     "Clicking this button will open the preferences.ini file with a text editor. It\ncontains all of eMule's settings. You can modify the settings in this file,\nhowever, a restart will be neccessary.\nNote that all settings can also be changed from within eMule MorphXT!"
+    IDS_EXTRAPREVIEWWITHMENU "Display Preview With menu in root context menu"
+    IDS_EXTRAPREVIEWWITHMENU_TIP "When extended controls are activated and multiple preview programs are set eMule\ndisplays a menu to choose program to preview with in the Download List. The\ncorresponding menu is usuallyadded in the Preview menu. Enabling this option\ncauses the Preview With menu to be added in the root context menu."
+    IDS_FILEBUFFERSIZE_TIP  "Downloaded data is temporarily buffered in the memory. This option allows you\nto configure how much data will be buffered. Buffered data will ultimately be\nflushed after a minute (default). Note that buffered data might be lost if eMule\nis not exited correctly because it was not written to disk.\nIncreasing the buffer size reduces the number of accesses to your HDD to write\ndata but increases the amount of data that could possibly be lost."
+    IDS_QUEUESIZE_TIP       "Clients asking for one of the shared files are added to the waiting queue if they\nare not directly added to upload. This option defines the maximum number\nof clients that may enter the queue. Increasing the number of allowed clients\nmay increase the overhead and resource usage.\nNote that the queue allows 25%% more clients that meet certain criterias if\nthe queue reached the limit."
+    IDS_SHOWUPDOWNICONINTASKBAR "Use overlay to indicate up/down in Tray"
+    IDS_SHOWUPDOWNICONINTASKBAR_TIP "Windows 7 allows overlays for the tray icon. eMule can utilize this to\nindicate active up- and downloads.\n\nDefault: disabled"
+    IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS "Keep unavailable directories on fixed drives"
+    IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP "Usually shared folders that are unavailable are being removed. Enabling\nthis option will keep those folders if they are on fixed drives so they can\nbe loaded again when they are available again.\n\nDefault: disabled"
+    IDS_FORCESPEEDSTOKB     "Display all speed values in KB/s"
+    IDS_FORCESPEEDSTOKB_TIP "eMule displays speed values in different units based on the speed\nto be displayed. This options forces all speed values to KB/s rather than\nB/s, KB/s, GB/s and TB/s."
 END
 
 #endif    // English (U.S.) resources

@@ -1507,9 +1507,9 @@ int CemuleApp::GetFileTypeSystemImageIdx(LPCTSTR pszFilePath, int iLength /* = -
 	return (int)vData;
 }
 
-bool CemuleApp::IsConnected()
+bool CemuleApp::IsConnected(bool bIgnoreEd2k, bool bIgnoreKad)
 {
-	return (theApp.serverconnect->IsConnected() || Kademlia::CKademlia::IsConnected());
+	return ( (theApp.serverconnect->IsConnected() && !bIgnoreEd2k) || (Kademlia::CKademlia::IsConnected() && !bIgnoreKad));
 }
 
 bool CemuleApp::IsPortchangeAllowed() {

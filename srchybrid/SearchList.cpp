@@ -948,7 +948,7 @@ void CSearchList::KademliaSearchKeyword(uint32 searchID, const Kademlia::CUInt12
 								, tempFile->GetFileName(), raAICHHashPopularity[0], byPublishers, raAICHHashs[0].GetString()) );
 		}
 		else if (raAICHHashs.GetCount() > 1)
-			DEBUG_ONLY( DebugLog(_T("Received multiple (%u) AICH Hashs for search result %s, ignoring AICH"), raAICHHashs.GetCount()) );
+			DEBUG_ONLY( DebugLog(_T("Received multiple (%u) AICH Hashs for search result %s, ignoring AICH"), raAICHHashs.GetCount(), tempFile->GetFileName()) );
 		AddToList(tempFile);
 	}
 	else

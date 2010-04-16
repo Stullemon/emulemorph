@@ -1014,11 +1014,11 @@ void CServerListCtrl::OnNmCustomDraw(NMHDR *pNMHDR, LRESULT *plResult)
 		// the server which we are connected to always has a valid numerical IP member assigned,
 		// therefor we do not need to call CServer::IsEqual which would be expensive
 		//if (pConnectedServer && pConnectedServer->IsEqual(pServer))
-		if (pConnectedServer && pConnectedServer->GetIP() == pServer->GetIP() && pConnectedServer->GetPort() == pServer->GetPort())
+		if (pServer && pConnectedServer && pConnectedServer->GetIP() == pServer->GetIP() && pConnectedServer->GetPort() == pServer->GetPort())
 			pnmlvcd->clrText = RGB(32,32,255);
-		else if (pServer->GetFailedCount() >= thePrefs.GetDeadServerRetries())
+		else if (pServer && pServer->GetFailedCount() >= thePrefs.GetDeadServerRetries())
 			pnmlvcd->clrText = RGB(192,192,192);
-		else if (pServer->GetFailedCount() >= 2)
+		else if (pServer && pServer->GetFailedCount() >= 2)
 			pnmlvcd->clrText = RGB(128,128,128);
 	}
 

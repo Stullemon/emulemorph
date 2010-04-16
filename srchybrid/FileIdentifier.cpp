@@ -52,11 +52,6 @@ CFileIdentifierBase::~CFileIdentifierBase(void)
 // TODO: Remove me
 EMFileSize CFileIdentifierBase::GetFileSize() const
 {
-#ifdef _BETA
-	// Do we have a problem with pure virtual function calls of this function? We should not, but
-	// to figure out, crash eMule in Beta if we ever get here so we can get a dump with callstack
-	*((int*)0) = 0;
-#endif
 	ASSERT( false );
 	return (uint64)0;
 }

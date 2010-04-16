@@ -563,6 +563,7 @@ public:
 	static  bool	m_bShowUpDownIconInTaskbar;
 	static	bool	m_bForceSpeedsToKB;
 	static	bool	m_bAutoShowLookups;
+	static	bool	m_bExtraPreviewWithMenu;
 
 
 	// Web Server [kuchin]
@@ -1707,15 +1708,16 @@ public:
 	static	bool	GetAutoShowLookups()				{return m_bAutoShowLookups;}
 	static	void	SetAutoShowLookups(bool bIn)		{m_bAutoShowLookups = bIn;}
 	static	bool	GetForceSpeedsToKB()				{return m_bForceSpeedsToKB;}
+	static	bool	GetExtraPreviewWithMenu()			{return m_bExtraPreviewWithMenu;}
 
-    //Commander - Added: Client Percentage - Start
+	//Commander - Added: Client Percentage - Start
 	static	bool	GetUseClientPercentage()					{ return m_bShowClientPercentage;}
 	static	void	SetUseClientPercentage(bool in)				{ m_bShowClientPercentage=in;}
 	//Commander - Added: Client Percentage - End
 
 	//MORPH START - Added by Commander, ClientQueueProgressBar
 	static bool ShowClientQueueProgressBar()					{ return m_bClientQueueProgressBar;}
-    //MORPH END - Added by Commander, ClientQueueProgressBar
+	//MORPH END - Added by Commander, ClientQueueProgressBar
 
 	//MORPH START - Added by Commander, FolderIcons
 	static bool ShowFolderIcons()								{ return m_bShowFolderIcons;}

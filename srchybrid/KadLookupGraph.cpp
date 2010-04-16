@@ -273,6 +273,9 @@ void CKadLookupGraph::OnPaint()
 		uScalingDistance /= (uHistHeight - NODE_ENTRY_HEIGHT);
 		uScalingDistance *= 3;
 		ASSERT(uScalingDistance > 0);
+		if (uScalingDistance == 0)
+			uScalingDistance = 1;
+
 
 		//if (m_bDbgLog)
 		//	AddDebugLogLine(false, _T("KadGraph: Considering %u of %u Nodes, 1/3 Max Distance found: %s"), iVisibleNodes, m_pLookupHistory->GetHistoryEntries().GetCount(), uTmpScalingDistance.ToHexString());  
@@ -291,7 +294,8 @@ void CKadLookupGraph::OnPaint()
 			else
 			{
 				uDrawYPos = (((uint64)uTmpDist.Get32BitChunk(byStartChunk) << 32) + (uint64)uTmpDist.Get32BitChunk(byStartChunk + 1));
-				uDrawYPos /= uScalingDistance;
+				if (uDrawYPos > 0)
+					uDrawYPos /= uScalingDistance;
 				uDrawYPos = (iBaseLineY - NODE_ENTRY_HEIGHT) - uDrawYPos;
 			}
 			//if (m_bDbgLog)

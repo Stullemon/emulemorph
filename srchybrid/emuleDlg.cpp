@@ -1614,7 +1614,7 @@ void CemuleDlg::OnSize(UINT nType, int cx, int cy)
 	CTrayDialog::OnSize(nType, cx, cy);
 	SetStatusBarPartsSize();
 	// we might receive this message during shutdown -> bad
-	if (transferwnd != NULL)
+	if (transferwnd != NULL && IsRunning())
 		transferwnd->VerifyCatTabSize();
 }
 
@@ -1685,6 +1685,14 @@ void CemuleDlg::ProcessED2KLink(LPCTSTR pszData)
 					delete pSrv; 
 				else
 					AddLogLine(true,GetResString(IDS_SERVERADDED), pSrv->GetListName());
+			}
+			break;
+		case CED2KLink::kSearch:
+			{
+				CED2KSearchLink* pListLink = pLink->GetSearchLink();
+				_ASSERT( pListLink !=0 ); 
+				SetActiveDialog(searchwnd);
+				searchwnd->ProcessEd2kSearchLinkRequest(pListLink->GetSearchTerm());
 			}
 			break;
 		// MORPH START - Added by Commander, Friendlinks [emulEspaña]
@@ -4516,6 +4524,8 @@ void CemuleDlg::UpdateThumbBarButtons(bool initialAddToDlg) {
 				{
 					m_thbButtons[i].hIcon   =  theApp.LoadIcon(_T("CONNECT"), 16, 16);
 					tooltip = GetResString(IDS_MAIN_BTN_CONNECT);
+					if (theApp.IsConnected()==true)
+						m_thbButtons[i].dwFlags |= THBF_DISABLED;
 					break;
 				}
 			case TBB_DISCONNECT:

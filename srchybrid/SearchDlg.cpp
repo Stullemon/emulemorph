@@ -248,6 +248,11 @@ bool CSearchDlg::DoNewEd2kSearch(SSearchParams* pParams)
 	return m_pwndResults->DoNewEd2kSearch(pParams);
 }
 
+void CSearchDlg::ProcessEd2kSearchLinkRequest(CString strSearchTerm)
+{
+	m_pwndParams->ProcessEd2kSearchLinkRequest(strSearchTerm);
+}
+
 void CSearchDlg::DeleteAllSearches()
 {
 	m_pwndResults->DeleteAllSearches();

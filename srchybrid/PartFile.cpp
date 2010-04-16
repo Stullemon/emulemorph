@@ -99,7 +99,10 @@ CPartFile::CPartFile(CSearchFile* searchresult, UINT cat)
 	
 	m_FileIdentifier.SetMD4Hash(searchresult->GetFileHash());
 	if (searchresult->GetFileIdentifierC().HasAICHHash())
+	{
 		m_FileIdentifier.SetAICHHash(searchresult->GetFileIdentifierC().GetAICHHash());
+		m_pAICHRecoveryHashSet->SetMasterHash(searchresult->GetFileIdentifierC().GetAICHHash(), AICH_VERIFIED);
+	}
 
 	for (int i = 0; i < searchresult->taglist.GetCount();i++){
 		const CTag* pTag = searchresult->taglist[i];
@@ -4894,8 +4897,8 @@ bool CPartFile::HashSinglePart(UINT partnumber, bool* pbAICHReportedOK)
 			else
 				bAICHError = m_FileIdentifier.GetAICHHash() != phtAICHPartHash->m_Hash;
 		}
-		else
-			DebugLogWarning(_T("AICH HashSet not present while verifying part %u for file %s"), partnumber, GetFileName());
+		//else
+		//	DebugLogWarning(_T("AICH HashSet not present while verifying part %u for file %s"), partnumber, GetFileName());
 
 		delete phtAICHPartHash;
 		phtAICHPartHash = NULL;

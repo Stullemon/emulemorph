@@ -1,6 +1,6 @@
 /*
 Copyright (C)2003 Barry Dunne (http://www.emule-project.net)
-Copyright (C)2007-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
+Copyright (C)2007-2010 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 
 
 This program is free software; you can redistribute it and/or

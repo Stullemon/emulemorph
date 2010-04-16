@@ -1996,6 +1996,7 @@ BEGIN
     IDS_POPULARITY          "Populariteitsrang"
     IDS_SHOWWIN7TASKBARGOODIES "Taakbalkeffecten van Windows 7 inschakelen"
     IDS_LANMODE             "LAN-mode"
+    IDS_OPENPREFINI         "Open preferences.ini"
 END
 
 STRINGTABLE 

@@ -1986,6 +1986,7 @@ BEGIN
     IDS_POPULARITY          "Popularitätsrang"
     IDS_SHOWWIN7TASKBARGOODIES "Aktiviere Windows7 Taskbareffekte"
     IDS_LANMODE             "LAN Modus"
+    IDS_OPENPREFINI         "Öffne preferences.ini"
 END
 
 // Morph

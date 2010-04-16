@@ -1989,7 +1989,8 @@ BEGIN
     IDS_DONOTASKAGAIN       "No preguntar de nuevo"
     IDS_POPULARITY          "Popularidad"
     IDS_SHOWWIN7TASKBARGOODIES "Activar efectos de la barra de tareas de Windows 7"
-    IDS_LANMODE             "LAN Mode"
+    IDS_LANMODE             "Modo LAN"
+    IDS_OPENPREFINI         "Open preferences.ini"
 END
 
 STRINGTABLE 
@@ -3472,7 +3473,7 @@ BEGIN
 	IDS_FAIR_PLAY_TIP       "Al menos se sube una copia del fichero descargado con mayor prioridad"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_DISABLECATCOLORS      "Desactivar los colores de categorías"
     IDS_DISABLECATCOLOR_TIP    "Desactivar los colores en el texto de las categorías en la pestaña de la ventana de Transferencias"
@@ -3593,7 +3594,7 @@ BEGIN
 	IDS_TAB_NT_SERVICE       "Servicio NT"
 END
 
-STRINGTABLE 
+STRINGTABLE
 BEGIN
     IDS_PURGE_DONT           "No purgar entradas"
     IDS_PURGE_PARTIALLY      "Purgar parcialmente entradas (Original)"

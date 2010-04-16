@@ -195,6 +195,53 @@ CED2KLink::LinkType CED2KServerLink::GetKind() const
 	return kServer;
 }
 
+///////////////////////////////////////////// 
+// CED2KSearchLink implementation 
+///////////////////////////////////////////// 
+CED2KSearchLink::CED2KSearchLink(const TCHAR* pszSearchTerm)
+{
+	m_strSearchTerm = OptUtf8ToStr(URLDecode(pszSearchTerm));
+}
+
+CED2KSearchLink::~CED2KSearchLink()
+{
+} 
+
+void CED2KSearchLink::GetLink(CString& lnk) const
+{
+	lnk.Format(_T("ed2k://|search|%s|/"), EncodeUrlUtf8(m_strSearchTerm));
+}
+
+CED2KServerListLink* CED2KSearchLink::GetServerListLink()
+{
+	return NULL;
+}
+
+CED2KSearchLink* CED2KSearchLink::GetSearchLink()
+{
+	return this;
+}
+
+CED2KServerLink* CED2KSearchLink::GetServerLink()
+{
+	return NULL;
+}
+
+CED2KFileLink* CED2KSearchLink::GetFileLink()
+{
+	return NULL;
+}
+
+CED2KNodesListLink* CED2KSearchLink::GetNodesListLink()
+{
+	return NULL;
+}
+
+CED2KLink::LinkType CED2KSearchLink::GetKind() const
+{
+	return kSearch;
+}
+
 
 /////////////////////////////////////////////
 // CED2KFileLink implementation
@@ -566,6 +613,13 @@ CED2KLink* CED2KLink::CreateLinkFromUrl(const TCHAR* uri)
 			if (!strURL.IsEmpty() && GetNextString(strURI, _T("|"), iPos) == _T("/"))
 				return new CED2KNodesListLink(strURL);
 		}
+		else if (strTok == _T("search"))
+		{
+			CString strSearchTerm = GetNextString(strURI, _T("|"), iPos);
+			// might be extended with more parameters in future versions
+			if (!strSearchTerm.IsEmpty())
+				return new CED2KSearchLink(strSearchTerm);
+		}
 		// MORPH START - Added by Commander, Friendlinks [emulEspaa]
 		else if ( strTok == _T("friend") )
 		{
@@ -639,11 +693,6 @@ CED2KFileLink* CED2KFriendLink::GetFileLink()
 	return NULL;
 }
 
-CED2KNodesListLink* CED2KFriendLink::GetNodesListLink()
-{
-	return NULL;
-}
-
 CED2KLink::LinkType CED2KFriendLink::GetKind() const
 {
 	return kFriend;
@@ -671,11 +720,6 @@ CED2KServerLink* CED2KFriendListLink::GetServerLink()
 
 CED2KFileLink* CED2KFriendListLink::GetFileLink() 
 { 
-	return NULL;
-}
-
-CED2KNodesListLink* CED2KFriendListLink::GetNodesListLink()
-{
 	return NULL;
 }
 

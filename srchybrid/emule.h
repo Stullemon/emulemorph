@@ -189,7 +189,7 @@ public:
 	void		CreateAllFonts();
 	const CString &GetDefaultFontFaceName();
 	bool		IsPortchangeAllowed();
-	bool		IsConnected();
+	bool		IsConnected(bool bIgnoreEd2k = false, bool bIgnoreKad = false);
 	bool		IsFirewalled();
 	bool		CanDoCallback( CUpDownClient *client );
 	uint32		GetID();
