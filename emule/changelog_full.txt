@@ -2,6 +2,21 @@
         http://emule-project.net
         ========================
 
+eMule 0.50a
+-----------------------
+- Apr, 5. 2010        -
+-----------------------
+.: Added preferences.ini-only option "ExtraPreviewWithMenu" (eMule section) which makes eMule put the "Preview with" command into the root context menu rather than into the preview menu (only applies to extended controls with multiple preview programs set)
+.: Added "Open preferences.ini" button to the extended options. Remember that you have to close eMule _before_ saving any changes if you want to edit any not preferences.ini-only settings
+.: AICH hashs work properly in all collection types now
+
+-----------------------
+- Apr, 2. 2010        -
+-----------------------
+.: Added new ed2k link type: "ed2k://|search|[searchterm]|/" makes eMule start a search for the specified searchterm. Plugin for webbrowsers which make use of this will follow later
+.: Fixed some minor bugs in the Kad graph
+.: Fixed a possible bug with AICH recovery when downloading a searchresult which includes the AICH hash
+
 eMule 0.50a BETA3
 -----------------------
 - Mar, 28. 2010       -
