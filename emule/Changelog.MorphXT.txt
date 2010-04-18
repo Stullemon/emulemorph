@@ -69,6 +69,7 @@ REMOVED: New official Ask-On-Exit Dialog in favor of Morph's one (NTService) [St
 REMOVED: "MorphXT 9.7" workaround [Stulle]
 REMOVED: Unusued ressource strings [Stulle]
 REMOVED: AppleJuice detection [Xman/Anonymous Anti-Leecher]
+REMOVED: ZZUL addition that sometimes caused crashes on receiving OP_FILESTATUS [Stulle]
 
 
 --------------------------------------

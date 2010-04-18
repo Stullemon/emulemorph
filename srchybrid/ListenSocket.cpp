@@ -586,10 +586,12 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 					client->ProcessFileStatus(false, &data, file);
 
                     //MORPH START - ZZUL_20070513-2310
-			if(client->GetDownloadState() == DS_DOWNLOADING) {
-                        AddDebugLogLine(false, _T("Checking if we should send block request, since OP_FILESTATUS was received when client->GetDownloadState() == DS_DOWNLOADING() %s"), client->DbgGetClientInfo());
-                        client->SendBlockRequests();
-			}
+#ifdef _DEBUG // removed to prevent from crashes
+					if(client->GetDownloadState() == DS_DOWNLOADING) {
+						AddDebugLogLine(false, _T("Checking if we should send block request, since OP_FILESTATUS was received when client->GetDownloadState() == DS_DOWNLOADING() %s"), client->DbgGetClientInfo());
+						client->SendBlockRequests();
+					}
+#endif
 					//MORPH END  - ZZUL_20070513-2310
 
 					break;
@@ -1553,11 +1555,13 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 								client->ProcessFileStatus(false, &data_in, reqfile);
 
                                 //MORPH START - ZZUL_20070513-2310
-				if(client->GetDownloadState() == DS_DOWNLOADING) {
-                                    AddDebugLogLine(false, _T("Checking if we should send block request, since OP_FILESTATUS in OP_MULTIPACKETANSWER was received when client->GetDownloadState() == DS_DOWNLOADING() %s"), client->DbgGetClientInfo());
-                                    client->SendBlockRequests();
-                                }
-				//MORPH END  - ZZUL_20070513-2310
+#ifdef _DEBUG // removed to prevent from crashes
+								if(client->GetDownloadState() == DS_DOWNLOADING) {
+									AddDebugLogLine(false, _T("Checking if we should send block request, since OP_FILESTATUS in OP_MULTIPACKETANSWER was received when client->GetDownloadState() == DS_DOWNLOADING() %s"), client->DbgGetClientInfo());
+									client->SendBlockRequests();
+								}
+#endif
+								//MORPH END  - ZZUL_20070513-2310
 
 								break;
 							}
