@@ -100,7 +100,9 @@ LONG CMiniDumper::TopLevelFilter(struct _EXCEPTION_POINTERS* pExceptionInfo)
 		{
 			// Ask user if they want to save a dump file
 			// Do *NOT* localize that string (in fact, do not use MFC to load it)!
+#ifndef _BETA // force dump for betas
 			if (MessageBox(NULL, _T("eMule crashed :-(\r\n\r\nA diagnostic file can be created which will help the author to resolve this problem. This file will be saved on your Disk (and not sent).\r\n\r\nDo you want to create this file now?"), m_szAppName, MB_ICONSTOP | MB_YESNO) == IDYES)
+#endif
 			{
 				// Create full path for DUMP file
 				TCHAR szDumpPath[MAX_PATH];

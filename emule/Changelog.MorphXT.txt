@@ -71,6 +71,9 @@ REMOVED: Unusued ressource strings [Stulle]
 REMOVED: AppleJuice detection [Xman/Anonymous Anti-Leecher]
 REMOVED: ZZUL addition that sometimes caused crashes on receiving OP_FILESTATUS [Stulle]
 
+Note: Following languages updated: German [Stulle]; French [Nicolas_FR]; Chinese (P.R.C.) [zz_fly]; 
+	Chinese (Taiwan) [AndCycle]; Italian [v-x-vendetta]; Turkish [omeringen]; Spanish [guijarrelson]
+
 
 --------------------------------------
 Changelog for eMule 0.49c MorphXT v11.3
