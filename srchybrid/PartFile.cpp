@@ -2116,8 +2116,10 @@ void CPartFile::PartFileHashFinished(CKnownFile* result){
 	{
 		if (!result->GetFileIdentifier().HasAICHHash())
 // WebCache ////////////////////////////////////////////////////////////////////////////////////
+		{
 			if(thePrefs.GetLogICHEvents()) //JP log ICH events
 				AddDebugLogLine(false, _T("Failed to store new AICH Recovery and Part Hashset for completed file %s"), GetFileName());
+		}
 		else
 		{
 			m_FileIdentifier.SetAICHHash(result->GetFileIdentifier().GetAICHHash());
