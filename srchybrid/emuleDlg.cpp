@@ -2511,6 +2511,10 @@ void CemuleDlg::OnTrayRButtonUp(CPoint pt)
 		{
 			case IDC_TOMAX:
 				QuickSpeedOther(MP_QS_UA);
+				//MORPH START - Added by Stulle, Don't reset Connection Settings without reason
+				if (uMaxUploadOld != thePrefs.GetMaxUpload() || uMaxDownloadOld != thePrefs.GetMaxDownload())
+					theApp.scheduler->SaveOriginals();
+				//MORPH END   - Added by Stulle, Don't reset Connection Settings without reason
 				break;
 			//MORPH - Removed by SiRoB
 			/*
@@ -2539,11 +2543,6 @@ void CemuleDlg::OnTrayRButtonUp(CPoint pt)
 				ShowPreferences();
 				break;
 		}
-		//MORPH START - Added by Stulle, Don't reset Connection Settings without reason
-		if (nResult != IDC_PREFERENCES && 
-			(uMaxUploadOld != thePrefs.GetMaxUpload() || uMaxDownloadOld != thePrefs.GetMaxDownload()))
-			theApp.scheduler->SaveOriginals();
-		//MORPH END   - Added by Stulle, Don't reset Connection Settings without reason
 	}
 }
 
