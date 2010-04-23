@@ -284,11 +284,11 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_SEARCH_PICS         "Figura"
+    IDS_SEARCH_PICS         "Imagem"
     IDS_SEARCH_PRG          "Programa"
     IDS_SEARCH_VIDEO        "Vídeo"
     IDS_SEARCH_CDIMG        "Imagem de CD"
-    IDS_SEARCH_ARC          "Arquivo"
+    IDS_SEARCH_ARC          "Compactado"
     IDS_ERR_INVALIDLINK     "Este link eD2K é inválido (%s)"
     IDS_ERR_LINKERROR       "Link inválido: %s"
     IDS_ERR_NOTCONNECTED    "Você não está conectado ao servidor!"
@@ -471,7 +471,7 @@ BEGIN
     IDS_SW_START            "Procurar"
     IDS_SCHEDULER           "Agendador de Tarefas"
     IDS_IRC                 "IRC"
-    IDS_SW_RESULT           "Resultado da Procura"
+    IDS_SW_RESULT           "Resultados das Pesquisas"
     IDS_SW_DOWNLOAD         "Baixar Selecionados"
     IDS_SV_SERVERLIST       "Lista de Servidores"
     IDS_SV_SERVERINFO       "Informações do Servidor"
@@ -576,7 +576,7 @@ BEGIN
     IDS_PW_USS              "Atualizar lista de servidores ao iniciar"
     IDS_PW_MISC             "Opções Variadas"
     IDS_PW_TRAY             "Ao minimi&zar, ir para a bandeja do sistema"
-    IDS_PW_BEEP             "Emitir som se houver erro"
+    IDS_LANMODE             "Modo LAN"
     IDS_PW_PROMPT           "Confirmar ao Sair"
 END
 
@@ -842,7 +842,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_UPDATEQUEUE         "Não atualizar fila de esp&era em tempo real"
+
     IDS_RECOVER_SINGLE      "Recuperação de arquivo: 1 arquivo recuperado."
     IDS_RECOVER_MULTIPLE    "Recuperação de arquivo: %ld arquivos recuperados."
     IDS_ATTEMPTING_RECOVERY "Recuperação de arquivo: Iniciada"
@@ -925,7 +925,6 @@ END
 STRINGTABLE 
 BEGIN
     IDS_LOG_LEVEL           "Nível de Registro"
-    IDS_DISABLEPEERACHE     "Desligar Download via PeerCache"
     IDS_NEWMSG              "Nova mensagem de '%s' (IP:%s)"
     IDS_PREF_STARTNEXTFILECATONLY "Só na mesma Categoria"
     IDS_LOG_ULDL_EVENTS     "Registrar eventos de upload/download"
@@ -1173,7 +1172,6 @@ STRINGTABLE
 BEGIN
     IDS_ERR_TOOLARGEFILE    "Arquivo maior do que o tamanho suportado pelo protocolo do edonkey (>=4GB)"
     IDS_MSGONLYFRIENDS      "&Aceitar somente de amigos"
-    IDS_MSGONLYSEC          "Aceitar somente de clientes &válidos"
     IDS_DAY_MO_SA           "Seg-Sáb"
     IDS_LIMITSOURCES        "Limite de fontes"
     IDS_LIMITCONS5SEC       "Limite de conexões/5segs"
@@ -1191,7 +1189,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_ACTSESSIONS         "Sessôes Ativas"
+    IDS_ACTSESSIONS         "Sessões Ativas"
     IDS_WEBSRV              "Servidor Web"
     IDS_SW_REFETCHRES       "Resultados remetidos"
     IDS_FILEHASH            "Hash do Arquivo"
@@ -1223,7 +1221,6 @@ BEGIN
     IDS_DL_RESUMENEXT       "Continuar próximo pausado"
     IDS_STARTPRIO           "Prioridade para essa categoria"
     IDS_PREF_STARTNEXTFILECAT "Priorizar a mesma Categoria"
-    IDS_REPAINTGRAPHS       "Não redimensionar os gráficos de Estatísticas"
     IDS_SOFTFILES           "Limite flexível de arquivos"
     IDS_HARDFILES           "Limite de arquivos"
     IDS_FILTER              "Filtro"
@@ -1950,6 +1947,30 @@ BEGIN
     IDS_WEBUPNPINCLUDE      "Incluir porta no UPnP"
     IDS_ADDEDON             "Adicionado em"
     IDS_RESOLVELINKS        "Seguir links em pastas compartilhadas"
+    IDS_PAUSEONPREVIEW      "Pausar quando possível previsualizar"
+    IDS_PREVIEWWITH         "Pré-visualizar com
+    IDS_DOWNLOADCOMMANDS    "Comandos de Download"
+    IDS_CLOSETOOLBAR        "Fechar barra de ferramentas"
+    IDS_SHOWTOOLBAR         "Mostrar barra de ferramentas"
+    IDS_SEARCH_BADOPERATORCOMBINATION 
+                            "A primeira palavra chave não pode ter o operador OR ao buscar no Kad!\n\nPor exemplo ""Palavra1 OR Palavra2"" não é aceitável. Tente ""Palavra1 AND (Palavra2 OR Palavra3)"" ou então faça várias buscas."
+    IDS_DISCOVEREDBY        "Descoberto por"
+    IDS_NODES               "Nó(s)"
+    IDS_ROUTINGTABLE        "Tabela de roteamento"
+    IDS_PROTOCOLVERSION     "Versão do Protocolo"
+    IDS_FOUNDNODESUSEFUL    "Nós encontrados (úteis)"
+    IDS_NORESPONSE          "Sem Resposta"
+END
+
+STRINGTABLE 
+BEGIN
+    IDS_NOTASKED            "Não perguntado"
+    IDS_LOOKUPGRAPH         "Detalhes da busca"
+    IDS_AUTOKADLOOKUPGRAPH  "Mostrar buscas ativas automaticamente"
+//    IDS_CLOSEEMULE          "Fechar eMule"
+    IDS_DONOTASKAGAIN       "Não perguntar novamente"
+    IDS_POPULARITY          "Nível de popularidade"
+    IDS_SHOWWIN7TASKBARGOODIES "Ligar efeitos da barra de tarefas do Windows 7"
 END
 
 STRINGTABLE 
@@ -2755,7 +2776,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_CONTINUE            "&Continuar"
-    //IDS_DONOTASKAGAIN       "Não me pergunte novamente"
+//    IDS_DONOTASKAGAIN       "Não me pergunte novamente"
     IDS_DONOTTELLAGAIN      "Não me diga novamente"
     IDS_DONOTSHOWAGAIN      "Não me mostre novamente"
     IDS_YESTOALL            "&Sim para tudo"
@@ -3255,7 +3276,7 @@ BEGIN
     IDS_ADVADMIN_USER       "Usuário:"
     IDS_ADVADMIN_CAT        "Categorias (sep. por |):"
     IDS_WS_COOKIE_LOGGEDIN  "Permanecer Logado:"
-    IDS_WS_COOKIE_LASTUSER  "Memorizar último usuário:"
+        IDS_WS_COOKIE_LASTUSER  "Memorizar último usuário:"
 END
 
 STRINGTABLE 
@@ -3535,15 +3556,15 @@ END
 
 STRINGTABLE 
 BEGIN
-   IDS_ADDSHAREDIR          "Adicionar compartilhamento ou UNC manualmente"
-   IDS_TEXTSHRETOADD        "Compartilhamento para adicionar"
-   IDS_SHAREWITHSUBDIR	    "Compartilhar com subpastas"
-   IDS_SUBDIRS              "Sub-pastas"
-   IDS_UNCLIST_INACTIVE     "Compartilhamentos inativos"
-   IDS_SCHED_RELOAD         "Agendador:Recarregar arquivos compartilhados"
-   IDS_SCHED_WARNENDTIME    "O tempo de término deve ser igual ao de início para eventos únicos"
-   IDS_SCHED_WARN_APPLY     "Pressione Ok ou Aplicar antes de selecionar outro agendamento"
-   IDS_SCHED_WARN_APPLY_TITLE "Aviso"
+    IDS_ADDSHAREDIR          "Adicionar compartilhamento ou UNC manualmente"
+    IDS_TEXTSHRETOADD        "Compartilhamento para adicionar"
+    IDS_SHAREWITHSUBDIR	    "Compartilhar com subpastas"
+    IDS_SUBDIRS              "Sub-pastas"
+    IDS_UNCLIST_INACTIVE     "Compartilhamentos inativos"
+    IDS_SCHED_RELOAD         "Agendador:Recarregar arquivos compartilhados"
+    IDS_SCHED_WARNENDTIME    "O tempo de término deve ser igual ao de início para eventos únicos"
+    IDS_SCHED_WARN_APPLY     "Pressione Ok ou Aplicar antes de selecionar outro agendamento"
+    IDS_SCHED_WARN_APPLY_TITLE "Aviso"
 END
 
 STRINGTABLE 
@@ -3555,121 +3576,199 @@ END
 
 STRINGTABLE 
 BEGIN
-   IDS_USSPINGDATASIZE      "Tamanho do ICMP (0=padrão 0..64 permitido)" 
-   IDS_PINGDATASIZE_TIP     "Alguns firewalls/roteadores não respondem icmp ping corretamente\nquando o tamanho é 0. Essa opção permite que você defina uma\npequena quantidade de dados para contornar esse problema"
+    IDS_USSPINGDATASIZE      "Tamanho do ICMP (0=padrão 0..64 permitido)" 
+    IDS_PINGDATASIZE_TIP     "Alguns firewalls/roteadores não respondem icmp ping corretamente\nquando o tamanho é 0. Essa opção permite que você defina uma\npequena quantidade de dados para contornar esse problema"
 END
 
 STRINGTABLE 
 BEGIN
-  IDS_INCFILES_TIP          "Especifica a pasta onde os arquivos completos serão movidos.\nSe o caminho padrão for alterado para outra pasta,\nesta tem que ter permissão de escrita. O eMule não irá\ncriar a pasta.\nVocê pode usar outras pastas por categoria.\nSua pasta de arquivos recebidos sempre será compartilhada."
-  IDS_TEMPFILES_TIP         "Essa opção especifica a pasta, ou pastas, onde os downloads\nem progresso serão armazenados. Por causa do sistema de download\nsimultaneo, o eMule cria arquivos dummy (*.part) do tamanho\nque o arquivo final terá quando chegar. Você pode configurar\no eMule para usar apenas o tamanho que já chegou ligando a opção\n'Sparse' nas Conf. Avançadas (funciona apenas em NTFS, no XP\ne no 2000, mas não no Vista). Você pode adicionar múltiplas pastas\n clicando no botão [+], próximo ao botão de procura\n(visível apenas quando 'mostrar mais controles' estiver ligado).\nA pasta será escolhida na seguinte ordem:\n1. No mesmo drive que a pasta de arquivos completos, caso tenha espaço.\n2. Espaço suficiente para todos os downloads.\n3. Maior espaço disponível.\nNote que não faz sentido botar várias pastas temporárias\no exato mesmo drive."
-  IDS_SHARESELECTOR_TIP     "Selecione pastas adicionais para compartilhar e caminhos de rede aqui.\nSe você segurar a tecla CTRL enquanto clicar em\numa pasta, esta será compartilhada com suas sub-pastas."
-  IDS_UNCLIST_TIP           "Pastas que já foram compartilhadas mas não puderam ser lidas quando\no eMule foi iniciado. Pressionando Aplicar fará com que\no eMule tente lê-las novamente.\nNote que compartilhamentos que não conseguem ser acessados fazem\naumentar o tempo de inicialização do eMule."
-  IDS_UNCADD_TIP            "Adicionar caminhos manualmente. Útil para pastas em rede que não estão listadas"
-  IDS_UNCREM_TIP            "Remove o compartilhamento marcado"
-
-  IDS_ENABLE_SCHED_TIP      "Ligar o agendador.\nQuando desligado, nenhum evento listado aqui irá acontecer.\n(padrão: desligado, não esqueça de ligar)"
-  IDS_REMOVE_SCHED_TIP      "Remove o evento marcado"
-  IDS_NEW_SCHED_TIP         "Cria um evento novo"
-  IDS_SCHEDLIST_TIP         "Mostra a ação do evento selecionado.\nUse NOVO para adicionar eventos e REMOVER para apagá-los.\nVocê terá que Aplicar depois de cada linha\nou a seleção de outro ítem pode falhar"
-  IDS_S_ENABLE_TIP          "Ativa a ação desse evento"
-  IDS_S_TITLE_TIP           "Edita o nome da ação desse evento"
-  IDS_TIMESEL_SCHED_TIP     "Seleciona com que frequência um evento ocorre"
-  IDS_DATETIMEPICKER1_TIP   "Hora de início"
-  IDS_DATETIMEPICKER2_TIP   "Hora do fim. Note que eventos que acontecem uma única vez\ncomo atualização de ipfilter deve ter o horário\ndo fim igual ao horário do início."
-  IDS_CHECKNOENDTIME_SCHED_TIP  "Evento não tem fim"
-  IDS_SCHEDACTION_TIP       "Clique com botão direito nessa janela para\nadicionar/remover ações do evento selecionado.\nAlgumas ações tem parâmetros que podem ser editados."
-
-  IDS_OVERWRITE1            "Arquivo %s já existe. Sobrescrever?"
-  IDS_OVERWRITE2            "Sobrescrever?"
-  IDS_BACKUPERROR           "Erro encontrado durante backup"
-  IDS_BACKUP_PART           "Por causa do tamanho deles, fazer backup de\narquivos *.part pode demorar alguns minutos.\nVocê tem certeza que quer fazer isso?"
-  IDS_BACKUP_PART_W         "Você tem certeza?"
-  IDS_BACKUP_COMPLETE       "Arquivo(s) copiado(s) com sucesso."
-
-  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME "Ajustar o horario de verão dos arquivos em NTFS"
-  IDS_X_PEERCACHESHOW       "Exibir informações do PeerCache"
-  IDS_X_DATETIMEFORMAT      "Formato de Date&Time format"
-  IDS_X_DATETIMEFORMAT4LOG  "Date&Time format for log"
-  IDS_X_LOGWARNING          "Cor de aviso no registro"
-  IDS_X_LOGSUCCESS          "Cor de sucesso no registro"
-  IDS_X_LOGERROR            "Cor de erro no registro"
-  IDS_X_ICH                 "Tratamento de corrupção inteligente (ICH)"
-  IDS_X_DONTCOMPRESSAVI     "Não comprimir AVI"
-  IDS_X_SHOWCOPYED2KLINK    "Mostrar comando 'copiar link ed2k'"
-  IDS_X_ICON_FLASH_ON_NEW_MESSAGE "Piscar ícone da bandeja quando chegar mensagens"
-  IDS_X_SHOWVERTICALHOURMARKERS "Stats- Mostrar marcadores de hora vertical"
-  IDS_X_REBARTOOLBAR        "Desligar algumas opções da barra de ferramentas"
+    IDS_INCFILES_TIP          "Especifica a pasta onde os arquivos completos serão movidos.\nSe o caminho padrão for alterado para outra pasta,\nesta tem que ter permissão de escrita. O eMule não irá\ncriar a pasta.\nVocê pode usar outras pastas por categoria.\nSua pasta de arquivos recebidos sempre será compartilhada."
+    IDS_TEMPFILES_TIP         "Essa opção especifica a pasta, ou pastas, onde os downloads\nem progresso serão armazenados. Por causa do sistema de download\nsimultaneo, o eMule cria arquivos dummy (*.part) do tamanho\nque o arquivo final terá quando chegar. Você pode configurar\no eMule para usar apenas o tamanho que já chegou ligando a opção\n'Sparse' nas Conf. Avançadas (funciona apenas em NTFS, no XP\ne no 2000, mas não no Vista). Você pode adicionar múltiplas pastas\n clicando no botão [+], próximo ao botão de procura\n(visível apenas quando 'mostrar mais controles' estiver ligado).\nA pasta será escolhida na seguinte ordem:\n1. No mesmo drive que a pasta de arquivos completos, caso tenha espaço.\n2. Espaço suficiente para todos os downloads.\n3. Maior espaço disponível.\nNote que não faz sentido botar várias pastas temporárias\no exato mesmo drive."
+    IDS_SHARESELECTOR_TIP     "Selecione pastas adicionais para compartilhar e caminhos de rede aqui.\nSe você segurar a tecla CTRL enquanto clicar em\numa pasta, esta será compartilhada com suas sub-pastas."
+    IDS_UNCLIST_TIP           "Pastas que já foram compartilhadas mas não puderam ser lidas quando\no eMule foi iniciado. Pressionando Aplicar fará com que\no eMule tente lê-las novamente.\nNote que compartilhamentos que não conseguem ser acessados fazem\naumentar o tempo de inicialização do eMule."
+    IDS_UNCADD_TIP            "Adicionar caminhos manualmente. Útil para pastas em rede que não estão listadas"
+    IDS_UNCREM_TIP            "Remove o compartilhamento marcado"
+    IDS_ENABLE_SCHED_TIP      "Ligar o agendador.\nQuando desligado, nenhum evento listado aqui irá acontecer.\n(padrão: desligado, não esqueça de ligar)"
+    IDS_REMOVE_SCHED_TIP      "Remove o evento marcado"
+    IDS_NEW_SCHED_TIP         "Cria um evento novo"
+    IDS_SCHEDLIST_TIP         "Mostra a ação do evento selecionado.\nUse NOVO para adicionar eventos e REMOVER para apagá-los.\nVocê terá que Aplicar depois de cada linha\nou a seleção de outro ítem pode falhar"
+    IDS_S_ENABLE_TIP          "Ativa a ação desse evento"
+    IDS_S_TITLE_TIP           "Edita o nome da ação desse evento"
+    IDS_TIMESEL_SCHED_TIP     "Seleciona com que frequência um evento ocorre"
+    IDS_DATETIMEPICKER1_TIP   "Hora de início"
+    IDS_DATETIMEPICKER2_TIP   "Hora do fim. Note que eventos que acontecem uma única vez\ncomo atualização de ipfilter deve ter o horário\ndo fim igual ao horário do início."
+    IDS_CHECKNOENDTIME_SCHED_TIP  "Evento não tem fim"
+    IDS_SCHEDACTION_TIP       "Clique com botão direito nessa janela para\nadicionar/remover ações do evento selecionado.\nAlgumas ações tem parâmetros que podem ser editados."
+    IDS_OVERWRITE1            "Arquivo %s já existe. Sobrescrever?"
+    IDS_OVERWRITE2            "Sobrescrever?"
+    IDS_BACKUPERROR           "Erro encontrado durante backup"
+    IDS_BACKUP_PART           "Por causa do tamanho deles, fazer backup de\narquivos *.part pode demorar alguns minutos.\nVocê tem certeza que quer fazer isso?"
+    IDS_BACKUP_PART_W         "Você tem certeza?"
+    IDS_BACKUP_COMPLETE       "Arquivo(s) copiado(s) com sucesso."
+    IDS_X_ADJUSTNTFSDAYLIGHTFILETIME "Ajustar o horario de verão dos arquivos em NTFS"
+    IDS_X_PEERCACHESHOW       "Exibir informações do PeerCache"
+    IDS_X_DATETIMEFORMAT      "Formato de Date&Time format"
+    IDS_X_DATETIMEFORMAT4LOG  "Date&Time format for log"
+    IDS_X_LOGWARNING          "Cor de aviso no registro"
+    IDS_X_LOGSUCCESS          "Cor de sucesso no registro"
+    IDS_X_LOGERROR            "Cor de erro no registro"
+    IDS_X_ICH                 "Tratamento de corrupção inteligente (ICH)"
+    IDS_X_DONTCOMPRESSAVI     "Não comprimir AVI"
+    IDS_X_SHOWCOPYED2KLINK    "Mostrar comando 'copiar link ed2k'"
+    IDS_X_ICON_FLASH_ON_NEW_MESSAGE "Piscar ícone da bandeja quando chegar mensagens"
+    IDS_X_SHOWVERTICALHOURMARKERS "Stats- Mostrar marcadores de hora vertical"
+    IDS_X_REBARTOOLBAR        "Desligar algumas opções da barra de ferramentas"
 
 
 END
 
 STRINGTABLE 
 BEGIN
-  IDS_OUTOFSERVERS_O        "Falha ao conectar codificadamente a servidores com chave de codificação. Tentando novamente."
-  IDS_NO_OBFUSCATION_KEY    "Servidor não tem chave de codificação."
-  IDS_URL_FOR_UPDATING_IP2COUNTRY "URL do arquivo pra atualizar"
-
-  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP "Se o arquivo está localizado em uma partição NTFS\no horário do arquivo será modificado por 1h se\nohorário de verão estiver ativo. Veja KB 129574\npadrão=ativado"
-  IDS_X_LOGERROR_TIP        "Cor das linhas do registro na aba de registro."
-  IDS_X_SHOWVERTICALHOURMARKERS_TIP "Mostra uma linha vertical nas estatísticas a cada hora.\nRedimensione a janela de estatísticas para ver o efeito (padrão: desativado)"
-  IDS_X_REBARTOOLBAR_TIP    "Opção para desligar as opções da barra de ferramentas como:\nLigar suporte chevron: Se a barra for muito pequena pra mostrar todos os botões um\nchevron (ícone '>>') será exibido na direita,\nque quando clicado mostrará um menu com os outros comandos.\nDicas para títulos truncados de botões e no modo 'Sem rótulos' da barra.\nBotões podem ser movidos e/ou removidos da barra se você segurar\nCtrl+Alt enquanto arrastar um botão com o mouse.\nTamanho de botões mais parecidos com os do Windows Explorer.\n(padrão: ativado)"
-  IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "Piscar o ícone da bandeja quando uma nova mensagem for recebida. (padrão: ativado)"
-  IDS_X_SHOWCOPYED2KLINK_TIP "Na janela de arquivos compartilhados, mostrar\n'Copiar links para área de transferência' invés de\n'Links ed2k...' (padrão: desativado)"
-  IDS_X_DONTCOMPRESSAVI_TIP "Normalmente todos os arquivos são comprimidos durante a transferência,\nexceto RAR, ZIP e outros formatos de compactação\nEssa opção desliga compressão de arquivos AVI também.\nPara velocidades super rápidas de Upload, isso melhora performance, mas\npara alguns tipos de avi alguma possível compressão será perdida.\n(padrão: desligado). Note que o Morph tem opção para\ndesligar ou diminuir compressão de todos os arquivos."
-
+    IDS_OUTOFSERVERS_O        "Falha ao conectar codificadamente a servidores com chave de codificação. Tentando novamente."
+    IDS_NO_OBFUSCATION_KEY    "Servidor não tem chave de codificação."
+    IDS_URL_FOR_UPDATING_IP2COUNTRY "URL do arquivo pra atualizar"
+    IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP "Se o arquivo está localizado em uma partição NTFS\no horário do arquivo será modificado por 1h se\nohorário de verão estiver ativo. Veja KB 129574\npadrão=ativado"
+    IDS_X_LOGERROR_TIP        "Cor das linhas do registro na aba de registro."
+    IDS_X_SHOWVERTICALHOURMARKERS_TIP "Mostra uma linha vertical nas estatísticas a cada hora.\nRedimensione a janela de estatísticas para ver o efeito (padrão: desativado)"
+    IDS_X_REBARTOOLBAR_TIP    "Opção para desligar as opções da barra de ferramentas como:\nLigar suporte chevron: Se a barra for muito pequena pra mostrar todos os botões um\nchevron (ícone '>>') será exibido na direita,\nque quando clicado mostrará um menu com os outros comandos.\nDicas para títulos truncados de botões e no modo 'Sem rótulos' da barra.\nBotões podem ser movidos e/ou removidos da barra se você segurar\nCtrl+Alt enquanto arrastar um botão com o mouse.\nTamanho de botões mais parecidos com os do Windows Explorer.\n(padrão: ativado)"
+    IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "Piscar o ícone da bandeja quando uma nova mensagem for recebida. (padrão: ativado)"
+    IDS_X_SHOWCOPYED2KLINK_TIP "Na janela de arquivos compartilhados, mostrar\n'Copiar links para área de transferência' invés de\n'Links ed2k...' (padrão: desativado)"
+    IDS_X_DONTCOMPRESSAVI_TIP "Normalmente todos os arquivos são comprimidos durante a transferência,\nexceto RAR, ZIP e outros formatos de compactação\nEssa opção desliga compressão de arquivos AVI também.\nPara velocidades super rápidas de Upload, isso melhora performance, mas\npara alguns tipos de avi alguma possível compressão será perdida.\n(padrão: desligado). Note que o Morph tem opção para\ndesligar ou diminuir compressão de todos os arquivos."
 END
 STRINGTABLE 
 BEGIN
-  IDS_UPNPDETECTSTATUS      "Status de detecção do assistente"
-  IDS_DETECTUPNP_TIP        "Status atual da detecção automática de upnp no assisntete\n2: Re-detectar upnp na próxima inicialização\n0: Gateway upnp detectado.\n-1: Não detectado.\n-2:Detecção desligada em endereços não locais\n-10:Não necessário. (outros valores são ignorados)"
-  IDS_UPNPPORT_TIP          "Porta que o upnp usa. NÃO FAÇA FORWARDING DESSA PORTA (padrão: 0 = automático)"
-  IDS_UPNPCLEARONCLOSE_TIP  "Ligado = Cria mapeamento estático e fecha ao sair\nDesligado = Cria mapeamento dinâmico e não fecha ao sair"
-  IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "Fazer forward das portas só no primeiro dispositivo encontrado\nNote que algumas instalações do Windows retornam\num gateway residencial que NÃO é\num dispositivo Internet. Padrão: desligado"
-  IDS_UPNPCLOSEONEXIT       "Fechar portas ao sair"
-  IDS_UPNPLIMITTOFIRSTCONNECTION "Fazer forward das portas apenas na primeira conexão"
-  IDS_UPNFORCEUPDATE        "Forçar atualizações periódicas"
-  IDS_UPNFORCEUPDATE_TIP    "Em vez de verificar no dispositivo de gateway de internet\nse o mapeamento de portas ainda existe, apenas adicione\num novo mapeamento a cada 10 minutos (padrão: desligado!)"
+    IDS_UPNPDETECTSTATUS      "Status de detecção do assistente"
+    IDS_DETECTUPNP_TIP        "Status atual da detecção automática de upnp no assisntete\n2: Re-detectar upnp na próxima inicialização\n0: Gateway upnp detectado.\n-1: Não detectado.\n-2:Detecção desligada em endereços não locais\n-10:Não necessário. (outros valores são ignorados)"
+    IDS_UPNPPORT_TIP          "Porta que o upnp usa. NÃO FAÇA FORWARDING DESSA PORTA (padrão: 0 = automático)"
+    IDS_UPNPCLEARONCLOSE_TIP  "Ligado = Cria mapeamento estático e fecha ao sair\nDesligado = Cria mapeamento dinâmico e não fecha ao sair"
+    IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "Fazer forward das portas só no primeiro dispositivo encontrado\nNote que algumas instalações do Windows retornam\num gateway residencial que NÃO é\num dispositivo Internet. Padrão: desligado"
+    IDS_UPNPCLOSEONEXIT       "Fechar portas ao sair"
+    IDS_UPNPLIMITTOFIRSTCONNECTION "Fazer forward das portas apenas na primeira conexão"
+    IDS_UPNFORCEUPDATE        "Forçar atualizações periódicas"
+    IDS_UPNFORCEUPDATE_TIP    "Em vez de verificar no dispositivo de gateway de internet\nse o mapeamento de portas ainda existe, apenas adicione\num novo mapeamento a cada 10 minutos (padrão: desligado!)"
 END
 
 STRINGTABLE 
 BEGIN
-   IDS_DONOTWATCHCLIP       "Pare de vigiar a área de transferência"
-   IDS_DONOTWATCHCLIP_TIP   "Um ou mais links foram copiados da área de transferência.\nMarque essa opção para desligar verificação da área de transferência.\npressione cancelar para não colar o link. \nDigite ou selecione uma categoria e pressione ok para inserir os links"
-   IDS_USS_INITIAL_TTL      "TTL Inicial" // [MoNKi: -USS initial TTL-] - Stulle
-   IDS_USS_INITIAL_TTL_TIP  "Ao tentar achar a última rota comum, pule N primeiros nós\nIsso pode ser útil se o provedor bloquear pings nos\nroteadores internos. Teste isso com o comando 'tracert'. Padrão = 0, \nSe você for acima de 8, você está numa rede esquisita. max = 20\n20 não é recomendado. Definindo isso muito alto causará mensagens de \n'Topologia da rede mudou.'. Perdendo assim\na efetividade do USS"
-   IDS_SELFILES_TIP         "Nomes de arquivos que estavam na fila de links ao mostrar\na seleção de categoria pela primeira vez. Mais podem ser adicionados durante\na seleção de categoria mas não será mostrado aqui"
-   IDS_USEDOWNLOADOVERHEAD  "Usar overhead do download"
-   IDS_USEDOWNLOADOVERHEAD_TIP "Usar o tráfego de ack vindo de uma sessão de download\nnas estatísticas de upload, permitindo assim definir\num limite um pouco maior de upload quando baixando muitos arquivos.\n(padrão: ligado)"
-   IDS_APPLY_SETTINGS       "Devo aplicar as configurações necessárias agora?"
-   IDS_TAB_WEB_SERVER       "Web Server"
-   IDS_TAB_MULTI_USER       "Multi Usuário"
-   IDS_TAB_NT_SERVICE       "Serviço NT"
-   IDS_PURGE_DONT           "Não limpar entradas"
-   IDS_PURGE_PARTIALLY      "Limpar parcilamente as entradas (Original)"
-   IDS_PURGE_COMPLETLY      "Limpar completametne as entradas (MorphXT)"
-   IDS_REMOVE_AICH_IMMEDIATLY "Remover hashs AICH não usadas imediatamente"
-   IDS_IPFILTERWHITELOADED  "%u IPs lidos para o filtro IP ""White List""" //MORPH - Added by Stulle, IP Filter White List [Stulle]
-   //MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
-   IDS_AUTOIPFILTERFAILED   "Falha ao verificar versão do IPFilter."
-   IDS_DL_NONE              "Nenhum"
-   //MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
-   IDS_X_FILE_BUFFER_TIME_LIMIT "Tempo limite para o Buffer de arquivo (em segs)"
-   IDS_X_FILE_BUFFER_TIME_LIMIT_TIP "Tempo máximo até que os dados sejam enviados\ndo cache de download para o disco rígido"
-   IDS_X_DATETIMEFORMAT4LIST "Formato de Data e &Tempo para listas"
-   IDS_X_REARRANGEKADSEARCH "Reorganizar chaves de busca do KAD"
-   IDS_X_REARRANGEKADSEARCH_TIP "Se ligado, eMule irá reorganizar automaticamente\nas chaves de busca para evitar limitações do KAD.\nPadrão: ligado"
-   IDS_RESOLVE_SHARED_SHELL_TIP "Seguir links para permitir o eMule compartilhar\narquivos 'linkados' (Atalhos do Windows Explorer).\nDessa forma você pode compartilhar arquivos únicos\nde pastas não compartilhadas."
-   IDS_AUTO_ARCH_TIP        "Quando você verifica os detalhes de um arquivo compactado,\no eMule tenta mostrar os arquivos dentro do arquivo compactado.\nVocê pode desligar esse comportamento para evitar um\npequeno atraso (em computadores lentos) ao\nvisualizar os detalhes dos arquivos.\nNesse caso você ainda pode visualizar manualmente cada arquivo."
-   IDS_MET_PURGE_DONT_TIP   "Entradas antigas do known.met nunca serão apagadas."
-   IDS_MET_PURGE_PART_TIP   "Partes de entradas antigas no known.met serão apagadas.\nEssa é a forma como o eMule oficial faz."
-   IDS_MET_PURGE_COMPL_TIP  "Entradas antigas no known.met serão apagadas completamente.\nEssa é a forma como o Morph fazia no passado."
-   IDS_REMOVE_AICH_TIP      "Ligue para apagar o hash AICH de arquivos descompartilhados\nimediatamente. Padrão: desligado"
-   IDS_WSUPNP_TIP           "Inclui o WebServer no port forwarding do UPnP."
-   IDS_CHECK_FILE_OPEN_TIP  "Ativar pergunta antes de abrir um arquivo pelo eMule."
+    IDS_DONOTWATCHCLIP       "Pare de vigiar a área de transferência"
+    IDS_DONOTWATCHCLIP_TIP   "Um ou mais links foram copiados da área de transferência.\nMarque essa opção para desligar verificação da área de transferência.\npressione cancelar para não colar o link. \nDigite ou selecione uma categoria e pressione ok para inserir os links"
+    IDS_USS_INITIAL_TTL      "TTL Inicial" // [MoNKi: -USS initial TTL-] - Stulle
+    IDS_USS_INITIAL_TTL_TIP  "Ao tentar achar a última rota comum, pule N primeiros nós\nIsso pode ser útil se o provedor bloquear pings nos\nroteadores internos. Teste isso com o comando 'tracert'. Padrão = 0, \nSe você for acima de 8, você está numa rede esquisita. max = 20\n20 não é recomendado. Definindo isso muito alto causará mensagens de \n'Topologia da rede mudou.'. Perdendo assim\na efetividade do USS"
+    IDS_SELFILES_TIP         "Nomes de arquivos que estavam na fila de links ao mostrar\na seleção de categoria pela primeira vez. Mais podem ser adicionados durante\na seleção de categoria mas não será mostrado aqui"
+    IDS_USEDOWNLOADOVERHEAD  "Usar overhead do download"
+    IDS_USEDOWNLOADOVERHEAD_TIP "Usar o tráfego de ack vindo de uma sessão de download\nnas estatísticas de upload, permitindo assim definir\num limite um pouco maior de upload quando baixando muitos arquivos.\n(padrão: ligado)"
+    IDS_APPLY_SETTINGS       "Devo aplicar as configurações necessárias agora?"
+    IDS_TAB_WEB_SERVER       "Web Server"
+    IDS_TAB_MULTI_USER       "Multi Usuário"
+    IDS_TAB_NT_SERVICE       "Serviço NT"
+    IDS_PURGE_DONT           "Não limpar entradas"
+    IDS_PURGE_PARTIALLY      "Limpar parcilamente as entradas (Original)"
+    IDS_PURGE_COMPLETLY      "Limpar completametne as entradas (MorphXT)"
+    IDS_REMOVE_AICH_IMMEDIATLY "Remover hashs AICH não usadas imediatamente"
+    IDS_IPFILTERWHITELOADED  "%u IPs lidos para o filtro IP 'White List'" //MORPH - Added by Stulle, IP Filter White List [Stulle]
+    //MORPH START - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+    IDS_AUTOIPFILTERFAILED   "Falha ao verificar versão do IPFilter."
+    IDS_DL_NONE              "Nenhum"
+    //MORPH END   - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+    IDS_X_FILE_BUFFER_TIME_LIMIT "Tempo limite para o Buffer de arquivo (em segs)"
+    IDS_X_FILE_BUFFER_TIME_LIMIT_TIP "Tempo máximo até que os dados sejam enviados\ndo cache de download para o disco rígido"
+    IDS_X_DATETIMEFORMAT4LIST "Formato de Data e &Tempo para listas"
+    IDS_X_REARRANGEKADSEARCH "Reorganizar chaves de busca do KAD"
+    IDS_X_REARRANGEKADSEARCH_TIP "Se ligado, eMule irá reorganizar automaticamente\nas chaves de busca para evitar limitações do KAD.\nPadrão: ligado"
+    IDS_RESOLVE_SHARED_SHELL_TIP "Seguir links para permitir o eMule compartilhar\narquivos 'linkados' (Atalhos do Windows Explorer).\nDessa forma você pode compartilhar arquivos únicos\nde pastas não compartilhadas."
+    IDS_AUTO_ARCH_TIP        "Quando você verifica os detalhes de um arquivo compactado,\no eMule tenta mostrar os arquivos dentro do arquivo compactado.\nVocê pode desligar esse comportamento para evitar um\npequeno atraso (em computadores lentos) ao\nvisualizar os detalhes dos arquivos.\nNesse caso você ainda pode visualizar manualmente cada arquivo."
+    IDS_MET_PURGE_DONT_TIP   "Entradas antigas do known.met nunca serão apagadas."
+    IDS_MET_PURGE_PART_TIP   "Partes de entradas antigas no known.met serão apagadas.\nEssa é a forma como o eMule oficial faz."
+    IDS_MET_PURGE_COMPL_TIP  "Entradas antigas no known.met serão apagadas completamente.\nEssa é a forma como o Morph fazia no passado."
+    IDS_REMOVE_AICH_TIP      "Ligue para apagar o hash AICH de arquivos descompartilhados\nimediatamente. Padrão: desligado"
+    IDS_WSUPNP_TIP           "Inclui o WebServer no port forwarding do UPnP."
+    IDS_CHECK_FILE_OPEN_TIP  "Ativar pergunta antes de abrir um arquivo pelo eMule."
+    //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
+    IDS_FILTER_CLIENTFAILEDDOWN "Filter clients with failed downloads"
+    IDS_FILTER_CLIENTFAILEDDOWN_TIP "Filter clients that transfer less than 12kB\nin a download session more than thrice.\nDefault: enabled"
+    //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
+    IDS_TCP_CONS            "TCP-connections"
+    IDS_X_ICH_TIP           "Intelligent Corruption Handling (ICH) ajuda\na recuperar dados errôneos baixados\nde outros clientes."
+    IDS_UPDATEQUEUE         "Não atualizar fila de esp&era em tempo real"
+    IDS_REPAINTGRAPHS       "Não redimensionar os gráficos de Estatísticas"
+    IDS_PW_BEEP             "Beep on errors"
+    IDS_MSGONLYSEC          "Aceitar somente de clientes &válidos"
+    IDS_DISABLEPEERACHE     "Desligar Download via PeerCache"
+    IDS_SHOWWIN7TASKBARGOODIES_TIP "O Windows 7 vem com algumas novas opções\npara a barra de tarefas Aero Glass que\npodem ser usadas com isso."
+    IDS_STORESEARCHES_TIP   "O eMule pode armazenar suas últimas buscas\ne carregá-las ao iniciar."
+    IDS_SEARCHSPAMFILTER_TIP "Alguns usuários ou servidores publicam arquivos falsos. Para proteger você,\nligue essa opção para que o eMule filtre os resultados\nusando dois métodos diferentes."
+    IDS_ENABLEMINIMULE_TIP  "MiniMule é uma pequena janela que pode ser mostrada para exibir informações básicas\nsobre o eMule quando ele está minimizado na bandeja. Ele irá flutuar e pode\nser feito transparente (veja Opções Avançadas em Extendido)."
+    IDS_PREVENTSTANDBY_TIP  "O Windows é frequentemente configurado para entrar em modo\nstandby depois de um tempo. Ligando essa opção você irá prevenir o Windows de entrar em modo Standby\npara continuar compartilhando arquivos."
+    IDS_STATIC_ICON_TIP     "Normalmente o ícone de bandeja do eMule só é mostrado quando este é minimizado para a bandeja.\nEssa opção fará com que o eMule mostre o ícone na bandeja estando minimizado ou não."
+    IDS_MORPHWIZ_SHOWLESS_TIP "eMule MorphXT inclui um monte de opções e informações extras que usuários inexperientes\npodem não precisar. Essa opção esconderá algumas dessas informações e opções\npara simplificar o programa."
+    IDS_WS_FAILED_LOGIN     "Você foi banido por 15 minutos por falhar nas autenticações."
+    IDS_ADVADMIN_DFILES     "Acesso - Baixar arquivos?"
+    IDS_ADVADMIN_DFILES_TIP "Permitir usuário a baixar arquivos compartilhados completos."
+    IDS_SERVICE_OPT_GROUP   "Otimizações do Serviço NT"
+    IDS_SERVICE_OPT_LABEL   "Nível de otimização:"
+    IDS_SERVICE_OPT_NONE    "Nenhum"
+    IDS_SERVICE_OPT_BASIC   "Básico"
+    IDS_SERVICE_OPT_LISTS   "Listas exceto Servidores"
+    IDS_SERVICE_OPT_FULL    "Completo"
+    IDS_SVC_STRT_MGR_FAIL   "O serviço iniciou com sucesso mas falhou em avisar o servicemanger. Saindo."
+    IDS_SVC_PAUSE_MGR_FAIL  "O serviço pausou mas falhou em avisar o servicemanger. Saindo."
+    IDS_SVC_INST_PATH_FAIL  "Impossível instalar serviço, caminho inválido. %s"
+    IDS_SVC_INST_SUCCESS    "Instalado como serviço."
+    IDS_SVC_INST_FAIL       "Falha ao instalar como serviço: %s"
+    IDS_SVC_SVCCTRL_FAIL    "Falhou ao conectar ao controle de Serviço: %s"
+    IDS_SVC_STOPPING        "Parando serviço"
+    IDS_SVC_STOP_PNDNG      "Parada de serviço pendente"
+    IDS_SVC_STOPPED         "Serviço parado"
+    IDS_SVC_STOP_FAIL       "Falha ao parar serviço: %s"
+    IDS_SVC_DELETED         "Serviço excluído"
+    IDS_SVC_DELETE_FAIL     "Remoção de serviço falhou: %s"
+    IDS_SVC_OPEN_FAIL       "Falha ao abrir serviço: %s"
+    IDS_SVC_TERMINATE       "Terminar serviço. Código de erro %d:%s"
+    IDS_SVC_STRTUP_SUCCESS  "Modo de startup do serviço alterado com sucesso."
+    IDS_SVC_STRTUP_FAIL     "Impossível mudar modo de startup do serviço: %s"
+    IDS_SVC_STRTUP_OPN_FAIL "Falhou ao abrir serviço para mudar modo de startup: %s"
+    IDS_SVC_STRTUP_CTRL_FAIL "Falhou ao conectar ao controle de serviço para mudar modo de startup: %s"
+    IDS_SVC_LINK_PASS_FAIL  "Passar o link para webservice: Internetopen error"
+    IDS_SERVICE_OPT_BOX_TIP "Usando o eMule como serviço NT permite a você ativar várias otimizações que irão\nreduzir o uso de CPU e memória com uma interface desnecessária.\n\nNíveis disponíveis:\n0: Nenhum = Sem otimizações\n4: Básico = Desliga alguns ítens da interface (como Dicas)\n6: Listas exceto Servidores = Desliga a maioria das listas exceto a de Servidores\n10: Completo = Também desliga funções da lista de Servidores"
+    //MORPH START - Added by Stulle, Adjustable NT Service Strings
+    IDS_SERVICE_STR_GROUP   "NT Service strings (empty = default)"
+    IDS_SERVICE_NAME        "Nome (para instalar)"
+    IDS_SERVICE_DISP_NAME   "Nome exibido"
+    IDS_SERVICE_DESCR       "Descrição exibida"
+    IDS_SERVICE_NAME_CHANGED "Você mudou o nome que o Serviço NT é instalado.\nTo enable the changes you made eMule will have to reinstall the service.\n\nPress 'Yes' to reinstall the service.\nPress 'No' to just change the install name.\nPress 'Cancel' to revert changes."
+    IDS_SERVICE_STR_CHANGED "String do Serviço NT alterada"
+    IDS_SERVICE_DISP_CHANGE_FAIL "Falha ao mudar o nome ou descrição do serviço.\nVocê quer tentar reinstalar o serviço para mudar essas strings?"
+    IDS_SERVICE_STR_CHANGE_FAIL "Falha ao alterar string do Serviço NT"
+    IDS_SERVICE_UNINSTALL_FAIL "Desinstalação do Serviço NT falhou.\nPor favor veja seu registro.\nTodas as alterações foram desfeitas."
+    IDS_SERVICE_UNINSTALL_TITLE "Desinstalação falhou"
+    IDS_SERVICE_INSTALL_FAIL "Instalação do Serviço NT falhou.\nPor favor verifique seu registro e tente reinstalar o serviço novamente no painel do Serviço NT."
+    IDS_SERVICE_INSTALL_TITLE "Instalação falhou"
+    IDS_SVC_DISP_SUCCESS    "Mudança do nome do serviço alterada com sucesso."
+    IDS_SVC_DISP_FAIL       "Impossível alterar nome do serviço: %s"
+    IDS_SVC_DESCR_SUCCESS   "Mudança de descrição de serviço alterada com sucesso."
+    IDS_SVC_DESCR_FAIL      "Impossível alterar a descrição do serviço: %s"
+    IDS_SVC_STR_OPN_FAIL    "Falha ao abrir serviço para mudar o modo de string: %s"
+    IDS_SVC_STR_CTRL_FAIL   "Falha ao conectar ao controle de serviço para alterar a string mostrada: %s"
+    IDS_SERVICE_NAME_TIP    "Nome interno sob o qual o serviço do eMule será instalado. Esse nome precisa ser\núnico (case insensitive) e é usado para manipular o serviço\npelo Command Prompt.\n\nPadrão: eMule"
+    IDS_SERVICE_DISP_NAME_TIP "Nome que será mostrado na lista de serviços do Windows. Esse nome precisa ser\núnico (case insensitive).\n\nPadrão: eMule MorphXT as a service"
+    IDS_SERVICE_DESCR_TIP   "Descrição que será mostrada na lista de Serviços do Windows.\n\nPadrão: Provê capacidade de rodar eMule como serviço do sistema."
+    //MORPH END   - Added by Stulle, Adjustable NT Service Strings
+    IDS_KEEPCATINCSHARED    "Pasta de arquivos recebidos da categoria removida deve ser adicionada como compartilhada?"
+    IDS_KEEPCATINCSHARED_TITLE "Categoria removida"
+    IDS_ADD_REMOVED_INC     "Recompartilhar arquivos recebidos de cat apagada"
+    IDS_ADD_REMOVED_INC_TIP   "Quando uma categoria é removida ou unida, uma pasta de arquivos recebidos\npode ser removida. Descompartilhar arquivos baixados não é sempre uma\nboa idéia. Com essa opção ligada o eMule irá lhe perguntar se deve adicionar\nnovamente a pasta de arquivos recebidos como pasta compartilhada.\nDesligue essa opção se você não quer ser perguntado."
+    IDS_OPENPREFINI         "Abrir preferences.ini"
+    IDS_EXTRAPREVIEWWITHMENU "Mostre Pré-visualização no menu principal"
+    IDS_EXTRAPREVIEWWITHMENU_TIP  "Quando controles extendidos estão ativos e vários programas\nde pré-visualizacao estão definidos, o eMule mostrará um menu para escolher\nqual programa usar na Lista de Download. Esse menu geralmente é adicionado\nno menu de pré-visualização. Ligando essa opção fará\ncom que o menu de pré-visualização seja no menu principal."
+    IDS_FILEBUFFERSIZE_TIP  "Dados baixados são temporariamente armazenados na memória.\nEssa opção permite que você configure o quanto será armazenado.\nDados na memória serão salvos depois de um minuto (padrão).\nNote que esses dados podem ser perdidos se o eMule não fechar corretamente.\nAumentar o tamanho de buffer reduz o número de acessos ao seu HD para\nescrita de dados mas aumenta o quantidade de dados que podem ser perdidos em um crash."
+    IDS_QUEUESIZE_TIP "Clientes pedindo por um arquivo compartilhado são adicionados à fila de espera\ncaso não existam slots de upload disponíveis. Essa opção define o\nnúmero máxmo de clientes que podem ficar na fila. Aumentando o\nnúmero de clientes permitidos pode aumentar o overhead e uso de\nrecursos. Note que a fila permite 25%% mais clientes do que o limite\ncaso eles se adequarem a alguns critérios."
+    IDS_SHOWUPDOWNICONINTASKBAR "Usar overlay de up/down na barra de tarefas"
+    IDS_SHOWUPDOWNICONINTASKBAR_TIP "Windows 7 permite overlays no ícone da barra de trabalho.\nO eMule pode utilizar isso para indicar uploads e downloads ativos.\n\nPadrão: desligado"
+    IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS "Manter pastas indisponíveis de drives fixos"
+    IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP "Geralmente pastas compartilhadas que não estão mais\ndisponíveis são removidas. Ligando essa opção essas pastas\npermanecerão compartilhadas quando estiverem disponíveis novamente.\n\nPadrão: desligado"
+    IDS_FORCESPEEDSTOKB     "Mostra todas as velocidades em KB/s"
+    IDS_FORCESPEEDSTOKB_TIP "O eMule mostra as velocidades de transferência em unidades diferentes,\nde acordo com a grandeza da velocidade. Com essa opção ligada,\nele sempre usará KB/s em vez de B/s, KB/s, GB/s e TB/s." 
 END
-
-
 
 #endif    // English (U.S.) resources
 /////////////////////////////////////////////////////////////////////////////
