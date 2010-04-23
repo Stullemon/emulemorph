@@ -71,8 +71,8 @@ REMOVED: Unusued ressource strings [Stulle]
 REMOVED: AppleJuice detection [Xman/Anonymous Anti-Leecher]
 REMOVED: ZZUL addition that sometimes caused crashes on receiving OP_FILESTATUS [Stulle]
 
-Note: Following languages updated: German [Stulle]; French [Nicolas_FR]; Chinese (P.R.C.) [zz_fly]; 
-	Chinese (Taiwan) [AndCycle]; Italian [v-x-vendetta]; Turkish [omeringen]; Spanish [guijarrelson]
+Note: Following languages updated: German [Stulle]; French [Heaven]; Chinese (P.R.C.) [zz_fly]; 
+	Chinese (Taiwan) [AndCycle]; Italian [Idro182]; Turkish [omeringen]; Spanish [guijarrelson]
 
 
 --------------------------------------
