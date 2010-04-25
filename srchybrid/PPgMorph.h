@@ -79,7 +79,9 @@ protected:
 	int	m_iMaxConnectionsSwitchBorder;//MORPH - Added by Yun.SF3, Auto DynUp changing
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	bool m_bShowCatNames;
+public: //MORPH leuk_he:run as ntservice v1.. 
 	bool m_bSelectCat;
+protected: //MORPH leuk_he:run as ntservice v1.. 
 	bool m_bUseActiveCat;
 	bool m_bAutoSetResOrder;
 	bool m_bShowA4AFDebugOutput;
@@ -101,7 +103,9 @@ protected:
 	bool m_bUseICS; //MORPH - Added by SIRoB, ICS Optional
 	bool m_bHighProcess; //MORPH - Added by IceCream, high process priority
 
+public: //MORPH leuk_he:run as ntservice v1.. 
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
+protected: //MORPH leuk_he:run as ntservice v1.. 
 	bool m_bInitializedTreeOpts;
 	HTREEITEM m_htiDM;
 	HTREEITEM m_htiUM;
@@ -176,7 +180,9 @@ protected:
 
 	//MORPH START - Added by SiRoB, khaos::categorymod+
 	HTREEITEM m_htiShowCatNames;
+public: //MORPH leuk_he:run as ntservice v1.. 
 	HTREEITEM m_htiSelectCat;
+protected: //MORPH leuk_he:run as ntservice v1.. 
 	HTREEITEM m_htiUseActiveCat;
 	HTREEITEM m_htiAutoSetResOrder;
 	HTREEITEM m_htiShowA4AFDebugOutput;

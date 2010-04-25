@@ -64,16 +64,19 @@ FIX: Wrong custom folder icon was displayed [Stulle]
 FIX: CRC32 recalculate commando in SharedFilesWnd did not work properly [Stulle]
 FIX: Setting HideOS for files was cancled when setting remained unchanged for one file [Stulle]
 FIX: Minor display bug around default for PowerShare limit [Stulle]
+FIX: Min Upload setting triggered nagging popup when Upload Capacity set to 1 kB/s [Stulle]
+FIX: Setting appropriate settings for NTservice did not work properly [Stulle]
 REMOVED: Official changes for high upload speed in favor for more advanced MorphXT code [Stulle]
 REMOVED: New official Ask-On-Exit Dialog in favor of Morph's one (NTService) [Stulle]
 REMOVED: "MorphXT 9.7" workaround [Stulle]
 REMOVED: Unusued ressource strings [Stulle]
 REMOVED: AppleJuice detection [Xman/Anonymous Anti-Leecher]
 REMOVED: ZZUL addition that sometimes caused crashes on receiving OP_FILESTATUS [Stulle]
+REMOVED: Dupe USS settings in Extended settings panel [Stulle]
 
 Note: Following languages updated: German [Stulle]; French [Heaven]; Chinese (P.R.C.) [zz_fly]; 
 	Chinese (Taiwan) [AndCycle]; Italian [Idro182]; Turkish [omeringen]; Spanish [guijarrelson];
-	Portuguese (Brazil) [Heiler]
+	Portuguese (Brazil) [Heiler]; Dutch [leuk_he]
 
 
 --------------------------------------
