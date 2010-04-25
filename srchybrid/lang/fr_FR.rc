@@ -1988,7 +1988,7 @@ BEGIN
     IDS_AUTOKADLOOKUPGRAPH  "Montrer automatiquement les recherches en cours"
     IDS_PAUSEONPREVIEW      "Mettre en pause lorsque la prévisualisation est possible"
     IDS_PREVIEWWITH         "Prévisualiser avec"
-    IDS_CLOSEEMULE          "Quitter eMule"
+    //IDS_CLOSEEMULE          "Quitter eMule"
     IDS_DONOTASKAGAIN       "Ne pas me le redemander"
     IDS_POPULARITY          "Rang de popularité"
     IDS_SHOWWIN7TASKBARGOODIES "Activer les effets Windows 7 de la barre des tâches"
@@ -2805,7 +2805,7 @@ END
 STRINGTABLE
 BEGIN
     IDS_CONTINUE       "&Continuer"
-    IDS_DONOTASKAGAIN       "Ne plus me redemander"
+    //IDS_DONOTASKAGAIN       "Ne plus me redemander"
     IDS_DONOTTELLAGAIN       "Ne plus me signaler"
     IDS_DONOTSHOWAGAIN       "Ne plus montrer"
     IDS_YESTOALL       "O&ui à tout"
@@ -3627,7 +3627,7 @@ BEGIN
     IDS_REPAINTGRAPHS       "Ne pas recréer les graphes de stats au redimensionnement"
     IDS_PW_BEEP             "Bip sur erreurs"
     IDS_MSGONLYSEC          "Acceptez les messages des clients valides uniquement"
-    IDS_DISABLEPEERACHEIDS_DISABLEPEERACHE    "Désactiver le téléchargement à partir du PeerCache"
+    IDS_DISABLEPEERACHE     "Désactiver le téléchargement à partir du PeerCache"
     IDS_SHOWWIN7TASKBARGOODIES_TIP "Windows 7 vient avec quelques nouvelles configurations , pour le Aero Glass taskbar qui peut être utilisé avec ceci."
     IDS_STORESEARCHES_TIP  "eMule peut stocker des recherches entre les sessions ainsi elles seront chargées sur le démarrage pour remettre à zéro le vieil état."
     IDS_SEARCHSPAMFILTER_TIP "Parfois les utilisateurs ou les serveurs éditent les faux dossiers. Pour se protéger permettre à cette option qui fera filtrer la recherche de eMule.les résultats utilisant deux approches différentes."

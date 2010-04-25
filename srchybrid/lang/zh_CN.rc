@@ -1963,7 +1963,7 @@ BEGIN
     IDS_AUTOKADLOOKUPGRAPH  "自动显示活动中的搜索" //"Automatically show active searches"
     IDS_PAUSEONPREVIEW      "当可预览时暂停下载" //"Pause when preview possible"
     IDS_PREVIEWWITH         "预览..." //"Preview with"
-    IDS_CLOSEEMULE          "关闭eMule" //"Close eMule"
+    //IDS_CLOSEEMULE          "关闭eMule" //"Close eMule"
     IDS_DONOTASKAGAIN       "不再询问" //"Don't ask me again"
     IDS_POPULARITY          "普及率" //"Popularity Rank"
     IDS_SHOWWIN7TASKBARGOODIES "启用 Winodws 7 任务栏特效" //"Enable Windows 7 taskbar effects"
