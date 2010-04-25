@@ -57,6 +57,8 @@ protected:
 	bool m_bFirewallStartup;
 	*/
 	int m_iLogLevel;
+	//MORPH START - Removed by Stulle, Removed dupe USS settings
+	/*
     bool m_bDynUpEnabled;
     int m_iDynUpMinUpload;
     int m_iDynUpPingTolerance;
@@ -65,6 +67,8 @@ protected:
     int m_iDynUpGoingUpDivider;
     int m_iDynUpGoingDownDivider;
     int m_iDynUpNumberOfPings;
+	*/
+	//MORPH END   - Removed by Stulle, Removed dupe USS settings
     bool m_bA4AFSaveCpu;
 	bool m_bAutoArchDisable;
 	int m_iExtractMetaData;
@@ -124,7 +128,9 @@ protected:
 	bool m_bRearrangeKadSearchKeywords;
 	bool m_bUpdateQueue;
 	bool m_bRepaint;
+public: //MORPH leuk_he:run as ntservice v1.. 
 	bool m_bBeeper;
+protected: //MORPH leuk_he:run as ntservice v1.. 
 	bool m_bMsgOnlySec;
 	bool m_bDisablePeerCache;
 	bool m_bExtraPreviewWithMenu;
@@ -185,7 +191,9 @@ protected:
 	HTREEITEM m_htiRearrangeKadSearchKeywords;
 	HTREEITEM m_htiUpdateQueue;
 	HTREEITEM m_htiRepaint;
+public: //MORPH leuk_he:run as ntservice v1.. 
 	HTREEITEM m_htiBeeper;
+protected: //MORPH leuk_he:run as ntservice v1.. 
 	HTREEITEM m_htiMsgOnlySec;
 	HTREEITEM m_htiDisablePeerCache;
 	HTREEITEM m_htiExtraPreviewWithMenu;
@@ -197,7 +205,9 @@ protected:
 
 	CSliderCtrl m_ctlFileBuffSize;
 	CSliderCtrl m_ctlQueueSize;
+public: //MORPH leuk_he:run as ntservice v1.. 
     CTreeOptionsCtrlEx m_ctrlTreeOptions;
+protected: //MORPH leuk_he:run as ntservice v1.. 
 	bool m_bInitializedTreeOpts;
 	HTREEITEM m_htiTCPGroup;
 	HTREEITEM m_htiMaxCon5Sec;
@@ -241,6 +251,8 @@ protected:
 	*/
 	// End emulEspaña
 	HTREEITEM m_htiLogLevel;
+	//MORPH START - Removed by Stulle, Removed dupe USS settings
+	/*
     HTREEITEM m_htiDynUp;
 	HTREEITEM m_htiDynUpEnabled;
     HTREEITEM m_htiDynUpMinUpload;
@@ -252,6 +264,8 @@ protected:
     HTREEITEM m_htiDynUpGoingUpDivider;
     HTREEITEM m_htiDynUpGoingDownDivider;
     HTREEITEM m_htiDynUpNumberOfPings;
+	*/
+	//MORPH END   - Removed by Stulle, Removed dupe USS settings
     HTREEITEM m_htiA4AFSaveCpu;
 	HTREEITEM m_htiExtractMetaData;
 	HTREEITEM m_htiExtractMetaDataNever;

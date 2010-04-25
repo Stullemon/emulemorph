@@ -428,7 +428,8 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	// <== [MoNKi: -USS initial TTL-] - Stulle
 	
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiMinUpload, m_iMinUpload);
-	DDV_MinMaxInt(pDX, m_iMinUpload, 1, thePrefs.GetMaxGraphUploadRate(false));
+	if(thePrefs.GetMaxGraphUploadRate(false)!=1) // work arround bug that would always cause a warning to pop up.
+		DDV_MinMaxInt(pDX, m_iMinUpload, 1, thePrefs.GetMaxGraphUploadRate(false));
 
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableDownloadInRed, m_bEnableDownloadInRed); //MORPH - Added by IceCream, show download in red
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiEnableDownloadInBold, m_bEnableDownloadInBold); //MORPH - Added by SiRoB, show download in Bold
@@ -656,6 +657,8 @@ BOOL CPPgMorph::OnApply()
 	// ==> [MoNKi: -USS initial TTL-] - Stulle
 	thePrefs.SetUSSInitialTTL((uint8)m_iUSSTTL);
 	// <== [MoNKi: -USS initial TTL-] - Stulle
+	if(thePrefs.GetMaxGraphUploadRate(false)==1) // work arround bug that would always cause a warning to pop up.
+		m_iMinUpload = 1;
 	thePrefs.SetMinUpload(m_iMinUpload);
 	thePrefs.enableDownloadInRed = m_bEnableDownloadInRed; //MORPH - Added by IceCream, show download in red
 	thePrefs.m_bShowActiveDownloadsBold = m_bEnableDownloadInBold; //MORPH - Added by SiRoB, show download in Bold

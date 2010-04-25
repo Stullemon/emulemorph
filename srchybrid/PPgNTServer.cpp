@@ -405,17 +405,80 @@ void CPPgNTService::OnBnManualStart(){
 
 void CPPgNTService::OnBnAllSettings(){
 	thePrefs.startupsound=false;
-	thePrefs.SetAutoConnect(true);
-	thePrefs.SetWSIsEnabled(true); 
-	RemAutoStart(); // remove from windows startup. 
 	thePrefs.m_bEnableMiniMule=false;
-	thePrefs.m_bSelCatOnAdd=false;
-	thePrefs.notifierSoundType = ntfstNoSound;
-	thePrefs.notifierOnDownloadFinished =false;
 	thePrefs.splashscreen=false;
 	thePrefs.startMinimized=true;
-	thePrefs.beepOnError=false;
 	thePrefs.bringtoforeground=false;
+	if(theApp.emuledlg->preferenceswnd->m_wndGeneral)
+	{
+		if(theApp.emuledlg->preferenceswnd->m_wndGeneral.GetDlgItem(IDC_STARTUPSOUNDON))
+			theApp.emuledlg->preferenceswnd->m_wndGeneral.CheckDlgButton(IDC_STARTUPSOUNDON,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndGeneral.GetDlgItem(IDC_MINIMULE))
+			theApp.emuledlg->preferenceswnd->m_wndGeneral.CheckDlgButton(IDC_MINIMULE,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndGeneral.GetDlgItem(IDC_SPLASHON))
+			theApp.emuledlg->preferenceswnd->m_wndGeneral.CheckDlgButton(IDC_SPLASHON,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndGeneral.GetDlgItem(IDC_STARTMIN))
+			theApp.emuledlg->preferenceswnd->m_wndGeneral.CheckDlgButton(IDC_STARTMIN,BST_CHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndGeneral.GetDlgItem(IDC_BRINGTOFOREGROUND))
+			theApp.emuledlg->preferenceswnd->m_wndGeneral.CheckDlgButton(IDC_BRINGTOFOREGROUND,BST_UNCHECKED);
+	}
+	thePrefs.SetAutoConnect(true);
+	if(theApp.emuledlg->preferenceswnd->m_wndConnection && theApp.emuledlg->preferenceswnd->m_wndConnection.GetDlgItem(IDC_AUTOCONNECT))
+		theApp.emuledlg->preferenceswnd->m_wndConnection.CheckDlgButton(IDC_AUTOCONNECT,BST_CHECKED);
+	thePrefs.SetWSIsEnabled(true); 
+	if(theApp.emuledlg->preferenceswnd->m_wndWebServer && theApp.emuledlg->preferenceswnd->m_wndWebServer.GetDlgItem(IDC_WSENABLED))
+	{
+		theApp.emuledlg->preferenceswnd->m_wndWebServer.CheckDlgButton(IDC_WSENABLED,BST_CHECKED);
+		theApp.emuledlg->preferenceswnd->m_wndWebServer.OnEnChangeWSEnabled();
+	}
+	RemAutoStart(); // remove from windows startup. 
+	thePrefs.m_bSelCatOnAdd=false;
+	if(theApp.emuledlg->preferenceswnd->m_wndMorph)
+	{
+		if(theApp.emuledlg->preferenceswnd->m_wndMorph.m_ctrlTreeOptions &&
+			theApp.emuledlg->preferenceswnd->m_wndMorph.m_htiSelectCat)
+			theApp.emuledlg->preferenceswnd->m_wndMorph.m_ctrlTreeOptions.SetCheckBoxEnable(theApp.emuledlg->preferenceswnd->m_wndMorph.m_htiSelectCat,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndMorph.m_bSelectCat)
+			theApp.emuledlg->preferenceswnd->m_wndMorph.m_bSelectCat = false;
+	}
+	thePrefs.notifierSoundType = ntfstNoSound;
+	thePrefs.notifierOnDownloadFinished = false;
+    thePrefs.notifierOnNewDownload = false;
+    thePrefs.notifierOnChat = false;
+    thePrefs.notifierOnLog = false;
+	thePrefs.notifierOnImportantError = false;
+    thePrefs.notifierOnEveryChatMsg = false;
+	thePrefs.notifierOnNewVersion = false;
+	if(theApp.emuledlg->preferenceswnd->m_wndNotify)
+	{
+		if(theApp.emuledlg->preferenceswnd->m_wndNotify.GetDlgItem(IDC_CB_TBN_USESOUND) &&
+			theApp.emuledlg->preferenceswnd->m_wndNotify.GetDlgItem(IDC_CB_TBN_USESPEECH) &&
+			theApp.emuledlg->preferenceswnd->m_wndNotify.GetDlgItem(IDC_CB_TBN_NOSOUND))
+				theApp.emuledlg->preferenceswnd->m_wndNotify.CheckRadioButton(IDC_CB_TBN_NOSOUND, IDC_CB_TBN_USESPEECH, IDC_CB_TBN_NOSOUND);
+		if(theApp.emuledlg->preferenceswnd->m_wndNotify.GetDlgItem(IDC_CB_TBN_ONDOWNLOAD))
+			theApp.emuledlg->preferenceswnd->m_wndNotify.CheckDlgButton(IDC_CB_TBN_ONDOWNLOAD,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndNotify.GetDlgItem(IDC_CB_TBN_ONNEWDOWNLOAD))
+			theApp.emuledlg->preferenceswnd->m_wndNotify.CheckDlgButton(IDC_CB_TBN_ONNEWDOWNLOAD,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndNotify.GetDlgItem(IDC_CB_TBN_ONCHAT))
+			theApp.emuledlg->preferenceswnd->m_wndNotify.CheckDlgButton(IDC_CB_TBN_ONCHAT,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndNotify.GetDlgItem(IDC_CB_TBN_ONLOG))
+			theApp.emuledlg->preferenceswnd->m_wndNotify.CheckDlgButton(IDC_CB_TBN_ONLOG,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndNotify.GetDlgItem(IDC_CB_TBN_IMPORTATNT))
+			theApp.emuledlg->preferenceswnd->m_wndNotify.CheckDlgButton(IDC_CB_TBN_IMPORTATNT,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndNotify.GetDlgItem(IDC_CB_TBN_POP_ALWAYS))
+			theApp.emuledlg->preferenceswnd->m_wndNotify.CheckDlgButton(IDC_CB_TBN_POP_ALWAYS,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndNotify.GetDlgItem(IDC_CB_TBN_ONNEWVERSION))
+			theApp.emuledlg->preferenceswnd->m_wndNotify.CheckDlgButton(IDC_CB_TBN_ONNEWVERSION,BST_UNCHECKED);
+	}
+	thePrefs.beepOnError=false;
+	if(theApp.emuledlg->preferenceswnd->m_wndTweaks)
+	{
+		if(theApp.emuledlg->preferenceswnd->m_wndTweaks.m_ctrlTreeOptions &&
+			theApp.emuledlg->preferenceswnd->m_wndTweaks.m_htiBeeper)
+			theApp.emuledlg->preferenceswnd->m_wndTweaks.m_ctrlTreeOptions.SetCheckBoxEnable(theApp.emuledlg->preferenceswnd->m_wndTweaks.m_htiBeeper,BST_UNCHECKED);
+		if(theApp.emuledlg->preferenceswnd->m_wndTweaks.m_bBeeper)
+			theApp.emuledlg->preferenceswnd->m_wndTweaks.m_bBeeper = false;
+	}
 //	SetModified();
 };	
 
