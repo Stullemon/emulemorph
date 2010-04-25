@@ -1,7 +1,7 @@
 --------------------------------------
 Changelog for eMule 0.50a MorphXT v12.0
 --------------------------------------
-XX-XX-2010
+25-04-2010
 
 Merged to 0.50a [Stulle]
 ADD: Visual Studio 2008 project files and solution [Stulle]
@@ -75,8 +75,8 @@ REMOVED: ZZUL addition that sometimes caused crashes on receiving OP_FILESTATUS 
 REMOVED: Dupe USS settings in Extended settings panel [Stulle]
 
 Note: Following languages updated: German [Stulle]; French [Heaven]; Chinese (P.R.C.) [zz_fly]; 
-	Chinese (Taiwan) [AndCycle]; Italian [Idro182]; Turkish [omeringen]; Spanish [guijarrelson];
-	Portuguese (Brazil) [Heiler]; Dutch [leuk_he]
+	Chinese (Taiwan) [AndCycle]; Italian [Idro182/Myth88]; Turkish [omeringen];
+	Dutch [leuk_he]; Portuguese (Brazil) [Heiler]; Spanish [guijarrelson/Rajil]
 
 
 --------------------------------------

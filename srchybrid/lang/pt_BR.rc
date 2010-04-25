@@ -1948,7 +1948,7 @@ BEGIN
     IDS_ADDEDON             "Adicionado em"
     IDS_RESOLVELINKS        "Seguir links em pastas compartilhadas"
     IDS_PAUSEONPREVIEW      "Pausar quando possível previsualizar"
-    IDS_PREVIEWWITH         "Pré-visualizar com
+    IDS_PREVIEWWITH         "Pré-visualizar com"
     IDS_DOWNLOADCOMMANDS    "Comandos de Download"
     IDS_CLOSETOOLBAR        "Fechar barra de ferramentas"
     IDS_SHOWTOOLBAR         "Mostrar barra de ferramentas"

@@ -198,6 +198,7 @@ BEGIN
     IDS_SHAREDFOLDERS       "Gedeelde mappen"
     IDS_VIEW1               "Bekijken"
     IDS_VIEW2               " (niet gedeeld)"
+    IDS_VIEW3               " (Gedeeld met subdir)"
     IDS_PRIOLOW             "Laag"
     IDS_PRIONORMAL          "Normaal"
 END
@@ -278,7 +279,7 @@ STRINGTABLE
 BEGIN
     IDS_ERR_FAILEDDOWNLOADMET 
                             "Het downloaden van de serverlijst via %s is mislukt"
-    IDS_PERMISSION          "Toestemming"
+    IDS_PERMISSION          "Toon Toestemming"
     IDS_SHAREDFILES         "Gedeelde bestanden"
     IDS_PRIOVERYLOW         "Zeer laag"
     IDS_PRIORELEASE         "Vrijgemaakt (uitgave)"
@@ -1252,7 +1253,7 @@ BEGIN
     IDS_STATS_TIMESTATS     "Tijdstatistieken"
     IDS_STATS_AVGANDPROJ    "Geprojecteerde gemiddelden"
     IDS_STATS_TIMESINCERESET "Tijd sinds laatste reset: %s"
-    IDS_CRYPT_INITFAILED    "Fout bij initialiseren van cryptokeys - beveiligde identificatie gedeactiveerd"
+    IDS_CRYPT_INITFAILED    "Fout bij initialiseren van cryptokeys - beveiligde identificatie gedeactiveerd\nControleer schrijf toegang op config dir."
     IDS_CD_IDENT            "Identificatie:"
     IDS_IDENTOK             "Succesvol"
     IDS_IDENTFAILED         "Ongeldig"
@@ -2562,6 +2563,9 @@ BEGIN
                             "Max client datasnelheid (0kB/s = ongelimiteerd)"
     IDS_MAXCLIENTDATARATE   "Max client datasnelheid (0kB/s = ongelimiteerd)"
     IDS_DISPLAYFUNNYNICK    "Activeer FunnyNicks"
+    IDS_MAXDATARATEFRIEND   "Max Globale datasnelheid limiet (% of upload speed)"
+    IDS_MAXDATARATEPOWERSHARE "Max Globale datasnelheid lo (% of upload speed)"
+    IDS_HIDDEN              "Verborgen"
 END
 
 STRINGTABLE 
@@ -2843,7 +2847,7 @@ BEGIN
     IDC_MSGONLYFRIEND_TIP   "Berichten van clients die niet in je vriendenlijst staan worden niet getoond"
     IDC_COMMENTFILTE_TIP    "File cometaar met deze strings zulle \nworden beschouwd als spam en niet in \nfile details getoond"
     IDC_SEC_MIS_TIP         "Secure identification staat altijd aan in  morph.\nRuns als secure user is alleen bechikbaar op NT/2000/XP/vista"
-    IDC_RUNASUSER_TIP       "Draai eMule onder een beperkte gebruikersaccount\nEmule zal een gebruiker eMule_secure' creeeren\ndie alleen mag schrijven in installatei folder, temp en incoming\nMerk op: Files starten/preview vanuit emule  eMule kan miskuukken\n                             eMule linken aan de ed2k link word beperkt . Je systeem is beter\n                             beveiligd tegen hacks. Controleer in taakbeer of emule als eMule secure draait.
+    IDC_RUNASUSER_TIP       "Draai eMule onder een beperkte gebruikersaccount\nEmule zal een gebruiker eMule_secure' creeeren\ndie alleen mag schrijven in installatei folder, temp en incoming\nMerk op: Files starten/preview vanuit emule  eMule kan miskuukken\neMule linken aan de ed2k link word beperkt . Je systeem is beter\nbeveiligd tegen hacks. Controleer in taakbeer of emule als eMule secure draait."
     IDC_MSGONLYSEC_SEC      "Alleen berichten van cleinte met secure indentificatie worden geaacpeteerd"
     IDC_ADVSPAMFILTER_TIP   "Dubbele berichten of berichten waar je niet binnen een paar\n berichten op reageert zijn spam en worden gebanned"
     IDS_LOG_SERVER_FILTERED "Verwijderde  server at %s  van lijst list '%s' :in ipfilter '%s'"
@@ -2857,13 +2861,13 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_PW_RDEAD_TIP        "Aantal pogingen voordat de server als dood wordt beschouwd \en verwijderd van de lijst”
-    IDS_PW_RETRIES_TIP      "The number of retries before a server is considered\ndead and removed from the list. (default 3)"
+    IDS_PW_RDEAD_TIP        "Aantal pogingen voordat de server als dood wordt beschouwd \en verwijderd van de lijst"
+    IDS_PW_RETRIES_TIP      "Aantal verbindings pogingen voordate een server als\ndood wordt beschoud en verwijderd van lijst. (default 3)"
     IDS_PW_USC_TIP          "Werk de serverlijst bij met de URL die in adderss.dat staat(edit)  tijdens tartup van eMule. (default: uit)"
     IDS_PW_UCC_TIP          "Als een ander cleint connect, \n voeg zijn server toe aan eigen serverlijst "
     IDS_PW_USS_TIP          "Bij server connectie vragen om lijst van servers van die server."
     IDS_SMARTLOWIDCHECK_TIP "Meerdere pogingen om te connecten als er voorheen een high-id was"
-    IDS_PW_FASTSRVCON_TIP   "Regelt of er met meerdere servers tegelijk een verbinding wordt gemaakt, maar kan in een valse lowid resulteren. “ 
+    IDS_PW_FASTSRVCON_TIP   "Regelt of er met meerdere servers tegelijk een verbinding wordt gemaakt, maar kan in een valse lowid resulteren. " 
     IDS_PW_SCORE_TIP        "gebruik de server prioriteit om met hoge server prios eerder te connecten"
     IDS_MANUALSERVERHIGHPRIO_TIP 
                             "Geef servers die handmatig zijn ingetikt een hoger prioriteit"
@@ -3797,7 +3801,7 @@ BEGIN
     IDS_SHOWUPDOWNICONINTASKBAR_TIP "Windows 7 allows overlays for the taskbar icon. eMule can utilize this to\nindicate active up- and downloads.\n\nDefault: disabled"
     IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS "Keep unavailable directories on fixed drives"
     IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP "Usually shared folders that are unavailable are being removed. Enabling\nthis option will keep those folders if they are on fixed drives so they can\nbe loaded again when they are available again.\n\nDefault: disabled"
-    IDS_FORCESPEEDSTOKB     Toon alle snelheden in KB/s"
+    IDS_FORCESPEEDSTOKB     "Toon alle snelheden in KB/s"
     IDS_FORCESPEEDSTOKB_TIP "eMule displays speed values in different units based on the speed\nto be displayed. This options forces all speed values to KB/s rather than\nB/s, KB/s, GB/s and TB/s."
 END
 
