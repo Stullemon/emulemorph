@@ -1,5 +1,5 @@
 -------------------------------------------------------------------------
-	How to compile eMule MorphXT using Visual Studio 2005 SP1
+	How to compile eMule MorphXT using Visual Studio 2008 SP1
 -------------------------------------------------------------------------
 
 1. Download Microsoft Windows SDK for Windows 7 and .NET Framework 3.5 SP1 here:
@@ -22,7 +22,7 @@
 6. When the installation is finished go to Start --> All Programs --> Microsoft Windows SDK v7.0 --> Visual Studio Registration
    and start Windows SDK Configuration Tool. Follow the instructions and register the new SDK to Microsoft Visual Studio 2005.
 
-7. Start $Source Dir$\srchybrid\emule80.sln and pick build type you want to compile.
+7. Start $Source Dir$\srchybrid\emule90.sln and pick build type you want to compile.
 
 8. Be happy with this new fine MorphXT Release.
 
