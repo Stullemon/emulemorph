@@ -1466,9 +1466,12 @@ void CUpDownClient::SendBlockRequests()
 					SetDownloadState(DS_ERROR);
 					return;
 				}
+			//MORPH START - Changed by SiRoB, Official fix to prevent sending same requested block
+			/*
 				break;
 			}
-			//MORPH START - Changed by SiRoB, Official fix to prevent sending same requested block
+			*/
+			}
 			++numberofblocktorequest;
 			//MORPH END   - Changed by SiRoB, Official fix to prevent sending same requested block
 		}
