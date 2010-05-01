@@ -104,12 +104,8 @@ protected:
 	void	RemoveFromWaitingQueue(POSITION pos, bool updatewindow);
 	//MORPH START - Upload Splitting Class
 	bool		AcceptNewClient(uint32 classID);
-	//==MagicAngel=> Fix Completing Bug - Stulle idea :) - evcz
-	//bool		AcceptNewClient(uint32 curUploadSlots, uint32 classID);
-	bool		AcceptNewClient(uint32 curUploadSlots, uint32 classID, bool bForceExtra=false);
-	//bool		ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 classID);
-	bool		ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 classID, bool bForceExtra=false);
-	//<=MagicAngel== Fix Completing Bug - Stulle idea :) - evcz
+	bool		AcceptNewClient(uint32 curUploadSlots, uint32 classID);
+	bool		ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 classID);
 	//MORPH END   - Upload Splitting Class
 
 	bool		AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd = 0, bool highPrioCheck = false);

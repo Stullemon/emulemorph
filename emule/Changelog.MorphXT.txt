@@ -1,4 +1,15 @@
 --------------------------------------
+Changelog for eMule 0.50a MorphXT v12.1
+--------------------------------------
+XX-XX-2010
+
+CHANGE: Increase size for displaying strings in Morph First Start Wiz [Stulle]
+FIX: Download of large files was broken [Stulle]
+FIX: Compiling settings for VS03 in emule_site_config.h [Stulle]
+REMOVED: Some unused code around the Slot Limiter (limit to number) [evcz]
+
+
+--------------------------------------
 Changelog for eMule 0.50a MorphXT v12.0
 --------------------------------------
 26-04-2010

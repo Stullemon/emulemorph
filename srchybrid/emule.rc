@@ -1242,18 +1242,18 @@ FONT 8, "MS Shell Dlg", 0, 0, 0x0
 BEGIN
     GROUPBOX        "Mod Options",IDC_MORPHWIZ_GUI,0,0,317,56,BS_FLAT
     CONTROL         "Show more controls (advanced)",IDC_MORPHWIZ_SHOWMORE,
-                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,13,144,
+                    "Button",BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,13,289,
                     10
     CONTROL         "Show less controls",IDC_MORPHWIZ_SHOWLESS,"Button",
-                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,32,144,10
+                    BS_AUTOCHECKBOX | BS_FLAT | WS_TABSTOP,7,32,289,10
     GROUPBOX        "On Finishing of wizard",IDC_MORPHWIZ_NEXT,0,68,317,72,
                     BS_FLAT
     CONTROL         "Run network wizard to configure up/down internet speed.",
                     IDC_MORPHWIZ_NET1,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | BS_FLAT | WS_TABSTOP,7,83,289,20
-    CONTROL         "Run import tool to import pending downloads\nfrom eDonkey/shareaza/eMule",
+                    BS_MULTILINE | BS_FLAT | WS_TABSTOP,7,83,289,10
+    CONTROL         "Run import tool to import pending downloads\nfrom eDonkey/Shareaza/eMule",
                     IDC_MORPHWIZ_IMPORT,"Button",BS_AUTOCHECKBOX | 
-                    BS_MULTILINE | BS_FLAT | WS_TABSTOP,7,103,289,29
+                    BS_MULTILINE | BS_FLAT | WS_TABSTOP,7,103,289,20
 END
 
 IDD_WIZ1_END DIALOGEX 0, 0, 317, 193
@@ -6327,7 +6327,7 @@ END
 
 STRINGTABLE 
 BEGIN
-    IDS_MORPHWIZ_IMPORT     "Run import tool to import pending downloads\nfrom eDonkey/shareaza/eMule"
+    IDS_MORPHWIZ_IMPORT     "Run import tool to import pending downloads\nfrom eDonkey/Shareaza/eMule"
     IDS_PREF_GROUPGENERAL   "General options"
     IDS_PREF_GROUPEXTENDED  "Advanced options"
     IDS_PREF_GROUPMOD       "Mod options"
