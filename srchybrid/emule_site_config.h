@@ -41,6 +41,7 @@
 //#undef HAVE_WMSDK_H
 
 #undef HAVE_WIN7_SDK_H //MORPH - Added by Stulle, We only use VS03 for compatibility builds (Win2k)
+#undef HAVE_VISTA_SDK //MORPH - Added by Stulle, We only use VS03 for compatibility builds (Win2k)
 
 #endif
 

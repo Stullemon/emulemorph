@@ -1073,13 +1073,7 @@ bool CUploadQueue::AcceptNewClient(uint32 classID)
 	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount(classID);
     return AcceptNewClient(curUploadSlots, classID);
 }
-//==MagicAngel=> Fix Completing Bug - Stulle idea :) - evcz
-/*
 bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
-*/
-bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID, bool bForceExtra){
-//<=MagicAngel== Fix Completing Bug - Stulle idea :) - evcz
-// check if we can allow a new client to start downloading from us
 /*
 bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 */
@@ -1105,16 +1099,6 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 	uint32 AllowedClientDatarate[NB_SPLITTING_CLASS];
 	theApp.lastCommonRouteFinder->GetClassByteToSend(AllowedDatarate,AllowedClientDatarate);
 	uint32 remaindatarateforcurrentclass = datarate_USS;   //datarate is too fast;
-	//<=MagicAngel== Fix Completing Bug - Stulle idea :) - evcz
-	uint32 TotalSlots =0;
-	for(uint32 i = 0; i < NB_SPLITTING_CLASS; i++)
-	{
-		if (i ==classID)
-			TotalSlots +=curUploadSlots;
-		else
-			TotalSlots +=GetEffectiveUploadListCount(i);  // this does not include completing slots ...
-	}
-	//==MagicAngel=> Fix Completing Bug - Stulle idea :) - evcz
 	 switch (classID) {
 		case 2:
 			if (remaindatarateforcurrentclass>powershareDatarate)
@@ -1138,10 +1122,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 			curUploadSlots >= (AllowedDatarate[classID]/min(currentclientdatarateclass,UPLOAD_CLIENT_DATARATE)) //Limiting by alloweddatarate for a class
 		 ) ||
 		 
-		 //==MagicAngel=> Fix Completing Bug - Stulle idea :) - evcz
-		  (((thePrefs.GetSlotLimitNumB() && 	TotalSlots >= thePrefs.GetSlotLimitNum()) && !bForceExtra ) ||
-		   ((thePrefs.GetSlotLimitNumB() && TotalSlots >= thePrefs.GetSlotLimitNum()+1 && bForceExtra)))
-		 //<=MagicAngel== Fix Completing Bug - Stulle idea :) - evcz
+		  (thePrefs.GetSlotLimitNumB() && GetUploadQueueLength() >= thePrefs.GetSlotLimitNum())
        ) // max number of clients to allow for all circumstances
 	   return false;
 
@@ -1149,7 +1130,7 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 }
 
 //MORPH START - Upload Splitting Class
-bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 classID, bool bForceExtra) { // MORPH evcz try
+bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 classID) {
 	//Get number of slot from above class and cur class
 	uint32 curUploadSlotsReal = m_aiSlotCounter[classID];
     if(!simulateScheduledClosingOfSlot || simulateScheduledClosingOfSlot && curUploadSlotsReal > 0) {
@@ -1161,10 +1142,7 @@ bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 cl
 		//Simulate a removed slot
 		if (simulateScheduledClosingOfSlot)
     	    curUploadSlotsReal--;
-		//==MagicAngel=> Fix Completing Bug - Stulle idea :) - evcz
-		//if(!AcceptNewClient(curUploadSlots, classID) || !theApp.lastCommonRouteFinder->AcceptNewClient()) // UploadSpeedSense can veto a new slot if USS enabled
-		if(!AcceptNewClient(curUploadSlots, classID, bForceExtra) || !theApp.lastCommonRouteFinder->AcceptNewClient()) // UploadSpeedSense can veto a new slot if USS enabled
-		//<=MagicAngel== Fix Completing Bug - Stulle idea :) - evcz
+		if(!AcceptNewClient(curUploadSlots, classID) || !theApp.lastCommonRouteFinder->AcceptNewClient()) // UploadSpeedSense can veto a new slot if USS enabled
 			needtoaddslot = false;
 		else {
 			if (curUploadSlotsReal < m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] && AcceptNewClient(curUploadSlots/**(2-(classID/2))*/, classID) /*+1*/ ||
