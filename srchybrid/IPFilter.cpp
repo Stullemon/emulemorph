@@ -710,24 +710,18 @@ void CIPFilter::UpdateIPFilterURL(uint32 uNewVersion)
 				}
 				else
 				{
-					CString strError;
-					strError.Format(_T("Failed to extract IP filter file from RAR file \"%s\"."), szTempFilePath);
-					AfxMessageBox(strError, MB_ICONERROR);
+					LogError(LOG_STATUSBAR, _T("Failed to extract IP filter file from RAR file \"%s\"."), szTempFilePath);
 				}
 			}
 			else
 			{
-				CString strError;
-				strError.Format(_T("Failed to find IP filter file \"guarding.p2p\" or \"ipfilter.dat\" in RAR file \"%s\"."), szTempFilePath);
-				AfxMessageBox(strError, MB_ICONERROR);
+				LogError(LOG_STATUSBAR, _T("Failed to find IP filter file \"guarding.p2p\" or \"ipfilter.dat\" in RAR file \"%s\"."), szTempFilePath);
 			}
 			rar.Close();
 		}
 		else
 		{
-			CString strError;
-			strError.Format(_T("Failed to open file \"%s\".\r\n\r\nInvalid file format?\r\n\r\nDownload latest version of UNRAR.DLL from http://www.rarlab.com and copy UNRAR.DLL into eMule installation folder."), strURL);
-			AfxMessageBox(strError, MB_ICONERROR);
+			LogError(LOG_STATUSBAR, _T("Failed to open file \"%s\".\r\n\r\nInvalid file format?\r\n\r\nDownload latest version of UNRAR.DLL from http://www.rarlab.com and copy UNRAR.DLL into eMule installation folder."), strURL);
 		}
 	}
 	//MORPH END   - Added by Stulle, RAR File download decompress [official]
