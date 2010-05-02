@@ -7,6 +7,7 @@ CHANGE: Increase size for displaying strings in Morph First Start Wiz [Stulle]
 CHANGE: Display log warnings on error auto updating ipfilter rar file [Stulle]
 FIX: Download of large files was broken [Stulle]
 FIX: Compiling settings for VS03 in emule_site_config.h [Stulle]
+FIX: Some typos in ressource strings [Heiler]
 REMOVED: Some unused code around the Slot Limiter (limit to number) [evcz]
 
 

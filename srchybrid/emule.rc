@@ -6338,7 +6338,7 @@ BEGIN
     IDS_DEBUGSEARCHDETAILLEVEL "DebugSearchDetailLevel"
     IDS_CRYPTTCPPADDINGLENGTH "CryptTCPPaddingLength=[1-254]"
     IDS_CRYPTTCPPADDINGLENGTH_TIP 
-                            "The amount of random bytes that is added to obfucsated traffic. (default 128). \nLow values means less overhead (try 16), higher values means better obfuscation."
+                            "The amount of random bytes that is added to obfuscated traffic. (default 128). \nLow values means less overhead (try 16), higher values means better obfuscation."
 END
 
 STRINGTABLE 
@@ -6375,7 +6375,7 @@ END
 STRINGTABLE 
 BEGIN
     IDS_USSPINGDATASIZE		"ICMP data size (0=default 0..64 allowed)" 
-    IDS_PINGDATASIZE_TIP    "Some firewalls/routers do not reply proper to icmp ping\nrequest with datasize 0. THis option allows you to set a\nsmall data size to work arround these buggy router"
+    IDS_PINGDATASIZE_TIP    "Some firewalls/routers do not reply proper to icmp ping\nrequest with datasize 0. This option allows you to set a\nsmall data size to work around these buggy router"
 END
 
 STRINGTABLE 
@@ -6431,12 +6431,12 @@ BEGIN
     IDS_X_REBARTOOLBAR_TIP  "option to disable toolbar options like i.e.:\nAdded chevron support: If toolbar is too small to display all buttons a\nchevron ('>>' icon) is shown at the very right side which opens a menu \nwith the remaining button commands.\nTooltips for truncated button titles and in 'No Labels' mode of toolbar.\nButtons can be moved and/or removed from the toolbar by holding down \nCtrl+Alt key while draging a button with the mouse.\nButton sizes more similar to Windows Explorer.\n(default: checked)"
     IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "Flash the system tray icon when a new message is received. (default=on)"
     IDS_X_SHOWCOPYED2KLINK_TIP "In the shared files windows,  Show Copy link to clipboard menu option\ninstead of the 'ed2k links....' context menu. (default = off)"
-    IDS_X_DONTCOMPRESSAVI_TIP "normally all file data is compressed before transfering,\nexcept for rar, zip and some other archive formats\nThis options disables compressing avi files like rar files\nFOr high speed upload links this increases performance, but\nfor some avi file some possible compression is lost.\n(default= false). Note that morph has the option to\ndisable/decrease compression  for all files."
+    IDS_X_DONTCOMPRESSAVI_TIP "Normally all file data is compressed before transfering,\nexcept for rar, zip and some other archive formats\nThis options disables compressing avi files like rar files\nFor high speed upload links this increases performance, but\nfor some avi file some possible compression is lost.\n(default= false). Note that Morph has the option to\ndisable/decrease compression for all files."
 END
 STRINGTABLE 
 BEGIN
     IDS_UPNPDETECTSTATUS    "wizard auto detect status"
-    IDS_DETECTUPNP_TIP      "Current status of automatic upnp detection in startup wizard\n2: ReDetect upnp on next start(only usefule value to set to 2)\n0: upnp gateway detected.\n-1: Not detected.\n-2:Detection disabled on non local lan address\n-10:Not needed.(other values ignored)"
+    IDS_DETECTUPNP_TIP      "Current status of automatic upnp detection in startup wizard\n2: ReDetect upnp on next start(only useful value to set to 2)\n0: upnp gateway detected.\n-1: Not detected.\n-2:Detection disabled on non local lan address\n-10:Not needed.(other values ignored)"
     IDS_UPNPPORT_TIP        "Port upnp uses. DO NOT FORWARD THIS PORT (default 0=automatic)"
     IDS_UPNPCLEARONCLOSE_TIP "enabled=create static portmapping and close on exit\ndisabled=create dynamic portmapping and do not close on exit"
     IDS_UPNPLIMITTOFIRSTCONNECTION_TIP "Forward only ports on the first device found\nNote that some windows installations return\na Residential gateway device that is NOT a\ninternet device. Defaut: disabled"
@@ -6486,21 +6486,21 @@ BEGIN
     IDS_FILTER_CLIENTFAILEDDOWN_TIP "Filter clients that transfer less than 12kB\nin a download session more than thrice.\nDefault: enabled"
     //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
     IDS_TCP_CONS            "TCP-connections"
-    IDS_X_ICH_TIP           "Intelligent Corruption Handing (ICH) helps\nrecovering corrupted data downloaded\nfrom other clients."
+    IDS_X_ICH_TIP           "Intelligent Corruption Handling (ICH) helps\nrecovering corrupted data downloaded\nfrom other clients."
     IDS_UPDATEQUEUE         "Don't update Queue list in real time"
     IDS_REPAINTGRAPHS       "Don't recreate statistic graphs on resize"
     IDS_PW_BEEP             "Beep on errors"
     IDS_MSGONLYSEC          "Accept messages from valid clients only"
     IDS_DISABLEPEERACHE     "Disable downloading from PeerCache"
     IDS_SHOWWIN7TASKBARGOODIES_TIP "Windows 7 comes with some new features\nfor the Aero Glass taskbar which can be\nused with this."
-    IDS_STORESEARCHES_TIP   "eMule can store searches between sessions so they\nwill be loaded upon startup to reset the old state."
+    IDS_STORESEARCHES_TIP   "eMule can store searches between sessions so the last\nsearches are displayed again after startup."
     IDS_SEARCHSPAMFILTER_TIP "Sometimes users or servers publish fake files. To protect yourself\nenable this option which will cause eMule to filter the search\nresults using two different approaches."
     IDS_ENABLEMINIMULE_TIP  "MiniMule is a small window that can be displayed to show basic information\nof eMule when eMule is minimized to tray. It will hover on top and can be\nmade transparent (see Advanced Preferences in Extended)."
     IDS_PREVENTSTANDBY_TIP  "Windows frequently is configured to go into standby mode after a while.\nEnabling this option will prevent Windows from going into standby when\neMule is running so file sharing continues."
     IDS_STATIC_ICON_TIP     "Usually the eMule Tray Icon is only shown when the program is minimized to tray.\nThis option will cause eMule to always show the Tray Icon, regardless if minimized or not."
     IDS_MORPHWIZ_SHOWLESS_TIP "eMule MorphXT includes a lot of features and extra information unexperienced\nusers might not need. This option will hide some information and features to\nsimplify the GUI."
     IDS_WS_FAILED_LOGIN     "You have been banned for 15 min due to failed login attempts!"
-    IDS_ADVADMIN_DFILES     "Acces - Download files?"
+    IDS_ADVADMIN_DFILES     "Access - Download files?"
     IDS_ADVADMIN_DFILES_TIP "Allow user to download complete shared files."
     IDS_SERVICE_OPT_GROUP   "NT Service optimizations"
     IDS_SERVICE_OPT_LABEL   "Optimization level:"
