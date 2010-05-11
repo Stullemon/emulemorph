@@ -19,7 +19,7 @@
 
 struct Fakes_Struct{
    uchar			Hash[16];
-   uint64			Lenght;
+   uint64			Length;
    CString			RealTitle;
 };
 
@@ -32,7 +32,7 @@ class CFakecheck
 public:
 	CFakecheck();
 	~CFakecheck();
-	void	AddFake(uchar* Hash,uint32& Lenght,CString& Realtitle);
+	void	AddFake(uchar* Hash,uint64& Lenght,CString& Realtitle);
 	void	RemoveAllFakes();
 	int		LoadFromFile();
 	CString GetLastHit() const;
@@ -42,4 +42,5 @@ public:
 private:
 	const Fakes_Struct* m_pLastHit;
 	CFakecheckArray m_fakelist;
+	Fakes_Struct* m_find;
 };

@@ -34,29 +34,31 @@ static char THIS_FILE[]=__FILE__;
 
 CFakecheck::CFakecheck(){
 	m_pLastHit = NULL;
+	m_find = new Fakes_Struct;
 	LoadFromFile();
 }
 
 CFakecheck::~CFakecheck(){
+	delete m_find;
 	RemoveAllFakes();
 }
 
-void CFakecheck::AddFake(uchar* Hash,uint32& Lenght,CString& Realtitle){
+void CFakecheck::AddFake(uchar* Hash,uint64& Length,CString& Realtitle){
 	Fakes_Struct* newFilter=new Fakes_Struct;
 	md4cpy(newFilter->Hash, Hash);
-	newFilter->Lenght=Lenght;
+	newFilter->Length=Length;
 	newFilter->RealTitle=Realtitle;
 	m_fakelist.Add(newFilter);
 }
 
-static int __cdecl CmpFakeByHash_Lenght(const void* p1, const void* p2)
+static int __cdecl CmpFakeByHash_Length(const void* p1, const void* p2)
 {
 	const Fakes_Struct* pFake1 = *(Fakes_Struct**)p1;
 	const Fakes_Struct* pFake2 = *(Fakes_Struct**)p2;
 	int diff = memcmp(pFake1->Hash, pFake2->Hash, 16);
 	if (diff)
 		return diff;
-	return CompareUnsigned64(pFake1->Lenght,pFake2->Lenght);
+	return CompareUnsigned64(pFake1->Length,pFake2->Length);
 }
 
 int CFakecheck::LoadFromFile(){
@@ -66,7 +68,7 @@ int CFakecheck::LoadFromFile(){
 	if (readFile!=NULL) {
 		CString sbuffer, sbuffer2;
 		int pos;
-		uint32 Lenght;
+		uint64 Length;
 		CString Title;
 		char buffer[512];
 		int fakecounter = 0;
@@ -92,14 +94,14 @@ int CFakecheck::LoadFromFile(){
 			int pos2=sbuffer.Find(_T(","),pos+1);
 			if (pos2==-1)
 				continue;
-			Lenght=_tstoi(sbuffer.Mid(pos+1,pos2-pos-1).Trim());
+			Length=_tstoi64(sbuffer.Mid(pos+1,pos2-pos-1).Trim());
 			Title=sbuffer.Mid(pos2+1,sbuffer.GetLength()-pos2-2);
-			AddFake(&Hash[0],Lenght,Title);
+			AddFake(&Hash[0],Length,Title);
 			++fakecounter;
 		}
 		fclose(readFile);
 		// sort the FakeCheck entry by Hash 
-		qsort(m_fakelist.GetData(), m_fakelist.GetCount(), sizeof(m_fakelist[0]), CmpFakeByHash_Lenght);
+		qsort(m_fakelist.GetData(), m_fakelist.GetCount(), sizeof(m_fakelist[0]), CmpFakeByHash_Length);
 
 		// merge overlapping and adjacent filter ranges
 		if (m_fakelist.GetCount() >= 2)
@@ -109,7 +111,7 @@ int CFakecheck::LoadFromFile(){
 			while (i < m_fakelist.GetCount())
 			{
 				Fakes_Struct* pCur = m_fakelist[i];
-				if ( memcmp(pCur->Hash, pPrv->Hash, 16) && pCur->Lenght == pPrv->Lenght)
+				if ( memcmp(pCur->Hash, pPrv->Hash, 16) && pCur->Length == pPrv->Length)
 				{
 					if (pCur->RealTitle != pPrv->RealTitle)
 					{
@@ -139,10 +141,12 @@ int CFakecheck::LoadFromFile(){
 	return m_fakelist.GetCount();
 }
 
-bool CFakecheck::IsFake(const uchar* Hash2test, uint64 ){
+bool CFakecheck::IsFake(const uchar* Hash2test, uint64 length){
 	if (m_fakelist.GetCount() == 0)
 		return false;
-	Fakes_Struct** ppFound = (Fakes_Struct**)bsearch(&Hash2test, m_fakelist.GetData(), m_fakelist.GetCount(), sizeof(m_fakelist[0]), CmpFakeByHash_Lenght);
+	md4cpy(m_find->Hash, Hash2test);
+	m_find->Length = length;
+	Fakes_Struct** ppFound = (Fakes_Struct**)bsearch(&m_find, m_fakelist.GetData(), m_fakelist.GetCount(), sizeof(m_fakelist[0]), CmpFakeByHash_Length);
 	if (ppFound)
 	{
 		m_pLastHit = *ppFound;
