@@ -61,6 +61,7 @@ BEGIN_MESSAGE_MAP(CPPgMorph2, CPropertyPage)
     ON_BN_CLICKED(IDC_UPDATEIPCURL, OnBnClickedUpdateipcurl)
 	ON_BN_CLICKED(IDC_RESETIPCURL, OnBnClickedResetipcurl)
 	ON_BN_CLICKED(IDC_AUTOUPIP2COUNTRY , OnSettingsChange)
+	ON_BN_CLICKED(IDC_AUTOUPCOUNTRYWEEK, OnSettingsChange)
 	//Commander - Added: IP2Country Auto-updating - End
 	ON_WM_HELPINFO()
 END_MESSAGE_MAP()
@@ -122,6 +123,10 @@ void CPPgMorph2::LoadSettings(void)
 		CheckDlgButton(IDC_AUTOUPIP2COUNTRY,1);
 	else
 		CheckDlgButton(IDC_AUTOUPIP2COUNTRY,0);
+    if (theApp.scheduler->HasWeekly(ACTION_UPDCOUNTRY)) // check in schedule.
+ 		CheckDlgButton(IDC_AUTOUPCOUNTRYWEEK,1);
+	else
+		CheckDlgButton(IDC_AUTOUPCOUNTRYWEEK,0);
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//Commander - Added: IP2Country Auto-updating - Start
@@ -186,6 +191,7 @@ BOOL CPPgMorph2::OnApply()
     GetDlgItem(IDC_UPDATE_URL_IP2COUNTRY)->GetWindowText(buffer);
 	_tcscpy(thePrefs.UpdateURLIP2Country, buffer);
 	thePrefs.AutoUpdateIP2Country = IsDlgButtonChecked(IDC_AUTOUPIP2COUNTRY)!=0;
+	theApp.scheduler->SetWeekly(ACTION_UPDCOUNTRY,IsDlgButtonChecked(IDC_AUTOUPCOUNTRYWEEK)!=0);
 	//Commander - Added: IP2Country Auto-updating - End
 
 	LoadSettings();
@@ -241,6 +247,7 @@ void CPPgMorph2::Localize(void)
 		GetDlgItem(IDC_UPDATEIPCURL)->SetWindowText(GetResString(IDS_UPDATEIPCURL));
 		GetDlgItem(IDC_URL_FOR_UPDATING_IP2COUNTRY)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING_IP2COUNTRY));
 		GetDlgItem(IDC_RESETIPCURL)->SetWindowText(GetResString(IDS_RESET));
+		GetDlgItem(IDC_UPDATEFAKELISTWEEK)->SetWindowText(GetResString(IDS_AUTOUPCOUNTRYWEEK));
 		//MORPH END - Added by Commander: IP2Country update
         // MORPH START leuk_he tooltipped
 		//SetTool(IDC_MORPH2_FILE,IDC_MORPH2_FILE_TIP);
@@ -263,6 +270,7 @@ void CPPgMorph2::Localize(void)
 		SetTool(IDC_URL_FOR_UPDATING_IP2COUNTRY,IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP);
 		SetTool(IDC_RESETIPCURL,IDC_RESETIPCURL_TIP);
 		SetTool(IDC_UPDATE_URL_IP2COUNTRY,IDC_URL_FOR_UPDATING_IP2COUNTRY_TIP);
+		SetTool(IDC_AUTOUPCOUNTRYWEEK,IDS_AUTOUPCOUNTRYWEEK_TIP);
 		//  MORPH END leuk_he tooltipped  
 	}
 }

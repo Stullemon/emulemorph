@@ -34,7 +34,8 @@
 #define ACTION_BACKUP  	    12
 #define ACTION_UPDIPCONF    13
 #define ACTION_UPDFAKES	    14
-#define ACTION_RELOAD	    15
+#define ACTION_UPDCOUNTRY   15
+#define ACTION_RELOAD	    16
 // [end] Mighty Knife
 
 #define DAY_DAYLY		0

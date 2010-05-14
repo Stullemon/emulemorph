@@ -157,10 +157,7 @@ void CPPgScheduler::Localize(void)
 		SetTool(IDC_DATETIMEPICKER2,IDS_DATETIMEPICKER2_TIP);
 		SetTool(IDC_CHECKNOENDTIME,IDS_CHECKNOENDTIME_SCHED_TIP);
 		SetTool(IDC_SCHEDACTION,IDS_SCHEDACTION_TIP);
-    // leuk_he tooltips end
-
-
-
+		// leuk_he tooltips end
 	}
 }
 
@@ -231,7 +228,26 @@ void CPPgScheduler::LoadSchedule(int index) {
 	for (int i=0;i<16;i++) {
 		if (schedule->actions[i]==0) break;
 		m_actions.InsertItem(i,GetActionLabel(schedule->actions[i]));
-		m_actions.SetItemText(i,1,schedule->values[i]);
+		//MORPH START - Changed by Stulle, Show cat name for scheduler cat actions
+		if(schedule->actions[i]==ACTION_CATSTOP || schedule->actions[i]==ACTION_CATRESUME)
+		{
+			int iCat = _tstoi(schedule->values[i]);
+			CString strCatTitle;
+			if(iCat == -1)
+				strCatTitle = GetResString(IDS_ALL);
+			else
+			{
+				Category_Struct* thisCat = thePrefs.GetCategory(iCat);
+				if(thisCat)
+					strCatTitle = thisCat->strTitle;
+				else
+					strCatTitle = GetResString(IDS_UNKNOWN);
+			}
+			m_actions.SetItemText(i,1,schedule->values[i]+L" ("+strCatTitle+L")");
+		}
+		else
+		//MORPH END   - Changed by Stulle, Show cat name for scheduler cat actions
+			m_actions.SetItemText(i,1,schedule->values[i]);
 		m_actions.SetItemData(i,schedule->actions[i]);
 	}
 // MORPH START  leuk_he: Remove 2nd apply in scheduler
@@ -344,7 +360,15 @@ BOOL CPPgScheduler::OnApply(){
 		schedule->ResetActions();
 		for (uint8 i=0;i<m_actions.GetItemCount();i++) {
 			schedule->actions[i]=m_actions.GetItemData(i);
-			schedule->values[i]=m_actions.GetItemText(i,1);
+			//MORPH START - Changed by Stulle, Show cat name for scheduler cat actions
+			if(schedule->actions[i]==ACTION_CATSTOP || schedule->actions[i]==ACTION_CATRESUME)
+			{
+				CString strCat = m_actions.GetItemText(i,1);
+				schedule->values[i]=strCat.Left(strCat.Find(L"(")-1);
+			}
+			else
+			//MORPH END   - Changed by Stulle, Show cat name for scheduler cat actions
+				schedule->values[i]=m_actions.GetItemText(i,1);
 		}
 		
 		m_list.SetItemText(index, 0, schedule->title);
@@ -411,6 +435,7 @@ CString CPPgScheduler::GetActionLabel(int index) {
 		case ACTION_BACKUP  	: return GetResString(IDS_SCHED_BACKUP);
 		case ACTION_UPDIPCONF	: return GetResString(IDS_SCHED_UPDATE_IPCONFIG);
 		case ACTION_UPDFAKES	: return GetResString(IDS_SCHED_UPDATE_FAKES);
+		case ACTION_UPDCOUNTRY	: return GetResString(IDS_SCHED_UPDATE_COUNTRY);
 		case ACTION_RELOAD		: return GetResString(IDS_SF_RELOAD); // MORPH add teload on schedule
 		// [end] MIghty Knife
 	}
@@ -510,6 +535,7 @@ void CPPgScheduler::OnNmRClickActionlist(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_BACKUP,GetResString(IDS_SCHED_BACKUP));
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_UPDFAKES,GetResString(IDS_SCHED_UPDATE_FAKES));
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_UPDIPCONF,GetResString(IDS_SCHED_UPDATE_IPCONFIG));
+	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_UPDCOUNTRY,GetResString(IDS_SCHED_UPDATE_COUNTRY));
 	m_ActionSel.AppendMenu(MF_STRING,MP_SCHACTIONS+ACTION_RELOAD,GetResString(IDS_SF_RELOAD));
 	// [end] MIghty Knife
 
@@ -565,13 +591,15 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 		if (action<6)
 			OnCommand(MP_CAT_EDIT,0);
 		// Mighty Knife START: parameterless schedule events
-		if (action>=ACTION_BACKUP && action<=ACTION_RELOAD) {
-			m_actions.SetItemText(i,1,_T("-"));
+		else if (action>=ACTION_BACKUP && action<=ACTION_RELOAD) {
 			// Small warning message
-			if (action == ACTION_UPDIPCONF || action == ACTION_UPDFAKES) {
+			if (action == ACTION_UPDIPCONF || action == ACTION_UPDFAKES || action == ACTION_UPDCOUNTRY) {
 				XMessageBox (NULL,GetResString (IDS_SCHED_UPDATE_WARNING),
 							 GetResString (IDS_WARNING),MB_OK | MB_ICONINFORMATION,NULL);
+				m_actions.SetItemText(i,1,L"update");
 			}
+			else
+				m_actions.SetItemText(i,1,L"-");
 			CTime myTime1 ;m_time.GetTime(myTime1);  // MORPH add check for one time events
 			CTime myTime2 ;m_timeTo.GetTime(myTime2);
 			if ( myTime1!= myTime2) // leuk_he: warn because will be executeed every minute! 
@@ -580,15 +608,36 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 					 m_timeTo.SetTime(&myTime1); // On ok reset end time. 
 		}
 		//  Mighty Knife END
+		//MORPH START - Changed by Stulle, Show cat name for scheduler cat actions
+		else
+			m_actions.SetItemText(i,1,L"-1 ("+GetResString(IDS_ALL)+L")");
+		//MORPH END   - Changed by Stulle, Show cat name for scheduler cat actions
 	}
 	else if (wParam>=MP_SCHACTIONS+20 && wParam<=MP_SCHACTIONS+80)
 	{
-	   CString newval;
+		CString newval;
+		//MORPH START - Changed by Stulle, Show cat name for scheduler cat actions
+		/*
 		newval.Format(_T("%i"),wParam-MP_SCHACTIONS-22);
-	   m_actions.SetItemText(item,1,newval);
-     // MORPH START  leuk_he: Remove 2nd apply in scheduler
-	   SetModified();
-     // lhane
+		*/
+		int iCat = wParam-MP_SCHACTIONS-22;
+		CString strCatTitle;
+		if(iCat == -1)
+			strCatTitle = GetResString(IDS_ALL);
+		else
+		{
+			Category_Struct* thisCat = thePrefs.GetCategory(iCat);
+			if(thisCat)
+				strCatTitle = thisCat->strTitle;
+			else // should not happen
+				strCatTitle = GetResString(IDS_UNKNOWN);
+		}
+		newval.Format(L"%i (%s)",iCat,strCatTitle);
+		//MORPH END   - Changed by Stulle, Show cat name for scheduler cat actions
+		m_actions.SetItemText(item,1,newval);
+		// MORPH START  leuk_he: Remove 2nd apply in scheduler
+		SetModified();
+		// lhane
    }
 	else if (wParam == ID_HELP)
 	{

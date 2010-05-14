@@ -28,8 +28,9 @@
 #include "PPgBackup.h"
 #include "ipfilter.h"
 #include "fakecheck.h"
+#include "ip2country.h"
 #include "log.h"
-#include "SharedFileList.h"  // MORPH add reload shared files on schedule
+#include "SharedFilesWnd.h"  // MORPH add reload shared files on schedule
 // [end] Mighty Knife
 
 #ifdef _DEBUG
@@ -327,12 +328,15 @@ void CScheduler::ActivateSchedule(int index,bool makedefault) {
 					AddLogLine (false,GetResString (IDS_SCHED_UPDATE_FAKES_LOG));
 					theApp.FakeCheck->DownloadFakeList();
 				} break;
+			case ACTION_UPDCOUNTRY : {
+					AddLogLine (false,GetResString (IDS_SCHED_UPDATE_COUNTRY_LOG));
+					theApp.ip2country->UpdateIP2CountryURL();
+				} break;
 			case ACTION_RELOAD : { // leuk_he reload on schedule
 					AddLogLine (false,GetResString (IDS_SCHED_RELOAD));
-					theApp.sharedfiles->Reload();
+					//theApp.sharedfiles->Reload(); // also update GUI... safely
+					theApp.emuledlg->sharedfileswnd->SendMessage(WM_COMMAND, IDC_RELOADSHAREDFILES);
 				} break;
-
-
 			// [end] Mighty Knife
 
 		}
