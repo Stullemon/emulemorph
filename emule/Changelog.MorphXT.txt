@@ -4,6 +4,7 @@ Changelog for eMule 0.50a MorphXT v12.1
 XX-XX-2010
 
 ADD: Weekly update option for ip-to-country.csv file [Stulle]
+ADD: Working Windows Firewall settings for Vista and above in installer [Stulle]
 CHANGE: Increase size for displaying strings in Morph First Start Wiz [Stulle]
 CHANGE: Display log warnings on error auto updating ipfilter rar file [Stulle]
 CHANGE: Show cat name for scheduler cat actions in preferences window [Stulle]
@@ -19,8 +20,10 @@ FIX: Fakes list could not handle entries with huge file sizes (>uint32) properly
 FIX: Country flags did not work in DownloadClientsListCtrl [morph4u]
 FIX: Setting for PowerShare limit was not limited [jerryBG]
 FIX: webservice.dat entry for peerates file stats [Motor]
+FIX: Windows Firewall settings for XP/ Server 2003 in installer [Stulle]
 REMOVED: Some unused code around the Slot Limiter (limit to number) [evcz]
 REMOVED: webservice.dat entries for now defunct donkeyfakes links [Motor]
+REMOVED: Redundant quotation marks in installer [Stulle/thx Heiler]
 
 
 --------------------------------------
