@@ -347,7 +347,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						cur_rec.right -= sm_iSubItemInset;
 
 						//EastShare Start - added by AndCycle, IP to Country
-						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(12)){
+						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(13)){
 							cur_rec.left-=20;
 							cur_rec.left -= sm_iLabelOffset;
 						}
