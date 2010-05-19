@@ -22,8 +22,6 @@
 eMule Morph (En), http://emulemorph.sourceforge.net/
 --,--
 ed2k-stats shortypower,http://ed2k.shortypower.dyndns.org/?hash=#hashid
-ed2k-check peerates,http://edk.peerates.net/check.php?hash=#hashid
+ed2k-check peerates,http://edk.peerates.net/check.php?p=#hashid
 #--,--
-DF Check,http://donkeyfakes.net/fakes.php?referer=emule&hash=#hashid&size=#filesize&name=#filename 
-DF Report,http://donkeyfakes.net/report.php?hash=#hashid&size=#filesize&name=#filename
 Fake Check Bitzi,http://bitzi.com/lookup/ed2k:#hashid?ref=eMule

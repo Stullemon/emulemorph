@@ -167,7 +167,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
 	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiPowerShareLimit, m_iPowerShareLimit);
-	DDV_MinMaxInt(pDX, m_iShareOnlyTheNeed, 0, INT_MAX);
+	DDV_MinMaxInt(pDX, m_iPowerShareLimit, 0, INT_MAX);
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 	DDX_TreeRadio(pDX, IDC_MORPH_OPTS, m_htiPowershareMode, m_iPowershareMode);
