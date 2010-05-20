@@ -3768,6 +3768,11 @@ BEGIN
     IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP "Geralmente pastas compartilhadas que não estão mais\ndisponíveis são removidas. Ligando essa opção essas pastas\npermanecerão compartilhadas quando estiverem disponíveis novamente.\n\nPadrão: desligado"
     IDS_FORCESPEEDSTOKB     "Mostra todas as velocidades em KB/s"
     IDS_FORCESPEEDSTOKB_TIP "O eMule mostra as velocidades de transferência em unidades diferentes,\nde acordo com a grandeza da velocidade. Com essa opção ligada,\nele sempre usará KB/s em vez de B/s, KB/s, GB/s e TB/s." 
+    IDS_AUTOUPCOUNTRYWEEK   "Atualizar semanalmente"
+    IDS_AUTOUPCOUNTRYWEEK_TIP 
+                            "Adicionar uma entrada ao agendador para atualizar\na lista de países pela URL toda semana.\nO Agendador será ativado. Note que isso só funcionará\nse o eMule estiver em execução no momento.\nVocê pode modificar o horário da atualização nas\npropriedades do agendador."
+    IDS_SCHED_UPDATE_COUNTRY "Atualizar o arquivo IP-TO-COUNTRY.CSV"
+    IDS_SCHED_UPDATE_COUNTRY_LOG "Iniciado a atualização do IP-TO-COUNTRY.CSV agendada."
 END
 
 #endif    // English (U.S.) resources
