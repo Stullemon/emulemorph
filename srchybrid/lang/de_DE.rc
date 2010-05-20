@@ -3646,13 +3646,13 @@ BEGIN
   IDS_OUTOFSERVERS_O "Verschleierte Verbindung mit vorhandenem Schlüssel fehlgeschlagen. Neuer Vesuch."
   IDS_NO_OBFUSCATION_KEY "Server hat keinen 'obfuscation Schlüssel'."
   IDS_URL_FOR_UPDATING_IP2COUNTRY "Datei-URL für Update"
-  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP "if the a file is located on a NTFS fs\nthe time on the file is  modified by 1 hour\nif daylightsaving is active.  See KB 129574\ndefault=enabled"
-	IDS_X_LOGERROR_TIP "Color of the log lines in the server pane log."
-    IDS_X_SHOWVERTICALHOURMARKERS_TIP "Show an vertical line in the statics window every hour.\nResize statistics window to see effect (default: enabled)"
-	IDS_X_REBARTOOLBAR_TIP      "option to disable toolbar options like i.e.:\nAdded chevron support: If toolbar is too small to display all buttons a\nchevron ('>>' icon) is shown at the very right side which opens a menu \nwith the remaining button commands.\nTooltips for truncated button titles and in 'No Labels' mode of toolbar.\nButtons can be moved and/or removed from the toolbar by holding down \nCtrl+Alt key while draging a button with the mouse.\nButton sizes more similar to Windows Explorer.\n(default: checked)"
-	IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "Flash the system tray icon when a new message is received. (default=on)"
-	IDS_X_SHOWCOPYED2KLINK_TIP "In the shared files windows,  Show Copy link to clipboard menu option\ninstead of the 'ed2k links....' context menu. (default = off)"
-	IDS_X_DONTCOMPRESSAVI_TIP   "normally all file data is compressed before transfering,\nexcept for rar, zip and some other archive formats\nThis options disables compressing avi files like rar files\nFOr high speed upload links this increases performance, but\nfor some avi file some possible compression is lost.\n(default= false). Note that morph has the option to\ndisable/decrease compression  for all files."
+  IDS_X_ADJUSTNTFSDAYLIGHTFILETIME_TIP "Wenn eine Datei auf in einem NTFS Dateisystem\nliegt wird die Zeit um eine Stunde verstellt\nwenn die Sommerzeit aktiv ist.Siehe KB 129574\nStandard: Eingeschaltet"
+  IDS_X_LOGERROR_TIP "Farbe der Logzeilen im Serverfenster"
+  IDS_X_SHOWVERTICALHOURMARKERS_TIP "Zeige jede Stunde eine vertikale Linie im Statistikfenster.\nVerändere Größe des Statistikfenster um den effekt zu sehen.\nStandard: Eingeschaltet"
+  IDS_X_REBARTOOLBAR_TIP      "Option zum Abschalten von Toolbar optionen, wie:\nChevron Unterstützung hinzugefügt: Wenn Toolbar zu klein ist um alle\nSymbole zu zeigen wird ein Chevron ('>>' Icon) am Ende auf der rechten\nSeite gezeigt, welches ein Menü mit den\nverbleibenden Symbolkommandos anzeigt.\nTooltips für abgeschnittene Symbole und wenn die 'Keine Symboltitel' Option an ist.\nSymbole können bewegt und/oder entfernt werden von der Toolbar, indem\n die Strg+Alt Tasten gehalten werden während des\nziehen des Symbols mit der Maus.\nSymbol größe ist ähnlicher zu der vom Windows Explorer.\nStandard: Eingeschaltet"
+	IDS_X_ICON_FLASH_ON_NEW_MESSAGE_TIP "Lass den System Tray Icon blinken, wenn eine Nachricht ankommt.\nStandard: Eingeschaltet"
+	IDS_X_SHOWCOPYED2KLINK_TIP "Im Freigegebene Dateien Fenster, zeige Kopiere Link in Zwischenablage\nstatt des 'ed2k links...' Kontextmenüs.\nStandard: Ausgeschaltet"
+  IDS_X_DONTCOMPRESSAVI_TIP   "Normalerweise werden alle Dateidaten vor dem Transferen\nkomprimiert, abgesehen von rar, zip und anderer Archivformate\nDiese Option schaltet die Kompression für avi Dateien\nebenso aus wie für rar Dateien.\nFür sehr schnelle Uploadanbindungen kann diese Option\ndie Leistung verbesser, aber bei manchen avi Dateien\ngeht mögliche Kompression verloren.\nStandard: Ausgeschaltet\nBeachte, dass Morph eine Option hat um die Kompression\nfür alle Dateien abzuschalten oder zu verringern."
 
 END
 STRINGTABLE 
@@ -3715,7 +3715,7 @@ BEGIN
     IDS_MSGONLYSEC          "Nachrichten nur von gültigen Clients akzeptieren"
     IDS_DISABLEPEERACHE     "Download von PeerCache deaktivieren"
     IDS_SHOWWIN7TASKBARGOODIES_TIP "Windows 7 bietet einige neue Funktionen\nfür die Aero Glass Taskleiste welche\nhiermitbenutzt werden können."
-    IDS_STORESEARCHES_TIP   "eMule kann Suchergebnisse zwischen Sitzungen speichern,\nso dass sie bei Start geladen werden um den alten Zustand\nwiederherzustellen."
+    IDS_STORESEARCHES_TIP   "eMule kann Suchergebnisse zwischen Sitzungen speichern, so\ndass die letzten Suchen nach dem Start wieder angezeigt werden."
     IDS_SEARCHSPAMFILTER_TIP "Manchmal bieten Nutzer und Server gefälschte Dateien an. Um sich dagegen\nzu schützen ist diese Funktion einzuschalten, welche eMule die\nResultate mit zwei verschiedenen Ansätzen filtert."
     IDS_ENABLEMINIMULE_TIP  "MiniMule ist ein kleines Fenster, dass angezeigt werden kann um generelle\nInformationen von eMule anzuzeigen, wenn eMule in den Tray minimiert ist.\nEs wird im Vordergrund angezeigt werden und transparent gemacht werden\n(siehe Erweiterte Einstellungen in Erweitert)."
     IDS_PREVENTSTANDBY_TIP  "Windows ist oft so eingestellt, dass es nach einer Weile in den Standby\nModus geht.Diese Option anzuschalten bewirkt, dass Windows nicht mehr\nin den Standby Modus eintritt, wenn eMule läuft und so weiter File\nSharing betrieben wird."
@@ -3788,6 +3788,11 @@ BEGIN
 	IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP "Normalerweise werden freigegebene Ordner, die nicht verfügbar sind,\nentfernt. Diese Option einzuschalten bewirkt, dass diese Ordner behalten werden,\nso dass sie wieder geladen werden können, wenn sie wieder verfügbar sind.\n\nStandard: ausgeschaltet"
     IDS_FORCESPEEDSTOKB     "Zeige alle Geschwindigkeiten in KB/s"
     IDS_FORCESPEEDSTOKB_TIP "eMule zeigt Geschwindigkeitswerte in verschiedenen Einheiten, basierend\nauf der Geschwindigkeit, die angezeigt wird. Diese Option zwingt alle\nGeschwindigkeits in eine Anzeige in KB/s statt B/s, KB/s, GB/s und TB/s."
+    IDS_AUTOUPCOUNTRYWEEK   "Wöchentliches Update"
+    IDS_UPDATEFAKELISTWEEK_TIP 
+                            "Ein Eintrag im Zeitplaner wird hinzufügt um die\nLänderliste wöchentlich von der angegebenen\nURL zu aktualisieren. Der Zeitplaner ist\naktiv. Beachte, dass dies nur funktioniert, wenn\nMorph läuft während dieser Zeit. Den genauen\nZeitpunkt für die Aktualisierung kannst du im\nZeitplaner einstellen."
+    IDS_SCHED_UPDATE_COUNTRY "Update IP-TO-COUNTRY.CSV"
+    IDS_SCHED_UPDATE_COUNTRY_LOG "Zeitgesteuertes IP-TO-COUNTRY.CSV-update gestartet."
 END
 
 #endif    // German (Germany) resources

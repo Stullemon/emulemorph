@@ -3635,7 +3635,7 @@ BEGIN
     IDS_MSGONLYSEC          "Sólo aceptar mensajes de clientes válidos"
     IDS_DISABLEPEERACHE     "Desactivar descarga desde PeerCache"
     IDS_SHOWWIN7TASKBARGOODIES_TIP "Windows 7 viene con nuevas características\nen la barra de tareas Aero Glass que puede ser\nusada."
-    IDS_STORESEARCHES_TIP   "eMule puede almacenar las búsquedas entre sesiones para que\nse cargen al arrancar para restablecer el estado anterior."
+    IDS_STORESEARCHES_TIP   "eMule puede guardar las busquedas entre sesiones para que las ultimas\n busquedas sean mostradas despues del inicio"
     IDS_SEARCHSPAMFILTER_TIP "A veces los usuarios o servidores publican archivos falsos. Para protegerse\nhabilite esta opción, hará que eMule filtre la búsqueda de\nresultados con dos enfoques diferentes."
     IDS_ENABLEMINIMULE_TIP  "MiniMule es una pequeña ventana puede aparecer para mostrar información básica\nde eMule cuando eMule esta minimizado en la bandeja. Aparece en la parte superior y se puede\nhacer transparente (ver Preferencias Avanzadas en Extendidas)."
     IDS_PREVENTSTANDBY_TIP  "Windows está configurado con frecuencia para entrar en modo de espera después de un tiempo.\nHabilitando esta opción, impide que Windows entre en modo de espera cuando\neMule se está ejecutando por lo que el intercambio de archivos continúa."
@@ -3708,6 +3708,10 @@ BEGIN
     IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP "Por lo general, las carpetas compartidas que no están disponibles se eliminan. Habilitando\nesta opción se guardan las carpetas si están en las unidades fijas de manera que puedan\nser cargados nuevamente cuando estén disponibles de nuevo.\n\nPor defecto: desabilitado"
     IDS_FORCESPEEDSTOKB     "Mostrar todos los valores de velocidad en KB/s"
     IDS_FORCESPEEDSTOKB_TIP "eMule muestra los valores de velocidad en unidades diferentes en función de la velocidad\n. Esta opción fuerza todos los valores de velocidad a KB/s en vez de\nB/s, KB/s, GB/s and TB/s."
+    IDS_AUTOUPCOUNTRYWEEK   "Actualizar semanalmente"
+    IDS_AUTOUPCOUNTRYWEEK_TIP "A�ade una entrada a la agenda para actualizar la lista de ips de paises\n de la url, una vez cada semana.\nLa agenda est� activada. Tenga en cuenta que esto\ns�lo funciona si se est� ejecutando Morph durante este tiempo.\nUsted puede modificar el momento en que se actualiza en\nla agenda de las preferencias."
+    IDS_SCHED_UPDATE_COUNTRY "Actualizar archivo IP-TO-COUNTRY.CSV"
+    IDS_SCHED_UPDATE_COUNTRY_LOG "Hora de actualizaci�n de IP-TO-COUNTRY.CSV iniciada."
 END
 
 #endif    // Spanish (Castilian) resources

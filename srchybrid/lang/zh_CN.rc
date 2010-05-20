@@ -3812,6 +3812,10 @@ BEGIN
    IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP "通常情况下不可访问的共享目录都会被移除.\n启用这个选项后, 在硬盘上的共享目录会被保留下来.\n当这些目录可以再次访问的时候就可以直接共享目录里的文件.\n\n默认: 关闭" //"Usually shared folders that are unavailable are being removed. Enabling\nthis option will keep those folders if they are on fixed drives so they can\nbe loaded again when they are available again.\n\nDefault: disabled"
    IDS_FORCESPEEDSTOKB     "以 KB/s 为单位显示所有速度值" //"Display all speed values in KB/s"
    IDS_FORCESPEEDSTOKB_TIP "通常eMule会根据速度大小使用不同的单位显示, 如B/s, KB/s, MB/s.\n这个选项可以使得eMule只使用 KB/s 显示速度." //"eMule displays speed values in different units based on the speed\nto be displayed. This options forces all speed values to KB/s rather than\nB/s, KB/s, GB/s and TB/s."
+   IDS_AUTOUPCOUNTRYWEEK   "每周更新" //"Update weekly"
+   IDS_AUTOUPCOUNTRYWEEK_TIP "向计划任务中添加一项每周更新国家旗帜数据库的条目.\n必须启用计划任务.\n注意: 这个功能只会在 Morph 运行时生效.\n你可以在计划任务设置中修改更新的时间." //"Add an entry to the schedule to update the\ncountrylist from the url once every week.\nSchedule is activated. Note that this will\n only work if Morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
+   IDS_SCHED_UPDATE_COUNTRY "更新国家旗帜数据库" //"Update IP-TO-COUNTRY.CSV-file"
+   IDS_SCHED_UPDATE_COUNTRY_LOG "计划中的国家旗帜数据库更新已启动" //"Scheduled IP-TO-COUNTRY.CSV-update initiated."
 END
 
 #endif    // Chinese (P.R.C.) resources
