@@ -399,8 +399,10 @@ private:
 	static CString	GetPermissionDenied();
 	static CString	_GetDownloadGraph(ThreadData Data,CString filehash);
 //>>> Advanced WebInterface Account Management
+//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 	//static void		InsertCatBox(CString &Out,int preselect,CString boxlabel, bool jump,bool extraCats,CString sSession,CString sFileHash,bool ed2kbox=false); 
-	static void		InsertCatBox(CString &Out,int preselect,CString boxlabel, bool jump,bool extraCats,CString sSession,CString sFileHash,bool ed2kbox, const Session& Rights); 
+	static void		InsertCatBox(CString &Out,int preselect,CString boxlabel, bool jump,bool extraCats,CString sSession,CString sFileHash,bool ed2kbox, const Session& Rights,bool all = true); 
+//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 //<<< Advanced WebInterface Account Management
 	static CString	GetSubCatLabel(int iCat);
 	static CString  _GetRemoteLinkAddedOk(ThreadData Data);

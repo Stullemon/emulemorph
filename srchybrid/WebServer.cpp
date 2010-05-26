@@ -553,7 +553,12 @@ void CWebServer::ProcessURL(ThreadData Data)
 						ses.username=Def.User;
 						ses.startTime = CTime::GetCurrentTime();
 						ses.lSession = lSession = rand() * 10000L + rand();
+						//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+						/*
 						ses.lastcat= 0;
+						*/
+						ses.lastcat= -1;
+						//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 						pThis->m_Params.Sessions.Add(ses);
 						theApp.emuledlg->serverwnd->UpdateMyInfo();
 
@@ -586,7 +591,12 @@ void CWebServer::ProcessURL(ThreadData Data)
 						//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 						ses.startTime = CTime::GetCurrentTime();
 						ses.lSession = lSession = GetRandomUInt32();
+						//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+						/*
 						ses.lastcat= 0; //- thePrefs.GetCatFilter(0);
+						*/
+						ses.lastcat=-1;
+						//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 						pThis->m_Params.Sessions.Add(ses);
 					}
 			
@@ -1298,11 +1308,13 @@ CString CWebServer::_GetHeader(ThreadData Data, long lSession)
 	if (thePrefs.GetCatCount()>1) 
 	{
 		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+		//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		/*
 		InsertCatBox(Out,0,pThis->m_Templates.sCatArrow,false,false,sSession,_T(""),true);
 		*/
 		Session Rights = GetSessionByID(Data, lSession); 
-		InsertCatBox(Out,0,pThis->m_Templates.sCatArrow,false,false,sSession,_T(""),true,Rights);		
+		InsertCatBox(Out,0,pThis->m_Templates.sCatArrow,false,false,sSession,_T(""),true,Rights,false);		
+		//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 	}
 	else 
@@ -2513,14 +2525,19 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 						}
 						Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 					}
-					if (pPartFile->GetCategory()!=0 && !Allowed)
+					if (!Allowed && pPartFile->GetCategory()!=0) //MORPH - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 						continue;
 				}
 			}
 			//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 			if (cat<0) {
 				switch (cat) {
+					//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+					/*
 					case -1 : if (pPartFile->GetCategory()!=0) continue; break;
+					*/
+					case -1 : break;
+					//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 					case -2 : if (!pPartFile->IsPartFile()) continue; break;
 					case -3 : if (pPartFile->IsPartFile()) continue; break;
 					case -4 : if (!((pPartFile->GetStatus()==PS_READY|| pPartFile->GetStatus()==PS_EMPTY) && pPartFile->GetTransferringSrcCount()==0)) continue; break;
@@ -2538,12 +2555,12 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 					//JOHNTODO: Not too sure here.. I was going to add Collections but noticed something strange.. Are these supposed to match the list in PartFile around line 5132? Because they do not..
 				}
 			}
-			//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+			//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 			/*
 			else if (cat>0 && pPartFile->GetCategory() != (UINT)cat)
 			*/
 			else if (pPartFile->GetCategory() != (UINT)cat)
-			//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
+			//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 				continue;
 
 			DownloadFiles dFile;
@@ -3140,10 +3157,12 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 			HTTPProcessData.Replace(_T("[Category]"), _T(""));
 
 		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+		//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		/*
 		InsertCatBox(HTTPProcessData,0,_T(""),false,false,session,dwnlf.sFileHash);
 		*/
-		InsertCatBox(HTTPProcessData,0,_T(""),false,false,session,dwnlf.sFileHash,false,Rights);
+		InsertCatBox(HTTPProcessData,-1,_T(""),false,false,session,dwnlf.sFileHash,false,Rights);
+		//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 
 		sDownList += HTTPProcessData;
@@ -5078,10 +5097,12 @@ CString	CWebServer::_GetSearch(ThreadData Data)
 
 	if (thePrefs.GetCatCount()>1) 
 		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+		//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		/*
 		InsertCatBox(Out,0,pThis->m_Templates.sCatArrow,false,false,sSession,_T(""));
 		*/
-		InsertCatBox(Out,0,pThis->m_Templates.sCatArrow,false,false,sSession,_T(""),false, Rights);
+		InsertCatBox(Out,0,pThis->m_Templates.sCatArrow,false,false,sSession,_T(""),false, Rights,false);
+		//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management		
 	else Out.Replace(_T("[CATBOX]"),_T(""));
 	
@@ -5216,10 +5237,12 @@ int CWebServer::UpdateSessionCount()
 }
 
 //MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 /*
 void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool jump,bool extraCats,CString sSession,CString sFileHash, bool ed2kbox)
 */
-void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool jump,bool extraCats,CString sSession,CString sFileHash, bool ed2kbox, const Session& Rights)
+void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool jump,bool extraCats,CString sSession,CString sFileHash, bool ed2kbox, const Session& Rights, bool all)
+//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 //MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 {
 	
@@ -5233,46 +5256,52 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 	else
 		tempBuf += _T(">");
 
-	for (int i = 0; i < thePrefs.GetCatCount(); i++)
-	{
-//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
-		if(thePrefs.UseIonixWebsrv())
+	//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+	if(all)
+		tempBuf.AppendFormat( _T("<option%s value=\"%i\">%s</option>\n"), (-1 == preselect) ? _T(" selected") : _T(""), -1, GetResString(IDS_ALL));
+
+	if(thePrefs.GetCatCount() > 1)
+	//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+		for (int i = 0; i < thePrefs.GetCatCount(); i++)
 		{
-			bool Allowed=false;
-			int curPos=0;
-			if (Rights.RightsToCategories.GetLength()>=2)
+			//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+			if(thePrefs.UseIonixWebsrv())
 			{
-				CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
-				while (Cat!=_T(""))
+				bool Allowed=false;
+				int curPos=0;
+				if (Rights.RightsToCategories.GetLength()>=2)
 				{
-					if (Cat==thePrefs.GetCategory(i)->strTitle)
+					CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+					while (Cat!=_T(""))
 					{
-						Allowed=true;
-						break;
+						if (Cat==thePrefs.GetCategory(i)->strTitle)
+						{
+							Allowed=true;
+							break;
+						}
+						Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 					}
-					Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+					if (!Allowed && i!=0) //MORPH - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+						continue;
 				}
-				if (i!=0 && !Allowed)
-					continue;
 			}
+			//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
+			CString strCategory = thePrefs.GetCategory(i)->strTitle;
+			strCategory.Replace(_T("'"),_T("\'"));
+			tempBuf.AppendFormat( _T("<option%s value=\"%i\">%s</option>\n"), (i == preselect) ? _T(" selected") : _T(""), i, strCategory);
 		}
-//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
-		CString strCategory = thePrefs.GetCategory(i)->strTitle;
-		strCategory.Replace(_T("'"),_T("\'"));
-		tempBuf.AppendFormat( _T("<option%s value=\"%i\">%s</option>\n"), (i == preselect) ? _T(" selected") : _T(""), i, strCategory);
-	}
 	if (extraCats)
 	{
 		if (thePrefs.GetCatCount() > 1)
 		{
 			tempBuf += _T("<option>-------------------</option>\n");
 		}
-		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+		//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		/*
 		for (int i = 1; i<16; i++)
 		*/
 		for (int i = 2; i<16; i++)
-		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
+		//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		{
 			tempBuf.AppendFormat( _T("<option%s value=\"%i\">%s</option>\n") , (0-i == preselect) ? _T(" selected") : _T(""), 0-i, GetSubCatLabel(0-i));
 		}
@@ -5284,64 +5313,83 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 	CString tempBuff;
 	CString		strCategory;
 
-	for (int i = 0; i < thePrefs.GetCatCount(); i++)
+	//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+	if (all)
 	{
-		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
-		if(thePrefs.UseIonixWebsrv())
-		{
-			bool Allowed=false;
-			int curPos=0;
-
-			if (Rights.RightsToCategories.GetLength()>=2)
-			{
-				CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
-				while (Cat!=_T(""))
-				{
-					if (Cat==thePrefs.GetCategory(i)->strTitle)
-					{
-						Allowed=true;
-						break;
-					}
-					Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
-				}
-				if (i!=0 && !Allowed)
-					continue;
-			}
-		}
-		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
-		if (i==preselect)
+		if (-1==preselect)
 		{
 			tempBuff3 = _T("checked.gif");
-			//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
-			/*
-			tempBuff4 = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->strTitle;
-			*/
-			tempBuff4 = thePrefs.GetCategory(i)->strTitle;
-			//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
+			tempBuff4 = GetResString(IDS_ALL);
 		}
 		else
 			tempBuff3 = _T("checked_no.gif");
 
-		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
-		/*
-		strCategory = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->strTitle;
-		*/
-		strCategory = thePrefs.GetCategory(i)->strTitle;
-		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
-		strCategory.Replace(_T("'"),_T("\\'"));
+		strCategory = GetResString(IDS_ALL);
 
 		tempBuff.AppendFormat(_T("<a href=&quot;/?ses=%s&w=transfer&cat=%d&quot;><div class=menuitems><img class=menuchecked src=%s>%s&nbsp;</div></a>"),
-			sSession, i, tempBuff3, strCategory);
+			sSession, -1, tempBuff3, strCategory);
 	}
+
+	if(thePrefs.GetCatCount() > 1)
+	//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+		for (int i = 0; i < thePrefs.GetCatCount(); i++)
+		{
+			//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+			if(thePrefs.UseIonixWebsrv())
+			{
+				bool Allowed=false;
+				int curPos=0;
+
+				if (Rights.RightsToCategories.GetLength()>=2)
+				{
+					CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+					while (Cat!=_T(""))
+					{
+						if (Cat==thePrefs.GetCategory(i)->strTitle)
+						{
+							Allowed=true;
+							break;
+						}
+						Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+					}
+					if (!Allowed && i!=0) //MORPH - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+						continue;
+				}
+			}
+			//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
+			if (i==preselect)
+			{
+				tempBuff3 = _T("checked.gif");
+				//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+				/*
+				tempBuff4 = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->strTitle;
+				*/
+				tempBuff4 = thePrefs.GetCategory(i)->strTitle;
+				//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+			}
+			else
+				tempBuff3 = _T("checked_no.gif");
+
+			//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+			/*
+			strCategory = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->strTitle;
+			*/
+			strCategory = thePrefs.GetCategory(i)->strTitle;
+			//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+			strCategory.Replace(_T("'"),_T("\\'"));
+
+			tempBuff.AppendFormat(_T("<a href=&quot;/?ses=%s&w=transfer&cat=%d&quot;><div class=menuitems><img class=menuchecked src=%s>%s&nbsp;</div></a>"),
+				sSession, i, tempBuff3, strCategory);
+		}
 	if (extraCats)
 	{
 		tempBuff.Append(_T("<div class=menuitems>&nbsp;------------------------------&nbsp;</div>"));
-		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+		//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		/*
 		for (int i = 1;i<16;i++)
 		*/
 		for (int i = 2;i<16;i++)
-		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
+		//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		{
 			if ((0-i)==preselect)
 			{
@@ -5383,7 +5431,7 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 					}
 					Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 				}
-				if (i!=0 && !Allowed)
+				if (!Allowed && i!=0) //MORPH - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 					continue;
 			}
 		}
@@ -5399,17 +5447,22 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 		if (i==preselect)
 		{
 			tempBuff3 = _T("checked.gif");
+			//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+			/*
 			tempBuff4 = (i==0)?GetResString(IDS_ALL):thePrefs.GetCategory(i)->strTitle;
+			*/
+			tempBuff4 = thePrefs.GetCategory(i)->strTitle;
+			//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		}
 		else
 			tempBuff3 = _T("checked_no.gif");
 
-		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+		//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		/*
 		strCategory = (i == 0)? GetResString(IDS_CAT_UNASSIGN) : thePrefs.GetCategory(i)->strTitle;
 		*/
 		strCategory = thePrefs.GetCategory(i)->strTitle;
-		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
+		//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
 		strCategory.Replace(_T("'"),_T("\\'"));
 
 		tempBuff.AppendFormat(_T("<a href=&quot;/?ses=%s&w=transfer[CatSel]&op=setcat&file=%s&filecat=%d&quot;><div class=menuitems><img class=menuchecked src=%s>%s&nbsp;</div></a>"),
