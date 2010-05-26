@@ -644,7 +644,7 @@ LPCTSTR CUpDownClient::TestLeecher(){
 			StrStrI(m_strModVersion,_T("L!()Netw0rk")) ||
 			StrStrI(m_strModVersion, _T("FreeCD")) || //GPL-Breaker
 			((StrStrI(m_strModVersion,_T("VeryCD 071107")) || StrStrI(m_strModVersion,_T("VeryCD 080307"))) && StrStrI(m_pszUsername, _T("[CHN][VeryCD]yourname"))) || // Fake VeryCD
-			(StrStrI(m_strModVersion,_T("VeryCD easymule 10")) && m_nClientVersion < MAKE_CLIENT_VERSION(0, 49, 2)) || // they seem to be related to screwing up our upload
+			(StrStrI(m_strModVersion,_T("VeryCD easymule 10")) && m_nClientVersion < MAKE_CLIENT_VERSION(0, 49, 1)) || // they seem to be related to screwing up our upload
 			// <== added - Stulle
 			m_strModVersion.IsEmpty() == false && StrStrI(m_strClientSoftware,_T("edonkey"))||
 			((GetVersion()>589) && (GetSourceExchange1Version()>0) && (GetClientSoft()==51)) //LSD, edonkey user with eMule property
