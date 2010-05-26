@@ -3710,7 +3710,7 @@ BEGIN
     IDS_MSGONLYSEC          "僅允許來自通過認證用戶的訊息"
     IDS_DISABLEPEERACHE     "停用 PeerCache"
     IDS_SHOWWIN7TASKBARGOODIES_TIP "使用 Windows 7 Aero 工具列的特效功能"
-    IDS_STORESEARCHES_TIP   "eMule 可以將每次運作時做的搜尋儲存起來,\n 以供下次啟動時回復到上次的搜尋狀況"
+    IDS_STORESEARCHES_TIP   "eMule可以保留上次的搜尋結果\n重新啟動後搜尋結果會再顯示出來"
     IDS_SEARCHSPAMFILTER_TIP "有時候用戶端或主機會發布假檔\n 啟用這個設定會讓 eMule 以兩種不同的方式過濾搜尋結果"
     IDS_ENABLEMINIMULE_TIP  "MiniMule 是當 eMule 縮小到通知區域時顯示基本資訊的小視窗\n他可以浮在最上層也可以半透明(詳見 進階選項)"
     IDS_PREVENTSTANDBY_TIP  "Windows 經常被設定為沒用一陣子後會進入待命模式\n啟用這個選項會避免 Windows 在 eMule 還在執行時進入待命模式\n這樣才能持續的分享檔案"
@@ -3783,6 +3783,10 @@ BEGIN
     IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP "通常當分享目錄無效的時候會被移除\n請用這個選項會保留無效的分享目錄,\n這樣當下次目錄又有效時會再次被分享\n\n預設: 停用"
     IDS_FORCESPEEDSTOKB     "以 KB/s 顯示所有的速度數據"
     IDS_FORCESPEEDSTOKB_TIP "eMule 根據不同的速度以不同的單位顯示速度數據\n這個選項強制所有的速度皆以 KB/s 顯示\n而非 KB/s, GB/s 或 TB/s."
+   IDS_AUTOUPCOUNTRYWEEK   "每週更新"
+   IDS_AUTOUPCOUNTRYWEEK_TIP "新增一筆排程在每周定期更新國家列表\n排程已啟動.\n注意, 只有當eMule在該時間有在執行的話有效\n你可以在排程偏好中更改時間"
+   IDS_SCHED_UPDATE_COUNTRY "更新IP-TO-COUNTRY.CSV檔"
+   IDS_SCHED_UPDATE_COUNTRY_LOG "排程IP-TO-COUNTRY.CSV更新初始化完成"
 END
 
 /////////////////////////////////////////////////////////////////////////////
