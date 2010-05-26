@@ -30,6 +30,10 @@ REMOVED: Some unused code around the Slot Limiter (limit to number) [evcz]
 REMOVED: webservice.dat entries for now defunct donkeyfakes links [Motor]
 REMOVED: Redundant quotation marks in installer [Stulle/thx Heiler]
 
+Note: Following languages updated: German [Stulle]; French [jamjam]; Chinese (P.R.C.) [zz_fly]; 
+	Chinese (Taiwan) [AndCycle]; Italian [Myth88]; Turkish [omeringen];
+	Portuguese (Brazil) [Heiler]; Spanish [Rajil]
+
 
 --------------------------------------
 Changelog for eMule 0.50a MorphXT v12.0

@@ -3712,7 +3712,7 @@ BEGIN
     IDS_MSGONLYSEC          "Accetta messaggi solo da client validi"
     IDS_DISABLEPEERACHE     "Disattiva il Download dalla PeerCache"
     IDS_SHOWWIN7TASKBARGOODIES_TIP "Windows 7 ha qualche nuova funzione\nper la barra di attività di Aero Glass che può essere \nusato con questo."
-    IDS_STORESEARCHES_TIP   "eMule può salvare ricerche tra diverse sessioni\nche verranno caricate al prossimo avvio."
+    IDS_STORESEARCHES_TIP   "eMule puo' salvare ricerche tra piu' sessioni \nin modo che le ultime ricerche sono di nuovo visualizzato al prossimo avvio di eMule."
     IDS_SEARCHSPAMFILTER_TIP "A volte utenti o server pubblicano file falsi. Per proteggerti\nattiva questa opzione che farà eMule filtrare i risultati\ndi ricerca usando due diversi approcci."
     IDS_ENABLEMINIMULE_TIP  "MiniMule è una piccola finestra che può essere visualizzata per vedere\ninformazioni base di eMule quando è minimizzato nella barra delle attività. Sarà in primo piano e può\nessere trasparente(vedi opzioni avanzate in opzioni in avanzato)."
     IDS_PREVENTSTANDBY_TIP  "Windows spesso è configurato per andare in modalità standby.\nAttivando questa opzione eMule impedirà Windows di andare in modalità standby\nquando eMule è acceso, per continuare la condivisione dei file."
@@ -3785,6 +3785,10 @@ BEGIN
     IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP "Solitamente cartelle condivise non disponibili vengono cancellate.\nAttivando questa opzione terrà queste cartelle in modo \nche possono essere ricaricate quando disponibili.\n\nDefault: disattivato"
     IDS_FORCESPEEDSTOKB     "Visualizza tutte le unità di velocità in KB/s"
     IDS_FORCESPEEDSTOKB_TIP "eMule visualizza valori di velocità diversi, secondo la velocità da visualizzare. Questa opzione fissa tutte le unità a KB/s invece di\nB/s, MB/s, GB/s and TB/s."
+    IDS_AUTOUPCOUNTRYWEEK   "Agg. settimanale"
+    IDS_AUTOUPCOUNTRYWEEK_TIP "Aggiungi un evento agli eventi pianificati per aggiornare \n la lista dei paesi dall'indirizzo una volta a settimana. \nEvento attivato. Ricorda che funzioner' solo se eMule e' attivo a quell'ora. \nPuoi modificare l'orario nelle preferenze dell'evento."
+    IDS_SCHED_UPDATE_COUNTRY "Aggiorna il file IP-TO-COUNTRY.CSV"
+    IDS_SCHED_UPDATE_COUNTRY_LOG "Aggiornamento del file IP-TO-COUNTRY.CSV avviato secondo l'evento pianificato."
 END
 
 #endif    // Italian (Italy) resources
