@@ -10,6 +10,8 @@
 #define BAN_TIME_SECS			900	// MORPH 15 minutes ban time 
 #define LOGIN_TRIES_LIMIT		4	// MORPH max number of tries to login before ban
 
+#include <vector>
+
 typedef struct
 {
 	double download;
@@ -27,7 +29,7 @@ typedef struct
 	bool	admin;
 	*/
 	uint8 admin;
-	CString	RightsToCategories;
+	std::vector<int>	RightsToCategories;
 	bool RightsToKad;
 	bool RightsToPrefs;
 	bool RightsToSearch;

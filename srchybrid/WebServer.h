@@ -414,7 +414,10 @@ private:
 private:
 	static void		SaveWIConfigArray(BOOL array[], int size, LPCTSTR key);
 	static CString	GetWebImageNameForFileType(CString filename);
-	static CString  GetClientSummary(CUpDownClient* client);
+//>>> Advanced WebInterface Account Management
+	//static CString  GetClientSummary(CUpDownClient* client);
+	static CString  GetClientSummary(CUpDownClient* client, const Session& Rights);
+//<<< Advanced WebInterface Account Management
 	static CString	_GetMyInfo(ThreadData Data);
 	static CString	GetClientversionImage(CUpDownClient* client);
 	// MORPH start badloging fix dreamwalker [leuk_he]

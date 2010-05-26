@@ -13,6 +13,8 @@ CHANGE: Cat related scheduler items are added with -1 (All) value [Stulle]
 CHANGE: Update GUI when reloading share via scheduler [Stulle/WiZaRd]
 CHANGE: Make user data dir default config dir for installer on Vista and above [Stulle]
 CHANGE: Allow to show Default tab seperately on Multi User Web Interface [Stulle]
+CHANGE: Do not show file names if Web Interface user may not see according cat [Stulle]
+	+ Applies to all files in incoming dir of cat unless an allowed cat has same dir
 FIX: Download of large files was broken [Stulle]
 FIX: Compiling settings for VS03 in emule_site_config.h [Stulle]
 FIX: Some typos in ressource strings [Heiler]
