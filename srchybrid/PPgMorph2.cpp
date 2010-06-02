@@ -247,7 +247,7 @@ void CPPgMorph2::Localize(void)
 		GetDlgItem(IDC_UPDATEIPCURL)->SetWindowText(GetResString(IDS_UPDATEIPCURL));
 		GetDlgItem(IDC_URL_FOR_UPDATING_IP2COUNTRY)->SetWindowText(GetResString(IDS_URL_FOR_UPDATING_IP2COUNTRY));
 		GetDlgItem(IDC_RESETIPCURL)->SetWindowText(GetResString(IDS_RESET));
-		GetDlgItem(IDC_UPDATEFAKELISTWEEK)->SetWindowText(GetResString(IDS_AUTOUPCOUNTRYWEEK));
+		GetDlgItem(IDC_AUTOUPCOUNTRYWEEK)->SetWindowText(GetResString(IDS_AUTOUPCOUNTRYWEEK));
 		//MORPH END - Added by Commander: IP2Country update
         // MORPH START leuk_he tooltipped
 		//SetTool(IDC_MORPH2_FILE,IDC_MORPH2_FILE_TIP);
