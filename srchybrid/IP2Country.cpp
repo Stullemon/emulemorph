@@ -263,7 +263,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 	try{
 
 		//detect windows version
-		if(thePrefs.GetWindowsVersion() == _WINVER_XP_){
+		if(thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2003_ || thePrefs.GetWindowsVersion() == _WINVER_VISTA_ || thePrefs.GetWindowsVersion() == _WINVER_7_){
 			//it's XP, we can use beautiful 32bits flags with alpha channel :)
 			ip2countryCountryFlag = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)+_T("countryflag32.dll");
 		}
@@ -344,8 +344,11 @@ bool CIP2Country::LoadCountryFlagLib(){
 			IDI_COUNTRY_FLAG_UK, //by tharghan
 			IDI_COUNTRY_FLAG_CS, //by propaganda
 			IDI_COUNTRY_FLAG_TP, //by commander
+			IDI_COUNTRY_FLAG_AQ, IDI_COUNTRY_FLAG_AX, IDI_COUNTRY_FLAG_BV, IDI_COUNTRY_FLAG_GF,
+			IDI_COUNTRY_FLAG_ME, IDI_COUNTRY_FLAG_MF, IDI_COUNTRY_FLAG_RE, IDI_COUNTRY_FLAG_RS,
+			IDI_COUNTRY_FLAG_YT, //by tomchen1989
 
-			65535//the end
+			251//the end ->251 used country-flags
 		};
 
 		CString countryID[] = {
@@ -369,7 +372,8 @@ bool CIP2Country::LoadCountryFlagLib(){
 			_T("VC"), _T("VE"), _T("VG"), _T("VI"), _T("VN"), _T("VU"), _T("WF"), _T("WS"), _T("YE"), _T("YU"), _T("ZA"), _T("ZM"), _T("ZW"), 
 			_T("UK"), //by tharghan
 			_T("CS"), //by propaganda
-			_T("TP") //by commander
+			_T("TP"), //by commander
+			_T("AQ"), _T("AX"), _T("BV"), _T("GF"), _T("ME"), _T("MF"), _T("RE"), _T("RS"), _T("YT") //by tomchen1989
 		};
 
 		HICON iconHandle;
