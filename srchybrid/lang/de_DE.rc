@@ -3789,7 +3789,7 @@ BEGIN
     IDS_FORCESPEEDSTOKB     "Zeige alle Geschwindigkeiten in KB/s"
     IDS_FORCESPEEDSTOKB_TIP "eMule zeigt Geschwindigkeitswerte in verschiedenen Einheiten, basierend\nauf der Geschwindigkeit, die angezeigt wird. Diese Option zwingt alle\nGeschwindigkeits in eine Anzeige in KB/s statt B/s, KB/s, GB/s und TB/s."
     IDS_AUTOUPCOUNTRYWEEK   "Wöchentliches Update"
-    IDS_UPDATEFAKELISTWEEK_TIP 
+    IDS_AUTOUPCOUNTRYWEEK_TIP 
                             "Ein Eintrag im Zeitplaner wird hinzufügt um die\nLänderliste wöchentlich von der angegebenen\nURL zu aktualisieren. Der Zeitplaner ist\naktiv. Beachte, dass dies nur funktioniert, wenn\nMorph läuft während dieser Zeit. Den genauen\nZeitpunkt für die Aktualisierung kannst du im\nZeitplaner einstellen."
     IDS_SCHED_UPDATE_COUNTRY "Update IP-TO-COUNTRY.CSV"
     IDS_SCHED_UPDATE_COUNTRY_LOG "Zeitgesteuertes IP-TO-COUNTRY.CSV-update gestartet."

@@ -1,10 +1,11 @@
 --------------------------------------
 Changelog for eMule 0.50a MorphXT v12.1
 --------------------------------------
-XX-XX-2010
+02-06-2010
 
 ADD: Weekly update option for ip-to-country.csv file [Stulle]
 ADD: Working Windows Firewall settings for Vista and above in installer [Stulle]
+ADD: Some more countries to country flags feature [tomchen1989]
 CHANGE: Increase size for displaying strings in Morph First Start Wiz [Stulle]
 CHANGE: Display log warnings on error auto updating ipfilter rar file [Stulle]
 CHANGE: Show cat name for scheduler cat actions in preferences window [Stulle]

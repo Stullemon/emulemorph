@@ -244,6 +244,15 @@
 #define IDI_COUNTRY_FLAG_CS             341
 #define IDI_COUNTRY_FLAG_NOFLAG         342
 #define IDI_COUNTRY_FLAG_TP				343
+#define IDI_COUNTRY_FLAG_AQ				344
+#define IDI_COUNTRY_FLAG_AX				345
+#define IDI_COUNTRY_FLAG_BV				346
+#define IDI_COUNTRY_FLAG_GF				347
+#define IDI_COUNTRY_FLAG_ME				348
+#define IDI_COUNTRY_FLAG_MF				349
+#define IDI_COUNTRY_FLAG_RE				350
+#define IDI_COUNTRY_FLAG_RS				351
+#define IDI_COUNTRY_FLAG_YT				352
 
 // Next default values for new objects
 // 
