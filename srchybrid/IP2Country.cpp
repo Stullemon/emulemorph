@@ -348,7 +348,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 			IDI_COUNTRY_FLAG_ME, IDI_COUNTRY_FLAG_MF, IDI_COUNTRY_FLAG_RE, IDI_COUNTRY_FLAG_RS,
 			IDI_COUNTRY_FLAG_YT, //by tomchen1989
 
-			251//the end ->251 used country-flags
+			65535//the end
 		};
 
 		CString countryID[] = {
