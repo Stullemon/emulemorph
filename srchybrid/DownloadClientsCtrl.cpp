@@ -332,7 +332,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						//MORPH END - Modified by SiRoB, More client & ownCredits overlay icon
 
 						//EastShare Start - added by AndCycle, IP to Country 
-						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(12)){
+						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(13)){
 							cur_rec.left+=20;
 							POINT point2= {cur_rec.left,cur_rec.top+1};
 							int index = client->GetCountryFlagIndex();
