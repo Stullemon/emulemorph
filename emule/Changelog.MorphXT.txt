@@ -1,4 +1,12 @@
 --------------------------------------
+Changelog for eMule 0.50a MorphXT v12.3
+--------------------------------------
+XX-XX-2010
+
+FIX: Rehashing of file on receiving unusable AICH hashset reply [Stulle]
+
+
+--------------------------------------
 Changelog for eMule 0.50a MorphXT v12.2
 --------------------------------------
 03-06-2010 *HOTFIX*

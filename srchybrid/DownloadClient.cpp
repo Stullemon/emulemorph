@@ -1280,16 +1280,18 @@ void CUpDownClient::ProcessHashSet(const uchar* packet, uint32 size, bool bFileI
 		else if (m_fHashsetRequestingMD4)
 			DebugLog(_T("Received valid MD4 Hashset (FileIdentifiers) form %s, file: %s"), DbgGetClientInfo(), reqfile->GetFileName());
 		
+		bool bPerformFirstHash = true;		// SLUGFILLER: SafeHash - Rehash
 		if (m_fHashsetRequestingAICH && !bAICH)
 		{
 			DebugLogWarning(_T("Client was unable to deliver requested AICH part hashset, asking other clients - %s, file: %s"), DbgGetClientInfo(), reqfile->GetFileName());
 			reqfile->SetAICHHashSetNeeded(true);
+			bPerformFirstHash = false;		// SLUGFILLER: SafeHash - Rehash
 		}
 		else if (m_fHashsetRequestingAICH)
 			DebugLog(_T("Received valid AICH Part Hashset form %s, file: %s"), DbgGetClientInfo(), reqfile->GetFileName());
 		m_fHashsetRequestingMD4 = 0;
 		m_fHashsetRequestingAICH = 0;
-		reqfile->PerformFirstHash();		// SLUGFILLER: SafeHash - Rehash
+		if(bPerformFirstHash) reqfile->PerformFirstHash();		// SLUGFILLER: SafeHash - Rehash
 	}
 	else
 	{
