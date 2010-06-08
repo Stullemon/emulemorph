@@ -1494,6 +1494,7 @@ void CSearchListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 	//MORPH START - Added by Stulle, Fakealyzer [netfinity]
 	// View files with different colours depending if tags match the filetype
+	if(thePrefs.GetFakeAlyzerIndications())
 	{
 		COLORREF cr = dc->GetBkColor();
 		int	eFakeState = CFakealyzer::CheckSearchResult(content);

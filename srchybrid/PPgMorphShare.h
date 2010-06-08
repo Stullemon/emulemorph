@@ -31,13 +31,14 @@ protected:
 	// [end] Mighty Knife
 	bool m_bPowershareInternalPrio; //Morph - added by AndCyle, selective PS internal Prio
 	bool m_bFolderIcons;
-	bool m_bStaticIcon;
+	bool m_bStaticIcon; //MORPH - Added, Static Tray Icon
 	// MORPH START show less controls
 	bool m_bShowLessControls;
 public:
 	bool m_bOverideBySetExtControls;
 protected:
 	// MORPH END  show less controls
+	bool m_bFakeAlyzerIndications; //MORPH - Added by Stulle, Fakealyzer [netfinity]
 
 	
 	CTreeOptionsCtrlEx m_ctrlTreeOptions;
@@ -74,6 +75,7 @@ protected:
 	HTREEITEM m_htiFolderIcons;
 	HTREEITEM m_htiStaticIcon; //MORPH - Added, Static Tray Icon
 	HTREEITEM m_htiShowLessControls ;// Show less controls
+	HTREEITEM m_htiFakeAlyzerIndications; //MORPH - Added by Stulle, Fakealyzer [netfinity]
 	
 	afx_msg void OnDestroy();
 	afx_msg LRESULT OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam);

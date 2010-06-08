@@ -6385,7 +6385,7 @@ void CPartFile::FlushDone()
 				m_PartsHashing++;
 				if (theApp.emuledlg->IsRunning()) { //MORPH - Flush Thread
 					CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
-					parthashthread->SetSinglePartHash(this, (uint16)partNumber);
+					parthashthread->SetSinglePartHash(this, (UINT)partNumber);
 					parthashthread->ResumeThread();
 				//MORPH START - Flush Thread
 				} else { 
@@ -6401,7 +6401,7 @@ void CPartFile::FlushDone()
 			{
 				if (theApp.emuledlg->IsRunning()) { //MORPH - Flush Thread
 					CPartHashThread* parthashthread = (CPartHashThread*) AfxBeginThread(RUNTIME_CLASS(CPartHashThread), THREAD_PRIORITY_BELOW_NORMAL,0, CREATE_SUSPENDED);
-					parthashthread->SetSinglePartHash(this, (uint16)partNumber, true);	// Special case, doesn't increment hashing parts, since part isn't really complete
+					parthashthread->SetSinglePartHash(this, (UINT)partNumber, true);	// Special case, doesn't increment hashing parts, since part isn't really complete
 					parthashthread->ResumeThread();
 				//MORPH START - Flush Thread
 				} else { 

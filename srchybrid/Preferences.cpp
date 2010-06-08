@@ -817,6 +817,8 @@ CString	CPreferences::m_strServiceDescr;
 
 bool CPreferences::m_bStaticIcon; //MORPH - Added, Static Tray Icon
 
+bool CPreferences::m_bFakeAlyzerIndications; //MORPH - Added by Stulle, Fakealyzer [netfinity]
+
 // ==> [MoNKi: -USS initial TTL-] - Stulle
 uint8	CPreferences::m_iUSSinitialTTL;
 // <== [MoNKi: -USS initial TTL-] - Stulle
@@ -2323,38 +2325,38 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"CryptLayerRequiredStrictServer",IsServerCryptLayerRequiredStrict()); // MORPH lh require obfuscated server connection 
 
 	// ==> Slot Limit - Stulle
-	ini.WriteBool(_T("SlotLimitThree"), m_bSlotLimitThree);
-	ini.WriteBool(_T("SlotLimitNumB"), m_bSlotLimitNum);
-	ini.WriteInt(_T("SlotLimitNum"), m_iSlotLimitNum);
+	ini.WriteBool(L"SlotLimitThree", m_bSlotLimitThree);
+	ini.WriteBool(L"SlotLimitNumB", m_bSlotLimitNum);
+	ini.WriteInt(L"SlotLimitNum", m_iSlotLimitNum);
 	// <== Slot Limit - Stulle
 
 	// MORPH START leuk_he Advanced official preferences.
-	ini.WriteBool(_T("MiniMuleAutoClose"),bMiniMuleAutoClose);
-	ini.WriteInt(_T("MiniMuleTransparency"),iMiniMuleTransparency);
-	ini.WriteBool(_T("CreateCrashDump"),bCreateCrashDump);
-	ini.WriteBool(_T("CheckComctl32"),bCheckComctl32 );
-	ini.WriteBool(_T("CheckShell32"),bCheckShell32);
-	ini.WriteBool(_T("IgnoreInstance"),bIgnoreInstances);
-	ini.WriteString(_T("NotifierMailEncryptCertName"),sNotifierMailEncryptCertName);
-	ini.WriteString(_T("MediaInfo_MediaInfoDllPath"),sMediaInfo_MediaInfoDllPath);
-	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RIFF_FIX"), 1)==1){ // fix morph 9.3 bad default once.
+	ini.WriteBool(L"MiniMuleAutoClose",bMiniMuleAutoClose);
+	ini.WriteInt(L"MiniMuleTransparency",iMiniMuleTransparency);
+	ini.WriteBool(L"CreateCrashDump",bCreateCrashDump);
+	ini.WriteBool(L"CheckComctl32",bCheckComctl32 );
+	ini.WriteBool(L"CheckShell32",bCheckShell32);
+	ini.WriteBool(L"IgnoreInstance",bIgnoreInstances);
+	ini.WriteString(L"NotifierMailEncryptCertName",sNotifierMailEncryptCertName);
+	ini.WriteString(L"MediaInfo_MediaInfoDllPath",sMediaInfo_MediaInfoDllPath);
+	if (theApp.GetProfileInt(L"eMule", L"MediaInfo_RIFF_FIX", 1)==1){ // fix morph 9.3 bad default once.
 		bMediaInfo_RIFF=true;
 		bMediaInfo_ID3LIB=true;
-		ini.WriteInt(_T("MediaInfo_RIFF_FIX"),0); //once
+		ini.WriteInt(L"MediaInfo_RIFF_FIX",0); //once
 	}
-	ini.WriteBool(_T("MediaInfo_RIFF"),bMediaInfo_RIFF);
-	ini.WriteBool(_T("MediaInfo_ID3LIB"),bMediaInfo_ID3LIB);
-	ini.WriteInt(_T("MaxLogBuff"),iMaxLogBuff/1024);
-	ini.WriteInt(_T("MaxChatHistoryLines"),m_iMaxChatHistory);
-	ini.WriteInt(_T("PreviewSmallBlocks"),m_iPreviewSmallBlocks);
-	ini.WriteBool(_T("RestoreLastMainWndDlg"),m_bRestoreLastMainWndDlg);
-	ini.WriteBool(_T("RestoreLastLogPane"),m_bRestoreLastLogPane);
-	ini.WriteBool(_T("PreviewCopiedArchives"),m_bPreviewCopiedArchives);
-	ini.WriteInt(_T("StraightWindowStyles"),m_iStraightWindowStyles);
-	ini.WriteInt(_T("LogFileFormat"),m_iLogFileFormat);
-	ini.WriteBool(_T("RTLWindowsLayout"),m_bRTLWindowsLayout);
-	ini.WriteBool(_T("PreviewOnIconDblClk"),m_bPreviewOnIconDblClk);
-	ini.WriteString(_T("InternetSecurityZone"),sInternetSecurityZone);
+	ini.WriteBool(L"MediaInfo_RIFF",bMediaInfo_RIFF);
+	ini.WriteBool(L"MediaInfo_ID3LIB",bMediaInfo_ID3LIB);
+	ini.WriteInt(L"MaxLogBuff",iMaxLogBuff/1024);
+	ini.WriteInt(L"MaxChatHistoryLines",m_iMaxChatHistory);
+	ini.WriteInt(L"PreviewSmallBlocks",m_iPreviewSmallBlocks);
+	ini.WriteBool(L"RestoreLastMainWndDlg",m_bRestoreLastMainWndDlg);
+	ini.WriteBool(L"RestoreLastLogPane",m_bRestoreLastLogPane);
+	ini.WriteBool(L"PreviewCopiedArchives",m_bPreviewCopiedArchives);
+	ini.WriteInt(L"StraightWindowStyles",m_iStraightWindowStyles);
+	ini.WriteInt(L"LogFileFormat",m_iLogFileFormat);
+	ini.WriteBool(L"RTLWindowsLayout",m_bRTLWindowsLayout);
+	ini.WriteBool(L"PreviewOnIconDblClk",m_bPreviewOnIconDblClk);
+	ini.WriteString(L"InternetSecurityZone",sInternetSecurityZone);
 	ini.WriteInt(L"InspectAllFileTypes",m_iInspectAllFileTypes);
     ini.WriteInt(L"MaxMessageSessions",maxmsgsessions);
     ini.WriteBool(L"PreferRestrictedOverUser",m_bPreferRestrictedOverUser);
@@ -2381,7 +2383,7 @@ void CPreferences::SavePreferences()
 	CString WriteAllowedIPs ;
 	if (GetAllowedRemoteAccessIPs().GetCount() > 0)
 		for (int i = 0; i <  GetAllowedRemoteAccessIPs().GetCount(); i++)
-           WriteAllowedIPs = WriteAllowedIPs  + _T(";") + ipstr(GetAllowedRemoteAccessIPs()[i]);
+           WriteAllowedIPs = WriteAllowedIPs  + L";" + ipstr(GetAllowedRemoteAccessIPs()[i]);
     ini.WriteString(L"AllowedIPs",WriteAllowedIPs);  // End Seciotn Webserver
     ini.WriteBool(L"ShowVerticalHourMarkers",m_bShowVerticalHourMarkers,L"Statistics");
 	ini.WriteBool(L"EnabledDeprecated", m_bPeerCacheEnabled, L"PeerCache");
@@ -2429,7 +2431,7 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"AllowAdminHiLevelFunc",m_bAllowAdminHiLevFunc);
 	ini.WriteInt(L"WebTimeoutMins", m_iWebTimeoutMins);
 	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
-	ini.WriteBool(_T("UseIonixWebsrv"), m_bIonixWebsrv);
+	ini.WriteBool(L"UseIonixWebsrv", m_bIonixWebsrv);
 	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 
 
@@ -2461,264 +2463,265 @@ void CPreferences::SavePreferences()
 #endif
 	
 	//MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-	ini.WriteBool(_T("UPnPNAT"), m_bUPnPNat, _T("eMule"));
-	ini.WriteBool(_T("UPnPNAT_Web"), m_bUPnPNatWeb);
-	ini.WriteBool(_T("UPnPVerbose"), m_bUPnPVerboseLog);
-	ini.WriteInt(_T("UPnPPort"), m_iUPnPPort);
-	ini.WriteBool(_T("UPnPClearOnClose"), m_bUPnPClearOnClose);
-	ini.WriteBool(_T("UPnPLimitToFirstConnection"), m_bUPnPLimitToFirstConnection);
-	ini.WriteInt(_T("UPnPDetect"), m_iDetectuPnP); // 
-	ini.WriteBool(_T("UPnPForceUpdate"), m_bUPnPForceUpdate);
+	ini.WriteBool(L"UPnPNAT", m_bUPnPNat, L"eMule");
+	ini.WriteBool(L"UPnPNAT_Web", m_bUPnPNatWeb);
+	ini.WriteBool(L"UPnPVerbose", m_bUPnPVerboseLog);
+	ini.WriteInt(L"UPnPPort", m_iUPnPPort);
+	ini.WriteBool(L"UPnPClearOnClose", m_bUPnPClearOnClose);
+	ini.WriteBool(L"UPnPLimitToFirstConnection", m_bUPnPLimitToFirstConnection);
+	ini.WriteInt(L"UPnPDetect", m_iDetectuPnP); // 
+	ini.WriteBool(L"UPnPForceUpdate", m_bUPnPForceUpdate);
 		//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
   
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
-	ini.WriteBool(_T("RandomPorts"), m_bRndPorts, _T("eMule"));
-	ini.WriteInt(_T("MinRandomPort"), m_iMinRndPort, _T("eMule"));
-	ini.WriteInt(_T("MaxRandomPort"), m_iMaxRndPort, _T("eMule"));
-	ini.WriteBool(_T("RandomPortsReset"), m_bRndPortsResetOnRestart, _T("eMule"));
-	ini.WriteInt(_T("RandomPortsSafeResetOnRestartTime"), m_iRndPortsSafeResetOnRestartTime, _T("eMule"));
+	ini.WriteBool(L"RandomPorts", m_bRndPorts, L"eMule");
+	ini.WriteInt(L"MinRandomPort", m_iMinRndPort, L"eMule");
+	ini.WriteInt(L"MaxRandomPort", m_iMaxRndPort, L"eMule");
+	ini.WriteBool(L"RandomPortsReset", m_bRndPortsResetOnRestart, L"eMule");
+	ini.WriteInt(L"RandomPortsSafeResetOnRestartTime", m_iRndPortsSafeResetOnRestartTime, L"eMule");
 
-	ini.WriteInt(_T("OldTCPRandomPort"), m_iCurrentTCPRndPort, _T("eMule"));
-	ini.WriteInt(_T("OldUDPRandomPort"), m_iCurrentUDPRndPort, _T("eMule"));
-	ini.WriteUInt64(_T("RandomPortsLastRun"), CTime::GetCurrentTime().GetTime() , _T("eMule"));
+	ini.WriteInt(L"OldTCPRandomPort", m_iCurrentTCPRndPort, L"eMule");
+	ini.WriteInt(L"OldUDPRandomPort", m_iCurrentUDPRndPort, L"eMule");
+	ini.WriteUInt64(L"RandomPortsLastRun", CTime::GetCurrentTime().GetTime() , L"eMule");
 	//MORPH END   - Added by SiRoB, [MoNKi: -Random Ports-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
-	ini.WriteBool(_T("ICFSupportFirstTime"), m_bICFSupportFirstTime, _T("eMule"));
-	ini.WriteBool(_T("ICFSupport"), m_bICFSupport, _T("eMule"));
-	ini.WriteBool(_T("ICFSupportServerUDP"), m_bICFSupportServerUDP , _T("eMule"));
+	ini.WriteBool(L"ICFSupportFirstTime", m_bICFSupportFirstTime, L"eMule");
+	ini.WriteBool(L"ICFSupport", m_bICFSupport, L"eMule");
+	ini.WriteBool(L"ICFSupportServerUDP", m_bICFSupportServerUDP , L"eMule");
 	//MORPH END   - Added by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 
     //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
-	ini.WriteBool(_T("WapEnabled"), m_bWapEnabled, _T("WapServer"));
-	ini.WriteString(_T("WapTemplateFile"),m_sWapTemplateFile, _T("WapServer"));
-	ini.WriteInt(_T("WapPort"), m_nWapPort, _T("WapServer"));
-	ini.WriteInt(_T("WapGraphWidth"), m_iWapGraphWidth, _T("WapServer"));
-	ini.WriteInt(_T("WapGraphHeight"), m_iWapGraphHeight, _T("WapServer"));
-	ini.WriteBool(_T("WapFilledGraphs"), m_bWapFilledGraphs, _T("WapServer"));
-	ini.WriteInt(_T("WapMaxItemsInPage"), m_iWapMaxItemsInPages, _T("WapServer"));
-	ini.WriteBool(_T("WapSendImages"), m_bWapSendImages, _T("WapServer"));
-	ini.WriteBool(_T("WapSendGraphs"), m_bWapSendGraphs, _T("WapServer"));
-	ini.WriteBool(_T("WapSendProgressBars"), m_bWapSendProgressBars, _T("WapServer"));
-	ini.WriteBool(_T("WapSendBWImages"), m_bWapAllwaysSendBWImages, _T("WapServer"));
-	ini.WriteInt(_T("WapLogsSize"), m_iWapLogsSize, _T("WapServer"));
-	ini.WriteString(_T("WapPassword"), m_sWapPassword, _T("WapServer"));
-	ini.WriteString(_T("WapPasswordLow"), m_sWapLowPassword, _T("WapServer"));
-	ini.WriteBool(_T("WapLowEnable"), m_bWapLowEnabled, _T("WapServer"));
+	ini.WriteBool(L"WapEnabled", m_bWapEnabled, L"WapServer");
+	ini.WriteString(L"WapTemplateFile",m_sWapTemplateFile, L"WapServer");
+	ini.WriteInt(L"WapPort", m_nWapPort, L"WapServer");
+	ini.WriteInt(L"WapGraphWidth", m_iWapGraphWidth, L"WapServer");
+	ini.WriteInt(L"WapGraphHeight", m_iWapGraphHeight, L"WapServer");
+	ini.WriteBool(L"WapFilledGraphs", m_bWapFilledGraphs, L"WapServer");
+	ini.WriteInt(L"WapMaxItemsInPage", m_iWapMaxItemsInPages, L"WapServer");
+	ini.WriteBool(L"WapSendImages", m_bWapSendImages, L"WapServer");
+	ini.WriteBool(L"WapSendGraphs", m_bWapSendGraphs, L"WapServer");
+	ini.WriteBool(L"WapSendProgressBars", m_bWapSendProgressBars, L"WapServer");
+	ini.WriteBool(L"WapSendBWImages", m_bWapAllwaysSendBWImages, L"WapServer");
+	ini.WriteInt(L"WapLogsSize", m_iWapLogsSize, L"WapServer");
+	ini.WriteString(L"WapPassword", m_sWapPassword, L"WapServer");
+	ini.WriteString(L"WapPasswordLow", m_sWapLowPassword, L"WapServer");
+	ini.WriteBool(L"WapLowEnable", m_bWapLowEnabled, L"WapServer");
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]        
 
 	//MORPH START - Added by Commander, ClientQueueProgressBar  
-	ini.WriteBool(_T("ClientQueueProgressBar"),m_bClientQueueProgressBar, _T("eMule"));
+	ini.WriteBool(L"ClientQueueProgressBar",m_bClientQueueProgressBar, L"eMule");
 	//MORPH END - Added by Commander, ClientQueueProgressBar
 
 	//MORPH START - Added by Commander, FolderIcons  
-	ini.WriteBool(_T("ShowFolderIcons"),m_bShowFolderIcons, _T("eMule"));
+	ini.WriteBool(L"ShowFolderIcons",m_bShowFolderIcons, L"eMule");
 	//MORPH END - Added by Commander, FolderIcons
 
-	ini.WriteBool(_T("InfiniteQueue"),infiniteQueue,_T("eMule"));	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	ini.WriteBool(L"InfiniteQueue",infiniteQueue,L"eMule");	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 
-	ini.WriteBool(_T("AutoDynUpSwitching"),isautodynupswitching,_T("eMule"));//MORPH - Added by Yun.SF3, Auto DynUp changing
-	ini.WriteInt(_T("PowershareMode"),m_iPowershareMode,_T("eMule")); //MORPH - Added by SiRoB, Avoid misusing of powersharing
-	ini.WriteBool(_T("PowershareInternalPrio"),m_bPowershareInternalPrio,_T("eMule"));//Morph - added by AndCyle, selective PS internal Prio
+	ini.WriteBool(L"AutoDynUpSwitching",isautodynupswitching,L"eMule");//MORPH - Added by Yun.SF3, Auto DynUp changing
+	ini.WriteInt(L"PowershareMode",m_iPowershareMode,L"eMule"); //MORPH - Added by SiRoB, Avoid misusing of powersharing
+	ini.WriteBool(L"PowershareInternalPrio",m_bPowershareInternalPrio,L"eMule");//Morph - added by AndCyle, selective PS internal Prio
 
-	ini.WriteBool(_T("EnableHighProcess"), enableHighProcess,_T("eMule")); //MORPH - Added by IceCream, high process priority
+	ini.WriteBool(L"EnableHighProcess", enableHighProcess,L"eMule"); //MORPH - Added by IceCream, high process priority
 
-	ini.WriteBool(_T("EnableDownloadInRed"), enableDownloadInRed,_T("eMule")); //MORPH - Added by IceCream, show download in red
-	ini.WriteBool(_T("EnableDownloadInBold"), m_bShowActiveDownloadsBold,_T("eMule")); //MORPH - Added by SiRoB, show download in Bold
+	ini.WriteBool(L"EnableDownloadInRed", enableDownloadInRed,L"eMule"); //MORPH - Added by IceCream, show download in red
+	ini.WriteBool(L"EnableDownloadInBold", m_bShowActiveDownloadsBold,L"eMule"); //MORPH - Added by SiRoB, show download in Bold
         //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
-	ini.WriteBool(_T("FilterClientFailedDown"), m_bFilterClientFailedDown,_T("eMule")); 
+	ini.WriteBool(L"FilterClientFailedDown", m_bFilterClientFailedDown,L"eMule"); 
         //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
-	ini.WriteBool(_T("EnableAntiLeecher"), enableAntiLeecher,_T("eMule")); //MORPH - Added by IceCream, enable AntiLeecher
-	ini.WriteBool(_T("EnableAntiCreditHack"), enableAntiCreditHack,_T("eMule")); //MORPH - Added by IceCream, enable AntiCreditHack
-	ini.WriteInt(_T("CreditSystemMode"), creditSystemMode,_T("eMule"));// EastShare - Added by linekin, ES CreditSystem
-	ini.WriteBool(_T("EqualChanceForEachFile"), m_bEnableEqualChanceForEachFile, _T("eMule"));	//Morph - added by AndCycle, Equal Chance For Each File
-	ini.WriteBool(_T("FollowTheMajority"), m_bFollowTheMajority, _T("eMule")); // EastShare       - FollowTheMajority by AndCycle
-	ini.WriteInt(_T("FairPlay"), m_iFairPlay, _T("eMule")); //EastShare	- FairPlay by AndCycle
+	ini.WriteBool(L"EnableAntiLeecher", enableAntiLeecher,L"eMule"); //MORPH - Added by IceCream, enable AntiLeecher
+	ini.WriteBool(L"EnableAntiCreditHack", enableAntiCreditHack,L"eMule"); //MORPH - Added by IceCream, enable AntiCreditHack
+	ini.WriteInt(L"CreditSystemMode", creditSystemMode,L"eMule");// EastShare - Added by linekin, ES CreditSystem
+	ini.WriteBool(L"EqualChanceForEachFile", m_bEnableEqualChanceForEachFile, L"eMule");	//Morph - added by AndCycle, Equal Chance For Each File
+	ini.WriteBool(L"FollowTheMajority", m_bFollowTheMajority, L"eMule"); // EastShare       - FollowTheMajority by AndCycle
+	ini.WriteInt(L"FairPlay", m_iFairPlay, L"eMule"); //EastShare	- FairPlay by AndCycle
 
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
-	ini.WriteInt(_T("DownloadDataRateAverageTime"),max(1,m_iDownloadDataRateAverageTime/1000),_T("eMule"));
-	ini.WriteInt(_T("UPloadDataRateAverageTime"),max(1,m_iUploadDataRateAverageTime/1000),_T("eMule"));
+	ini.WriteInt(L"DownloadDataRateAverageTime",max(1,m_iDownloadDataRateAverageTime/1000),L"eMule");
+	ini.WriteInt(L"UPloadDataRateAverageTime",max(1,m_iUploadDataRateAverageTime/1000),L"eMule");
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	ini.WriteInt(_T("GlobalDataRateFriend"),globaldataratefriend,_T("eMule"));
-	ini.WriteInt(_T("MaxGlobalDataRateFriend"),maxglobaldataratefriend,_T("eMule"));
-	ini.WriteInt(_T("GlobalDataRatePowerShare"),globaldataratepowershare,_T("eMule"));
-	ini.WriteInt(_T("MaxGlobalDataRatePowerShare"),maxglobaldataratepowershare,_T("eMule"));
-	ini.WriteInt(_T("MaxClientDataRateFriend"),maxclientdataratefriend,_T("eMule"));
-	ini.WriteInt(_T("MaxClientDataRatePowerShare"),maxclientdataratepowershare,_T("eMule"));
-	ini.WriteInt(_T("MaxClientDataRate"),maxclientdatarate,_T("eMule"));
+	ini.WriteInt(L"GlobalDataRateFriend",globaldataratefriend,L"eMule");
+	ini.WriteInt(L"MaxGlobalDataRateFriend",maxglobaldataratefriend,L"eMule");
+	ini.WriteInt(L"GlobalDataRatePowerShare",globaldataratepowershare,L"eMule");
+	ini.WriteInt(L"MaxGlobalDataRatePowerShare",maxglobaldataratepowershare,L"eMule");
+	ini.WriteInt(L"MaxClientDataRateFriend",maxclientdataratefriend,L"eMule");
+	ini.WriteInt(L"MaxClientDataRatePowerShare",maxclientdataratepowershare,L"eMule");
+	ini.WriteInt(L"MaxClientDataRate",maxclientdatarate,L"eMule");
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	ini.WriteInt(_T("ReconnectOnLowIdRetries"),LowIdRetries,_T("eMule"));	// SLUGFILLER: lowIdRetry
+	ini.WriteInt(L"ReconnectOnLowIdRetries",LowIdRetries,L"eMule");	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	ini.WriteInt(_T("SpreadbarSetStatus"), m_iSpreadbarSetStatus, _T("eMule"));
+	ini.WriteInt(L"SpreadbarSetStatus", m_iSpreadbarSetStatus, L"eMule");
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
-	ini.WriteInt(_T("HideOvershares"),hideOS,_T("eMule"));
-	ini.WriteBool(_T("SelectiveShare"),selectiveShare,_T("eMule"));
+	ini.WriteInt(L"HideOvershares",hideOS,L"eMule");
+	ini.WriteBool(L"SelectiveShare",selectiveShare,L"eMule");
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	ini.WriteInt(_T("ShareOnlyTheNeed"),ShareOnlyTheNeed,_T("eMule"));
+	ini.WriteInt(L"ShareOnlyTheNeed",ShareOnlyTheNeed,L"eMule");
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
-	ini.WriteInt(_T("PowerShareLimit"),PowerShareLimit,_T("eMule"));
+	ini.WriteInt(L"PowerShareLimit",PowerShareLimit,L"eMule");
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, Show Permissions
-	ini.WriteInt(_T("ShowSharePermissions"),permissions,_T("eMule"));
+	ini.WriteInt(L"ShowSharePermissions",permissions,L"eMule");
 	//MORPH END   - Added by SiRoB, Show Permissions
 
     //MORPH START added by Yun.SF3: Ipfilter.dat update
-	ini.WriteBinary(_T("IPfilterVersion"), (LPBYTE)&m_IPfilterVersion, sizeof(m_IPfilterVersion),_T("eMule")); 
-	ini.WriteBool(_T("AutoUPdateIPFilter"),AutoUpdateIPFilter,_T("eMule"));
-	ini.WriteInt(_T("IPFilterVersionNum"), m_uIPFilterVersionNum,_T("eMule"));
+	ini.WriteBinary(L"IPfilterVersion", (LPBYTE)&m_IPfilterVersion, sizeof(m_IPfilterVersion),L"eMule"); 
+	ini.WriteBool(L"AutoUPdateIPFilter",AutoUpdateIPFilter,L"eMule");
+	ini.WriteInt(L"IPFilterVersionNum", m_uIPFilterVersionNum,L"eMule");
     //MORPH END added by Yun.SF3: Ipfilter.dat update
 
 	//Commander - Added: IP2Country Auto-updating - Start
-	ini.WriteBinary(_T("IP2CountryVersion"), (LPBYTE)&m_IP2CountryVersion, sizeof(m_IP2CountryVersion),_T("eMule")); 
-	ini.WriteBool(_T("AutoUPdateIP2Country"),AutoUpdateIP2Country,_T("eMule"));
+	ini.WriteBinary(L"IP2CountryVersion", (LPBYTE)&m_IP2CountryVersion, sizeof(m_IP2CountryVersion),L"eMule"); 
+	ini.WriteBool(L"AutoUPdateIP2Country",AutoUpdateIP2Country,L"eMule");
 	//Commander - Added: IP2Country Auto-updating - End
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
-	ini.WriteBinary(_T("FakesDatVersion"), (LPBYTE)&m_FakesDatVersion, sizeof(m_FakesDatVersion),_T("eMule")); 
-	ini.WriteBool(_T("UpdateFakeStartup"),UpdateFakeStartup,_T("eMule"));
+	ini.WriteBinary(L"FakesDatVersion", (LPBYTE)&m_FakesDatVersion, sizeof(m_FakesDatVersion),L"eMule"); 
+	ini.WriteBool(L"UpdateFakeStartup",UpdateFakeStartup,L"eMule");
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
-	ini.WriteString(_T("UpdateURLFakeList"),UpdateURLFakeList,_T("eMule"));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	ini.WriteString(_T("UpdateURLIPFilter"),UpdateURLIPFilter,_T("eMule"));//MORPH START added by Yun.SF3: Ipfilter.dat update
-    ini.WriteString(_T("UpdateURLIP2Country"),UpdateURLIP2Country,_T("eMule"));//Commander - Added: IP2Country auto-updating
+	ini.WriteString(L"UpdateURLFakeList",UpdateURLFakeList,L"eMule");		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	ini.WriteString(L"UpdateURLIPFilter",UpdateURLIPFilter,L"eMule");//MORPH START added by Yun.SF3: Ipfilter.dat update
+    ini.WriteString(L"UpdateURLIP2Country",UpdateURLIP2Country,L"eMule");//Commander - Added: IP2Country auto-updating
 
 	//EastShare Start - PreferShareAll by AndCycle
-	ini.WriteBool(_T("ShareAll"),shareall,_T("eMule"));	// SLUGFILLER: preferShareAll
+	ini.WriteBool(L"ShareAll",shareall,L"eMule");	// SLUGFILLER: preferShareAll
 	//EastShare END - PreferShareAll by AndCycle
 	// EastShare START - Added by TAHO, .met file control
-	ini.WriteInt(_T("KnownMetDays"), m_iKnownMetDays,_T("eMule"));
-	ini.WriteBool(_T("PartiallyPurgeOldKnownFiles"),m_bPartiallyPurgeOldKnownFiles,_T("eMule"));
-	ini.WriteBool(_T("CompletlyPurgeOldKnownFiles"),m_bCompletlyPurgeOldKnownFiles,_T("eMule"));
-	ini.WriteBool(_T("RemoveAichImmediatly"),m_bRemoveAichImmediatly,_T("eMule"));
+	ini.WriteInt(L"KnownMetDays", m_iKnownMetDays,L"eMule");
+	ini.WriteBool(L"PartiallyPurgeOldKnownFiles",m_bPartiallyPurgeOldKnownFiles,L"eMule");
+	ini.WriteBool(L"CompletlyPurgeOldKnownFiles",m_bCompletlyPurgeOldKnownFiles,L"eMule");
+	ini.WriteBool(L"RemoveAichImmediatly",m_bRemoveAichImmediatly,L"eMule");
 	// EastShare END - Added by TAHO, .met file control
 	//EastShare - Added by Pretender, Option for ChunkDots
-	ini.WriteInt(_T("EnableChunkDots"), m_bEnableChunkDots,_T("eMule"));
+	ini.WriteInt(L"EnableChunkDots", m_bEnableChunkDots,L"eMule");
 	//EastShare - Added by Pretender, Option for ChunkDots
 
 	//EastShare - added by AndCycle, IP to Country
-	ini.WriteInt(_T("IP2Country"), m_iIP2CountryNameMode,_T("eMule")); 
-	ini.WriteBool(_T("IP2CountryShowFlag"), m_bIP2CountryShowFlag,_T("eMule"));
+	ini.WriteInt(L"IP2Country", m_iIP2CountryNameMode,L"eMule"); 
+	ini.WriteBool(L"IP2CountryShowFlag", m_bIP2CountryShowFlag,L"eMule");
 	//EastShare - added by AndCycle, IP to Country
 
 	// khaos::categorymod+ Save Preferences
-	ini.WriteBool(_T("ValidSrcsOnly"), m_bValidSrcsOnly,_T("eMule"));
-	ini.WriteBool(_T("ShowCatName"), m_bShowCatNames,_T("eMule"));
-	ini.WriteBool(_T("ActiveCatDefault"), m_bActiveCatDefault,_T("eMule"));
-	ini.WriteBool(_T("SelCatOnAdd"), m_bSelCatOnAdd,_T("eMule"));
-	ini.WriteBool(_T("AutoSetResumeOrder"), m_bAutoSetResumeOrder,_T("eMule"));
-	ini.WriteBool(_T("SmallFileDLPush"), m_bSmallFileDLPush,_T("eMule"));
-	ini.WriteInt(_T("StartDLInEmptyCats"), m_iStartDLInEmptyCats,_T("eMule"));
-	ini.WriteBool(_T("UseAutoCat"), m_bUseAutoCat,_T("eMule"));
-	ini.WriteBool(_T("AddRemovedInc"), m_bAddRemovedInc,_T("eMule"));
+	ini.WriteBool(L"ValidSrcsOnly", m_bValidSrcsOnly,L"eMule");
+	ini.WriteBool(L"ShowCatName", m_bShowCatNames,L"eMule");
+	ini.WriteBool(L"ActiveCatDefault", m_bActiveCatDefault,L"eMule");
+	ini.WriteBool(L"SelCatOnAdd", m_bSelCatOnAdd,L"eMule");
+	ini.WriteBool(L"AutoSetResumeOrder", m_bAutoSetResumeOrder,L"eMule");
+	ini.WriteBool(L"SmallFileDLPush", m_bSmallFileDLPush,L"eMule");
+	ini.WriteInt(L"StartDLInEmptyCats", m_iStartDLInEmptyCats,L"eMule");
+	ini.WriteBool(L"UseAutoCat", m_bUseAutoCat,L"eMule");
+	ini.WriteBool(L"AddRemovedInc", m_bAddRemovedInc,L"eMule");
 	// khaos::categorymod-
 	// MORPH START leuk_he disable catcolor
-	ini.WriteBool(_T("DisableCatColors"), m_bDisableCatColors,_T("eMule"));
+	ini.WriteBool(L"DisableCatColors", m_bDisableCatColors,L"eMule");
 	// MORPH END   leuk_he disable catcolor
 	// khaos::kmod+
-	ini.WriteBool(_T("SmartA4AFSwapping"), m_bSmartA4AFSwapping,_T("eMule"));
-	ini.WriteInt(_T("AdvancedA4AFMode"), m_iAdvancedA4AFMode,_T("eMule"));
-	ini.WriteBool(_T("ShowA4AFDebugOutput"), m_bShowA4AFDebugOutput,_T("eMule"));
-	ini.WriteBool(_T("RespectMaxSources"), m_bRespectMaxSources,_T("eMule"));
-	ini.WriteBool(_T("UseSaveLoadSources"), m_bUseSaveLoadSources,_T("eMule"));
+	ini.WriteBool(L"SmartA4AFSwapping", m_bSmartA4AFSwapping,L"eMule");
+	ini.WriteInt(L"AdvancedA4AFMode", m_iAdvancedA4AFMode,L"eMule");
+	ini.WriteBool(L"ShowA4AFDebugOutput", m_bShowA4AFDebugOutput,L"eMule");
+	ini.WriteBool(L"RespectMaxSources", m_bRespectMaxSources,L"eMule");
+	ini.WriteBool(L"UseSaveLoadSources", m_bUseSaveLoadSources,L"eMule");
 	// khaos::categorymod-
 	// khaos::accuratetimerem+
-	ini.WriteInt(_T("TimeRemainingMode"), m_iTimeRemainingMode,_T("eMule"));
+	ini.WriteInt(L"TimeRemainingMode", m_iTimeRemainingMode,L"eMule");
 	// khaos::accuratetimerem-
 	//MORPH START - Added by SiRoB, ICS Optional
-	ini.WriteBool(_T("UseIntelligentChunkSelection"), m_bUseIntelligentChunkSelection,_T("eMule"));
+	ini.WriteBool(L"UseIntelligentChunkSelection", m_bUseIntelligentChunkSelection,L"eMule");
 	//MORPH END   - Added by SiRoB, ICS Optional
 	//MORPH START - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	ini.WriteBool(_T("SUCEnabled"),m_bSUCEnabled,_T("eMule"));
-	ini.WriteInt(_T("SUCLog"),m_bSUCLog,_T("eMule"));
-	ini.WriteInt(_T("SUCHigh"),m_iSUCHigh,_T("eMule"));
-	ini.WriteInt(_T("SUCLow"),m_iSUCLow,_T("eMule"));
-	ini.WriteInt(_T("SUCDrift"),m_iSUCDrift,_T("eMule"));
-	ini.WriteInt(_T("SUCPitch"),m_iSUCPitch,_T("eMule"));
+	ini.WriteBool(L"SUCEnabled",m_bSUCEnabled,L"eMule");
+	ini.WriteInt(L"SUCLog",m_bSUCLog,L"eMule");
+	ini.WriteInt(L"SUCHigh",m_iSUCHigh,L"eMule");
+	ini.WriteInt(L"SUCLow",m_iSUCLow,L"eMule");
+	ini.WriteInt(L"SUCDrift",m_iSUCDrift,L"eMule");
+	ini.WriteInt(L"SUCPitch",m_iSUCPitch,L"eMule");
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	ini.WriteInt(_T("MaxConnectionsSwitchBorder"),maxconnectionsswitchborder,_T("eMule"));//MORPH - Added by Yun.SF3, Auto DynUp changing
+	ini.WriteInt(L"MaxConnectionsSwitchBorder",maxconnectionsswitchborder,L"eMule");//MORPH - Added by Yun.SF3, Auto DynUp changing
 
-	ini.WriteBool(_T("IsPayBackFirst"),m_bPayBackFirst,_T("eMule"));//EastShare - added by AndCycle, Pay Back First
-	ini.WriteInt(_T("PayBackFirstLimit"),m_iPayBackFirstLimit,_T("eMule"));//MORPH - Added by SiRoB, Pay Back First Tweak
-	ini.WriteBool(_T("OnlyDownloadCompleteFiles"), m_bOnlyDownloadCompleteFiles,_T("eMule"));//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	ini.WriteBool(_T("SaveUploadQueueWaitTime"), m_bSaveUploadQueueWaitTime,_T("eMule"));//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	ini.WriteBool(_T("DateFileNameLog"), m_bDateFileNameLog,_T("eMule"));//Morph - added by AndCycle, Date File Name Log
-	ini.WriteBool(_T("DontRemoveSpareTrickleSlot"), m_bDontRemoveSpareTrickleSlot,_T("eMule"));//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-	ini.WriteBool(_T("UseDownloadOverhead"),m_bUseDownloadOverhead,_T("eMule"));//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
-	ini.WriteBool(_T("DisplayFunnyNick"), m_bFunnyNick,_T("eMule"));//MORPH - Added by SiRoB, Optionnal funnynick display
+	ini.WriteBool(L"IsPayBackFirst",m_bPayBackFirst,L"eMule");//EastShare - added by AndCycle, Pay Back First
+	ini.WriteInt(L"PayBackFirstLimit",m_iPayBackFirstLimit,L"eMule");//MORPH - Added by SiRoB, Pay Back First Tweak
+	ini.WriteBool(L"OnlyDownloadCompleteFiles", m_bOnlyDownloadCompleteFiles,L"eMule");//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+	ini.WriteBool(L"SaveUploadQueueWaitTime", m_bSaveUploadQueueWaitTime,L"eMule");//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	ini.WriteBool(L"DateFileNameLog", m_bDateFileNameLog,L"eMule");//Morph - added by AndCycle, Date File Name Log
+	ini.WriteBool(L"DontRemoveSpareTrickleSlot", m_bDontRemoveSpareTrickleSlot,L"eMule");//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	ini.WriteBool(L"UseDownloadOverhead",m_bUseDownloadOverhead,L"eMule");//Morph - added by AndCycle, Dont Remove Spare Trickle Slot
+	ini.WriteBool(L"DisplayFunnyNick", m_bFunnyNick,L"eMule");//MORPH - Added by SiRoB, Optionnal funnynick display
 	//EastShare Start - Added by Pretender, TBH-AutoBackup
-	ini.WriteBool(_T("AutoBackup"),autobackup,_T("eMule"));
-	ini.WriteBool(_T("AutoBackup2"),autobackup2,_T("eMule"));
+	ini.WriteBool(L"AutoBackup",autobackup,L"eMule");
+	ini.WriteBool(L"AutoBackup2",autobackup2,L"eMule");
 	//EastShare End - Added by Pretender, TBH-AutoBackup
 
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
-	ini.WriteString(_T("CommunityName"), m_sCommunityName,_T("eMule"));
-	ini.WriteBool (_T("ReportHashingFiles"),m_bReportHashingFiles,_T("eMule"));
-	ini.WriteBool (_T("LogFriendlistActivities"),m_bLogFriendlistActivities,_T("eMule"));
+	ini.WriteString(L"CommunityName", m_sCommunityName,L"eMule");
+	ini.WriteBool (L"ReportHashingFiles",m_bReportHashingFiles,L"eMule");
+	ini.WriteBool (L"LogFriendlistActivities",m_bLogFriendlistActivities,L"eMule");
 	// [end] Mighty Knife
 
 	// Mighty Knife: CRC32-Tag
-	ini.WriteBool (_T("DontAddCRC32ToFilename"),m_bDontAddCRCToFilename,_T("eMule"));
-	ini.WriteBool (_T("ForceCRC32Uppercase"),m_bCRC32ForceUppercase,_T("eMule"));
-	ini.WriteBool (_T("ForceCRC32Adding"),m_bCRC32ForceAdding,_T("eMule"));
+	ini.WriteBool (L"DontAddCRC32ToFilename",m_bDontAddCRCToFilename,L"eMule");
+	ini.WriteBool (L"ForceCRC32Uppercase",m_bCRC32ForceUppercase,L"eMule");
+	ini.WriteBool (L"ForceCRC32Adding",m_bCRC32ForceAdding,L"eMule");
 	CString temp;
 	// Encapsule these strings by "" because space characters are allowed at the
 	// beginning/end of the prefix/suffix !
-	temp.Format (_T("\"%s\""),m_sCRC32Prefix);
-	ini.WriteString(_T("LastCRC32Prefix"),temp,_T("eMule"));
-	temp.Format (_T("\"%s\""),m_sCRC32Suffix);
-	ini.WriteString(_T("LastCRC32Suffix"),temp,_T("eMule"));
+	temp.Format (L"\"%s\"",m_sCRC32Prefix);
+	ini.WriteString(L"LastCRC32Prefix",temp,L"eMule");
+	temp.Format (L"\"%s\"",m_sCRC32Suffix);
+	ini.WriteString(L"LastCRC32Suffix",temp,L"eMule");
 	// [end] Mighty Knife
 
 	// Mighty Knife: Simple cleanup options
-	ini.WriteInt (_T("SimpleCleanupOptions"),m_SimpleCleanupOptions);
+	ini.WriteInt (L"SimpleCleanupOptions",m_SimpleCleanupOptions);
 	// Enclose the strings with '"' before writing them to the file.
 	// These will be filtered if the string is read again
-	ini.WriteString (_T("SimpleCleanupSearch"),CString ('\"')+m_SimpleCleanupSearch+'\"');
-	ini.WriteString (_T("SimpleCleanupReplace"),CString ('\"')+m_SimpleCleanupReplace+'\"');
-	ini.WriteString (_T("SimpleCleanupSearchChars"),CString ('\"')+m_SimpleCleanupSearchChars+'\"');
-	ini.WriteString (_T("SimpleCleanupReplaceChars"),CString ('\"')+m_SimpleCleanupReplaceChars+'\"');
+	ini.WriteString (L"SimpleCleanupSearch",CString ('\"')+m_SimpleCleanupSearch+'\"');
+	ini.WriteString (L"SimpleCleanupReplace",CString ('\"')+m_SimpleCleanupReplace+'\"');
+	ini.WriteString (L"SimpleCleanupSearchChars",CString ('\"')+m_SimpleCleanupSearchChars+'\"');
+	ini.WriteString (L"SimpleCleanupReplaceChars",CString ('\"')+m_SimpleCleanupReplaceChars+'\"');
 	// [end] Mighty Knife
 
 	// Mighty Knife: Static server handling
-	ini.WriteBool (_T("DontRemoveStaticServers"),m_bDontRemoveStaticServers,_T("eMule"));
+	ini.WriteBool (L"DontRemoveStaticServers",m_bDontRemoveStaticServers,L"eMule");
 	// [end] Mighty Knife
 
 	//MORPH START - Added by SiRoB,  ZZ dynamic upload (USS)
-	ini.WriteBool(_T("USSLog"), m_bDynUpLog,_T("eMule"));
+	ini.WriteBool(L"USSLog", m_bDynUpLog,L"eMule");
 	//MORPH END    - Added by SiRoB,  ZZ dynamic upload (USS)
-	ini.WriteBool(_T("USSUDP_FORCE"), m_bUSSUDP,_T("eMule")); //MORPH - Added by SiRoB, USS UDP preferency
-	ini.WriteInt(_T("USSPingDataSize"), (int)m_sPingDataSize); // MORPH leuk_he ICMP ping datasize <> 0 setting
-    ini.WriteBool(_T("ShowClientPercentage"),m_bShowClientPercentage);  //Commander - Added: Client Percentage
+	ini.WriteBool(L"USSUDP_FORCE", m_bUSSUDP,L"eMule"); //MORPH - Added by SiRoB, USS UDP preferency
+	ini.WriteInt(L"USSPingDataSize", (int)m_sPingDataSize); // MORPH leuk_he ICMP ping datasize <> 0 setting
+    ini.WriteBool(L"ShowClientPercentage",m_bShowClientPercentage);  //Commander - Added: Client Percentage
 
     //Commander - Added: Invisible Mode [TPT] - Start
-    ini.WriteBool(_T("InvisibleMode"), m_bInvisibleMode);
-	ini.WriteInt(_T("InvisibleModeHKKey"), (int)m_cInvisibleModeHotKey);
-	ini.WriteInt(_T("InvisibleModeHKKeyModifier"), m_iInvisibleModeHotKeyModifier);
+    ini.WriteBool(L"InvisibleMode", m_bInvisibleMode);
+	ini.WriteInt(L"InvisibleModeHKKey", (int)m_cInvisibleModeHotKey);
+	ini.WriteInt(L"InvisibleModeHKKeyModifier", m_iInvisibleModeHotKeyModifier);
     //Commander - Added: Invisible Mode [TPT] - End        
 
 	//MORPH START - Added by Stulle, Global Source Limit
-	ini.WriteBool(_T("GlobalHL"), m_bGlobalHL);
-	ini.WriteInt(_T("GlobalHLvalue"), m_uGlobalHL);
+	ini.WriteBool(L"GlobalHL", m_bGlobalHL);
+	ini.WriteInt(L"GlobalHLvalue", m_uGlobalHL);
 	//MORPH END   - Added by Stulle, Global Source Limit
 
 	//MORPH START - Added, Downloaded History [Monki/Xman]
-	ini.WriteBool(_T("ShowSharedInHistory"), m_bHistoryShowShared);
+	ini.WriteBool(L"ShowSharedInHistory", m_bHistoryShowShared);
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	//MORPH START leuk_he:run as ntservice v1..
-	ini.WriteInt(_T("ServiceStartupMode"),m_iServiceStartupMode);
-	ini.WriteInt(_T("ServiceOptLvl"),m_iServiceOptLvl);
+	ini.WriteInt(L"ServiceStartupMode",m_iServiceStartupMode);
+	ini.WriteInt(L"ServiceOptLvl",m_iServiceOptLvl);
 	//MORPH END leuk_he:run as ntservice v1..
-	ini.WriteBool(_T("StaticIcon"),m_bStaticIcon); //MORPH - Added, Static Tray Icon
+	ini.WriteBool(L"StaticIcon",m_bStaticIcon); //MORPH - Added, Static Tray Icon
+	ini.WriteBool(L"FakeAlyzerIndications",m_bFakeAlyzerIndications); //MORPH - Added by Stulle, Fakealyzer [netfinity]
 	// ==> [MoNKi: -USS initial TTL-] - Stulle
-	ini.WriteInt(_T("USSInitialTTL"), m_iUSSinitialTTL, _T("StulleMule"));
+	ini.WriteInt(L"USSInitialTTL", m_iUSSinitialTTL, L"StulleMule");
 	// <== [MoNKi: -USS initial TTL-] - Stulle
 	//MORPH START - Added by Stulle, Adjustable NT Service Strings
 	ini.WriteString(L"ServiceName", m_strServiceName);
@@ -3181,7 +3184,7 @@ void CPreferences::LoadPreferences()
     // MORPH END  show less controls
 	versioncheckLastAutomatic=ini.GetInt(L"VersionCheckLastAutomatic",0);
 	//MORPH START - Added by SiRoB, New Version check
-	mversioncheckLastAutomatic=ini.GetInt(_T("MVersionCheckLastAutomatic"),0);
+	mversioncheckLastAutomatic=ini.GetInt(L"MVersionCheckLastAutomatic",0);
 	//MORPH END   - Added by SiRoB, New Version check
 	m_bDisableKnownClientList=ini.GetBool(L"DisableKnownClientList",false);
 	m_bDisableQueueList=ini.GetBool(L"DisableQueueList",false);
@@ -3263,201 +3266,201 @@ void CPreferences::LoadPreferences()
 		m_strSkinProfileDir = GetDefaultDirectory(EMULE_SKINDIR, true);
 
     //Commander - Added: Invisible Mode [TPT] - Start
-    m_bInvisibleMode = ini.GetBool(_T("InvisibleMode"), false);
-	m_iInvisibleModeHotKeyModifier = ini.GetInt(_T("InvisibleModeHKKeyModifier"), MOD_CONTROL | MOD_SHIFT | MOD_ALT);
-	m_cInvisibleModeHotKey = (char)ini.GetInt(_T("InvisibleModeHKKey"),(int)'E');
+    m_bInvisibleMode = ini.GetBool(L"InvisibleMode", false);
+	m_iInvisibleModeHotKeyModifier = ini.GetInt(L"InvisibleModeHKKeyModifier", MOD_CONTROL | MOD_SHIFT | MOD_ALT);
+	m_cInvisibleModeHotKey = (char)ini.GetInt(L"InvisibleModeHKKey",(int)'E');
     SetInvisibleMode(m_bInvisibleMode  ,m_iInvisibleModeHotKeyModifier ,m_cInvisibleModeHotKey );
 	//Commander - Added: Invisible Mode [TPT] - End
 
     //MORPH START - Added by Commander, ClientQueueProgressBar
-	m_bClientQueueProgressBar=ini.GetBool(_T("ClientQueueProgressBar"),false);
+	m_bClientQueueProgressBar=ini.GetBool(L"ClientQueueProgressBar",false);
     //MORPH END - Added by Commander, ClientQueueProgressBar
 	
 	//MORPH START - Added by Commander, FolderIcons
-	m_bShowFolderIcons=ini.GetBool(_T("ShowFolderIcons"),false);
+	m_bShowFolderIcons=ini.GetBool(L"ShowFolderIcons",false);
 	//MORPH END - Added by Commander, FolderIcons
 
-    m_bShowClientPercentage=ini.GetBool(_T("ShowClientPercentage"),false);  //Commander - Added: Client Percentage
-	enableDownloadInRed = ini.GetBool(_T("EnableDownloadInRed"), true); //MORPH - Added by IceCream, show download in red
-	m_bShowActiveDownloadsBold = ini.GetBool(_T("EnableDownloadInBold"), true); //MORPH - Added by SiRoB, show download in Bold
+    m_bShowClientPercentage=ini.GetBool(L"ShowClientPercentage",false);  //Commander - Added: Client Percentage
+	enableDownloadInRed = ini.GetBool(L"EnableDownloadInRed", true); //MORPH - Added by IceCream, show download in red
+	m_bShowActiveDownloadsBold = ini.GetBool(L"EnableDownloadInBold", true); //MORPH - Added by SiRoB, show download in Bold
         //MORPH START - Added by schnulli900, filter clients with failed downloads [Xman]
-	m_bFilterClientFailedDown = ini.GetBool(_T("FilterClientFailedDown"), true);
+	m_bFilterClientFailedDown = ini.GetBool(L"FilterClientFailedDown", true);
         //MORPH END   - Added by schnulli900, filter clients with failed downloads [Xman]
-	enableAntiLeecher = ini.GetBool(_T("EnableAntiLeecher"), true); //MORPH - Added by IceCream, enable AntiLeecher
-	enableAntiCreditHack = ini.GetBool(_T("EnableAntiCreditHack"), true); //MORPH - Added by IceCream, enable AntiCreditHack
-	enableHighProcess = ini.GetBool(_T("EnableHighProcess"), false); //MORPH - Added by IceCream, high process priority
-	creditSystemMode = ini.GetInt(_T("CreditSystemMode"), 0/*Official*/); // EastShare - Added by linekin, ES CreditSystem
+	enableAntiLeecher = ini.GetBool(L"EnableAntiLeecher", true); //MORPH - Added by IceCream, enable AntiLeecher
+	enableAntiCreditHack = ini.GetBool(L"EnableAntiCreditHack", true); //MORPH - Added by IceCream, enable AntiCreditHack
+	enableHighProcess = ini.GetBool(L"EnableHighProcess", false); //MORPH - Added by IceCream, high process priority
+	creditSystemMode = ini.GetInt(L"CreditSystemMode", 0/*Official*/); // EastShare - Added by linekin, ES CreditSystem
 	if (    (creditSystemMode <0 )  || (creditSystemMode >3)) // MORPH leuk_he only valid credit systems in morph
        creditSystemMode =0;  // MORPH leuk_he only valid credit systems in morph 
-	m_bEnableEqualChanceForEachFile = ini.GetBool(_T("EqualChanceForEachFile"), false);//Morph - added by AndCycle, Equal Chance For Each File
-	m_bFollowTheMajority = ini.GetBool(_T("FollowTheMajority"), false); // EastShare       - FollowTheMajority by AndCycle
-	m_iFairPlay = ini.GetInt(_T("FairPlay"), 0); //EastShare	- FairPlay by AndCycle
+	m_bEnableEqualChanceForEachFile = ini.GetBool(L"EqualChanceForEachFile", false);//Morph - added by AndCycle, Equal Chance For Each File
+	m_bFollowTheMajority = ini.GetBool(L"FollowTheMajority", false); // EastShare       - FollowTheMajority by AndCycle
+	m_iFairPlay = ini.GetInt(L"FairPlay", 0); //EastShare	- FairPlay by AndCycle
         
 	//MORPH START added by Yun.SF3: Ipfilter.dat update
-	m_uIPFilterVersionNum = ini.GetInt(_T("IPFilterVersionNum"),0); //MORPH - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+	m_uIPFilterVersionNum = ini.GetInt(L"IPFilterVersionNum",0); //MORPH - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
 	LPBYTE pst = NULL;
 	UINT usize = sizeof m_IPfilterVersion;
-	if (ini.GetBinary(_T("IPfilterVersion"), &pst, &usize) && usize == sizeof m_IPfilterVersion)
+	if (ini.GetBinary(L"IPfilterVersion", &pst, &usize) && usize == sizeof m_IPfilterVersion)
 		memcpy(&m_IPfilterVersion, pst, sizeof m_IPfilterVersion);
 	else
 		memset(&m_IPfilterVersion, 0, sizeof m_IPfilterVersion);
 	delete[] pst;
-	AutoUpdateIPFilter=ini.GetBool(_T("AutoUPdateIPFilter"),false); //added by milobac: Ipfilter.dat update
+	AutoUpdateIPFilter=ini.GetBool(L"AutoUPdateIPFilter",false); //added by milobac: Ipfilter.dat update
 	//MORPH END added by Yun.SF3: Ipfilter.dat update
     
     //Commander - Added: IP2Country Auto-updating - Start
 	pst = NULL;
 	usize = sizeof m_IP2CountryVersion;
-	if (ini.GetBinary(_T("IP2CountryVersion"), &pst, &usize) && usize == sizeof m_IP2CountryVersion)
+	if (ini.GetBinary(L"IP2CountryVersion", &pst, &usize) && usize == sizeof m_IP2CountryVersion)
 		memcpy(&m_IP2CountryVersion, pst, sizeof m_IP2CountryVersion);
 	else
 		memset(&m_IP2CountryVersion, 0, sizeof m_IP2CountryVersion);
 	delete[] pst;
-	AutoUpdateIP2Country=ini.GetBool(_T("AutoUPdateIP2Country"),false);
+	AutoUpdateIP2Country=ini.GetBool(L"AutoUPdateIP2Country",false);
     //Commander - Added: IP2Country Auto-updating - End
 
 	//MORPH START - Added by milobac, FakeCheck, FakeReport, Auto-updating
 	pst = NULL;
 	usize = sizeof m_FakesDatVersion;
-	if (ini.GetBinary(_T("FakesDatVersion"), &pst, &usize) && usize == sizeof m_FakesDatVersion)
+	if (ini.GetBinary(L"FakesDatVersion", &pst, &usize) && usize == sizeof m_FakesDatVersion)
 		memcpy(&m_FakesDatVersion, pst, sizeof m_FakesDatVersion);
 	else
 		memset(&m_FakesDatVersion, 0, sizeof m_FakesDatVersion);
 	delete[] pst;
-	UpdateFakeStartup=ini.GetBool(_T("UpdateFakeStartup"),false);
+	UpdateFakeStartup=ini.GetBool(L"UpdateFakeStartup",false);
 	//MORPH END - Added by milobac, FakeCheck, FakeReport, Auto-updating
 
 	//EastShare - added by AndCycle, IP to Country
-	m_iIP2CountryNameMode = ini.GetInt(_T("IP2Country"), IP2CountryName_DISABLE); 
-	m_bIP2CountryShowFlag = ini.GetBool(_T("IP2CountryShowFlag"), false);
+	m_iIP2CountryNameMode = ini.GetInt(L"IP2Country", IP2CountryName_DISABLE); 
+	m_bIP2CountryShowFlag = ini.GetBool(L"IP2CountryShowFlag", false);
 	//EastShare - added by AndCycle, IP to Country
 	
 	//MORPH START - Added by SiRoB, Datarate Average Time Management
-	m_iDownloadDataRateAverageTime = 1000*max(1, (uint8)ini.GetInt(_T("DownloadDataRateAverageTime"),30));
-	m_iUploadDataRateAverageTime = 1000*max(1, (uint8)ini.GetInt(_T("UploadDataRateAverageTime"),30));
+	m_iDownloadDataRateAverageTime = 1000*max(1, (uint8)ini.GetInt(L"DownloadDataRateAverageTime",30));
+	m_iUploadDataRateAverageTime = 1000*max(1, (uint8)ini.GetInt(L"UploadDataRateAverageTime",30));
 	//MORPH END   - Added by SiRoB, Datarate Average Time Management
 
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	globaldataratefriend=ini.GetInt(_T("GlobalDataRateFriend"),3);
-	maxglobaldataratefriend=ini.GetInt(_T("MaxGlobalDataRateFriend"),100);
-	globaldataratepowershare=ini.GetInt(_T("GlobalDataRatePowerShare"),0);
-	maxglobaldataratepowershare=ini.GetInt(_T("MaxGlobalDataRatePowerShare"),85); 
-	maxclientdataratefriend=ini.GetInt(_T("MaxClientDataRateFriend"),0);
-	maxclientdataratepowershare=ini.GetInt(_T("MaxClientDataRatePowerShare"),0);
-	maxclientdatarate=ini.GetInt(_T("MaxClientDataRate"),0);
+	globaldataratefriend=ini.GetInt(L"GlobalDataRateFriend",3);
+	maxglobaldataratefriend=ini.GetInt(L"MaxGlobalDataRateFriend",100);
+	globaldataratepowershare=ini.GetInt(L"GlobalDataRatePowerShare",0);
+	maxglobaldataratepowershare=ini.GetInt(L"MaxGlobalDataRatePowerShare",85); 
+	maxclientdataratefriend=ini.GetInt(L"MaxClientDataRateFriend",0);
+	maxclientdataratepowershare=ini.GetInt(L"MaxClientDataRatePowerShare",0);
+	maxclientdatarate=ini.GetInt(L"MaxClientDataRate",0);
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
     // ==> Slot Limit - Stulle
-	m_bSlotLimitThree = ini.GetBool(_T("SlotLimitThree"),true); // default
+	m_bSlotLimitThree = ini.GetBool(L"SlotLimitThree",true); // default
 	if (!m_bSlotLimitThree)
-		m_bSlotLimitNum = ini.GetBool(_T("SlotLimitNumB"),false);
+		m_bSlotLimitNum = ini.GetBool(L"SlotLimitNumB",false);
 	else
 		m_bSlotLimitNum = false;
-	int temp = ini.GetInt(_T("SlotLimitNum"),100);
+	int temp = ini.GetInt(L"SlotLimitNum",100);
 	m_iSlotLimitNum = (uint8)((temp >= 60 && temp <= 255) ? temp : 100);
 	// <== Slot Limit - Stulle
 
 
 	//MORPH START - Added by SiRoB, SLUGFILLER: lowIdRetry
-	LowIdRetries=ini.GetInt(_T("ReconnectOnLowIdRetries"),3);	// SLUGFILLER: lowIdRetry
+	LowIdRetries=ini.GetInt(L"ReconnectOnLowIdRetries",3);	// SLUGFILLER: lowIdRetry
 	//MORPH END   - Added by SiRoB, SLUGFILLER: lowIdRetry
 	//MORPH	Start	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
-	m_iSpreadbarSetStatus = ini.GetInt(_T("SpreadbarSetStatus"), 0);
+	m_iSpreadbarSetStatus = ini.GetInt(L"SpreadbarSetStatus", 0);
 	//MORPH	End	- Added by AndCycle, SLUGFILLER: Spreadbars - per file
 	//MORPH START - Added by SiRoB, SLUGFILLER: hideOS
-	hideOS=ini.GetInt(_T("HideOvershares"),0/*5*/);
-	selectiveShare=ini.GetBool(_T("SelectiveShare"),false);
+	hideOS=ini.GetInt(L"HideOvershares",0/*5*/);
+	selectiveShare=ini.GetBool(L"SelectiveShare",false);
 	//MORPH END   - Added by SiRoB, SLUGFILLER: hideOS
 	//MORPH START - Added by SiRoB, SHARE_ONLY_THE_NEED
-	ShareOnlyTheNeed=ini.GetInt(_T("ShareOnlyTheNeed"),false);
+	ShareOnlyTheNeed=ini.GetInt(L"ShareOnlyTheNeed",false);
 	//MORPH END   - Added by SiRoB, SHARE_ONLY_THE_NEED
 	//MORPH START - Added by SiRoB, POWERSHARE Limit
-	PowerShareLimit=ini.GetInt(_T("PowerShareLimit"),0);
+	PowerShareLimit=ini.GetInt(L"PowerShareLimit",0);
 	//MORPH END   - Added by SiRoB, POWERSHARE Limit
 	//MORPH START - Added by SiRoB, Show Permissions
-	permissions=ini.GetInt(_T("ShowSharePermissions"),0);
+	permissions=ini.GetInt(L"ShowSharePermissions",0);
 	//MORPH END   - Added by SiRoB, Show Permissions
 	//EastShare - Added by Pretender, TBH-AutoBackup
-	autobackup = ini.GetBool(_T("AutoBackup"),true);
-	autobackup2 = ini.GetBool(_T("AutoBackup2"),true);
+	autobackup = ini.GetBool(L"AutoBackup",true);
+	autobackup2 = ini.GetBool(L"AutoBackup2",true);
 	//EastShare - Added by Pretender, TBH-AutoBackup
-	infiniteQueue=ini.GetBool(_T("InfiniteQueue"),false);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
+	infiniteQueue=ini.GetBool(L"InfiniteQueue",false);	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
 	//MORPH START - Added by SiRoB, Avoid misusing of powersharing
-	m_iPowershareMode=ini.GetInt(_T("PowershareMode"),2);
+	m_iPowershareMode=ini.GetInt(L"PowershareMode",2);
 	//MORPH END   - Added by SiRoB, Avoid misusing of powersharing
-	m_bPowershareInternalPrio = ini.GetBool(_T("PowershareInternalPrio"),false);//Morph - added by AndCyle, selective PS internal Prio
+	m_bPowershareInternalPrio = ini.GetBool(L"PowershareInternalPrio",false);//Morph - added by AndCyle, selective PS internal Prio
 
 	//MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	m_bSUCEnabled = ini.GetBool(_T("SUCEnabled"),false);
-	m_bSUCLog =  ini.GetBool(_T("SUCLog"),false);
-	m_iSUCHigh = ini.GetInt(_T("SUCHigh"),900);
+	m_bSUCEnabled = ini.GetBool(L"SUCEnabled",false);
+	m_bSUCLog =  ini.GetBool(L"SUCLog",false);
+	m_iSUCHigh = ini.GetInt(L"SUCHigh",900);
 	m_iSUCHigh = min(max(m_iSUCHigh,350),1000);
-	m_iSUCLow = ini.GetInt(_T("SUCLow"),600);
+	m_iSUCLow = ini.GetInt(L"SUCLow",600);
 	m_iSUCLow = min(max(m_iSUCLow,350),m_iSUCHigh);
-	m_iSUCPitch = ini.GetInt(_T("SUCPitch"),3000);
+	m_iSUCPitch = ini.GetInt(L"SUCPitch",3000);
 	m_iSUCPitch = min(max(m_iSUCPitch,2500),10000);
-	m_iSUCDrift = ini.GetInt(_T("SUCDrift"),50);
+	m_iSUCDrift = ini.GetInt(L"SUCDrift",50);
 	m_iSUCDrift = min(max(m_iSUCDrift,0),100);
 	//MORPH END - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
-	maxconnectionsswitchborder = ini.GetInt(_T("MaxConnectionsSwitchBorder"),100);//MORPH - Added by Yun.SF3, Auto DynUp changing
+	maxconnectionsswitchborder = ini.GetInt(L"MaxConnectionsSwitchBorder",100);//MORPH - Added by Yun.SF3, Auto DynUp changing
 	maxconnectionsswitchborder = min(max(maxconnectionsswitchborder,50),60000);//MORPH - Added by Yun.SF3, Auto DynUp changing
 
 	//EastShare Start - PreferShareAll by AndCycle
-	shareall=ini.GetBool(_T("ShareAll"),true);	// SLUGFILLER: preferShareAll
+	shareall=ini.GetBool(L"ShareAll",true);	// SLUGFILLER: preferShareAll
 	//EastShare END - PreferShareAll by AndCycle
 	// EastShare START - Added by TAHO, .met file control
-	m_iKnownMetDays = ini.GetInt(_T("KnownMetDays"), 0);
-	m_bCompletlyPurgeOldKnownFiles = ini.GetBool(_T("CompletlyPurgeOldKnownFiles"),false);
+	m_iKnownMetDays = ini.GetInt(L"KnownMetDays", 0);
+	m_bCompletlyPurgeOldKnownFiles = ini.GetBool(L"CompletlyPurgeOldKnownFiles",false);
 	if(m_bPartiallyPurgeOldKnownFiles && m_bCompletlyPurgeOldKnownFiles)
 		m_bCompletlyPurgeOldKnownFiles = false;
-	m_bRemoveAichImmediatly = ini.GetBool(_T("RemoveAichImmediatly"),false);
+	m_bRemoveAichImmediatly = ini.GetBool(L"RemoveAichImmediatly",false);
 	// EastShare END - Added by TAHO, .met file control
 	//EastShare - Added by Pretender, Option for ChunkDots
-	m_bEnableChunkDots=ini.GetBool(_T("EnableChunkDots"),true);
+	m_bEnableChunkDots=ini.GetBool(L"EnableChunkDots",true);
 	//EastShare - Added by Pretender, Option for ChunkDots
 
-	isautodynupswitching=ini.GetBool(_T("AutoDynUpSwitching"),false);
-	m_bDateFileNameLog=ini.GetBool(_T("DateFileNameLog"), true);//Morph - added by AndCycle, Date File Name Log
-	m_bPayBackFirst=ini.GetBool(_T("IsPayBackFirst"),false);//EastShare - added by AndCycle, Pay Back First
-	m_iPayBackFirstLimit=(uint8)min(ini.GetInt(_T("PayBackFirstLimit"),10),255);//MORPH - Added by SiRoB, Pay Back First Tweak
-	m_bOnlyDownloadCompleteFiles = ini.GetBool(_T("OnlyDownloadCompleteFiles"), false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
-	m_bSaveUploadQueueWaitTime = ini.GetBool(_T("SaveUploadQueueWaitTime"), true );//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
-	m_bDontRemoveSpareTrickleSlot = ini.GetBool(_T("DontRemoveSpareTrickleSlot"), false);//Morph - added by AndCycle, Dont Remove Spare Trickle Slot --> default is now false because it disables slotfocus
-	m_bUseDownloadOverhead= ini.GetBool(_T("UseDownloadOverhead"), true); //Morph - leuk_he use download overhead in upload
+	isautodynupswitching=ini.GetBool(L"AutoDynUpSwitching",false);
+	m_bDateFileNameLog=ini.GetBool(L"DateFileNameLog", true);//Morph - added by AndCycle, Date File Name Log
+	m_bPayBackFirst=ini.GetBool(L"IsPayBackFirst",false);//EastShare - added by AndCycle, Pay Back First
+	m_iPayBackFirstLimit=(uint8)min(ini.GetInt(L"PayBackFirstLimit",10),255);//MORPH - Added by SiRoB, Pay Back First Tweak
+	m_bOnlyDownloadCompleteFiles = ini.GetBool(L"OnlyDownloadCompleteFiles", false);//EastShare - Added by AndCycle, Only download complete files v2.1 (shadow)
+	m_bSaveUploadQueueWaitTime = ini.GetBool(L"SaveUploadQueueWaitTime", true );//Morph - added by AndCycle, Save Upload Queue Wait Time (MSUQWT)
+	m_bDontRemoveSpareTrickleSlot = ini.GetBool(L"DontRemoveSpareTrickleSlot", false);//Morph - added by AndCycle, Dont Remove Spare Trickle Slot --> default is now false because it disables slotfocus
+	m_bUseDownloadOverhead= ini.GetBool(L"UseDownloadOverhead", true); //Morph - leuk_he use download overhead in upload
 	
-	m_bFunnyNick = ini.GetBool(_T("DisplayFunnyNick"), true);//MORPH - Added by SiRoB, Optionnal funnynick display
-	_stprintf(UpdateURLFakeList,_T("%s"),ini.GetString(_T("UpdateURLFakeList"),_T("http://emulepawcio.sourceforge.net/fakes.zip")));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
-	_stprintf(UpdateURLIPFilter,_T("%s"),ini.GetString(_T("UpdateURLIPFilter"),_T("http://downloads.sourceforge.net/scarangel/ipfilter.rar")));//MORPH START added by Yun.SF3: Ipfilter.dat update
-	_stprintf(UpdateURLIP2Country,_T("%s"),ini.GetString(_T("UpdateURLIP2Country"),_T("http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip")));//Commander - Added: IP2Country auto-updating
+	m_bFunnyNick = ini.GetBool(L"DisplayFunnyNick", true);//MORPH - Added by SiRoB, Optionnal funnynick display
+	_stprintf(UpdateURLFakeList,L"%s",ini.GetString(L"UpdateURLFakeList",L"http://emulepawcio.sourceforge.net/fakes.zip"));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
+	_stprintf(UpdateURLIPFilter,L"%s",ini.GetString(L"UpdateURLIPFilter",L"http://downloads.sourceforge.net/scarangel/ipfilter.rar"));//MORPH START added by Yun.SF3: Ipfilter.dat update
+	_stprintf(UpdateURLIP2Country,L"%s",ini.GetString(L"UpdateURLIP2Country",L"http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"));//Commander - Added: IP2Country auto-updating
 
 	// khaos::categorymod+ Load Preferences
-	m_bShowCatNames=ini.GetBool(_T("ShowCatName"),true);
-	m_bValidSrcsOnly=ini.GetBool(_T("ValidSrcsOnly"), false);
-	m_bActiveCatDefault=ini.GetBool(_T("ActiveCatDefault"), true);
-	m_bSelCatOnAdd=ini.GetBool(_T("SelCatOnAdd"), true);
-	m_bAutoSetResumeOrder=ini.GetBool(_T("AutoSetResumeOrder"), true);
-	m_bSmallFileDLPush=ini.GetBool(_T("SmallFileDLPush"), true);
-	m_iStartDLInEmptyCats=(uint8)ini.GetInt(_T("StartDLInEmptyCats"), 0);
-	m_bUseAutoCat=ini.GetBool(_T("UseAutoCat"), true);
-	m_bAddRemovedInc=ini.GetBool(_T("AddRemovedInc"),true);
+	m_bShowCatNames=ini.GetBool(L"ShowCatName",true);
+	m_bValidSrcsOnly=ini.GetBool(L"ValidSrcsOnly", false);
+	m_bActiveCatDefault=ini.GetBool(L"ActiveCatDefault", true);
+	m_bSelCatOnAdd=ini.GetBool(L"SelCatOnAdd", true);
+	m_bAutoSetResumeOrder=ini.GetBool(L"AutoSetResumeOrder", true);
+	m_bSmallFileDLPush=ini.GetBool(L"SmallFileDLPush", true);
+	m_iStartDLInEmptyCats=(uint8)ini.GetInt(L"StartDLInEmptyCats", 0);
+	m_bUseAutoCat=ini.GetBool(L"UseAutoCat", true);
+	m_bAddRemovedInc=ini.GetBool(L"AddRemovedInc",true);
 	// khaos::categorymod-
 	// MORPH START leuk_he disable catcolor
-	m_bDisableCatColors=ini.GetBool(_T("DisableCatColors"), false);
+	m_bDisableCatColors=ini.GetBool(L"DisableCatColors", false);
 	// MORPH END   leuk_he disable catcolor
 	
 	// khaos::kmod+
-	m_bUseSaveLoadSources=ini.GetBool(_T("UseSaveLoadSources"), true);
-	m_bRespectMaxSources=ini.GetBool(_T("RespectMaxSources"), true);
-	m_bSmartA4AFSwapping=ini.GetBool(_T("SmartA4AFSwapping"), true);
-	m_iAdvancedA4AFMode=(uint8)ini.GetInt(_T("AdvancedA4AFMode"), 1);
-	m_bShowA4AFDebugOutput=ini.GetBool(_T("ShowA4AFDebugOutput"), false);
+	m_bUseSaveLoadSources=ini.GetBool(L"UseSaveLoadSources", true);
+	m_bRespectMaxSources=ini.GetBool(L"RespectMaxSources", true);
+	m_bSmartA4AFSwapping=ini.GetBool(L"SmartA4AFSwapping", true);
+	m_iAdvancedA4AFMode=(uint8)ini.GetInt(L"AdvancedA4AFMode", 1);
+	m_bShowA4AFDebugOutput=ini.GetBool(L"ShowA4AFDebugOutput", false);
 	// khaos::accuratetimerem+
-	m_iTimeRemainingMode=(uint8)ini.GetInt(_T("TimeRemainingMode"), 0);
+	m_iTimeRemainingMode=(uint8)ini.GetInt(L"TimeRemainingMode", 0);
 	// khaos::accuratetimerem-
 	//MORPH START - Added by SiRoB, ICS Optional
-	m_bUseIntelligentChunkSelection=ini.GetBool(_T("UseIntelligentChunkSelection"), true);
+	m_bUseIntelligentChunkSelection=ini.GetBool(L"UseIntelligentChunkSelection", true);
 	//MORPH END   - Added by SiRoB, ICS Optional
 	//MORPH START - Added by SiRoB, XML News [O²]
-	enableNEWS=ini.GetBool(_T("ShowNews"), 1);
+	enableNEWS=ini.GetBool(L"ShowNews", 1);
 	//MORPH END   - Added by SiRoB, XML News [O²]
 
 	LPBYTE pData = NULL;
@@ -3480,7 +3483,7 @@ void CPreferences::LoadPreferences()
 	m_crLogWarning = ini.GetColRef(L"LogWarningColor", m_crLogWarning);
 	m_crLogSuccess = ini.GetColRef(L"LogSuccessColor", m_crLogSuccess);
 	//MORPH START - Added by SiRoB, Upload Splitting Class
-	m_crLogUSC = ini.GetColRef(_T("LogUploadSplittingClassColor"), m_crLogUSC);
+	m_crLogUSC = ini.GetColRef(L"LogUploadSplittingClassColor", m_crLogUSC);
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
 	if (statsAverageMinutes < 1)
@@ -3500,9 +3503,9 @@ void CPreferences::LoadPreferences()
 	// ZZ:UploadSpeedSense <--
 
 	//MORPH START - Added by SiRoB,  USS log flag
-	m_bDynUpLog = ini.GetBool(_T("USSLog"), true);
+	m_bDynUpLog = ini.GetBool(L"USSLog", true);
 	//MORPH END   - Added by SiRoB,  USS log flag
-	m_bUSSUDP = ini.GetBool(_T("USSUDP_FORCE"), false); //MORPH - Added by SiRoB, USS UDP preferency
+	m_bUSSUDP = ini.GetBool(L"USSUDP_FORCE", false); //MORPH - Added by SiRoB, USS UDP preferency
     m_sPingDataSize = (short)ini.GetInt(L"USSPingDataSize", 0); //MORPH leuk_he ICMP ping datasize <> 0 setting
 	m_bA4AFSaveCpu = ini.GetBool(L"A4AFSaveCpu", false); // ZZ:DownloadManager
     m_bHighresTimer = ini.GetBool(L"HighresTimer", false);
@@ -3540,36 +3543,36 @@ void CPreferences::LoadPreferences()
   m_bCryptLayerRequiredStrictServer = ini.GetBool(L"CryptLayerRequiredStrictServer",false); // MORPH lh require obfuscated server connection 
 
 	// Mighty Knife: Community visualization, Report hashing files, Log friendlist activities
-	_stprintf (m_sCommunityName,_T("%s"),ini.GetString (_T("CommunityName")));
-	m_bReportHashingFiles = ini.GetBool (_T("ReportHashingFiles"),true);
-	m_bLogFriendlistActivities = ini.GetBool (_T("LogFriendlistActivities"),true);
+	_stprintf (m_sCommunityName,L"%s",ini.GetString (L"CommunityName"));
+	m_bReportHashingFiles = ini.GetBool (L"ReportHashingFiles",true);
+	m_bLogFriendlistActivities = ini.GetBool (L"LogFriendlistActivities",true);
 	// [end] Mighty Knife
 
 	// Mighty Knife: CRC32-Tag
-	SetDontAddCRCToFilename (ini.GetBool (_T("DontAddCRC32ToFilename"),false));
-	SetCRC32ForceUppercase (ini.GetBool (_T("ForceCRC32Uppercase"),false));
-	SetCRC32ForceAdding (ini.GetBool (_T("ForceCRC32Adding"),false));
+	SetDontAddCRCToFilename (ini.GetBool (L"DontAddCRC32ToFilename",false));
+	SetCRC32ForceUppercase (ini.GetBool (L"ForceCRC32Uppercase",false));
+	SetCRC32ForceAdding (ini.GetBool (L"ForceCRC32Adding",false));
 	// From the prefix/suffix delete the leading/trailing "".
-	SetCRC32Prefix (ini.GetString(_T("LastCRC32Prefix"),_T("\" [\"")).Trim (_T("\"")));
-	SetCRC32Suffix (ini.GetString(_T("LastCRC32Suffix"),_T("\"]\"")).Trim (_T("\"")));
+	SetCRC32Prefix (ini.GetString(L"LastCRC32Prefix",L"\" [\"").Trim (L"\""));
+	SetCRC32Suffix (ini.GetString(L"LastCRC32Suffix",L"\"]\"").Trim (L"\""));
 	// [end] Mighty Knife
 
 	// Mighty Knife: Simple cleanup options
-	SetSimpleCleanupOptions (ini.GetInt (_T("SimpleCleanupOptions"),3));
-	SetSimpleCleanupSearch (ini.GetString (_T("SimpleCleanupSearch")));
-	SetSimpleCleanupReplace (ini.GetString (_T("SimpleCleanupReplace")));
+	SetSimpleCleanupOptions (ini.GetInt (L"SimpleCleanupOptions",3));
+	SetSimpleCleanupSearch (ini.GetString (L"SimpleCleanupSearch"));
+	SetSimpleCleanupReplace (ini.GetString (L"SimpleCleanupReplace"));
 	// Format of the preferences string for character replacement:
 	//      "str";"str";"str";...;"str"
 	// Every "str" in SimpleCleanupSearchChars corresponds to a "str"
 	// in SimpleCleanupReplaceChars at the same position.
-	SetSimpleCleanupSearchChars (ini.GetString (_T("SimpleCleanupSearchChars"),
-								 _T("\"\xE4\";\"\xF6\";\"\xFC\";\"\xC4\";\"\xD6\";\"\xDC\";\"\xDF\"")));/*ISO 8859-4*/
-	SetSimpleCleanupReplaceChars (ini.GetString (_T("SimpleCleanupReplaceChars"),
-								 _T("\"ae\";\"oe\";\"ue\";\"Ae\";\"Oe\";\"Ue\";\"ss\"")));
+	SetSimpleCleanupSearchChars (ini.GetString (L"SimpleCleanupSearchChars",
+								 L"\"\xE4\";\"\xF6\";\"\xFC\";\"\xC4\";\"\xD6\";\"\xDC\";\"\xDF\""));/*ISO 8859-4*/
+	SetSimpleCleanupReplaceChars (ini.GetString (L"SimpleCleanupReplaceChars",
+								 L"\"ae\";\"oe\";\"ue\";\"Ae\";\"Oe\";\"Ue\";\"ss\""));
 	// [end] Mighty Knife
 
 	// Mighty Knife: Static server handling
-	SetDontRemoveStaticServers (ini.GetBool (_T("DontRemoveStaticServers"),false));
+	SetDontRemoveStaticServers (ini.GetBool (L"DontRemoveStaticServers",false));
 	// [end] Mighty Knife
 
 	///////////////////////////////////////////////////////////////////////////
@@ -3633,7 +3636,7 @@ void CPreferences::LoadPreferences()
 		strIP = buffer2.Tokenize(L";", iPos);
 	}
 	//>>> [ionix] - iONiX::Advanced WebInterface Account Management
-	m_bIonixWebsrv=ini.GetBool(_T("UseIonixWebsrv"), false);
+	m_bIonixWebsrv=ini.GetBool(L"UseIonixWebsrv", false);
 	//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	
 
@@ -3667,26 +3670,26 @@ void CPreferences::LoadPreferences()
 #endif
 
     //MORPH START - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
-	m_bUPnPNat = ini.GetBool(_T("UPnPNAT"), false, _T("eMule"));
-	m_bUPnPNatWeb = ini.GetBool(_T("UPnPNAT_Web"), false, _T("eMule"));
-	m_bUPnPVerboseLog = ini.GetBool(_T("UPnPVerbose"), true, _T("eMule"));
-	m_iUPnPPort = (uint16)ini.GetInt(_T("UPnPPort"), 0, _T("eMule"));
-	m_bUPnPLimitToFirstConnection = ini.GetBool(_T("UPnPLimitToFirstConnection"), false, _T("eMule"));
-	m_bUPnPClearOnClose = ini.GetBool(_T("UPnPClearOnClose"), true, _T("eMule"));
-    SetUpnpDetect(ini.GetInt(_T("uPnPDetect"), UPNP_DO_AUTODETECT, _T("eMule"))); //leuk_he autodetect upnp in wizard
-    m_bUPnPForceUpdate=ini.GetBool(_T("UPnPForceUpdate"), false);
+	m_bUPnPNat = ini.GetBool(L"UPnPNAT", false, L"eMule");
+	m_bUPnPNatWeb = ini.GetBool(L"UPnPNAT_Web", false, L"eMule");
+	m_bUPnPVerboseLog = ini.GetBool(L"UPnPVerbose", true, L"eMule");
+	m_iUPnPPort = (uint16)ini.GetInt(L"UPnPPort", 0, L"eMule");
+	m_bUPnPLimitToFirstConnection = ini.GetBool(L"UPnPLimitToFirstConnection", false, L"eMule");
+	m_bUPnPClearOnClose = ini.GetBool(L"UPnPClearOnClose", true, L"eMule");
+    SetUpnpDetect(ini.GetInt(L"uPnPDetect", UPNP_DO_AUTODETECT, L"eMule")); //leuk_he autodetect upnp in wizard
+    m_bUPnPForceUpdate=ini.GetBool(L"UPnPForceUpdate", false);
 	//MORPH END   - Added by SiRoB, [MoNKi: -UPnPNAT Support-]
 
 	//MORPH START - Added by SiRoB, [MoNKi: -Random Ports-]
-	m_bRndPorts = ini.GetBool(_T("RandomPorts"), false, _T("eMule"));
-	m_iMinRndPort = (uint16)ini.GetInt(_T("MinRandomPort"), 3000, _T("eMule"));
-	m_iMaxRndPort = (uint16)ini.GetInt(_T("MaxRandomPort"), 0xFFFF, _T("eMule"));
-	m_bRndPortsResetOnRestart = ini.GetBool(_T("RandomPortsReset"), false, _T("eMule"));
-	m_iRndPortsSafeResetOnRestartTime = (uint16)ini.GetInt(_T("RandomPortsSafeResetOnRestartTime"), 0, _T("eMule"));
+	m_bRndPorts = ini.GetBool(L"RandomPorts", false, L"eMule");
+	m_iMinRndPort = (uint16)ini.GetInt(L"MinRandomPort", 3000, L"eMule");
+	m_iMaxRndPort = (uint16)ini.GetInt(L"MaxRandomPort", 0xFFFF, L"eMule");
+	m_bRndPortsResetOnRestart = ini.GetBool(L"RandomPortsReset", false, L"eMule");
+	m_iRndPortsSafeResetOnRestartTime = (uint16)ini.GetInt(L"RandomPortsSafeResetOnRestartTime", 0, L"eMule");
 	
-	uint16 iOldRndTCPPort = (uint16)ini.GetInt(_T("OldTCPRandomPort"), 0, _T("eMule"));
-	uint16 iOldRndUDPPort = (uint16)ini.GetInt(_T("OldUDPRandomPort"), 0, _T("eMule"));
-	__time64_t iRndPortsLastRun = ini.GetUInt64(_T("RandomPortsLastRun"), 0, _T("eMule"));
+	uint16 iOldRndTCPPort = (uint16)ini.GetInt(L"OldTCPRandomPort", 0, L"eMule");
+	uint16 iOldRndUDPPort = (uint16)ini.GetInt(L"OldUDPRandomPort", 0, L"eMule");
+	__time64_t iRndPortsLastRun = ini.GetUInt64(L"RandomPortsLastRun", 0, L"eMule");
 	
 	m_iCurrentTCPRndPort = 0;
 	m_iCurrentUDPRndPort = 0;
@@ -3707,34 +3710,34 @@ void CPreferences::LoadPreferences()
 
 	//MORPH START - Added by by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 	m_bICFSupportStatusChanged = false;
-	m_bICFSupport = ini.GetBool(_T("ICFSupport"), false, _T("eMule"));
-	m_bICFSupportFirstTime = ini.GetBool(_T("ICFSupportFirstTime"), true, _T("eMule"));
-	m_bICFSupportServerUDP = ini.GetBool(_T("ICFSupportServerUDP"), false, _T("eMule"));
+	m_bICFSupport = ini.GetBool(L"ICFSupport", false, L"eMule");
+	m_bICFSupportFirstTime = ini.GetBool(L"ICFSupportFirstTime", true, L"eMule");
+	m_bICFSupportServerUDP = ini.GetBool(L"ICFSupportServerUDP", false, L"eMule");
 	//MORPH END   - Added by by SiRoB, [MoNKi: -Improved ICS-Firewall support-]
 
 	///////////////////////////////////////////////////////////////////////////
 	// Section: "WapServer"
 	//
     //MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
-	m_bWapEnabled=ini.GetBool(_T("WapEnabled"), false, _T("WapServer"));
-	_stprintf(m_sWapTemplateFile,_T("%s"),ini.GetString(_T("WapTemplateFile"),_T("eMule_Wap.tmpl"),_T("WapServer")));
-	m_nWapPort=(uint16)ini.GetInt(_T("WapPort"), 80, _T("WapServer"));
-	m_iWapGraphWidth=ini.GetInt(_T("WapGraphWidth"), 60, _T("WapServer"));
-	m_iWapGraphHeight=ini.GetInt(_T("WapGraphHeight"), 45, _T("WapServer"));
-	m_bWapFilledGraphs=ini.GetBool(_T("WapFilledGraphs"), false, _T("WapServer"));
-	m_iWapMaxItemsInPages = ini.GetInt(_T("WapMaxItemsInPage"), 5, _T("WapServer"));
-	m_bWapSendImages=ini.GetBool(_T("WapSendImages"), true, _T("WapServer"));
-	m_bWapSendGraphs=ini.GetBool(_T("WapSendGraphs"), true, _T("WapServer"));
-	m_bWapSendProgressBars=ini.GetBool(_T("WapSendProgressBars"), true, _T("WapServer"));
-	m_bWapAllwaysSendBWImages=ini.GetBool(_T("WapSendBWImages"), true, _T("WapServer"));
-	m_iWapLogsSize=ini.GetInt(_T("WapLogsSize"), 1024, _T("WapServer"));
-	m_sWapPassword = ini.GetString(_T("WapPassword"), _T("WapServer"), _T("WapServer"));
-	m_sWapLowPassword = ini.GetString(_T("WapPasswordLow"), _T(""), _T("WapServer"));
-	m_bWapLowEnabled = ini.GetBool(_T("WapLowEnable"), false, _T("WapServer"));
+	m_bWapEnabled=ini.GetBool(L"WapEnabled", false, L"WapServer");
+	_stprintf(m_sWapTemplateFile,L"%s",ini.GetString(L"WapTemplateFile",L"eMule_Wap.tmpl",L"WapServer"));
+	m_nWapPort=(uint16)ini.GetInt(L"WapPort", 80, L"WapServer");
+	m_iWapGraphWidth=ini.GetInt(L"WapGraphWidth", 60, L"WapServer");
+	m_iWapGraphHeight=ini.GetInt(L"WapGraphHeight", 45, L"WapServer");
+	m_bWapFilledGraphs=ini.GetBool(L"WapFilledGraphs", false, L"WapServer");
+	m_iWapMaxItemsInPages = ini.GetInt(L"WapMaxItemsInPage", 5, L"WapServer");
+	m_bWapSendImages=ini.GetBool(L"WapSendImages", true, L"WapServer");
+	m_bWapSendGraphs=ini.GetBool(L"WapSendGraphs", true, L"WapServer");
+	m_bWapSendProgressBars=ini.GetBool(L"WapSendProgressBars", true, L"WapServer");
+	m_bWapAllwaysSendBWImages=ini.GetBool(L"WapSendBWImages", true, L"WapServer");
+	m_iWapLogsSize=ini.GetInt(L"WapLogsSize", 1024, L"WapServer");
+	m_sWapPassword = ini.GetString(L"WapPassword", L"WapServer", L"WapServer");
+	m_sWapLowPassword = ini.GetString(L"WapPasswordLow", L"", L"WapServer");
+	m_bWapLowEnabled = ini.GetBool(L"WapLowEnable", false, L"WapServer");
 	//MORPH END - Added by SiRoB / Commander, Wapserver [emulEspaña]
 
 	//MORPH START - Added by Stulle, Global Source Limit
-	m_bGlobalHL = ini.GetBool(_T("GlobalHL"), true, _T("eMule"));
+	m_bGlobalHL = ini.GetBool(L"GlobalHL", true, L"eMule");
 	uint32 m_uGlobalHlStandard = 3500;
 	if (maxGraphUploadRate != UNLIMITED)
 	{
@@ -3742,38 +3745,39 @@ void CPreferences::LoadPreferences()
 		m_uGlobalHlStandard = (uint32)((m_uGlobalHlStandard*400 - (m_uGlobalHlStandard-10.0f)*100)*0.65f);
 		m_uGlobalHlStandard = max(1000,min(m_uGlobalHlStandard,MAX_GSL));
 	}
-	uint32 m_uTemp = ini.GetInt(_T("GlobalHLvalue"), m_uGlobalHlStandard);
+	uint32 m_uTemp = ini.GetInt(L"GlobalHLvalue", m_uGlobalHlStandard);
 	m_uGlobalHL = (m_uTemp >= 1000 && m_uTemp <= MAX_GSL) ? m_uTemp : m_uGlobalHlStandard;
 	//MORPH END   - Added by Stulle, Global Source Limit
 
 	//MORPH START leuk_he Advanced official preferences.
-	bMiniMuleAutoClose=ini.GetBool(_T("MiniMuleAutoClose"),0,_T("eMule"));
-	iMiniMuleTransparency=min(ini.GetInt(_T("MiniMuleTransparency"),0),100); // range 0..100
-	bCreateCrashDump=ini.GetBool(_T("CreateCrashDump"),0);
-	bCheckComctl32 =ini.GetBool(_T("CheckComctl32"),true);
-	bCheckShell32=ini.GetBool(_T("CheckShell32"),true);
-	bIgnoreInstances=ini.GetBool(_T("IgnoreInstance"),false);
-	sNotifierMailEncryptCertName=ini.GetString(_T("NotifierMailEncryptCertName"),L"");
-	sMediaInfo_MediaInfoDllPath=ini.GetString(L"MediaInfo_MediaInfoDllPath",_T("MEDIAINFO.DLL")) ;
-	bMediaInfo_RIFF=ini.GetBool(_T("MediaInfo_RIFF"),true);
-	bMediaInfo_ID3LIB =ini.GetBool(_T("MediaInfo_ID3LIB"),true);
-	sInternetSecurityZone=ini.GetString(_T("InternetSecurityZone"),_T("Untrusted"));
+	bMiniMuleAutoClose=ini.GetBool(L"MiniMuleAutoClose",0,L"eMule");
+	iMiniMuleTransparency=min(ini.GetInt(L"MiniMuleTransparency",0),100); // range 0..100
+	bCreateCrashDump=ini.GetBool(L"CreateCrashDump",0);
+	bCheckComctl32 =ini.GetBool(L"CheckComctl32",true);
+	bCheckShell32=ini.GetBool(L"CheckShell32",true);
+	bIgnoreInstances=ini.GetBool(L"IgnoreInstance",false);
+	sNotifierMailEncryptCertName=ini.GetString(L"NotifierMailEncryptCertName",L"");
+	sMediaInfo_MediaInfoDllPath=ini.GetString(L"MediaInfo_MediaInfoDllPath",L"MEDIAINFO.DLL") ;
+	bMediaInfo_RIFF=ini.GetBool(L"MediaInfo_RIFF",true);
+	bMediaInfo_ID3LIB =ini.GetBool(L"MediaInfo_ID3LIB",true);
+	sInternetSecurityZone=ini.GetString(L"InternetSecurityZone",L"Untrusted");
     m_iDebugSearchResultDetailLevel = ini.GetInt(L"DebugSearchResultDetailLevel", 0); // NOTE: this variable is also initialized to 0 above! 
 	// MORPH END  leuk_he Advanced official preferences. 
 
 
  	//MORPH START - Added, Downloaded History [Monki/Xman]
-	m_bHistoryShowShared = ini.GetBool(_T("ShowSharedInHistory"), false);
+	m_bHistoryShowShared = ini.GetBool(L"ShowSharedInHistory", false);
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
    	m_bUseCompression=ini.GetBool(L"UseCompression",true);//Xman disable compression
 	//MORPH START leuk_he:run as ntservice v1..
 	GetServiceName();
 	m_iServiceOptLvl = ini.GetInt(L"ServiceOptLvl",SVC_SVR_OPT);
 	//MORPH END leuk_he:run as ntservice v1..
-	m_bStaticIcon=ini.GetBool(L"StaticIcon",false); //MORPH - Added, Static Tray Icon
+	m_bStaticIcon = ini.GetBool(L"StaticIcon",false); //MORPH - Added, Static Tray Icon
+	m_bFakeAlyzerIndications = ini.GetBool(L"FakeAlyzerIndications",false); //MORPH - Added by Stulle, Fakealyzer [netfinity]
 
 	// ==> [MoNKi: -USS initial TTL-] - Stulle
-	m_iUSSinitialTTL = (uint8)ini.GetInt(_T("USSInitialTTL"), 1,_T("StulleMule"));
+	m_iUSSinitialTTL = (uint8)ini.GetInt(L"USSInitialTTL", 1,L"StulleMule");
 	// <== [MoNKi: -USS initial TTL-] - Stulle
 	//MORPH START - Added by Stulle, Adjustable NT Service Strings
 	m_strServiceName = ini.GetString(L"ServiceName",NULL);
@@ -3822,7 +3826,7 @@ void CPreferences::SaveCats()
 	(void)_tremove(strCatIniFilePath);
 	CIni ini(strCatIniFilePath);
 	ini.WriteInt(L"Count", catMap.GetCount() - 1, L"General");
-	ini.WriteInt(_T("CategoryVersion"), 2, _T("General")); // khaos::categorymod+
+	ini.WriteInt(L"CategoryVersion", 2, L"General"); // khaos::categorymod+
 	for (int i = 0; i < catMap.GetCount(); i++)
 	{
 		CString strSection;
@@ -3837,7 +3841,7 @@ void CPreferences::SaveCats()
 		*/
 		ini.WriteInt(L"Color", catMap.GetAt(i)->color);
 		ini.WriteInt(L"a4afPriority", catMap.GetAt(i)->prio); // ZZ:DownloadManager
-		ini.WriteInt(_T("AdvancedA4AFMode"), catMap.GetAt(i)->iAdvA4AFMode);
+		ini.WriteInt(L"AdvancedA4AFMode", catMap.GetAt(i)->iAdvA4AFMode);
 		/*Removed by SiRoB
 		ini.WriteStringUTF8(L"AutoCat", catMap.GetAt(i)->autocat);
 		ini.WriteInt(L"Filter", catMap.GetAt(i)->filter);
@@ -3847,36 +3851,36 @@ void CPreferences::SaveCats()
 		ini.WriteBool(L"downloadInAlphabeticalOrder", catMap.GetAt(i)->downloadInAlphabeticalOrder!=FALSE);
 		// removed care4all
 		// khaos::categorymod+ Save View Filters
-		ini.WriteInt(_T("vfFromCats"), catMap.GetAt(i)->viewfilters.nFromCats);
-		ini.WriteBool(_T("vfVideo"), catMap.GetAt(i)->viewfilters.bVideo!=FALSE);
-		ini.WriteBool(_T("vfAudio"), catMap.GetAt(i)->viewfilters.bAudio!=FALSE);
-		ini.WriteBool(_T("vfArchives"), catMap.GetAt(i)->viewfilters.bArchives!=FALSE);
-		ini.WriteBool(_T("vfImages"), catMap.GetAt(i)->viewfilters.bImages!=FALSE);
-		ini.WriteBool(_T("vfWaiting"), catMap.GetAt(i)->viewfilters.bWaiting!=FALSE);
-		ini.WriteBool(_T("vfTransferring"), catMap.GetAt(i)->viewfilters.bTransferring!=FALSE);
-		ini.WriteBool(_T("vfPaused"), catMap.GetAt(i)->viewfilters.bPaused!=FALSE);
-		ini.WriteBool(_T("vfStopped"), catMap.GetAt(i)->viewfilters.bStopped!=FALSE);
-		ini.WriteBool(_T("vfComplete"), catMap.GetAt(i)->viewfilters.bComplete!=FALSE);
-		ini.WriteBool(_T("vfHashing"), catMap.GetAt(i)->viewfilters.bHashing!=FALSE);
-		ini.WriteBool(_T("vfErrorUnknown"), catMap.GetAt(i)->viewfilters.bErrorUnknown!=FALSE);
-		ini.WriteBool(_T("vfCompleting"), catMap.GetAt(i)->viewfilters.bCompleting!=FALSE);
-		ini.WriteBool(_T("vfSeenComplet"), catMap.GetAt(i)->viewfilters.bSeenComplet!=FALSE); //MORPH - Added by SiRoB, Seen Complet filter
-		ini.WriteUInt64(_T("vfFSizeMin"), catMap.GetAt(i)->viewfilters.nFSizeMin);
-		ini.WriteUInt64(_T("vfFSizeMax"), catMap.GetAt(i)->viewfilters.nFSizeMax);
-		ini.WriteUInt64(_T("vfRSizeMin"), catMap.GetAt(i)->viewfilters.nRSizeMin);
-		ini.WriteUInt64(_T("vfRSizeMax"), catMap.GetAt(i)->viewfilters.nRSizeMax);
-		ini.WriteInt(_T("vfTimeRemainingMin"), catMap.GetAt(i)->viewfilters.nTimeRemainingMin);
-		ini.WriteInt(_T("vfTimeRemainingMax"), catMap.GetAt(i)->viewfilters.nTimeRemainingMax);
-		ini.WriteInt(_T("vfSourceCountMin"), catMap.GetAt(i)->viewfilters.nSourceCountMin);
-		ini.WriteInt(_T("vfSourceCountMax"), catMap.GetAt(i)->viewfilters.nSourceCountMax);
-		ini.WriteInt(_T("vfAvailSourceCountMin"), catMap.GetAt(i)->viewfilters.nAvailSourceCountMin);
-		ini.WriteInt(_T("vfAvailSourceCountMax"), catMap.GetAt(i)->viewfilters.nAvailSourceCountMax);
-		ini.WriteString(_T("vfAdvancedFilterMask"), catMap.GetAt(i)->viewfilters.sAdvancedFilterMask);
+		ini.WriteInt(L"vfFromCats", catMap.GetAt(i)->viewfilters.nFromCats);
+		ini.WriteBool(L"vfVideo", catMap.GetAt(i)->viewfilters.bVideo!=FALSE);
+		ini.WriteBool(L"vfAudio", catMap.GetAt(i)->viewfilters.bAudio!=FALSE);
+		ini.WriteBool(L"vfArchives", catMap.GetAt(i)->viewfilters.bArchives!=FALSE);
+		ini.WriteBool(L"vfImages", catMap.GetAt(i)->viewfilters.bImages!=FALSE);
+		ini.WriteBool(L"vfWaiting", catMap.GetAt(i)->viewfilters.bWaiting!=FALSE);
+		ini.WriteBool(L"vfTransferring", catMap.GetAt(i)->viewfilters.bTransferring!=FALSE);
+		ini.WriteBool(L"vfPaused", catMap.GetAt(i)->viewfilters.bPaused!=FALSE);
+		ini.WriteBool(L"vfStopped", catMap.GetAt(i)->viewfilters.bStopped!=FALSE);
+		ini.WriteBool(L"vfComplete", catMap.GetAt(i)->viewfilters.bComplete!=FALSE);
+		ini.WriteBool(L"vfHashing", catMap.GetAt(i)->viewfilters.bHashing!=FALSE);
+		ini.WriteBool(L"vfErrorUnknown", catMap.GetAt(i)->viewfilters.bErrorUnknown!=FALSE);
+		ini.WriteBool(L"vfCompleting", catMap.GetAt(i)->viewfilters.bCompleting!=FALSE);
+		ini.WriteBool(L"vfSeenComplet", catMap.GetAt(i)->viewfilters.bSeenComplet!=FALSE); //MORPH - Added by SiRoB, Seen Complet filter
+		ini.WriteUInt64(L"vfFSizeMin", catMap.GetAt(i)->viewfilters.nFSizeMin);
+		ini.WriteUInt64(L"vfFSizeMax", catMap.GetAt(i)->viewfilters.nFSizeMax);
+		ini.WriteUInt64(L"vfRSizeMin", catMap.GetAt(i)->viewfilters.nRSizeMin);
+		ini.WriteUInt64(L"vfRSizeMax", catMap.GetAt(i)->viewfilters.nRSizeMax);
+		ini.WriteInt(L"vfTimeRemainingMin", catMap.GetAt(i)->viewfilters.nTimeRemainingMin);
+		ini.WriteInt(L"vfTimeRemainingMax", catMap.GetAt(i)->viewfilters.nTimeRemainingMax);
+		ini.WriteInt(L"vfSourceCountMin", catMap.GetAt(i)->viewfilters.nSourceCountMin);
+		ini.WriteInt(L"vfSourceCountMax", catMap.GetAt(i)->viewfilters.nSourceCountMax);
+		ini.WriteInt(L"vfAvailSourceCountMin", catMap.GetAt(i)->viewfilters.nAvailSourceCountMin);
+		ini.WriteInt(L"vfAvailSourceCountMax", catMap.GetAt(i)->viewfilters.nAvailSourceCountMax);
+		ini.WriteString(L"vfAdvancedFilterMask", catMap.GetAt(i)->viewfilters.sAdvancedFilterMask);
 		// Save Selection Criteria
-		ini.WriteBool(_T("scFileSize"), catMap.GetAt(i)->selectioncriteria.bFileSize!=FALSE);
-		ini.WriteBool(_T("scAdvancedFilterMask"), catMap.GetAt(i)->selectioncriteria.bAdvancedFilterMask!=FALSE);
+		ini.WriteBool(L"scFileSize", catMap.GetAt(i)->selectioncriteria.bFileSize!=FALSE);
+		ini.WriteBool(L"scAdvancedFilterMask", catMap.GetAt(i)->selectioncriteria.bAdvancedFilterMask!=FALSE);
 		// khaos::categorymod-
-		ini.WriteBool(_T("ResumeFileOnlyInSameCat"), catMap.GetAt(i)->bResumeFileOnlyInSameCat!=FALSE); //MORPH - Added by SiRoB, Resume file only in the same category
+		ini.WriteBool(L"ResumeFileOnlyInSameCat", catMap.GetAt(i)->bResumeFileOnlyInSameCat!=FALSE); //MORPH - Added by SiRoB, Resume file only in the same category
 	}
 }
 // khaos::categorymod+
@@ -3896,7 +3900,7 @@ void CPreferences::LoadCats()
 	else
 	{
 		//ini.SetFileName(strCatIniFilePath);
-		if (ini.GetInt(_T("CategoryVersion"), 0, L"General") == 0)
+		if (ini.GetInt(L"CategoryVersion", 0, L"General") == 0)
 			bCreateDefault = true;
 	}
 
@@ -3904,11 +3908,11 @@ void CPreferences::LoadCats()
 	{
 		Category_Struct* defcat=new Category_Struct;
 
-		defcat->strTitle=_T("Default");
+		defcat->strTitle=L"Default";
     	defcat->prio=PR_NORMAL; // ZZ:DownloadManager
 		defcat->iAdvA4AFMode = 0;
 		defcat->strIncomingPath = GetMuleDirectory(EMULE_INCOMINGDIR);
-		defcat->strComment = _T("The default category.  It can't be merged or deleted.");
+		defcat->strComment = L"The default category.  It can't be merged or deleted.";
 		defcat->color = 0;
 		defcat->viewfilters.bArchives = true;
 		defcat->viewfilters.bAudio = true;
@@ -3966,53 +3970,53 @@ void CPreferences::LoadCats()
 		newcat->filterNeg = ini.GetBool(L"FilterNegator", FALSE);
 		newcat->ac_regexpeval = ini.GetBool(L"AutoCatAsRegularExpression", FALSE);
 		newcat->care4all = ini.GetBool(L"Care4All", FALSE);
-		newcat->regexp = ini.GetStringUTF8(L"RegularExpression");
-		newcat->autocat = ini.GetStringUTF8(L"Autocat");
+		newcat->regexp = ini.GetStringUTF8(L"RegularExpression";
+		newcat->autocat = ini.GetStringUTF8(L"Autocat";
 		*/
 		newcat->downloadInAlphabeticalOrder = ini.GetBool(L"downloadInAlphabeticalOrder", FALSE); // ZZ:DownloadManager
 		newcat->color = ini.GetInt(L"Color", (DWORD)-1 );
 
 		// khaos::kmod+ Category Advanced A4AF Mode
-		newcat->iAdvA4AFMode = ini.GetInt(_T("AdvancedA4AFMode"), 0);
+		newcat->iAdvA4AFMode = ini.GetInt(L"AdvancedA4AFMode", 0);
 		// khaos::kmod-
 		// Load View Filters
-		newcat->viewfilters.nFromCats = ini.GetInt(_T("vfFromCats"), i==0?0:2);
+		newcat->viewfilters.nFromCats = ini.GetInt(L"vfFromCats", i==0?0:2);
 		newcat->viewfilters.bSuspendFilters = false;
-		newcat->viewfilters.bVideo = ini.GetBool(_T("vfVideo"), true);
-		newcat->viewfilters.bAudio = ini.GetBool(_T("vfAudio"), true);
-		newcat->viewfilters.bArchives = ini.GetBool(_T("vfArchives"), true);
-		newcat->viewfilters.bImages = ini.GetBool(_T("vfImages"), true);
-		newcat->viewfilters.bWaiting = ini.GetBool(_T("vfWaiting"), true);
-		newcat->viewfilters.bTransferring = ini.GetBool(_T("vfTransferring"), true);
-		newcat->viewfilters.bPaused = ini.GetBool(_T("vfPaused"), true);
-		newcat->viewfilters.bStopped = ini.GetBool(_T("vfStopped"), true);
-		newcat->viewfilters.bComplete = ini.GetBool(_T("vfComplete"), true);
-		newcat->viewfilters.bHashing = ini.GetBool(_T("vfHashing"), true);
-		newcat->viewfilters.bErrorUnknown = ini.GetBool(_T("vfErrorUnknown"), true);
-		newcat->viewfilters.bCompleting = ini.GetBool(_T("vfCompleting"), true);
-		newcat->viewfilters.bSeenComplet = ini.GetBool(_T("vfSeenComplet"), true); //MORPH - Added by SiRoB, Seen Complet filter
-		newcat->viewfilters.nFSizeMin = ini.GetInt(_T("vfFSizeMin"), 0);
-		newcat->viewfilters.nFSizeMax = ini.GetInt(_T("vfFSizeMax"), 0);
-		newcat->viewfilters.nRSizeMin = ini.GetInt(_T("vfRSizeMin"), 0);
-		newcat->viewfilters.nRSizeMax = ini.GetInt(_T("vfRSizeMax"), 0);
-		newcat->viewfilters.nTimeRemainingMin = ini.GetInt(_T("vfTimeRemainingMin"), 0);
-		newcat->viewfilters.nTimeRemainingMax = ini.GetInt(_T("vfTimeRemainingMax"), 0);
-		newcat->viewfilters.nSourceCountMin = ini.GetInt(_T("vfSourceCountMin"), 0);
-		newcat->viewfilters.nSourceCountMax = ini.GetInt(_T("vfSourceCountMax"), 0);
-		newcat->viewfilters.nAvailSourceCountMin = ini.GetInt(_T("vfAvailSourceCountMin"), 0);
-		newcat->viewfilters.nAvailSourceCountMax = ini.GetInt(_T("vfAvailSourceCountMax"), 0);
-		newcat->viewfilters.sAdvancedFilterMask = ini.GetString(_T("vfAdvancedFilterMask"), _T(""));
+		newcat->viewfilters.bVideo = ini.GetBool(L"vfVideo", true);
+		newcat->viewfilters.bAudio = ini.GetBool(L"vfAudio", true);
+		newcat->viewfilters.bArchives = ini.GetBool(L"vfArchives", true);
+		newcat->viewfilters.bImages = ini.GetBool(L"vfImages", true);
+		newcat->viewfilters.bWaiting = ini.GetBool(L"vfWaiting", true);
+		newcat->viewfilters.bTransferring = ini.GetBool(L"vfTransferring", true);
+		newcat->viewfilters.bPaused = ini.GetBool(L"vfPaused", true);
+		newcat->viewfilters.bStopped = ini.GetBool(L"vfStopped", true);
+		newcat->viewfilters.bComplete = ini.GetBool(L"vfComplete", true);
+		newcat->viewfilters.bHashing = ini.GetBool(L"vfHashing", true);
+		newcat->viewfilters.bErrorUnknown = ini.GetBool(L"vfErrorUnknown", true);
+		newcat->viewfilters.bCompleting = ini.GetBool(L"vfCompleting", true);
+		newcat->viewfilters.bSeenComplet = ini.GetBool(L"vfSeenComplet", true); //MORPH - Added by SiRoB, Seen Complet filter
+		newcat->viewfilters.nFSizeMin = ini.GetInt(L"vfFSizeMin", 0);
+		newcat->viewfilters.nFSizeMax = ini.GetInt(L"vfFSizeMax", 0);
+		newcat->viewfilters.nRSizeMin = ini.GetInt(L"vfRSizeMin", 0);
+		newcat->viewfilters.nRSizeMax = ini.GetInt(L"vfRSizeMax", 0);
+		newcat->viewfilters.nTimeRemainingMin = ini.GetInt(L"vfTimeRemainingMin", 0);
+		newcat->viewfilters.nTimeRemainingMax = ini.GetInt(L"vfTimeRemainingMax", 0);
+		newcat->viewfilters.nSourceCountMin = ini.GetInt(L"vfSourceCountMin", 0);
+		newcat->viewfilters.nSourceCountMax = ini.GetInt(L"vfSourceCountMax", 0);
+		newcat->viewfilters.nAvailSourceCountMin = ini.GetInt(L"vfAvailSourceCountMin", 0);
+		newcat->viewfilters.nAvailSourceCountMax = ini.GetInt(L"vfAvailSourceCountMax", 0);
+		newcat->viewfilters.sAdvancedFilterMask = ini.GetString(L"vfAdvancedFilterMask", L"");
 		// Load Selection Criteria
-		newcat->selectioncriteria.bFileSize = ini.GetBool(_T("scFileSize"), true);
-		newcat->selectioncriteria.bAdvancedFilterMask = ini.GetBool(_T("scAdvancedFilterMask"), true);
-		newcat->bResumeFileOnlyInSameCat = ini.GetBool(_T("ResumeFileOnlyInSameCat"), false); //MORPH - Added by SiRoB, Resume file only in the same category
+		newcat->selectioncriteria.bFileSize = ini.GetBool(L"scFileSize", true);
+		newcat->selectioncriteria.bAdvancedFilterMask = ini.GetBool(L"scAdvancedFilterMask", true);
+		newcat->bResumeFileOnlyInSameCat = ini.GetBool(L"ResumeFileOnlyInSameCat", false); //MORPH - Added by SiRoB, Resume file only in the same category
 
 		AddCat(newcat);
 		if (!PathFileExists(newcat->strIncomingPath))
 			//MORPH START: test if directory was succesfuly create else yell in log
 			if (::CreateDirectory(newcat->strIncomingPath, 0)!= 0 ){
 				newcat->strIncomingPath = GetMuleDirectory(EMULE_INCOMINGDIR); // MORPH
-			    theApp.QueueLogLine(true,_T("incoming directory  %s of category %s not found ") , newcat->strIncomingPath, newcat->strTitle );  // Note that  queue need to be used because logwindow is not initialized (logged time is wrong)
+			    theApp.QueueLogLine(true,L"incoming directory  %s of category %s not found " , newcat->strIncomingPath, newcat->strTitle );  // Note that  queue need to be used because logwindow is not initialized (logged time is wrong)
 			}
 			//MORPH	END
 	}
