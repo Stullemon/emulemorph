@@ -69,6 +69,7 @@ CPPgMorphShare::CPPgMorphShare()
 	m_htiDisplay = NULL;
 	m_htiStaticIcon = NULL; //MORPH - Added, Static Tray Icon
 	m_htiShowLessControls = NULL; // show less controls
+	m_htiFakeAlyzerIndications = NULL; //MORPH - Added by Stulle, Fakealyzer [netfinity]
 }
 
 CPPgMorphShare::~CPPgMorphShare()
@@ -143,6 +144,7 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 		// MORPH START show less controls
 		m_htiShowLessControls= m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MORPHWIZ_SHOWLESS),m_htiDisplay, m_bShowLessControls);
 		// MORPH END  show less controls
+		m_htiFakeAlyzerIndications = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_FAKEALYZER_INDICATIONS),m_htiDisplay, m_bFakeAlyzerIndications); //MORPH - Added by Stulle, Fakealyzer [netfinity]
 
 
 		m_ctrlTreeOptions.Expand(m_htiSFM, TVE_EXPAND);
@@ -184,9 +186,9 @@ void CPPgMorphShare::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiFolderIcons, m_bFolderIcons);
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiStaticIcon, m_bStaticIcon); //MORPH - Added, Static Tray Icon
 	// MORPH START show less controls
-	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowLessControls, m_bShowLessControls); //MORPH - Added, Static Tray Icon
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiShowLessControls, m_bShowLessControls);
 	// MORPH END  show less controls
-
+	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiFakeAlyzerIndications, m_bFakeAlyzerIndications); //MORPH - Added by Stulle, Fakealyzer [netfinity]
 }
 
 
@@ -209,6 +211,7 @@ BOOL CPPgMorphShare::OnInitDialog()
     m_bShowLessControls = thePrefs.IsLessControls();
 	m_bOverideBySetExtControls = false;
 	// MORPH END  show less controls
+	m_bFakeAlyzerIndications = thePrefs.GetFakeAlyzerIndications(); //MORPH - Added by Stulle, Fakealyzer [netfinity]
 
 	CPropertyPage::OnInitDialog();
 	//InitTooltips(); //leuk_he tooltipped
@@ -284,6 +287,7 @@ BOOL CPPgMorphShare::OnApply()
 	    thePrefs.SetLessControls(m_bShowLessControls);
 	m_bOverideBySetExtControls = false; // we just want to override once
 	//MORPH END  show less controls
+	thePrefs.m_bFakeAlyzerIndications = m_bFakeAlyzerIndications; //MORPH - Added by Stulle, Fakealyzer [netfinity]
 	
 	//theApp.scheduler->SaveOriginals(); //Removed by SiRoB, no scheduler param in this ppg //Added by SiRoB, Fix for Param used in scheduler
 
@@ -332,6 +336,7 @@ void CPPgMorphShare::Localize(void)
 		// MORPH START show less controls
 		if (m_htiShowLessControls) m_ctrlTreeOptions.SetItemText(m_htiShowLessControls, GetResString(IDS_MORPHWIZ_SHOWLESS)); 
 		// MORPH END  show less controls
+		if (m_htiStaticIcon) m_ctrlTreeOptions.SetItemText(m_htiFakeAlyzerIndications, GetResString(IDS_FAKEALYZER_INDICATIONS)); //MORPH - Added by Stulle, Fakealyzer [netfinity]
         // MORPH START leuk_he tooltipped
        SetTool(m_htiSFM ,IDS_SFM_TIP);
        SetTool(m_htiSpreadbar ,IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP);
@@ -355,6 +360,7 @@ void CPPgMorphShare::Localize(void)
 		SetTool(m_htiFolderIcons ,IDS_FOLDERICON_TIP);
 		SetTool(m_htiStaticIcon ,IDS_STATIC_ICON_TIP);
 		SetTool(m_htiShowLessControls ,IDS_MORPHWIZ_SHOWLESS_TIP);
+		SetTool(m_htiFakeAlyzerIndications ,IDS_FAKEALYZER_INDICATIONS_TIP);
         // MORPH END leuk_he tooltipped
 
 	}
@@ -390,6 +396,8 @@ void CPPgMorphShare::OnDestroy()
 	m_htiDisplay = NULL;
 	m_htiStaticIcon = NULL; //MORPH - Added, Static Tray Icon
     m_htiShowLessControls = NULL; // MORPH show less controls
+	m_htiFakeAlyzerIndications = NULL; //MORPH - Added by Stulle, Fakealyzer [netfinity]
+
 	CPropertyPage::OnDestroy();
 }
 LRESULT CPPgMorphShare::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM /*lParam*/)

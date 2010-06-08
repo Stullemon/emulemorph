@@ -977,6 +977,8 @@ public:
 	static bool		m_bServiceStringsLoaded;
 	//MORPH END   - Added by Stulle, Adjustable NT Service Strings
 
+	static bool		m_bFakeAlyzerIndications; //MORPH - Added by Stulle, Fakealyzer [netfinity]
+
 	enum Table
 	{
 		tableDownload, 
@@ -2186,6 +2188,8 @@ public:
 	static void		SetUSSInitialTTL(uint8 i)		{ m_iUSSinitialTTL = i; }
 	static uint8	GetUSSInitialTTL()				{ return m_iUSSinitialTTL; }
 	// <== [MoNKi: -USS initial TTL-] - Stulle
+
+	static bool		GetFakeAlyzerIndications()		{ return m_bFakeAlyzerIndications; } //MORPH - Added by Stulle, Fakealyzer [netfinity]
 };
 
 extern CPreferences thePrefs;
