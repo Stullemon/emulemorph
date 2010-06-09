@@ -3673,16 +3673,16 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			if ( clientState1 == DS_ONQUEUE ){
 				if ( clientState2 == DS_ONQUEUE ) {
 					if ( client1->IsRemoteQueueFull() ){
-						return (client2->IsRemoteQueueFull()) ? 0 : -1;
+						return (client2->IsRemoteQueueFull()) ? 0 : 1;
 					}
 					else if ( client2->IsRemoteQueueFull() ){
-						return 1;
+						return -1;
 					}
 
 					if ( client1->GetRemoteQueueRank() ){
-						return (client2->GetRemoteQueueRank()) ? client2->GetRemoteQueueRank() - client1->GetRemoteQueueRank() : 1;
+						return (client2->GetRemoteQueueRank()) ? CompareUnsigned(client1->GetRemoteQueueRank(), client2->GetRemoteQueueRank()) : -1;
 					}
-					return (client2->GetRemoteQueueRank()) ? -1 : 0;
+					return (client2->GetRemoteQueueRank()) ? 1 : 0;
 				}
 				return 1;
 			} else if ( clientState2 == DS_ONQUEUE ){

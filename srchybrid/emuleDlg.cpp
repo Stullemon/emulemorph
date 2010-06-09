@@ -251,7 +251,9 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(TM_HASHFAILED, OnHashFailed)
 	// SLUGFILLER: SafeHash
 	ON_MESSAGE(TM_PARTHASHEDOK, OnPartHashedOK)
+	ON_MESSAGE(TM_PARTHASHEDOKNOAICH, OnPartHashedOKNoAICH)
 	ON_MESSAGE(TM_PARTHASHEDCORRUPT, OnPartHashedCorrupt)
+	ON_MESSAGE(TM_PARTHASHEDCORRUPTNOAICH, OnPartHashedCorruptNoAICH)
 	ON_MESSAGE(TM_PARTHASHEDOKAICHRECOVER, OnPartHashedOKAICHRecover)
 	ON_MESSAGE(TM_PARTHASHEDCORRUPTAICHRECOVER, OnPartHashedCorruptAICHRecover)
 	// SLUGFILLER: SafeHash
@@ -1932,6 +1934,20 @@ LRESULT CemuleDlg::OnPartHashedOK(WPARAM wParam,LPARAM lParam)
 	//MORPH END   - Added by SiRoB, Fix crash at shutdown
 	CPartFile* pOwner = (CPartFile*)lParam;
 	if (theApp.downloadqueue->IsPartFile(pOwner)){	// could have been canceled
+		pOwner->PartHashFinished((UINT)wParam, true, false);
+		pOwner->UpdateDisplayedInfo()  ; //MORPH Display update (if IsPartFile! )
+	}
+	return 0;
+}
+
+LRESULT CemuleDlg::OnPartHashedOKNoAICH(WPARAM wParam,LPARAM lParam)
+{
+	//MORPH START - Added by SiRoB, Fix crash at shutdown
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN)
+		return FALSE;
+	//MORPH END   - Added by SiRoB, Fix crash at shutdown
+	CPartFile* pOwner = (CPartFile*)lParam;
+	if (theApp.downloadqueue->IsPartFile(pOwner)){	// could have been canceled
 		pOwner->PartHashFinished((UINT)wParam, false, false);
 		pOwner->UpdateDisplayedInfo()  ; //MORPH Display update (if IsPartFile! )
 	}
@@ -1939,6 +1955,18 @@ LRESULT CemuleDlg::OnPartHashedOK(WPARAM wParam,LPARAM lParam)
 }
 
 LRESULT CemuleDlg::OnPartHashedCorrupt(WPARAM wParam,LPARAM lParam)
+{
+	//MORPH START - Added by SiRoB, Fix crash at shutdown
+	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN)
+		return FALSE;
+	//MORPH END   - Added by SiRoB, Fix crash at shutdown
+	CPartFile* pOwner = (CPartFile*)lParam;
+	if (theApp.downloadqueue->IsPartFile(pOwner))	// could have been canceled
+		pOwner->PartHashFinished((UINT)wParam, true, true);
+	return 0;
+}
+
+LRESULT CemuleDlg::OnPartHashedCorruptNoAICH(WPARAM wParam,LPARAM lParam)
 {
 	//MORPH START - Added by SiRoB, Fix crash at shutdown
 	if (theApp.m_app_state == APP_STATE_SHUTTINGDOWN)

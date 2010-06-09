@@ -4,6 +4,8 @@ Changelog for eMule 0.50a MorphXT v12.3
 XX-XX-2010
 
 ADD: Option to enable background color FakeAlyzer indication for searches [Stulle]
+CHANGE: Made sorting for client status (QR,...) more like official [Stulle]
+CHANGE: Made SafeHash ready for new AICH based file identifier (like official) [Stulle]
 FIX: Rehashing of file on receiving unusable AICH hashset reply [Stulle]
 
 

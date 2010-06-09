@@ -8300,22 +8300,52 @@ int CPartHashThread::SetFirstHash(CPartFile* pOwner)
 		*/
 		if (pOwner->IsComplete((uint64)i*PARTSIZE,(uint64)(i+1)*PARTSIZE-1, true)){
 			uchar* cur_hash = new uchar[16];
-			// The following change in code should probably be unnessessary but I'll take the safe part here
 			/*
 			md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4PartHash(i));
 			*/
-			if (pOwner->GetPartCount() > 1 || pOwner->GetFileSize()== (uint64)PARTSIZE)
+			//MD4
+			if (pOwner->m_FileIdentifier.HasExpectedMD4HashCount())
 			{
-				if (pOwner->GetFileIdentifier().GetAvailableMD4PartHashCount() > i)
-					md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4PartHash(i));
+				if (pOwner->GetPartCount() > 1 || pOwner->GetFileSize()== (uint64)PARTSIZE)
+				{
+					if (pOwner->GetFileIdentifier().GetAvailableMD4PartHashCount() > i)
+						md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4PartHash(i));
+					else
+						ASSERT( false );
+				}
+				else
+					md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4Hash());
+			}
+
+			//AICH
+			CAICHHash cur_AICH_hash;
+			CAICHHashTree* phtAICHPartHash = NULL;
+			if (pOwner->m_FileIdentifier.HasAICHHash() && pOwner->m_FileIdentifier.HasExpectedAICHHashCount())
+			{
+				const CAICHHashTree* pPartTree = pOwner->m_pAICHRecoveryHashSet->FindPartHash((uint16)i);
+				if (pPartTree != NULL)
+				{
+					// use a new part tree, so we don't overwrite any existing recovery data which we might still need lateron
+					phtAICHPartHash = new CAICHHashTree(pPartTree->m_nDataSize,pPartTree->m_bIsLeftBranch, pPartTree->GetBaseSize());	
+				}
 				else
 					ASSERT( false );
+
+				if (pOwner->GetPartCount() > 1)
+				{
+					if (pOwner->m_FileIdentifier.GetAvailableAICHPartHashCount() > i)
+						cur_AICH_hash = pOwner->m_FileIdentifier.GetRawAICHHashSet()[i];
+					else
+						ASSERT( false );
+				}
+				else
+					cur_AICH_hash = pOwner->m_FileIdentifier.GetAICHHash();
 			}
-			else
-				md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4Hash());
 
 			m_PartsToHash.Add(i);
 			m_DesiredHashes.Add(cur_hash);
+			m_phtAICHPartHash.Add(phtAICHPartHash);
+			m_DesiredAICHHashes.Add(cur_AICH_hash);
 		}
 	return m_PartsToHash.GetSize();
 }
@@ -8339,19 +8369,54 @@ void CPartHashThread::SetSinglePartHash(CPartFile* pOwner, UINT part, bool ICHus
 		return;
 	}
 
-	uchar* cur_hash = new uchar[16];
-	if (pOwner->GetPartCount() > 1 || pOwner->GetFileSize()== (uint64)PARTSIZE)
+	//MD4
+	uchar* cur_hash = NULL;
+	if (pOwner->m_FileIdentifier.HasExpectedMD4HashCount())
 	{
-		if (pOwner->GetFileIdentifier().GetAvailableMD4PartHashCount() > part)
-			md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4PartHash(part));
+		cur_hash = new uchar[16];
+		if (pOwner->GetPartCount() > 1 || pOwner->GetFileSize()== (uint64)PARTSIZE)
+		{
+			if (pOwner->GetFileIdentifier().GetAvailableMD4PartHashCount() > part)
+				md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4PartHash(part));
+			else
+			{
+				ASSERT( false );
+				pOwner->m_bMD4HashsetNeeded = true;
+			}
+		}
+		else
+			md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4Hash());
+	}
+
+	//AICH
+	CAICHHash cur_AICH_hash;
+	CAICHHashTree* phtAICHPartHash = NULL;
+	if (pOwner->m_FileIdentifier.HasAICHHash() && pOwner->m_FileIdentifier.HasExpectedAICHHashCount())
+	{
+		const CAICHHashTree* pPartTree = pOwner->m_pAICHRecoveryHashSet->FindPartHash((uint16)part);
+		if (pPartTree != NULL)
+		{
+			// use a new part tree, so we don't overwrite any existing recovery data which we might still need lateron
+			phtAICHPartHash = new CAICHHashTree(pPartTree->m_nDataSize,pPartTree->m_bIsLeftBranch, pPartTree->GetBaseSize());	
+		}
 		else
 			ASSERT( false );
+
+		if (pOwner->GetPartCount() > 1)
+		{
+			if (pOwner->m_FileIdentifier.GetAvailableAICHPartHashCount() > part)
+				cur_AICH_hash = pOwner->m_FileIdentifier.GetRawAICHHashSet()[part];
+			else
+				ASSERT( false );
+		}
+		else
+			cur_AICH_hash = pOwner->m_FileIdentifier.GetAICHHash();
 	}
-	else
-		md4cpy(cur_hash, pOwner->GetFileIdentifier().GetMD4Hash());
 
 	m_PartsToHash.Add(part);
 	m_DesiredHashes.Add(cur_hash);
+	m_phtAICHPartHash.Add(phtAICHPartHash);
+	m_DesiredAICHHashes.Add(cur_AICH_hash);
 }
 
 int CPartHashThread::Run()
@@ -8372,6 +8437,7 @@ int CPartHashThread::Run()
 	
 	if (file.Open(directory+_T("\\")+filename,CFile::modeRead|CFile::osSequentialScan|CFile::shareDenyNone)){
 		for (UINT i = 0; i < (UINT)m_PartsToHash.GetSize(); i++){
+			bool pbAICHReportedOK = false;
 			UINT partnumber = m_PartsToHash[i];
 			uchar hashresult[16];
 			file.Seek((LONGLONG)PARTSIZE*partnumber,0);
@@ -8381,10 +8447,12 @@ int CPartHashThread::Run()
 				ASSERT( length <= PARTSIZE );
 			}
 
+			CAICHHashTree* phtAICHPartHash = m_phtAICHPartHash[i];
+
 			//MORPH - Changed by SiRoB, avoid crash if the file has been canceled
 			try
 			{
-				m_pOwner->CreateHash(&file, length, hashresult, NULL);
+				m_pOwner->CreateHash(&file, length, hashresult, phtAICHPartHash);
 				if (!theApp.emuledlg->IsRunning())	// in case of shutdown while still hashing
 					break;
 			}
@@ -8396,25 +8464,75 @@ int CPartHashThread::Run()
 				continue;
 			}
 
+			bool bMD4Error = false;
+			bool bMD4Checked = false;
+			bool bAICHError = false;
+			bool bAICHChecked = false;
 
-			if (md4cmp(hashresult,m_DesiredHashes[i])){
+			//MD4
+			if (m_DesiredHashes[i] != NULL)
+			{
+				bMD4Checked = true;
+				bMD4Error = md4cmp(hashresult,m_DesiredHashes[i]) != 0;
+			}
+			else
+			{
+				DebugLogError(_T("MD4 HashSet not present while veryfing part %u for file %s"), partnumber, m_pOwner->GetFileName());
+				m_pOwner->m_bMD4HashsetNeeded = true;
+			}
+
+			//AICH
+			//Note: If phtAICHPartHash is NULL it will remain NULL while hashing using CreateHash. So if we should not check by AICH it
+			//      is going to be NULL and thus the below will not be executed.
+			if (phtAICHPartHash != NULL)
+			{
+				ASSERT( phtAICHPartHash->m_bHashValid );
+				bAICHChecked = true;
+				bAICHError = m_DesiredAICHHashes[i] != phtAICHPartHash->m_Hash;
+			}
+			//else
+			//	DebugLogWarning(_T("AICH HashSet not present while verifying part %u for file %s"), partnumber, m_pOwner->GetFileName());
+			phtAICHPartHash = NULL;
+
+			if (bAICHChecked)
+				pbAICHReportedOK = !bAICHError;
+			if (bMD4Checked && bAICHChecked && bMD4Error != bAICHError)
+				DebugLogError(_T("AICH and MD4 HashSet disagree on verifying part %u for file %s. MD4: %s - AICH: %s"), partnumber
+				, m_pOwner->GetFileName(), bMD4Error ? _T("Corrupt") : _T("OK"), bAICHError ? _T("Corrupt") : _T("OK"));
+#ifdef _DEBUG
+			else
+				DebugLog(_T("Verifying part %u for file %s. MD4: %s - AICH: %s"), partnumber , m_pOwner->GetFileName()
+				, bMD4Checked ? (bMD4Error ? _T("Corrupt") : _T("OK")) : _T("Unavailable"), bAICHChecked ? (bAICHError ? _T("Corrupt") : _T("OK")) : _T("Unavailable"));	
+#endif
+
+			if (bMD4Error || bAICHError){
 				if (m_AICHRecover)
 					PostMessage(theApp.emuledlg->m_hWnd,TM_PARTHASHEDCORRUPTAICHRECOVER,partnumber,(LPARAM)m_pOwner);
 				else if (!m_ICHused)		// ICH only sends successes
-					PostMessage(theApp.emuledlg->m_hWnd,TM_PARTHASHEDCORRUPT,partnumber,(LPARAM)m_pOwner);
+				{
+					if(pbAICHReportedOK)
+						PostMessage(theApp.emuledlg->m_hWnd,TM_PARTHASHEDCORRUPT,partnumber,(LPARAM)m_pOwner);
+					else
+						PostMessage(theApp.emuledlg->m_hWnd,TM_PARTHASHEDCORRUPTNOAICH,partnumber,(LPARAM)m_pOwner);
+				}
 			} else {
 				if (m_ICHused)
 					m_pOwner->m_ICHPartsComplete.AddTail(partnumber);	// Time critical, don't use message callback
 				else if (m_AICHRecover)
 					PostMessage(theApp.emuledlg->m_hWnd,TM_PARTHASHEDOKAICHRECOVER,partnumber,(LPARAM)m_pOwner);
-				else
+				else if(pbAICHReportedOK)
 					PostMessage(theApp.emuledlg->m_hWnd,TM_PARTHASHEDOK,partnumber,(LPARAM)m_pOwner);
+				else
+					PostMessage(theApp.emuledlg->m_hWnd,TM_PARTHASHEDOKNOAICH,partnumber,(LPARAM)m_pOwner);
 			}
 		}
 		file.Close();
 	}
 	for (UINT i = 0; i < (UINT)m_DesiredHashes.GetSize(); i++)
 		delete[] m_DesiredHashes[i];
+	for (UINT i = 0; i < (UINT)m_phtAICHPartHash.GetSize(); i++)
+		delete m_phtAICHPartHash[i];
+	m_DesiredAICHHashes.RemoveAll(); // I just hope this does not create a mem leak...
 	if (m_ICHused)
 		sLock.Unlock();
 	return 0;
