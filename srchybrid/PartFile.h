@@ -594,6 +594,8 @@ private:
 	CString					filename;
 	CArray<UINT,UINT>	m_PartsToHash;
 	CArray<uchar*,uchar*>	m_DesiredHashes;
+	CArray<CAICHHashTree*,CAICHHashTree*>	m_phtAICHPartHash;
+	CArray<CAICHHash,CAICHHash>	m_DesiredAICHHashes;
 };
 // SLUGFILLER: SafeHash
 //MORPH START - Added by SiRoB, Flush Thread
