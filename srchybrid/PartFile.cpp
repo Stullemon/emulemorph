@@ -8318,7 +8318,7 @@ int CPartHashThread::SetFirstHash(CPartFile* pOwner)
 			}
 			else
 			{
-				DebugLogError(_T("MD4 HashSet not present while veryfing part %u for file %s"), partnumber, m_pOwner->GetFileName());
+				DebugLogError(_T("MD4 HashSet not present while veryfing part %u for file %s"), i, m_pOwner->GetFileName());
 				m_pOwner->m_bMD4HashsetNeeded = true;
 			}
 
@@ -8394,7 +8394,7 @@ void CPartHashThread::SetSinglePartHash(CPartFile* pOwner, UINT part, bool ICHus
 	}
 	else
 	{
-		DebugLogError(_T("MD4 HashSet not present while veryfing part %u for file %s"), partnumber, m_pOwner->GetFileName());
+		DebugLogError(_T("MD4 HashSet not present while veryfing part %u for file %s"), part, m_pOwner->GetFileName());
 		m_pOwner->m_bMD4HashsetNeeded = true;
 	}
 
