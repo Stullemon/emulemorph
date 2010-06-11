@@ -865,6 +865,12 @@
 			<File
 				RelativePath=".\res\yt.ico">
 			</File>
+			<File
+				RelativePath=".\res\ap.ico">
+			</File>
+			<File
+				RelativePath=".\res\eu.ico">
+			</File>
 		</Filter>
 		<File
 			RelativePath=".\flag.rc">
