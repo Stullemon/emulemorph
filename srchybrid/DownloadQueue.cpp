@@ -512,7 +512,7 @@ bool CDownloadQueue::PurgeED2KLinkQueue()
 		bCreatedNewCat = getCatDlg->CreatedNewCat();
 		bCanceled = getCatDlg->WasCancelled(); //MORPH - Added by SiRoB, WasCanceled
 		delete getCatDlg;
-		m_bClipboardLinkInQueue=false; 
+		// m_bClipboardLinkInQueue=false; // What is this doing here??? We don't want our choice to be ignored later
 	}
 	else if (thePrefs.UseActiveCatForLinks())
 		useCat = theApp.emuledlg->transferwnd->GetActiveCategory();

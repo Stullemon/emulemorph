@@ -7,6 +7,8 @@ ADD: Option to enable background color FakeAlyzer indication for searches [Stull
 ADD: Some more countries to country flags feature [tomchen1989]
 CHANGE: Made sorting for client status (QR,...) more like official [Stulle]
 CHANGE: Made SafeHash ready for new AICH based file identifier (like official) [Stulle]
+CHANGE: Don't assign downloads via watch clipboard feature using view filters [Stulle]
+	+ This caused own selection to be ignored!
 FIX: Rehashing of file on receiving unusable AICH hashset reply [Stulle]
 FIX: Possible icon size related error when loading flag icons [WiZaRd]
 FIX: A4AF swapping aborted download and caused sources to not be reasked within 20 minutes [Stulle]
