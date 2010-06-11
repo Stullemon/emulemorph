@@ -347,8 +347,11 @@ bool CIP2Country::LoadCountryFlagLib(){
 			IDI_COUNTRY_FLAG_AQ, IDI_COUNTRY_FLAG_AX, IDI_COUNTRY_FLAG_BV, IDI_COUNTRY_FLAG_GF,
 			IDI_COUNTRY_FLAG_ME, IDI_COUNTRY_FLAG_MF, IDI_COUNTRY_FLAG_RE, IDI_COUNTRY_FLAG_RS,
 			IDI_COUNTRY_FLAG_YT, //by tomchen1989
+			IDI_COUNTRY_FLAG_AP, //by tomchen1989
+			IDI_COUNTRY_FLAG_EU, //by tomchen1989
 
-			65535//the end
+			//65535//the end
+			355//the end
 		};
 
 		CString countryID[] = {
@@ -373,16 +376,19 @@ bool CIP2Country::LoadCountryFlagLib(){
 			_T("UK"), //by tharghan
 			_T("CS"), //by propaganda
 			_T("TP"), //by commander
-			_T("AQ"), _T("AX"), _T("BV"), _T("GF"), _T("ME"), _T("MF"), _T("RE"), _T("RS"), _T("YT") //by tomchen1989
+			_T("AQ"), _T("AX"), _T("BV"), _T("GF"), _T("ME"), _T("MF"), _T("RE"), _T("RS"), _T("YT"), //by tomchen1989
+			_T("AP"), _T("EU") //by tomchen1989
 		};
 
-		HICON iconHandle;
+		//HICON iconHandle;
 
 		CountryFlagImageList.DeleteImageList();
 		CountryFlagImageList.Create(18,16,theApp.m_iDfltImageListColorFlags|ILC_MASK,0,1);
 		CountryFlagImageList.SetBkColor(CLR_NONE);
 
 		//the res Array have one element to be the STOP
+		//NOTE: Wiz provided us with a fix so let's use this!
+		/*
 		for(int cur_pos = 0; resID[cur_pos] != 65535; cur_pos++){
 
 			CountryIDtoFlagIndex.SetAt(countryID[cur_pos], (uint16)cur_pos);
@@ -392,8 +398,28 @@ bool CIP2Country::LoadCountryFlagLib(){
 			
 			CountryFlagImageList.Add(iconHandle);
 		}
-	
-
+		*/
+		//>>> FiX for IP2Country and other custom lists
+		HICON iconHandle = NULL;
+		int iconIndex = -1;
+		//<<< FiX for IP2Country and other custom lists
+		for(int i = 0; i != _countof(resID); ++i)
+		{
+			//>>> FiX for IP2Country and other custom lists
+			iconHandle = (HICON)::LoadImage(_hCountryFlagDll, MAKEINTRESOURCE(resID[i]), IMAGE_ICON, 18, 16, LR_DEFAULTCOLOR);
+			if(iconHandle) 
+			//<<< FiX for IP2Country and other custom lists
+			{
+				//>>> FiX for IP2Country and other custom lists
+				iconIndex = CountryFlagImageList.Add(iconHandle);
+				if(iconIndex != -1)
+					CountryIDtoFlagIndex.SetAt(countryID[i], (uint16)iconIndex);
+				::DestroyIcon(iconHandle);
+				//<<< FiX for IP2Country and other custom lists
+			}
+			else
+				theApp.QueueDebugLogLineEx(LOG_WARNING, GetResString(IDS_IP2COUNTRY_ERROR5), resID[i]);
+		}
 	}
 	catch(CString error){
 		AddLogLine(false, _T("%s in %s"), error, ip2countryCountryFlag);

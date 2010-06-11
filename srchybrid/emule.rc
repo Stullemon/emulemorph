@@ -5222,7 +5222,7 @@ STRINGTABLE
 BEGIN
     IDS_COUNTRY             "Country"
     IDS_MISSING_STARTUPSOUND 
-                            "Missing startupsound.wav! Note: The file 'startupsound.wav' has to be placed in your config dir"
+                            "Missing startupsound.wav! Note: The file 'startup.wav' has to be placed in your config dir"
     IDS_PW_STARTUPSOUND     "Play startupsound"
 END
 
