@@ -97,6 +97,10 @@ void CDeadSourceList::Init(bool bGlobalList){
 }
 
 bool CDeadSourceList::IsDeadSource(const CUpDownClient* pToCheck) const{
+	//MORPH START - Added by Stulle, Don't block HTTP sources via DeadSourceList [Avi-3k]
+	if (pToCheck->GetClientSoft() == SO_URL)
+		return false;
+	//MORPH END   - Added by Stulle, Don't block HTTP sources via DeadSourceList [Avi-3k]
 	uint32 dwExpTime;
 	bool bDbgCheck = false;
 	if(!pToCheck->HasLowID() || pToCheck->GetServerIP() != 0){
@@ -122,6 +126,10 @@ void CDeadSourceList::AddDeadSource(const CUpDownClient* pToAdd){
 	//	AddDebugLogLine(DLP_VERYLOW, false, _T("Added source to bad source list (%s) - file %s : %s")
 	//	, m_bGlobalList? _T("Global"):_T("Local"), (pToAdd->GetRequestFile() != NULL)? pToAdd->GetRequestFile()->GetFileName() : _T("???"), pToAdd->DbgGetClientInfo() );
 
+	//MORPH START - Added by Stulle, Don't block HTTP sources via DeadSourceList [Avi-3k]
+	if (pToAdd->GetClientSoft() == SO_URL)
+		return;
+	//MORPH END   - Added by Stulle, Don't block HTTP sources via DeadSourceList [Avi-3k]
 	if(!pToAdd->HasLowID())
 		m_mapDeadSources.SetAt(CDeadSource(pToAdd->GetUserIDHybrid(), pToAdd->GetUserPort(), pToAdd->GetServerIP(), pToAdd->GetKadPort()), BLOCKTIME );
 	else{

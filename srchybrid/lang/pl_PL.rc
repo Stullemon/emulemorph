@@ -2439,7 +2439,7 @@ STRINGTABLE
 BEGIN
     IDS_COUNTRY             "Kraj"
     IDS_MISSING_STARTUPSOUND 
-                            "Nie znaleziono startupsound.wav! Uwaga: Plik 'startupsound.wav' musi znajdowaæ siê w katalogu config."
+                            "Nie znaleziono startup.wav! Uwaga: Plik 'startup.wav' musi znajdowaæ siê w katalogu config."
     IDS_PW_STARTUPSOUND     "DŸwiêk przy uruchamianiu"
 END
 

@@ -2463,7 +2463,7 @@ STRINGTABLE
 BEGIN
     IDS_COUNTRY             "Ülke"
     IDS_MISSING_STARTUPSOUND 
-                            "startupsound.wav kayýp! Bilgi: 'startupsound.wav' dosyasý config dizininde olmalý"
+                            "startup.wav kayýp! Bilgi: 'startup.wav' dosyasý config dizininde olmalý"
     IDS_PW_STARTUPSOUND     "Baþlangýç sesi"
 END
 

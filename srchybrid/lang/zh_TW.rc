@@ -2440,7 +2440,7 @@ STRINGTABLE
 BEGIN
 	IDS_COUNTRY             "國家"
     IDS_MISSING_STARTUPSOUND
-							   "缺少startupsound.wav! 注意: 'startupsound.wav' 必須置於config資料夾中"
+							   "缺少startup.wav! 注意: 'startup.wav' 必須置於config資料夾中"
 	IDS_PW_STARTUPSOUND     "播放起始音樂"
 END
 
@@ -3787,6 +3787,8 @@ BEGIN
    IDS_AUTOUPCOUNTRYWEEK_TIP "新增一筆排程在每周定期更新國家列表\n排程已啟動.\n注意, 只有當eMule在該時間有在執行的話有效\n你可以在排程偏好中更改時間"
    IDS_SCHED_UPDATE_COUNTRY "更新IP-TO-COUNTRY.CSV檔"
    IDS_SCHED_UPDATE_COUNTRY_LOG "排程IP-TO-COUNTRY.CSV更新初始化完成"
+   IDS_FAKEALYZER_INDICATIONS "在搜尋裡指出 偽檔分析 (FakeAlyzer) 的結果"
+   IDS_FAKEALYZER_INDICATIONS_TIP "偽檔分析 (FakeAlyzer) 是利用先進的演算法來判斷檔案是否是假的.\n啟用這個功能會在搜尋結果的背景顏色以三原色做出不同的 分\n如以白色為預設的背景顏色則:\n良好=亮綠色\n沒問題=亮藍色\n可疑=亮黃色\n假檔=亮紅色\n尚 計算=白色\n\n[預設:停用]"
 END
 
 /////////////////////////////////////////////////////////////////////////////

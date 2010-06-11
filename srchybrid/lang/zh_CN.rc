@@ -2446,7 +2446,7 @@ STRINGTABLE
 BEGIN
     IDS_COUNTRY             "国家或地区"
     IDS_MISSING_STARTUPSOUND 
-                            "startupsound.wav丢失! 注意: 'startupsound.wav'必须放在config目录下"
+                            "startup.wav丢失! 注意: 'startup.wav'必须放在config目录下"
     IDS_PW_STARTUPSOUND     "播放启动音乐"
 END
 
@@ -3816,6 +3816,8 @@ BEGIN
    IDS_AUTOUPCOUNTRYWEEK_TIP "向计划任务中添加一项每周更新国家旗帜数据库的条目.\n必须启用计划任务.\n注意: 这个功能只会在 Morph 运行时生效.\n你可以在计划任务设置中修改更新的时间." //"Add an entry to the schedule to update the\ncountrylist from the url once every week.\nSchedule is activated. Note that this will\n only work if Morph is running at that time.\nYou can modify the time when it updates in\n the schedule preferences."
    IDS_SCHED_UPDATE_COUNTRY "更新国家旗帜数据库" //"Update IP-TO-COUNTRY.CSV-file"
    IDS_SCHED_UPDATE_COUNTRY_LOG "计划中的国家旗帜数据库更新已启动" //"Scheduled IP-TO-COUNTRY.CSV-update initiated."
+    IDS_FAKEALYZER_INDICATIONS "在搜索结果中启用假档分析器" //"Indicate FakeAlyzer results for searches"
+    IDS_FAKEALYZER_INDICATIONS_TIP "假档分析器使用高级算法推测可能的假档.\n启用这个选项后, MorphXT会在搜索结果中显示不同的颜色.\n颜色是根据背景颜色和可疑程度计算得到的.\n如果背景颜色是白色, 不同可疑程度对应的颜色为:\n好的 = 亮绿色\n正常的 = 亮蓝色\n可疑的 = 亮黄色\n假档 = 亮红色\n未评级 = 白色\n[默认: 关闭]" //"FakeAlyzer is a feature that uses advanced algorithms to indicate if a\nfile may be a fake. Enabling this option will cause MorphXT to display\ncolored background for search results. The color is distinguished by\nthe background color and some RGB based calculation.\nIf white is the default background the colors are:\nGood = Light green\nOK = Light blue\nSuspect = Light yellow\nFake = Light red\nNot computed = White\n\n[Default: disabled]"
 END
 
 #endif    // Chinese (P.R.C.) resources

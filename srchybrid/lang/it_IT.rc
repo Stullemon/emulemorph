@@ -2428,7 +2428,7 @@ STRINGTABLE
 BEGIN
     IDS_COUNTRY             "Nazione"
     IDS_MISSING_STARTUPSOUND 
-                            "'startupsound.wav' non trovato! Nota: Il File 'startupsound.wav' deve essere collocato nella cartella 'config'"
+                            "'startup.wav' non trovato! Nota: Il File 'startup.wav' deve essere collocato nella cartella 'config'"
     IDS_PW_STARTUPSOUND     "Attiva il suono di avvio"
 END
 
