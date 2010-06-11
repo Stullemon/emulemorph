@@ -142,7 +142,12 @@ void CSelCategoryDlg::OnOK()
 		((CComboBox*)GetDlgItem(IDC_CATCOMBO))->GetWindowText(comboText);
 		comboText.Trim();
 
+		//khaos::categorymod+
+		/*
 		if (catTitle->CompareNoCase(comboText) == 0 || (comboIndex == 0 && comboText.Compare(GetResString(IDS_ALL) + _T("/") + GetResString(IDS_CAT_UNASSIGN)) == 0))
+		*/
+		if (catTitle->CompareNoCase(comboText) == 0 || (comboIndex == 0 && comboText.Compare(thePrefs.GetCategory(0)->strTitle) == 0))
+		//khaos::categorymod-
 			m_Return = comboIndex;
 		else {
 			m_bCreatedNew = true;

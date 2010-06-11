@@ -2422,7 +2422,7 @@ STRINGTABLE
 BEGIN
     IDS_COUNTRY             "País"
     IDS_MISSING_STARTUPSOUND 
-                            "Startupsound.wav não encontrado! Nota: 'startupsound.wav' tem de estar na pasta 'config'"
+                            "startup.wav não encontrado! Nota: 'startup.wav' tem de estar na pasta 'config'"
     IDS_PW_STARTUPSOUND     "Tocar som de abertura"
 END
 

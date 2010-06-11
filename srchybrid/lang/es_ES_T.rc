@@ -3712,6 +3712,8 @@ BEGIN
     IDS_AUTOUPCOUNTRYWEEK_TIP "Añade una entrada a la agenda para actualizar la lista de ips de paises\n de la url, una vez cada semana.\nLa agenda está activada. Tenga en cuenta que esto\nsólo funciona si se está ejecutando Morph durante este tiempo.\nUsted puede modificar el momento en que se actualiza en\nla agenda de las preferencias."
     IDS_SCHED_UPDATE_COUNTRY "Actualizar archivo IP-TO-COUNTRY.CSV"
     IDS_SCHED_UPDATE_COUNTRY_LOG "Hora de actualización de IP-TO-COUNTRY.CSV iniciada."
+    IDS_FAKEALYZER_INDICATIONS "Indica los resultados de las búsquedas de FakeAlyzer"
+    IDS_FAKEALYZER_INDICATIONS_TIP "FakeAlyzer es una funcionalidad que usa avanzados algoritmos e indica si un\narchivo puede ser falso. Habilitando esta opción hará que MorphXT muestre\ncolores de fondo para los resultados de búsqueda. El color se distingue por\nel color de fondo y algunos cálculos basado en RGB.\nSi el blanco es el fondo por defecto, los colores son:\nBueno = Color Verde\nOK = Color Azul\nSospechoso = Color Amarillo\nFalso = Color Rojo\nNo Calculado = Blanco\n\n[Por Defecto: deshabilitado]"
 END
 
 #endif    // Spanish (Castilian) resources

@@ -2440,7 +2440,7 @@ STRINGTABLE
 BEGIN
     IDS_COUNTRY             "Land"
     IDS_MISSING_STARTUPSOUND 
-                            "Fehlende startupsound.wav! Hinweis: Datei 'startupsound.wav' muss im 'config' Verzeichnis sein."
+                            "Fehlende startup.wav! Hinweis: Datei 'startup.wav' muss im 'config' Verzeichnis sein."
     IDS_PW_STARTUPSOUND     "Startsound abspielen"
 END
 
@@ -3793,6 +3793,8 @@ BEGIN
                             "Ein Eintrag im Zeitplaner wird hinzufügt um die\nLänderliste wöchentlich von der angegebenen\nURL zu aktualisieren. Der Zeitplaner ist\naktiv. Beachte, dass dies nur funktioniert, wenn\nMorph läuft während dieser Zeit. Den genauen\nZeitpunkt für die Aktualisierung kannst du im\nZeitplaner einstellen."
     IDS_SCHED_UPDATE_COUNTRY "Update IP-TO-COUNTRY.CSV"
     IDS_SCHED_UPDATE_COUNTRY_LOG "Zeitgesteuertes IP-TO-COUNTRY.CSV-update gestartet."
+    IDS_FAKEALYZER_INDICATIONS "Zeige FakeAlyzer Ergebnis für Suchen"
+    IDS_FAKEALYZER_INDICATIONS_TIP "FakeAlyzer ist eine Funktion die fortgeschrittene Algorithmen benutzt um\nanzuzeigen ob eine Datei eine Fälschung (fake) sein könnte. Wird diese\nOption angeschaltet wird MorphXT den Hintergrund von Suchergebnissen\neinfärben. Die Farbe wird aus der Hintergrundfarbe und einer RGB\nBerechnung ermittelt.\nWenn weiß die Standardhintergrundfarbe ist sind die Farben:\nGut = Hellgrün\nOK = Hellblau\nSuspekt = Hellgelb\nFälschung = Hellrot\nNicht bestimmt = Weiß\n\n[Standard: ausgeschaltet]"
 END
 
 #endif    // German (Germany) resources

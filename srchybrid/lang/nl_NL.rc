@@ -2448,7 +2448,7 @@ STRINGTABLE
 BEGIN
     IDS_COUNTRY             "land"
     IDS_MISSING_STARTUPSOUND 
-                            "eMule mist startupsound.wav! Merk op : Het bestand 'startupsound.wav' moet geplaatst worden in de config-map"
+                            "eMule mist startup.wav! Merk op : Het bestand 'startup.wav' moet geplaatst worden in de config-map"
     IDS_PW_STARTUPSOUND     "Speel opstartgeluid"
 END
 
