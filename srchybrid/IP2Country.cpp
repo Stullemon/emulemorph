@@ -350,8 +350,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 			IDI_COUNTRY_FLAG_AP, //by tomchen1989
 			IDI_COUNTRY_FLAG_EU, //by tomchen1989
 
-			//65535//the end
-			355//the end
+			65535//the end
 		};
 
 		CString countryID[] = {
@@ -403,7 +402,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 		HICON iconHandle = NULL;
 		int iconIndex = -1;
 		//<<< FiX for IP2Country and other custom lists
-		for(int i = 0; i != _countof(resID); ++i)
+		for(int i = 0; resID[i] != 65535; i++)
 		{
 			//>>> FiX for IP2Country and other custom lists
 			iconHandle = (HICON)::LoadImage(_hCountryFlagDll, MAKEINTRESOURCE(resID[i]), IMAGE_ICON, 18, 16, LR_DEFAULTCOLOR);
