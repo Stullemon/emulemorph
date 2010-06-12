@@ -3789,6 +3789,8 @@ BEGIN
     IDS_AUTOUPCOUNTRYWEEK_TIP "Aggiungi un evento agli eventi pianificati per aggiornare \n la lista dei paesi dall'indirizzo una volta a settimana. \nEvento attivato. Ricorda che funzioner' solo se eMule e' attivo a quell'ora. \nPuoi modificare l'orario nelle preferenze dell'evento."
     IDS_SCHED_UPDATE_COUNTRY "Aggiorna il file IP-TO-COUNTRY.CSV"
     IDS_SCHED_UPDATE_COUNTRY_LOG "Aggiornamento del file IP-TO-COUNTRY.CSV avviato secondo l'evento pianificato."
+    IDS_FAKEALYZER_INDICATIONS "Mostra i risultati del FakeAlyzer (durante la ricerca dei file)"
+    IDS_FAKEALYZER_INDICATIONS_TIP "FakeAlyzer è una funzione che usa algoritmi avanzati che mostrerà se un\nfile può essere un falso. Attivando questa funzione, MorphXT visualizzerà\nsfondi colorati per i risultati della ricerca. Il colore si contraddistingue dal colore dello sfondo e qualche calcolo basato su RGB.\nSe bianco è il colore di sfondo predefinito, i colori sono:\nBuono = Verde\nOK = Azzurro\nSospetto = Giallo\nFalso = Rosso\nNon calcolato = Bianco\n\n[Predefinito: disattivato]"
 END
 
 #endif    // Italian (Italy) resources
