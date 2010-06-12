@@ -4456,6 +4456,10 @@ uint16 CPreferences::GetRandomUDPPort()
 // Fallback: ApplicationDir
 CString CPreferences::GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCreate){
 	
+	//MORPH START - Added by Stulle, Copy files from bin package config to used config dir
+	bool bMoveConfigFiles = false;
+	CString strProgDirConfigPath;
+	//MORPH END   - Added by Stulle, Copy files from bin package config to used config dir
 	if (m_astrDefaultDirs[0].IsEmpty()){ // already have all directories fetched and stored?	
 		
 		// Get out exectuable starting directory which was our default till Vista
@@ -4477,6 +4481,8 @@ CString CPreferences::GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCr
 		CFileFind ff;
 		bool bConfigAvailableExecuteable = ff.FindFile(strSelectedConfigBaseDirectory + CONFIGFOLDER + _T("preferences.ini"), 0) != 0;
 		ff.Close();
+
+		strProgDirConfigPath = strSelectedConfigBaseDirectory + CONFIGFOLDER; //MORPH - Added by Stulle, Copy files from bin package config to used config dir
 		
 		// check if our registry setting is present which forces the single or multiuser directories
 		// and lets us ignore other defaults
@@ -4544,7 +4550,12 @@ CString CPreferences::GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCr
 									else if (bConfigAvailableExecuteable)
 										m_nCurrentUserDirMode = 2;
 									else
+									{ //MORPH - Added by Stulle, Copy files from bin package config to used config dir
 										m_nCurrentUserDirMode = 0; // no preferences.ini found, use the default
+									//MORPH START - Added by Stulle, Copy files from bin package config to used config dir
+										bMoveConfigFiles = true;
+									}
+									//MORPH END   - Added by Stulle, Copy files from bin package config to used config dir
 								}
 							}
 							else
@@ -4601,6 +4612,7 @@ CString CPreferences::GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCr
 									strSelectedDataBaseDirectory = strPersonal + _T("eMule Downloads\\");
 									strSelectedConfigBaseDirectory = strAppData + _T("eMule\\");
 									m_nCurrentUserDirMode = 0;
+									bMoveConfigFiles = true; //MORPH - Added by Stulle, Copy files from bin package config to used config dir
 								}
 								ff.Close();
 							}
@@ -4660,6 +4672,20 @@ CString CPreferences::GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCr
 		::CreateDirectory(m_astrDefaultDirs[eDirectory], NULL);
 		m_abDefaultDirsCreated[eDirectory] = true;
 	}
+	//MORPH START - Added by Stulle, Copy files from bin package config to used config dir
+	if (bMoveConfigFiles)
+	{
+		//NOTE: Can't log right here and making a popup here would be really annoying!
+		CopyFile(strProgDirConfigPath + _T("countryflag.dll"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("countryflag.dll"),TRUE);
+		CopyFile(strProgDirConfigPath + _T("countryflag32.dll"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("countryflag32.dll"),TRUE);
+		CopyFile(strProgDirConfigPath + _T("eMule Light.tmpl"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("eMule Light.tmpl"),TRUE);
+		CopyFile(strProgDirConfigPath + _T("eMule.tmpl"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("eMule.tmpl"),TRUE);
+		CopyFile(strProgDirConfigPath + _T("Multiuser eMule.tmpl"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("Multiuser eMule.tmpl"),TRUE);
+		CopyFile(strProgDirConfigPath + _T("startup.wav"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("startup.wav"),TRUE);
+		CopyFile(strProgDirConfigPath + _T("webservices.dat"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("webservices.dat"),TRUE);
+		CopyFile(strProgDirConfigPath + _T("XMLNews.dat"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("XMLNews.dat"),TRUE);
+	}
+	//MORPH END   - Added by Stulle, Copy files from bin package config to used config dir
 	return m_astrDefaultDirs[eDirectory];
 }
 

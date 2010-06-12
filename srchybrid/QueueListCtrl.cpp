@@ -791,16 +791,16 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 			iResult = CompareUnsigned(item1->GetScore(false), item2->GetScore(false));
 		*/
 		{
-			//MORPH START - Added by SiRoB, Optimization requpfile
-			/*
-			const CKnownFile *file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
-			const CKnownFile *file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
-			*/
-			const CKnownFile *file1 = item1->CheckAndGetReqUpFile();
-			const CKnownFile *file2 = item2->CheckAndGetReqUpFile();
-			//MORPH END   - Added by SiRoB, Optimization requpfile
+//			//MORPH START - Added by SiRoB, Optimization requpfile
+//			/*
+//			const CKnownFile *file1 = theApp.sharedfiles->GetFileByID(item1->GetUploadFileID());
+//			const CKnownFile *file2 = theApp.sharedfiles->GetFileByID(item2->GetUploadFileID());
+//			*/
+//			const CKnownFile *file1 = item1->CheckAndGetReqUpFile();
+//			const CKnownFile *file2 = item2->CheckAndGetReqUpFile();
+//			//MORPH END   - Added by SiRoB, Optimization requpfile
 			
-			if( (file1 != NULL) && (file2 != NULL)){
+//			if( (file1 != NULL) && (file2 != NULL)){
 
 				//Morph - modified by AndCycle, definitely a correct compare to show queue
 				CUpDownClient *lClient = (CUpDownClient*)item2, *rClient = (CUpDownClient*)item1;
@@ -811,11 +811,11 @@ int CQueueListCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParamSort)
 					theApp.uploadqueue->RightClientIsBetter(rClient, rScore, lClient, lScore) ? -1 :
 					0;
 
-			}
-			else if( file1 == NULL )
-				iResult = 1;
-			else
-				iResult = -1;
+//			}
+//			else if( file1 == NULL )
+//				iResult = 1;
+//			else
+//				iResult = -1;
 		}
 		//MORPH END - Changed by SiRoB, ZZ Upload System
 			break;
