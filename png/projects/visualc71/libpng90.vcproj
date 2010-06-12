@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="libpng90"
 	ProjectGUID="{3E1649FA-0B0F-460D-9AE4-7B702737B13D}"
 	RootNamespace="libpng"
@@ -433,7 +433,7 @@
 				PreprocessorDefinitions="WIN32;NDEBUG"
 				StringPooling="true"
 				ExceptionHandling="2"
-				RuntimeLibrary="2"
+				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
 				TreatWChar_tAsBuiltInType="true"
 				UsePrecompiledHeader="2"
@@ -503,7 +503,7 @@
 				AdditionalIncludeDirectories="..\..;..\..\..\zlib"
 				PreprocessorDefinitions="WIN32;_DEBUG;DEBUG;PNG_DEBUG=1"
 				BasicRuntimeChecks="3"
-				RuntimeLibrary="3"
+				RuntimeLibrary="1"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderThrough="png.h"
 				WarningLevel="3"

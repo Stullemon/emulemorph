@@ -5,6 +5,7 @@ XX-XX-2010
 
 ADD: Option to enable background color FakeAlyzer indication for searches [Stulle]
 ADD: Some more countries to country flags feature [tomchen1989]
+ADD: Copy files from bin package config to used config dir [Stulle]
 CHANGE: Made sorting for client status (QR,...) more like official [Stulle]
 CHANGE: Made SafeHash ready for new AICH based file identifier (like official) [Stulle]
 CHANGE: Don't assign downloads via watch clipboard feature using view filters [Stulle]
@@ -14,6 +15,8 @@ FIX: Rehashing of file on receiving unusable AICH hashset reply [Stulle]
 FIX: Possible icon size related error when loading flag icons [WiZaRd]
 FIX: A4AF swapping aborted download and caused sources to not be reasked within 20 minutes [Stulle]
 FIX: Wrong file name mentioned in Startup sound error logging [Stulle]
+FIX: libpng warnings when compiling [MorphCA/moloko+?]
+REMOVED: Some code around the sorting by score in QueueListCtrl [Stulle]
 
 Note: Following languages updated: German [Stulle]; French [jamjam]; Chinese (P.R.C.) [zz_fly]; 
 	Chinese (Taiwan) [AndCycle]; Italian [xilolee]; Turkish [omeringen];
