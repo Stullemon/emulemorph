@@ -16,7 +16,7 @@ FIX: A4AF swapping aborted download and caused sources to not be reasked within 
 FIX: Wrong file name mentioned in Startup sound error logging [Stulle]
 
 Note: Following languages updated: German [Stulle]; French [jamjam]; Chinese (P.R.C.) [zz_fly]; 
-	Chinese (Taiwan) [AndCycle]; Italian [Myth88]; Turkish [omeringen];
+	Chinese (Taiwan) [AndCycle]; Italian [xilolee]; Turkish [omeringen];
 	Portuguese (Brazil) [Heiler]; Spanish [Rajil]
 
 
