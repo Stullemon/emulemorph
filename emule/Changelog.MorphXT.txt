@@ -6,6 +6,7 @@ XX-XX-2010
 ADD: Option to enable background color FakeAlyzer indication for searches [Stulle]
 ADD: Some more countries to country flags feature [tomchen1989]
 ADD: Copy files from bin package config to used config dir [Stulle]
+ADD: Turkish translation for installer [omeringen]
 CHANGE: Made sorting for client status (QR,...) more like official [Stulle]
 CHANGE: Made SafeHash ready for new AICH based file identifier (like official) [Stulle]
 CHANGE: Don't assign downloads via watch clipboard feature using view filters [Stulle]
