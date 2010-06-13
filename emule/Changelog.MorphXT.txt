@@ -11,6 +11,7 @@ CHANGE: Made SafeHash ready for new AICH based file identifier (like official) [
 CHANGE: Don't assign downloads via watch clipboard feature using view filters [Stulle]
 	+ This caused own selection to be ignored!
 CHANGE: Don't block HTTP sources via DeadSourceList [Avi-3k]
+CHANGE: Increase space for strings in Morph Update windows [Stulle]
 FIX: Rehashing of file on receiving unusable AICH hashset reply [Stulle]
 FIX: Possible icon size related error when loading flag icons [WiZaRd]
 FIX: A4AF swapping aborted download and caused sources to not be reasked within 20 minutes [Stulle]
