@@ -15,7 +15,7 @@ FIX: Rehashing of file on receiving unusable AICH hashset reply [Stulle]
 FIX: Possible icon size related error when loading flag icons [WiZaRd]
 FIX: A4AF swapping aborted download and caused sources to not be reasked within 20 minutes [Stulle]
 FIX: Wrong file name mentioned in Startup sound error logging [Stulle]
-FIX: libpng warnings when compiling [MorphCA/moloko+?]
+FIX: libpng warnings when compiling [moloko+]
 REMOVED: Some code around the sorting by score in QueueListCtrl [Stulle]
 
 Note: Following languages updated: German [Stulle]; French [jamjam]; Chinese (P.R.C.) [zz_fly]; 

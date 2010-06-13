@@ -3293,8 +3293,8 @@ BEGIN
     IDS_DOWNHISTORY_CLEAR_QUESTION       "Etes-vous sûr de vouloir effacer l'historique des téléchargements ?"
     IDS_UPDATEFAKELISTWEEK       "MAJ hebdomadaire"
     IDS_AUTOUPIPFILTERWEEK       "MAJ hebdomadaire"
-    IDS_UPDATEFAKELISTWEEK_TIP       "Ajoute une entrée dans la planification pour mettre\nà jour fakelist.dat depuis l'URL une fois par semaine.\nLe planificateur est activé.\nNotez que cela ne fonctionne que lorsque eMule\nest en marche au même moment.\nVous pouvez modifier l'heure de mise à jour\ndans les préférences du planificateur."
-    IDS_UPDATEIPFILTERWEEK_TIP       "Ajoute une entrée dans la planification pour mettre\nà jour ipfilter.dat depuis l'URL une fois par semaine.\nLe planificateur est activé.\nNotez que cela ne fonctionne que lorsque eMule\nest en marche au même moment.\nVous pouvez modifier l'heure de mise à jour\ndans les préférences du planificateur."
+    IDS_UPDATEFAKELISTWEEK_TIP       "Ajoute une entrée dans la planification d'une\nMAJ de fakelist.dat depuis l'URL une fois par semaine.\nLe planificateur est activé.\nNotez que cela ne fonctionne que lorsque eMule\nest en marche au même moment.\nVous pouvez modifier l'heure de mise à jour\ndans les préférences du planificateur."
+    IDS_UPDATEIPFILTERWEEK_TIP       "Ajoute une entrée dans la planification d'une\nMAJ d'ipfilter.dat depuis l'URL une fois par semaine.\nLe planificateur est activé.\nNotez que cela ne fonctionne que lorsque eMule\nest en marche au même moment.\nVous pouvez modifier l'heure de mise à jour\ndans les préférences du planificateur."
     IDS_SCHEDTEXT       "Ajouté par Morph pour la mise à jour auto"
 END
 
@@ -3630,10 +3630,10 @@ BEGIN
     IDS_DISABLEPEERACHE     "Désactiver le téléchargement à partir du PeerCache"
     IDS_SHOWWIN7TASKBARGOODIES_TIP "Windows 7 vient avec quelques nouvelles configurations , pour le Aero Glass taskbar qui peut être utilisé avec ceci."
     IDS_STORESEARCHES_TIP  "eMule peut stocker des recherches entre les sessions ainsi elles \nseront chargées au démarrage pour remettre à zéro le vieil état."
-    IDS_SEARCHSPAMFILTER_TIP "Parfois les utilisateurs ou les serveurs diffusent de faux dossiers. Pour se protéger autoriser cette option qui fera filtrer par eMule la recherche . Les résultats utilisant deux approches différentes."
+    IDS_SEARCHSPAMFILTER_TIP "Parfois les utilisateurs ou les serveurs diffusent de faux dossiers. Pour se protéger, cocher cette option qui fera filtrer la recherche par eMule. Les résultats utilisant deux approches différentes."
     IDS_ENABLEMINIMULE_TIP  "MiniMule est une petite fenêtre qui peut être montrée pour visionner des données de base de eMule quand eMule est réduit au minimum dans le plateau. Il planera sur le dessus et peut être rendu transparent (voir les préférences avancées dans Extensions)."
     IDS_PREVENTSTANDBY_TIP "Windows est fréquemment configuré pour passer en mode 'économique' après un moment. Cocher cette option empêchera Windows de passer en mode 'économique' quand eMule fonctionne afin que le partage de fichiers continue."
-    IDS_STATIC_ICON_TIP  "Habituellement l'icône de plateau d'eMule est seulement montrée quand le programme est réduit au minimum dans le plateau. Cette option fera montrer toujours l'icône de eMule dans le plateau, sans se soucier si il réduit au minimum ou pas."
+    IDS_STATIC_ICON_TIP     "Habituellement l'icône de notification d'eMule est apparait uniquement quand le programme est minimisé dans la zone de notification. Cette option affichera en permanence l'icône d'eMule dans la zone de notification, qu'eMule soit minimisé ou pas."
     IDS_MORPHWIZ_SHOWLESS_TIP  "eMule MorphXT inclut beaucoup d'outils et d'informations supplémentaires dont un utilisateur\npeu expérimenté pourrait se passer. Cette option cachera ces informations et ces outils\nafin d'alléger l'interface graphique."
     IDS_WS_FAILED_LOGIN  "Vous avez été banni pour une durée de 15 minutes due aux tentatives d'ouvertures échouées !"
     IDS_ADVADMIN_DFILES     "Accès - fichiers de téléchargements ?"
@@ -3707,6 +3707,8 @@ BEGIN
                             "Ajoute une entrée dans la planification d'une\nMAJ de countrylist depuis l'URL une fois par semaine.\nLe planificateur est activé.\nNotez que cela ne fonctionne que lorsque eMule\nest en marche au même moment.\nVous pouvez modifier l'heure de mise à jour\ndans les préférences du planificateur."
     IDS_SCHED_UPDATE_COUNTRY "MAJ d'IP-TO-COUNTRY.CSV-file"
     IDS_SCHED_UPDATE_COUNTRY_LOG "Planification d'une MAJ d'IP-TO-COUNTRY.CSV-update programmée."
+    IDS_FAKEALYZER_INDICATIONS "Indique l'évaluation des résultats des recherches par le FakeAlyzer."
+    IDS_FAKEALYZER_INDICATIONS_TIP "Le FakeAlyzer est un outil faisant appel à de puissants algorythmes qui permettent d'évaluer la probabilité\nqu'un fichier soit un fake. Cocher cette option, et MorphXT affichera\nun fond coloré derrière les résultats des recherches. La couleur est déterminée par\nla couleur du fond, ainsi que des calculs RGB.\nLe fond étant Blanc par défaut, les couleurs sont:\nBon = Vert clair\nOK = Bleu clair\nSuspect = Jaune clair\nFake = Rouge\nIndéterminé = Blanc\n\n[Désactivé par défaut]"
 END
 
 
