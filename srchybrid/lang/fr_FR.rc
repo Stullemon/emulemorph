@@ -3708,7 +3708,7 @@ BEGIN
     IDS_SCHED_UPDATE_COUNTRY "MAJ d'IP-TO-COUNTRY.CSV-file"
     IDS_SCHED_UPDATE_COUNTRY_LOG "Planification d'une MAJ d'IP-TO-COUNTRY.CSV-update programmée."
     IDS_FAKEALYZER_INDICATIONS "Indique l'évaluation des résultats des recherches par le FakeAlyzer."
-    IDS_FAKEALYZER_INDICATIONS_TIP "Le FakeAlyzer est un outil faisant appel à de puissants algorythmes qui permettent d'évaluer la probabilité\nqu'un fichier soit un fake. Cocher cette option, et MorphXT affichera\nun fond coloré derrière les résultats des recherches. La couleur est déterminée par\nla couleur du fond, ainsi que des calculs RGB.\nLe fond étant Blanc par défaut, les couleurs sont:\nBon = Vert clair\nOK = Bleu clair\nSuspect = Jaune clair\nFake = Rouge\nIndéterminé = Blanc\n\n[Désactivé par défaut]"
+    IDS_FAKEALYZER_INDICATIONS_TIP "Le FakeAlyzer est un outil faisant appel à de puissants algorythmes qui permettent d'évaluer la probabilité\nqu'un fichier soit un fake. Cocher cette option, et MorphXT affichera\nun fond coloré derrière les résultats des recherches. La couleur est déterminée par\nla couleur du fond, ainsi que des calculs RGB avancés.\nLe fond étant Blanc par défaut, les couleurs sont:\nBon = Vert clair\nOK = Bleu clair\nSuspect = Jaune clair\nFake = Rouge\nIndéterminé = Blanc\n\n[Désactivé par défaut]"
 END
 
 
