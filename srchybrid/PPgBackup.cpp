@@ -122,6 +122,7 @@ void CPPgBackup::OnBnClickedBackupnow()
 {
 	TCHAR buffer[200];
 	y2All = FALSE;
+	n2All = FALSE;
 	if (IsDlgButtonChecked(IDC_DAT)!=0)
 	{
 		Backup(_T("*.dat"), true);
@@ -160,6 +161,7 @@ void CPPgBackup::OnBnClickedBackupnow()
 
 	MessageBox(_GetResString(IDS_BACKUP_COMPLETE), _T("BackUp complete."), MB_OK); //"File(s) Copied Successfully."
 	y2All = FALSE;
+	n2All = FALSE;
 }
 
 
@@ -203,10 +205,10 @@ void CPPgBackup::Backup(LPCTSTR extensionToBack, BOOL conFirm)
 		{
 			if (conFirm)
 			{
-				if (y2All == FALSE)
+				if (y2All == FALSE && n2All == FALSE)
 				{
 					_stprintf(buffer, GetResString(IDS_OVERWRITE1), FileData.cFileName);
-					int rc = ::XMessageBox(m_hWnd,buffer,GetResString(IDS_OVERWRITE2),MB_YESNO|MB_YESTOALL|MB_ICONQUESTION);
+					int rc = ::XMessageBox(m_hWnd,buffer,GetResString(IDS_OVERWRITE2),MB_YESNO|MB_YESTOALL|MB_NOTOALL|MB_ICONQUESTION);
 					if (rc == IDYES)
 						OverWrite = TRUE;
 					else if (rc == IDYESTOALL)
@@ -214,10 +216,17 @@ void CPPgBackup::Backup(LPCTSTR extensionToBack, BOOL conFirm)
 						OverWrite = TRUE;
 						y2All = TRUE;
 					}
+					else if (rc == IDNOTOALL)
+					{
+						OverWrite = FALSE;
+						n2All = TRUE;
+					}
 					else 
 						OverWrite = FALSE;
-				} else
+				} else if(y2All == TRUE)
 					OverWrite = TRUE;
+				else //if(n2All == TRUE)
+					OverWrite = FALSE;
 			} 
 			else
 				OverWrite = TRUE;
@@ -304,10 +313,10 @@ void CPPgBackup::Backup2(LPCTSTR extensionToBack)
 			//MessageBox(szNewPath,"New Path",MB_OK);  
 			if(PathFileExists(szNewPath))  
 			{  
-				if (y2All == FALSE)
+				if (y2All == FALSE && n2All == FALSE)
 				{
 					_stprintf(buffer, GetResString(IDS_OVERWRITE1), FileData.cFileName);
-					int rc = ::XMessageBox(m_hWnd,buffer,GetResString(IDS_OVERWRITE2) ,MB_YESNO|MB_YESTOALL|MB_ICONQUESTION);
+					int rc = ::XMessageBox(m_hWnd,buffer,GetResString(IDS_OVERWRITE2),MB_YESNO|MB_YESTOALL|MB_NOTOALL|MB_ICONQUESTION);
 					if (rc == IDYES)
 						OverWrite = TRUE;
 					else if (rc == IDYESTOALL)
@@ -315,10 +324,17 @@ void CPPgBackup::Backup2(LPCTSTR extensionToBack)
 						OverWrite = TRUE;
 						y2All = TRUE;
 					}
+					else if (rc == IDNOTOALL)
+					{
+						OverWrite = FALSE;
+						n2All = TRUE;
+					}
 					else 
 						OverWrite = FALSE;
-				} else
-					OverWrite = TRUE;  
+				} else if(y2All == TRUE)
+					OverWrite = TRUE;
+				else //if(n2All == TRUE)
+					OverWrite = FALSE;
 			}  
 
 			if(OverWrite)  

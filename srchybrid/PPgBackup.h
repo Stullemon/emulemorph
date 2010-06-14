@@ -31,6 +31,7 @@ private:
 	void Backup2(LPCTSTR extensionToBack);
 	void LoadSettings(void);
 	BOOL y2All;
+	BOOL n2All;
 public:
 
 	DECLARE_MESSAGE_MAP()

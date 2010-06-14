@@ -4681,6 +4681,8 @@ CString CPreferences::GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCr
 		CopyFile(strProgDirConfigPath + _T("eMule Light.tmpl"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("eMule Light.tmpl"),TRUE);
 		CopyFile(strProgDirConfigPath + _T("eMule.tmpl"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("eMule.tmpl"),TRUE);
 		CopyFile(strProgDirConfigPath + _T("Multiuser eMule.tmpl"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("Multiuser eMule.tmpl"),TRUE);
+		CopyFile(strProgDirConfigPath + _T("nodes.dat"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("nodes.dat"),TRUE);
+		CopyFile(strProgDirConfigPath + _T("server.met"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("server.met"),TRUE);
 		CopyFile(strProgDirConfigPath + _T("startup.wav"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("startup.wav"),TRUE);
 		CopyFile(strProgDirConfigPath + _T("webservices.dat"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("webservices.dat"),TRUE);
 		CopyFile(strProgDirConfigPath + _T("XMLNews.dat"), m_astrDefaultDirs[EMULE_CONFIGDIR] + _T("XMLNews.dat"),TRUE);
