@@ -1,12 +1,13 @@
 --------------------------------------
 Changelog for eMule 0.50a MorphXT v12.3
 --------------------------------------
-XX-XX-2010
+14-06-2010
 
 ADD: Option to enable background color FakeAlyzer indication for searches [Stulle]
 ADD: Some more countries to country flags feature [tomchen1989]
 ADD: Copy files from bin package config to used config dir [Stulle]
 ADD: Turkish translation for installer [omeringen]
+ADD: "No to all" option for backup nagging dialog in Backup window [Stulle]
 CHANGE: Made sorting for client status (QR,...) more like official [Stulle]
 CHANGE: Made SafeHash ready for new AICH based file identifier (like official) [Stulle]
 CHANGE: Don't assign downloads via watch clipboard feature using view filters [Stulle]
@@ -21,8 +22,7 @@ FIX: libpng warnings when compiling [moloko+]
 REMOVED: Some code around the sorting by score in QueueListCtrl [Stulle]
 
 Note: Following languages updated: German [Stulle]; French [jamjam]; Chinese (P.R.C.) [zz_fly]; 
-	Chinese (Taiwan) [AndCycle]; Italian [xilolee]; Turkish [omeringen];
-	Portuguese (Brazil) [Heiler]; Spanish [Rajil]
+	Chinese (Taiwan) [AndCycle]; Italian [xilolee]; Turkish [omeringen]; Spanish [Rajil]
 
 
 --------------------------------------
