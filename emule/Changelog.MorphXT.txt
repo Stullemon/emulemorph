@@ -10,8 +10,8 @@ CHANGE: update zlib 1.2.5 [Stulle]
 CHANGE: update libpng 1.4.3 [Stulle]
 CHANGE: Rename CMemDC to CMemoryDC [Avi-3k]
 CHANGE: Some other minor changes to compile on VS 2010
-CHANGE: Rewrote the passing of params for drawing country flags to work with VS10 [Stulle]
-	+ not unique to VS10, used in all compiles
+CHANGE: Rewrote the passing of params for drawing country flags to work in VS10 [Stulle]
+	+ bug in VS10 MFC; fixed code not only for VS10, used in all compiles
 
 
 --------------------------------------
