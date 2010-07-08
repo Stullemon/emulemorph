@@ -462,7 +462,12 @@ CemuleApp theApp(_T("eMule"));
 
 
 // Workaround for bugged 'AfxSocketTerm' (needed at least for MFC 7.0, 7.1, 8.0, 9.0)
+//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+/*
 #if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900
+*/
+#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900 || _MFC_VER==0x0A00
+//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 void __cdecl __AfxSocketTerm()
 {
 #if defined(_AFXDLL) && (_MFC_VER==0x0700 || _MFC_VER==0x0710)
@@ -649,7 +654,12 @@ BOOL CemuleApp::InitInstance()
 	}
 		}
 	//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
+//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+/*
 #if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900
+*/
+#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900 || _MFC_VER==0x0A00
+//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 	atexit(__AfxSocketTerm);
 #else
 #error "You are using an MFC version which may require a special version of the above function!"

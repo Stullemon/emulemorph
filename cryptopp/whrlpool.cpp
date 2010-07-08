@@ -64,16 +64,9 @@
  */
 
 #include "pch.h"
-
-#ifdef WORD64_AVAILABLE
-
 #include "whrlpool.h"
 #include "misc.h"
 #include "cpu.h"
-
-#if CRYPTOPP_BOOL_SSE2_INTRINSICS_AVAILABLE
-#include <emmintrin.h>
-#endif
 
 NAMESPACE_BEGIN(CryptoPP)
 
@@ -118,7 +111,11 @@ void Whirlpool::TruncatedFinal(byte *hash, size_t size)
  * employed).
  */
 
+#if CRYPTOPP_BOOL_SSE2_ASM_AVAILABLE
 CRYPTOPP_ALIGN_DATA(16) static const word64 Whirlpool_C[4*256+R] CRYPTOPP_SECTION_ALIGN16 = {
+#else
+static const word64 Whirlpool_C[4*256+R] = {
+#endif
     W64LIT(0x18186018c07830d8), W64LIT(0x23238c2305af4626), W64LIT(0xc6c63fc67ef991b8), W64LIT(0xe8e887e8136fcdfb),
     W64LIT(0x878726874ca113cb), W64LIT(0xb8b8dab8a9626d11), W64LIT(0x0101040108050209), W64LIT(0x4f4f214f426e9e0d),
     W64LIT(0x3636d836adee6c9b), W64LIT(0xa6a6a2a6590451ff), W64LIT(0xd2d26fd2debdb90c), W64LIT(0xf5f5f3f5fb06f70e),
@@ -400,7 +397,7 @@ void Whirlpool::Transform(word64 *digest, const word64 *block)
 		// MMX version has the same structure as C version below
 #ifdef __GNUC__
 	#if CRYPTOPP_BOOL_X64
-		__m128i workspace[8];
+		word64 workspace[16];
 	#endif
 	__asm__ __volatile__
 	(
@@ -702,5 +699,3 @@ void Whirlpool::Transform(word64 *digest, const word64 *block)
 }
 
 NAMESPACE_END
-
-#endif // WORD64_AVAILABLE

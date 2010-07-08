@@ -122,8 +122,8 @@ class PanamaCipherPolicy : public AdditiveCipherConcretePolicy<word32, 8>,
 protected:
 	void CipherSetKey(const NameValuePairs &params, const byte *key, size_t length);
 	void OperateKeystream(KeystreamOperation operation, byte *output, const byte *input, size_t iterationCount);
-	bool IsRandomAccess() const {return false;}
-	void CipherResynchronize(byte *keystreamBuffer, const byte *iv);
+	bool CipherIsRandomAccess() const {return false;}
+	void CipherResynchronize(byte *keystreamBuffer, const byte *iv, size_t length);
 #if CRYPTOPP_BOOL_X86 || CRYPTOPP_BOOL_X64
 	unsigned int GetAlignment() const;
 #endif

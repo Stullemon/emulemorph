@@ -113,7 +113,12 @@ void CProgressCtrlX::OnPaint()
 
 	
 	// Draw to memory DC
+	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	/*
 	CMemDC memDC(&dc);
+	*/
+	CMemoryDC memDC(&dc);
+	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 	info.pDC = &memDC;
 	
 	// fill background 

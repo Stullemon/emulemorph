@@ -147,7 +147,12 @@ void CKadLookupGraph::OnPaint()
 	if (rcClnt.IsRectEmpty())
 		return;
 
+	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	/*
 	CMemDC dc(&pdc, rcClnt);
+	*/
+	CMemoryDC dc(&pdc, rcClnt);
+	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 	CPen* pOldPen = dc.SelectObject(&m_penAxis);
 	if (g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed())
 	{

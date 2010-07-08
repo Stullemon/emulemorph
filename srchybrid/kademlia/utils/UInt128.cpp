@@ -33,7 +33,9 @@ there client on the eMule forum..
 #pragma warning(disable:4244) // conversion from 'type1' to 'type2', possible loss of data
 #pragma warning(disable:4100) // unreferenced formal parameter
 #pragma warning(disable:4702) // unreachable code
+#pragma warning(disable:4189) // local variable is initialized but not referenced
 #include <cryptopp/osrng.h>
+#pragma warning(default:4189) // local variable is initialized but not referenced
 #pragma warning(default:4702) // unreachable code
 #pragma warning(default:4100) // unreferenced formal parameter
 #pragma warning(default:4244) // conversion from 'type1' to 'type2', possible loss of data

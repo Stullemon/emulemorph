@@ -1,5 +1,10 @@
 //////////////////////////////////////////////////
+//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+/*
 // CMemDC - memory DC
+*/
+// CMemoryDC - memory DC
+//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 //
 // Author: Keith Rule
 // Email:  keithr@europa.com
@@ -24,7 +29,12 @@
 // flicker free drawing.
 #pragma once
 
+//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+/*
 class CMemDC : public CDC
+*/
+class CMemoryDC : public CDC
+//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 {
 private:
 	CBitmap		m_bitmap;		// Offscreen bitmap
@@ -36,7 +46,12 @@ private:
 	bool		m_bFlushed;
 
 public:
+	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	/*
 	CMemDC(CDC *pDC, LPCRECT pRect = NULL, COLORREF crBackground = CLR_DEFAULT)
+	*/
+	CMemoryDC(CDC *pDC, LPCRECT pRect = NULL, COLORREF crBackground = CLR_DEFAULT)
+	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 		: CDC()
 	{
 		ASSERT( pDC != NULL );
@@ -80,7 +95,12 @@ public:
 		FillBackground(crBackground);
 	}
 
+	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	/*
 	~CMemDC()
+	*/
+	~CMemoryDC()
+	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 	{
 		Flush();
 		if (m_oldFont)
@@ -121,13 +141,23 @@ public:
 	}
 
 	// Allow usage as a pointer
+	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	/*
 	CMemDC* operator->()
+	*/
+	CMemoryDC* operator->()
+	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 	{
 		return this;
 	}
 
 	// Allow usage as a pointer
+	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	/*
 	operator CMemDC*()
+	*/
+	operator CMemoryDC*()
+	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 	{
 		return this;
 	}

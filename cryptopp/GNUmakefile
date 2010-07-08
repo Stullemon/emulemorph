@@ -1,4 +1,7 @@
 CXXFLAGS = -DNDEBUG -g -O2
+#CXXFLAGS = -g
+# -fPIC is supported. Please report any breakage of -fPIC as a bug.
+# CXXFLAGS += -fPIC
 # the following options reduce code size, but breaks link or makes link very slow on some systems
 # CXXFLAGS += -ffunction-sections -fdata-sections
 # LDFLAGS += -Wl,--gc-sections
@@ -8,7 +11,7 @@ CP = cp
 MKDIR = mkdir
 EGREP = egrep
 UNAME = $(shell uname)
-ISX86 = $(shell uname -m | $(EGREP) -c "i.86|x86|i86")
+ISX86 = $(shell uname -m | $(EGREP) -c "i.86|x86|i86|amd64")
 ISMINGW = $(shell uname | $(EGREP) -c "MINGW32")
 
 # Default prefix for make install
@@ -22,31 +25,35 @@ endif
 
 ifeq ($(ISX86),1)
 
-GCC34_OR_LATER = $(shell $(CXX) --version 2>&1 | $(EGREP) -c "\(GCC\) (3.[4-9]|[4-9])")
 GCC42_OR_LATER = $(shell $(CXX) --version 2>&1 | $(EGREP) -c "\(GCC\) (4.[2-9]|[5-9])")
 INTEL_COMPILER = $(shell $(CXX) --version 2>&1 | $(EGREP) -c "\(ICC\)")
-GAS210_OR_LATER = $(shell echo "" | $(AS) -v 2>&1 | $(EGREP) -c "GNU assembler version (2.[1-9][0-9]|[3-9])")
+GAS210_OR_LATER = $(shell echo "" | $(AS) -v 2>&1 | $(EGREP) -c "GNU assembler version (2\.[1-9][0-9]|[3-9])")
+GAS217_OR_LATER = $(shell echo "" | $(AS) -v 2>&1 | $(EGREP) -c "GNU assembler version (2\.1[7-9]|2\.[2-9]|[3-9])")
 
-ifneq ($(GCC34_OR_LATER) $(INTEL_COMPILER),0 0)
 ifneq ($(GCC42_OR_LATER),0)
+ifneq ($(UNAME),Darwin)
 CXXFLAGS += -march=native -mtune=native
-else
-# -msse2 is in GCC 3.3, but it causes internal compiler error on salsa.cpp,
-# so don't use it unless we're at GCC 3.4 or later
-# actually, we're not using SSE2 intrinsics anymore, and -msse2 causes invalid instructions on non-SSE2 CPUs
-# CXXFLAGS += -msse2
 endif
+endif
+
+ifneq ($(INTEL_COMPILER),0)
+# "internal error: backend signals" occurs on some x86 inline assembly with ICC 9 and some x64 inline assembly with ICC 11
+# if you want to use Crypto++'s assembly code with ICC, try enabling it on individual files
+CXXFLAGS += -DCRYPTOPP_DISABLE_ASM
 endif
 
 ifeq ($(GAS210_OR_LATER),0)	# .intel_syntax wasn't supported until GNU assembler 2.10
 CXXFLAGS += -DCRYPTOPP_DISABLE_ASM
 else
+ifeq ($(GAS217_OR_LATER),0)
+CXXFLAGS += -DCRYPTOPP_DISABLE_SSSE3
+endif
 ifeq ($(UNAME),SunOS)
 CXXFLAGS += -Wa,--divide	# allow use of "/" operator
 endif
 endif
 
-endif
+endif	# ISX86
 
 ifeq ($(ISMINGW),1)
 LDLIBS += -lws2_32
@@ -77,7 +84,7 @@ endif
 ifeq ($(UNAME),SunOS)
 LDLIBS += -lnsl -lsocket
 ifeq ($(CXX),CC)	# override flags for CC (Solaris native C++ compiler)
-CXXFLAGS = -DNDEBUG -O -g -native
+CXXFLAGS = -DNDEBUG -O -g0 -native -template=no%extdef -m$(shell isainfo -b)
 LDFLAGS =
 ifeq ($(ISX86),1)
 # SSE2 intrinsics should work in Sun Studio 12, but we're not using SSE2 intrinsics anymore
@@ -103,6 +110,9 @@ TESTIMPORTOBJS = $(TESTOBJS:.o=.import.o)
 DLLTESTOBJS = dlltest.dllonly.o
 
 all: cryptest.exe
+
+test: cryptest.exe
+	./cryptest.exe v
 
 clean:
 	$(RM) cryptest.exe libcryptopp.a $(LIBOBJS) $(TESTOBJS) cryptopp.dll libcryptopp.dll.a libcryptopp.import.a cryptest.import.exe dlltest.exe $(DLLOBJS) $(LIBIMPORTOBJS) $(TESTIMPORTOBJS) $(DLLTESTOBJS)

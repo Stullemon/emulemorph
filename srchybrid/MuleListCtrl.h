@@ -3,7 +3,12 @@
 #include "resource.h"
 
 class CIni;
+//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+/*
 class CMemDC;
+*/
+class CMemoryDC;
+//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 
 ///////////////////////////////////////////////////////////////////////////////
 // CMuleListCtrl
@@ -224,7 +229,12 @@ protected:
 	int MoveItem(int iOldIndex, int iNewIndex);
 	void SetColors();
 	void DrawFocusRect(CDC *pDC, const CRect &rcItem, BOOL bItemFocused, BOOL bCtrlFocused, BOOL bItemSelected);
+	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	/*
 	void InitItemMemDC(CMemDC *dc, LPDRAWITEMSTRUCT lpDrawItemStruct, BOOL &bCtrlFocused);
+	*/
+	void InitItemMemDC(CMemoryDC *dc, LPDRAWITEMSTRUCT lpDrawItemStruct, BOOL &bCtrlFocused);
+	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 
 	static __inline bool HaveIntersection(const CRect &rc1, const CRect &rc2) {
         return (rc1.left   < rc2.right  &&

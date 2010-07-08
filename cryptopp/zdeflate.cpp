@@ -214,6 +214,7 @@ inline void HuffmanEncoder::Encode(LowFirstBitWriter &writer, value_t value) con
 
 Deflator::Deflator(BufferedTransformation *attachment, int deflateLevel, int log2WindowSize, bool detectUncompressible)
 	: LowFirstBitWriter(attachment)
+	, m_deflateLevel(-1)
 {
 	InitializeStaticEncoders();
 	IsolatedInitialize(MakeParameters("DeflateLevel", deflateLevel)("Log2WindowSize", log2WindowSize)("DetectUncompressible", detectUncompressible));
@@ -385,7 +386,7 @@ unsigned int Deflator::LongestMatch(unsigned int &bestMatch) const
 		{
 			assert(scan[2] == match[2]);
 			unsigned int len = (unsigned int)(
-#if defined(_STDEXT_BEGIN) && !(defined(_MSC_VER) && _MSC_VER < 1400) && !defined(_STLPORT_VERSION)
+#if defined(_STDEXT_BEGIN) && !(defined(_MSC_VER) && _MSC_VER < 1400 || _MSC_VER >= 1600) && !defined(_STLPORT_VERSION)
 				stdext::unchecked_mismatch
 #else
 				std::mismatch

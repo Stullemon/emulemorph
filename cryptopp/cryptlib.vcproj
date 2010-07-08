@@ -365,6 +365,9 @@ echo: &gt;&gt; adhoc.cpp.copied
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\authenc.cpp">
+			</File>
+			<File
 				RelativePath="base32.cpp">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -605,6 +608,9 @@ echo: &gt;&gt; adhoc.cpp.copied
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ccm.cpp">
+			</File>
+			<File
 				RelativePath="channels.cpp">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -627,6 +633,9 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\cmac.cpp">
 			</File>
 			<File
 				RelativePath=".\cpu.cpp">
@@ -849,6 +858,9 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\eax.cpp">
 			</File>
 			<File
 				RelativePath="ec2n.cpp">
@@ -1089,6 +1101,9 @@ echo: &gt;&gt; adhoc.cpp.copied
 						Optimization="1"
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\gcm.cpp">
 			</File>
 			<File
 				RelativePath="gf256.cpp">
@@ -1385,21 +1400,24 @@ echo: &gt;&gt; adhoc.cpp.copied
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="1"
-						PreprocessorDefinitions=""/>
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="0"
-						PreprocessorDefinitions=""/>
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 				<FileConfiguration
 					Name="Beta|Win32">
 					<Tool
 						Name="VCCLCompilerTool"
 						Optimization="1"
-						PreprocessorDefinitions=""/>
+						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"/>
 				</FileConfiguration>
 			</File>
 			<File
@@ -2222,6 +2240,9 @@ echo: &gt;&gt; adhoc.cpp.copied
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\seed.cpp">
+			</File>
+			<File
 				RelativePath="serpent.cpp">
 				<FileConfiguration
 					Name="Release|Win32">
@@ -2898,6 +2919,9 @@ echo: &gt;&gt; adhoc.cpp.copied
 				RelativePath="asn.h">
 			</File>
 			<File
+				RelativePath=".\authenc.h">
+			</File>
+			<File
 				RelativePath="base32.h">
 			</File>
 			<File
@@ -2922,7 +2946,13 @@ echo: &gt;&gt; adhoc.cpp.copied
 				RelativePath="cbcmac.h">
 			</File>
 			<File
+				RelativePath=".\ccm.h">
+			</File>
+			<File
 				RelativePath="channels.h">
+			</File>
+			<File
+				RelativePath=".\cmac.h">
 			</File>
 			<File
 				RelativePath="config.h">
@@ -2953,6 +2983,9 @@ echo: &gt;&gt; adhoc.cpp.copied
 			</File>
 			<File
 				RelativePath="dword.h">
+			</File>
+			<File
+				RelativePath=".\eax.h">
 			</File>
 			<File
 				RelativePath="ec2n.h">
@@ -2986,6 +3019,9 @@ echo: &gt;&gt; adhoc.cpp.copied
 			</File>
 			<File
 				RelativePath="fltrimpl.h">
+			</File>
+			<File
+				RelativePath=".\gcm.h">
 			</File>
 			<File
 				RelativePath="gf256.h">
@@ -3154,6 +3190,9 @@ echo: &gt;&gt; adhoc.cpp.copied
 			</File>
 			<File
 				RelativePath="seckey.h">
+			</File>
+			<File
+				RelativePath=".\seed.h">
 			</File>
 			<File
 				RelativePath="serpent.h">

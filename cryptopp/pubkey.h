@@ -240,7 +240,11 @@ public:
 		{
 			static HashIdentifier CRYPTOPP_API Lookup()
 			{
+#if (_MSC_VER < 1600)
 				return HashIdentifier(NULL, 0);
+#else
+				return HashIdentifier((const byte*)NULL, 0);
+#endif
 			}
 		};
 	};

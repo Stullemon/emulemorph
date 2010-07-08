@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="windows-1256"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="zlib90"
 	ProjectGUID="{5C2D7860-D1EE-4D75-B42B-EE548AD6E9F9}"
 	RootNamespace="zlib"
@@ -354,32 +354,20 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="gzio.c"
+				RelativePath=".\gzclose.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="debug90|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\gzlib.c"
+				>
+			</File>
+			<File
+				RelativePath=".\gzread.c"
+				>
+			</File>
+			<File
+				RelativePath=".\gzwrite.c"
+				>
 			</File>
 			<File
 				RelativePath="infback.c"
@@ -616,6 +604,10 @@
 			</File>
 			<File
 				RelativePath="deflate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\gzguts.h"
 				>
 			</File>
 			<File

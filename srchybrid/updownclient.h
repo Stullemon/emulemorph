@@ -510,7 +510,7 @@ public:
 
 	uint16			GetUpCompleteSourcesCount() const				{ return m_nUpCompleteSourcesCount; }
 	//MORPH START - Added by SiRoB, Keep A4AF infos
-	uint16			GetUpCompleteSourcesCount(const CPartFile* partfile) const				{ uint16 CompletSourceCount; return m_nUpCompleteSourcesCount_list.Lookup(partfile,CompletSourceCount)?CompletSourceCount:0; }
+	uint16			GetUpCompleteSourcesCount(const CPartFile* partfile) const				{ uint16 CompletSourceCount=0; return m_nUpCompleteSourcesCount_list.Lookup(partfile,CompletSourceCount)?CompletSourceCount:0; }
 	//MORPH END   - Added by SiRoB, Keep A4AF infos
 	
 	//MORPH START - Changed by SiRoB, Keep A4AF infos
