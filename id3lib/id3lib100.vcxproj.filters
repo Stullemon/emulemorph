@@ -202,8 +202,5 @@
     <ClInclude Include="include\id3\writers.h">
       <Filter>Include Files</Filter>
     </ClInclude>
-    <ClInclude Include="Zlib\Include\Zlib.h">
-      <Filter>Include Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

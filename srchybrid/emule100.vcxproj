@@ -1008,7 +1008,6 @@ del $(IntDir)emule.obj
     <ClInclude Include="Packets.h" />
     <ClInclude Include="PartFile.h" />
     <ClInclude Include="PartFileConvert.h" />
-    <ClInclude Include="PeerCacheClient.h" />
     <ClInclude Include="PeerCacheFinder.h" />
     <ClInclude Include="PeerCacheSocket.h" />
     <ClInclude Include="PerfLog.h" />
@@ -1023,7 +1022,6 @@ del $(IntDir)emule.obj
     <ClInclude Include="SafeFile.h" />
     <ClInclude Include="Scheduler.h" />
     <ClInclude Include="SearchFile.h" />
-    <ClInclude Include="SearchFrm.h" />
     <ClInclude Include="SearchList.h" />
     <ClInclude Include="SecRunAsUser.h" />
     <ClInclude Include="SendMail.h" />

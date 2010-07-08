@@ -2092,7 +2092,6 @@ echo: &gt;&gt; adhoc.cpp.copied
     <ClInclude Include="modexppc.h" />
     <ClInclude Include="mqueue.h" />
     <ClInclude Include="mqv.h" />
-    <ClInclude Include="mummy.h" />
     <ClInclude Include="nbtheory.h" />
     <ClInclude Include="network.h" />
     <ClInclude Include="nr.h" />
@@ -2146,7 +2145,6 @@ echo: &gt;&gt; adhoc.cpp.copied
     <ClInclude Include="whrlpool.h" />
     <ClInclude Include="winpipes.h" />
     <ClInclude Include="words.h" />
-    <ClInclude Include="xormac.h" />
     <ClInclude Include="xtr.h" />
     <ClInclude Include="xtrcrypt.h" />
     <ClInclude Include="zdeflate.h" />

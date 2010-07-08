@@ -1313,10 +1313,6 @@
 				>
 			</File>
 			<File
-				RelativePath="PeerCacheClient.h"
-				>
-			</File>
-			<File
 				RelativePath="PeerCacheFinder.h"
 				>
 			</File>
@@ -1366,10 +1362,6 @@
 			</File>
 			<File
 				RelativePath="SearchFile.h"
-				>
-			</File>
-			<File
-				RelativePath="SearchFrm.h"
 				>
 			</File>
 			<File

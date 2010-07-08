@@ -580,9 +580,6 @@
     <ClInclude Include="mqv.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="mummy.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="nbtheory.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -737,9 +734,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="words.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="xormac.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="xtr.h">

@@ -3258,9 +3258,6 @@ echo: &gt;&gt; adhoc.cpp.copied
 				RelativePath="words.h">
 			</File>
 			<File
-				RelativePath="xormac.h">
-			</File>
-			<File
 				RelativePath="xtr.h">
 			</File>
 			<File

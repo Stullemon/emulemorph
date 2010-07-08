@@ -8366,10 +8366,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\mummy.h"
-				>
-			</File>
-			<File
 				RelativePath="nbtheory.h"
 				>
 			</File>
@@ -8579,10 +8575,6 @@
 			</File>
 			<File
 				RelativePath="words.h"
-				>
-			</File>
-			<File
-				RelativePath="xormac.h"
 				>
 			</File>
 			<File

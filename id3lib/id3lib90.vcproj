@@ -1394,10 +1394,6 @@
 				RelativePath="include\id3\writers.h"
 				>
 			</File>
-			<File
-				RelativePath="Zlib\Include\Zlib.h"
-				>
-			</File>
 		</Filter>
 	</Files>
 	<Globals>
