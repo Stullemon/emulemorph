@@ -785,7 +785,12 @@ void CSharedFilesCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (!lpDrawItemStruct->itemData)
 		return;
 
+	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	/*
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
+	*/
+	CMemoryDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
+	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 	BOOL bCtrlFocused;
 	InitItemMemDC(dc, lpDrawItemStruct, bCtrlFocused);
 	CRect cur_rec(lpDrawItemStruct->rcItem);

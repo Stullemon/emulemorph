@@ -98,20 +98,19 @@ public:
 		if (n == 0)
 			return NULL;
 
-		if (T_Align16 && n*sizeof(T) >= 16)
+		if (CRYPTOPP_BOOL_ALIGN16_ENABLED && T_Align16 && n*sizeof(T) >= 16)
 		{
 			byte *p;
 		#ifdef CRYPTOPP_MM_MALLOC_AVAILABLE
-			p = (byte *)_mm_malloc(sizeof(T)*n, 16);
+			while (!(p = (byte *)_mm_malloc(sizeof(T)*n, 16)))
 		#elif defined(CRYPTOPP_MEMALIGN_AVAILABLE)
-			p = (byte *)memalign(16, sizeof(T)*n);
+			while (!(p = (byte *)memalign(16, sizeof(T)*n)))
 		#elif defined(CRYPTOPP_MALLOC_ALIGNMENT_IS_16)
-			p = (byte *)malloc(sizeof(T)*n);
+			while (!(p = (byte *)malloc(sizeof(T)*n)))
 		#else
-			p = (byte *)malloc(sizeof(T)*n + 16)
+			while (!(p = (byte *)malloc(sizeof(T)*n + 16)))
 		#endif
-				while (!p)
-					CallNewHandler();
+				CallNewHandler();
 
 		#ifdef CRYPTOPP_NO_ALIGNED_ALLOC
 			size_t adjustment = 16-((size_t)p%16);
@@ -124,17 +123,16 @@ public:
 		}
 
 		pointer p;
-		p = (pointer)malloc(sizeof(T)*n);
-		while (!p)
+		while (!(p = (pointer)malloc(sizeof(T)*n)))
 			CallNewHandler();
 		return p;
 	}
 
 	void deallocate(void *p, size_type n)
 	{
-		memset(p, 0, n*sizeof(T));
+		memset_z(p, 0, n*sizeof(T));
 
-		if (T_Align16 && n*sizeof(T) >= 16)
+		if (CRYPTOPP_BOOL_ALIGN16_ENABLED && T_Align16 && n*sizeof(T) >= 16)
 		{
 		#ifdef CRYPTOPP_MM_MALLOC_AVAILABLE
 			_mm_free(p);
@@ -264,8 +262,8 @@ private:
 	T* GetAlignedArray() {return m_array;}
 	T m_array[S];
 #else
-	T* GetAlignedArray() {return T_Align16 ? (T*)(((byte *)m_array) + (0-(size_t)m_array)%16) : m_array;}
-	CRYPTOPP_ALIGN_DATA(8) T m_array[T_Align16 ? S+8/sizeof(T) : S];
+	T* GetAlignedArray() {return (CRYPTOPP_BOOL_ALIGN16_ENABLED && T_Align16) ? (T*)(((byte *)m_array) + (0-(size_t)m_array)%16) : m_array;}
+	CRYPTOPP_ALIGN_DATA(8) T m_array[(CRYPTOPP_BOOL_ALIGN16_ENABLED && T_Align16) ? S+8/sizeof(T) : S];
 #endif
 	A m_fallbackAllocator;
 	bool m_allocated;
@@ -290,7 +288,7 @@ public:
 	{
 		m_ptr = m_alloc.allocate(len, NULL);
 		if (t == NULL)
-			memset(m_ptr, 0, len*sizeof(T));
+			memset_z(m_ptr, 0, len*sizeof(T));
 		else
 			memcpy(m_ptr, t, len*sizeof(T));
 	}
@@ -384,7 +382,7 @@ public:
 
 	bool operator==(const SecBlock<T, A> &t) const
 	{
-		return m_size == t.m_size && memcmp(m_ptr, t.m_ptr, m_size*sizeof(T)) == 0;
+		return m_size == t.m_size && VerifyBufsEqual(m_ptr, t.m_ptr, m_size*sizeof(T));
 	}
 
 	bool operator!=(const SecBlock<T, A> &t) const
@@ -403,7 +401,7 @@ public:
 	void CleanNew(size_type newSize)
 	{
 		New(newSize);
-		memset(m_ptr, 0, m_size*sizeof(T));
+		memset_z(m_ptr, 0, m_size*sizeof(T));
 	}
 
 	//! change size only if newSize > current size. contents are preserved
@@ -449,7 +447,7 @@ public:
 };
 
 typedef SecBlock<byte> SecByteBlock;
-typedef SecBlock<byte, AllocatorWithCleanup<byte, CRYPTOPP_BOOL_X86 | CRYPTOPP_BOOL_X64> > AlignedSecByteBlock;
+typedef SecBlock<byte, AllocatorWithCleanup<byte, true> > AlignedSecByteBlock;
 typedef SecBlock<word> SecWordBlock;
 
 //! a SecBlock with fixed size, allocated statically
@@ -460,8 +458,8 @@ public:
 	explicit FixedSizeSecBlock() : SecBlock<T, A>(S) {}
 };
 
-template <class T, unsigned int S, bool T_Align16 = CRYPTOPP_BOOL_X86 | CRYPTOPP_BOOL_X64>
-class FixedSizeAlignedSecBlock : public FixedSizeSecBlock<T, S, FixedSizeAllocatorWithCleanup<T, S, NullAllocator<word32>, T_Align16> >
+template <class T, unsigned int S, bool T_Align16 = true>
+class FixedSizeAlignedSecBlock : public FixedSizeSecBlock<T, S, FixedSizeAllocatorWithCleanup<T, S, NullAllocator<T>, T_Align16> >
 {
 };
 

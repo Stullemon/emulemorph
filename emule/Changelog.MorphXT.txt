@@ -1,4 +1,18 @@
 --------------------------------------
+Changelog for eMule 0.50a MorphXT v12.4
+--------------------------------------
+XX-XX-2010
+
+ADD: Visual Studio 2010 project files and solution [Stulle]
+CHANGE: update cryptolib Version 5.6.0 (3/15/2009) [Stulle]
+CHANGE: update pugxml.h (http://www.codeproject.com/KB/cpp/JCraneArticle.aspx) [JCrane2/tychen]
+CHANGE: update zlib 1.2.5 [Stulle]
+CHANGE: update libpng 1.4.3 [Stulle]
+CHANGE: Rename CMemDC to CMemoryDC [Avi-3k]
+CHANGE: Some other minor changes to compile on VS 2010
+
+
+--------------------------------------
 Changelog for eMule 0.50a MorphXT v12.3
 --------------------------------------
 14-06-2010
@@ -78,7 +92,7 @@ Changelog for eMule 0.50a MorphXT v12.0
 26-04-2010
 
 Merged to 0.50a [Stulle]
-CHANGE: update libping to 1.41 [Stulle]
+CHANGE: update libpng to 1.4.1 [Stulle]
 ADD: Visual Studio 2008 project files and solution [Stulle]
 ADD: ATL Server code for VS2008 compilation [Stulle]
 ADD: Settings removed from official eMule to Advanced Preferences [Officials/Stulle]

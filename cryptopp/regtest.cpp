@@ -25,6 +25,28 @@
 #include "md5.h"
 #include "sosemanuk.h"
 #include "arc4.h"
+#include "ccm.h"
+#include "gcm.h"
+#include "eax.h"
+#include "twofish.h"
+#include "serpent.h"
+#include "cast.h"
+#include "rc6.h"
+#include "mars.h"
+#include "shacal2.h"
+#include "des.h"
+#include "idea.h"
+#include "rc5.h"
+#include "tea.h"
+#include "skipjack.h"
+#include "cmac.h"
+#include "dmac.h"
+#include "blowfish.h"
+#include "seed.h"
+#include "wake.h"
+#include "seal.h"
+#include "crc.h"
+#include "adler32.h"
 
 USING_NAMESPACE(CryptoPP)
 
@@ -35,16 +57,16 @@ void RegisterFactories()
 		return;
 
 	RegisterDefaultFactoryFor<SimpleKeyAgreementDomain, DH>();
+	RegisterDefaultFactoryFor<HashTransformation, CRC32>();
+	RegisterDefaultFactoryFor<HashTransformation, Adler32>();
 	RegisterDefaultFactoryFor<HashTransformation, Weak::MD5>();
 	RegisterDefaultFactoryFor<HashTransformation, SHA1>();
 	RegisterDefaultFactoryFor<HashTransformation, SHA224>();
 	RegisterDefaultFactoryFor<HashTransformation, SHA256>();
-#ifdef WORD64_AVAILABLE
 	RegisterDefaultFactoryFor<HashTransformation, SHA384>();
 	RegisterDefaultFactoryFor<HashTransformation, SHA512>();
 	RegisterDefaultFactoryFor<HashTransformation, Whirlpool>();
 	RegisterDefaultFactoryFor<HashTransformation, Tiger>();
-#endif
 	RegisterDefaultFactoryFor<HashTransformation, RIPEMD160>();
 	RegisterDefaultFactoryFor<HashTransformation, RIPEMD320>();
 	RegisterDefaultFactoryFor<HashTransformation, RIPEMD128>();
@@ -59,6 +81,9 @@ void RegisterFactories()
 	RegisterDefaultFactoryFor<MessageAuthenticationCode, VMAC<AES, 64> >();
 	RegisterDefaultFactoryFor<MessageAuthenticationCode, Weak::PanamaMAC<LittleEndian> >();
 	RegisterDefaultFactoryFor<MessageAuthenticationCode, Weak::PanamaMAC<BigEndian> >();
+	RegisterDefaultFactoryFor<MessageAuthenticationCode, CMAC<AES> >();
+	RegisterDefaultFactoryFor<MessageAuthenticationCode, DMAC<AES> >();
+	RegisterDefaultFactoryFor<MessageAuthenticationCode, CMAC<DES_EDE3> >();
 	RegisterAsymmetricCipherDefaultFactories<RSAES<OAEP<SHA1> > >("RSA/OAEP-MGF1(SHA-1)");
 	RegisterAsymmetricCipherDefaultFactories<DLIES<> >("DLIES(NoCofactorMultiplication, KDF2(SHA-1), XOR, HMAC(SHA-1), DHAES)");
 	RegisterSignatureSchemeDefaultFactories<DSA>("DSA(1363)");
@@ -82,8 +107,33 @@ void RegisterFactories()
 	RegisterSymmetricCipherDefaultFactories<OFB_Mode<AES> >();
 	RegisterSymmetricCipherDefaultFactories<CTR_Mode<AES> >();
 	RegisterSymmetricCipherDefaultFactories<Salsa20>();
+	RegisterSymmetricCipherDefaultFactories<XSalsa20>();
 	RegisterSymmetricCipherDefaultFactories<Sosemanuk>();
 	RegisterSymmetricCipherDefaultFactories<Weak::MARC4>();
+	RegisterSymmetricCipherDefaultFactories<WAKE_OFB<LittleEndian> >();
+	RegisterSymmetricCipherDefaultFactories<SEAL<LittleEndian> >();
+	RegisterAuthenticatedSymmetricCipherDefaultFactories<CCM<AES> >();
+	RegisterAuthenticatedSymmetricCipherDefaultFactories<GCM<AES> >();
+	RegisterAuthenticatedSymmetricCipherDefaultFactories<EAX<AES> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<Camellia> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<Twofish> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<Serpent> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<CAST256> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<RC6> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<MARS> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<SHACAL2> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<DES> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<DES_XEX3> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<DES_EDE3> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<IDEA> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<RC5> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<TEA> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<XTEA> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<CAST128> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<SKIPJACK> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<Blowfish> >();
+	RegisterSymmetricCipherDefaultFactories<ECB_Mode<SEED> >();
+	RegisterSymmetricCipherDefaultFactories<CTR_Mode<SEED> >();
 
 	s_registered = true;
 }

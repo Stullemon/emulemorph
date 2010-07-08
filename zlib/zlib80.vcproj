@@ -353,32 +353,20 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="gzio.c"
+				RelativePath=".\gzclose.c"
 				>
-				<FileConfiguration
-					Name="Debug|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="debug80|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						PreprocessorDefinitions=""
-					/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\gzlib.c"
+				>
+			</File>
+			<File
+				RelativePath=".\gzread.c"
+				>
+			</File>
+			<File
+				RelativePath=".\gzwrite.c"
+				>
 			</File>
 			<File
 				RelativePath="infback.c"
@@ -615,6 +603,10 @@
 			</File>
 			<File
 				RelativePath="deflate.h"
+				>
+			</File>
+			<File
+				RelativePath=".\gzguts.h"
 				>
 			</File>
 			<File

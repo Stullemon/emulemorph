@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="gb2312"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="9.00"
+	Version="9,00"
 	Name="cryptlib90"
 	ProjectGUID="{3423EC9A-52E4-4A4D-9753-EDEBC38785EF}"
 	RootNamespace="cryptlib"
@@ -1155,6 +1155,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\authenc.cpp"
+				>
+			</File>
+			<File
 				RelativePath="base32.cpp"
 				>
 				<FileConfiguration
@@ -1805,6 +1809,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ccm.cpp"
+				>
+			</File>
+			<File
 				RelativePath="channels.cpp"
 				>
 				<FileConfiguration
@@ -1868,6 +1876,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\cmac.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\cpu.cpp"
@@ -2464,6 +2476,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\eax.cpp"
+				>
 			</File>
 			<File
 				RelativePath="ec2n.cpp"
@@ -3132,6 +3148,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\gcm.cpp"
+				>
 			</File>
 			<File
 				RelativePath="gf256.cpp"
@@ -3923,6 +3943,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -3931,6 +3952,7 @@
 					<Tool
 						Name="VCCLCompilerTool"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -3940,6 +3962,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -3949,6 +3972,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -3958,6 +3982,23 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="debug90|x64"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL-Import Release|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -3967,6 +4008,15 @@
 						Name="VCCLCompilerTool"
 						Optimization="2"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="DLL-Import Debug|Win32"
+					>
+					<Tool
+						Name="VCCLCompilerTool"
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -3976,6 +4026,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="0"
 						PreprocessorDefinitions=""
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 			</File>
@@ -6201,6 +6252,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\seed.cpp"
+				>
+			</File>
+			<File
 				RelativePath="serpent.cpp"
 				>
 				<FileConfiguration
@@ -8065,6 +8120,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\authenc.h"
+				>
+			</File>
+			<File
 				RelativePath="base32.h"
 				>
 			</File>
@@ -8097,7 +8156,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ccm.h"
+				>
+			</File>
+			<File
 				RelativePath="channels.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cmac.h"
 				>
 			</File>
 			<File
@@ -8138,6 +8205,10 @@
 			</File>
 			<File
 				RelativePath="dsa.h"
+				>
+			</File>
+			<File
+				RelativePath=".\eax.h"
 				>
 			</File>
 			<File
@@ -8182,6 +8253,10 @@
 			</File>
 			<File
 				RelativePath="fltrimpl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\gcm.h"
 				>
 			</File>
 			<File
@@ -8406,6 +8481,10 @@
 			</File>
 			<File
 				RelativePath="seckey.h"
+				>
+			</File>
+			<File
+				RelativePath=".\seed.h"
 				>
 			</File>
 			<File

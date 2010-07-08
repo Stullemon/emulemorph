@@ -3,22 +3,6 @@
 #define _CRT_SECURE_NO_DEPRECATE
 
 #include "bench.h"
-#include "crc.h"
-#include "adler32.h"
-#include "idea.h"
-#include "des.h"
-#include "rc5.h"
-#include "blowfish.h"
-#include "wake.h"
-#include "cast.h"
-#include "seal.h"
-#include "rc6.h"
-#include "mars.h"
-#include "twofish.h"
-#include "serpent.h"
-#include "skipjack.h"
-#include "cbcmac.h"
-#include "dmac.h"
 #include "aes.h"
 #include "blumshub.h"
 #include "rng.h"
@@ -85,6 +69,7 @@ void OutputResultOperations(const char *name, const char *operation, bool pc, un
 	logcount++;
 }
 
+/*
 void BenchMark(const char *name, BlockTransformation &cipher, double timeTotal)
 {
 	const int BUF_SIZE = RoundUpToMultipleOf(2048U, cipher.OptimalNumberOfParallelBlocks() * cipher.BlockSize());
@@ -105,6 +90,7 @@ void BenchMark(const char *name, BlockTransformation &cipher, double timeTotal)
 
 	OutputResultBytes(name, double(blocks) * BUF_SIZE, timeTaken);
 }
+*/
 
 void BenchMark(const char *name, StreamTransformation &cipher, double timeTotal)
 {
@@ -188,36 +174,9 @@ void BenchMarkKeying(SimpleKeyingInterface &c, size_t keyLength, const NameValue
 }
 
 //VC60 workaround: compiler bug triggered without the extra dummy parameters
-template <class T>
-void BenchMarkKeyed(const char *name, double timeTotal, const NameValuePairs &params = g_nullNameValuePairs, T *x=NULL)
-{
-	T c;
-	c.SetKey(key, c.DefaultKeyLength(), CombinedNameValuePairs(params, MakeParameters(Name::IV(), key, false)));
-	BenchMark(name, c, timeTotal);
-	BenchMarkKeying(c, c.DefaultKeyLength(), CombinedNameValuePairs(params, MakeParameters(Name::IV(), key, false)));
-}
-
-//VC60 workaround: compiler bug triggered without the extra dummy parameters
-template <class T>
-void BenchMarkKeyedVariable(const char *name, double timeTotal, unsigned int keyLength, const NameValuePairs &params = g_nullNameValuePairs, T *x=NULL)
-{
-	T c;
-	c.SetKey(key, keyLength, CombinedNameValuePairs(params, MakeParameters(Name::IV(), key, false)));
-	BenchMark(name, c, timeTotal);
-	BenchMarkKeying(c, keyLength, CombinedNameValuePairs(params, MakeParameters(Name::IV(), key, false)));
-}
-
-//VC60 workaround: compiler bug triggered without the extra dummy parameters
-template <class T>
-void BenchMarkKeyless(const char *name, double timeTotal, T *x=NULL)
-{
-	T c;
-	BenchMark(name, c, timeTotal);
-}
-
-//VC60 workaround: compiler bug triggered without the extra dummy parameters
-template <class T>
-void BenchMarkByName(const char *factoryName, size_t keyLength = 0, const char *displayName=NULL, const NameValuePairs &params = g_nullNameValuePairs, T *x=NULL)
+// on VC60 also needs to be named differently from BenchMarkByName
+template <class T_FactoryOutput, class T_Interface>
+void BenchMarkByName2(const char *factoryName, size_t keyLength = 0, const char *displayName=NULL, const NameValuePairs &params = g_nullNameValuePairs, T_FactoryOutput *x=NULL, T_Interface *y=NULL)
 {
 	std::string name = factoryName;
 	if (displayName)
@@ -225,12 +184,19 @@ void BenchMarkByName(const char *factoryName, size_t keyLength = 0, const char *
 	else if (keyLength)
 		name += " (" + IntToString(keyLength * 8) + "-bit key)";
 
-	std::auto_ptr<T> obj(ObjectFactoryRegistry<T>::Registry().CreateObject(factoryName));
+	std::auto_ptr<T_FactoryOutput> obj(ObjectFactoryRegistry<T_FactoryOutput>::Registry().CreateObject(factoryName));
 	if (!keyLength)
 		keyLength = obj->DefaultKeyLength();
-	obj->SetKey(key, keyLength, CombinedNameValuePairs(params, MakeParameters(Name::IV(), key, false)));
-	BenchMark(name.c_str(), *obj, g_allocatedTime);
-	BenchMarkKeying(*obj, keyLength, CombinedNameValuePairs(params, MakeParameters(Name::IV(), key, false)));
+	obj->SetKey(key, keyLength, CombinedNameValuePairs(params, MakeParameters(Name::IV(), ConstByteArrayParameter(key, obj->IVSize()), false)));
+	BenchMark(name.c_str(), *static_cast<T_Interface *>(obj.get()), g_allocatedTime);
+	BenchMarkKeying(*obj, keyLength, CombinedNameValuePairs(params, MakeParameters(Name::IV(), ConstByteArrayParameter(key, obj->IVSize()), false)));
+}
+
+//VC60 workaround: compiler bug triggered without the extra dummy parameters
+template <class T_FactoryOutput>
+void BenchMarkByName(const char *factoryName, size_t keyLength = 0, const char *displayName=NULL, const NameValuePairs &params = g_nullNameValuePairs, T_FactoryOutput *x=NULL)
+{
+	BenchMarkByName2<T_FactoryOutput, T_FactoryOutput>(factoryName, keyLength, displayName, params, x, x);
 }
 
 template <class T>
@@ -268,25 +234,31 @@ void BenchmarkAll(double t, double hertz)
 	cout << "<TABLE border=1><COLGROUP><COL align=left><COL align=right><COL align=right><COL align=right><COL align=right>" << endl;
 	cout << "<THEAD><TR><TH>Algorithm<TH>MiB/Second" << cpb << "<TH>Microseconds to<br>Setup Key and IV" << cpk << endl;
 
+	cout << "\n<TBODY style=\"background: yellow\">";
+	BenchMarkByName2<AuthenticatedSymmetricCipher, StreamTransformation>("AES/GCM", 0, "AES/GCM (2K tables)", MakeParameters(Name::TableSize(), 2048));
+	BenchMarkByName2<AuthenticatedSymmetricCipher, StreamTransformation>("AES/GCM", 0, "AES/GCM (64K tables)", MakeParameters(Name::TableSize(), 64*1024));
+	BenchMarkByName2<AuthenticatedSymmetricCipher, StreamTransformation>("AES/CCM");
+	BenchMarkByName2<AuthenticatedSymmetricCipher, StreamTransformation>("AES/EAX");
+
 	cout << "\n<TBODY style=\"background: white\">";
+	BenchMarkByName2<AuthenticatedSymmetricCipher, MessageAuthenticationCode>("AES/GCM", 0, "GMAC(AES) (2K tables)", MakeParameters(Name::TableSize(), 2048));
+	BenchMarkByName2<AuthenticatedSymmetricCipher, MessageAuthenticationCode>("AES/GCM", 0, "GMAC(AES) (64K tables)", MakeParameters(Name::TableSize(), 64*1024));
 	BenchMarkByName<MessageAuthenticationCode>("VMAC(AES)-64");
 	BenchMarkByName<MessageAuthenticationCode>("VMAC(AES)-128");
 	BenchMarkByName<MessageAuthenticationCode>("HMAC(SHA-1)");
 	BenchMarkByName<MessageAuthenticationCode>("Two-Track-MAC");
-	BenchMarkKeyed<CBC_MAC<AES> >("CBC-MAC/AES", t);
-	BenchMarkKeyed<DMAC<AES> >("DMAC/AES", t);
+	BenchMarkByName<MessageAuthenticationCode>("CMAC(AES)");
+	BenchMarkByName<MessageAuthenticationCode>("DMAC(AES)");
 
 	cout << "\n<TBODY style=\"background: yellow\">";
-	BenchMarkKeyless<CRC32>("CRC-32", t);
-	BenchMarkKeyless<Adler32>("Adler-32", t);
+	BenchMarkByNameKeyLess<HashTransformation>("CRC32");
+	BenchMarkByNameKeyLess<HashTransformation>("Adler32");
 	BenchMarkByNameKeyLess<HashTransformation>("MD5");
 	BenchMarkByNameKeyLess<HashTransformation>("SHA-1");
 	BenchMarkByNameKeyLess<HashTransformation>("SHA-256");
-#ifdef WORD64_AVAILABLE
 	BenchMarkByNameKeyLess<HashTransformation>("SHA-512");
 	BenchMarkByNameKeyLess<HashTransformation>("Tiger");
 	BenchMarkByNameKeyLess<HashTransformation>("Whirlpool");
-#endif
 	BenchMarkByNameKeyLess<HashTransformation>("RIPEMD-160");
 	BenchMarkByNameKeyLess<HashTransformation>("RIPEMD-320");
 	BenchMarkByNameKeyLess<HashTransformation>("RIPEMD-128");
@@ -300,38 +272,39 @@ void BenchmarkAll(double t, double hertz)
 	BenchMarkByName<SymmetricCipher>("Salsa20", 0, "Salsa20/8", MakeParameters(Name::Rounds(), 8));
 	BenchMarkByName<SymmetricCipher>("Sosemanuk");
 	BenchMarkByName<SymmetricCipher>("MARC4");
-	BenchMarkKeyed<SEAL<BigEndian>::Encryption>("SEAL-3.0-BE", t);
-	BenchMarkKeyed<SEAL<LittleEndian>::Encryption>("SEAL-3.0-LE", t);
-	BenchMarkKeyed<WAKE_OFB<BigEndian>::Encryption>("WAKE-OFB-BE", t);
-	BenchMarkKeyed<WAKE_OFB<LittleEndian>::Encryption>("WAKE-OFB-LE", t);
+	BenchMarkByName<SymmetricCipher>("SEAL-3.0-LE");
+	BenchMarkByName<SymmetricCipher>("WAKE-OFB-LE");
 
 	cout << "\n<TBODY style=\"background: yellow\">";
-	BenchMarkByName<SymmetricCipher>("AES/ECB", 16);
-	BenchMarkByName<SymmetricCipher>("AES/ECB", 24);
-	BenchMarkByName<SymmetricCipher>("AES/ECB", 32);
 	BenchMarkByName<SymmetricCipher>("AES/CTR", 16);
+	BenchMarkByName<SymmetricCipher>("AES/CTR", 24);
+	BenchMarkByName<SymmetricCipher>("AES/CTR", 32);
+	BenchMarkByName<SymmetricCipher>("AES/CBC", 16);
+	BenchMarkByName<SymmetricCipher>("AES/CBC", 24);
+	BenchMarkByName<SymmetricCipher>("AES/CBC", 32);
 	BenchMarkByName<SymmetricCipher>("AES/OFB", 16);
 	BenchMarkByName<SymmetricCipher>("AES/CFB", 16);
-	BenchMarkByName<SymmetricCipher>("AES/CBC", 16);
-	BenchMarkByName<SymmetricCipher>("Camellia/ECB", 16);
-	BenchMarkByName<SymmetricCipher>("Camellia/ECB", 32);
-	BenchMarkKeyed<Twofish::Encryption>("Twofish", t);
-	BenchMarkKeyed<Serpent::Encryption>("Serpent", t);
-	BenchMarkKeyed<CAST256::Encryption>("CAST-256", t);
-	BenchMarkKeyed<RC6::Encryption>("RC6", t);
-	BenchMarkKeyed<MARS::Encryption>("MARS", t);
-	BenchMarkByName<SymmetricCipher>("SHACAL-2/ECB", 16);
-	BenchMarkByName<SymmetricCipher>("SHACAL-2/ECB", 64);
-	BenchMarkKeyed<DES::Encryption>("DES", t);
-	BenchMarkKeyed<DES_XEX3::Encryption>("DES-XEX3", t);
-	BenchMarkKeyed<DES_EDE3::Encryption>("DES-EDE3", t);
-	BenchMarkKeyed<IDEA::Encryption>("IDEA", t);
-	BenchMarkKeyed<RC5::Encryption>("RC5 (r=16)", t);
-	BenchMarkKeyed<Blowfish::Encryption>("Blowfish", t);
-	BenchMarkByName<SymmetricCipher>("TEA/ECB");
-	BenchMarkByName<SymmetricCipher>("XTEA/ECB");
-	BenchMarkKeyed<CAST128::Encryption>("CAST-128", t);
-	BenchMarkKeyed<SKIPJACK::Encryption>("SKIPJACK", t);
+	BenchMarkByName<SymmetricCipher>("AES/ECB", 16);
+	BenchMarkByName<SymmetricCipher>("Camellia/CTR", 16);
+	BenchMarkByName<SymmetricCipher>("Camellia/CTR", 32);
+	BenchMarkByName<SymmetricCipher>("Twofish/CTR");
+	BenchMarkByName<SymmetricCipher>("Serpent/CTR");
+	BenchMarkByName<SymmetricCipher>("CAST-256/CTR");
+	BenchMarkByName<SymmetricCipher>("RC6/CTR");
+	BenchMarkByName<SymmetricCipher>("MARS/CTR");
+	BenchMarkByName<SymmetricCipher>("SHACAL-2/CTR", 16);
+	BenchMarkByName<SymmetricCipher>("SHACAL-2/CTR", 64);
+	BenchMarkByName<SymmetricCipher>("DES/CTR");
+	BenchMarkByName<SymmetricCipher>("DES-XEX3/CTR");
+	BenchMarkByName<SymmetricCipher>("DES-EDE3/CTR");
+	BenchMarkByName<SymmetricCipher>("IDEA/CTR");
+	BenchMarkByName<SymmetricCipher>("RC5/CTR", 0, "RC5 (r=16)");
+	BenchMarkByName<SymmetricCipher>("Blowfish/CTR");
+	BenchMarkByName<SymmetricCipher>("TEA/CTR");
+	BenchMarkByName<SymmetricCipher>("XTEA/CTR");
+	BenchMarkByName<SymmetricCipher>("CAST-128/CTR");
+	BenchMarkByName<SymmetricCipher>("SKIPJACK/CTR");
+	BenchMarkByName<SymmetricCipher>("SEED/CTR", 0, "SEED/CTR (1/2 K table)");
 	cout << "</TABLE>" << endl;
 
 	BenchmarkAll2(t, hertz);

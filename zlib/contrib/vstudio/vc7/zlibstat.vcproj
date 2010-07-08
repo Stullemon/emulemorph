@@ -227,43 +227,16 @@
 				RelativePath="..\..\..\deflate.c">
 			</File>
 			<File
-				RelativePath="..\..\masmx86\gvmat32.asm">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Assembling..."
-						CommandLine="ml.exe /nologo /c /Cx /coff /Zi /safeseh /Fo $(IntDir)\ &quot;$(InputPath)&quot;
-"
-						Outputs="$(IntDir)\$(InputName).obj"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Assembling..."
-						CommandLine="ml.exe /nologo /c /Cx /coff /Zi /safeseh /Fo $(IntDir)\ &quot;$(InputPath)&quot;
-"
-						Outputs="$(IntDir)\$(InputName).obj"/>
-				</FileConfiguration>
+				RelativePath="..\..\..\gzclose.c">
 			</File>
 			<File
-				RelativePath="..\..\masmx86\gvmat32c.c">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories="."/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories="."/>
-				</FileConfiguration>
+				RelativePath="..\..\..\gzlib.c">
 			</File>
 			<File
-				RelativePath="..\..\..\gzio.c">
+				RelativePath="..\..\..\gzread.c">
+			</File>
+			<File
+				RelativePath="..\..\..\gzwrite.c">
 			</File>
 			<File
 				RelativePath="..\..\..\infback.c">

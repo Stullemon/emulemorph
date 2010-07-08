@@ -543,6 +543,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\authenc.cpp"
+				>
+			</File>
+			<File
 				RelativePath="basecode.cpp"
 				>
 				<FileConfiguration
@@ -627,6 +631,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\ccm.cpp"
+				>
+			</File>
+			<File
 				RelativePath="channels.cpp"
 				>
 				<FileConfiguration
@@ -667,6 +675,10 @@
 						BasicRuntimeChecks="3"
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath=".\cmac.cpp"
+				>
 			</File>
 			<File
 				RelativePath=".\cpu.cpp"
@@ -1269,6 +1281,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath=".\gcm.cpp"
+				>
+			</File>
+			<File
 				RelativePath="gf2n.cpp"
 				>
 				<FileConfiguration
@@ -1492,6 +1508,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="1"
 						PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;_MBCS;_USRDLL;CRYPTOPP_EXPORTS;CRYPTOPP_ENABLE_COMPLIANCE_WITH_FIPS_140_2=1;USE_PRECOMPILED_HEADERS;$(NoInherit)"
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1501,6 +1518,7 @@
 						Name="VCCLCompilerTool"
 						Optimization="1"
 						PreprocessorDefinitions="NDEBUG;WIN32;_WINDOWS;_MBCS;_USRDLL;CRYPTOPP_EXPORTS;CRYPTOPP_ENABLE_COMPLIANCE_WITH_FIPS_140_2=1;USE_PRECOMPILED_HEADERS;$(NoInherit)"
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1511,6 +1529,7 @@
 						Optimization="0"
 						PreprocessorDefinitions="_DEBUG;WIN32;_WINDOWS;_MBCS;_USRDLL;CRYPTOPP_EXPORTS;CRYPTOPP_ENABLE_COMPLIANCE_WITH_FIPS_140_2=1;USE_PRECOMPILED_HEADERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -1521,6 +1540,7 @@
 						Optimization="0"
 						PreprocessorDefinitions="_DEBUG;WIN32;_WINDOWS;_MBCS;_USRDLL;CRYPTOPP_EXPORTS;CRYPTOPP_ENABLE_COMPLIANCE_WITH_FIPS_140_2=1;USE_PRECOMPILED_HEADERS;$(NoInherit)"
 						BasicRuntimeChecks="3"
+						UsePrecompiledHeader="0"
 					/>
 				</FileConfiguration>
 			</File>
@@ -2377,15 +2397,15 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\x64masm.asm"
+				RelativePath=".\x64dll.asm"
 				>
 				<FileConfiguration
 					Name="Release|x64"
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="ml64.exe /c /nologo /Fo&quot;$(IntDir)\x64masm.obj&quot; /Zi $(InputPath)"
-						Outputs="$(IntDir)\x64masm.obj"
+						CommandLine="ml64.exe /c /nologo /Fo&quot;$(IntDir)\x64dll.obj&quot; /Zi &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						Outputs="$(IntDir)\x64dll.obj"
 					/>
 				</FileConfiguration>
 				<FileConfiguration
@@ -2393,8 +2413,8 @@
 					>
 					<Tool
 						Name="VCCustomBuildTool"
-						CommandLine="ml64.exe /c /nologo /Fo&quot;$(IntDir)\x64masm.obj&quot; /Zi $(InputPath)"
-						Outputs="$(IntDir)\x64masm.obj"
+						CommandLine="ml64.exe /c /nologo /Fo&quot;$(IntDir)\x64dll.obj&quot; /Zi &quot;$(InputPath)&quot;&#x0D;&#x0A;"
+						Outputs="$(IntDir)\x64dll.obj"
 					/>
 				</FileConfiguration>
 			</File>
@@ -2424,6 +2444,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\authenc.h"
+				>
+			</File>
+			<File
 				RelativePath="basecode.h"
 				>
 			</File>
@@ -2432,7 +2456,15 @@
 				>
 			</File>
 			<File
+				RelativePath=".\ccm.h"
+				>
+			</File>
+			<File
 				RelativePath="channels.h"
+				>
+			</File>
+			<File
+				RelativePath=".\cmac.h"
 				>
 			</File>
 			<File
@@ -2497,6 +2529,10 @@
 			</File>
 			<File
 				RelativePath="fltrimpl.h"
+				>
+			</File>
+			<File
+				RelativePath=".\gcm.h"
 				>
 			</File>
 			<File

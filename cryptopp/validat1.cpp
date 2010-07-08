@@ -93,6 +93,11 @@ bool ValidateAll(bool thorough)
 	pass=ValidateSalsa() && pass;
 	pass=ValidateSosemanuk() && pass;
 	pass=ValidateVMAC() && pass;
+	pass=ValidateCCM() && pass;
+	pass=ValidateGCM() && pass;
+	pass=ValidateCMAC() && pass;
+	pass=RunTestDataFile("TestVectors/eax.txt") && pass;
+	pass=RunTestDataFile("TestVectors/seed.txt") && pass;
 
 	pass=ValidateBBS() && pass;
 	pass=ValidateDH() && pass;
@@ -154,6 +159,19 @@ bool TestSettings()
 		pass = false;
 	}
 
+#ifdef CRYPTOPP_ALLOW_UNALIGNED_DATA_ACCESS
+	byte testvals[10] = {1,2,2,3,3,3,3,2,2,1};
+	if (*(word32 *)(testvals+3) == 0x03030303 && *(word64 *)(testvals+1) == W64LIT(0x0202030303030202))
+		cout << "passed:  Your machine allows unaligned data access.\n";
+	else
+	{
+		cout << "FAILED:  Unaligned data access gave incorrect results.\n";
+		pass = false;
+	}
+#else
+	cout << "passed:  CRYPTOPP_ALLOW_UNALIGNED_DATA_ACCESS is not defined. Will restrict to aligned data access.\n";
+#endif
+
 	if (sizeof(byte) == 1)
 		cout << "passed:  ";
 	else
@@ -181,7 +199,6 @@ bool TestSettings()
 	}
 	cout << "sizeof(word32) == " << sizeof(word32) << endl;
 
-#ifdef WORD64_AVAILABLE
 	if (sizeof(word64) == 8)
 		cout << "passed:  ";
 	else
@@ -190,15 +207,6 @@ bool TestSettings()
 		pass = false;
 	}
 	cout << "sizeof(word64) == " << sizeof(word64) << endl;
-#elif defined(CRYPTOPP_NATIVE_DWORD_AVAILABLE)
-	if (sizeof(dword) >= 8)
-	{
-		cout << "FAILED:  sizeof(dword) >= 8, but WORD64_AVAILABLE not defined" << endl;
-		pass = false;
-	}
-	else
-		cout << "passed:  word64 not available" << endl;
-#endif
 
 #ifdef CRYPTOPP_WORD128_AVAILABLE
 	if (sizeof(word128) == 16)
@@ -500,12 +508,12 @@ bool ValidateDES()
 {
 	cout << "\nDES validation suite running...\n\n";
 
-	FileSource valdata("descert.dat", true, new HexDecoder);
+	FileSource valdata("TestData/descert.dat", true, new HexDecoder);
 	bool pass = BlockTransformationTest(FixedRoundsCipherFactory<DESEncryption, DESDecryption>(), valdata);
 
 	cout << "\nTesting EDE2, EDE3, and XEX3 variants...\n\n";
 
-	FileSource valdata1("3desval.dat", true, new HexDecoder);
+	FileSource valdata1("TestData/3desval.dat", true, new HexDecoder);
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<DES_EDE2_Encryption, DES_EDE2_Decryption>(), valdata1, 1) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<DES_EDE3_Encryption, DES_EDE3_Decryption>(), valdata1, 1) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<DES_XEX3_Encryption, DES_XEX3_Decryption>(), valdata1, 1) && pass;
@@ -811,6 +819,34 @@ bool ValidateCipherModes()
 		pass = pass && !fail;
 		cout << (fail ? "FAILED   " : "passed   ") << "DMAC" << endl;
 	}
+	{
+		CTR_Mode<AES>::Encryption modeE(plain, 16, plain);
+		CTR_Mode<AES>::Decryption modeD(plain, 16, plain);
+		fail = !TestModeIV(modeE, modeD);
+		pass = pass && !fail;
+		cout << (fail ? "FAILED   " : "passed   ") << "AES CTR Mode" << endl;
+	}
+	{
+		OFB_Mode<AES>::Encryption modeE(plain, 16, plain);
+		OFB_Mode<AES>::Decryption modeD(plain, 16, plain);
+		fail = !TestModeIV(modeE, modeD);
+		pass = pass && !fail;
+		cout << (fail ? "FAILED   " : "passed   ") << "AES OFB Mode" << endl;
+	}
+	{
+		CFB_Mode<AES>::Encryption modeE(plain, 16, plain);
+		CFB_Mode<AES>::Decryption modeD(plain, 16, plain);
+		fail = !TestModeIV(modeE, modeD);
+		pass = pass && !fail;
+		cout << (fail ? "FAILED   " : "passed   ") << "AES CFB Mode" << endl;
+	}
+	{
+		CBC_Mode<AES>::Encryption modeE(plain, 16, plain);
+		CBC_Mode<AES>::Decryption modeD(plain, 16, plain);
+		fail = !TestModeIV(modeE, modeD);
+		pass = pass && !fail;
+		cout << (fail ? "FAILED   " : "passed   ") << "AES CBC Mode" << endl;
+	}
 
 	return pass;
 }
@@ -819,7 +855,7 @@ bool ValidateIDEA()
 {
 	cout << "\nIDEA validation suite running...\n\n";
 
-	FileSource valdata("ideaval.dat", true, new HexDecoder);
+	FileSource valdata("TestData/ideaval.dat", true, new HexDecoder);
 	return BlockTransformationTest(FixedRoundsCipherFactory<IDEAEncryption, IDEADecryption>(), valdata);
 }
 
@@ -827,7 +863,7 @@ bool ValidateSAFER()
 {
 	cout << "\nSAFER validation suite running...\n\n";
 
-	FileSource valdata("saferval.dat", true, new HexDecoder);
+	FileSource valdata("TestData/saferval.dat", true, new HexDecoder);
 	bool pass = true;
 	pass = BlockTransformationTest(VariableRoundsCipherFactory<SAFER_K_Encryption, SAFER_K_Decryption>(8,6), valdata, 4) && pass;
 	pass = BlockTransformationTest(VariableRoundsCipherFactory<SAFER_K_Encryption, SAFER_K_Decryption>(16,12), valdata, 4) && pass;
@@ -840,7 +876,7 @@ bool ValidateRC2()
 {
 	cout << "\nRC2 validation suite running...\n\n";
 
-	FileSource valdata("rc2val.dat", true, new HexDecoder);
+	FileSource valdata("TestData/rc2val.dat", true, new HexDecoder);
 	HexEncoder output(new FileSink(cout));
 	SecByteBlock plain(RC2Encryption::BLOCKSIZE), cipher(RC2Encryption::BLOCKSIZE), out(RC2Encryption::BLOCKSIZE), outplain(RC2Encryption::BLOCKSIZE);
 	SecByteBlock key(128);
@@ -1050,7 +1086,7 @@ bool ValidateRC5()
 {
 	cout << "\nRC5 validation suite running...\n\n";
 
-	FileSource valdata("rc5val.dat", true, new HexDecoder);
+	FileSource valdata("TestData/rc5val.dat", true, new HexDecoder);
 	return BlockTransformationTest(VariableRoundsCipherFactory<RC5Encryption, RC5Decryption>(16, 12), valdata);
 }
 
@@ -1058,7 +1094,7 @@ bool ValidateRC6()
 {
 	cout << "\nRC6 validation suite running...\n\n";
 
-	FileSource valdata("rc6val.dat", true, new HexDecoder);
+	FileSource valdata("TestData/rc6val.dat", true, new HexDecoder);
 	bool pass = true;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<RC6Encryption, RC6Decryption>(16), valdata, 2) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<RC6Encryption, RC6Decryption>(24), valdata, 2) && pass;
@@ -1070,7 +1106,7 @@ bool ValidateMARS()
 {
 	cout << "\nMARS validation suite running...\n\n";
 
-	FileSource valdata("marsval.dat", true, new HexDecoder);
+	FileSource valdata("TestData/marsval.dat", true, new HexDecoder);
 	bool pass = true;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<MARSEncryption, MARSDecryption>(16), valdata, 4) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<MARSEncryption, MARSDecryption>(24), valdata, 3) && pass;
@@ -1080,13 +1116,14 @@ bool ValidateMARS()
 
 bool ValidateRijndael()
 {
-	cout << "\nRijndael validation suite running...\n\n";
+	cout << "\nRijndael (AES) validation suite running...\n\n";
 
-	FileSource valdata("rijndael.dat", true, new HexDecoder);
+	FileSource valdata("TestData/rijndael.dat", true, new HexDecoder);
 	bool pass = true;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<RijndaelEncryption, RijndaelDecryption>(16), valdata, 4) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<RijndaelEncryption, RijndaelDecryption>(24), valdata, 3) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<RijndaelEncryption, RijndaelDecryption>(32), valdata, 2) && pass;
+	pass = RunTestDataFile("TestVectors/aes.txt") && pass;
 	return pass;
 }
 
@@ -1094,7 +1131,7 @@ bool ValidateTwofish()
 {
 	cout << "\nTwofish validation suite running...\n\n";
 
-	FileSource valdata("twofishv.dat", true, new HexDecoder);
+	FileSource valdata("TestData/twofishv.dat", true, new HexDecoder);
 	bool pass = true;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<TwofishEncryption, TwofishDecryption>(16), valdata, 4) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<TwofishEncryption, TwofishDecryption>(24), valdata, 3) && pass;
@@ -1106,7 +1143,7 @@ bool ValidateSerpent()
 {
 	cout << "\nSerpent validation suite running...\n\n";
 
-	FileSource valdata("serpentv.dat", true, new HexDecoder);
+	FileSource valdata("TestData/serpentv.dat", true, new HexDecoder);
 	bool pass = true;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<SerpentEncryption, SerpentDecryption>(16), valdata, 4) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<SerpentEncryption, SerpentDecryption>(24), valdata, 3) && pass;
@@ -1152,7 +1189,7 @@ bool ValidateThreeWay()
 {
 	cout << "\n3-WAY validation suite running...\n\n";
 
-	FileSource valdata("3wayval.dat", true, new HexDecoder);
+	FileSource valdata("TestData/3wayval.dat", true, new HexDecoder);
 	return BlockTransformationTest(FixedRoundsCipherFactory<ThreeWayEncryption, ThreeWayDecryption>(), valdata);
 }
 
@@ -1160,7 +1197,7 @@ bool ValidateGOST()
 {
 	cout << "\nGOST validation suite running...\n\n";
 
-	FileSource valdata("gostval.dat", true, new HexDecoder);
+	FileSource valdata("TestData/gostval.dat", true, new HexDecoder);
 	return BlockTransformationTest(FixedRoundsCipherFactory<GOSTEncryption, GOSTDecryption>(), valdata);
 }
 
@@ -1168,13 +1205,8 @@ bool ValidateSHARK()
 {
 	cout << "\nSHARK validation suite running...\n\n";
 
-#ifdef WORD64_AVAILABLE
-	FileSource valdata("sharkval.dat", true, new HexDecoder);
+	FileSource valdata("TestData/sharkval.dat", true, new HexDecoder);
 	return BlockTransformationTest(FixedRoundsCipherFactory<SHARKEncryption, SHARKDecryption>(), valdata);
-#else
-	cout << "word64 not available, skipping SHARK validation." << endl;
-	return true;
-#endif
 }
 
 bool ValidateCAST()
@@ -1183,14 +1215,14 @@ bool ValidateCAST()
 
 	cout << "\nCAST-128 validation suite running...\n\n";
 
-	FileSource val128("cast128v.dat", true, new HexDecoder);
+	FileSource val128("TestData/cast128v.dat", true, new HexDecoder);
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<CAST128Encryption, CAST128Decryption>(16), val128, 1) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<CAST128Encryption, CAST128Decryption>(10), val128, 1) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<CAST128Encryption, CAST128Decryption>(5), val128, 1) && pass;
 
 	cout << "\nCAST-256 validation suite running...\n\n";
 
-	FileSource val256("cast256v.dat", true, new HexDecoder);
+	FileSource val256("TestData/cast256v.dat", true, new HexDecoder);
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<CAST256Encryption, CAST256Decryption>(16), val256, 1) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<CAST256Encryption, CAST256Decryption>(24), val256, 1) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<CAST256Encryption, CAST256Decryption>(32), val256, 1) && pass;
@@ -1202,7 +1234,7 @@ bool ValidateSquare()
 {
 	cout << "\nSquare validation suite running...\n\n";
 
-	FileSource valdata("squareva.dat", true, new HexDecoder);
+	FileSource valdata("TestData/squareva.dat", true, new HexDecoder);
 	return BlockTransformationTest(FixedRoundsCipherFactory<SquareEncryption, SquareDecryption>(), valdata);
 }
 
@@ -1210,7 +1242,7 @@ bool ValidateSKIPJACK()
 {
 	cout << "\nSKIPJACK validation suite running...\n\n";
 
-	FileSource valdata("skipjack.dat", true, new HexDecoder);
+	FileSource valdata("TestData/skipjack.dat", true, new HexDecoder);
 	return BlockTransformationTest(FixedRoundsCipherFactory<SKIPJACKEncryption, SKIPJACKDecryption>(), valdata);
 }
 
@@ -1314,7 +1346,7 @@ bool ValidateSHACAL2()
 	cout << "\nSHACAL-2 validation suite running...\n\n";
 
 	bool pass = true;
-	FileSource valdata("shacal2v.dat", true, new HexDecoder);
+	FileSource valdata("TestData/shacal2v.dat", true, new HexDecoder);
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<SHACAL2Encryption, SHACAL2Decryption>(16), valdata, 4) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<SHACAL2Encryption, SHACAL2Decryption>(64), valdata, 10) && pass;
 	return pass;
@@ -1325,7 +1357,7 @@ bool ValidateCamellia()
 	cout << "\nCamellia validation suite running...\n\n";
 
 	bool pass = true;
-	FileSource valdata("camellia.dat", true, new HexDecoder);
+	FileSource valdata("TestData/camellia.dat", true, new HexDecoder);
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<CamelliaEncryption, CamelliaDecryption>(16), valdata, 15) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<CamelliaEncryption, CamelliaDecryption>(24), valdata, 15) && pass;
 	pass = BlockTransformationTest(FixedRoundsCipherFactory<CamelliaEncryption, CamelliaDecryption>(32), valdata, 15) && pass;
@@ -1349,4 +1381,25 @@ bool ValidateVMAC()
 {
 	cout << "\nVMAC validation suite running...\n";
 	return RunTestDataFile("TestVectors/vmac.txt");
+}
+
+bool ValidateCCM()
+{
+	cout << "\nAES/CCM validation suite running...\n";
+	return RunTestDataFile("TestVectors/ccm.txt");
+}
+
+bool ValidateGCM()
+{
+	cout << "\nAES/GCM validation suite running...\n";
+	cout << "\n2K tables:";
+	bool pass = RunTestDataFile("TestVectors/gcm.txt", MakeParameters(Name::TableSize(), (int)2048));
+	cout << "\n64K tables:";
+	return RunTestDataFile("TestVectors/gcm.txt", MakeParameters(Name::TableSize(), (int)64*1024)) && pass;
+}
+
+bool ValidateCMAC()
+{
+	cout << "\nCMAC validation suite running...\n";
+	return RunTestDataFile("TestVectors/cmac.txt");
 }

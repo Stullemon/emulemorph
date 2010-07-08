@@ -1225,7 +1225,12 @@ BOOL CMuleListCtrl::OnChildNotify(UINT message, WPARAM wParam, LPARAM lParam, LR
 	return TRUE;
 }
 
+//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+/*
 void CMuleListCtrl::InitItemMemDC(CMemDC *dc, LPDRAWITEMSTRUCT lpDrawItemStruct, BOOL &bCtrlFocused)
+*/
+void CMuleListCtrl::InitItemMemDC(CMemoryDC *dc, LPDRAWITEMSTRUCT lpDrawItemStruct, BOOL &bCtrlFocused)
+//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 {
 	bCtrlFocused = ((GetFocus() == this) || (GetStyle() & LVS_SHOWSELALWAYS));
 
@@ -1270,7 +1275,12 @@ void CMuleListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	CRect rcItem(lpDrawItemStruct->rcItem);
 	*/
 	CDC *oDC = CDC::FromHandle(lpDrawItemStruct->hDC);
+	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	/*
 	CMemDC pDC(oDC, &rcItem, m_crWindow);
+	*/
+	CMemoryDC pDC(oDC, &rcItem, m_crWindow);
+	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
 	CFont *pOldFont = pDC->SelectObject(GetFont());
 	CRect rcClient;
 	GetClientRect(&rcClient);

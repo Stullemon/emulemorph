@@ -12,7 +12,11 @@
              / 2004 [TPT] Phoenix mod added file
 *********************************************************************/
 #include "stdafx.h"
+#if _MSC_VER >= 1600
+#include "winuser.h"
+#else
 #include "multimon.h"
+#endif
 #include "PPToolTip.h"
 #include "TreeOptionsCtrlEx.h"
 #include "OtherFunctions.h"

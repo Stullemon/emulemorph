@@ -131,9 +131,9 @@ public:
 			if outputLen < MinEncodedSize, the most significant bytes will be dropped
 			if outputLen > MinEncodedSize, the most significant bytes will be padded
 		*/
-		size_t Encode(byte *output, size_t outputLen, Signedness=UNSIGNED) const;
+		void Encode(byte *output, size_t outputLen, Signedness=UNSIGNED) const;
 		//!
-		size_t Encode(BufferedTransformation &bt, size_t outputLen, Signedness=UNSIGNED) const;
+		void Encode(BufferedTransformation &bt, size_t outputLen, Signedness=UNSIGNED) const;
 
 		//! encode using Distinguished Encoding Rules, put result into a BufferedTransformation object
 		void DEREncode(BufferedTransformation &bt) const;
@@ -408,11 +408,13 @@ inline CryptoPP::word    operator%(const CryptoPP::Integer &a, CryptoPP::word b)
 
 NAMESPACE_END
 
+#ifndef __BORLANDC__
 NAMESPACE_BEGIN(std)
-template<> inline void swap(CryptoPP::Integer &a, CryptoPP::Integer &b)
+inline void swap(CryptoPP::Integer &a, CryptoPP::Integer &b)
 {
 	a.swap(b);
 }
 NAMESPACE_END
+#endif
 
 #endif
