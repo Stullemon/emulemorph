@@ -456,11 +456,39 @@ bool CIPFilter::ParseFilterLine2(const CStringA& sbuffer, uint32& ip1, uint32& i
 void CIPFilter::RemoveAllIPFilters()
 {
 	for (int i = 0; i < m_iplist.GetCount(); i++)
+		//MORPH START - Changed by Stulle, Fix crash on shutdown in ipfilter [Xman]
+		/*
 		delete m_iplist[i];
+		*/
+	{
+		try
+		{
+			delete m_iplist[i];
+		}
+		catch(...)
+		{
+			//do nothing
+		}
+	}
+		//MORPH END   - Changed by Stulle, Fix crash on shutdown in ipfilter [Xman]
 	m_iplist.RemoveAll();
 	//MORPH START - Added by Stulle, IP Filter White List [Stulle]
 	for (int i = 0; i < m_iplist_White.GetCount(); i++)
+		//MORPH START - Changed by Stulle, Fix crash on shutdown in ipfilter [Xman]
+		/*
 		delete m_iplist_White[i];
+		*/
+	{
+		try
+		{
+			delete m_iplist_White[i];
+		}
+		catch(...)
+		{
+			//do nothing
+		}
+	}
+		//MORPH END   - Changed by Stulle, Fix crash on shutdown in ipfilter [Xman]
 	m_iplist_White.RemoveAll();
 	//MORPH END   - Added by Stulle, IP Filter White List [Stulle]
 	m_pLastHit = NULL;

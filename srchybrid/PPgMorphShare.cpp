@@ -336,7 +336,7 @@ void CPPgMorphShare::Localize(void)
 		// MORPH START show less controls
 		if (m_htiShowLessControls) m_ctrlTreeOptions.SetItemText(m_htiShowLessControls, GetResString(IDS_MORPHWIZ_SHOWLESS)); 
 		// MORPH END  show less controls
-		if (m_htiStaticIcon) m_ctrlTreeOptions.SetItemText(m_htiFakeAlyzerIndications, GetResString(IDS_FAKEALYZER_INDICATIONS)); //MORPH - Added by Stulle, Fakealyzer [netfinity]
+		if (m_htiFakeAlyzerIndications) m_ctrlTreeOptions.SetItemText(m_htiFakeAlyzerIndications, GetResString(IDS_FAKEALYZER_INDICATIONS)); //MORPH - Added by Stulle, Fakealyzer [netfinity]
         // MORPH START leuk_he tooltipped
        SetTool(m_htiSFM ,IDS_SFM_TIP);
        SetTool(m_htiSpreadbar ,IDS_SPREADBAR_DEFAULT_CHECKBOX_TIP);
