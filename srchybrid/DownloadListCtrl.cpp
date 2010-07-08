@@ -1287,7 +1287,8 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, UIN
 			//Morph Start - added by AndCycle, IP to Country
 			if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(16)){
 				POINT point3= {cur_rec.left,cur_rec.top+1};
-				theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, pClient->GetCountryFlagIndex(), point3, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+				//theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, pClient->GetCountryFlagIndex(), point3, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+				theApp.ip2country->GetFlagImageList()->DrawIndirect(&theApp.ip2country->GetFlagImageDrawParams(dc,pClient->GetCountryFlagIndex(),point3));
 				cur_rec.left+=20;
 			}
 			//Morph End - added by AndCycle, IP to Country
@@ -1545,7 +1546,8 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, UIN
 			RECT cur_rec = *lpRect;
 			if(theApp.ip2country->ShowCountryFlag()){
 				POINT point3= {cur_rec.left,cur_rec.top+1};
-				theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, pClient->GetCountryFlagIndex(), point3, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+				//theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, pClient->GetCountryFlagIndex(), point3, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+				theApp.ip2country->GetFlagImageList()->DrawIndirect(&theApp.ip2country->GetFlagImageDrawParams(dc,pClient->GetCountryFlagIndex(),point3));
 				cur_rec.left+=20;
 			}
 			dc->DrawText(szItem, -1, &cur_rec, MLC_DT_TEXT | uDrawTextAlignment);

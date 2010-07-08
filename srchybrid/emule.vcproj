@@ -967,9 +967,6 @@ del $(IntDir)\emule.obj
 				RelativePath="PartFileConvert.h">
 			</File>
 			<File
-				RelativePath="PeerCacheClient.h">
-			</File>
-			<File
 				RelativePath="PeerCacheFinder.h">
 			</File>
 			<File
@@ -1007,9 +1004,6 @@ del $(IntDir)\emule.obj
 			</File>
 			<File
 				RelativePath="SearchFile.h">
-			</File>
-			<File
-				RelativePath="SearchFrm.h">
 			</File>
 			<File
 				RelativePath="SearchList.h">

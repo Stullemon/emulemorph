@@ -59,6 +59,7 @@ class CIP2Country
 		WORD	GetFlagResIDfromCountryCode(CString shortCountryName);
 
 		CImageList* GetFlagImageList() {return &CountryFlagImageList;}
+		IMAGELISTDRAWPARAMS GetFlagImageDrawParams(CDC* dc,int iIndex,POINT point) const;
 		void    UpdateIP2CountryURL();//Commander - Added: IP2Country auto-updating
 		CString GetDefaultFilePath() const;
 	private:

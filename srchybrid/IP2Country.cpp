@@ -634,3 +634,27 @@ CString CIP2Country::GetDefaultFilePath() const
 {
 	return thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + DFLT_IP2COUNTRY_FILENAME;
 }
+
+IMAGELISTDRAWPARAMS CIP2Country::GetFlagImageDrawParams(CDC* dc,int iIndex, POINT point) const
+{
+	IMAGELISTDRAWPARAMS imldp;
+	imldp.cbSize   = sizeof(IMAGELISTDRAWPARAMS);
+	imldp.himl     = CountryFlagImageList.m_hImageList;
+	imldp.i        = iIndex;
+	imldp.hdcDst   = dc->m_hDC;
+	imldp.x        = point.x;
+	imldp.y        = point.y;
+	imldp.cx       = 18;
+	imldp.cy       = 16;
+	imldp.xBitmap  = 0;
+	imldp.yBitmap  = 0;
+	imldp.rgbBk    = CLR_DEFAULT;
+	imldp.rgbFg    = CLR_DEFAULT;
+	imldp.fStyle   = ILD_NORMAL;
+	imldp.dwRop    = SRCCOPY;
+	imldp.fState   = ILS_NORMAL;
+	imldp.Frame    = 0;
+	imldp.crEffect = CLR_DEFAULT;
+
+	return imldp;
+}

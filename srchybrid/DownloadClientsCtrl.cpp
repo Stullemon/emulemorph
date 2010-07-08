@@ -340,8 +340,9 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(13)){
 							cur_rec.left+=20;
 							POINT point2= {cur_rec.left,cur_rec.top+1};
-							int index = client->GetCountryFlagIndex();
-							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+							//int index = client->GetCountryFlagIndex();
+							//theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+							theApp.ip2country->GetFlagImageList()->DrawIndirect(&theApp.ip2country->GetFlagImageDrawParams(dc,client->GetCountryFlagIndex(),point2));
 							cur_rec.left += sm_iLabelOffset;
 						}
 						//EastShare End - added by AndCycle, IP to Country
@@ -466,8 +467,9 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					case 13:
 						if(theApp.ip2country->ShowCountryFlag()){
 							POINT point2= {cur_rec.left,cur_rec.top+1};
-							int index = client->GetCountryFlagIndex();
-							theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+							//int index = client->GetCountryFlagIndex();
+							//theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, index , point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+							theApp.ip2country->GetFlagImageList()->DrawIndirect(&theApp.ip2country->GetFlagImageDrawParams(dc,client->GetCountryFlagIndex(),point2));
 							cur_rec.left+=20;
 						}
 						dc.DrawText(szItem, -1, &cur_rec, MLC_DT_TEXT | uDrawTextAlignment);

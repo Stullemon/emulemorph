@@ -1119,7 +1119,8 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 
 					POINT point2= {cur_rec.left,cur_rec.top+1};
 					if(theApp.ip2country->ShowCountryFlag() && IsColumnHidden(16)){
-						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, server->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+						//theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, server->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+						theApp.ip2country->GetFlagImageList()->DrawIndirect(&theApp.ip2country->GetFlagImageDrawParams(dc,server->GetCountryFlagIndex(),point2));
 					}
 					else
 						imagelist.DrawIndirect(dc, 0, point2, CSize(16,16), CPoint(0,0), ILD_NORMAL);
@@ -1278,7 +1279,8 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 					Sbuffer.Format(_T("%s"), server->GetCountryName());
 					if(theApp.ip2country->ShowCountryFlag()){
 						POINT point2= {cur_rec.left,cur_rec.top+1};
-						theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, server->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+						//theApp.ip2country->GetFlagImageList()->DrawIndirect(dc, server->GetCountryFlagIndex(), point2, CSize(18,16), CPoint(0,0), ILD_NORMAL);
+						theApp.ip2country->GetFlagImageList()->DrawIndirect(&theApp.ip2country->GetFlagImageDrawParams(dc,server->GetCountryFlagIndex(),point2));
 						cur_rec.left+=20;
 						}
 				    dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,MLC_DT_TEXT);
