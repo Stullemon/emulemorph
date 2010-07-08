@@ -2118,9 +2118,6 @@
     <ClInclude Include="PartFileConvert.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="PeerCacheClient.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="PeerCacheFinder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -2158,9 +2155,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SearchFile.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="SearchFrm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SearchList.h">

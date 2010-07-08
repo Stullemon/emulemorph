@@ -451,7 +451,6 @@
     <ClInclude Include="include\id3\utils.h" />
     <ClInclude Include="include\id3\writer.h" />
     <ClInclude Include="include\id3\writers.h" />
-    <ClInclude Include="Zlib\Include\Zlib.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
