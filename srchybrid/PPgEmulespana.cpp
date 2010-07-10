@@ -729,7 +729,7 @@ BOOL CPPgEmulespana::OnApply()
     thePrefs.SetUPnPLimitToFirstConnection(m_bUPnPLimitToFirstConnection);
 	if (m_iDetectuPnP==2 || m_iDetectuPnP==0 || m_iDetectuPnP==-1 ||m_iDetectuPnP==-2 ||m_iDetectuPnP==-10)
 		thePrefs.SetUpnpDetect(m_iDetectuPnP); // other values are undefined. 
-	thePrefs.m_bUPnPForceUpdate=thePrefs.m_bUPnPForceUpdate;
+	thePrefs.m_bUPnPForceUpdate=m_bUPnPForceUpdate;
 	
 	// End MoNKi
 
