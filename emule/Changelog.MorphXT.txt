@@ -14,6 +14,7 @@ CHANGE: Rewrote the passing of params for drawing country flags to work in VS10 
 	+ bug in VS10 MFC; fixed code not only for VS10, used in all compiles
 FIX: Reverted faulty parts from sorting change in 12.3 [Stulle]
 FIX: Crash on shutdown in ipfilter [Xman]
+FIX: Force periodic updates was reset to previous state on applying [Stulle/thx Hiwi]
 
 
 --------------------------------------
