@@ -3687,9 +3687,9 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 					}
 
 					if ( client1->GetRemoteQueueRank() ){
-						return (client2->GetRemoteQueueRank()) ? CompareUnsigned(client1->GetRemoteQueueRank(), client2->GetRemoteQueueRank()) : 1;
+						return (client2->GetRemoteQueueRank()) ? CompareUnsigned(client1->GetRemoteQueueRank(), client2->GetRemoteQueueRank()) : -1;
 					}
-					return (client2->GetRemoteQueueRank()) ? -1 : 0;
+					return (client2->GetRemoteQueueRank()) ? 1 : 0;
 				}
 				return -1;
 			} else if ( clientState2 == DS_ONQUEUE ){
@@ -3697,9 +3697,9 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			}
 
 			if ( clientState1 == DS_NONEEDEDPARTS && clientState2 != DS_NONEEDEDPARTS)
-				return -1;
-			else if ( clientState2 == DS_NONEEDEDPARTS)
 				return 1;
+			else if ( clientState2 == DS_NONEEDEDPARTS)
+				return -1;
 
 			if ( clientState1 == DS_TOOMANYCONNS && clientState2 != DS_TOOMANYCONNS)
 				return 1;
