@@ -3602,7 +3602,7 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 			*/
 			if (client1->GetClientSoft() == client2->GetClientSoft())
 			{
-				if(client2->GetVersion() == client1->GetVersion() && client1->GetClientSoft() == SO_EMULE)
+				if(client2->GetVersion() == client1->GetVersion() && (client1->GetClientSoft() == SO_EMULE || client1->GetClientSoft() == SO_AMULE))
 					return CompareOptLocaleStringNoCase(client2->GetClientSoftVer(), client1->GetClientSoftVer());
 				else
 					return client1->GetVersion() - client2->GetVersion();
@@ -3672,18 +3672,18 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 				if ( clientState2 == DS_DOWNLOADING) {
 					return CompareUnsigned(client1->GetDownloadDatarate(), client2->GetDownloadDatarate());
 				}
-				return 1;
-			} else if ( clientState2 == DS_DOWNLOADING) {
 				return -1;
+			} else if ( clientState2 == DS_DOWNLOADING) {
+				return 1;
 			}
 
 			if ( clientState1 == DS_ONQUEUE ){
 				if ( clientState2 == DS_ONQUEUE ) {
 					if ( client1->IsRemoteQueueFull() ){
-						return (client2->IsRemoteQueueFull()) ? 0 : -1;
+						return (client2->IsRemoteQueueFull()) ? 0 : 1;
 					}
 					else if ( client2->IsRemoteQueueFull() ){
-						return 1;
+						return -1;
 					}
 
 					if ( client1->GetRemoteQueueRank() ){
@@ -3691,15 +3691,19 @@ int CDownloadListCtrl::Compare(const CUpDownClient *client1, const CUpDownClient
 					}
 					return (client2->GetRemoteQueueRank()) ? -1 : 0;
 				}
-				return 1;
-			} else if ( clientState2 == DS_ONQUEUE ){
 				return -1;
+			} else if ( clientState2 == DS_ONQUEUE ){
+				return 1;
 			}
 
 			if ( clientState1 == DS_NONEEDEDPARTS && clientState2 != DS_NONEEDEDPARTS)
+				return -1;
+			else if ( clientState2 == DS_NONEEDEDPARTS)
 				return 1;
 
 			if ( clientState1 == DS_TOOMANYCONNS && clientState2 != DS_TOOMANYCONNS)
+				return 1;
+			else if ( clientState2 == DS_TOOMANYCONNS )
 				return -1;
 
 			return 0;
