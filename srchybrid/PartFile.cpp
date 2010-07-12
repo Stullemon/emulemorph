@@ -362,12 +362,55 @@ CPartFile::~CPartFile()
 			}
        	}
 
+		//MORPH START - Changed by WiZaRd, Flush Thread
+		/*
 		if (m_hpartfile.m_hFile != INVALID_HANDLE_VALUE)
 			FlushBuffer(true, false, true);
+		*/
+		//MORPH END   - Changed by WiZaRd, Flush Thread
 	}
 	catch(CFileException* e){
 		e->Delete();
 	}
+	//MORPH START - Added by WiZaRd, Flush Thread
+	bool bNeedFlush = true;
+	//moved to a separate try-catch-block to avoid skipping flushing due to an exception in the allocate-thread
+	try{
+		if (m_hpartfile.m_hFile != INVALID_HANDLE_VALUE)
+		{
+			FlushBuffer(true, false, true);
+			bNeedFlush = false;
+		}
+	}
+	catch(CFileException* e){
+		e->Delete();
+	}
+	//this is usually done in FlushBuffer above - if not, wo do it now
+	if(bNeedFlush)
+	{
+		try
+		{
+			if (m_FlushThread != NULL)
+			{
+				HANDLE hThread = m_FlushThread->m_hThread;
+				// 2 minutes to let the thread finish - will never need that much time, just to be sure
+				m_FlushThread->SetThreadPriority(THREAD_PRIORITY_NORMAL); 
+				if (WaitForSingleObject(hThread, 120000) == WAIT_TIMEOUT)
+				{
+					AddDebugLogLine(true, L"Flushing (force=true) failed.(%s)", GetFileName(), m_nTotalBufferData, m_BufferedData_list.GetCount(), m_uTransferred, m_nLastBufferFlushTime);
+					TerminateThread(hThread, 100);
+					ASSERT(0); // did this happen why? 
+				}
+				m_FlushThread = NULL;
+			} 
+			if (m_FlushSetting != NULL) //We normally flushed something to disk
+				FlushDone();
+		}
+		catch(CFileException* e){
+			e->Delete();
+		} 
+	}
+	//MORPH END   - Added by WiZaRd, Flush Thread
 	ASSERT(m_FlushSetting == NULL); // flush was reported done but thread not properly ended?
 	
 	if (m_hpartfile.m_hFile != INVALID_HANDLE_VALUE){

@@ -13,6 +13,8 @@ CHANGE: Some other minor changes to compile on VS 2010
 CHANGE: Rewrote the passing of params for drawing country flags to work in VS10 [Stulle]
 	+ bug in VS10 MFC; fixed code not only for VS10, used in all solutions
 CHANGE: Also sort aMule for mods (if availablel) [Stulle]
+CHANGE: Added additional wait time and security checks for flush threads on exit [WiZaRd]
+	+ possible crashfix
 FIX: Sorting of client status (QR,...) to make sense at last [Stulle]
 FIX: Crash on shutdown in ipfilter [Xman]
 FIX: Force periodic updates was reset to previous state on applying [Stulle/thx Hiwi]
