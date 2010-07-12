@@ -2012,7 +2012,7 @@ LRESULT CemuleDlg::OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 {
 	CUpDownClient* client = (CUpDownClient*) lParam;
-	if (theApp.m_app_state != APP_STATE_SHUTTINGDOWN && theApp.uploadqueue->IsDownloading(client)) {	// could have been canceled
+	if (theApp.m_app_state == APP_STATE_RUNNING && theApp.uploadqueue && theApp.uploadqueue->IsDownloading(client)) {	// could have been canceled
 		client->SetReadBlockFromFileBuffer((byte*)wParam);
 		client->CreateNextBlockPackage(); //Used to not wait uploadqueue timer (110ms) capping upload to 1ReadBlock/110ms~1.6MB/s
 	}
@@ -2025,7 +2025,7 @@ LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 LRESULT CemuleDlg::OnFlushDone(WPARAM /*wParam*/ ,LPARAM lParam)
 {
 	CPartFile* partfile = (CPartFile*) lParam;
-	if (theApp.m_app_state != APP_STATE_SHUTTINGDOWN && theApp.downloadqueue->IsPartFile(partfile))	// could have been canceled
+	if (theApp.m_app_state == APP_STATE_RUNNING && theApp.downloadqueue && theApp.downloadqueue->IsPartFile(partfile))	// could have been canceled
 		partfile->FlushDone();
 	return 0;
 }
