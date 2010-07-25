@@ -1,9 +1,10 @@
 --------------------------------------
 Changelog for eMule 0.50a MorphXT v12.4
 --------------------------------------
-XX-XX-2010
+26-07-2010
 
 ADD: Visual Studio 2010 project files and solution [Stulle]
+ADD: Display check mark next to currently assigned category [Stulle]
 CHANGE: update cryptolib Version 5.6.0 (3/15/2009) [Stulle]
 CHANGE: update pugxml.h (http://www.codeproject.com/KB/cpp/JCraneArticle.aspx) [JCrane2/tychen]
 CHANGE: update zlib 1.2.5 [Stulle]
@@ -18,6 +19,9 @@ CHANGE: Added additional wait time and security checks for flush threads on exit
 FIX: Sorting of client status (QR,...) to make sense at last [Stulle]
 FIX: Crash on shutdown in ipfilter [Xman]
 FIX: Force periodic updates was reset to previous state on applying [Stulle/thx Hiwi]
+FIX: Download from http sources (e.g. sourceforge) broken because of sending user-agent [WiZaRd]
+	+ Added option to maintain list of URLs that should not receive user-agents
+REMOVED: Display of session download in ChunkBar in DownloadClientsCtrl [Stulle]
 
 
 --------------------------------------

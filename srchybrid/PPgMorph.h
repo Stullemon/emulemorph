@@ -101,6 +101,7 @@ protected: //MORPH leuk_he:run as ntservice v1..
     
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	bool m_bUseICS; //MORPH - Added by SIRoB, ICS Optional
+	CString m_sBrokenURLs; //MORPH - Added by WiZaRd, Fix broken HTTP downloads
 	bool m_bHighProcess; //MORPH - Added by IceCream, high process priority
 
 public: //MORPH leuk_he:run as ntservice v1.. 
@@ -209,6 +210,7 @@ protected: //MORPH leuk_he:run as ntservice v1..
 
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	HTREEITEM m_htiUseICS; //MORPH - Added by SIRoB, ICS Optional
+	HTREEITEM m_htiBrokenURLs; //MORPH - Added by WiZaRd, Fix broken HTTP downloads
 	HTREEITEM m_htiHighProcess; //MORPH - Added by IceCream, high process priority
 
 	// Mighty Knife: Report hashing files, Log friendlist activities
