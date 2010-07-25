@@ -979,6 +979,8 @@ public:
 
 	static bool		m_bFakeAlyzerIndications; //MORPH - Added by Stulle, Fakealyzer [netfinity]
 
+	static	CString	m_strBrokenURLs; //MORPH - Added by WiZaRd, Fix broken HTTP downloads
+
 	enum Table
 	{
 		tableDownload, 
@@ -2190,13 +2192,11 @@ public:
 	// <== [MoNKi: -USS initial TTL-] - Stulle
 
 	static bool		GetFakeAlyzerIndications()		{ return m_bFakeAlyzerIndications; } //MORPH - Added by Stulle, Fakealyzer [netfinity]
-//>>> WiZaRd::Fix broken HTTP downloads
-private:
-	static	CString	m_strBrokenURLs;
-public:
+
+	//MORPH START - Added by WiZaRd, Fix broken HTTP downloads
 	static	CString	GetBrokenURLs()						{return m_strBrokenURLs;}
 	static	void	SetBrokenURLs(const CString& str)	{m_strBrokenURLs = str;}
-//<<< WiZaRd::Fix broken HTTP downloads
+	//MORPH END   - Added by WiZaRd, Fix broken HTTP downloads
 };
 
 extern CPreferences thePrefs;
