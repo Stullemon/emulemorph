@@ -1,4 +1,12 @@
 --------------------------------------
+Changelog for eMule 0.50a MorphXT v12.5
+--------------------------------------
+XX-XX-2010
+
+FIX: + not showing before "All Directories" in SharedDirsTreeCtrl [Stulle]
+
+
+--------------------------------------
 Changelog for eMule 0.50a MorphXT v12.4
 --------------------------------------
 26-07-2010

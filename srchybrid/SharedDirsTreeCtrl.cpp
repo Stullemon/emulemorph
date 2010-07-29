@@ -299,7 +299,12 @@ void CSharedDirsTreeCtrl::InitalizeStandardItems(){
 	m_pRootDirectoryItem->liSubDirectories.AddTail(pDir);
 
 	m_pRootUnsharedDirectries = new CDirectoryItem(_T(""), TVI_ROOT, SDI_FILESYSTEMPARENT);
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+	/*
 	m_pRootUnsharedDirectries->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_CHILDREN, GetResString(IDS_ALLDIRECTORIES), 4, 4, 0, 0, (LPARAM)m_pRootUnsharedDirectries, TVI_ROOT, TVI_LAST);
+	*/
+	m_pRootUnsharedDirectries->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_CHILDREN, GetResString(IDS_ALLDIRECTORIES), 4, 4, TVS_HASBUTTONS, TVS_HASBUTTONS, (LPARAM)m_pRootUnsharedDirectries, TVI_ROOT, TVI_LAST);
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 
 	//MORPH START - Added, Downloaded History [Monki/Xman]
 #ifndef NO_HISTORY
