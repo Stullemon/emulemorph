@@ -1123,7 +1123,12 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						theApp.ip2country->GetFlagImageList()->DrawIndirect(&theApp.ip2country->GetFlagImageDrawParams(dc,server->GetCountryFlagIndex(),point2));
 					}
 					else
+						//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+						/*
 						imagelist.DrawIndirect(dc, 0, point2, CSize(16,16), CPoint(0,0), ILD_NORMAL);
+						*/
+						imagelist.Draw(dc, 0, point2, ILD_NORMAL);
+						//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 
 					cur_rec.left +=20;
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,MLC_DT_TEXT);
