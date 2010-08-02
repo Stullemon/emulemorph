@@ -1,10 +1,10 @@
 //////////////////////////////////////////////////
-//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
 /*
 // CMemDC - memory DC
 */
 // CMemoryDC - memory DC
-//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
+//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 //
 // Author: Keith Rule
 // Email:  keithr@europa.com
@@ -29,12 +29,12 @@
 // flicker free drawing.
 #pragma once
 
-//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
 /*
 class CMemDC : public CDC
 */
 class CMemoryDC : public CDC
-//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
+//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 {
 private:
 	CBitmap		m_bitmap;		// Offscreen bitmap
@@ -46,12 +46,12 @@ private:
 	bool		m_bFlushed;
 
 public:
-	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
 	/*
 	CMemDC(CDC *pDC, LPCRECT pRect = NULL, COLORREF crBackground = CLR_DEFAULT)
 	*/
 	CMemoryDC(CDC *pDC, LPCRECT pRect = NULL, COLORREF crBackground = CLR_DEFAULT)
-	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 		: CDC()
 	{
 		ASSERT( pDC != NULL );
@@ -95,12 +95,12 @@ public:
 		FillBackground(crBackground);
 	}
 
-	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
 	/*
 	~CMemDC()
 	*/
 	~CMemoryDC()
-	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 	{
 		Flush();
 		if (m_oldFont)
@@ -141,23 +141,23 @@ public:
 	}
 
 	// Allow usage as a pointer
-	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
 	/*
 	CMemDC* operator->()
 	*/
 	CMemoryDC* operator->()
-	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 	{
 		return this;
 	}
 
 	// Allow usage as a pointer
-	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
 	/*
 	operator CMemDC*()
 	*/
 	operator CMemoryDC*()
-	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 	{
 		return this;
 	}
