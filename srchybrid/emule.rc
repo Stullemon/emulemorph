@@ -6576,7 +6576,7 @@ BEGIN
     IDS_FAKEALYZER_INDICATIONS "Indicate FakeAlyzer results for searches"
     IDS_FAKEALYZER_INDICATIONS_TIP "FakeAlyzer is a feature that uses advanced algorithms to indicate if a\nfile may be a fake. Enabling this option will cause MorphXT to display\ncolored background for search results. The color is distinguished by\nthe background color and some RGB based calculation.\nIf white is the default background the colors are:\nGood = Light green\nOK = Light blue\nSuspect = Light yellow\nFake = Light red\nNot computed = White\n\n[Default: disabled]"
     IDS_BROKEN_URLS         "Don't send user-agents URLs (separated by '|')"
-    IDS_BROKEN_URLS_TIP     "eMule sends Mozilla Firefox 4.0 as the user-agent when downloading from http\nsources to avoid being limited in speed by remote servers. However, some\nservers, like SourceForge, will send us a webpage rather than the file because\nthey think we are a server. Adding URL keywords to this list will disable sending\nthe user-agent string to URLs that include any of the keywords.\nDefault: sourceforge\nSeparate individual keyboards by '|'"
+    IDS_BROKEN_URLS_TIP     "eMule sends Mozilla Firefox 4.0 as the user-agent when downloading from http\nsources to avoid being limited in speed by remote servers. However, some\nservers, like SourceForge, will send us a webpage rather than the file because\nthey think we are a server. Adding URL keywords to this list will disable sending\nthe user-agent string to URLs that include any of the keywords.\nDefault: sourceforge\nSeparate individual keywords by '|'"
 END
 
 #endif    // English (U.S.) resources

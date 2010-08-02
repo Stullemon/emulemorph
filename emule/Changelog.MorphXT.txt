@@ -5,6 +5,7 @@ XX-XX-2010
 
 FIX: + not showing before "All Directories" in SharedDirsTreeCtrl [Stulle]
 FIX: Server icon not drawn in ServerWndCtrl [Stulle]
+FIX: Compilation of zlib and IP2Country on Visual Studio 2003 SP1 [Stulle]
 
 
 --------------------------------------
