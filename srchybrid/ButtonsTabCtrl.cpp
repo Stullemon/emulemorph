@@ -106,7 +106,13 @@ void CButtonsTabCtrl::DrawItem(LPDRAWITEMSTRUCT lpDIS)
 	int iPartId = BP_PUSHBUTTON;
 	int iStateId = PBS_NORMAL;
 	bool bVistaHotTracked = false;
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER<1600
 	bool bVistaThemeActive = theApp.IsVistaThemeActive();
+#else
+	bool bVistaThemeActive = theApp.IsVistaThemeActive() || theApp.IsXPThemeActive();
+#endif
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 	if (bVistaThemeActive)
 	{
 		// To determine if the current item is in 'hot tracking' mode, we need to evaluate
@@ -186,7 +192,13 @@ int CButtonsTabCtrl::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 void CButtonsTabCtrl::InternalInit()
 {
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER<1600
 	if (theApp.IsVistaThemeActive()) {
+#else
+	if (theApp.IsVistaThemeActive() || theApp.IsXPThemeActive()){
+#endif
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 		ModifyStyle(0, TCS_OWNERDRAWFIXED);
 		ModifyStyle(0, TCS_HOTTRACK);
 	}
