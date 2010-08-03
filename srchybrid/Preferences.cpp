@@ -4652,7 +4652,7 @@ CString CPreferences::GetDefaultDirectory(EDefaultDirectory eDirectory, bool bCr
 		m_astrDefaultDirs[EMULE_TOOLBARDIR] = strSelectedExpansionBaseDirectory + _T("skins");
 		m_astrDefaultDirs[EMULE_EXPANSIONDIR] = strSelectedExpansionBaseDirectory; // has ending backslashes
 		m_astrDefaultDirs[EMULE_WAPSERVERDIR] = m_astrDefaultDirs[EMULE_EXECUTEABLEDIR] + _T("wapserver\\");
-		m_astrDefaultDirs[EMULE_FEEDSDIR] = m_astrDefaultDirs[EMULE_EXECUTEABLEDIR] + _T("feeds\\");
+		m_astrDefaultDirs[EMULE_FEEDSDIR] = strSelectedConfigBaseDirectory + _T("feeds\\");
 
 		/*CString strDebug;
 		for (int i = 0; i < 12; i++)
