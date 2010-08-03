@@ -121,7 +121,7 @@
 				AdditionalOptions="/EHa"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\..;..\..\masmx86"
-				PreprocessorDefinitions="WIN32;ASMV;ASMINF"
+				PreprocessorDefinitions="WIN32"
 				StringPooling="TRUE"
 				ExceptionHandling="FALSE"
 				RuntimeLibrary="0"
@@ -242,27 +242,6 @@
 				RelativePath="..\..\..\infback.c">
 			</File>
 			<File
-				RelativePath="..\..\masmx86\inffas32.asm">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Assembling..."
-						CommandLine="ml.exe /nologo /c /Cx /coff /Zi /safeseh /Fo $(IntDir)\ &quot;$(InputPath)&quot;
-"
-						Outputs="$(IntDir)\$(InputName).obj"/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCustomBuildTool"
-						Description="Assembling..."
-						CommandLine="ml.exe /nologo /c /Cx /coff /Zi /safeseh /Fo $(IntDir)\ &quot;$(InputPath)&quot;
-"
-						Outputs="$(IntDir)\$(InputName).obj"/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\..\..\inffast.c">
 			</File>
 			<File
@@ -272,19 +251,10 @@
 				RelativePath="..\..\..\inftrees.c">
 			</File>
 			<File
-				RelativePath="..\..\minizip\ioapi.c">
-			</File>
-			<File
 				RelativePath="..\..\..\trees.c">
 			</File>
 			<File
 				RelativePath="..\..\..\uncompr.c">
-			</File>
-			<File
-				RelativePath="..\..\minizip\unzip.c">
-			</File>
-			<File
-				RelativePath="..\..\minizip\zip.c">
 			</File>
 			<File
 				RelativePath="..\..\..\zutil.c">

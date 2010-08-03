@@ -3905,6 +3905,8 @@
 #define IDS_SCHED_UPDATE_COUNTRY_LOG    31423
 #define IDS_FAKEALYZER_INDICATIONS      31424
 #define IDS_FAKEALYZER_INDICATIONS_TIP  31425
+#define IDS_BROKEN_URLS                 31426
+#define IDS_BROKEN_URLS_TIP             31427
 
 // Next default values for new objects
 // 

@@ -115,6 +115,7 @@ CPPgMorph::CPPgMorph()
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	//MORPH START - Added by SiRoB, ICS Optional
 	m_htiUseICS = NULL;
+	m_htiBrokenURLs = NULL; //MORPH - Added by WiZaRd, Fix broken HTTP downloads
 	//MORPH END   - Added by SiRoB, ICS Optional
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
 	m_htiInfiniteQueue = NULL;	//Morph - added by AndCycle, SLUGFILLER: infiniteQueue
@@ -268,6 +269,10 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 		//MORPH START - Added by SiRoB, ICS Optional
 		m_htiUseICS = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_ICS_USEICS), m_htiDM, m_bUseICS);
 		//MORPH END   - Added by SiRoB, ICS Optional
+		//MORPH START - Added by WiZaRd, Fix broken HTTP downloads
+		m_htiBrokenURLs = m_ctrlTreeOptions.InsertItem(GetResString(IDS_BROKEN_URLS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_htiDM);
+		m_ctrlTreeOptions.AddEditBox(m_htiBrokenURLs, RUNTIME_CLASS(CTreeOptionsEdit));
+		//MORPH END   - Added by WiZaRd, Fix broken HTTP downloads
 
 		CString Buffer;
 		m_htiUM = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_UM), iImgUM, TVI_ROOT);
@@ -491,6 +496,7 @@ void CPPgMorph::DoDataExchange(CDataExchange* pDX)
 	//MORPH END   - Added by Stulle, Global Source Limit
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiUseICS, m_bUseICS);//MORPH - Added by SiRoB, ICS Optional
+	DDX_TreeEdit(pDX, IDC_MORPH_OPTS, m_htiBrokenURLs, m_sBrokenURLs); //MORPH - Added by WiZaRd, Fix broken HTTP downloads
 
 	DDX_TreeCheck(pDX, IDC_MORPH_OPTS, m_htiHighProcess, m_bHighProcess); //MORPH - Added by IceCream, high process priority 
 
@@ -593,6 +599,7 @@ BOOL CPPgMorph::OnInitDialog()
 	//MORPH START - Added by SiRoB, ICS Optional
 	m_bUseICS = thePrefs.UseICS();
 	//MORPH END   - Added by SiRoB, ICS Optional
+	m_sBrokenURLs = thePrefs.GetBrokenURLs(); //MORPH - Added by WiZaRd, Fix broken HTTP downloads
 	//MORPH START - Added by IceCream, high process priority
 	m_bHighProcess = thePrefs.GetEnableHighProcess();
 	//MORPH END   - Added by IceCream, high process priority
@@ -749,6 +756,7 @@ BOOL CPPgMorph::OnApply()
 	//MORPH START - Added by SiRoB, ICS Optional
 	thePrefs.m_bUseIntelligentChunkSelection = m_bUseICS;
 	//MORPH END   - Added by SiRoB, ICS Optional
+	thePrefs.SetBrokenURLs(m_sBrokenURLs); //MORPH - Added by WiZaRd, Fix broken HTTP downloads
 
 	//MORPH START - Added by IceCream, high process priority
 	thePrefs.SetEnableHighProcess(m_bHighProcess);
@@ -1022,7 +1030,12 @@ void CPPgMorph::Localize(void)
 		if (m_htiUseICS) {m_ctrlTreeOptions.SetItemText(m_htiUseICS, GetResString(IDS_ICS_USEICS));
 						  SetTool(m_htiUseICS,IDS_ICS_USEICS_TIP);
 		}
-		//MORPH START - Added by SiRoB, ICS Optional
+		//MORPH END   - Added by SiRoB, ICS Optional
+		//MORPH START - Added by WiZaRd, Fix broken HTTP downloads
+		if (m_htiBrokenURLs) {m_ctrlTreeOptions.SetEditLabel(m_htiBrokenURLs, GetResString(IDS_BROKEN_URLS));
+								SetTool(m_htiBrokenURLs, IDS_BROKEN_URLS_TIP);
+		}
+		//MORPH END   - Added by WiZaRd, Fix broken HTTP downloads
 		//MORPH START - Added by IceCream, high process priority
 		if (m_htiHighProcess) {m_ctrlTreeOptions.SetItemText(m_htiHighProcess, GetResString(IDS_HIGHPROCESS));
 							   SetTool(m_htiHighProcess,IDS_HIGHPROCESS_TIP);
@@ -1159,6 +1172,7 @@ void CPPgMorph::OnDestroy()
 	// khaos::accuratetimerem-
 	//MORPH END - Added by SiRoB, khaos::categorymod+
 	m_htiUseICS = NULL;//MORPH - Added by SiRoB, ICS Optional
+	m_htiBrokenURLs = NULL; //MORPH - Added by WiZaRd, Fix broken HTTP downloads
 	m_htiHighProcess = NULL; //MORPH - Added by IceCream, high process priority
 	CPropertyPage::OnDestroy();
 }

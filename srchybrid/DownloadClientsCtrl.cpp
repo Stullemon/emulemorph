@@ -237,12 +237,12 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	if (!lpDrawItemStruct->itemData)
 		return;
 
-	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
 	/*
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	*/
 	CMemoryDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
-	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 	BOOL bCtrlFocused;
 	InitItemMemDC(dc, lpDrawItemStruct, bCtrlFocused);
 	CRect cur_rec(lpDrawItemStruct->rcItem);
@@ -439,21 +439,6 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						dc.SetTextColor(RGB(255,255,255));
 						DrawClientPercentTextLeft;
 						
-						dc.SetTextColor(RGB(0,0,0));
-						buffer.Format(_T("%s"), CastItoXBytes(client->GetSessionPayloadDown(), false, false));
-#define	DrawClientPercentTextRight		dc.DrawText(buffer, buffer.GetLength(),&cur_rec, MLC_DT_TEXT | DT_RIGHT)
-						cur_rec.top-=1;cur_rec.bottom-=1;
-						DrawClientPercentTextRight;cur_rec.left+=1;cur_rec.right+=1;
-						DrawClientPercentTextRight;cur_rec.left+=1;cur_rec.right+=1;
-						DrawClientPercentTextRight;cur_rec.top+=1;cur_rec.bottom+=1;
-						DrawClientPercentTextRight;cur_rec.top+=1;cur_rec.bottom+=1;
-						DrawClientPercentTextRight;cur_rec.left-=1;cur_rec.right-=1;
-						DrawClientPercentTextRight;cur_rec.left-=1;cur_rec.right-=1;
-						DrawClientPercentTextRight;cur_rec.top-=1;cur_rec.bottom-=1;
-						DrawClientPercentTextRight;cur_rec.left++;cur_rec.right++;
-						dc.SetTextColor(RGB(255,255,255));
-						DrawClientPercentTextRight;
-
 						dc.SelectObject(pOldFont);
 						dc.SetBkMode(iOMode);
 						dc.SetTextColor(oldclr);

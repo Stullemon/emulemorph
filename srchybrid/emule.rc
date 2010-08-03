@@ -108,15 +108,15 @@ BEGIN
                     LVS_SINGLESEL | LVS_SHAREIMAGELISTS | LVS_OWNERDRAWFIXED | 
                     LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,4,119,341,36
     LTEXT           "Clients on queue:",IDC_QUEUECOUNT_LABEL,5,180,87,8
-    LTEXT           "0",IDC_QUEUECOUNT,99,180,90,8
+    LTEXT           "0",IDC_QUEUECOUNT,99,180,100,8
     PUSHBUTTON      "Refresh",IDC_QUEUE_REFRESH_BUTTON,277,179,68,11,NOT 
                     WS_VISIBLE
     CONTROL         "",IDC_DOWNLOADCLIENTS,"SysListView32",LVS_REPORT | 
                     LVS_SINGLESEL | LVS_SHAREIMAGELISTS | LVS_OWNERDRAWFIXED | 
                     LVS_ALIGNLEFT | NOT WS_VISIBLE | WS_BORDER | WS_TABSTOP,
                     4,119,341,36
-    CONTROL         "",IDC_QUEUE,"msctls_progress32",0x1,193,180,60,7
-    CONTROL         "",IDC_QUEUE2,"msctls_progress32",0x1,255,180,20,7
+    CONTROL         "",IDC_QUEUE,"msctls_progress32",0x1,200,180,55,7
+    CONTROL         "",IDC_QUEUE2,"msctls_progress32",0x1,260,180,15,7
 END
 
 IDD_SERVER DIALOGEX 0, 35, 511, 289
@@ -6575,6 +6575,8 @@ BEGIN
     IDS_SCHED_UPDATE_COUNTRY_LOG "Scheduled IP-TO-COUNTRY.CSV-update initiated."
     IDS_FAKEALYZER_INDICATIONS "Indicate FakeAlyzer results for searches"
     IDS_FAKEALYZER_INDICATIONS_TIP "FakeAlyzer is a feature that uses advanced algorithms to indicate if a\nfile may be a fake. Enabling this option will cause MorphXT to display\ncolored background for search results. The color is distinguished by\nthe background color and some RGB based calculation.\nIf white is the default background the colors are:\nGood = Light green\nOK = Light blue\nSuspect = Light yellow\nFake = Light red\nNot computed = White\n\n[Default: disabled]"
+    IDS_BROKEN_URLS         "Don't send user-agents URLs (separated by '|')"
+    IDS_BROKEN_URLS_TIP     "eMule sends Mozilla Firefox 4.0 as the user-agent when downloading from http\nsources to avoid being limited in speed by remote servers. However, some\nservers, like SourceForge, will send us a webpage rather than the file because\nthey think we are a server. Adding URL keywords to this list will disable sending\nthe user-agent string to URLs that include any of the keywords.\nDefault: sourceforge\nSeparate individual keywords by '|'"
 END
 
 #endif    // English (U.S.) resources
