@@ -550,7 +550,33 @@ HBRUSH CClosableTabCtrl::OnCtlColor(CDC* pDC, CWnd* pWnd, UINT nCtlColor)
 // Vista: Can not be used to workaround the problems with owner drawn tab control
 BOOL CClosableTabCtrl::OnEraseBkgnd(CDC* pDC)
 {
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER<1600
 	return CTabCtrl::OnEraseBkgnd(pDC);
+#else
+	// So it seems this finaly got broken on VS2010 for XP... so when we erase background now we just set it ourself now...
+	BOOL obr = CTabCtrl::OnEraseBkgnd(pDC);
+	if(theApp.IsXPThemeActive())
+	{
+		CRect Rect; 
+		GetClientRect(&Rect);
+
+		pDC->FillSolidRect(Rect,GetSysColor(COLOR_BTNFACE));
+		// I think we should use the below but it turns out it does not work... so we do it with FillSolidRect
+		/*
+		HTHEME hTheme = NULL;
+		hTheme = g_xpStyle.OpenThemeData(m_hWnd, L"TAB");
+		if(hTheme)
+		{
+			//if (g_xpStyle.IsThemeBackgroundPartiallyTransparent(hTheme, TABP_TABITEM, TIS_NORMAL))
+				g_xpStyle.DrawThemeParentBackground(m_hWnd, *pDC, &Rect);
+			//g_xpStyle.DrawThemeBackground(hTheme, *pDC, TABP_TABITEM, TIS_NORMAL, &Rect, NULL);
+		}
+		*/
+	}
+	return obr;
+#endif
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 }
 
 BOOL CClosableTabCtrl::DeleteItem(int nItem)
