@@ -21,6 +21,7 @@ All rights reserved.
 #include "HttpDownloadDlg.h"
 #include "OtherFunctions.h"
 #include "Log.h"
+#include "Preferences.h" //MORPH - Added by WiZaRd, Fix broken HTTP downloads
 
 ///////////////////////////////// Defines /////////////////////////////////////
 #define HAS_ZLIB
@@ -535,7 +536,7 @@ void CHttpDownloadDlg::DownloadThread()
 	HttpAddRequestHeaders(m_hHttpFile, ACCEPT_ENCODING_HEADER, (DWORD)-1L, HTTP_ADDREQ_FLAG_ADD);
 
 	// some sites give unacceptable low download speed if they don't see a well known user agent in the headers...
-//>>> WiZaRd::Fix broken HTTP downloads
+	//MORPH START - Added by WiZaRd, Fix broken HTTP downloads
 	int curPos = 0;
 	bool skipAgent = false;
 	CString strBroken = thePrefs.GetBrokenURLs();
@@ -551,7 +552,7 @@ void CHttpDownloadDlg::DownloadThread()
 		cur = strBroken.Tokenize(L"|", curPos);
 	}
 	if(!skipAgent)
-//<<< WiZaRd::Fix broken HTTP downloads
+	//MORPH END   - Added by WiZaRd, Fix broken HTTP downloads
 	HttpAddRequestHeaders(m_hHttpFile, _T("User-Agent: Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0; SLCC1)\r\n"), (DWORD)-1L, HTTP_ADDREQ_FLAG_ADD);
 
 //label used to jump to if we need to resend the request

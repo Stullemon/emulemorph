@@ -652,9 +652,11 @@ IMAGELISTDRAWPARAMS CIP2Country::GetFlagImageDrawParams(CDC* dc,int iIndex, POIN
 	imldp.rgbFg    = CLR_DEFAULT;
 	imldp.fStyle   = ILD_NORMAL;
 	imldp.dwRop    = SRCCOPY;
+#if (_WIN32_WINNT >= 0x501)
 	imldp.fState   = ILS_NORMAL;
 	imldp.Frame    = 0;
 	imldp.crEffect = CLR_DEFAULT;
+#endif
 
 	return imldp;
 }

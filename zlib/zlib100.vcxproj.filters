@@ -48,9 +48,6 @@
     <ClCompile Include="zutil.c">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="contrib\masmx86\gvmat32c.c">
-      <Filter>Assembler Files %28Unsupported%29</Filter>
-    </ClCompile>
     <ClCompile Include="gzclose.c">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -103,12 +100,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuildStep Include="win32\zlib.def">
-      <Filter>Source Files</Filter>
-    </CustomBuildStep>
-    <CustomBuildStep Include="contrib\masmx86\gvmat32.asm">
-      <Filter>Assembler Files %28Unsupported%29</Filter>
-    </CustomBuildStep>
     <CustomBuildStep Include="contrib\masmx86\inffas32.asm">
       <Filter>Assembler Files %28Unsupported%29</Filter>
     </CustomBuildStep>

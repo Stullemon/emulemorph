@@ -1061,12 +1061,12 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 	else
 		odc->SetBkColor(GetBkColor());
-	//MORPH START - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
 	/*
 	CMemDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
 	*/
 	CMemoryDC dc(CDC::FromHandle(lpDrawItemStruct->hDC), &lpDrawItemStruct->rcItem);
-	//MORPH END   - Changed by Stulle - Compiling with Visual Studio 2010
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 	CFont* pOldFont = dc.SelectObject(GetFont());
 	//MORPH - Moved by SiRoB, Don't draw hidden Rect
 	/*
@@ -1123,7 +1123,12 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						theApp.ip2country->GetFlagImageList()->DrawIndirect(&theApp.ip2country->GetFlagImageDrawParams(dc,server->GetCountryFlagIndex(),point2));
 					}
 					else
+						//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+						/*
 						imagelist.DrawIndirect(dc, 0, point2, CSize(16,16), CPoint(0,0), ILD_NORMAL);
+						*/
+						imagelist.Draw(dc, 0, point2, ILD_NORMAL);
+						//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 
 					cur_rec.left +=20;
 					dc->DrawText(Sbuffer,Sbuffer.GetLength(),&cur_rec,MLC_DT_TEXT);
