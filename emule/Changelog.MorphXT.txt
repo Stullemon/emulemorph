@@ -4,6 +4,7 @@ Changelog for eMule 0.50a MorphXT v12.5
 XX-XX-2010
 
 CHANGE: Increased space for displaying number of clients on queue [Stulle]
+CHANGE: Place news feeds dir in config base dir instead of executable dir [Stulle]
 FIX: + not showing before "All Directories" in SharedDirsTreeCtrl [Stulle]
 FIX: Server icon not drawn in ServerWndCtrl [Stulle]
 FIX: Compilation of zlib and IP2Country on Visual Studio 2003 SP1 [Stulle]
