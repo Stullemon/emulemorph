@@ -395,9 +395,10 @@ CPartFile::~CPartFile()
 				HANDLE hThread = m_FlushThread->m_hThread;
 				// 2 minutes to let the thread finish - will never need that much time, just to be sure
 				m_FlushThread->SetThreadPriority(THREAD_PRIORITY_NORMAL); 
+				((CPartFileFlushThread*) m_FlushThread)->StopFlush();
 				if (WaitForSingleObject(hThread, 120000) == WAIT_TIMEOUT)
 				{
-					AddDebugLogLine(true, L"Flushing (force=true) failed.(%s)", GetFileName(), m_nTotalBufferData, m_BufferedData_list.GetCount(), m_uTransferred, m_nLastBufferFlushTime);
+					AddDebugLogLine(true, L"Flushing (force=true) failed2.(%s)", GetFileName()/*, m_nTotalBufferData, m_BufferedData_list.GetCount(), m_uTransferred, m_nLastBufferFlushTime*/);
 					TerminateThread(hThread, 100);
 					ASSERT(0); // did this happen why? 
 				}
@@ -6113,7 +6114,7 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 			pThread->SetThreadPriority(THREAD_PRIORITY_NORMAL); 
 			((CPartFileFlushThread*) m_FlushThread)->StopFlush();
 			if (WaitForSingleObject(hThread, 120000) == WAIT_TIMEOUT) {
-				AddDebugLogLine(true, _T("Flushing (force=true) failed.(%s)"), GetFileName(), m_nTotalBufferData, m_BufferedData_list.GetCount(), m_uTransferred, m_nLastBufferFlushTime);
+				AddDebugLogLine(true, _T("Flushing (force=true) failed.(%s)"), GetFileName()/*, m_nTotalBufferData, m_BufferedData_list.GetCount(), m_uTransferred, m_nLastBufferFlushTime*/);
 				TerminateThread(hThread, 100); // Should never happen
 				ASSERT(0);
 			}
