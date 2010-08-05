@@ -516,8 +516,8 @@ void CUploadListCtrl::GetItemDisplayText(const CUpDownClient *client, int iSubIt
 			//MORPH END - Adde by SiRoB, Optimization requpfile
 			//Morph Start - added by AndCycle, Equal Chance For Each File
 			//Morph - added by AndCycle, more detail...for debug?
-			if(thePrefs.IsEqualChanceEnable())
-				_sntprintf(pszText, cchTextMax, _T("%s :%s"), file->statistic.GetEqualChanceValueString(false),(file != NULL) ? file->GetFileName() : _T("?"));
+			if(thePrefs.IsEqualChanceEnable() && file != NULL)
+				_sntprintf(pszText, cchTextMax, _T("%s :%s"), file->statistic.GetEqualChanceValueString(false),file->GetFileName());
 			else
 			//Morph - added by AndCycle, more detail...for debug?
 			//Morph End - added by AndCycle, Equal Chance For Each File

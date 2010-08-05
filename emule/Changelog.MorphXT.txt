@@ -10,6 +10,8 @@ FIX: Server icon not drawn in ServerWndCtrl [Stulle]
 FIX: Compilation of zlib and IP2Country on Visual Studio 2003 SP1 [Stulle]
 FIX: Display errors around Category tabs/buttons on Windows XP [Stulle]
 FIX: Display errors around closeable (search result) tabs on Windows XP [Stulle]
+FIX: Possible crash around Equal Chances For Each file in UploadListCtrl [Stulle]
+FIX: PartFileFlushThread was not terminated properly in all cases [WiZaRd]
 
 
 --------------------------------------
