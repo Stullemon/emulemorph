@@ -555,26 +555,12 @@ BOOL CClosableTabCtrl::OnEraseBkgnd(CDC* pDC)
 	return CTabCtrl::OnEraseBkgnd(pDC);
 #else
 	// So it seems this finaly got broken on VS2010 for XP... so when we erase background now we just set it ourself now...
-	BOOL obr = CTabCtrl::OnEraseBkgnd(pDC);
-	if(theApp.IsXPThemeActive())
-	{
-		CRect Rect; 
-		GetClientRect(&Rect);
+	CRect rect;
+	pDC->GetClipBox(&rect);     // Erase the area needed
 
-		pDC->FillSolidRect(Rect,GetSysColor(COLOR_BTNFACE));
-		// I think we should use the below but it turns out it does not work... so we do it with FillSolidRect
-		/*
-		HTHEME hTheme = NULL;
-		hTheme = g_xpStyle.OpenThemeData(m_hWnd, L"TAB");
-		if(hTheme)
-		{
-			//if (g_xpStyle.IsThemeBackgroundPartiallyTransparent(hTheme, TABP_TABITEM, TIS_NORMAL))
-				g_xpStyle.DrawThemeParentBackground(m_hWnd, *pDC, &Rect);
-			//g_xpStyle.DrawThemeBackground(hTheme, *pDC, TABP_TABITEM, TIS_NORMAL, &Rect, NULL);
-		}
-		*/
-	}
-	return obr;
+	pDC->PatBlt(rect.left, rect.top, rect.Width(), rect.Height(),
+        PATCOPY);
+	return TRUE;
 #endif
 	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 }
