@@ -13,6 +13,7 @@ FIX: Display errors around closeable (search result) tabs on Windows XP [Stulle]
 FIX: Possible crash around Equal Chances For Each file in UploadListCtrl [Stulle]
 FIX: PartFileFlushThread was not terminated properly in all cases [WiZaRd]
 FIX: Sorting of score column in DownloadClientsCtrl was partially broken [TimDzang]
+FIX: Collection double extension fix was rendered useless [CB]
 
 
 --------------------------------------

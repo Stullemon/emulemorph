@@ -49,16 +49,15 @@ CCollection::CCollection(void)
 
 CCollection::CCollection(const CCollection* pCollection)
 {
-   //MORPH START  CB Mod : Fix : Collection double extension leuk_he
-   /* see http://forum.emule-project.net/index.php?showtopic=107054
-   m_sCollectionName = pCollection->m_sCollectionName;
-   */
-  CString collectionName = pCollection->m_sCollectionName;
-  collectionName.Left(collectionName.ReverseFind('.')); // no extension should be handled correctly as well
-  m_sCollectionName = collectionName;
-  //MORPH END  CB Mod : Fix : Collection double extension leuk_he
-
+	//MORPH START  CB Mod : Fix : Collection double extension leuk_he
+	//see http://forum.emule-project.net/index.php?showtopic=107054
+	/*
 	m_sCollectionName = pCollection->m_sCollectionName;
+	*/
+	CString collectionName = pCollection->m_sCollectionName;
+	collectionName.Left(collectionName.ReverseFind('.')); // no extension should be handled correctly as well
+	m_sCollectionName = collectionName;
+	//MORPH END  CB Mod : Fix : Collection double extension leuk_he
 	if (pCollection->m_pabyCollectionAuthorKey != NULL){
 		m_nKeySize = pCollection->m_nKeySize;
 		m_pabyCollectionAuthorKey = new BYTE[m_nKeySize];
