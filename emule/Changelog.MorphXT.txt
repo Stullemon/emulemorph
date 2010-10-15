@@ -12,6 +12,7 @@ FIX: Display errors around Category tabs/buttons on Windows XP [Stulle]
 FIX: Display errors around closeable (search result) tabs on Windows XP [Stulle]
 FIX: Possible crash around Equal Chances For Each file in UploadListCtrl [Stulle]
 FIX: PartFileFlushThread was not terminated properly in all cases [WiZaRd]
+FIX: Sorting of score column in DownloadClientsCtrl was partially broken [TimDzang]
 
 
 --------------------------------------
