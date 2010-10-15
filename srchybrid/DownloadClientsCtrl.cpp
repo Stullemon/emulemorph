@@ -746,18 +746,21 @@ int CDownloadClientsCtrl::SortProc(LPARAM lParam1, LPARAM lParam2, LPARAM lParam
 
 		case 8:
 			{   
-				if (!item1->Credits()) 
-					iResult=1; 
-				else if (!item2->Credits())   
-					iResult=-1;
-				float r1=item2->credits->GetScoreRatio(item2->GetIP());
-				float r2=item1->credits->GetScoreRatio(item1->GetIP());
-				if (r1==r2)
-					iResult=0;
-				else if (r1<r2)
+				if (!item1->Credits())
+					iResult=1;
+				else if (!item2->Credits())
 					iResult=-1;
 				else
-					iResult=1;
+				{
+					float r1=item2->credits->GetScoreRatio(item2->GetIP());
+					float r2=item1->credits->GetScoreRatio(item1->GetIP());
+					if (r1==r2)
+						iResult=0;
+					else if (r1<r2)
+						iResult=-1;
+					else
+						iResult=1;
+				}
 				break;
 			}
 
