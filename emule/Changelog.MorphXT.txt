@@ -18,6 +18,7 @@ FIX: PartFileFlushThread was not terminated properly in all cases [WiZaRd]
 FIX: Sorting of score column in DownloadClientsCtrl was partially broken [TimDzang]
 FIX: Collection double extension fix was rendered useless [CB]
 FIX: Possible bug around FlushBuffersExceptionHandler(CFileException* error) [WiZaRd]
+FIX: Connection Wizard did not start after being selected in 1stTimeWizard [Stulle]
 
 
 --------------------------------------

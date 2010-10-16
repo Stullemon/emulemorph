@@ -122,6 +122,7 @@
 
 #include "NTservice.h" // MORPH leuk_he:run as ntservice v1..
 #include "HttpDownloadDlg.h" //MORPH - Added by Stulle, New IP Filter by Ozzy [Stulle/Ozzy]
+#include "wizard.h" // MORPH first start wizard
 
 #ifndef RBBS_USECHEVRON
 #define RBBS_USECHEVRON     0x00000200  // display drop-down button for this band if it's sized smaller than ideal width
@@ -137,7 +138,12 @@
 static char THIS_FILE[] = __FILE__;
 #endif
 
+// MORPH first start wizard
+/*
 extern BOOL FirstTimeWizard();
+*/
+extern UINT FirstTimeWizard();
+// MORPH first start wizard
 
 #define	SYS_TRAY_ICON_COOKIE_FORCE_UPDATE	(UINT)-1
 
@@ -937,13 +943,18 @@ void CALLBACK CemuleDlg::StartupTimer(HWND /*hwnd*/, UINT /*uiMsg*/, UINT /*idEv
 				// wait until emule is ready before opening the wizard
 				if (thePrefs.IsFirstStart())
 				{
-					extern BOOL FirstTimeWizard(); // MORPH first start wizard
-					BOOL startImport = FirstTimeWizard();
-					if (startImport)
+					extern UINT FirstTimeWizard(); // MORPH first start wizard
+					UINT FirstTimeWizardAction = FirstTimeWizard();
+					if (FirstTimeWizardAction & 1)
+					{
+						CConnectionWizardDlg conWizard;
+						conWizard.DoModal();
+					}
+					if (FirstTimeWizardAction & 2)
 					{
 						// start import tool.
 						CPartFileConvert::ShowGUI();
-					}     // MORPH first start wizard
+					}   // MORPH first start wizard
 				}
 				// SLUGFILLER: SafeHash
 				theApp.emuledlg->StopTimer();
@@ -3262,9 +3273,14 @@ BOOL CemuleDlg::OnCommand(WPARAM wParam, LPARAM lParam)
 			FirstTimeWizard();
 			*/
 			{
-				extern BOOL FirstTimeWizard(); // MORPH first start wizard
-				BOOL startImport = FirstTimeWizard();
-				if (startImport)
+				extern UINT FirstTimeWizard(); // MORPH first start wizard
+				UINT FirstTimeWizardAction = FirstTimeWizard();
+				if (FirstTimeWizardAction & 1)
+				{
+					CConnectionWizardDlg conWizard;
+					conWizard.DoModal();
+				}
+				if (FirstTimeWizardAction & 2)
 				{
 					// start import tool.
 					CPartFileConvert::ShowGUI();

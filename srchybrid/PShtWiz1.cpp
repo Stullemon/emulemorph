@@ -935,7 +935,12 @@ CPShtWiz1::~CPShtWiz1()
 {
 }
 
+// MORPH first start wizard
+/*
 BOOL FirstTimeWizard()
+*/
+UINT FirstTimeWizard()
+// MORPH first start wizard
 {
 	CEnBitmap bmWatermark;
 	VERIFY( bmWatermark.LoadImage(IDR_WIZ1_WATERMARK, _T("GIF"), NULL, GetSysColor(COLOR_WINDOW)) );
@@ -1079,6 +1084,11 @@ BOOL FirstTimeWizard()
 	/* MORPH
     return TRUE;
 	*/
-	return page6b.m_iRunImportTool ; // MORPH  startup wizard (run import)
+	UINT FirstTimeWizardAction = 0;
+	if (page6b.m_iRunNetworkWizard)
+		FirstTimeWizardAction |= 1;
+	if (page6b.m_iRunImportTool)
+		FirstTimeWizardAction |= 2;
+	return FirstTimeWizardAction;
 }
 
