@@ -6577,11 +6577,6 @@ int CPartFileFlushThread::Run()
 //MORPH END  - Added by SiRoB, Flush Thread
 void CPartFile::FlushBuffersExceptionHandler(CFileException* error)
 {
-//MORPH START - Added by SiRoB, Flush Thread
-	delete[] m_FlushSetting->changedPart;
-	delete m_FlushSetting;
-	m_FlushSetting = NULL;
-//MORPH END   - Added by SiRoB, Flush Thread
 	if (thePrefs.IsCheckDiskspaceEnabled() && error->m_cause == CFileException::diskFull)
 	{
 		LogError(LOG_STATUSBAR, GetResString(IDS_ERR_OUTOFSPACE), GetFileName());

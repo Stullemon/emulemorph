@@ -5,7 +5,10 @@ XX-XX-2010
 
 CHANGE: Increased space for displaying number of clients on queue [Stulle]
 CHANGE: Place news feeds dir in config base dir instead of executable dir [Stulle]
+CHANGE: Rewrote drawing code of ServerListCtrl like official in other lists [Stulle]
+	+ fixes some bugs (e.g. auto resize on dbl click) and adds functionality
 FIX: + not showing before "All Directories" in SharedDirsTreeCtrl [Stulle]
+	+ rewrote passing of params for inserting the item for VS10
 FIX: Server icon not drawn in ServerWndCtrl [Stulle]
 FIX: Compilation of zlib and IP2Country on Visual Studio 2003 SP1 [Stulle]
 FIX: Display errors around Category tabs/buttons on Windows XP [Stulle]
@@ -14,6 +17,7 @@ FIX: Possible crash around Equal Chances For Each file in UploadListCtrl [Stulle
 FIX: PartFileFlushThread was not terminated properly in all cases [WiZaRd]
 FIX: Sorting of score column in DownloadClientsCtrl was partially broken [TimDzang]
 FIX: Collection double extension fix was rendered useless [CB]
+FIX: Possible bug around FlushBuffersExceptionHandler(CFileException* error) [WiZaRd]
 
 
 --------------------------------------

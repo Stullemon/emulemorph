@@ -39,16 +39,22 @@ protected:
 
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 
-        //Commander - Added: CountryFlag - Start
+	//MORPH START - Changed by Stulle, Drawing of ServerListCtrl like in other lists
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct);
 	CImageList imagelist;
-        //Commander - Added: CountryFlag - End
+	void GetItemDisplayText(const CServer *pClient, int iSubItem, LPTSTR pszText, int cchTextMax);
+	afx_msg void OnLvnGetDispInfo(NMHDR *pNMHDR, LRESULT *pResult);
+	//MORPH END   - Changed by Stulle, Drawing of ServerListCtrl like in other lists
 
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnContextMenu(CWnd* pWnd, CPoint point);
 	afx_msg void OnLvnColumnClick(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnLvnGetInfoTip(NMHDR *pNMHDR, LRESULT *pResult);
+	//MORPH START - Changed by Stulle, Drawing of ServerListCtrl like in other lists
+	/*
 	afx_msg void OnNmCustomDraw(NMHDR *pNMHDR, LRESULT *pResult);
+	*/
+	//MORPH END   - Changed by Stulle, Drawing of ServerListCtrl like in other lists
 	afx_msg void OnNmDblClk(NMHDR *pNMHDR, LRESULT *pResult);
 	afx_msg void OnSysColorChange();
 };
