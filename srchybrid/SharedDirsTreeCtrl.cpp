@@ -300,10 +300,24 @@ void CSharedDirsTreeCtrl::InitalizeStandardItems(){
 
 	m_pRootUnsharedDirectries = new CDirectoryItem(_T(""), TVI_ROOT, SDI_FILESYSTEMPARENT);
 	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
-	/*
+#if _MSC_VER<1600
 	m_pRootUnsharedDirectries->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_CHILDREN, GetResString(IDS_ALLDIRECTORIES), 4, 4, 0, 0, (LPARAM)m_pRootUnsharedDirectries, TVI_ROOT, TVI_LAST);
-	*/
-	m_pRootUnsharedDirectries->m_htItem = InsertItem(TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_CHILDREN, GetResString(IDS_ALLDIRECTORIES), 4, 4, TVS_HASBUTTONS, TVS_HASBUTTONS, (LPARAM)m_pRootUnsharedDirectries, TVI_ROOT, TVI_LAST);
+#else
+	CString strLabel = GetResString(IDS_ALLDIRECTORIES);
+	TVINSERTSTRUCT tvs = {0};
+	tvs.item.mask = TVIF_TEXT | TVIF_PARAM | TVIF_IMAGE | TVIF_SELECTEDIMAGE | TVIF_CHILDREN;
+	tvs.item.pszText = strLabel.GetBuffer();
+	tvs.item.iImage = 4;
+	tvs.item.iImage = 4;
+	tvs.item.state = 0;
+	tvs.item.state = 0;
+	tvs.item.lParam = (LPARAM)m_pRootUnsharedDirectries;
+	tvs.item.cChildren = I_CHILDRENCALLBACK;
+	tvs.hParent = TVI_ROOT;
+	tvs.hInsertAfter = TVI_LAST;
+	m_pRootUnsharedDirectries->m_htItem = InsertItem(&tvs);
+	strLabel.ReleaseBuffer();
+#endif
 	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 
 	//MORPH START - Added, Downloaded History [Monki/Xman]
