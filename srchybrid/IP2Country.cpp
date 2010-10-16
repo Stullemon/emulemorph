@@ -263,7 +263,7 @@ bool CIP2Country::LoadCountryFlagLib(){
 	try{
 
 		//detect windows version
-		if(thePrefs.GetWindowsVersion() == _WINVER_XP_ || thePrefs.GetWindowsVersion() == _WINVER_2003_ || thePrefs.GetWindowsVersion() == _WINVER_VISTA_ || thePrefs.GetWindowsVersion() == _WINVER_7_){
+		if(thePrefs.GetWindowsVersion() >= _WINVER_XP_){
 			//it's XP, we can use beautiful 32bits flags with alpha channel :)
 			ip2countryCountryFlag = thePrefs.GetMuleDirectory(EMULE_CONFIGDIR)+_T("countryflag32.dll");
 		}
