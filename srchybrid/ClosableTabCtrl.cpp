@@ -21,6 +21,11 @@
 #include "MenuCmds.h"
 #include "UserMsgs.h"
 #include "VisualStylesXP.h"
+//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER>=1600
+#include "Preferences.h"
+#endif
+//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -554,7 +559,9 @@ BOOL CClosableTabCtrl::OnEraseBkgnd(CDC* pDC)
 #if _MSC_VER<1600
 	return CTabCtrl::OnEraseBkgnd(pDC);
 #else
-	// So it seems this finaly got broken on VS2010 for XP... so when we erase background now we just set it ourself now...
+	if(thePrefs.GetWindowsVersion() >= _WINVER_VISTA_)
+		return CTabCtrl::OnEraseBkgnd(pDC);
+	// So it seems this finally got broken on VS2010 for XP... so when we erase background now we just set it ourself now...
 	CRect rect;
 	pDC->GetClipBox(&rect);     // Erase the area needed
 
