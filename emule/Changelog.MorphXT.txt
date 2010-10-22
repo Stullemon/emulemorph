@@ -1,7 +1,7 @@
 --------------------------------------
 Changelog for eMule 0.50a MorphXT v12.5
 --------------------------------------
-XX-XX-2010
+22-10-2010
 
 CHANGE: Increased space for displaying number of clients on queue [Stulle]
 CHANGE: Place news feeds dir in config base dir instead of executable dir [Stulle]
