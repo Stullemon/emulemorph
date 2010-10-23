@@ -1181,12 +1181,10 @@ UINT CPreferences::GetMaxDownload(){	 //MORPH  uint16 is not enough
     return ((UINT)GetMaxDownloadInBytesPerSec()/1024); //MORPH  uint16 is not enough
 }
 
+//MORPH START - Removed by Stulle, Official ul/dl ratio restrictions
+/*
 uint64 CPreferences::GetMaxDownloadInBytesPerSec(bool dynamic){
 	//dont be a Lam3r :)
-	//MORPH START - Added by SiRoB, ZZ Upload system
-	if (IsZZRatioDoesWork() || (dynamic && (thePrefs.IsDynUpEnabled() || thePrefs.IsSUCDoesWork())))
-		return maxdownload*1024;
-	//MORPH END   - Added by SiRoB, ZZ Upload system
 	UINT maxup;
 	if (dynamic && thePrefs.IsDynUpEnabled() && theApp.uploadqueue->GetWaitingUserCount() != 0 && theApp.uploadqueue->GetDatarate() != 0) {
 		maxup = theApp.uploadqueue->GetDatarate();
@@ -1198,6 +1196,11 @@ uint64 CPreferences::GetMaxDownloadInBytesPerSec(bool dynamic){
 		return (((maxup < 10*1024) && ((uint64)maxup*3 < maxdownload*1024)) ? (uint64)maxup*3 : maxdownload*1024);
 	return (((maxup < 10*1024) && ((uint64)maxup*4 < maxdownload*1024)) ? (uint64)maxup*4 : maxdownload*1024);
 }
+*/
+uint64 CPreferences::GetMaxDownloadInBytesPerSec(bool){
+	return maxdownload*1024;
+}
+//MORPH END   - Removed by Stulle, Official ul/dl ratio restrictions
 
 //MORPH START - Added by SiRoB, Upload Splitting Class
 uint32	CPreferences::GetGlobalDataRateFriend()

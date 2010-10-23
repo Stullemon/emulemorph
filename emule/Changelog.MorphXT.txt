@@ -19,6 +19,7 @@ FIX: Sorting of score column in DownloadClientsCtrl was partially broken [TimDza
 FIX: Collection double extension fix was rendered useless [CB]
 FIX: Possible bug around FlushBuffersExceptionHandler(CFileException* error) [WiZaRd]
 FIX: Connection Wizard did not start after being selected in 1stTimeWizard [Stulle]
+REMOVED: Official ul/dl ratio restrictions (entirely handled by ZZ ratio now) [Stulle]
 
 
 --------------------------------------

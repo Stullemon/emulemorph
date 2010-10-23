@@ -681,6 +681,8 @@ void CPPgConnection::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
 	SetModified(TRUE);
 
+	//MORPH START - Removed by Stulle, Official ul/dl ratio restrictions
+	/*
 	if (pScrollBar->GetSafeHwnd() == m_ctlMaxUp.m_hWnd)
 	{
 		uint32 maxup = m_ctlMaxUp.GetPos();
@@ -707,6 +709,8 @@ void CPPgConnection::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 			m_ctlMaxUp.SetPos((int)ceil((double)maxdown/4));
 		}
 	}
+	*/
+	//MORPH END   - Removed by Stulle, Official ul/dl ratio restrictions
 
 	ShowLimitValues();
 
