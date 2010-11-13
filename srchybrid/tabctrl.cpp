@@ -4,6 +4,11 @@
 #include "UserMsgs.h"
 #include "emule.h"
 #include "VisualStylesXP.h"
+//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER>=1600
+#include "Preferences.h"
+#endif
+//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -27,6 +32,11 @@ BEGIN_MESSAGE_MAP(TabControl, CTabCtrl)
 	ON_WM_LBUTTONUP()
 	ON_WM_MOUSEMOVE()
 	ON_WM_CAPTURECHANGED()
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER>=1600
+	ON_WM_ERASEBKGND()
+#endif
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 END_MESSAGE_MAP()
 
 //
@@ -519,3 +529,28 @@ void TabControl::SetTabTextColor(int index, DWORD color) {
 	tab.lParam=color;
 	SetItem(index,&tab);
 }
+
+//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER>=1600
+BOOL TabControl::OnEraseBkgnd(CDC* pDC)
+{
+	if(thePrefs.GetWindowsVersion() >= _WINVER_VISTA_)
+		return CTabCtrl::OnEraseBkgnd(pDC);
+
+	// Set brush to desired background color
+	CBrush backBrush(GetSysColor(COLOR_BTNFACE));
+
+	// Save old brush
+	CBrush* pOldBrush = pDC->SelectObject(&backBrush);
+
+	// So it seems this finally got broken on VS2010 for XP... so when we erase background now we just set it ourself now...
+	CRect rect;
+	pDC->GetClipBox(&rect);     // Erase the area needed
+
+	pDC->PatBlt(rect.left, rect.top, rect.Width(), rect.Height(),
+        PATCOPY);
+	pDC->SelectObject(pOldBrush);
+	return TRUE;
+}
+#endif
+//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
