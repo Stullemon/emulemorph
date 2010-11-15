@@ -236,6 +236,12 @@ void CTransferWnd::OnInitialUpdate()
 		GetDlgItem(IDC_QUEUE2)->ShowWindow(SW_HIDE);
 	}
 	//Commander - Added: ClientQueueProgressBar - End
+
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER>=1600
+	m_Refresh.ModifyStyle(0,BS_OWNERDRAW,0);
+#endif
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 }
 
 void CTransferWnd::ShowQueueCount(uint32 number)
@@ -290,6 +296,11 @@ void CTransferWnd::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_DLTAB, m_dlTab);
 	DDX_Control(pDX, IDC_QUEUE, queueBar); //Commander - Added: ClientQueueProgressBar
 	DDX_Control(pDX, IDC_QUEUE2, queueBar2); //Commander - Added: ClientQueueProgressBar
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER>=1600
+	DDX_Control(pDX, IDC_QUEUE_REFRESH_BUTTON, m_Refresh);
+#endif
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 	DDX_Control(pDX, IDC_UPLOADLIST, uploadlistctrl);
 	DDX_Control(pDX, IDC_DOWNLOADLIST, downloadlistctrl);
 	DDX_Control(pDX, IDC_QUEUELIST, queuelistctrl);

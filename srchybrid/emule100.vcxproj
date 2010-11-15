@@ -269,6 +269,7 @@ del $(IntDir)emule.obj
     <ClCompile Include="AsyncSocketEx.cpp" />
     <ClCompile Include="AsyncSocketExLayer.cpp" />
     <ClCompile Include="BaseClient.cpp" />
+    <ClCompile Include="ButtonVE.cpp" />
     <ClCompile Include="CaptchaGenerator.cpp" />
     <ClCompile Include="CBase64Coding.cpp" />
     <ClCompile Include="ClientCredits.cpp" />
@@ -604,6 +605,11 @@ del $(IntDir)emule.obj
       <Outputs Condition="'$(Configuration)|$(Platform)'=='debug100|Win32'">%(Outputs)</Outputs>
     </CustomBuild>
     <None Include="Flex.skl" />
+    <None Include="res\Browse8.ico" />
+    <None Include="res\CloseTab.ico" />
+    <None Include="res\CloseTabSelected.ico" />
+    <None Include="res\Incoming.gif" />
+    <None Include="res\KadServer.ico" />
     <None Include="res\MOD\AAMorph.ico" />
     <None Include="res\all.ico" />
     <None Include="res\ArchivePreview.ico" />
@@ -708,6 +714,7 @@ del $(IntDir)emule.obj
     <None Include="res\emuleCollEdit.ico" />
     <None Include="res\emuleCollSearch.ico" />
     <None Include="res\emuleCollView.ico" />
+    <None Include="res\MOD\emulefuture.ico" />
     <None Include="res\Mod\emulespana.ico" />
     <None Include="res\Exit.ico" />
     <None Include="res\ExpandAll.ico" />
@@ -722,6 +729,7 @@ del $(IntDir)emule.obj
     <None Include="res\Mod\FileDownload.ico" />
     <None Include="res\Mod\FileDownloadPaused.ico" />
     <None Include="res\Mod\FileDownloadPreviewFirst.ico" />
+    <None Include="res\MOD\FileDownloadPreviewPause.ico" />
     <None Include="res\Mod\FileHideOS.ico" />
     <None Include="res\Mod\fileimportparts.ico" />
     <None Include="res\FileInfo.gif" />
@@ -806,9 +814,12 @@ del $(IntDir)emule.obj
       <DeploymentContent>true</DeploymentContent>
     </None>
     <None Include="res\MiniMuleBack.gif" />
+    <None Include="res\MOD\MagicAngel.ico" />
+    <None Include="res\MOD\mephisto.ico" />
     <None Include="res\Mod\mobile.ico" />
     <None Include="res\Mod\Morph.ico" />
     <None Include="res\Mod\MorphBanner.jpg" />
+    <None Include="res\MOD\xray.ico" />
     <None Include="res\Mule.ico" />
     <None Include="res\mule_wiz.gif" />
     <None Include="res\mule_wiz_hdr.gif" />
@@ -817,6 +828,7 @@ del $(IntDir)emule.obj
     <None Include="res\NavigateForward.ico" />
     <None Include="res\Mod\nextEMF.ico" />
     <None Include="res\MOD\not.ico" />
+    <None Include="res\NoAccessFolderOvl.ico" />
     <None Include="res\Notifications.ico" />
     <None Include="res\Pause.ico" />
     <None Include="res\Preferences.gif" />
@@ -863,6 +875,7 @@ del $(IntDir)emule.obj
     <None Include="res\ServersUpdate.ico" />
     <None Include="res\SharedFiles.ico" />
     <None Include="res\SharedFilesList.ico" />
+    <None Include="res\SharedFolderOvl.ico" />
     <None Include="res\Smiley_Cry.ico" />
     <None Include="res\Smiley_Disgust.ico" />
     <None Include="res\Smiley_Happy.ico" />
@@ -955,6 +968,8 @@ del $(IntDir)emule.obj
     <ClInclude Include="AsyncProxySocketLayer.h" />
     <ClInclude Include="AsyncSocketEx.h" />
     <ClInclude Include="AsyncSocketExLayer.h" />
+    <ClInclude Include="ButtonVE.h" />
+    <ClInclude Include="ButtonVE_Helper.h" />
     <ClInclude Include="CaptchaGenerator.h" />
     <ClInclude Include="CBase64Coding.hpp" />
     <ClInclude Include="ClientCredits.h" />
