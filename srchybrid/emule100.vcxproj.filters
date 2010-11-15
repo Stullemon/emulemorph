@@ -903,6 +903,9 @@
     <ClCompile Include="WapServer\WapSocket.cpp">
       <Filter>WapServer</Filter>
     </ClCompile>
+    <ClCompile Include="ButtonVE.cpp">
+      <Filter>Interface Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <MASM Include="MD4_asm.asm">
@@ -1939,6 +1942,42 @@
     <None Include="..\todo.txt">
       <Filter>Documents</Filter>
     </None>
+    <None Include="res\KadServer.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\CloseTab.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\CloseTabSelected.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\SharedFolderOvl.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\NoAccessFolderOvl.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Browse8.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\MOD\emulefuture.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\MOD\mephisto.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\MOD\xray.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\MOD\MagicAngel.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\MOD\FileDownloadPreviewPause.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Incoming.gif">
+      <Filter>Resource Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="AbstractFile.h">
@@ -2828,6 +2867,12 @@
     </ClInclude>
     <ClInclude Include="PPGtooltipped.h">
       <Filter>Interface Header\Tooltip</Filter>
+    </ClInclude>
+    <ClInclude Include="ButtonVE_Helper.h">
+      <Filter>Interface Header</Filter>
+    </ClInclude>
+    <ClInclude Include="ButtonVE.h">
+      <Filter>Interface Header</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

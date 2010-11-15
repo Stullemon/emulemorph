@@ -25,6 +25,11 @@
 #include "ClientListCtrl.h"
 #include "DownloadClientsCtrl.h"
 #include "progressctrlx.h" //Commander - Added: ClientQueueProgressBar
+//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER>=1600
+#include "ButtonVE.h"
+#endif
+//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 
 class CDropDownButton;
 class CToolTipCtrlX;
@@ -109,6 +114,11 @@ protected:
 	CProgressCtrlX queueBar; //Commander - Added: ClientQueueProgressBar
 	CProgressCtrlX queueBar2; //Commander - Added: ClientQueueProgressBar
 	CFont bold;//Commander - Added: ClientQueueProgressBar
+	//MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
+#if _MSC_VER>=1600
+	CButtonVE	m_Refresh;
+#endif
+	//MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 
 	void	ShowWnd2(EWnd2 uList);
 	void	SetWnd2(EWnd2 uWnd2);
