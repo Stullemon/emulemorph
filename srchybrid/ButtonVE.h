@@ -315,7 +315,7 @@ private:
   virtual void DrawThemedButtonBackground(HDC /*hDC*/, CDC &mDC, HTHEME hTheme, int stateid, CRect &rc, CRect &border)
   {
 	// Fill background with button face to avoid nasty border around buttons
-	mDC.FillSolidRect(rc, GetSysColor(COLOR_BTNFACE));
+	mDC.FillSolidRect(rc, m_bgcolor);
 
     // Draw themed button background...
     if (g_xpStyle.IsThemeBackgroundPartiallyTransparent(hTheme, BP_PUSHBUTTON, stateid))
