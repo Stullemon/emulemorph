@@ -6359,9 +6359,8 @@ void CPartFile::WriteToDisk() { //Called by Flush Thread
 	// Loop through queue
 	uint64 previouspos = (uint64)-1;
 	bool *changedPart = m_FlushSetting->changedPart;
-	uint64 uWrotetodisk = 0;
 	m_BufferedData_list_Locker.Lock();
-	for (int i = m_BufferedData_list.GetCount(); i>0 && uWrotetodisk < thePrefs.GetFileBufferSize(); i--)
+	while (m_BufferedData_list.GetCount()>0)
 	{
 		item = m_BufferedData_list.GetHead();
 		if (item->data == NULL) {
@@ -6389,13 +6388,8 @@ void CPartFile::WriteToDisk() { //Called by Flush Thread
 		delete [] item->data;
 		item->data = NULL;
 		m_BufferedData_list_Locker.Lock();
-
-		// Remove item from queue
-		m_BufferedData_list.RemoveHead();
-
 		// Decrease buffer size
 		m_nTotalBufferData -= lenData;
-		uWrotetodisk+=lenData;
 	}
 	m_BufferedData_list_Locker.Unlock();
 
