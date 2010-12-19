@@ -1057,9 +1057,7 @@ UINT FirstTimeWizard()
 	thePrefs.SetSafeServerConnectEnabled(page6.m_iSafeServerConnect!=0);
 	thePrefs.SetNetworkKademlia(page6.m_iKademlia!=0);
 	thePrefs.SetNetworkED2K(page6.m_iED2K!=0);
-	thePrefs.m_bCryptLayerRequested = page5.m_iObfuscation != 0;
-	if (page5.m_iObfuscation != 0)
-		thePrefs.m_bCryptLayerSupported = true;
+	thePrefs.m_bCryptLayerRequiredStrictServer = page6.m_iReqObfus?true:false; // MORPH lh require obfuscated server connection
 	thePrefs.SetExtControls(page6b.m_iShowMoreControls!=0 ); //morph show more controls in wizard
 	thePrefs.SetLessControls(page6b.m_iShowLessControls!=0); // MORPH START show less controls
 
