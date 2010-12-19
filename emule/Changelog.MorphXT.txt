@@ -1,7 +1,7 @@
 --------------------------------------
 Changelog for eMule 0.50a MorphXT v12.6
 --------------------------------------
-XX-XX-2010
+19-12-2010
 
 CHANGE: Use owner-drawn push buttons in TransferWnd and SearchWnd [ied/Stulle]
 	+ fixes weird borders when compiling with VS10
@@ -10,6 +10,7 @@ CHANGE: Use owner-drawn push buttons in TransferWnd and SearchWnd [ied/Stulle]
 FIX: Category tab display on XP for VS10 [Stulle]
 FIX: Search and logs tabs (CClosableTab) display on XP for VS10 [Stulle]
 FIX: (Hopefully) Error causing flushed data to be lost on restart [Stulle]
+FIX: Require Obfuscation for Servers Setting not applied in 1st-time-Wizard [Stulle]
 
 
 --------------------------------------
