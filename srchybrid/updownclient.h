@@ -1061,7 +1061,7 @@ static LPCTSTR apszSnafuTag[] =
 	_T("[SpeedMule]"),										//18 Xman 
 	_T("[pimp]")											//19 Xman 
 	,_T("[Chinese Leecher]")								//20 squallATF
-	,_T("[eChanblardNext]")									//21 zz_fly
+	//,_T("[eChanblardNext]")									//21 zz_fly
 	};
 
 //<<< new tags from eMule 0.04x
@@ -1103,7 +1103,7 @@ static LPCTSTR apszSnafuTag[] =
 #define CT_UNKNOWNx4D			0x4D // pimp my mule (00de)
 #define CT_UNKNOWNxEC			0xec // SpeedMule and clones	//Xman x4
 #define CT_UNKNOWNxD2			0xD2 // Chinese Leecher //squallATF
-#define CT_UNKNOWNx85			0x85 // viper-israel.org and eChanblardNext  //zz_fly
+//#define CT_UNKNOWNx85			0x85 // viper-israel.org and eChanblardNext  //zz_fly, viper become good
 
 #define CT_FRIENDSHARING		0x66 //eWombat  [SNAFU]
 #define CT_DARK					0x54 //eWombat [SNAFU]

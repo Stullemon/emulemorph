@@ -1,4 +1,12 @@
 --------------------------------------
+Changelog for eMule 0.50a MorphXT v12.7
+--------------------------------------
+XX-XX-2011
+
+CHANGE: Updated Bad Mod List and Bad Hashs List (DLP v43) [zz_fly]
+
+
+--------------------------------------
 Changelog for eMule 0.50a MorphXT v12.6
 --------------------------------------
 19-12-2010
