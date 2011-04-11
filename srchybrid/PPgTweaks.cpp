@@ -707,7 +707,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	if (m_htiCryptTCPPaddingLength) { DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_htiCryptTCPPaddingLength,m_iCryptTCPPaddingLength );
 									  DDV_MinMaxInt(pDX, m_iCryptTCPPaddingLength , 1,256);}
 	if (m_htiFileBufferTimeLimit) { DDX_TreeEdit(pDX,IDC_EXT_OPTS,m_htiFileBufferTimeLimit,m_iFileBufferTimeLimit );
-									  DDV_MinMaxInt(pDX, m_iFileBufferTimeLimit , 1,6000);} // max 10 minutes
+									  DDV_MinMaxInt(pDX, m_iFileBufferTimeLimit , 1,600);} // max 10 minutes
 
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiAdjustNTFSDaylightFileTime, m_bAdjustNTFSDaylightFileTime);
 	DDX_Text(pDX, IDC_EXT_OPTS, m_htidatetimeformat, m_strDateTimeFormat);
