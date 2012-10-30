@@ -1441,7 +1441,7 @@ void CDownloadListCtrl::DrawSourceItem(CDC *dc, int nColumn, LPCRECT lpRect, UIN
 						buffer.Format(_T("%.1f%%"), percent);
 						COLORREF oldclr = cdcStatus.SetTextColor(RGB(0,0,0));
 						int iOMode = cdcStatus.SetBkMode(TRANSPARENT);
-						CFont *pOldFont = cdcStatus.SelectObject(&m_fontSmaller);
+						CFont *pOldFont = cdcStatus.SelectObject(&m_fontBoldSmaller);
 #define	DrawClientPercentText		cdcStatus.DrawText(buffer, buffer.GetLength(),&rec_status, ((MLC_DT_TEXT | DT_RIGHT) & ~DT_LEFT) | DT_CENTER)
 						rec_status.top-=1;rec_status.bottom-=1;
 						DrawClientPercentText;rec_status.left+=1;rec_status.right+=1;

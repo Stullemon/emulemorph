@@ -6,6 +6,7 @@ XX-XX-2011
 CHANGE: Updated Bad Mod List and Bad Hashs List (DLP v43) [zz_fly]
 CHANGE: Max FileBufferTimeLimit changed from 100 to 10 minutes [Stulle]
 CHANGE: Displayed ed2k link list in category selection can be scrolled through [Stulle]
+CHANGE: Use bold font for drawing client progress percentage in DownloadListCtrl [Stulle]
 FIX: Don't assign downloads via watch clipboard feature using view filters CHANGE [Stulle]
 FIX: Weird result calculation for Fakealyzer [Stulle]
 FIX: Pasting eD2k links from DownloadListCtrl was not handled as pasting [Stulle]
