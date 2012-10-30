@@ -2,7 +2,7 @@
 	  How to compile eMule MorphXT using Visual Studio 2010
 -------------------------------------------------------------------------
 
-1. Start $Source Dir$\srchybrid\emule90.sln and pick build type you want to compile.
+1. Start $Source Dir$\srchybrid\emule100.sln and pick build type you want to compile.
 
 2. Be happy with this new fine MorphXT Release.
 
