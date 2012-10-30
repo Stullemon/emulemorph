@@ -234,6 +234,7 @@ void CUrlClient::Connect()
 
 void CUrlClient::OnSocketConnected(int nErrorCode)
 {
+	ConnectionEstablished(); //MORPH - Added by Stulle, Fix for aborting HTTP downloads [WiZaRd]
 	if (nErrorCode == 0)
 		SendHttpBlockRequests();
 }

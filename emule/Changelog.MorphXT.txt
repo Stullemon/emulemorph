@@ -12,6 +12,7 @@ FIX: Weird result calculation for Fakealyzer [Stulle]
 FIX: Pasting eD2k links from DownloadListCtrl was not handled as pasting [Stulle]
 FIX: Setting for "Don't update Queue list in real time" was inverted in Tweaks [Stulle]
 	+ Note: It now works as expected so you might have to set it anew.
+FIX: Aborting HTTP downloads [WiZaRd]
 REMOVED: Obsolete Vista and above fix in ExportPartMetFilesOverview [leuk_he]
 
 
