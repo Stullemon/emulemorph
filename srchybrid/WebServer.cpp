@@ -3493,6 +3493,7 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 		CString sQueueFriend;
 		
 		OutE = pThis->m_Templates.sTransferUpQueueFriendLine;
+		OutE.Replace(_T("[admin]"), (bAdmin) ? _T("admin") : _T("")); //MORPH - Added by Stulle, Show friend menu in Friendlist of Webinterface
 
 		for(int i = 0; i < QueueArray.GetCount(); i++)
 		{
