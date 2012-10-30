@@ -2942,6 +2942,10 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 			dUser.sClientExtra = _T("friend");
 			nCountQueueFriend++;
 			if (bSecure) nCountQueueFriendSecure++;
+			//MORPH START - Added by Stulle, Show all clients that are not banned in On Queue list of WebInterface
+			nCountQueue++;
+			if (bSecure) nCountQueueSecure++;
+			//MORPH END   - Added by Stulle, Show all clients that are not banned in On Queue list of WebInterface
 		}
 		else
 		{
@@ -3406,7 +3410,12 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 		for(int i = 0; i < QueueArray.GetCount(); i++)
 		{
             TCHAR HTTPTempC[100] = _T("");
+			//MORPH START - Added by Stulle, Show all clients that are not banned in On Queue list of WebInterface
+			/*
 			if (QueueArray[i].sClientExtra == _T("none"))
+			*/
+			if (QueueArray[i].sClientExtra != _T("banned"))
+			//MORPH END   - Added by Stulle, Show all clients that are not banned in On Queue list of WebInterface
 			{
 				HTTPProcessData = OutE;
 				pcTmp = (!WSqueueColumnHidden[0]) ? QueueArray[i].sUserName.GetString() : _T("");

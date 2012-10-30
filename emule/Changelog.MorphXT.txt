@@ -10,6 +10,7 @@ CHANGE: Use bold font for drawing client progress percentage in DownloadListCtrl
 CHANGE: Improved category rights handling for Multi User Web Interface [Stulle]
 CHANGE: Improved download right handling for Multi User Web Interface [Stulle]
 CHANGE: Show friend menu in friend list of Web Interface transfer panel [Stulle]
+CHANGE: Show all clients that are not banned in On Queue list of Web Interface [Stulle]
 FIX: Don't assign downloads via watch clipboard feature using view filters CHANGE [Stulle]
 FIX: Weird result calculation for Fakealyzer [Stulle]
 FIX: Pasting eD2k links from DownloadListCtrl was not handled as pasting [Stulle]
