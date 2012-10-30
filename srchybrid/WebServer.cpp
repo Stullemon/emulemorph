@@ -2947,6 +2947,14 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 			if (bSecure) nCountQueueSecure++;
 			//MORPH END   - Added by Stulle, Show all clients that are not banned in On Queue list of WebInterface
 		}
+		//MORPH START - Added by Stulle, Display if a client has credits in On Queue list of WebInterface [Stulle] - Stulle
+		else if (cur_client->Credits()->GetHasScore(cur_client->GetIP()))
+		{
+			dUser.sClientExtra = _T("credit");
+			nCountQueue++;
+			if (bSecure) nCountQueueSecure++;
+		}
+		//MORPH END   - Added by Stulle, Display if a client has credits in On Queue list of WebInterface [Stulle] - Stulle
 		else
 		{
 			dUser.sClientExtra = _T("none");
