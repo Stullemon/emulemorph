@@ -4815,9 +4815,13 @@ CString CWebServer::_GetLoginScreen(ThreadData Data, bool bLogout)
 	Out.Replace(_T("[LoginNow]"), _GetPlainResString(IDS_WEB_LOGIN_NOW));
 	Out.Replace(_T("[WebControl]"), _GetPlainResString(IDS_WEB_CONTROL));
 
+	//MORPH START - Added by SiRoB/Commander, FAILEDLOGIN
+	/*
 	if(pThis->m_nIntruderDetect >= 1)
 		Out.Replace(_T("[FailedLogin]"), _T("<p class=\"failed\">") + _GetPlainResString(IDS_WEB_BADLOGINATTEMPT) + _T("</p>"));
 	else
+	*/
+	//MORPH END   - Added by SiRoB/Commander, FAILEDLOGIN
 		Out.Replace(_T("[FailedLogin]"), _T("&nbsp;") );
 
 	return Out;
