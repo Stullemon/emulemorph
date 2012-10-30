@@ -866,7 +866,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bReBarToolbar = !thePrefs.m_bReBarToolbar;
 	m_iFileBufferTimeLimit = thePrefs.GetFileBufferTimeLimit()/1000;
 	m_bRearrangeKadSearchKeywords = thePrefs.GetRearrangeKadSearchKeywords();
-	m_bUpdateQueue = thePrefs.m_bupdatequeuelist;
+	m_bUpdateQueue = !thePrefs.m_bupdatequeuelist;
 	m_bRepaint = thePrefs.IsGraphRecreateDisabled();
 	m_bBeeper = thePrefs.beepOnError;
 	m_bMsgOnlySec = thePrefs.msgsecure;
@@ -1121,7 +1121,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_bReBarToolbar = !m_bReBarToolbar;
 	thePrefs.m_uFileBufferTimeLimit = SEC2MS(m_iFileBufferTimeLimit);
 	thePrefs.m_bRearrangeKadSearchKeywords = m_bRearrangeKadSearchKeywords;
-	thePrefs.m_bupdatequeuelist = m_bUpdateQueue;
+	thePrefs.m_bupdatequeuelist = !m_bUpdateQueue;
 	thePrefs.dontRecreateGraphs = m_bRepaint;
 	thePrefs.beepOnError = m_bBeeper;
 	thePrefs.msgsecure = m_bMsgOnlySec;
