@@ -2033,7 +2033,12 @@ void CemuleApp::PasteClipboard(int cat)
 	if (strLinks.IsEmpty())
 		return;
 
+	//MORPH START - Changed by Stulle, force Selection category support khaos::categorymod+
+	/*
 	AddEd2kLinksToDownload(strLinks, cat);
+	*/
+	AddEd2kLinksToDownload(strLinks, cat, true);
+	//MORPH END   - Changed by Stulle, force Selection category support khaos::categorymod+
 }
 
 bool CemuleApp::IsEd2kLinkInClipboard(LPCSTR pszLinkType, int iLinkTypeLen)
