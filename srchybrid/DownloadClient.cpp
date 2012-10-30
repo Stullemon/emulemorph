@@ -1317,6 +1317,7 @@ void CUpDownClient::ProcessHashSet(const uchar* packet, uint32 size, bool bFileI
 }
 
 //MORPH START - Enhanced DBR
+/*
 uint64 CUpDownClient::GetRemainingReservedDataToDownload() const {
 	uint64 reserveddata = 0;
 	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition(); pos != NULL;) {
@@ -1333,6 +1334,7 @@ uint64 CUpDownClient::GetRemainingReservedDataToDownload() const {
 	}
 	return reserveddata;
 }
+*/
 uint64	CUpDownClient::GetRemainingAvailableData(const CPartFile* file) const{
 	uint8* thisAbyPartStatus;
 	if (m_PartStatus_list.Lookup(file, thisAbyPartStatus))

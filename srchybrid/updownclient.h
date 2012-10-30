@@ -467,7 +467,7 @@ public:
 	void			ProcessAcceptUpload();
 	bool			AddRequestForAnotherFile(CPartFile* file);
 	//MORPH START - Enhanced DBR
-	uint64			GetRemainingReservedDataToDownload() const;
+	//uint64			GetRemainingReservedDataToDownload() const;
 	uint64			GetRemainingAvailableData(const CPartFile* file) const;
 	//MORPH END   - Enhanced DBR
 	void			CreateBlockRequests(int iMaxBlocks);
