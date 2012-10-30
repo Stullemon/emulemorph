@@ -29,7 +29,7 @@ typedef struct
 	bool	admin;
 	*/
 	uint8 admin;
-	std::vector<int>	RightsToCategories;
+	CString	RightsToCategories;
 	bool RightsToKad;
 	bool RightsToPrefs;
 	bool RightsToSearch;
@@ -81,6 +81,7 @@ typedef struct
 	bool	bIsPartFile;
 	CString	sFileState;
 	CString	sFileName;
+	bool	bShowFileName; // [ionix] - iONiX::Advanced WebInterface Account Management
 	CString sFileType;
 	uint64	m_qwFileSize;
 	uint64	nFileTransferred;

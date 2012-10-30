@@ -541,25 +541,7 @@ void CWebServer::ProcessURL(ThreadData Data)
 					{
 						Session ses;
 						ses.admin=Def.RightsToAddRemove;
-						ses.RightsToCategories.push_back(0);
-						CString CatsList(Def.RightsToCategories);
-						for (int i = 1; i < thePrefs.GetCatCount(); i++)
-						{
-							int curPos=0;
-							if (CatsList.GetLength()>=2)
-							{
-								CString Cat=CatsList.Tokenize(_T("|"),curPos);
-								while (Cat!=_T(""))
-								{
-									if (Cat==thePrefs.GetCategory(i)->strTitle)
-									{
-										ses.RightsToCategories.push_back(i);
-										break;
-									}
-									Cat=CatsList.Tokenize(_T("|"),curPos);
-								}
-							}
-						}
+						ses.RightsToCategories=Def.RightsToCategories;
 						ses.RightsToKad=Def.RightsToKad;
 						ses.RightsToServers=Def.RightsToServers;
 						ses.RightsToTransfered=Def.RightsToTransfered;
@@ -2529,20 +2511,24 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 			//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
 			if(thePrefs.UseIonixWebsrv())
 			{
-				bool Allowed=false;
-				if (Rights.RightsToCategories.size()>1)
+			bool Allowed=false;
+			int curPos=0;
+			if (Rights.RightsToCategories.GetLength()>=2)
+			{
+				CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+				while (Cat!=_T(""))
 				{
-					for (int j = 0; j < (int)Rights.RightsToCategories.size(); j++)
+					if (pPartFile->GetCategory() == 0 || // always show default category files
+						Cat==thePrefs.GetCategory(pPartFile->GetCategory())->strTitle)
 					{
-						if (Rights.RightsToCategories.at(j)==(int)pPartFile->GetCategory())
-						{
-							Allowed=true;
-							break;
-						}
+						Allowed=true;
+						break;
 					}
-					if (!Allowed)
-						continue;
+					Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 				}
+			}
+			if (!Allowed && Rights.RightsToCategories.GetLength()>=2)
+				continue;
 			}
 			//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 			if (cat<0) {
@@ -2742,12 +2728,11 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
 		/*
 		dUser.sFileInfo = _SpecialChars(GetClientSummary(cur_client),false);
-		*/
-		dUser.sFileInfo = _SpecialChars(GetClientSummary(cur_client,Rights),false);
-		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 		dUser.sFileInfo.Replace(_T("\\"),_T("\\\\"));
 		dUser.sFileInfo.Replace(_T("\n"), _T("<br />"));
 		dUser.sFileInfo.Replace(_T("'"),_T("&#8217;"));
+		*/
+		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 
 		sTemp= GetClientversionImage(cur_client) ;
 		dUser.sClientSoft = sTemp;
@@ -2782,31 +2767,76 @@ CString CWebServer::_GetTransferList(ThreadData Data)
 		/*
 		if (file)
 		*/
-		int Allowed=0; //-1 = not allowed, 0 = not found, 1  = allowed
-		if(thePrefs.UseIonixWebsrv())
+		// If the user may only see certain categories hide file names if the user has no access to the
+		// category that shares the file
+		bool bAllowed = true;
+		if(thePrefs.UseIonixWebsrv() && Rights.RightsToCategories.GetLength()>=2)
 		{
-			if (Rights.RightsToCategories.size()>1)
+			bAllowed = false;
+
+			if(file->IsPartFile()) // It's a partfile, so we only check if the category is available
 			{
-				CString Path = file->GetPath();
-				Path = Path.Left(Path.GetLength()-1);
-				for (int i = 0; i < thePrefs.GetCatCount(); i++)
+				int curPos=0;
+				CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+
+				while (Cat!=_T(""))
 				{
-					for (int j = 0; j < (int)Rights.RightsToCategories.size(); j++)
+					if (((CPartFile*)file)->GetCategory() == 0 || // always show default category files
+						Cat==thePrefs.GetCategory(((CPartFile*)file)->GetCategory())->strTitle) // or user has access to this cat
 					{
-						if (thePrefs.GetCategory(Rights.RightsToCategories.at(j))->strIncomingPath == Path)
+						bAllowed = true;
+						break;
+					}
+					Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+				}
+			}
+			else
+			{
+				bool bFoundMatchingCat = false;
+
+				for (int i = 0; i < thePrefs.GetCatCount() && !bAllowed; i++)
+				{
+					CString strFilePath = file->GetPath();
+					if(strFilePath.Left(strFilePath.GetLength()-1) == thePrefs.GetCategory(i)->strIncomingPath) // check if the files dir equals this cats inc dir
+					{
+						bFoundMatchingCat = true;
+						if(i == 0) // always show default category files
 						{
-							Allowed=1;
+							bAllowed = true;
 							break;
 						}
 					}
-					if (Allowed==1)
-						break;
-					if (thePrefs.GetCategory(i)->strIncomingPath == Path)
-						Allowed=-1;
+					else
+						continue; // next cat if the dirs don't match
+
+					int curPos=0;
+					CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+
+					while (Cat!=_T(""))
+					{
+						if (Cat==thePrefs.GetCategory(i)->strTitle) // user has access to this cat
+						{
+							bAllowed = true;
+							break;
+						}
+						Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+					}
 				}
+
+				if(bFoundMatchingCat == false) // If we did not find a cat with matching dir
+					bAllowed = true; // we just show the name
 			}
 		}
-		if (file && Allowed>=0)
+
+		// Moved down to be able to hide File name in tooltip
+		dUser.sFileInfo = _SpecialChars(GetClientSummary(cur_client,bAllowed),false);
+		dUser.sFileInfo.Replace(_T("\\"),_T("\\\\"));
+		dUser.sFileInfo.Replace(_T("\n"), _T("<br />"));
+		dUser.sFileInfo.Replace(_T("'"),_T("&#8217;"));
+
+		if (file && !bAllowed)
+			dUser.sFileName = _GetPlainResString(IDS_WS_HIDDEN);
+		else if (file)
 		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 			dUser.sFileName = _SpecialChars(file->GetFileName());
 		else
@@ -2932,31 +2962,69 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 		/*
 		if (file)
 		*/
-		int Allowed=0; //-1 = not allowed, 0 = not found, 1  = allowed
-		if(thePrefs.UseIonixWebsrv())
+		// If the user may only see certain categories hide file names if the user has no access to the
+		// category that shares the file
+		bool bAllowed = true;
+		if(thePrefs.UseIonixWebsrv() && Rights.RightsToCategories.GetLength()>=2)
 		{
-			if (Rights.RightsToCategories.size()>1)
+			bAllowed = false;
+
+			if(file->IsPartFile()) // It's a partfile, so we only check if the category is available
 			{
-				CString Path = file->GetPath();
-				Path = Path.Left(Path.GetLength()-1);
-				for (int i = 0; i < thePrefs.GetCatCount(); i++)
+				int curPos=0;
+				CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+
+				while (Cat!=_T(""))
 				{
-					for (int j = 0; j < (int)Rights.RightsToCategories.size(); j++)
+					if (((CPartFile*)file)->GetCategory() == 0 || // always show default category files
+						Cat==thePrefs.GetCategory(((CPartFile*)file)->GetCategory())->strTitle) // or user has access to this cat
 					{
-						if (thePrefs.GetCategory(Rights.RightsToCategories.at(j))->strIncomingPath == Path)
+						bAllowed = true;
+						break;
+					}
+					Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+				}
+			}
+			else
+			{
+				bool bFoundMatchingCat = false;
+
+				for (int i = 0; i < thePrefs.GetCatCount() && !bAllowed; i++)
+				{
+					CString strFilePath = file->GetPath();
+					if(strFilePath.Left(strFilePath.GetLength()-1) == thePrefs.GetCategory(i)->strIncomingPath) // check if the files dir equals this cats inc dir
+					{
+						bFoundMatchingCat = true;
+						if(i == 0) // always show default category files
 						{
-							Allowed=1;
+							bAllowed = true;
 							break;
 						}
 					}
-					if (Allowed==1)
-						break;
-					if (thePrefs.GetCategory(i)->strIncomingPath == Path)
-						Allowed=-1;
+					else
+						continue; // next cat if the dirs don't match
+
+					int curPos=0;
+					CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+
+					while (Cat!=_T(""))
+					{
+						if (Cat==thePrefs.GetCategory(i)->strTitle) // user has access to this cat
+						{
+							bAllowed = true;
+							break;
+						}
+						Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+					}
 				}
+
+				if(bFoundMatchingCat == false) // If we did not find a cat with matching dir
+					bAllowed = true; // we just show the name
 			}
 		}
-		if (file && Allowed>=0)
+		if (file && !bAllowed)
+			dUser.sFileName = _GetPlainResString(IDS_WS_HIDDEN);
+		else if (file)
 		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 			dUser.sFileName = _SpecialChars(file->GetFileName());
 		else
@@ -3897,34 +3965,71 @@ CString CWebServer::_GetSharedFilesList(ThreadData Data)
 		/*
 		dFile.sFileName = cur_file->GetFileName();
 		*/
-		int Allowed=0; //-1 = not allowed, 0 = not found, 1  = allowed
-		if(thePrefs.UseIonixWebsrv())
+		// If the user may only see certain categories hide file names if the user has no access to the
+		// category that shares the file
+		bool bAllowed = true;
+		if(thePrefs.UseIonixWebsrv() && Rights.RightsToCategories.GetLength()>=2)
 		{
-			if (Rights.RightsToCategories.size()>1)
+			bAllowed = false;
+
+			if(cur_file->IsPartFile()) // It's a partfile, so we only check if the category is available
 			{
-				CString Path = cur_file->GetPath();
-				Path = Path.Left(Path.GetLength()-1);
-				for (int i = 0; i < thePrefs.GetCatCount(); i++)
+				int curPos=0;
+				CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+
+				while (Cat!=_T(""))
 				{
-					for (int j = 0; j < (int)Rights.RightsToCategories.size(); j++)
+					if (((CPartFile*)cur_file)->GetCategory() == 0 || // always show default category files
+						Cat==thePrefs.GetCategory(((CPartFile*)cur_file)->GetCategory())->strTitle) // or user has access to this cat
 					{
-						if (thePrefs.GetCategory(Rights.RightsToCategories.at(j))->strIncomingPath == Path)
+						bAllowed = true;
+						break;
+					}
+					Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+				}
+			}
+			else
+			{
+				bool bFoundMatchingCat = false;
+
+				for (int i = 0; i < thePrefs.GetCatCount() && !bAllowed; i++)
+				{
+					CString strFilePath = cur_file->GetPath();
+					if(strFilePath.Left(strFilePath.GetLength()-1) == thePrefs.GetCategory(i)->strIncomingPath) // check if the files dir equals this cats inc dir
+					{
+						bFoundMatchingCat = true;
+						if(i == 0) // always show default category files
 						{
-							Allowed=1;
+							bAllowed = true;
 							break;
 						}
 					}
-					if (Allowed==1)
-						break;
-					if (thePrefs.GetCategory(i)->strIncomingPath == Path)
-						Allowed=-1;
+					else
+						continue; // next cat if the dirs don't match
+
+					int curPos=0;
+					CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+
+					while (Cat!=_T(""))
+					{
+						if (Cat==thePrefs.GetCategory(i)->strTitle) // user has access to this cat
+						{
+							bAllowed = true;
+							break;
+						}
+						Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+					}
 				}
+
+				if(bFoundMatchingCat == false) // If we did not find a cat with matching dir
+					bAllowed = true; // we just show the name
 			}
 		}
-		if (Allowed>=0)
+		if (bAllowed)
 			dFile.sFileName = cur_file->GetFileName();
 		else
-			dFile.sFileName = _T("???");
+			dFile.sFileName = _GetPlainResString(IDS_WS_HIDDEN);
+		dFile.bShowFileName = bAllowed;
 		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 		if(bPartFile)
 			dFile.sFileState = _T("filedown");
@@ -4123,7 +4228,7 @@ CString CWebServer::_GetSharedFilesList(ThreadData Data)
 					HTTPProcessData.Replace(_T("[FileIsPriority]"), _T("none"));
 				downloadable = !cur_file->IsPartFile() && (thePrefs.GetMaxWebUploadFileSizeMB() == 0 || SharedArray[i].m_qwFileSize < thePrefs.GetMaxWebUploadFileSizeMB()*1024*1024);
 				//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
-				downloadable &= !thePrefs.UseIonixWebsrv() || Rights.RightsToDownloadFiles;
+				downloadable &= !thePrefs.UseIonixWebsrv() || Rights.RightsToDownloadFiles && SharedArray[i].bShowFileName;
 				//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 			}
 		}
@@ -4810,9 +4915,6 @@ bool CWebServer::_RemoveSession(ThreadData Data, long lSession)
 	{
 		if(pThis->m_Params.Sessions[i].lSession == lSession && lSession != 0)
 		{
-			//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
-			pThis->m_Params.Sessions.GetAt(i).RightsToCategories.clear();
-			//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 			pThis->m_Params.Sessions.RemoveAt(i);
 			CString t_ulCurIP;
 			t_ulCurIP.Format(_T("%u.%u.%u.%u"),(byte)pThis->m_ulCurIP,(byte)(pThis->m_ulCurIP>>8),(byte)(pThis->m_ulCurIP>>16),(byte)(pThis->m_ulCurIP>>24));
@@ -5337,12 +5439,7 @@ int CWebServer::UpdateSessionCount()
 	{
 		CTimeSpan ts = CTime::GetCurrentTime() - m_Params.Sessions[i].startTime;
 		if(thePrefs.GetWebTimeoutMins()>0 && ts.GetTotalSeconds() > thePrefs.GetWebTimeoutMins()*60 )
-		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
-		{
-			m_Params.Sessions.GetAt(i).RightsToCategories.clear();
-		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 			m_Params.Sessions.RemoveAt(i);
-		}//MORPH [ionix] - iONiX::Advanced WebInterface Account Management
 		else
 			i++;
 	}
@@ -5386,19 +5483,24 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 			if(thePrefs.UseIonixWebsrv())
 			{
 				bool Allowed=false;
-				if (Rights.RightsToCategories.size()>1)
+				int curPos=0;
+				if (Rights.RightsToCategories.GetLength()>=2)
 				{
-					for (int j = 0; j < (int)Rights.RightsToCategories.size(); j++)
+					CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+					while (Cat!=_T(""))
 					{
-						if (Rights.RightsToCategories.at(j)==i)
+						if (i == 0 || // always show default category
+							Cat==thePrefs.GetCategory(i)->strTitle)
 						{
 							Allowed=true;
 							break;
 						}
+						Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 					}
-					if (!Allowed)
-						continue;
 				}
+
+				if (!Allowed && Rights.RightsToCategories.GetLength()>=2)
+					continue;
 			}
 			//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 			CString strCategory = thePrefs.GetCategory(i)->strTitle;
@@ -5453,19 +5555,25 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 			if(thePrefs.UseIonixWebsrv())
 			{
 				bool Allowed=false;
-				if (Rights.RightsToCategories.size()>1)
+				int curPos=0;
+
+				if (Rights.RightsToCategories.GetLength()>=2)
 				{
-					for (int j = 0; j < (int)Rights.RightsToCategories.size(); j++)
+					CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+					while (Cat!=_T(""))
 					{
-						if (Rights.RightsToCategories.at(j)==i)
+						if (i == 0 || // always show default category
+							Cat==thePrefs.GetCategory(i)->strTitle)
 						{
 							Allowed=true;
 							break;
 						}
+						Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 					}
-					if (!Allowed)
-						continue;
 				}
+
+				if (!Allowed && Rights.RightsToCategories.GetLength()>=2)
+					continue;
 			}
 			//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 			if (i==preselect)
@@ -5528,19 +5636,25 @@ void CWebServer::InsertCatBox(CString &Out,int preselect,CString boxlabel,bool j
 		if(thePrefs.UseIonixWebsrv())
 		{
 			bool Allowed=false;
-			if (Rights.RightsToCategories.size()>1)
+			int curPos=0;
+
+			if (Rights.RightsToCategories.GetLength()>=2)
 			{
-				for (int j = 0; j < (int)Rights.RightsToCategories.size(); j++)
+				CString Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
+				while (Cat!=_T(""))
 				{
-					if (Rights.RightsToCategories.at(j)==i)
+					if (i == 0 || // always show default category
+						Cat==thePrefs.GetCategory(i)->strTitle)
 					{
 						Allowed=true;
 						break;
 					}
+					Cat=Rights.RightsToCategories.Tokenize(_T("|"),curPos);
 				}
-				if (!Allowed)
-					continue;
 			}
+
+			if (!Allowed && Rights.RightsToCategories.GetLength()>=2)
+				continue;
 		}
 		//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 		CPartFile *found_file = NULL;
@@ -5762,7 +5876,7 @@ CString CWebServer::GetWebImageNameForFileType(CString filename)
 /*
 CString CWebServer::GetClientSummary(CUpDownClient* client) {
 */
-CString CWebServer::GetClientSummary(CUpDownClient* client, const Session& Rights) {
+CString CWebServer::GetClientSummary(CUpDownClient* client, bool bShowFilename) {
 //MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 
 	// name
@@ -5777,35 +5891,16 @@ CString CWebServer::GetClientSummary(CUpDownClient* client, const Session& Right
 	//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
 	/*
 	if (file) {
-	*/
-	int Allowed=0; //-1 = not allowed, 0 = not found, 1  = allowed
-	if(thePrefs.UseIonixWebsrv())
-	{
-		if (Rights.RightsToCategories.size()>1)
-		{
-			CString Path = file->GetPath();
-			Path = Path.Left(Path.GetLength()-1);
-			for (int i = 0; i < thePrefs.GetCatCount(); i++)
-			{
-				for (int j = 0; j < (int)Rights.RightsToCategories.size(); j++)
-				{
-					if (thePrefs.GetCategory(Rights.RightsToCategories.at(j))->strIncomingPath == Path)
-					{
-						Allowed=1;
-						break;
-					}
-				}
-				if (Allowed==1)
-					break;
-				if (thePrefs.GetCategory(i)->strIncomingPath == Path)
-					Allowed=-1;
-			}
-		}
-	}
-	if (file && Allowed>=0) {
-	//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 		buffer += file->GetFileName();
 	}
+	*/
+	if (file && !bShowFilename)
+		buffer += _GetPlainResString(IDS_WS_HIDDEN);
+	else if (file)
+		buffer += file->GetFileName();
+	else
+		buffer += _GetPlainResString(IDS_REQ_UNKNOWNFILE);
+	//MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
 	buffer+= _T("\n\n");
 	
 

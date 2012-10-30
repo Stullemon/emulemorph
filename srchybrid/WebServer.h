@@ -416,7 +416,7 @@ private:
 	static CString	GetWebImageNameForFileType(CString filename);
 //>>> Advanced WebInterface Account Management
 	//static CString  GetClientSummary(CUpDownClient* client);
-	static CString  GetClientSummary(CUpDownClient* client, const Session& Rights);
+	static CString  GetClientSummary(CUpDownClient* client, bool bShowFilename);
 //<<< Advanced WebInterface Account Management
 	static CString	_GetMyInfo(ThreadData Data);
 	static CString	GetClientversionImage(CUpDownClient* client);

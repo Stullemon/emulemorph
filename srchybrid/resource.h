@@ -3907,6 +3907,7 @@
 #define IDS_FAKEALYZER_INDICATIONS_TIP  31425
 #define IDS_BROKEN_URLS                 31426
 #define IDS_BROKEN_URLS_TIP             31427
+#define IDS_WS_HIDDEN                   31428
 
 // Next default values for new objects
 // 
