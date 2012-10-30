@@ -70,9 +70,9 @@ void CDownloadClientsCtrl::Init()
 	InsertColumn(6,	GetResString(IDS_CL_TRANSFUP),		LVCFMT_RIGHT, DFLT_SIZE_COL_WIDTH);
 	InsertColumn(7,	GetResString(IDS_META_SRCTYPE),		LVCFMT_LEFT,  100);
 	InsertColumn(8,	GetResString(IDS_DL_ULDL),		LVCFMT_LEFT, 60);
-	//MORPH START - Added by SiRoB, Display current uploading chunk
+	//MORPH START - Added by SiRoB, Downloading Chunk Detail Display
 	InsertColumn(9,	GetResString(IDS_CHUNK),			LVCFMT_LEFT, 100);
-	//MORPH END   - Added by SiRoB, Display current uploading chunk
+	//MORPH END   - Added by SiRoB, Downloading Chunk Detail Display
 	InsertColumn(10, GetResString(IDS_LAST_ASKED),		LVCFMT_LEFT, 100); //SLAHAM: ADDED Last Asked 
 	InsertColumn(11, GetResString(IDS_DOWNL_TIME),		LVCFMT_LEFT, 100); //SLAHAM: ADDED Downloading Time
 	InsertColumn(12, GetResString(IDS_KNOWN_SINCE),		LVCFMT_LEFT, 100); //SLAHAM: ADDED Known Since
@@ -134,11 +134,11 @@ void CDownloadClientsCtrl::Localize()
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(8, &hdi);
 
-	//MORPH START - Added by SiRoB, Display current uploading chunk
+	//MORPH START - Added by SiRoB, Downloading Chunk Detail Display
 	strRes = GetResString(IDS_CHUNK);
 	hdi.pszText = const_cast<LPTSTR>((LPCTSTR)strRes);
 	pHeaderCtrl->SetItem(9, &hdi);
-	//MORPH START - Added by SiRoB, Display current uploading chunk
+	//MORPH START - Added by SiRoB, Downloading Chunk Detail Display
 
 	//SLAHAM: ADDED Last Asked =>
 	strRes = GetResString(IDS_LAST_ASKED);
@@ -407,7 +407,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						break;
 					}	
 
-					//MORPH START - Added by SiRoB, Display current uploading chunk
+					//MORPH START - Added by SiRoB, Downloading Chunk Detail Display
 					case 9:
 					{
 						cur_rec.bottom--;
@@ -446,7 +446,7 @@ void CDownloadClientsCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 						cur_rec.top--;
 					}
 					break;
-					//MORPH END   - Added by SiRoB, Display current uploading chunk
+					//MORPH END   - Added by SiRoB, Downloading Chunk Detail Display
 
 					// EastShare - Added by Pretender: IP2Country column
 					case 13:
