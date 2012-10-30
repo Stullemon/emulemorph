@@ -68,15 +68,13 @@ BOOL CSelCategoryDlg::OnInitDialog()
 		for (POSITION pos = theApp.downloadqueue->m_ED2KLinkQueue.GetHeadPosition(); pos != 0; theApp.downloadqueue->m_ED2KLinkQueue.GetNext(pos))
 		{
 			ListFilesNames +=  theApp.downloadqueue->m_ED2KLinkQueue.GetAt(pos)->GetName();
-			ListFilesNames +=   _T("\n");
+			ListFilesNames +=   _T("\r\n");
 		}
-		GetDlgItem(IDC_SELFILES)->SetWindowText(ListFilesNames);
+		GetDlgItem(IDC_SELFILES)->SetWindowText(ListFilesNames.Left(ListFilesNames.GetLength()-2));
 		SetTool(IDC_SELFILES,IDS_SELFILES_TIP);
 	}
 	else // no need to display empty box
 		GetDlgItem(IDC_SELFILES)->ShowWindow(SW_HIDE);
-
-
 
 	if (m_bFromClipboard) {
 		GetDlgItem(IDC_DONTASKMEAGAINCB)->SetWindowText(GetResString(IDS_DONOTWATCHCLIP    ));
@@ -93,8 +91,6 @@ BOOL CSelCategoryDlg::OnInitDialog()
 	SetTool(IDCANCEL,IDS_OKCANCELSEL_TIP);
 	SetTool(IDOK,IDS_OKCANCELSEL_TIP);
 	
-
-
 
 	// 'All' is always an option.
 	//khaos::categorymod+
