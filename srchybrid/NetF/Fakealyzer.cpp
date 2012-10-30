@@ -104,7 +104,7 @@ CFakealyzer::CheckSearchResult(CSearchFile* content)
 	int nScore;
 	if (nNegatives > 0)
 	{
-		nScore = (nNegatives > 0 ? (nPositives - 1) : 0) - nNegatives;
+		nScore = (nPositives > 0 ? (nPositives - 1) : 0) - nNegatives;
 	}
 	else
 	{
