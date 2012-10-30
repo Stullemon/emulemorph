@@ -15,6 +15,7 @@ FIX: Setting for "Don't update Queue list in real time" was inverted in Tweaks [
 	+ Note: It now works as expected so you might have to set it anew.
 FIX: Aborting HTTP downloads [WiZaRd]
 FIX: Wrong input focus for Multi User Web Interface login if user remembered [Stulle]
+FIX: File Percentage in title of progress images in WebServer did not show 100% [Stulle]
 REMOVED: Obsolete Vista and above fix in ExportPartMetFilesOverview [leuk_he]
 REMOVED: Obsolete GetRemainingReservedDataToDownload function [Stulle]
 
