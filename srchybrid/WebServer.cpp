@@ -3188,7 +3188,14 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 		HTTPProcessData.Replace(_T("[filehash]"), filehash);
 		HTTPProcessData.Replace(_T("[down-priority]"), downpriority);
 		HTTPProcessData.Replace(_T("[FileType]"), dwnlf.sFileType);
+		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
+		/*
 		HTTPProcessData.Replace(_T("[downloadable]"), (bAdmin && (thePrefs.GetMaxWebUploadFileSizeMB()==0 ||dwnlf.m_qwFileSize<thePrefs.GetMaxWebUploadFileSizeMB()*1024*1024))?_T("yes"):_T("no")  );
+		*/
+		bool bDownloadable = bAdmin && (thePrefs.GetMaxWebUploadFileSizeMB() == 0 || dwnlf.m_qwFileSize < thePrefs.GetMaxWebUploadFileSizeMB()*1024*1024);
+		bDownloadable &= !thePrefs.UseIonixWebsrv() || Rights.RightsToDownloadFiles;
+		HTTPProcessData.Replace(_T("[downloadable]"), bDownloadable?_T("yes"):_T("no")  );
+		//MORPH END   [ionix] - iONiX::Advanced WebInterface Account Management
 		
 		// comment icon
 		if (!dwnlf.iComment)
