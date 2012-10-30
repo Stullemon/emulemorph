@@ -2525,22 +2525,14 @@ void CDownloadQueue::ExportPartMetFilesOverview() const
 	CFileException fexp;
 	if (!file.Open(strTmpFileListPath, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary | CFile::shareDenyWrite, &fexp))
 	{
-		// MORPH START: some vista stuff.. c:\program files\emule is not writeable. so write in config dir. 
-		strFileListPath= thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("downloads.txt");
-		PathRenameExtension(strTmpFileListPath.GetBuffer(MAX_PATH), _T(".tmp"));
-    	strTmpFileListPath.ReleaseBuffer();
-		if (!file.Open(strTmpFileListPath, CFile::modeCreate | CFile::modeWrite | CFile::typeBinary | CFile::shareDenyWrite, &fexp))
-	    {
-		// MORPH END: some vista stuff.. 
-			CString strError;
-			TCHAR szError[MAX_CFEXP_ERRORMSG];
-			if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
-				strError += _T(" - ");
-				strError += szError;
-			}
-			LogError(_T("Failed to create %s  file list%s"),strTmpFileListPath, strError);
-			return;
+		CString strError;
+		TCHAR szError[MAX_CFEXP_ERRORMSG];
+		if (fexp.GetErrorMessage(szError, ARRSIZE(szError))){
+			strError += _T(" - ");
+			strError += szError;
 		}
+		LogError(_T("Failed to create %s  file list%s"),strTmpFileListPath, strError);
+		return;
 	}
 
 	// write Unicode byte-order mark 0xFEFF
