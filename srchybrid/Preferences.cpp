@@ -2385,6 +2385,9 @@ void CPreferences::SavePreferences()
 	ini.WriteBool(L"ForceSpeedsToKB",m_bForceSpeedsToKB);
 	ini.WriteBool(L"ExtraPreviewWithMenu",m_bExtraPreviewWithMenu);
 	ini.WriteBool(L"KeepUnavailableFixedSharedDirs",m_bKeepUnavailableFixedSharedDirs);
+	ini.WriteColRef(L"LogErrorColor",m_crLogError);
+	ini.WriteColRef(L"LogWarningColor",m_crLogWarning);
+	ini.WriteColRef(L"LogSuccessColor",m_crLogSuccess);
 
 	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
 	CString WriteAllowedIPs ;

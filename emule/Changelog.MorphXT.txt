@@ -23,6 +23,7 @@ FIX: Aborting HTTP downloads [WiZaRd]
 FIX: Wrong input focus for Multi User Web Interface login if user remembered [Stulle]
 FIX: File Percentage in title of progress images in WebServer did not show 100% [Stulle]
 FIX: Potential crash in USC logging due to format code in user name [Jesse Hager]
+FIX: Log color settings were not stored in preferences.ini [Stulle]
 REMOVED: Obsolete Vista and above fix in ExportPartMetFilesOverview [leuk_he]
 REMOVED: Obsolete GetRemainingReservedDataToDownload function [Stulle]
 
