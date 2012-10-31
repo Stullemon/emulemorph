@@ -148,13 +148,13 @@ protected: //MORPH leuk_he:run as ntservice v1..
 
     // continue extra official preferences....
 	HTREEITEM m_hti_advanced;
+
+	HTREEITEM m_hti_MiniMule;
     HTREEITEM m_hti_bMiniMuleAutoClose;
 	HTREEITEM m_hti_iMiniMuleTransparency;
-	HTREEITEM m_hti_bCreateCrashDump;
-	HTREEITEM m_hti_bCheckComctl32 ;
-	HTREEITEM m_hti_bCheckShell32;
-	HTREEITEM m_hti_bIgnoreInstances;
-	HTREEITEM m_hti_sNotifierMailEncryptCertName;
+
+	HTREEITEM m_htiMediInfo;
+	HTREEITEM m_hti_InspectAllFileTypes;
 	HTREEITEM m_hti_sMediaInfo_MediaInfoDllPath;
 	HTREEITEM m_hti_bMediaInfo_RIFF;
 	HTREEITEM m_hti_bMediaInfo_ID3LIB;
@@ -165,15 +165,42 @@ protected: //MORPH leuk_he:run as ntservice v1..
 #ifdef HAVE_WMSDK_H
 	HTREEITEM m_hti_MediaInfo_WM;
 #endif//HAVE_WMSDK_H
-	HTREEITEM m_hti_iMaxLogBuff;
-	HTREEITEM m_hti_m_iMaxChatHistory;
-	HTREEITEM m_hti_m_iPreviewSmallBlocks;
+
+	HTREEITEM m_hti_Display;
 	HTREEITEM m_hti_m_bRestoreLastMainWndDlg;
 	HTREEITEM m_hti_m_bRestoreLastLogPane;
-	HTREEITEM m_hti_m_bPreviewCopiedArchives;
 	HTREEITEM m_hti_m_iStraightWindowStyles;
-	HTREEITEM m_hti_m_iLogFileFormat;
 	HTREEITEM m_hti_m_bRTLWindowsLayout;
+	HTREEITEM m_hti_m_iMaxChatHistory;
+	HTREEITEM m_hti_maxmsgsessions;
+	HTREEITEM m_htidatetimeformat;
+	HTREEITEM m_htidatetimeformat4list;
+	HTREEITEM m_htiShowVerticalHourMarkers;
+	HTREEITEM m_htiReBarToolbar;
+	HTREEITEM m_htiIconflashOnNewMessage;
+	HTREEITEM m_htiShowCopyEd2kLinkCmd;
+	HTREEITEM m_htiUpdateQueue;
+	HTREEITEM m_htiRepaint;
+	HTREEITEM m_htiExtraPreviewWithMenu;
+	HTREEITEM m_htiShowUpDownIconInTaskbar;
+	HTREEITEM m_htiForceSpeedsToKB;
+
+	HTREEITEM m_hti_Log;
+	HTREEITEM m_hti_iMaxLogBuff;
+	HTREEITEM m_hti_m_iLogFileFormat;
+	HTREEITEM m_htidatetimeformat4log;
+	HTREEITEM m_htiLogError;
+	HTREEITEM m_htiLogWarning;
+	HTREEITEM m_htiLogSuccess;
+	HTREEITEM m_htiLogUSC;
+
+	HTREEITEM m_hti_bCreateCrashDump;
+	HTREEITEM m_hti_bCheckComctl32 ;
+	HTREEITEM m_hti_bCheckShell32;
+	HTREEITEM m_hti_bIgnoreInstances;
+	HTREEITEM m_hti_sNotifierMailEncryptCertName;
+	HTREEITEM m_hti_m_iPreviewSmallBlocks;
+	HTREEITEM m_hti_m_bPreviewCopiedArchives;
 	HTREEITEM m_hti_m_bPreviewOnIconDblClk;
 	HTREEITEM m_hti_sInternetSecurityZone;
 	HTREEITEM m_hti_sTxtEditor;
@@ -181,8 +208,6 @@ protected: //MORPH leuk_he:run as ntservice v1..
 	HTREEITEM m_hti_m_bRemoveFilesToBin;
 	HTREEITEM m_hti_HighresTimer;
 	HTREEITEM m_hti_TrustEveryHash;
-	HTREEITEM m_hti_InspectAllFileTypes;
-	HTREEITEM m_hti_maxmsgsessions;
 	HTREEITEM m_hti_PreferRestrictedOverUser;
 	HTREEITEM m_hti_WebFileUploadSizeLimitMB ;
 	HTREEITEM m_hti_AllowedIPs;
@@ -190,32 +215,16 @@ protected: //MORPH leuk_he:run as ntservice v1..
 	HTREEITEM m_hti_DebugSearchResultDetailLevel;
 	HTREEITEM m_htiCryptTCPPaddingLength;
 	HTREEITEM m_htiAdjustNTFSDaylightFileTime;	  //neo offcial pref II
-	HTREEITEM m_htidatetimeformat;
-	HTREEITEM m_htidatetimeformat4log;
-	HTREEITEM m_htidatetimeformat4list;
-	HTREEITEM m_htiLogError;
-	HTREEITEM m_htiLogWarning;
-	HTREEITEM m_htiLogSuccess;
-	HTREEITEM m_htiLogUSC;
-	HTREEITEM m_htiShowVerticalHourMarkers;
-	HTREEITEM m_htiReBarToolbar;
-	HTREEITEM m_htiIconflashOnNewMessage;
-	HTREEITEM m_htiShowCopyEd2kLinkCmd;
 	HTREEITEM m_htidontcompressavi;
 	HTREEITEM m_htiICH;
 	HTREEITEM m_htiFileBufferTimeLimit;
 	HTREEITEM m_htiRearrangeKadSearchKeywords;
-	HTREEITEM m_htiUpdateQueue;
-	HTREEITEM m_htiRepaint;
 public: //MORPH leuk_he:run as ntservice v1.. 
 	HTREEITEM m_htiBeeper;
 protected: //MORPH leuk_he:run as ntservice v1.. 
 	HTREEITEM m_htiMsgOnlySec;
 	HTREEITEM m_htiDisablePeerCache;
-	HTREEITEM m_htiExtraPreviewWithMenu;
-	HTREEITEM m_htiShowUpDownIconInTaskbar;
 	HTREEITEM m_htiKeepUnavailableFixedSharedDirs;
-	HTREEITEM m_htiForceSpeedsToKB;
 	// MORPH END  leuk_he Advanced official preferences. 
 	
 

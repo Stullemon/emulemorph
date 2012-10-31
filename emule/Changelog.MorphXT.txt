@@ -15,6 +15,7 @@ CHANGE: Show all clients that are not banned in On Queue list of Web Interface [
 CHANGE: Display if a client has credits in On Queue list of Web Interface [Stulle]
 CHANGE: Tweasked NTService optimizations [Stulle]
 CHANGE: Retrieve ID3LIB setting from memory during runtime [Stulle]
+CHANGE: Rearranged Advanced (official) Preferences for better overview [Stulle]
 FIX: Don't assign downloads via watch clipboard feature using view filters CHANGE [Stulle]
 FIX: Weird result calculation for Fakealyzer [Stulle]
 FIX: Pasting eD2k links from DownloadListCtrl was not handled as pasting [Stulle]

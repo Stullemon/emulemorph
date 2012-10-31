@@ -6585,6 +6585,11 @@ BEGIN
     IDS_MEDIAINFO_WM        "Use mediainfo.dll to recognise Windows Media files"
     IDS_MEDIAINFO_WM_TIP    "Use the mediainfo dll to verify if a file is a Windows Media file.\nDefault=1"
     IDS_X_LOGUSC            "Log USC color"
+    IDS_MINIMULE            "MiniMule"
+    IDS_MINIMULE_TIP        "Additional settings for the MiniMule feature."
+    IDS_FILEINFO_TIP        "Additional settings concerning mediainfo.dll and the inspection of known files."
+    IDS_ADV_DISPLAY_TIP     "Additional settings for the look and feel of the eMule GUI."
+    IDS_SV_LOG_TIP          "Additional settings for customizing the logging."
 END
 
 #endif    // English (U.S.) resources

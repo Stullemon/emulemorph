@@ -3915,6 +3915,11 @@
 #define IDS_MEDIAINFO_WM                31433
 #define IDS_MEDIAINFO_WM_TIP            31434
 #define IDS_X_LOGUSC                    31435
+#define IDS_MINIMULE                    31436
+#define IDS_MINIMULE_TIP                31437
+#define IDS_FILEINFO_TIP                31438
+#define IDS_ADV_DISPLAY_TIP             31439
+#define IDS_SV_LOG_TIP                  31440
 
 // Next default values for new objects
 // 
