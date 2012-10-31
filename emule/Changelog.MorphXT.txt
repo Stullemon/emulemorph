@@ -5,6 +5,7 @@ XX-XX-2011
 
 ADD: Some more MediaInfo settings and USC log color to Advanced Preferences [Stulle]
 ADD: New flags to countryflag.dll in order to meet ISO 3166-1 standard [Stulle]
+	+ Note that you absolutely need to update the countryflag.dlls!
 CHANGE: Updated Bad Mod List and Bad Hashs List (DLP v43) [zz_fly]
 CHANGE: Max FileBufferTimeLimit changed from 100 to 10 minutes [Stulle]
 CHANGE: Displayed ed2k link list in category selection can be scrolled through [Stulle]
