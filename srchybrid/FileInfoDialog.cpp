@@ -1108,7 +1108,11 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 	////////////////////////////////////////////////////////////////////////////
 	// Check for MPEG Audio file
 	//
+	/* morph use advanced pref
 	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_ID3LIB"), 1) &&
+	*/
+	if (CPreferences::bMediaInfo_ID3LIB &&
+	// end morph advanced pref
 		(_tcscmp(szExt, _T(".mp3"))==0 || _tcscmp(szExt, _T(".mp2"))==0 || _tcscmp(szExt, _T(".mp1"))==0 || _tcscmp(szExt, _T(".mpa"))==0))
 	{
 		try
