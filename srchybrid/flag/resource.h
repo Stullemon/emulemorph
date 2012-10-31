@@ -255,6 +255,13 @@
 #define IDI_COUNTRY_FLAG_YT				352
 #define IDI_COUNTRY_FLAG_AP				353
 #define IDI_COUNTRY_FLAG_EU				354
+#define IDI_COUNTRY_FLAG_BL             355
+#define IDI_COUNTRY_FLAG_BQ             356
+#define IDI_COUNTRY_FLAG_CW             357
+#define IDI_COUNTRY_FLAG_HM             358
+#define IDI_COUNTRY_FLAG_SJ             359
+#define IDI_COUNTRY_FLAG_SS             360
+#define IDI_COUNTRY_FLAG_SX             361
 
 // Next default values for new objects
 // 
