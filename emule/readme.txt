@@ -411,7 +411,7 @@ morph supporters:
 
 LEGAL:
 ------
-eMulemorph  Copyright (C)2002-2007 Morph team 
+eMulemorph  Copyright (C)2002-2012 Morph team 
 
 eMule Copyright (C)2002-2005 Merkur (merkur-@users.sourceforge.net)
 

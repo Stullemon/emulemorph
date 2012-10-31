@@ -1161,7 +1161,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	}
 	DrawFocusRect(dc, lpDrawItemStruct->rcItem, lpDrawItemStruct->itemState & ODS_FOCUS, bCtrlFocused, lpDrawItemStruct->itemState & ODS_SELECTED);
 
-	dc.SetTextColor(crOldTextColor);
+	dc->SetTextColor(crOldTextColor);
 	if (!theApp.IsRunningAsService(SVC_FULL_OPT)) // MORPH leuk_he:run as ntservice v1..
 		m_updatethread->AddItemUpdated((LPARAM)server); //MORPH - UpdateItemThread
 }

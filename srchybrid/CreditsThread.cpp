@@ -447,6 +447,10 @@ void CCreditsThread::InitText()
 
 	m_arCredits.Add(sTmp);
 	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2009 Merkur"));
+	m_arCredits.Add(_T("S:20"));
+	m_arCredits.Add(_T("01:06:MorphXT includes GeoLite data created by MaxMind,")); 
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:available from http://www.maxmind.com"));
 	m_arCredits.Add(_T("S:50"));
 
     //Commander - Added: MorphTeam - Start
