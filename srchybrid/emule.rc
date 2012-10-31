@@ -6578,6 +6578,13 @@ BEGIN
     IDS_BROKEN_URLS         "Don't send user-agents URLs (separated by '|')"
     IDS_BROKEN_URLS_TIP     "eMule sends Mozilla Firefox 4.0 as the user-agent when downloading from http\nsources to avoid being limited in speed by remote servers. However, some\nservers, like SourceForge, will send us a webpage rather than the file because\nthey think we are a server. Adding URL keywords to this list will disable sending\nthe user-agent string to URLs that include any of the keywords.\nDefault: sourceforge\nSeparate individual keywords by '|'"
     IDS_WS_HIDDEN           "Filename hidden"
+    IDS_MEDIAINFO_MEDIADET  "Use Media Detector (MediaDet) to retrieve information about media files"
+    IDS_MEDIAINFO_MEDIADET_TIP "Use the Media Detector (MediaDet) from mediainfo.dll to retrieve in depth codec information.\nDefault=1"
+    IDS_MEDIAINFO_RM        "Use mediainfo.dll to recognise Real Media files"
+    IDS_MEDIAINFO_RM_TIP    "Use the mediainfo dll to verify if a file is a Real Media file.\nDefault=1"
+    IDS_MEDIAINFO_WM        "Use mediainfo.dll to recognise Windows Media files"
+    IDS_MEDIAINFO_WM_TIP    "Use the mediainfo dll to verify if a file is a Windows Media file.\nDefault=1"
+    IDS_X_LOGUSC            "Log USC color"
 END
 
 #endif    // English (U.S.) resources

@@ -1055,7 +1055,11 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 	// Check for RM file
 	//
 	bool bIsRM = false;
+	/* morph use advanced pref
 	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_RM"), 1))
+	*/
+	if (CPreferences::m_bMediaInfo_RM)
+	// end morph advanced pref
 	{
 		try
 		{
@@ -1080,7 +1084,11 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 	//
 #ifdef HAVE_WMSDK_H
 	bool bIsWM = false;
+	/* morph use advanced pref
 	if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_WM"), 1))
+	*/
+	if (CPreferences::m_bMediaInfo_WM)
+	// end morph advanced pref
 	{
 		try
 		{
@@ -2065,7 +2073,11 @@ bool CGetMediaInfoThread::GetMediaInfo(HWND hWndOwner, const CShareableFile* pFi
 		//
 		// Avoid processing of some file types which are known to crash due to bugged DirectShow filters.
 #ifdef HAVE_QEDIT_H
+		/* morph use advanced pref
 		if (theApp.GetProfileInt(_T("eMule"), _T("MediaInfo_MediaDet"), 1)
+		*/
+		if (CPreferences::m_bMediaInfo_MediaDet
+		// end morph advanced pref
 			&& (   thePrefs.GetInspectAllFileTypes() 
 			    || (_tcscmp(szExt, _T(".ogm"))!=0 && _tcscmp(szExt, _T(".ogg"))!=0 && _tcscmp(szExt, _T(".mkv"))!=0)))
 		{

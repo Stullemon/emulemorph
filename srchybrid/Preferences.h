@@ -956,6 +956,13 @@ public:
 	static CString sMediaInfo_MediaInfoDllPath ;
 	static bool bMediaInfo_RIFF ;
 	static bool bMediaInfo_ID3LIB; 
+#ifdef HAVE_QEDIT_H
+	static bool m_bMediaInfo_MediaDet;
+#endif//HAVE_QEDIT_H
+	static bool m_bMediaInfo_RM;
+#ifdef HAVE_WMSDK_H
+	static bool m_bMediaInfo_WM;
+#endif//HAVE_WMSDK_H
 	static CString sInternetSecurityZone;
    // MORPH END  leuk_he Advanced official preferences. 
 

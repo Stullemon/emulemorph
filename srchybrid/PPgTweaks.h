@@ -87,6 +87,13 @@ protected:
 	CString  sMediaInfo_MediaInfoDllPath;
 	bool bMediaInfo_RIFF;
 	bool bMediaInfo_ID3LIB;
+#ifdef HAVE_QEDIT_H
+	bool m_bMediaInfo_MediaDet;
+#endif//HAVE_QEDIT_H
+	bool m_bMediaInfo_RM;
+#ifdef HAVE_WMSDK_H
+	bool m_bMediaInfo_WM;
+#endif//HAVE_WMSDK_H
 	int iMaxLogBuff;
 	int m_iMaxChatHistory;
 	int m_iPreviewSmallBlocks;
@@ -118,6 +125,7 @@ protected:
 	COLORREF m_crLogError;
 	COLORREF m_crLogWarning;
 	COLORREF m_crLogSuccess;
+	COLORREF m_crLogUSC;
 	bool m_bShowVerticalHourMarkers;
 	bool m_bReBarToolbar;
 	bool m_bIconflashOnNewMessage;
@@ -150,6 +158,13 @@ protected: //MORPH leuk_he:run as ntservice v1..
 	HTREEITEM m_hti_sMediaInfo_MediaInfoDllPath;
 	HTREEITEM m_hti_bMediaInfo_RIFF;
 	HTREEITEM m_hti_bMediaInfo_ID3LIB;
+#ifdef HAVE_QEDIT_H
+	HTREEITEM m_hti_MediaInfo_MediaDet;
+#endif//HAVE_QEDIT_H
+	HTREEITEM m_hti_MediaInfo_RM;
+#ifdef HAVE_WMSDK_H
+	HTREEITEM m_hti_MediaInfo_WM;
+#endif//HAVE_WMSDK_H
 	HTREEITEM m_hti_iMaxLogBuff;
 	HTREEITEM m_hti_m_iMaxChatHistory;
 	HTREEITEM m_hti_m_iPreviewSmallBlocks;
@@ -181,6 +196,7 @@ protected: //MORPH leuk_he:run as ntservice v1..
 	HTREEITEM m_htiLogError;
 	HTREEITEM m_htiLogWarning;
 	HTREEITEM m_htiLogSuccess;
+	HTREEITEM m_htiLogUSC;
 	HTREEITEM m_htiShowVerticalHourMarkers;
 	HTREEITEM m_htiReBarToolbar;
 	HTREEITEM m_htiIconflashOnNewMessage;

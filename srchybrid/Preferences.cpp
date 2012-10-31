@@ -799,6 +799,13 @@ CString CPreferences::sNotifierMailEncryptCertName;
 CString CPreferences::sMediaInfo_MediaInfoDllPath ;
 bool CPreferences::bMediaInfo_RIFF;
 bool CPreferences::bMediaInfo_ID3LIB ;
+#ifdef HAVE_QEDIT_H
+bool CPreferences::m_bMediaInfo_MediaDet;
+#endif//HAVE_QEDIT_H
+bool CPreferences::m_bMediaInfo_RM;
+#ifdef HAVE_WMSDK_H
+bool CPreferences::m_bMediaInfo_WM;
+#endif//HAVE_WMSDK_H
 CString CPreferences::sInternetSecurityZone;
 // MORPH END  leuk_he Advanced official preferences. 
 
@@ -2353,6 +2360,13 @@ void CPreferences::SavePreferences()
 	}
 	ini.WriteBool(L"MediaInfo_RIFF",bMediaInfo_RIFF);
 	ini.WriteBool(L"MediaInfo_ID3LIB",bMediaInfo_ID3LIB);
+#ifdef HAVE_QEDIT_H
+	ini.WriteBool(_T("MediaInfo_MediaDet"),m_bMediaInfo_MediaDet);
+#endif//HAVE_QEDIT_H
+	ini.WriteBool(_T("MediaInfo_RM"),m_bMediaInfo_RM);
+#ifdef HAVE_WMSDK_H
+	ini.WriteBool(_T("MediaInfo_WM"),m_bMediaInfo_WM);
+#endif//HAVE_WMSDK_H
 	ini.WriteInt(L"MaxLogBuff",iMaxLogBuff/1024);
 	ini.WriteInt(L"MaxChatHistoryLines",m_iMaxChatHistory);
 	ini.WriteInt(L"PreviewSmallBlocks",m_iPreviewSmallBlocks);
@@ -2388,6 +2402,9 @@ void CPreferences::SavePreferences()
 	ini.WriteColRef(L"LogErrorColor",m_crLogError);
 	ini.WriteColRef(L"LogWarningColor",m_crLogWarning);
 	ini.WriteColRef(L"LogSuccessColor",m_crLogSuccess);
+	//MORPH START - Added by SiRoB, Upload Splitting Class
+	ini.WriteColRef(L"LogUploadSplittingClassColor",m_crLogUSC);
+	//MORPH END   - Added by SiRoB, Upload Splitting Class
 
 	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
 	CString WriteAllowedIPs ;
@@ -3774,6 +3791,13 @@ void CPreferences::LoadPreferences()
 	sMediaInfo_MediaInfoDllPath=ini.GetString(L"MediaInfo_MediaInfoDllPath",L"MEDIAINFO.DLL") ;
 	bMediaInfo_RIFF=ini.GetBool(L"MediaInfo_RIFF",true);
 	bMediaInfo_ID3LIB =ini.GetBool(L"MediaInfo_ID3LIB",true);
+#ifdef HAVE_QEDIT_H
+	m_bMediaInfo_MediaDet =ini.GetBool(_T("MediaInfo_MediaDet"),true);
+#endif//HAVE_QEDIT_H
+	m_bMediaInfo_RM =ini.GetBool(_T("MediaInfo_RM"),true);
+#ifdef HAVE_WMSDK_H
+	m_bMediaInfo_WM =ini.GetBool(_T("MediaInfo_WM"),true);
+#endif//HAVE_WMSDK_H
 	sInternetSecurityZone=ini.GetString(L"InternetSecurityZone",L"Untrusted");
     m_iDebugSearchResultDetailLevel = ini.GetInt(L"DebugSearchResultDetailLevel", 0); // NOTE: this variable is also initialized to 0 above! 
 	// MORPH END  leuk_he Advanced official preferences. 

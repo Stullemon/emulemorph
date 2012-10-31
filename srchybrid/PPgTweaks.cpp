@@ -229,6 +229,13 @@ CPPgTweaks::CPPgTweaks()
 	m_hti_sMediaInfo_MediaInfoDllPath=NULL;
 	m_hti_bMediaInfo_RIFF=NULL;
 	m_hti_bMediaInfo_ID3LIB=NULL;
+#ifdef HAVE_QEDIT_H
+	m_hti_MediaInfo_MediaDet=NULL;
+#endif//HAVE_QEDIT_H
+	m_hti_MediaInfo_RM=NULL;
+#ifdef HAVE_WMSDK_H
+	m_hti_MediaInfo_WM=NULL;
+#endif//HAVE_WMSDK_H
 	m_hti_iMaxLogBuff=NULL;
 	m_hti_m_iMaxChatHistory=NULL;
 	m_hti_m_iPreviewSmallBlocks=NULL;
@@ -259,6 +266,7 @@ CPPgTweaks::CPPgTweaks()
 	m_htiLogError = NULL;
 	m_htiLogWarning = NULL;
 	m_htiLogSuccess = NULL;
+	m_htiLogUSC = NULL;
 	m_htidontcompressavi = NULL;
 	m_htiShowCopyEd2kLinkCmd = NULL;
 	m_htiIconflashOnNewMessage = NULL;
@@ -453,6 +461,13 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 
 		m_hti_bMediaInfo_RIFF=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MEDIAINFO_RIFF),m_hti_advanced,bMediaInfo_RIFF);
 		m_hti_bMediaInfo_ID3LIB=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MEDIAINFO_ID3LIB),m_hti_advanced,bMediaInfo_ID3LIB);
+#ifdef HAVE_QEDIT_H
+		m_hti_MediaInfo_MediaDet=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MEDIAINFO_MEDIADET),m_hti_advanced,m_bMediaInfo_MediaDet);
+#endif//HAVE_QEDIT_H
+		m_hti_MediaInfo_RM=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MEDIAINFO_RM),m_hti_advanced,m_bMediaInfo_RM);
+#ifdef HAVE_WMSDK_H
+		m_hti_MediaInfo_WM=m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MEDIAINFO_WM),m_hti_advanced,m_bMediaInfo_WM);
+#endif//HAVE_WMSDK_H
 		m_hti_iMaxLogBuff= m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXLOGBUFF),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
 		m_ctrlTreeOptions.AddEditBox(m_hti_iMaxLogBuff, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		m_hti_m_iMaxChatHistory= m_ctrlTreeOptions.InsertItem(GetResString(IDS_MAXCHATHISTORY),TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT,m_hti_advanced);
@@ -517,6 +532,8 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddColorSelector(m_htiLogWarning, RUNTIME_CLASS(CTreeOptionsBrowseButton));
 		m_htiLogSuccess = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_LOGSUCCESS), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
 		m_ctrlTreeOptions.AddColorSelector(m_htiLogSuccess, RUNTIME_CLASS(CTreeOptionsBrowseButton));
+		m_htiLogUSC = m_ctrlTreeOptions.InsertItem(GetResString(IDS_X_LOGUSC), TREEOPTSCTRLIMG_EDIT, TREEOPTSCTRLIMG_EDIT, m_hti_advanced);
+		m_ctrlTreeOptions.AddColorSelector(m_htiLogUSC, RUNTIME_CLASS(CTreeOptionsBrowseButton));
 		m_htiShowVerticalHourMarkers = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_SHOWVERTICALHOURMARKERS), m_hti_advanced, m_bShowVerticalHourMarkers);
    	    m_htiReBarToolbar = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_REBARTOOLBAR), m_hti_advanced, m_bReBarToolbar);		
     	m_htiIconflashOnNewMessage = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_X_ICON_FLASH_ON_NEW_MESSAGE), m_hti_advanced, m_bIconflashOnNewMessage);
@@ -672,6 +689,13 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 
 	if(m_hti_bMediaInfo_RIFF) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_bMediaInfo_RIFF,bMediaInfo_RIFF);
 	if(m_hti_bMediaInfo_ID3LIB) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_bMediaInfo_ID3LIB,bMediaInfo_ID3LIB);
+#ifdef HAVE_QEDIT_H
+	if(m_hti_MediaInfo_MediaDet) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_MediaInfo_MediaDet,m_bMediaInfo_MediaDet);
+#endif//HAVE_QEDIT_H
+	if(m_hti_MediaInfo_RM) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_MediaInfo_RM,m_bMediaInfo_RM);
+#ifdef HAVE_WMSDK_H
+	if(m_hti_MediaInfo_WM) DDX_TreeCheck(pDX,IDC_EXT_OPTS,m_hti_MediaInfo_WM,m_bMediaInfo_WM);
+#endif//HAVE_WMSDK_H
 	if (m_hti_iMaxLogBuff) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_iMaxLogBuff, iMaxLogBuff);
 										 DDV_MinMaxInt(pDX, iMaxLogBuff, 64, 512);}
 	if (m_hti_m_iMaxChatHistory) {DDX_TreeEdit(pDX, IDC_EXT_OPTS, m_hti_m_iMaxChatHistory, m_iMaxChatHistory);
@@ -716,6 +740,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogError, m_crLogError);
 	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogWarning, m_crLogWarning);
 	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogSuccess, m_crLogSuccess);
+	DDX_TreeColor(pDX, IDC_EXT_OPTS, m_htiLogUSC, m_crLogUSC);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiShowVerticalHourMarkers, m_bShowVerticalHourMarkers);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiICH, m_ICH);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htidontcompressavi, m_dontcompressavi);
@@ -824,6 +849,13 @@ BOOL CPPgTweaks::OnInitDialog()
 	sMediaInfo_MediaInfoDllPath=thePrefs.sMediaInfo_MediaInfoDllPath;
 	bMediaInfo_RIFF=thePrefs.bMediaInfo_RIFF;
 	bMediaInfo_ID3LIB=thePrefs.bMediaInfo_ID3LIB;
+#ifdef HAVE_QEDIT_H
+	m_bMediaInfo_MediaDet=thePrefs.m_bMediaInfo_MediaDet;
+#endif//HAVE_QEDIT_H
+	m_bMediaInfo_RM=thePrefs.m_bMediaInfo_RM;
+#ifdef HAVE_WMSDK_H
+	m_bMediaInfo_WM=thePrefs.m_bMediaInfo_WM;
+#endif//HAVE_WMSDK_H
 	iMaxLogBuff=thePrefs.GetMaxLogBuff()/1024;
 	m_iMaxChatHistory=thePrefs.m_iMaxChatHistory;
 	m_iPreviewSmallBlocks=thePrefs.m_iPreviewSmallBlocks;
@@ -858,6 +890,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_crLogError = thePrefs.m_crLogError;
 	m_crLogWarning = thePrefs.m_crLogWarning;
 	m_crLogSuccess = thePrefs.m_crLogSuccess;
+	m_crLogUSC = thePrefs.m_crLogUSC;
 	m_ICH = thePrefs.ICH;
 	m_dontcompressavi = thePrefs.dontcompressavi;
 	m_bShowCopyEd2kLinkCmd = thePrefs.m_bShowCopyEd2kLinkCmd;
@@ -1071,6 +1104,13 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.sMediaInfo_MediaInfoDllPath=sMediaInfo_MediaInfoDllPath;
 	thePrefs.bMediaInfo_RIFF=bMediaInfo_RIFF;
 	thePrefs.bMediaInfo_ID3LIB=bMediaInfo_ID3LIB;
+#ifdef HAVE_QEDIT_H
+	thePrefs.m_bMediaInfo_MediaDet=m_bMediaInfo_MediaDet;
+#endif//HAVE_QEDIT_H
+	thePrefs.m_bMediaInfo_RM=m_bMediaInfo_RM;
+#ifdef HAVE_WMSDK_H
+	thePrefs.m_bMediaInfo_WM=m_bMediaInfo_WM;
+#endif//HAVE_WMSDK_H
 	thePrefs.iMaxLogBuff=iMaxLogBuff*1024;
 	thePrefs.m_iMaxChatHistory=m_iMaxChatHistory;
 	thePrefs.m_iPreviewSmallBlocks=m_iPreviewSmallBlocks;
@@ -1112,6 +1152,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.m_crLogError = m_crLogError;
 	thePrefs.m_crLogWarning = m_crLogWarning;
 	thePrefs.m_crLogSuccess = m_crLogSuccess;
+	thePrefs.m_crLogUSC = m_crLogUSC;
 
 	thePrefs.ICH = m_ICH;
 	thePrefs.dontcompressavi = m_dontcompressavi;
@@ -1301,6 +1342,16 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_hti_bMediaInfo_RIFF,IDS_MEDIAINFO_RIFF_TIP);
 		if (m_hti_bMediaInfo_ID3LIB) m_ctrlTreeOptions.SetItemText(m_hti_bMediaInfo_ID3LIB, GetResString(IDS_MEDIAINFO_ID3LIB));
 		SetTool(m_hti_bMediaInfo_ID3LIB,IDS_MEDIAINFO_ID3LIB_TIP);
+#ifdef HAVE_QEDIT_H
+		if (m_hti_MediaInfo_MediaDet) m_ctrlTreeOptions.SetItemText(m_hti_MediaInfo_MediaDet, GetResString(IDS_MEDIAINFO_MEDIADET));
+		SetTool(m_hti_MediaInfo_MediaDet,IDS_MEDIAINFO_MEDIADET_TIP);
+#endif//HAVE_QEDIT_H
+		if (m_hti_MediaInfo_RM) m_ctrlTreeOptions.SetItemText(m_hti_MediaInfo_RM, GetResString(IDS_MEDIAINFO_RM));
+		SetTool(m_hti_MediaInfo_RM,IDS_MEDIAINFO_RM_TIP);
+#ifdef HAVE_WMSDK_H
+		if (m_hti_MediaInfo_WM) m_ctrlTreeOptions.SetItemText(m_hti_MediaInfo_WM, GetResString(IDS_MEDIAINFO_WM));
+		SetTool(m_hti_MediaInfo_WM,IDS_MEDIAINFO_WM_TIP);
+#endif//HAVE_WMSDK_H
 		if (m_hti_iMaxLogBuff) m_ctrlTreeOptions.SetEditLabel(m_hti_iMaxLogBuff, GetResString(IDS_MAXLOGBUFF));
 		SetTool(m_hti_iMaxLogBuff,IDS_MAXLOGBUFF_TIP);
 		if (m_hti_m_iMaxChatHistory) m_ctrlTreeOptions.SetEditLabel(m_hti_m_iMaxChatHistory, GetResString(IDS_MAXCHATHISTORY));
@@ -1365,6 +1416,8 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiLogWarning ,IDS_X_LOGERROR_TIP );
 		if (m_htiLogSuccess) m_ctrlTreeOptions.SetEditLabel(m_htiLogSuccess, GetResString(IDS_X_LOGSUCCESS));
 		SetTool(m_htiLogSuccess,IDS_X_LOGERROR_TIP );
+		if (m_htiLogUSC) m_ctrlTreeOptions.SetEditLabel(m_htiLogUSC, GetResString(IDS_X_LOGUSC));
+		SetTool(m_htiLogUSC,IDS_X_LOGERROR_TIP );
 		if (m_htiShowVerticalHourMarkers) m_ctrlTreeOptions.SetItemText(m_htiShowVerticalHourMarkers, GetResString(IDS_X_SHOWVERTICALHOURMARKERS));
 		SetTool(m_htiShowVerticalHourMarkers,IDS_X_SHOWVERTICALHOURMARKERS_TIP);
 		if (m_htiReBarToolbar) m_ctrlTreeOptions.SetItemText(m_htiReBarToolbar, GetResString(IDS_X_REBARTOOLBAR));
@@ -1486,6 +1539,13 @@ void CPPgTweaks::OnDestroy()
 	m_hti_sMediaInfo_MediaInfoDllPath=NULL;
 	m_hti_bMediaInfo_RIFF=NULL;
 	m_hti_bMediaInfo_ID3LIB=NULL;
+#ifdef HAVE_QEDIT_H
+	m_hti_MediaInfo_MediaDet=NULL;
+#endif//HAVE_QEDIT_H
+	m_hti_MediaInfo_RM=NULL;
+#ifdef HAVE_WMSDK_H
+	m_hti_MediaInfo_WM=NULL;
+#endif//HAVE_WMSDK_H
 	m_hti_iMaxLogBuff=NULL;
 	m_hti_m_iMaxChatHistory=NULL;
 	m_hti_m_iPreviewSmallBlocks=NULL;
@@ -1516,6 +1576,7 @@ void CPPgTweaks::OnDestroy()
 	m_htiLogError = NULL;
 	m_htiLogWarning = NULL;
 	m_htiLogSuccess = NULL;
+	m_htiLogUSC = NULL;
 	m_htidontcompressavi = NULL;
 	m_htiShowCopyEd2kLinkCmd = NULL;
 	m_htiIconflashOnNewMessage = NULL;

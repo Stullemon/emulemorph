@@ -3908,6 +3908,13 @@
 #define IDS_BROKEN_URLS                 31426
 #define IDS_BROKEN_URLS_TIP             31427
 #define IDS_WS_HIDDEN                   31428
+#define IDS_MEDIAINFO_MEDIADET          31429
+#define IDS_MEDIAINFO_MEDIADET_TIP      31430
+#define IDS_MEDIAINFO_RM                31431
+#define IDS_MEDIAINFO_RM_TIP            31432
+#define IDS_MEDIAINFO_WM                31433
+#define IDS_MEDIAINFO_WM_TIP            31434
+#define IDS_X_LOGUSC                    31435
 
 // Next default values for new objects
 // 
