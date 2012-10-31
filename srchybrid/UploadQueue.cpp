@@ -865,7 +865,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 			buffer.AppendFormat(_T("[C%i %i/%i]-"), classID, m_aiSlotCounter[classID], m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]);
 		}
 		buffer.AppendFormat(_T(" Added client to class %i: %s Client: %s"), newclientClassID, pszReason, newclient->DbgGetClientInfo());
-		DebugLog(LOG_USC, buffer);
+		DebugLog(LOG_USC, _T("%s"), buffer);
 	}
 	//MORPH END   - Upload Splitting Class
 
