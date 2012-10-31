@@ -500,27 +500,23 @@ void CPPgNTService::InitOptLvlCbn(bool bFirstInit)
 	int iItem;
 	m_cbOptLvl.ResetContent();
 	iItem = m_cbOptLvl.AddString(_T("0: ") + GetResString(IDS_SERVICE_OPT_NONE));		m_cbOptLvl.SetItemData(iItem, SVC_NO_OPT);
-	iItem = m_cbOptLvl.AddString(_T("4: ") + GetResString(IDS_SERVICE_OPT_BASIC));		m_cbOptLvl.SetItemData(iItem, SVC_LIST_OPT);
-	iItem = m_cbOptLvl.AddString(_T("6: ") + GetResString(IDS_SERVICE_OPT_LISTS));		m_cbOptLvl.SetItemData(iItem, SVC_SVR_OPT);
+	iItem = m_cbOptLvl.AddString(_T("2: ") + GetResString(IDS_SERVICE_OPT_BASIC));		m_cbOptLvl.SetItemData(iItem, SVC_BASIC_OPT);
+	iItem = m_cbOptLvl.AddString(_T("6: ") + GetResString(IDS_SERVICE_OPT_LISTS));		m_cbOptLvl.SetItemData(iItem, SVC_LIST_OPT);
 	iItem = m_cbOptLvl.AddString(_T("10: ") + GetResString(IDS_SERVICE_OPT_FULL));		m_cbOptLvl.SetItemData(iItem, SVC_FULL_OPT);
 
 	if(bFirstInit)
 	{
-		switch(thePrefs.GetServiceOptLvl())
+		bool bFound = false;
+		for(int i = 0; i < m_cbOptLvl.GetCount(); i++)
 		{
-			case SVC_NO_OPT:
-				m_cbOptLvl.SetCurSel(0);
+			if (m_cbOptLvl.GetItemData(i) == thePrefs.GetServiceOptLvl())
+			{
+				m_cbOptLvl.SetCurSel(i);
+				bFound = true;
 				break;
-			case SVC_LIST_OPT:
-				m_cbOptLvl.SetCurSel(1);
-				break;
-			case SVC_SVR_OPT:
-				m_cbOptLvl.SetCurSel(2);
-				break;
-			case SVC_FULL_OPT:
-				m_cbOptLvl.SetCurSel(3);
-				break;
+			}
 		}
+		if (!bFound) ASSERT(FALSE); // Should not happen
 	}
 	else
 		m_cbOptLvl.SetCurSel(iSel != CB_ERR ? iSel : 0);

@@ -74,7 +74,7 @@ CUploadListCtrl::CUploadListCtrl()
 
 CUploadListCtrl::~CUploadListCtrl()
 {
-	if (!theApp.IsRunningAsService(SVC_LIST_OPT)) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
+	if (!theApp.IsRunningAsService()) // MORPH leuk_he:run as ntservice v1.. (worksaround for MFC as a service) 
 		delete m_tooltip;
 }
 

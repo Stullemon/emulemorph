@@ -1082,7 +1082,7 @@ void CQueueListCtrl::AddClient(/*const*/ CUpDownClient *client, bool resetclient
 	//MORPH END - Added by SiRoB, ZZ Upload System
 	}
 
-	if (theApp.IsRunningAsService()) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;// MORPH leuk_he:run as ntservice v1..
 
 	if (!theApp.emuledlg->IsRunning())
 		return;

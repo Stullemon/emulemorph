@@ -2723,7 +2723,10 @@ void CPreferences::SavePreferences()
 	//MORPH END   - Added, Downloaded History [Monki/Xman]
 	//MORPH START leuk_he:run as ntservice v1..
 	ini.WriteInt(L"ServiceStartupMode",m_iServiceStartupMode);
-	ini.WriteInt(L"ServiceOptLvl",m_iServiceOptLvl);
+	if(theApp.GetProfileInt(_T("eMule"), _T("ServiceOptLvlNew"),-1) == 4 && m_iServiceOptLvl == SVC_BASIC_OPT) // Import from future StulleMule versions
+		ini.WriteInt(L"ServiceOptLvlNew",4);
+	else
+		ini.WriteInt(L"ServiceOptLvlNew",m_iServiceOptLvl);
 	//MORPH END leuk_he:run as ntservice v1..
 	ini.WriteBool(L"StaticIcon",m_bStaticIcon); //MORPH - Added, Static Tray Icon
 	ini.WriteBool(L"FakeAlyzerIndications",m_bFakeAlyzerIndications); //MORPH - Added by Stulle, Fakealyzer [netfinity]
@@ -3779,7 +3782,31 @@ void CPreferences::LoadPreferences()
    	m_bUseCompression=ini.GetBool(L"UseCompression",true);//Xman disable compression
 	//MORPH START leuk_he:run as ntservice v1..
 	GetServiceName();
-	m_iServiceOptLvl = ini.GetInt(L"ServiceOptLvl",SVC_SVR_OPT);
+	m_iServiceOptLvl = ini.GetInt(L"ServiceOptLvlNew",-1);
+	if(m_iServiceOptLvl < 0) // import old settings
+	{
+		m_iServiceOptLvl = ini.GetInt(L"ServiceOptLvl",-1);
+		switch(m_iServiceOptLvl)
+		{
+		case 0:
+			m_iServiceOptLvl = SVC_NO_OPT;
+			break;
+		case 4:
+			m_iServiceOptLvl = SVC_BASIC_OPT;
+			break;
+		case 6:
+			m_iServiceOptLvl = SVC_LIST_OPT;
+			break;
+		case 10:
+			m_iServiceOptLvl = SVC_FULL_OPT;
+			break;
+		default: // this will be the default in case there was nothing to import
+			m_iServiceOptLvl = SVC_LIST_OPT;
+			break;
+		}
+	}
+	else if(m_iServiceOptLvl == 4) // Import from future StulleMule versions
+		m_iServiceOptLvl = SVC_BASIC_OPT;
 	//MORPH END leuk_he:run as ntservice v1..
 	m_bStaticIcon = ini.GetBool(L"StaticIcon",false); //MORPH - Added, Static Tray Icon
 	m_bFakeAlyzerIndications = ini.GetBool(L"FakeAlyzerIndications",false); //MORPH - Added by Stulle, Fakealyzer [netfinity]

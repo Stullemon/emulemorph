@@ -114,7 +114,7 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort)
 	m_iAutoSizeWidth = LVSCW_AUTOSIZE;
 	// not for server list and download list	
 	// MORPH START leuk_he:run as ntservice v1..
-	if (theApp.IsRunningAsService(SVC_SVR_OPT )) return; // THIS SHOULD BE SVC_LIST_OPT for other than server	TODO.
+	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return; // THIS SHOULD BE SVC_LIST_OPT for other than server	TODO.
 	// MORPH END leuk_he:run as ntservice v1..
 	//MORPH START - UpdateItemThread
 	m_updatethread = (CUpdateItemThread*) AfxBeginThread(RUNTIME_CLASS(CUpdateItemThread), THREAD_PRIORITY_NORMAL,0, CREATE_SUSPENDED);
@@ -126,7 +126,7 @@ CMuleListCtrl::CMuleListCtrl(PFNLVCOMPARE pfnCompare, DWORD dwParamSort)
 CMuleListCtrl::~CMuleListCtrl() {
 	delete[] m_aColumns;
 	// MORPH START leuk_he:run as ntservice v1..
-   	if (theApp.IsRunningAsService(SVC_SVR_OPT)) return;
+   	if (theApp.IsRunningAsService(SVC_LIST_OPT)) return;
 	// MORPH END leuk_he:run as ntservice v1..
 		m_updatethread->EndThread(); //MORPH - UpdateItemThread
 }

@@ -297,7 +297,7 @@ bool CServerListCtrl::AddServer(const CServer* pServer, bool bAddToList, bool bR
 	if (!theApp.serverlist->AddServer(pServer, bAddTail))
 		return false;
 
-	if (theApp.IsRunningAsService(SVC_SVR_OPT)) return true;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_FULL_OPT)) return true;// MORPH leuk_he:run as ntservice v1..
 
 	if (bAddToList)
 	{
@@ -310,7 +310,7 @@ bool CServerListCtrl::AddServer(const CServer* pServer, bool bAddToList, bool bR
 
 void CServerListCtrl::RefreshServer(const CServer* server)
 {
-	if (theApp.IsRunningAsService(SVC_SVR_OPT )) return;// MORPH leuk_he:run as ntservice v1..
+	if (theApp.IsRunningAsService(SVC_FULL_OPT)) return;// MORPH leuk_he:run as ntservice v1..
 	
 	if (!server || !theApp.emuledlg->IsRunning())
 		return;
@@ -1162,7 +1162,7 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 	DrawFocusRect(dc, lpDrawItemStruct->rcItem, lpDrawItemStruct->itemState & ODS_FOCUS, bCtrlFocused, lpDrawItemStruct->itemState & ODS_SELECTED);
 
 	dc.SetTextColor(crOldTextColor);
-	if (!theApp.IsRunningAsService(SVC_SVR_OPT)) // MORPH leuk_he:run as ntservice v1..
+	if (!theApp.IsRunningAsService(SVC_FULL_OPT)) // MORPH leuk_he:run as ntservice v1..
 		m_updatethread->AddItemUpdated((LPARAM)server); //MORPH - UpdateItemThread
 }
 

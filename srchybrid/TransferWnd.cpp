@@ -246,6 +246,7 @@ void CTransferWnd::OnInitialUpdate()
 
 void CTransferWnd::ShowQueueCount(uint32 number)
 {
+	if(theApp.IsRunningAsService(SVC_BASIC_OPT)) return; //MORPH leuk_he:run as ntservice v1..
 	TCHAR buffer[100];
 	// MORPH START
 	/*
