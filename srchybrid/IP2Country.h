@@ -23,7 +23,8 @@ enum IP2CountryNameSelection{
 };
 //EastShare End - added by AndCycle, IP to Country
 
-#define DFLT_IP2COUNTRY_FILENAME  _T("ip-to-country.csv")//Commander - Added: IP2Country auto-updating
+#define DFLT_IP2COUNTRY_FILENAME_OLD  _T("ip-to-country.csv")//Commander - Added: IP2Country auto-updating
+#define DFLT_IP2COUNTRY_FILENAME  _T("GeoIPCountryWhois.csv")
 
 typedef CTypedPtrArray<CPtrArray, IPRange_Struct2*> CIP2CountryArray;
 
@@ -61,7 +62,7 @@ class CIP2Country
 		CImageList* GetFlagImageList() {return &CountryFlagImageList;}
 		IMAGELISTDRAWPARAMS GetFlagImageDrawParams(CDC* dc,int iIndex,POINT point) const;
 		void    UpdateIP2CountryURL();//Commander - Added: IP2Country auto-updating
-		CString GetDefaultFilePath() const;
+		CString GetDefaultFilePath(int &iNewDfltFile) const;
 	private:
 
 		//check is program current running, if it's under init or shutdown, set to false

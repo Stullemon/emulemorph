@@ -4,6 +4,7 @@ Changelog for eMule 0.50a MorphXT v12.7
 XX-XX-2011
 
 ADD: Some more MediaInfo settings and USC log color to Advanced Preferences [Stulle]
+ADD: New flags to countryflag.dll in order to meet ISO 3166-1 standard [Stulle]
 CHANGE: Updated Bad Mod List and Bad Hashs List (DLP v43) [zz_fly]
 CHANGE: Max FileBufferTimeLimit changed from 100 to 10 minutes [Stulle]
 CHANGE: Displayed ed2k link list in category selection can be scrolled through [Stulle]
@@ -16,6 +17,10 @@ CHANGE: Display if a client has credits in On Queue list of Web Interface [Stull
 CHANGE: Tweasked NTService optimizations [Stulle]
 CHANGE: Retrieve ID3LIB setting from memory during runtime [Stulle]
 CHANGE: Rearranged Advanced (official) Preferences for better overview [Stulle]
+CHANGE: Integrate MaxMind GeoLite Country into IP2Country feature (download and processing) [Stulle]
+	+ You might need to reset the update URL to use this new source and format!
+	+ For maximum comfort old format and source may still be used (only for ip-to-country.csv).
+	+ Notice: MorphXT includes GeoLite data created by MaxMind, available from http://www.maxmind.com
 FIX: Don't assign downloads via watch clipboard feature using view filters CHANGE [Stulle]
 FIX: Weird result calculation for Fakealyzer [Stulle]
 FIX: Pasting eD2k links from DownloadListCtrl was not handled as pasting [Stulle]

@@ -3461,7 +3461,7 @@ void CPreferences::LoadPreferences()
 	m_bFunnyNick = ini.GetBool(L"DisplayFunnyNick", true);//MORPH - Added by SiRoB, Optionnal funnynick display
 	_stprintf(UpdateURLFakeList,L"%s",ini.GetString(L"UpdateURLFakeList",L"http://emulepawcio.sourceforge.net/fakes.zip"));		//MORPH START - Added by milobac and Yun.SF3, FakeCheck, FakeReport, Auto-updating
 	_stprintf(UpdateURLIPFilter,L"%s",ini.GetString(L"UpdateURLIPFilter",L"http://downloads.sourceforge.net/scarangel/ipfilter.rar"));//MORPH START added by Yun.SF3: Ipfilter.dat update
-	_stprintf(UpdateURLIP2Country,L"%s",ini.GetString(L"UpdateURLIP2Country",L"http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip"));//Commander - Added: IP2Country auto-updating
+	_stprintf(UpdateURLIP2Country,L"%s",ini.GetString(L"UpdateURLIP2Country",L"http://geolite.maxmind.com/download/geoip/database/GeoIPCountryCSV.zip"));//Commander - Added: IP2Country auto-updating
 
 	// khaos::categorymod+ Load Preferences
 	m_bShowCatNames=ini.GetBool(L"ShowCatName",true);

@@ -357,7 +357,7 @@ void CPPgMorph2::OnBnClickedUpdateipcurl()
 //Commander - Added: IP2Country Auto-updating - End
 void CPPgMorph2::OnBnClickedResetipcurl()
 {
-	CString strBuffer = _T("http://ip-to-country.webhosting.info/downloads/ip-to-country.csv.zip");
+	CString strBuffer = _T("http://geolite.maxmind.com/download/geoip/database/GeoIPCountryCSV.zip");
 	GetDlgItem(IDC_UPDATE_URL_IP2COUNTRY)->SetWindowText(strBuffer);
 	memset(thePrefs.GetIP2CountryVersion(), 0, sizeof(SYSTEMTIME));
 	GetDlgItem(IDC_IP2COUNTRY_VERSION)->SetWindowText(_T(""));
