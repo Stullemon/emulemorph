@@ -1284,6 +1284,10 @@ CString CWebServer::_GetHeader(ThreadData Data, long lSession)
 		HTTPHelp = GetResString(IDS_PW_UNLIMITED);
 	else
 		HTTPHelp.Format(_T("%u"), dwMax);
+	//MORPH START - Added by Stulle, Show zz ratio activation in WebInterface
+	if (thePrefs.IsZZRatioDoesWork())
+		HTTPHelp.Append(theApp.downloadqueue->IsZZRatioInWork()?_T(" R"):_T(" r"));
+	//MORPH END   - Added by Stulle, Show zz ratio activation in WebInterface
 	Out.Replace(_T("[MaxDownload]"), HTTPHelp);
 
 	dwMax = thePrefs.GetMaxConnections();
