@@ -2973,7 +2973,11 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 			dUser.sUserName = _SpecialChars(usn);
 
 		dUser.sClientNameVersion = cur_client->GetClientSoftVer();
+		//MORPH - Changed by SiRoB, Optimization requpfile
+		/*
 		CKnownFile* file = theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID() );
+		*/
+		CKnownFile* file = cur_client->CheckAndGetReqUpFile();
 		//MORPH START [ionix] - iONiX::Advanced WebInterface Account Management
 		/*
 		if (file)
@@ -3048,6 +3052,49 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 		dUser.sClientState = dUser.sClientExtra;
 		dUser.sClientStateSpecial = _T("connecting");
 		dUser.nScore = cur_client->GetScore(false);
+		//MORPH START - Added by Stulle, Respect and display USC in WebInterface queue sorting
+		dUser.nUSCFlags = 0;
+		if(file->GetPowerShared())
+			dUser.nUSCFlags |= 1; // 1. Bit = PS
+		if(cur_client->IsMoreUpThanDown(file))
+			dUser.nUSCFlags |= 2; // 2. Bit = PBF
+		if(!file->IsPartFile() && file->statistic.GetFairPlay())
+			dUser.nUSCFlags |= 4; // 3. Bit = FairPlay
+
+		if(cur_client->IsFriend() && cur_client->GetFriendSlot())
+			dUser.nUSCPriority = 20;
+		else if(dUser.nUSCFlags>0)
+		{
+			//MORPH START - added by AndCyle, selective PS internal Prio
+			if(thePrefs.IsPSinternalPrioEnable())
+			{
+				switch(file->GetUpPriority())
+				{
+					case PR_VERYHIGH:
+						dUser.nUSCPriority = 19;
+						break;
+					case PR_HIGH:
+						dUser.nUSCPriority = 17;
+						break;
+					case PR_LOW:
+						dUser.nUSCPriority = 13;
+						break;
+					case PR_VERYLOW:
+						dUser.nUSCPriority = 11;
+						break;
+					case PR_NORMAL: 
+					default: 
+						dUser.nUSCPriority = 15;
+						break; 
+				}
+			}
+			else
+			//MORPH END   - added by AndCyle, selective PS internal Prio
+				dUser.nUSCPriority = 10;
+		}
+		else
+			dUser.nUSCPriority = 0;
+		//MORPH END   - Added by Stulle, Respect and display USC in WebInterface queue sorting
 
 		sTemp=GetClientversionImage(cur_client);
 		dUser.sClientSoft = sTemp;
@@ -3068,7 +3115,15 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 			dUser.sIndex = dUser.sFileName;
 			break;
 		case QU_SORT_SCORE:
+			//MORPH START - Changed by Stulle, Respect and display USC in WebInterface queue sorting
+			/*
 			dUser.sIndex.Format(_T("%09u"), dUser.nScore);
+			*/
+			if(dUser.nUSCPriority > 0)
+				dUser.sIndex.Format(_T("%u%09u"), dUser.nUSCPriority, dUser.nScore);
+			else
+				dUser.sIndex.Format(_T("%09u"), dUser.nScore);
+			//MORPH END   - Changed by Stulle, Respect and display USC in WebInterface queue sorting
 			break;
 		default:
 			dUser.sIndex.Empty();
@@ -3078,10 +3133,19 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 
 	int nNextPos = 0;	// position in queue of the user with the highest score -> next upload user
 	uint32 nNextScore = 0;	// highest score -> next upload user
+	uint8 nUSCPriority = 0; //MORPH - Added by Stulle, Respect and display USC in WebInterface queue sorting
 	for(int i = 0; i < QueueArray.GetCount(); i++)
 	{
+		//MORPH START - Changed by Stulle, Respect and display USC in WebInterface queue sorting
+		/*
 		if (QueueArray[i].nScore > nNextScore)
 		{
+		*/
+		if (QueueArray[i].nUSCPriority > nUSCPriority ||
+			QueueArray[i].nUSCPriority == nUSCPriority && QueueArray[i].nScore > nNextScore)
+		{
+			nUSCPriority = QueueArray[i].nUSCPriority;
+		//MORPH END   - Changed by Stulle, Respect and display USC in WebInterface queue sorting
 			nNextPos = i;
 			nNextScore = QueueArray[i].nScore;
 		}
@@ -3442,7 +3506,22 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 				pcTmp = _T("");
 				if (!WSqueueColumnHidden[3])
 				{
-					_stprintf(HTTPTempC, _T("%i") , QueueArray[i].nScore);
+					//MORPH START - Added by Stulle, Respect and display USC in WebInterface queue sorting
+					CString buffer;
+					if(QueueArray[i].nUSCPriority == 20)
+						buffer.Append(_T("FS,"));
+					if(QueueArray[i].nUSCFlags & 1)
+						buffer.Append(_T("PS,"));
+					if(QueueArray[i].nUSCFlags & 2)
+						buffer.Append(_T("PBF,"));
+					if(QueueArray[i].nUSCFlags & 4)
+						buffer.Append(_T("FP,"));
+
+					if (QueueArray[i].nUSCPriority >= 10)
+						_stprintf(HTTPTempC, _T("%s %i") , buffer, QueueArray[i].nScore);
+					else
+					//MORPH END   - Added by Stulle, Respect and display USC in WebInterface queue sorting
+						_stprintf(HTTPTempC, _T("%i") , QueueArray[i].nScore);
 					pcTmp = HTTPTempC;
 				}
 				HTTPProcessData.Replace(_T("[Score]"), pcTmp);
@@ -3487,7 +3566,22 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 				pcTmp = _T("");
 				if (!WSqueueColumnHidden[3])
 				{
-					_stprintf(HTTPTempC, _T("%i") , QueueArray[i].nScore);
+					//MORPH START - Added by Stulle, Respect and display USC in WebInterface queue sorting
+					CString buffer;
+					if(QueueArray[i].nUSCPriority == 20)
+						buffer.Append(_T("FS,"));
+					if(QueueArray[i].nUSCFlags & 1)
+						buffer.Append(_T("PS,"));
+					if(QueueArray[i].nUSCFlags & 2)
+						buffer.Append(_T("PBF,"));
+					if(QueueArray[i].nUSCFlags & 4)
+						buffer.Append(_T("FP,"));
+
+					if (QueueArray[i].nUSCPriority >= 10)
+						_stprintf(HTTPTempC, _T("%s %i") , buffer, QueueArray[i].nScore);
+					else
+					//MORPH END   - Added by Stulle, Respect and display USC in WebInterface queue sorting
+						_stprintf(HTTPTempC, _T("%i") , QueueArray[i].nScore);
 					pcTmp = HTTPTempC;
 				}
 				HTTPProcessData.Replace(_T("[Score]"), pcTmp);
@@ -3534,7 +3628,22 @@ CString CWebServer::_CreateTransferList(CString Out, CWebServer *pThis, ThreadDa
 				pcTmp = _T("");
 				if (!WSqueueColumnHidden[3])
 				{
-					_stprintf(HTTPTempC, _T("%i") , QueueArray[i].nScore);
+					//MORPH START - Added by Stulle, Respect and display USC in WebInterface queue sorting
+					CString buffer;
+					if(QueueArray[i].nUSCPriority == 20)
+						buffer.Append(_T("FS,"));
+					if(QueueArray[i].nUSCFlags & 1)
+						buffer.Append(_T("PS,"));
+					if(QueueArray[i].nUSCFlags & 2)
+						buffer.Append(_T("PBF,"));
+					if(QueueArray[i].nUSCFlags & 4)
+						buffer.Append(_T("FP,"));
+
+					if (QueueArray[i].nUSCPriority >= 10)
+						_stprintf(HTTPTempC, _T("%s %i") , buffer, QueueArray[i].nScore);
+					else
+					//MORPH END   - Added by Stulle, Respect and display USC in WebInterface queue sorting
+						_stprintf(HTTPTempC, _T("%i") , QueueArray[i].nScore);
 					pcTmp = HTTPTempC;
 				}
 				HTTPProcessData.Replace(_T("[Score]"), pcTmp);

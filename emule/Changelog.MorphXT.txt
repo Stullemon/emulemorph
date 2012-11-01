@@ -7,6 +7,7 @@ ADD: Some more MediaInfo settings and USC log color to Advanced Preferences [Stu
 ADD: New flags to countryflag.dll in order to meet ISO 3166-1 standard [Stulle]
 	+ Note that you absolutely need to update the countryflag.dlls!
 ADD: Show ZZ ratio activation in Web Interface [Stulle]
+ADD: Respect and display USC in WebInterface queue sorting [Stulle]
 CHANGE: Updated Bad Mod List and Bad Hashs List (DLP v43) [zz_fly]
 CHANGE: Max FileBufferTimeLimit changed from 100 to 10 minutes [Stulle]
 CHANGE: Displayed ed2k link list in category selection can be scrolled through [Stulle]

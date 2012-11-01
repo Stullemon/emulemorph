@@ -127,6 +127,10 @@ typedef struct
 	CString	sFileName;
 	CString	sClientNameVersion;
 	uint32	nScore;
+	//MORPH START - Added by Stulle, Respect and display USC in WebInterface queue sorting
+	uint8	nUSCPriority;
+	uint8	nUSCFlags;
+	//MORPH END   - Added by Stulle, Respect and display USC in WebInterface queue sorting
 	CString sIndex;	//SyruS CQArray-Sorting element
 } QueueUsers;
 
