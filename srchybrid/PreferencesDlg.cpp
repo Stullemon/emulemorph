@@ -349,24 +349,24 @@ void CPreferencesDlg::Localize()
 	UpdateCaption();
 */
 //	Official group
-	int iGroup = m_slideBar.AddGroup( GetResString(IDS_PREF_GROUPGENERAL )/*, 1*/);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_GENERAL), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_DISPLAY), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_CONNECTION), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_SERVER), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_DIR), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_FILES), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_EKDEV_OPTIONS), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_MESSAGESCOMMENTS), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_SECURITY), iGroup, c++);
+	int iGroup = m_slideBar.AddGroup(RemoveAmbersand(GetResString(IDS_PREF_GROUPGENERAL))/*, 1*/);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_PW_GENERAL)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_PW_DISPLAY)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_PW_CONNECTION)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_PW_SERVER)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_PW_DIR)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_PW_FILES)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_PW_EKDEV_OPTIONS)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_MESSAGESCOMMENTS)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_SECURITY)), iGroup, c++);
 // advanced...	official. 
-	iGroup = m_slideBar.AddGroup(GetResString(IDS_PREF_GROUPEXTENDED));
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_PROXY), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_IRC), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_STATSSETUPINFO), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_SCHEDULER), iGroup, c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_WS), iGroup, Webserver=c++);
-	m_slideBar.AddGroupItem(GetResString(IDS_PW_TWEAK), iGroup, c++);
+	iGroup = m_slideBar.AddGroup(RemoveAmbersand(GetResString(IDS_PREF_GROUPEXTENDED)));
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_PW_PROXY)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_IRC)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_STATSSETUPINFO)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_SCHEDULER)), iGroup, c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_PW_WS)), iGroup, Webserver=c++);
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_PW_TWEAK)), iGroup, c++);
 
 
 #if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
@@ -374,8 +374,8 @@ void CPreferencesDlg::Localize()
 #endif
 
 	//	MOD group
-	iGroup = m_slideBar.AddGroup(GetResString(IDS_PREF_GROUPMOD));
-	m_slideBar.AddGroupItem(GetResString(IDS_BACKUP), iGroup, c++);
+	iGroup = m_slideBar.AddGroup(RemoveAmbersand(GetResString(IDS_PREF_GROUPMOD)));
+	m_slideBar.AddGroupItem(RemoveAmbersand(GetResString(IDS_BACKUP)), iGroup, c++);
 	m_slideBar.AddGroupItem(_T("Morph"), iGroup, c++);
 	m_slideBar.AddGroupItem(_T("Morph Share"), iGroup, c++);
 	m_slideBar.AddGroupItem(_T("Morph Update"), iGroup, c++);
