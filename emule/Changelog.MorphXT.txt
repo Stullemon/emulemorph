@@ -1,7 +1,7 @@
 --------------------------------------
 Changelog for eMule 0.50a MorphXT v12.7
 --------------------------------------
-XX-XX-2011
+21-11-2012
 
 ADD: Some more MediaInfo settings and USC log color to Advanced Preferences [Stulle]
 ADD: New flags to countryflag.dll in order to meet ISO 3166-1 standard [Stulle]
