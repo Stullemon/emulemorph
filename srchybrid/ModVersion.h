@@ -21,7 +21,7 @@
 //START - This part should not be changed in anyway
 #define MOD_VERSION_MJR		12
 #define MOD_VERSION_MIN		7
-#define MOD_VERSION_BUILD   1
+#define MOD_VERSION_BUILD   2
 #define	MOD_VERSION			_T("MorphXT")
 #define	MOD_VERSION_LONG	_T("MorphXT v")
 //END   - This part should not be changed in anyway
