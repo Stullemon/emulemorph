@@ -146,3 +146,32 @@
 #endif//!defined(HAVE_VISTA_SDK) && !defined(HAVE_WMF_SDK)
 
 #endif
+
+//////////////////////////////////////////////////////////////////////////////
+// Visual Studio 2012, 2013, 2015, 2017, 2019
+//////////////////////////////////////////////////////////////////////////////
+//  VS2012==1700, VS2013==1800, VS2015==1900, VS2017==1910-1916, VS2019==????
+#if _MSC_VER>=1700
+
+#define HAVE_VISTA_SDK		// shipped with Windows SDK
+#define HAVE_WMF_SDK		// WMF SDK is part of the Windows SDK
+#define HAVE_DIRECTX_SDK	// DirectX 9(!) SDK
+
+// 'sapi.h' is shipped as part of the Windows SDK
+#ifndef HAVE_VISTA_SDK
+#undef HAVE_SAPI_H
+#endif//HAVE_VISTA_SDK
+
+// 'qedit.h' file is not shipped after VS200
+#if !defined(HAVE_VISTA_SDK) || !defined(HAVE_DIRECTX_SDK)
+#undef HAVE_QEDIT_H
+#endif//!defined(HAVE_VISTA_SDK) || !defined(HAVE_DIRECTX_SDK)
+
+// 'wmsdk.h' is shipped as part of the Windows SDK
+#if !defined(HAVE_VISTA_SDK) && !defined(HAVE_WMF_SDK)
+#undef HAVE_WMSDK_H
+#endif//!defined(HAVE_VISTA_SDK) && !defined(HAVE_WMF_SDK)
+
+#include <sdkddkver.h>
+
+#endif

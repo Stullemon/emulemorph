@@ -1604,19 +1604,19 @@ bool GetAttributeT(IWMHeaderInfo *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName
 	return true;
 }
 
-template<class T> bool GetAttribute(IWMHeaderInfo *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, T &nData);
+template<class T> bool GetAttributeT(IWMHeaderInfo *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, T &nData);
 
-bool GetAttribute<>(IWMHeaderInfo *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, BOOL &nData)
+bool GetAttribute(IWMHeaderInfo *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, BOOL &nData)
 {
 	return GetAttributeT<BOOL, WMT_TYPE_BOOL>(pIWMHeaderInfo, wStream, pwszName, nData);
 }
 
-bool GetAttribute<>(IWMHeaderInfo *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, DWORD &nData)
+bool GetAttribute(IWMHeaderInfo *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, DWORD &nData)
 {
 	return GetAttributeT<DWORD, WMT_TYPE_DWORD>(pIWMHeaderInfo, wStream, pwszName, nData);
 }
 
-bool GetAttribute<>(IWMHeaderInfo *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, QWORD &nData)
+bool GetAttribute(IWMHeaderInfo *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, QWORD &nData)
 {
 	return GetAttributeT<QWORD, WMT_TYPE_QWORD>(pIWMHeaderInfo, wStream, pwszName, nData);
 }
@@ -1714,19 +1714,19 @@ bool GetAttributeExT(IWMHeaderInfo3 *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszN
 	return true;
 }
 
-template<class T> bool GetAttributeEx(IWMHeaderInfo3 *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, T &nData);
+template<class T> bool GetAttributeExT(IWMHeaderInfo3 *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, T &nData);
 
-bool GetAttributeEx<>(IWMHeaderInfo3 *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, BOOL &nData)
+bool GetAttributeEx(IWMHeaderInfo3 *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, BOOL &nData)
 {
 	return GetAttributeExT<BOOL, WMT_TYPE_BOOL>(pIWMHeaderInfo, wStream, pwszName, nData);
 }
 
-bool GetAttributeEx<>(IWMHeaderInfo3 *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, DWORD &nData)
+bool GetAttributeEx(IWMHeaderInfo3 *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, DWORD &nData)
 {
 	return GetAttributeExT<DWORD, WMT_TYPE_DWORD>(pIWMHeaderInfo, wStream, pwszName, nData);
 }
 
-bool GetAttributeEx<>(IWMHeaderInfo3 *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, QWORD &nData)
+bool GetAttributeEx(IWMHeaderInfo3 *pIWMHeaderInfo, WORD wStream, LPCWSTR pwszName, QWORD &nData)
 {
 	return GetAttributeExT<QWORD, WMT_TYPE_QWORD>(pIWMHeaderInfo, wStream, pwszName, nData);
 }

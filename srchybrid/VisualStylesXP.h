@@ -1,7 +1,7 @@
 #pragma once
 
 #include <uxtheme.h>
-#include <tmschema.h>
+#include <vssym32.h>
 
 #pragma warning(disable:4100) // unreferenced formal parameter
 class CVisualStylesXP

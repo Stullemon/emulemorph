@@ -908,14 +908,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <MASM Include="MD4_asm.asm">
-      <Filter>Source Files</Filter>
-    </MASM>
-    <MASM Include="SHA_asm.asm">
-      <Filter>Source Files</Filter>
-    </MASM>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Flex.skl">
       <Filter>Interface Source</Filter>
     </None>

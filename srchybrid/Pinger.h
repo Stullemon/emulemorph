@@ -106,35 +106,35 @@ typedef BOOL WINAPI IcmpCloseHandle(HANDLE IcmpHandle); /* FALSE on error */
 /* Note 2: For the most part, you can refer to RFC 791 for detials 
 * on how to fill in values for the IP option information structure. 
 */
-typedef struct ip_option_information {
-    u_char Ttl;		/* Time To Live (used for traceroute) */
-    u_char Tos; 	/* Type Of Service (usually 0) */
-    u_char Flags; 	/* IP header flags (usually 0) */
-    u_char OptionsSize; /* Size of options data (usually 0, max 40) */
-    u_char FAR *OptionsData;   /* Options data buffer */
-} IPINFO, *PIPINFO, FAR *LPIPINFO;
+//typedef struct ip_option_information {
+//    u_char Ttl;		/* Time To Live (used for traceroute) */
+//    u_char Tos; 	/* Type Of Service (usually 0) */
+//    u_char Flags; 	/* IP header flags (usually 0) */
+//    u_char OptionsSize; /* Size of options data (usually 0, max 40) */
+//    u_char FAR *OptionsData;   /* Options data buffer */
+//} IPINFO, *PIPINFO, FAR *LPIPINFO;
 
 /* Note 1: The Reply Buffer will have an array of ICMP_ECHO_REPLY
 * structures, followed by options and the data in ICMP echo reply
 * datagram received. You must have room for at least one ICMP
 * echo reply structure, plus 8 bytes for an ICMP header. 
 */
-typedef struct icmp_echo_reply {
-    u_long Address; 	/* source address */
-    u_long Status;	/* IP status value (see below) */
-    u_long RTTime;	/* Round Trip Time in milliseconds */
-    u_short DataSize; 	/* reply data size */
-    u_short Reserved; 	/* */
-    void FAR *Data; 	/* reply data buffer */
-    struct ip_option_information Options; /* reply options */
-} ICMPECHO, *PICMPECHO, FAR *LPICMPECHO;
+//typedef struct icmp_echo_reply {
+//    u_long Address; 	/* source address */
+//    u_long Status;	/* IP status value (see below) */
+//    u_long RTTime;	/* Round Trip Time in milliseconds */
+//    u_short DataSize; 	/* reply data size */
+//    u_short Reserved; 	/* */
+//    void FAR *Data; 	/* reply data buffer */
+//    struct ip_option_information Options; /* reply options */
+//} ICMPECHO, *PICMPECHO, FAR *LPICMPECHO;
 
 typedef DWORD WINAPI IcmpSendEcho(
     HANDLE IcmpHandle, 	/* handle returned from IcmpCreateFile() */
     u_long DestAddress, /* destination IP address (in network order) */
     LPVOID RequestData, /* pointer to buffer to send */
     WORD RequestSize,	/* length of data in buffer */
-    LPIPINFO RequestOptns,  /* see Note 2 */
+    PIP_OPTION_INFORMATION RequestOptns,  /* see Note 2 */
     LPVOID ReplyBuffer, /* see Note 1 */
     DWORD ReplySize, 	/* length of reply (must allow at least 1 reply) */
     DWORD Timeout 	/* time in milliseconds to wait for reply */
@@ -231,7 +231,7 @@ private:
 
     HANDLE hICMP;
     HMODULE hICMP_DLL; // PENDING: was HANDLE
-    IPINFO stIPInfo;
+    IP_OPTION_INFORMATION stIPInfo;
 
     SOCKET us;          // UDP socket to send requests
     SOCKET is;          // raw ICMP socket to catch responses

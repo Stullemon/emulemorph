@@ -1,4 +1,4 @@
-// ------------------------------------------------------------
+﻿// ------------------------------------------------------------
 //  CDialogMinTrayBtn template class
 //  MFC CDialog with minimize to systemtray button (0.04)
 //  Supports WinXP styles (thanks to David Yuheng Zhao for CVisualStylesXP - yuheng_zhao@yahoo.com)
@@ -13,6 +13,9 @@
 #include "AfxBeginMsgMapTemplate.h"
 #include "OtherFunctions.h"
 #include "MenuCmds.h"
+#undef SCHEMADEF_H
+#undef SCHEMA_VERIFY_VSSYM32
+#include "SchemaDef.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW

@@ -19,45 +19,39 @@
 // Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 //
 #pragma once
+#define CRYPTOPP_ENABLE_NAMESPACE_WEAK 1
+#include "cryptopp/md4.h"
+#include "otherfunctions.h"
 
-typedef union
+#define MD4_BLOCK_SIZE	64
+#define MD4_DIGEST_SIZE	16
+
+typedef struct
 {
-	BYTE	n[16];
-	BYTE	b[16];
-	DWORD	w[4];
-} MD4, MD5;
+	byte	b[MD4_DIGEST_SIZE];
+} MD4;
 
 class CMD4
 {
-// Construction
-public:
-	CMD4();
-	virtual ~CMD4();
-
-	static bool VerifyImplementation();
-
 // Attributes
-protected:
-	// NOTE: if you change this, modify the offsets in MD4_ASM.ASM accordingly
-	DWORD	m_nState[4];
-	DWORD	m_nCount[2];
-	BYTE	m_nBuffer[64];
-
+	CryptoPP::Weak::MD4 m_md4; // netfinity: Use cryptlib
+	MD4 m_hash;
 // Operations
 public:
+	// Construction
+	CMD4();
 	void	Reset();
-	void	Add(LPCVOID pData, DWORD nLength);
+	void	Add(LPCVOID pData, size_t nLength);
 	void	Finish();
-	void	GetHash(MD4* pHash);
-	const BYTE* GetHash() const { return (const BYTE*)m_nState; }
+	const byte* GetHash() const;
 };
 
-inline bool operator==(const MD4& md4a, const MD4& md4b)
+inline bool operator==(const MD4 &md4a, const MD4 &md4b)
 {
-    return memcmp( &md4a, &md4b, 16 ) == 0;
+	return md4equ(&md4a, &md4b);
 }
 
-inline bool operator!=(const MD4& md4a, const MD4& md4b)
+inline bool operator!=(const MD4 &md4a, const MD4 &md4b)
 {
-    return memcmp( &md4a, &md4b, 16 ) != 0;
+	return !(md4a == md4b);
 }

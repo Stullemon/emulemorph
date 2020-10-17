@@ -890,7 +890,7 @@ void CUDPSocket::SendPacket(Packet* packet, CServer* pServer, uint16 nSpecialPor
 								pszHostAddressA, pDNSReq->m_DnsHostBuffer, sizeof pDNSReq->m_DnsHostBuffer);
 		if (pDNSReq->m_hDNSTask == NULL) {
 			if (thePrefs.GetVerbose())
-				DebugLogWarning(_T("Error: Server UDP socket: Failed to resolve address for '%hs' - %s"), pszHostAddressA, GetErrorMessage(GetLastError(), 1));
+				DebugLogWarning(_T("Error: Server UDP socket: Failed to resolve address for '%hs' - %s"), CString(pszHostAddressA), GetErrorMessage(GetLastError(), 1));
 			delete pDNSReq;
 			delete[] pRawPacket;
 			return;

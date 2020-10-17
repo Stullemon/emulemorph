@@ -869,7 +869,7 @@ void CUPnP_IGDControlPoint::AddDevice( IXML_Document * doc, CString location, in
 									subsRet = UpnpSubscribe(m_ctrlPoint, CT2CA(service->EventURL), &TimeOut, service->SubscriptionID);
 									if(subsRet == UPNP_E_SUCCESS){
 										if(thePrefs.GetUPnPVerboseLog())
-											theApp.QueueDebugLogLine(false, _T("UPnP: Subscribed with service \"%s\" [SID=%s]"), service->ServiceType, CA2CT(service->SubscriptionID));
+											theApp.QueueDebugLogLine(false, _T("UPnP: Subscribed with service \"%s\" [SID=%s]"), service->ServiceType, CString(service->SubscriptionID));
 									}
 									else{
 										if(thePrefs.GetUPnPVerboseLog())
@@ -1518,14 +1518,14 @@ void CUPnP_IGDControlPoint::OnEventReceived(Upnp_SID sid, int /* evntkey */, IXM
 
 									if(value.CompareNoCase(_T("Connected")) == 0){
 										if(thePrefs.GetUPnPVerboseLog())
-											theApp.QueueDebugLogLine(false, _T("UPnP: New ConnectionStatus for \"%s\" (Connected) [SID=%s] "), srv->ServiceType, CA2CT(srv->SubscriptionID));
+											theApp.QueueDebugLogLine(false, _T("UPnP: New ConnectionStatus for \"%s\" (Connected) [SID=%s] "), srv->ServiceType, CString(srv->SubscriptionID));
 										if(srv->Enabled != 1)
 											update = true;
 										srv->Enabled = 1;
 									}
 									else{
 										if(thePrefs.GetUPnPVerboseLog())
-											theApp.QueueDebugLogLine(false, _T("UPnP: New ConnectionStatus for \"%s\" (Disconnected) [SID=%s]"), srv->ServiceType, CA2CT(srv->SubscriptionID));
+											theApp.QueueDebugLogLine(false, _T("UPnP: New ConnectionStatus for \"%s\" (Disconnected) [SID=%s]"), srv->ServiceType, CString(srv->SubscriptionID));
 										if(srv->Enabled != 0)
 											update = true;
 										srv->Enabled = 0;

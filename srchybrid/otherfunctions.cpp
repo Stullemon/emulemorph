@@ -3094,6 +3094,40 @@ bool AdjustNTFSDaylightFileTime(time_t& ruFileDate, LPCTSTR pszFilePath) //vs200
 	return false;
 }
 
+__time64_t FileTimeToUnixTime(const FILETIME &ft)
+{
+	const ULONGLONG t = *(UNALIGNED64 ULONGLONG*)&ft;
+	return t ? t / 10000000ull - 11644473600ull : 0;
+}
+
+int statUTC(LPCTSTR pname, struct _stat64 &ft)
+{
+	WIN32_FILE_ATTRIBUTE_DATA fa;
+	if (GetFileAttributesEx(pname, GetFileExInfoStandard, &fa)) {
+		memset(&ft, 0, sizeof ft);
+		ft.st_atime = FileTimeToUnixTime(fa.ftLastAccessTime);
+		ft.st_ctime = FileTimeToUnixTime(fa.ftCreationTime);
+		ft.st_mtime = FileTimeToUnixTime(fa.ftLastWriteTime);
+		ft.st_size = ((__int64)fa.nFileSizeHigh << 32) | fa.nFileSizeLow;
+		return 0;
+	}
+	return -1;
+}
+
+int statUTC(int ifile, struct _stat64 &ft)
+{
+	BY_HANDLE_FILE_INFORMATION fi;
+	if (GetFileInformationByHandle((HANDLE)_get_osfhandle(ifile), &fi)) {
+		memset(&ft, 0, sizeof ft);
+		ft.st_atime = FileTimeToUnixTime(fi.ftLastAccessTime);
+		ft.st_ctime = FileTimeToUnixTime(fi.ftCreationTime);
+		ft.st_mtime = FileTimeToUnixTime(fi.ftLastWriteTime);
+		ft.st_size = ((__int64)fi.nFileSizeHigh << 32) | fi.nFileIndexLow;
+		return 0;
+	}
+	return -1;
+}
+
 bool ExpandEnvironmentStrings(CString& rstrStrings)
 {
 	DWORD dwSize = ExpandEnvironmentStrings(rstrStrings, NULL, 0);

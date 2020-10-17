@@ -1,4 +1,4 @@
-//this file is part of eMule
+ï»¿//this file is part of eMule
 //Copyright (C)2002-2008 Merkur ( strEmail.Format("%s@%s", "devteam", "emule-project.net") / http://www.emule-project.net )
 //
 //This program is free software; you can redistribute it and/or
@@ -97,9 +97,9 @@ static int	rgiState[2+55];
 // Wildcard support for Category Selection Mask
 int wildcmp(LPCTSTR wild, LPCTSTR string); // kumod ^= constant parameters
 // khaos::kmod-
-//MORPH START - Added by SiRoB, XML News [O²]
+//MORPH START - Added by SiRoB, XML News [Oï¿½]
 void HTMLParse(CString &buffer); // Added by N_OxYdE
-//MORPH END  - Added by SiRoB, XML News [O²]
+//MORPH END  - Added by SiRoB, XML News [Oï¿½]
 
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -253,6 +253,9 @@ int GetMaxWindowsTCPConnections();
 #define _WINVER_VISTA_	0x0600	// 6.0
 #define _WINVER_7_		0x0601	// 6.1
 #define	_WINVER_S2008_	0x0601	// 6.1
+#define _WINVER_8_		0x0602	// 6.2
+#define _WINVER_8_1_	0x0603	// 6.3
+#define _WINVER_10_		0x0a00	// 10.0
 
 WORD		DetectWinVersion();
 int			IsRunningXPSP2();
@@ -267,12 +270,22 @@ bool		AddIconGrayscaledToImageList(CImageList& rList, HICON hIcon);
 
 
 ///////////////////////////////////////////////////////////////////////////////
-// MD4 helpers
+// MD4/MD5 helpers
 //
+#define MDX_BLOCK_SIZE	64 //both MD4 and MD5
+#define MDX_DIGEST_SIZE	16
 
-__inline BYTE toHex(const BYTE &x){
-	return x > 9 ? x + 55: x + 48;
+inline BYTE toHex(const BYTE &x)
+{
+	return x + (x > 9 ? 'A' - 10 : '0');
 }
+
+// md4equ - replacement for memcmp(hash1,hash2,16) == 0
+inline bool md4equ(const void *hash1, const void *hash2)
+{
+	return memcmp(hash1, hash2, MDX_DIGEST_SIZE) == 0;
+}
+
 
 // md4cmp -- replacement for memcmp(hash1,hash2,16)
 // Like 'memcmp' this function returns 0, if hash1==hash2, and !0, if hash1!=hash2.
@@ -430,8 +443,12 @@ __inline CStringA ipstrA(in_addr nIP){
 // Date/Time
 //
 time_t safe_mktime(struct tm* ptm);
-bool AdjustNTFSDaylightFileTime(time_t& ruFileDate, LPCTSTR pszFilePath); // vs2005
-
+bool AdjustNTFSDaylightFileTime(time_t &ruFileDate, LPCTSTR pszFilePath);
+//MS have broken stat functions in XP builds of VS 2015+, and refused to fix it properly.
+//Return UTC time and file size in _stat64 structure; all time fields are in UTC.
+__time64_t FileTimeToUnixTime(const FILETIME &ft);
+int statUTC(LPCTSTR pname, struct _stat64 &ft);
+int statUTC(int ifile, struct _stat64 &ft);
 
 ///////////////////////////////////////////////////////////////////////////////
 // Random Numbers

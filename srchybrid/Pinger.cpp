@@ -442,7 +442,7 @@ PingStatus Pinger::PingICMP(uint32 lAddr, uint32 ttl, bool doLog) {
     PingStatus returnValue;
 
     IN_ADDR stDestAddr;
-    char achRepData[sizeof(ICMPECHO) + BUFSIZE];
+    char achRepData[sizeof(icmp_echo_reply) + BUFSIZE];
 
     // Address is assumed to be ok
     stDestAddr.s_addr = lAddr;

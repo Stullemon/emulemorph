@@ -466,7 +466,7 @@ CemuleApp theApp(_T("eMule"));
 /*
 #if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900
 */
-#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900 || _MFC_VER==0x0A00
+#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900 || _MFC_VER>=0x0A00
 //MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 void __cdecl __AfxSocketTerm()
 {
@@ -594,6 +594,7 @@ BOOL CemuleApp::InitInstance()
 	// XP SP3				6   0
 	// Vista SP1			6   16
 	InitCommonControls();
+	/*
 	DWORD dwComCtrlMjr = 4;
 	DWORD dwComCtrlMin = 0;
 	AtlGetCommCtrlVersion(&dwComCtrlMjr, &dwComCtrlMin);
@@ -631,6 +632,18 @@ BOOL CemuleApp::InitInstance()
 			// No need to exit eMule, it will most likely work as expected but it will have some GUI glitches here and there..
 		}
 	}
+	*/
+	switch (thePrefs.GetWindowsVersion()) {
+	case _WINVER_2K_:
+		m_ullComCtrlVer = MAKEDLLVERULL(5, 81, 0, 0);
+		break;
+	case _WINVER_XP_:
+	case _WINVER_2003_:
+		m_ullComCtrlVer = MAKEDLLVERULL(6, 0, 0, 0);
+		break;
+	default:  //Vista .. Win10
+		m_ullComCtrlVer = MAKEDLLVERULL(6, 16, 0, 0);
+	};
 
 	m_sizSmallSystemIcon.cx = GetSystemMetrics(SM_CXSMICON);
 	m_sizSmallSystemIcon.cy = GetSystemMetrics(SM_CYSMICON);
@@ -658,7 +671,7 @@ BOOL CemuleApp::InitInstance()
 /*
 #if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900
 */
-#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900 || _MFC_VER==0x0A00
+#if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900 || _MFC_VER>=0x0A00
 //MORPH END   - Changed by Stulle, Visual Studio 2010 Compatibility
 	atexit(__AfxSocketTerm);
 #else
