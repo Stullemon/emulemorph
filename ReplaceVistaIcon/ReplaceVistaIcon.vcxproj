@@ -14,7 +14,7 @@
     <ProjectGuid>{58A54F98-FF3F-472F-9282-DA411EE850A2}</ProjectGuid>
     <RootNamespace>ReplaceVistaIcon</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <ProjectName>ReplaceVistaIcon_vc100</ProjectName>
+    <ProjectName>ReplaceVistaIcon</ProjectName>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
