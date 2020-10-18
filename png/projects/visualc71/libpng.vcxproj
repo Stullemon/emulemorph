@@ -92,7 +92,7 @@
       <CompileAs>Default</CompileAs>
     </ClCompile>
     <Lib>
-      <OutputFile>$(OutDir)libpngd.lib</OutputFile>
+      <OutputFile>$(OutDir)libpng.lib</OutputFile>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -139,9 +139,8 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\..\zlib\zlib100.vcxproj">
+    <ProjectReference Include="..\..\..\zlib\zlib.vcxproj">
       <Project>{5c2d7860-d1ee-4d75-b42b-ee548ad6e9f9}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
