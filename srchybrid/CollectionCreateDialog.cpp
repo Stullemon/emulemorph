@@ -312,7 +312,7 @@ void CCollectionCreateDialog::OnBnClickedOk()
 				RSASSA_PKCS1v15_SHA_Verifier pubkey(*pSignkey);
 				byte abyMyPublicKey[1000];
 				ArraySink asink(abyMyPublicKey, 1000);
-				pubkey.DEREncode(asink);
+				pubkey.GetMaterial().Save(asink);
 				int nLen = asink.TotalPutLength();
 				asink.MessageEnd();
 				m_pCollection->SetCollectionAuthorKey(abyMyPublicKey, nLen);

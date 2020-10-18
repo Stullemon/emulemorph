@@ -1,0 +1,4 @@
+[submodule "cryptopp"]
+	path = cryptopp
+	url = https://github.com/Stullemon/cryptopp.git
+	branch = lastrelease

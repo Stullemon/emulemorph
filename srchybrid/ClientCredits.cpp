@@ -897,7 +897,7 @@ void CClientCreditsList::InitalizeCrypting()
 		// calculate and store public key
 		RSASSA_PKCS1v15_SHA_Verifier pubkey(*m_pSignkey);
 		ArraySink asink(m_abyMyPublicKey, 80);
-		pubkey.DEREncode(asink);
+		pubkey.GetMaterial().Save(asink);
 		m_nMyPublicKeyLen = (uint8)asink.TotalPutLength();
 		asink.MessageEnd();
 	}
@@ -1065,7 +1065,7 @@ bool CClientCreditsList::Debug_CheckCrypting()
 
 	byte abyPublicKey[80];
 	ArraySink asink(abyPublicKey, 80);
-	pub.DEREncode(asink);
+	pub.GetMaterial().Save(asink);
 	uint8 PublicKeyLen = (uint8)asink.TotalPutLength();
 	asink.MessageEnd();
 	uint32 challenge = rand();
