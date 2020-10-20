@@ -1,4 +1,4 @@
 **/.vs/*
-**/*Debug/*
-**/*Release/*
+**/*Debug*/*
+**/*Release*/*
 *.user

@@ -1263,8 +1263,8 @@ del $(IntDir)emule.obj
     <ProjectReference Include="..\id3lib\id3lib.vcxproj">
       <Project>{119fb498-e3ac-49a5-a310-20e8b466b413}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\png\projects\visualc71\libpng.vcxproj">
-      <Project>{3e1649fa-0b0f-460d-9ae4-7b702737b13d}</Project>
+    <ProjectReference Include="..\png\projects\vstudio\libpng\libpng.vcxproj">
+      <Project>{d6973076-9317-4ef2-a0b8-b7a18ac0713e}</Project>
     </ProjectReference>
     <ProjectReference Include="..\ReplaceVistaIcon\ReplaceVistaIcon.vcxproj">
       <Project>{58a54f98-ff3f-472f-9282-da411ee850a2}</Project>

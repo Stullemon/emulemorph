@@ -6,3 +6,7 @@
 	path = zlib
 	url = https://github.com/Stullemon/zlib.git
 	branch = emule
+[submodule "png"]
+	path = png
+	url = https://github.com/Stullemon/libpng.git
+	branch = emule
