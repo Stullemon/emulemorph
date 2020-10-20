@@ -16,7 +16,9 @@
 //Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 #pragma once
 
+#if ZLIB_VERNUM < 0x1260
 typedef void* gzFile;
+#endif
 
 class CGZIPFile
 {

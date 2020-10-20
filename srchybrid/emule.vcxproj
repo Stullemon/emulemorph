@@ -1272,8 +1272,8 @@ del $(IntDir)emule.obj
     <ProjectReference Include="..\ResizableLib\ResizableLib.vcxproj">
       <Project>{a5743026-de7a-4c3d-86ea-46d6b6847f14}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\zlib\zlib.vcxproj">
-      <Project>{5c2d7860-d1ee-4d75-b42b-ee548ad6e9f9}</Project>
+    <ProjectReference Include="..\zlib\contrib\vstudio\vc14\zlibstat.vcxproj">
+      <Project>{745dec58-ebb3-47a9-a9b8-4c6627c01bf8}</Project>
     </ProjectReference>
     <ProjectReference Include="CxImage\cximage.vcxproj">
       <Project>{8fec2660-7f95-4c2e-8747-36176e1fcf82}</Project>
