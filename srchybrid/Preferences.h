@@ -2000,7 +2000,7 @@ public:
 
 	// Mighty Knife: Community visualization, report hashing files, Log friendlist activities
 	static	CString GetCommunityName ()						{ return m_sCommunityName; }
-	static	void	SetCommunityName (CString _CommName)	{ _stprintf(m_sCommunityName,_T("%s"),_CommName); }
+	static	void	SetCommunityName (CString _CommName)	{ _stprintf(m_sCommunityName,_T("%s"), (LPCWSTR)_CommName); }
 	static	bool	IsCommunityEnabled()					{ return m_sCommunityName [0] != '\0' ? true : false; }
 	static	bool    GetReportHashingFiles ()				{ return m_bReportHashingFiles; }
 	static	void	SetReportHashingFiles (bool _b)			{ m_bReportHashingFiles = _b; }
@@ -2016,9 +2016,9 @@ public:
 	static	bool    GetCRC32ForceAdding ()					{ return m_bCRC32ForceAdding; }
 	static	void	SetCRC32ForceAdding (bool _b)			{ m_bCRC32ForceAdding = _b; }
 	static	CString GetCRC32Prefix ()						{ return m_sCRC32Prefix; }
-	static	void	SetCRC32Prefix (CString _s)				{ _stprintf (m_sCRC32Prefix,_T("%s"),_s); }
+	static	void	SetCRC32Prefix (CString _s)				{ _stprintf (m_sCRC32Prefix,_T("%s"), (LPCWSTR)_s); }
 	static	CString GetCRC32Suffix ()						{ return m_sCRC32Suffix; }
-	static	void	SetCRC32Suffix (CString _s)				{ _stprintf (m_sCRC32Suffix,_T("%s"),_s); }
+	static	void	SetCRC32Suffix (CString _s)				{ _stprintf (m_sCRC32Suffix,_T("%s"), (LPCWSTR)_s); }
 	// [end] Mighty Knife
 
 	// Mighty Knife: Simple cleanup options
@@ -2156,7 +2156,7 @@ public:
 
 	//MORPH START - Added by SiRoB / Commander, Wapserver [emulEspaña]
 	static CString	GetWapTemplate()				{ return CString(m_sWapTemplateFile);}
-	static void		SetWapTemplate(CString in)		{ _stprintf(m_sWapTemplateFile,_T("%s"),in);}
+	static void		SetWapTemplate(CString in)		{ _stprintf(m_sWapTemplateFile,_T("%s"), (LPCWSTR)in);}
 	static bool		GetWapServerEnabled()			{ return m_bWapEnabled; }
 	static void		SetWapServerEnabled(bool on)	{ m_bWapEnabled=on; }
 	static uint16	GetWapPort()					{ return m_nWapPort; }

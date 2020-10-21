@@ -18,13 +18,13 @@
 
 class Packet;
 
-typedef enum EHttpSocketState
+typedef enum
 {
 	HttpStateUnknown = 0,
 	HttpStateRecvExpected,
 	HttpStateRecvHeaders,
 	HttpStateRecvBody
-};
+} EHttpSocketState;
 
 ///////////////////////////////////////////////////////////////////////////////
 // CHttpClientReqSocket

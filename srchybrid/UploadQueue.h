@@ -134,7 +134,7 @@ private:
 	//MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
 	// By BadWolf - Accurate Speed Measurement
-	typedef struct TransferredData {
+	struct TransferredData {
 		uint64	datalen;
 		DWORD	timestamp;
 	};

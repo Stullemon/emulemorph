@@ -212,7 +212,7 @@ private:
 	uint32		m_nFailedUDPFileReasks;
 
 	// By BadWolf - Accurate Speed Measurement
-	typedef struct TransferredData {
+	struct TransferredData {
 		uint32	datalen;
 		DWORD	timestamp;
 	};

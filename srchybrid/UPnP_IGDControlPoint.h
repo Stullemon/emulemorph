@@ -101,7 +101,7 @@ public:
 		}
 	};
 
-	typedef struct UPNP_DEVICE{
+	struct UPNP_DEVICE{
 		//Commented for a possible future use.
 		/*
 		UPNP_INFO_LIST	infoList;
@@ -131,7 +131,7 @@ public:
 		UNAT_UDP						// UDP Protocol
 	} UPNPNAT_PROTOCOL;
 
-	typedef struct UPNPNAT_MAPPING{
+	struct UPNPNAT_MAPPING{
 		WORD internalPort;				// Port mapping internal port
 		WORD externalPort;				// Port mapping external port
 		UPNPNAT_PROTOCOL protocol;		// Protocol-> TCP (UPNPNAT_PROTOCOL:UNAT_TCP) || UDP (UPNPNAT_PROTOCOL:UNAT_UDP)
@@ -139,7 +139,7 @@ public:
 		bool removeAtEnd;				// Remove port mapping on close?
 	};
 
-	typedef struct UPNPNAT_FULLMAPPING{
+	struct UPNPNAT_FULLMAPPING{
 		WORD internalPort;				// Port mapping internal port
 		WORD externalPort;				// Port mapping external port
 		UPNPNAT_PROTOCOL protocol;		// Protocol-> TCP (UPNPNAT_PROTOCOL:UNAT_TCP) || UDP (UPNPNAT_PROTOCOL:UNAT_UDP)
@@ -171,7 +171,7 @@ private:
 		UPNPNAT_ACTION_DELETE
 	} UPNPNAT_ACTIONTYPE;
 
-	typedef struct UPNPNAT_ACTIONPARAM {
+	struct UPNPNAT_ACTIONPARAM {
 		UPNPNAT_ACTIONTYPE type;
 		UPNP_SERVICE srv;
 		UPNPNAT_MAPPING mapping;

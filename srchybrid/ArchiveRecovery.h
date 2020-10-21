@@ -28,8 +28,6 @@ struct Gap_Struct;
 
 #define RAR_HEAD_FILE 0x74
 
-#define LODWORD(l)           ((DWORD)(((LONG64)(l)) & 0xffffffff))
-
 #pragma pack(1)
 struct ZIP_Entry
 {

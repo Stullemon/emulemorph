@@ -166,7 +166,7 @@ public:
 	static DWORD	starttime;
 
 private:
-	typedef struct TransferredData {
+	struct TransferredData {
 		uint32	datalen;
 		DWORD	timestamp;
 	};

@@ -842,7 +842,7 @@ protected:
 
 	/*ZZ*/DWORD       m_dwLastCheckedForEvictTick;
 
-	typedef struct TransferredData {
+	struct TransferredData {
 		UINT	datalen;
 		DWORD	timestamp;
 	};
