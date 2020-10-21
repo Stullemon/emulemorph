@@ -1,6 +1,6 @@
 // xImaInt.cpp : interpolation functions
-/* 02/2004 - Branko Brevensek 
- * CxImage version 6.0.0 02/Feb/2008 - Davide Pizzolato - www.xdp.it
+/* 02/2004 - Branko Brevensek
+ * CxImage version 7.0.3 08/Feb/2019 - Davide Pizzolato - www.xdp.it
  */
 
 #include "ximage.h"
@@ -15,12 +15,12 @@
  *
  *  \param x, y - coordinates of pixel
  *  \param ofMethod - overflow method
- * 
+ *
  *  \return x, y - new coordinates (pixel (x,y) now lies inside image)
  *
  *  \author ***bd*** 2.2004
  */
-void CxImage::OverflowCoordinates(long &x, long &y, OverflowMethod const ofMethod)
+void CxImage::OverflowCoordinates(int32_t &x, int32_t &y, OverflowMethod const ofMethod)
 {
   if (IsInside(x,y)) return;  //if pixel is within bounds, no change
   switch (ofMethod) {
@@ -50,7 +50,7 @@ void CxImage::OverflowCoordinates(long &x, long &y, OverflowMethod const ofMetho
 
 ////////////////////////////////////////////////////////////////////////////////
 /**
- * See OverflowCoordinates for integer version 
+ * See OverflowCoordinates for integer version
  * \author ***bd*** 2.2004
  */
 void CxImage::OverflowCoordinates(float &x, float &y, OverflowMethod const ofMethod)
@@ -99,10 +99,10 @@ void CxImage::OverflowCoordinates(float &x, float &y, OverflowMethod const ofMet
  * \return color : color of pixel
  * \author ***bd*** 2.2004
  */
-RGBQUAD CxImage::GetPixelColorWithOverflow(long x, long y, OverflowMethod const ofMethod, RGBQUAD* const rplColor)
+RGBQUAD CxImage::GetPixelColorWithOverflow(int32_t x, int32_t y, OverflowMethod const ofMethod, RGBQUAD* const rplColor)
 {
   RGBQUAD color;          //color to return
-  if ((!IsInside(x,y)) || pDib==NULL) {     //is pixel within bouns?:
+  if ((!IsInside(x,y)) || pDib==NULL) {     //is pixel within bounds?:
     //pixel is out of bounds or no DIB
     if (rplColor!=NULL)
       color=*rplColor;
@@ -130,7 +130,7 @@ RGBQUAD CxImage::GetPixelColorWithOverflow(long x, long y, OverflowMethod const 
       case OM_BACKGROUND:
 		  //return background color (if it exists, otherwise input value)
 		  if (info.nBkgndIndex >= 0) {
-			  if (head.biBitCount<24) color = GetPaletteColor((BYTE)info.nBkgndIndex);
+			  if (head.biBitCount<24) color = GetPaletteColor((uint8_t)info.nBkgndIndex);
 			  else color = info.nBkgndColor;
 		  }//if
 		  return color;
@@ -162,14 +162,14 @@ RGBQUAD CxImage::GetPixelColorWithOverflow(long x, long y, OverflowMethod const 
  *           as (1,1). Center of first pixel is at (0,0) and center of pixel right to it is (1,0).
  *           (0.5,0) is half way between these two pixels.
  *  \param inMethod - interpolation (reconstruction) method (kernel) to use:
- *    - IM_NEAREST_NEIGHBOUR - returns colour of nearest lying pixel (causes stairy look of 
+ *    - IM_NEAREST_NEIGHBOUR - returns colour of nearest lying pixel (causes stairy look of
  *                            processed images)
  *    - IM_BILINEAR - interpolates colour from four neighbouring pixels (softens image a bit)
  *    - IM_BICUBIC - interpolates from 16 neighbouring pixels (can produce "halo" artifacts)
- *    - IM_BICUBIC2 - interpolates from 16 neighbouring pixels (perhaps a bit less halo artifacts 
+ *    - IM_BICUBIC2 - interpolates from 16 neighbouring pixels (perhaps a bit less halo artifacts
                      than IM_BICUBIC)
  *    - IM_BSPLINE - interpolates from 16 neighbouring pixels (softens image, washes colours)
- *                  (As far as I know, image should be prefiltered for this method to give 
+ *                  (As far as I know, image should be prefiltered for this method to give
  *                   good results... some other time :) )
  *                  This method uses bicubic interpolation kernel from CXImage 5.99a and older
  *                  versions.
@@ -180,23 +180,23 @@ RGBQUAD CxImage::GetPixelColorWithOverflow(long x, long y, OverflowMethod const 
  *              (and other modes if colour can't calculated in a specified way)
  *
  *  \return interpolated color value (including interpolated alpha value, if image has alpha layer)
- * 
+ *
  *  \author ***bd*** 2.2004
  */
 RGBQUAD CxImage::GetPixelColorInterpolated(
-  float x,float y, 
-  InterpolationMethod const inMethod, 
-  OverflowMethod const ofMethod, 
+  float x,float y,
+  InterpolationMethod const inMethod,
+  OverflowMethod const ofMethod,
   RGBQUAD* const rplColor)
 {
   //calculate nearest pixel
-  int xi=(int)(x); if (x<0) xi--;   //these replace (incredibly slow) floor (Visual c++ 2003, AMD Athlon)
-  int yi=(int)(y); if (y<0) yi--;
+  int32_t xi=(int32_t)(x); if (x<0) xi--;   //these replace (incredibly slow) floor (Visual c++ 2003, AMD Athlon)
+  int32_t yi=(int32_t)(y); if (y<0) yi--;
   RGBQUAD color;                    //calculated colour
 
   switch (inMethod) {
     case IM_NEAREST_NEIGHBOUR:
-      return GetPixelColorWithOverflow((long)(x+0.5f), (long)(y+0.5f), ofMethod, rplColor);
+      return GetPixelColorWithOverflow((int32_t)(x+0.5f), (int32_t)(y+0.5f), ofMethod, rplColor);
     default: {
       //IM_BILINEAR: bilinear interpolation
       if (xi<-1 || xi>=head.biWidth || yi<-1 || yi>=head.biHeight) {  //all 4 points are outside bounds?:
@@ -207,35 +207,35 @@ RGBQUAD CxImage::GetPixelColorInterpolated(
           default:
             //recalculate coordinates and use faster method later on
             OverflowCoordinates(x,y,ofMethod);
-            xi=(int)(x); if (x<0) xi--;   //x and/or y have changed ... recalculate xi and yi
-            yi=(int)(y); if (y<0) yi--;
+            xi=(int32_t)(x); if (x<0) xi--;   //x and/or y have changed ... recalculate xi and yi
+            yi=(int32_t)(y); if (y<0) yi--;
         }//switch
       }//if
       //get four neighbouring pixels
       if ((xi+1)<head.biWidth && xi>=0 && (yi+1)<head.biHeight && yi>=0 && head.biClrUsed==0) {
         //all pixels are inside RGB24 image... optimize reading (and use fixed point arithmetic)
-        WORD wt1=(WORD)((x-xi)*256.0f), wt2=(WORD)((y-yi)*256.0f);
-        WORD wd=wt1*wt2>>8;
-        WORD wb=wt1-wd;
-        WORD wc=wt2-wd;
-        WORD wa=256-wt1-wc;
-        WORD wrr,wgg,wbb;
-        BYTE *pxptr=(BYTE*)info.pImage+yi*info.dwEffWidth+xi*3;
+        uint16_t wt1=(uint16_t)((x-xi)*256.0f), wt2=(uint16_t)((y-yi)*256.0f);
+        uint16_t wd=(wt1*wt2)>>8;
+        uint16_t wb=wt1-wd;
+        uint16_t wc=wt2-wd;
+        uint16_t wa=256-wt1-wc;
+        uint16_t wrr,wgg,wbb;
+        uint8_t *pxptr=(uint8_t*)info.pImage+yi*info.dwEffWidth+xi*3;
         wbb=wa*(*pxptr++); wgg=wa*(*pxptr++); wrr=wa*(*pxptr++);
         wbb+=wb*(*pxptr++); wgg+=wb*(*pxptr++); wrr+=wb*(*pxptr);
         pxptr+=(info.dwEffWidth-5); //move to next row
-        wbb+=wc*(*pxptr++); wgg+=wc*(*pxptr++); wrr+=wc*(*pxptr++); 
-        wbb+=wd*(*pxptr++); wgg+=wd*(*pxptr++); wrr+=wd*(*pxptr); 
-        color.rgbRed=(BYTE) (wrr>>8); color.rgbGreen=(BYTE) (wgg>>8); color.rgbBlue=(BYTE) (wbb>>8);
+        wbb+=wc*(*pxptr++); wgg+=wc*(*pxptr++); wrr+=wc*(*pxptr++);
+        wbb+=wd*(*pxptr++); wgg+=wd*(*pxptr++); wrr+=wd*(*pxptr);
+        color.rgbRed=(uint8_t) (wrr>>8); color.rgbGreen=(uint8_t) (wgg>>8); color.rgbBlue=(uint8_t) (wbb>>8);
 #if CXIMAGE_SUPPORT_ALPHA
         if (pAlpha) {
-          WORD waa;
+          uint16_t waa;
           //image has alpha layer... we have to do the same for alpha data
           pxptr=AlphaGetPointer(xi,yi);                           //pointer to first byte
           waa=wa*(*pxptr++); waa+=wb*(*pxptr);   //first two pixels
           pxptr+=(head.biWidth-1);                                //move to next row
           waa+=wc*(*pxptr++); waa+=wd*(*pxptr);   //and second row pixels
-          color.rgbReserved=(BYTE) (waa>>8);
+          color.rgbReserved=(uint8_t) (waa>>8);
         } else
 #endif
 		{ //Alpha not supported or no alpha at all
@@ -255,21 +255,18 @@ RGBQUAD CxImage::GetPixelColorInterpolated(
         rgb12=GetPixelColorWithOverflow(xi, yi+1, ofMethod, rplColor);
         rgb22=GetPixelColorWithOverflow(xi+1, yi+1, ofMethod, rplColor);
         //calculate linear interpolation
-        color.rgbRed=(BYTE) (a*rgb11.rgbRed+b*rgb21.rgbRed+c*rgb12.rgbRed+d*rgb22.rgbRed);
-        color.rgbGreen=(BYTE) (a*rgb11.rgbGreen+b*rgb21.rgbGreen+c*rgb12.rgbGreen+d*rgb22.rgbGreen);
-        color.rgbBlue=(BYTE) (a*rgb11.rgbBlue+b*rgb21.rgbBlue+c*rgb12.rgbBlue+d*rgb22.rgbBlue);
+        color.rgbRed=(uint8_t) (a*rgb11.rgbRed+b*rgb21.rgbRed+c*rgb12.rgbRed+d*rgb22.rgbRed);
+        color.rgbGreen=(uint8_t) (a*rgb11.rgbGreen+b*rgb21.rgbGreen+c*rgb12.rgbGreen+d*rgb22.rgbGreen);
+        color.rgbBlue=(uint8_t) (a*rgb11.rgbBlue+b*rgb21.rgbBlue+c*rgb12.rgbBlue+d*rgb22.rgbBlue);
 #if CXIMAGE_SUPPORT_ALPHA
-        if (AlphaIsValid())
-			color.rgbReserved=(BYTE) (a*rgb11.rgbReserved+b*rgb21.rgbReserved+c*rgb12.rgbReserved+d*rgb22.rgbReserved);
-		else
+		color.rgbReserved=(uint8_t) (a*rgb11.rgbReserved+b*rgb21.rgbReserved+c*rgb12.rgbReserved+d*rgb22.rgbReserved);
+#else
+		color.rgbReserved = 0;
 #endif
-		{ //Alpha not supported or no alpha at all
-			color.rgbReserved = 0;
-		}
         return color;
       }//if
     }//default
-    case IM_BICUBIC: 
+    case IM_BICUBIC:
     case IM_BICUBIC2:
     case IM_BSPLINE:
 	case IM_BOX:
@@ -290,22 +287,21 @@ RGBQUAD CxImage::GetPixelColorInterpolated(
           case OM_COLOR: case OM_TRANSPARENT: case OM_BACKGROUND:
             //we don't need to interpolate anything with all points outside in this case
             return GetPixelColorWithOverflow(-999, -999, ofMethod, rplColor);
-            break;
           default:
             //recalculate coordinates and use faster method later on
             OverflowCoordinates(x,y,ofMethod);
-            xi=(int)(x); if (x<0) xi--;   //x and/or y have changed ... recalculate xi and yi
-            yi=(int)(y); if (y<0) yi--;
+            xi=(int32_t)(x); if (x<0) xi--;   //x and/or y have changed ... recalculate xi and yi
+            yi=(int32_t)(y); if (y<0) yi--;
         }//switch
       }//if
 
       //some variables needed from here on
-      int xii,yii;                      //x any y integer indexes for loops
+      int32_t xii,yii;                  //x any y integer indexes for loops
       float kernel, kernelyc;           //kernel cache
       float kernelx[12], kernely[4];    //precalculated kernel values
       float rr,gg,bb,aa;                //accumulated color values
       //calculate multiplication factors for all pixels
-	  int i;
+	  int32_t i;
       switch (inMethod) {
         case IM_BICUBIC:
           for (i=0; i<4; i++) {
@@ -397,18 +393,22 @@ RGBQUAD CxImage::GetPixelColorInterpolated(
             kernely[i]=KernelPower((float)(yi+i-1-y));
           }//for i
           break;
+        default: //might be throwing an exception
+          for (i=0; i<4; ++i) {
+            kernelx[i] = 0;
+            kernely[i] = 0;
+          }//for i
       }//switch
       rr=gg=bb=aa=0;
       if (((xi+2)<head.biWidth) && xi>=1 && ((yi+2)<head.biHeight) && (yi>=1) && !IsIndexed()) {
         //optimized interpolation (faster pixel reads) for RGB24 images with all pixels inside bounds
-        BYTE *pxptr, *pxptra;
         for (yii=yi-1; yii<yi+3; yii++) {
-          pxptr=(BYTE *)BlindGetPixelPointer(xi-1, yii);    //calculate pointer to first byte in row
+          uint8_t *pxptr=(uint8_t *)BlindGetPixelPointer(xi-1, yii);    //calculate pointer to first byte in row
           kernelyc=kernely[yii-(yi-1)];
 #if CXIMAGE_SUPPORT_ALPHA
           if (AlphaIsValid()) {
-            //alpha is supported and valid (optimized bicubic int. for image with alpha)
-            pxptra=AlphaGetPointer(xi-1, yii);
+            //alpha is supported and valid (optimized bicubic int32_t. for image with alpha)
+            uint8_t *pxptra=AlphaGetPointer(xi-1, yii);
             kernel=kernelyc*kernelx[0];
             bb+=kernel*(*pxptr++); gg+=kernel*(*pxptr++); rr+=kernel*(*pxptr++); aa+=kernel*(*pxptra++);
             kernel=kernelyc*kernelx[1];
@@ -419,7 +419,7 @@ RGBQUAD CxImage::GetPixelColorInterpolated(
             bb+=kernel*(*pxptr++); gg+=kernel*(*pxptr++); rr+=kernel*(*pxptr); aa+=kernel*(*pxptra);
           } else
 #endif
-          //alpha not supported or valid (optimized bicubic int. for no alpha channel)
+          //alpha not supported or valid (optimized bicubic int32_t. for no alpha channel)
           {
             kernel=kernelyc*kernelx[0];
             bb+=kernel*(*pxptr++); gg+=kernel*(*pxptr++); rr+=kernel*(*pxptr++);
@@ -449,17 +449,14 @@ RGBQUAD CxImage::GetPixelColorInterpolated(
         }//yii
       }//if
       //for all colors, clip to 0..255 and assign to RGBQUAD
-      if (rr>255) rr=255; if (rr<0) rr=0; color.rgbRed=(BYTE) rr;
-      if (gg>255) gg=255; if (gg<0) gg=0; color.rgbGreen=(BYTE) gg;
-      if (bb>255) bb=255; if (bb<0) bb=0; color.rgbBlue=(BYTE) bb;
+      if (rr>255) rr=255; if (rr<0) rr=0; color.rgbRed=(uint8_t) rr;
+      if (gg>255) gg=255; if (gg<0) gg=0; color.rgbGreen=(uint8_t) gg;
+      if (bb>255) bb=255; if (bb<0) bb=0; color.rgbBlue=(uint8_t) bb;
 #if CXIMAGE_SUPPORT_ALPHA
-      if (AlphaIsValid()) {
-        if (aa>255) aa=255; if (aa<0) aa=0; color.rgbReserved=(BYTE) aa;
-      } else
+      if (aa>255) aa=255; if (aa<0) aa=0; color.rgbReserved=(uint8_t) aa;
+#else
+	  color.rgbReserved = 0;
 #endif
-		{ //Alpha not supported or no alpha at all
-			color.rgbReserved = 0;
-		}
       return color;
     case IM_LANCZOS:
       //lanczos window (16*16) sinc interpolation
@@ -469,12 +466,11 @@ RGBQUAD CxImage::GetPixelColorInterpolated(
           case OM_COLOR: case OM_TRANSPARENT: case OM_BACKGROUND:
             //we don't need to interpolate anything with all points outside in this case
             return GetPixelColorWithOverflow(-999, -999, ofMethod, rplColor);
-            break;
           default:
             //recalculate coordinates and use faster method later on
             OverflowCoordinates(x,y,ofMethod);
-            xi=(int)(x); if (x<0) xi--;   //x and/or y have changed ... recalculate xi and yi
-            yi=(int)(y); if (y<0) yi--;
+            xi=(int32_t)(x); if (x<0) xi--;   //x and/or y have changed ... recalculate xi and yi
+            yi=(int32_t)(y); if (y<0) yi--;
         }//switch
       }//if
 
@@ -483,14 +479,13 @@ RGBQUAD CxImage::GetPixelColorInterpolated(
 
       if (((xi+6)<head.biWidth) && ((xi-5)>=0) && ((yi+6)<head.biHeight) && ((yi-5)>=0) && !IsIndexed()) {
         //optimized interpolation (faster pixel reads) for RGB24 images with all pixels inside bounds
-        BYTE *pxptr, *pxptra;
         for (yii=yi-5; yii<yi+7; yii++) {
-          pxptr=(BYTE *)BlindGetPixelPointer(xi-5, yii);    //calculate pointer to first byte in row
+          uint8_t *pxptr=(uint8_t *)BlindGetPixelPointer(xi-5, yii);    //calculate pointer to first byte in row
           kernelyc=KernelLanczosSinc((float)(yii-y),6.0f);
 #if CXIMAGE_SUPPORT_ALPHA
           if (AlphaIsValid()) {
             //alpha is supported and valid
-            pxptra=AlphaGetPointer(xi-1, yii);
+            uint8_t *pxptra=AlphaGetPointer(xi-1, yii);
             for (xii=0; xii<12; xii++) {
               kernel=kernelyc*kernelx[xii];
               bb+=kernel*(*pxptr++); gg+=kernel*(*pxptr++); rr+=kernel*(*pxptr++); aa+=kernel*(*pxptra++);
@@ -523,17 +518,14 @@ RGBQUAD CxImage::GetPixelColorInterpolated(
         }//yii
       }//if
       //for all colors, clip to 0..255 and assign to RGBQUAD
-      if (rr>255) rr=255; if (rr<0) rr=0; color.rgbRed=(BYTE) rr;
-      if (gg>255) gg=255; if (gg<0) gg=0; color.rgbGreen=(BYTE) gg;
-      if (bb>255) bb=255; if (bb<0) bb=0; color.rgbBlue=(BYTE) bb;
+      if (rr>255) rr=255; if (rr<0) rr=0; color.rgbRed=(uint8_t) rr;
+      if (gg>255) gg=255; if (gg<0) gg=0; color.rgbGreen=(uint8_t) gg;
+      if (bb>255) bb=255; if (bb<0) bb=0; color.rgbBlue=(uint8_t) bb;
 #if CXIMAGE_SUPPORT_ALPHA
-      if (AlphaIsValid()) {
-        if (aa>255) aa=255; if (aa<0) aa=0; color.rgbReserved=(BYTE) aa;   
-      } else
+      if (aa>255) aa=255; if (aa<0) aa=0; color.rgbReserved=(uint8_t) aa;
+#else
+	  color.rgbReserved = 0;
 #endif
-		{ //Alpha not supported or no alpha at all
-			color.rgbReserved = 0;
-		}
       return color;
   }//switch
 }
@@ -553,12 +545,12 @@ void CxImage::AddAveragingCont(RGBQUAD const &color, float const surf, float &rr
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
- * This method is similar to GetPixelColorInterpolated, but this method also properly handles 
+ * This method is similar to GetPixelColorInterpolated, but this method also properly handles
  * subsampling.
- * If you need to sample original image with interval of more than 1 pixel (as when shrinking an image), 
+ * If you need to sample original image with interval of more than 1 pixel (as when shrinking an image),
  * you should use this method instead of GetPixelColorInterpolated or aliasing will occur.
  * When area width and height are both less than pixel, this method gets pixel color by interpolating
- * color of frame center with selected (inMethod) interpolation by calling GetPixelColorInterpolated. 
+ * color of frame center with selected (inMethod) interpolation by calling GetPixelColorInterpolated.
  * If width and height are more than 1, method calculates color by averaging color of pixels within area.
  * Interpolation method is not used in this case. Pixel color is interpolated by averaging instead.
  * If only one of both is more than 1, method uses combination of interpolation and averaging.
@@ -566,7 +558,7 @@ void CxImage::AddAveragingCont(RGBQUAD const &color, float const surf, float &rr
  * between IM_BILINEAR (perhaps best for this case) and better methods. IM_NEAREST_NEIGHBOUR again
  * leads to aliasing artifacts.
  * This method is a bit slower than GetPixelColorInterpolated and when aliasing is not a problem, you should
- * simply use the later. 
+ * simply use the later.
  *
  * \param  xc, yc - center of (rectangular) area
  * \param  w, h - width and height of area
@@ -577,31 +569,30 @@ void CxImage::AddAveragingCont(RGBQUAD const &color, float const surf, float &rr
  * \author ***bd*** 2.2004
  */
 RGBQUAD CxImage::GetAreaColorInterpolated(
-  float const xc, float const yc, float const w, float const h, 
-  InterpolationMethod const inMethod, 
-  OverflowMethod const ofMethod, 
+  float const xc, float const yc, float const w, float const h,
+  InterpolationMethod const inMethod,
+  OverflowMethod const ofMethod,
   RGBQUAD* const rplColor)
 {
 	RGBQUAD color;      //calculated colour
-	
+
 	if (h<=1 && w<=1) {
 		//both width and height are less than one... we will use interpolation of center point
 		return GetPixelColorInterpolated(xc, yc, inMethod, ofMethod, rplColor);
 	} else {
 		//area is wider and/or taller than one pixel:
 		CxRect2 area(xc-w/2.0f, yc-h/2.0f, xc+w/2.0f, yc+h/2.0f);   //area
-		int xi1=(int)(area.botLeft.x+0.49999999f);                //low x
-		int yi1=(int)(area.botLeft.y+0.49999999f);                //low y
-		
-		
-		int xi2=(int)(area.topRight.x+0.5f);                      //top x
-		int yi2=(int)(area.topRight.y+0.5f);                      //top y (for loops)
-		
+		int32_t xi1=(int32_t)(area.botLeft.x+0.49999999f);                //low x
+		int32_t yi1=(int32_t)(area.botLeft.y+0.49999999f);                //low y
+
+
+		int32_t xi2=(int32_t)(area.topRight.x+0.5f);                      //top x
+		int32_t yi2=(int32_t)(area.topRight.y+0.5f);                      //top y (for loops)
+
 		float rr,gg,bb,aa;                                        //red, green, blue and alpha components
 		rr=gg=bb=aa=0;
-		int x,y;                                                  //loop counters
+		int32_t x,y;                                                  //loop counters
 		float s=0;                                                //surface of all pixels
-		float cps;                                                //surface of current crosssection
 		if (h>1 && w>1) {
 			//width and height of area are greater than one pixel, so we can employ "ordinary" averaging
 			CxRect2 intBL, intTR;     //bottom left and top right intersection
@@ -612,7 +603,7 @@ RGBQUAD CxImage::GetAreaColorInterpolated(
 			hBL=intBL.Height();           //height of bottom left...
 			wTR=intTR.Width();            //width of top right...
 			hTR=intTR.Height();           //height of top right...
-			
+
 			AddAveragingCont(GetPixelColorWithOverflow(xi1,yi1,ofMethod,rplColor), wBL*hBL, rr, gg, bb, aa);    //bottom left pixel
 			AddAveragingCont(GetPixelColorWithOverflow(xi2,yi1,ofMethod,rplColor), wTR*hBL, rr, gg, bb, aa);    //bottom right pixel
 			AddAveragingCont(GetPixelColorWithOverflow(xi1,yi2,ofMethod,rplColor), wBL*hTR, rr, gg, bb, aa);    //top left pixel
@@ -628,7 +619,7 @@ RGBQUAD CxImage::GetAreaColorInterpolated(
 				AddAveragingCont(GetPixelColorWithOverflow(xi2,y,ofMethod,rplColor), wTR, rr, gg, bb, aa);    //right column
 			}
 			for (y=yi1+1; y<yi2; y++) {
-				for (x=xi1+1; x<xi2; x++) { 
+				for (x=xi1+1; x<xi2; x++) {
 					color=GetPixelColorWithOverflow(x,y,ofMethod,rplColor);
 					rr+=color.rgbRed;
 					gg+=color.rgbGreen;
@@ -647,7 +638,7 @@ RGBQUAD CxImage::GetAreaColorInterpolated(
 					intersect=area.CrossSection(CxRect2(((float)x)-0.5f, ((float)y)-0.5f, ((float)x)+0.5f, ((float)y)+0.5f));
 					center=intersect.Center();
 					color=GetPixelColorInterpolated(center.x, center.y, inMethod, ofMethod, rplColor);
-					cps=intersect.Surface();
+					float cps=intersect.Surface();                      //surface of current crosssection
 					rr+=color.rgbRed*cps;
 					gg+=color.rgbGreen*cps;
 					bb+=color.rgbBlue*cps;
@@ -655,18 +646,18 @@ RGBQUAD CxImage::GetAreaColorInterpolated(
 					aa+=color.rgbReserved*cps;
 #endif
 				}//for x
-			}//for y      
+			}//for y
 		}//if
-		
+
 		s=area.Surface();
 		rr/=s; gg/=s; bb/=s; aa/=s;
-		if (rr>255) rr=255; if (rr<0) rr=0; color.rgbRed=(BYTE) rr;
-		if (gg>255) gg=255; if (gg<0) gg=0; color.rgbGreen=(BYTE) gg;
-		if (bb>255) bb=255; if (bb<0) bb=0; color.rgbBlue=(BYTE) bb;
+		if (rr>255) rr=255; if (rr<0) rr=0; color.rgbRed=(uint8_t) rr;
+		if (gg>255) gg=255; if (gg<0) gg=0; color.rgbGreen=(uint8_t) gg;
+		if (bb>255) bb=255; if (bb<0) bb=0; color.rgbBlue=(uint8_t) bb;
 #if CXIMAGE_SUPPORT_ALPHA
-		if (AlphaIsValid()) {
-			if (aa>255) aa=255; if (aa<0) aa=0; color.rgbReserved=(BYTE) aa;
-		}//if
+		if (aa>255) aa=255; if (aa<0) aa=0; color.rgbReserved=(uint8_t) aa;
+#else
+		color.rgbReserved = 0;
 #endif
 	}//if
 	return color;
@@ -678,13 +669,13 @@ float CxImage::KernelBSpline(const float x)
 	if (x>2.0f) return 0.0f;
 	// thanks to Kristian Kratzenstein
 	float a, b, c, d;
-	float xm1 = x - 1.0f; // Was calculatet anyway cause the "if((x-1.0f) < 0)"
+	float xm1 = x - 1.0f; // Was calculated anyway cause the "if((x-1.0f) < 0)"
 	float xp1 = x + 1.0f;
 	float xp2 = x + 2.0f;
 
 	if ((xp2) <= 0.0f) a = 0.0f; else a = xp2*xp2*xp2; // Only float, not float -> double -> float
 	if ((xp1) <= 0.0f) b = 0.0f; else b = xp1*xp1*xp1;
-	if (x <= 0) c = 0.0f; else c = x*x*x;  
+	if (x <= 0) c = 0.0f; else c = x*x*x;
 	if ((xm1) <= 0.0f) d = 0.0f; else d = xm1*xm1*xm1;
 
 	return (0.16666666666666666667f * (a - (4.0f * b) + (6.0f * c) - (4.0f * d)));
@@ -721,7 +712,7 @@ float CxImage::KernelLinear(const float t)
 //  if (0<=t && t<=1) return 1-t;
 //  if (-1<=t && t<0) return 1+t;
 //  return 0;
-	
+
 	//<Vladimír Kloucek>
 	if (t < -1.0f)
 		return 0.0f;
@@ -852,9 +843,9 @@ float CxImage::KernelBlackman(const float x)
 float CxImage::KernelBessel_J1(const float x)
 {
 	double p, q;
-	
-	register long i;
-	
+
+	register int32_t i;
+
 	static const double
 	Pone[] =
 	{
@@ -880,7 +871,7 @@ float CxImage::KernelBessel_J1(const float x)
 		0.1606931573481487801970916749e+4,
 		0.1e+1
 	};
-		
+
 	p = Pone[8];
 	q = Qone[8];
 	for (i=7; i >= 0; i--)
@@ -894,9 +885,9 @@ float CxImage::KernelBessel_J1(const float x)
 float CxImage::KernelBessel_P1(const float x)
 {
 	double p, q;
-	
-	register long i;
-	
+
+	register int32_t i;
+
 	static const double
 	Pone[] =
 	{
@@ -916,7 +907,7 @@ float CxImage::KernelBessel_P1(const float x)
 		0.2030775189134759322293574e+3,
 		0.1e+1
 	};
-		
+
 	p = Pone[5];
 	q = Qone[5];
 	for (i=4; i >= 0; i--)
@@ -930,9 +921,9 @@ float CxImage::KernelBessel_P1(const float x)
 float CxImage::KernelBessel_Q1(const float x)
 {
 	double p, q;
-	
-	register long i;
-	
+
+	register int32_t i;
+
 	static const double
 	Pone[] =
 	{
@@ -952,7 +943,7 @@ float CxImage::KernelBessel_Q1(const float x)
 		0.1038187585462133728776636e+3,
 		0.1e+1
 	};
-		
+
 	p = Pone[5];
 	q = Qone[5];
 	for (i=4; i >= 0; i--)
@@ -966,7 +957,7 @@ float CxImage::KernelBessel_Q1(const float x)
 float CxImage::KernelBessel_Order1(float x)
 {
 	float p, q;
-	
+
 	if (x == 0.0)
 		return (0.0f);
 	p = x;
@@ -1017,7 +1008,7 @@ float CxImage::KernelMitchell(const float x)
 #define KM_Q1 ((-12.0f * KM_B - 48.0f * KM_C) / 6.0f)
 #define KM_Q2 ((  6.0f * KM_B + 30.0f * KM_C) / 6.0f)
 #define KM_Q3 (( -1.0f * KM_B -  6.0f * KM_C) / 6.0f)
-	
+
 	if (x < -2.0)
 		return(0.0f);
 	if (x < -1.0)

@@ -45,16 +45,16 @@
 
 	c) Size
 
-	Although the filesize of a Metafile may be very small, it might
+	Although the file size of a Metafile may be very small, it might
 	produce a Bitmap with a bombastic size. Assume you have a Metafile
 	with an image size of 6000*4000, which contains just one Metafile
-	record ((e.g. a line from (0,0) to (6000, 4000)). The filesize
+	record ((e.g. a line from (0,0) to (6000, 4000)). The file size
 	of this Metafile would be let's say 100kB. If we convert it to
 	a 6000*4000 Bitmap with 24 Bits/Pixes, the Bitmap would consume
 	about 68MB of memory.
 
-	I have choosen, to limit the size of the Bitmap to max.
-	screensize, to avoid memory problems.
+	I have chosen, to limit the size of the Bitmap to max.
+	screen size, to avoid memory problems.
 
 	If you want something else,
 	modify #define XMF_MAXSIZE_CX / XMF_MAXSIZE_CY below
@@ -76,21 +76,21 @@ class CxImageWMF: public CxImage
 
 typedef struct tagRECT16
 {
-	short int	left;
-	short int	top;
-	short int	right;
-	short int	bottom;
+	int16_t	left;
+	int16_t	top;
+	int16_t	right;
+	int16_t	bottom;
 } RECT16;
 
 // taken from Windos 3.11 SDK Documentation (Programmer's Reference Volume 4: Resources)
 typedef struct tagMETAFILEHEADER
 {
-	DWORD	key;		// always 0x9ac6cdd7
-	WORD	reserved1;	// reserved = 0
+	uint32_t	key;		// always 0x9ac6cdd7
+	uint16_t	reserved1;	// reserved = 0
 	RECT16	bbox;		// bounding rectangle in metafile units as defined in "inch"
-	WORD	inch;		// number of metafile units per inch (should be < 1440)
-	DWORD	reserved2;	// reserved = 0
-	WORD	checksum;	// sum of the first 10 WORDS (using XOR operator)
+	uint16_t	inch;		// number of metafile units per inch (should be < 1440)
+	uint32_t	reserved2;	// reserved = 0
+	uint16_t	checksum;	// sum of the first 10 WORDS (using XOR operator)
 } METAFILEHEADER;
 
 #pragma pack()
@@ -98,8 +98,8 @@ typedef struct tagMETAFILEHEADER
 public:
 	CxImageWMF(): CxImage(CXIMAGE_FORMAT_WMF) { }
 
-	bool Decode(CxFile * hFile, long nForceWidth=0, long nForceHeight=0);
-	bool Decode(FILE *hFile, long nForceWidth=0, long nForceHeight=0)
+	bool Decode(CxFile * hFile, int32_t nForceWidth=0, int32_t nForceHeight=0);
+	bool Decode(FILE *hFile, int32_t nForceWidth=0, int32_t nForceHeight=0)
 			{ CxIOFile file(hFile); return Decode(&file,nForceWidth,nForceHeight); }
 
 #if CXIMAGE_SUPPORT_ENCODE
@@ -108,7 +108,7 @@ public:
 #endif // CXIMAGE_SUPPORT_ENCODE
 
 protected:
-	void ShrinkMetafile(int &cx, int &cy);
+	void ShrinkMetafile(int32_t &cx, int32_t &cy);
 	BOOL CheckMetafileHeader(METAFILEHEADER *pmetafileheader);
 	HENHMETAFILE ConvertWmfFiletoEmf(CxFile *pFile, METAFILEHEADER *pmetafileheader);
 	HENHMETAFILE ConvertEmfFiletoEmf(CxFile *pFile, ENHMETAHEADER *pemfh);

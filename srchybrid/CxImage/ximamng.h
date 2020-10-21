@@ -36,13 +36,13 @@ extern "C" {
 #include "../mng/libmng_error.h"
 }
 
-//unsigned long _stdcall RunMNGThread(void *lpParam);
+//uint32_t _stdcall RunMNGThread(void *lpParam);
 
 typedef struct tagmngstuff 
 {
 	CxFile		*file;
-	BYTE		*image;
-	BYTE		*alpha;
+	uint8_t		*image;
+	uint8_t		*alpha;
 	HANDLE		thread;
 	mng_uint32	delay;
 	mng_uint32  width;
@@ -52,7 +52,7 @@ typedef struct tagmngstuff
 	mng_bool	animation;
 	mng_bool	animation_enabled;
 	float		speed;
-	long		nBkgndIndex;
+	int32_t		nBkgndIndex;
 	RGBQUAD		nBkgndColor;
 } mngstuff;
 
@@ -73,13 +73,13 @@ public:
 	bool Save(const TCHAR * imageFileName){ return CxImage::Save(imageFileName,CXIMAGE_FORMAT_MNG);}
 #endif // CXIMAGE_SUPPORT_ENCODE
 
-	long Resume();
+	int32_t Resume();
 	void SetSpeed(float speed);
 	
 	mng_handle hmng;
 	mngstuff mnginfo;
 protected:
-	void WritePNG(mng_handle hMNG, int Frame, int FrameCount );
+	void WritePNG(mng_handle hMNG, int32_t Frame, int32_t FrameCount );
 	void SetCallbacks(mng_handle mng);
 };
 

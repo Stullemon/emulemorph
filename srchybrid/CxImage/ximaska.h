@@ -18,10 +18,10 @@ class CxImageSKA: public CxImage
 {
 #pragma pack(1)
 	typedef struct tagSkaHeader {
-    unsigned short  Width;
-    unsigned short  Height;
-    BYTE  BppExp;
-    DWORD dwUnknown;
+    uint16_t  Width;
+    uint16_t  Height;
+    uint8_t  BppExp;
+    uint32_t dwUnknown;
 } SKAHEADER;
 #pragma pack()
 

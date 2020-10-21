@@ -52,27 +52,27 @@
 ////////////////////////////////////////////////////////////////////////////////
 #if CXIMAGE_SUPPORT_DECODE
 ////////////////////////////////////////////////////////////////////////////////
-bool CxImageWMF::Decode(CxFile *hFile, long nForceWidth, long nForceHeight)
+bool CxImageWMF::Decode(CxFile *hFile, int32_t nForceWidth, int32_t nForceHeight)
 {
 	if (hFile == NULL) return false;
 
 	HENHMETAFILE	hMeta;
 	HDC				hDC;
-	int				cx,cy;
+	int32_t				cx,cy;
 
 	//save the current position of the file
-	long pos = hFile->Tell();
+	int32_t pos = hFile->Tell();
 
 	// Read the Metafile and convert to an Enhanced Metafile
 	METAFILEHEADER	mfh;
 	hMeta = ConvertWmfFiletoEmf(hFile, &mfh);
-	if (hMeta) {	// ok, it's a WMF
+	if (hMeta) {	// OK, it's a WMF
 
 /////////////////////////////////////////////////////////////////////
 //	We use the original WMF size information, because conversion to
 //	EMF adjusts the Metafile to Full Screen or does not set rclBounds at all
 //	ENHMETAHEADER	emh;
-//	UINT			uRet;
+//	uint32_t			uRet;
 //	uRet = GetEnhMetaFileHeader(hMeta,					// handle of enhanced metafile 
 //								sizeof(ENHMETAHEADER),	// size of buffer, in bytes 
 //								&emh); 					// address of buffer to receive data  
@@ -90,8 +90,8 @@ bool CxImageWMF::Decode(CxFile *hFile, long nForceWidth, long nForceHeight)
 		// mfh.inch already checked to be <> 0
 
 		hDC = ::GetDC(0);
-		int cx1 = ::GetDeviceCaps(hDC, LOGPIXELSX);
-		int cy1 = ::GetDeviceCaps(hDC, LOGPIXELSY);
+		int32_t cx1 = ::GetDeviceCaps(hDC, LOGPIXELSX);
+		int32_t cy1 = ::GetDeviceCaps(hDC, LOGPIXELSY);
 		::ReleaseDC(0, hDC);
 
 		cx = (mfh.inch/2 + (mfh.bbox.right - mfh.bbox.left) * cx1) / mfh.inch;
@@ -109,7 +109,7 @@ bool CxImageWMF::Decode(CxFile *hFile, long nForceWidth, long nForceHeight)
 			return false; // definitively give up
 		}
 
-		// ok, it's an EMF; calculate canvas size
+		// OK, it's an EMF; calculate canvas size
 		cx = emh.rclBounds.right - emh.rclBounds.left;
 		cy = emh.rclBounds.bottom - emh.rclBounds.top;
 
@@ -119,10 +119,10 @@ bool CxImageWMF::Decode(CxFile *hFile, long nForceWidth, long nForceHeight)
 		//
 		//hDC = ::GetDC(0);
 		//float hscale = (float)GetDeviceCaps(hDC, HORZRES)/(100.0f * GetDeviceCaps(hDC, HORZSIZE));
-		//float vscale  =  (float)GetDeviceCaps(hDC, VERTRES)/(100.0f * GetDeviceCaps(hDC, VERTSIZE));
+		//float vscale = (float)GetDeviceCaps(hDC, VERTRES)/(100.0f * GetDeviceCaps(hDC, VERTSIZE));
 		//::ReleaseDC(0, hDC);
-		//cx = (long)((emh.rclFrame.right - emh.rclFrame.left) * hscale);
-		//cy = (long)((emh.rclFrame.bottom - emh.rclFrame.top) * vscale);
+		//cx = (int32_t)((emh.rclFrame.right - emh.rclFrame.left) * hscale);
+		//cy = (int32_t)((emh.rclFrame.bottom - emh.rclFrame.top) * vscale);
 	}
 
 	if (info.nEscape == -1) {	// Check if cancelled
@@ -152,17 +152,17 @@ bool CxImageWMF::Decode(CxFile *hFile, long nForceWidth, long nForceHeight)
 	if (hDC){
 		if (hBitmap){
 			RECT rc = {0,0,cx,cy};
-			int bpp = ::GetDeviceCaps(hDC, BITSPIXEL);
+			int32_t bpp = ::GetDeviceCaps(hDC, BITSPIXEL);
 
 			HBITMAP hBitmapOld = (HBITMAP)SelectObject(hDC, hBitmap);
 
 			// clear out the entire bitmap with windows background
 			// because the MetaFile may not contain background information
-			DWORD	dwBack = XMF_COLOR_BACK;
+			uint32_t	dwBack = XMF_COLOR_BACK;
 #if XMF_SUPPORT_TRANSPARENCY
 			if (bpp == 24) dwBack = XMF_COLOR_TRANSPARENT;
 #endif
-		    DWORD OldColor = SetBkColor(hDC, dwBack);
+		    uint32_t OldColor = SetBkColor(hDC, dwBack);
 		    ExtTextOut(hDC, 0, 0, ETO_OPAQUE, &rc, NULL, 0, NULL);
 			SetBkColor(hDC, OldColor);
 
@@ -170,10 +170,10 @@ bool CxImageWMF::Decode(CxFile *hFile, long nForceWidth, long nForceHeight)
 			PLOGPALETTE plogPal;
 			PBYTE pjTmp; 
 			HPALETTE hPal; 
-			int iEntries = GetEnhMetaFilePaletteEntries(hMeta, 0, NULL);
+			int32_t iEntries = GetEnhMetaFilePaletteEntries(hMeta, 0, NULL);
 			if (iEntries) { 
 				if ((plogPal = (PLOGPALETTE)GlobalAlloc(GMEM_FIXED | GMEM_ZEROINIT, 
-					sizeof(DWORD) + sizeof(PALETTEENTRY)*iEntries )) == NULL) { 
+					sizeof(uint32_t) + sizeof(PALETTEENTRY)*iEntries )) == NULL) { 
 					DeleteObject(hBitmap);
 					DeleteDC(hDC);
 					DeleteEnhMetaFile(hMeta);
@@ -182,7 +182,7 @@ bool CxImageWMF::Decode(CxFile *hFile, long nForceWidth, long nForceHeight)
 				} 
 
 				plogPal->palVersion = 0x300; 
-				plogPal->palNumEntries = (WORD) iEntries; 
+				plogPal->palNumEntries = (uint16_t) iEntries; 
 				pjTmp = (PBYTE) plogPal; 
 				pjTmp += 4; 
 
@@ -227,7 +227,7 @@ bool CxImageWMF::Decode(CxFile *hFile, long nForceWidth, long nForceHeight)
 		    // it party on our bitmap. It will fill in the color table,
 		    // and bitmap bits of our global memory block.
 			bRet = GetDIBits(hDC, hBitmap, 0,
-			        (UINT)cy, GetBits(), (LPBITMAPINFO)pDib, DIB_RGB_COLORS);
+			        (uint32_t)cy, GetBits(), (LPBITMAPINFO)pDib, DIB_RGB_COLORS);
 
 			DeleteObject(hBitmap);
 			DeleteDC(hDC);
@@ -251,15 +251,15 @@ bool CxImageWMF::Decode(CxFile *hFile, long nForceWidth, long nForceHeight)
 **********************************************************************/
 BOOL CxImageWMF::CheckMetafileHeader(METAFILEHEADER *metafileheader)
 {
-	WORD	*pw;
-	WORD	cs;
-	int		i;
+	uint16_t	*pw;
+	uint16_t	cs;
+	int32_t		i;
 
 	// check magic #
 	if (metafileheader->key != 0x9ac6cdd7L)	return false;
 
 	// test checksum of header
-	pw = (WORD *)metafileheader;
+	pw = (uint16_t *)metafileheader;
 	cs = *pw;
 	pw++;
 	for (i = 0; i < 9; i++)	{
@@ -282,11 +282,11 @@ BOOL CxImageWMF::CheckMetafileHeader(METAFILEHEADER *metafileheader)
 HENHMETAFILE CxImageWMF::ConvertWmfFiletoEmf(CxFile *fp, METAFILEHEADER *metafileheader)
 {
 	HENHMETAFILE	hMeta;
-	long			lenFile;
-	long			len;
-	BYTE			*p;
+	uint32_t	lenFile;
+	uint32_t	len;
+	uint8_t			*p;
 	METAHEADER		mfHeader;
-	DWORD			seekpos;
+	uint32_t			seekpos;
 
 	hMeta = 0;
 
@@ -337,7 +337,7 @@ HENHMETAFILE CxImageWMF::ConvertWmfFiletoEmf(CxFile *fp, METAFILEHEADER *metafil
 	if (len > lenFile) return (hMeta);
 
 	// Allocate memory for the metafile bits 
-	p = (BYTE *)malloc(len);
+	p = (uint8_t *)malloc(len);
 	if (!p)	return (hMeta);
 
 	// seek back to METAHEADER and read all the stuff at once
@@ -356,15 +356,13 @@ HENHMETAFILE CxImageWMF::ConvertWmfFiletoEmf(CxFile *fp, METAFILEHEADER *metafil
 
 	// scale the metafile (pixels/inch of metafile => pixels/inch of display)
 
-	METAFILEPICT	mfp;
-	int cx1, cy1;
+	METAFILEPICT	mfp = {};
+	int32_t cx1, cy1;
 	HDC hDC;
 
 	hDC = ::GetDC(0);
 	cx1 = ::GetDeviceCaps(hDC, LOGPIXELSX);
 	cy1 = ::GetDeviceCaps(hDC, LOGPIXELSY);
-
-	memset(&mfp, 0, sizeof(mfp));
 
 	mfp.mm = MM_ANISOTROPIC;
 	mfp.xExt = 10000; //(metafileheader->bbox.right - metafileheader->bbox.left) * cx1 / metafileheader->inch;
@@ -376,7 +374,7 @@ HENHMETAFILE CxImageWMF::ConvertWmfFiletoEmf(CxFile *fp, METAFILEHEADER *metafil
 	//mfp.xExt *= 1000;
 	//mfp.yExt *= 1000;
 	// ????
-	//int k = 332800 / ::GetSystemMetrics(SM_CXSCREEN);
+	//int32_t k = 332800 / ::GetSystemMetrics(SM_CXSCREEN);
 	//mfp.xExt *= k;	mfp.yExt *= k;
 
 	// fix for Win9x
@@ -404,18 +402,18 @@ HENHMETAFILE CxImageWMF::ConvertWmfFiletoEmf(CxFile *fp, METAFILEHEADER *metafil
 HENHMETAFILE CxImageWMF::ConvertEmfFiletoEmf(CxFile *pFile, ENHMETAHEADER *pemfh)
 {
 	HENHMETAFILE	hMeta;
-	long iLen = pFile->Size();
+	int32_t iLen = pFile->Size();
 
 	// Check the header first: <km>
-	long pos = pFile->Tell();
-	long iLenRead = pFile->Read(pemfh, 1, sizeof(ENHMETAHEADER));
+	int32_t pos = pFile->Tell();
+	int32_t iLenRead = pFile->Read(pemfh, 1, sizeof(ENHMETAHEADER));
 	if (iLenRead < sizeof(ENHMETAHEADER))         return NULL;
 	if (pemfh->iType != EMR_HEADER)               return NULL;
 	if (pemfh->dSignature != ENHMETA_SIGNATURE)   return NULL;
-	//if (pemfh->nBytes != (DWORD)iLen)             return NULL;
+	//if (pemfh->nBytes != (uint32_t)iLen)             return NULL;
 	pFile->Seek(pos,SEEK_SET);
 
-	BYTE* pBuff = (BYTE *)malloc(iLen);
+	uint8_t* pBuff = (uint8_t *)malloc(iLen);
 	if (!pBuff)	return (FALSE);
 
 	// Read the Enhanced Metafile
@@ -433,7 +431,7 @@ HENHMETAFILE CxImageWMF::ConvertEmfFiletoEmf(CxFile *pFile, ENHMETAHEADER *pemfh
 	if (!hMeta)	return NULL;	// oops.
 
 	// Get the Enhanced Metafile Header
-	UINT uRet = GetEnhMetaFileHeader(hMeta,				// handle of enhanced metafile 
+	uint32_t uRet = GetEnhMetaFileHeader(hMeta,				// handle of enhanced metafile 
 								sizeof(ENHMETAHEADER),	// size of buffer, in bytes 
 								pemfh); 				// address of buffer to receive data  
   
@@ -463,10 +461,10 @@ Function:	ShrinkMetafile
 Purpose:	Shrink the size of a metafile to be not larger than
 			the definition
 **********************************************************************/
-void CxImageWMF::ShrinkMetafile(int &cx, int &cy)
+void CxImageWMF::ShrinkMetafile(int32_t &cx, int32_t &cy)
 {
-	int	xScreen = XMF_MAXSIZE_CX;
-	int	yScreen = XMF_MAXSIZE_CY;
+	int32_t	xScreen = XMF_MAXSIZE_CX;
+	int32_t	yScreen = XMF_MAXSIZE_CY;
 
 	if (cx > xScreen){
 		cy = cy * xScreen / cx;

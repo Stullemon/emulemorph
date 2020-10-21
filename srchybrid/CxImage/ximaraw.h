@@ -35,6 +35,10 @@ public:
 	bool Decode(CxFile * hFile);
 	bool Decode(FILE *hFile) { CxIOFile file(hFile); return Decode(&file); }
 
+#if CXIMAGE_SUPPORT_EXIF
+	bool GetExifThumbnail(const TCHAR *filename, const TCHAR *outname, int32_t type);
+#endif //CXIMAGE_SUPPORT_EXIF
+
 #if CXIMAGE_SUPPORT_ENCODE
 	bool Encode(CxFile * hFile);
 	bool Encode(FILE *hFile) { CxIOFile file(hFile); return Encode(&file); }
@@ -71,31 +75,31 @@ protected:
 
 		}
 
-		static int raw_sfile_read(dcr_stream_obj *obj, void *buf, int size, int cnt)
+		static int32_t raw_sfile_read(dcr_stream_obj *obj, void *buf, int32_t size, int32_t cnt)
 		{	return ((CxFile*)obj)->Read(buf,size,cnt); }
 
-		static int raw_sfile_write(dcr_stream_obj *obj, void *buf, int size, int cnt)
+		static int32_t raw_sfile_write(dcr_stream_obj *obj, void *buf, int32_t size, int32_t cnt)
 		{	return ((CxFile*)obj)->Write(buf,size,cnt); }
 
-		static long raw_sfile_seek(dcr_stream_obj *obj, long offset, int origin)
+		static long raw_sfile_seek(dcr_stream_obj *obj, long offset, int32_t origin)
 		{	return ((CxFile*)obj)->Seek(offset,origin); }
 
-		static int raw_sfile_close(dcr_stream_obj *obj)
+		static int32_t raw_sfile_close(dcr_stream_obj *obj)
 		{	return 1; /*((CxFile*)obj)->Close();*/ }
 
-		static char* raw_sfile_gets(dcr_stream_obj *obj, char *string, int n)
+		static char* raw_sfile_gets(dcr_stream_obj *obj, char *string, int32_t n)
 		{	return ((CxFile*)obj)->GetS(string,n); }
 
-		static int   raw_sfile_eof(dcr_stream_obj *obj)
+		static int32_t   raw_sfile_eof(dcr_stream_obj *obj)
 		{	return ((CxFile*)obj)->Eof(); }
 
 		static long  raw_sfile_tell(dcr_stream_obj *obj)
 		{	return ((CxFile*)obj)->Tell(); }
 
-		static int   raw_sfile_getc(dcr_stream_obj *obj)
+		static int32_t   raw_sfile_getc(dcr_stream_obj *obj)
 		{	return ((CxFile*)obj)->GetC(); }
 
-		static int   raw_sfile_scanf(dcr_stream_obj *obj,const char *format, void* output)
+		static int32_t   raw_sfile_scanf(dcr_stream_obj *obj,const char *format, void* output)
 		{	return ((CxFile*)obj)->Scanf(format, output); }
 
 	private:

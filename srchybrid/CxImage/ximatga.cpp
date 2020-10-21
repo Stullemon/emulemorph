@@ -2,7 +2,7 @@
  * File:	ximatga.cpp
  * Purpose:	Platform Independent TGA Image Class Loader and Writer
  * 05/Jan/2001 Davide Pizzolato - www.xdp.it
- * CxImage version 6.0.0 02/Feb/2008
+ * CxImage version 7.0.3 08/Feb/2019
  */
 
 #include "ximatga.h"
@@ -81,7 +81,7 @@ bool CxImageTGA::Decode(CxFile *hFile)
 	if (tgaHead.CmapType != 0){ // read the palette
 		rgb_color pal[256];
 		hFile->Read(pal,tgaHead.CmapLength*sizeof(rgb_color), 1);
-		for (int i=0;i<tgaHead.CmapLength; i++) SetPaletteColor((BYTE)i,pal[i].b,pal[i].g,pal[i].r);
+		for (int32_t i=0;i<tgaHead.CmapLength; i++) SetPaletteColor((uint8_t)i,pal[i].b,pal[i].g,pal[i].r);
 	}
 
 	if (tgaHead.ImageType == TGA_Mono || tgaHead.ImageType == TGA_RLEMono)
@@ -92,9 +92,9 @@ bool CxImageTGA::Decode(CxFile *hFile)
 	bool bYReversed = ((tgaHead.ImagDesc & 32) == 32);
 
     CImageIterator iter(this);
-	BYTE rleLeftover = 255; //for images with illegal packet boundary 
-	BYTE* pDest;
-    for (int y=0; y < tgaHead.ImageHeight; y++){
+	uint8_t rleLeftover = 255; //for images with illegal packet boundary 
+	uint8_t* pDest;
+    for (int32_t y=0; y < tgaHead.ImageHeight; y++){
 
 		if (info.nEscape) cx_throw("Cancelled"); // <vho> - cancel decoding
 
@@ -137,17 +137,17 @@ bool CxImageTGA::Encode(CxFile * hFile)
 
     tgaHead.IdLength = 0;				// Image ID Field Length
     tgaHead.CmapType = GetPalette()!=0; // Color Map Type
-    tgaHead.ImageType = (head.biBitCount == 8) ? (BYTE)TGA_Map : (BYTE)TGA_RGB; // Image Type
+    tgaHead.ImageType = (head.biBitCount == 8) ? (uint8_t)TGA_Map : (uint8_t)TGA_RGB; // Image Type
 
     tgaHead.CmapIndex=0;				// First Entry Index
     tgaHead.CmapLength=(head.biBitCount == 8) ? 256 : 0;   // Color Map Length
-    tgaHead.CmapEntrySize=(head.biBitCount == 8) ? (BYTE)24 : (BYTE)0; // Color Map Entry Size
+    tgaHead.CmapEntrySize=(head.biBitCount == 8) ? (uint8_t)24 : (uint8_t)0; // Color Map Entry Size
 
     tgaHead.X_Origin=0;					// X-origin of Image
     tgaHead.Y_Origin=0;					// Y-origin of Image
-    tgaHead.ImageWidth=(WORD)head.biWidth;		// Image Width
-    tgaHead.ImageHeight=(WORD)head.biHeight;	// Image Height
-    tgaHead.PixelDepth=(BYTE)head.biBitCount;	// Pixel Depth
+    tgaHead.ImageWidth=(uint16_t)head.biWidth;		// Image Width
+    tgaHead.ImageHeight=(uint16_t)head.biHeight;	// Image Height
+    tgaHead.PixelDepth=(uint8_t)head.biBitCount;	// Pixel Depth
     tgaHead.ImagDesc=0;					// Image Descriptor
 
 	if (pAlpha && head.biBitCount==24) tgaHead.PixelDepth=32; 
@@ -159,7 +159,7 @@ bool CxImageTGA::Encode(CxFile * hFile)
 	if (head.biBitCount==8){
 		rgb_color pal[256];
 		RGBQUAD* ppal = GetPalette();
-		for (int i=0;i<256; i++){
+		for (int32_t i=0;i<256; i++){
 			pal[i].r = ppal[i].rgbBlue;
 			pal[i].g = ppal[i].rgbGreen;
 			pal[i].b = ppal[i].rgbRed;
@@ -168,17 +168,17 @@ bool CxImageTGA::Encode(CxFile * hFile)
 	}
 	
 	CImageIterator iter(this);
-	BYTE* pDest;
+	uint8_t* pDest;
 	if (pAlpha==0 || head.biBitCount==8){
-		for (int y=0; y < tgaHead.ImageHeight; y++){
+		for (int32_t y=0; y < tgaHead.ImageHeight; y++){
 			pDest = iter.GetRow(y);
 			hFile->Write(pDest,tgaHead.ImageWidth * (head.biBitCount >> 3),1);
 		}
 	} else {
-		pDest = (BYTE*)malloc(4*tgaHead.ImageWidth);
+		pDest = (uint8_t*)malloc(4*tgaHead.ImageWidth);
 		RGBQUAD c;
-		for (int y=0; y < tgaHead.ImageHeight; y++){
-			for(int x=0, x4=0;x<tgaHead.ImageWidth;x++, x4+=4){
+		for (int32_t y=0; y < tgaHead.ImageHeight; y++){
+			for(int32_t x=0, x4=0;x<tgaHead.ImageWidth;x++, x4+=4){
 				c = BlindGetPixelColor(x,y);
 				pDest[x4+0]=c.rgbBlue;
 				pDest[x4+1]=c.rgbGreen;
@@ -198,11 +198,11 @@ bool CxImageTGA::Encode(CxFile * hFile)
 ////////////////////////////////////////////////////////////////////////////////
 #endif // CXIMAGE_SUPPORT_ENCODE
 ////////////////////////////////////////////////////////////////////////////////
-BYTE CxImageTGA::ExpandCompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *hFile,int width, int y, BYTE rleLeftover)
+uint8_t CxImageTGA::ExpandCompressedLine(uint8_t* pDest,TGAHEADER* ptgaHead,CxFile *hFile,int32_t width, int32_t y, uint8_t rleLeftover)
 {
-	BYTE rle;
-	long filePos=0;
-	for (int x=0; x<width; ){
+	uint8_t rle;
+	int32_t filePos=0;
+	for (int32_t x=0; x<width; ){
 		if (rleLeftover != 255){
             rle = rleLeftover;
             rleLeftover = 255;
@@ -212,16 +212,16 @@ BYTE CxImageTGA::ExpandCompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *hF
 		if (rle & 128) { // RLE-Encoded packet
 			rle -= 127; // Calculate real repeat count.
 			if ((x+rle)>width){
-				rleLeftover = (BYTE)(128 + (rle - (width - x) - 1));
+				rleLeftover = (uint8_t)(128 + (rle - (width - x) - 1));
                 filePos = hFile->Tell();
-				rle = (BYTE)(width - x);
+				rle = (uint8_t)(width - x);
 			}
 			switch (ptgaHead->PixelDepth)
 			{
 			case 32: {
 				RGBQUAD color;
 				hFile->Read(&color,4,1);
-				for (int ix = 0; ix < rle; ix++){
+				for (int32_t ix = 0; ix < rle; ix++){
 					memcpy(&pDest[3*ix],&color,3);
 #if CXIMAGE_SUPPORT_ALPHA	// <vho>
 					AlphaSet(ix+x,y,color.rgbReserved);
@@ -232,34 +232,34 @@ BYTE CxImageTGA::ExpandCompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *hF
 			case 24: {
 				rgb_color triple;
 				hFile->Read(&triple,3,1);
-				for (int ix = 0; ix < rle; ix++) memcpy(&pDest[3*ix],&triple,3);
+				for (int32_t ix = 0; ix < rle; ix++) memcpy(&pDest[3*ix],&triple,3);
 				break;
 					 }
 			case 15:
 			case 16: {
-				WORD pixel;
+				uint16_t pixel;
 				hFile->Read(&pixel,2,1);
 				rgb_color triple;
-				triple.r = (BYTE)(( pixel & 0x1F ) * 8);     // red
-				triple.g = (BYTE)(( pixel >> 2 ) & 0x0F8);   // green
-				triple.b = (BYTE)(( pixel >> 7 ) & 0x0F8);   // blue
-				for (int ix = 0; ix < rle; ix++){
+				triple.r = (uint8_t)(( pixel & 0x1F ) * 8);     // red
+				triple.g = (uint8_t)(( pixel >> 2 ) & 0x0F8);   // green
+				triple.b = (uint8_t)(( pixel >> 7 ) & 0x0F8);   // blue
+				for (int32_t ix = 0; ix < rle; ix++){
 					memcpy(&pDest[3*ix],&triple,3);
 				}
 				break;
 					 }
 			case 8: {
-				BYTE pixel;
+				uint8_t pixel;
 				hFile->Read(&pixel,1,1);
-				for (int ix = 0; ix < rle; ix++) pDest[ix] = pixel;
+				for (int32_t ix = 0; ix < rle; ix++) pDest[ix] = pixel;
 					}
 			}
 			if (rleLeftover!=255) hFile->Seek(filePos, SEEK_SET);
 		} else { // Raw packet
 			rle += 1; // Calculate real repeat count.
 			if ((x+rle)>width){
-                rleLeftover = (BYTE)(rle - (width - x) - 1);
-				rle = (BYTE)(width - x);
+                rleLeftover = (uint8_t)(rle - (width - x) - 1);
+				rle = (uint8_t)(width - x);
 			}
 			ExpandUncompressedLine(pDest,ptgaHead,hFile,rle,y,x);
 		}
@@ -269,7 +269,7 @@ BYTE CxImageTGA::ExpandCompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *hF
 	return rleLeftover;
 }
 ////////////////////////////////////////////////////////////////////////////////
-void CxImageTGA::ExpandUncompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *hFile,int width, int y, int xoffset)
+void CxImageTGA::ExpandUncompressedLine(uint8_t* pDest,TGAHEADER* ptgaHead,CxFile *hFile,int32_t width, int32_t y, int32_t xoffset)
 {
 	switch (ptgaHead->PixelDepth){
 	case 8:
@@ -277,13 +277,13 @@ void CxImageTGA::ExpandUncompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *
 		break;
 	case 15:
 	case 16:{
-		BYTE* dst=pDest;
-		WORD pixel;
-		for (int x=0; x<width; x++){
+		uint8_t* dst=pDest;
+		uint16_t pixel;
+		for (int32_t x=0; x<width; x++){
 			hFile->Read(&pixel,2,1);
-			*dst++ = (BYTE)(( pixel & 0x1F ) * 8);     // blue
-			*dst++ = (BYTE)(( pixel >> 2 ) & 0x0F8);   // green
-			*dst++ = (BYTE)(( pixel >> 7 ) & 0x0F8);   // red
+			*dst++ = (uint8_t)(( pixel & 0x1F ) * 8);     // blue
+			*dst++ = (uint8_t)(( pixel >> 2 ) & 0x0F8);   // green
+			*dst++ = (uint8_t)(( pixel >> 7 ) & 0x0F8);   // red
 		}
 		break;
 			}
@@ -291,8 +291,8 @@ void CxImageTGA::ExpandUncompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *
 		hFile->Read(pDest,3*width,1);
 		break;
 	case 32:{
-		BYTE* dst=pDest;
-		for (int x=0; x<width; x++){
+		uint8_t* dst=pDest;
+		for (int32_t x=0; x<width; x++){
 			RGBQUAD pixel;
 			hFile->Read(&pixel,4,1);
 			*dst++ = pixel.rgbBlue;
@@ -309,13 +309,12 @@ void CxImageTGA::ExpandUncompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *
 ////////////////////////////////////////////////////////////////////////////////
 void CxImageTGA::tga_toh(TGAHEADER* p)
 {
-    p->CmapIndex = ntohs(p->CmapIndex);
-    p->CmapLength = ntohs(p->CmapLength);
-    p->X_Origin = ntohs(p->X_Origin);
-    p->Y_Origin = ntohs(p->Y_Origin);
-    p->ImageWidth = ntohs(p->ImageWidth);
-    p->ImageHeight = ntohs(p->ImageHeight);
+    p->CmapIndex = m_ntohs(p->CmapIndex);
+    p->CmapLength = m_ntohs(p->CmapLength);
+    p->X_Origin = m_ntohs(p->X_Origin);
+    p->Y_Origin = m_ntohs(p->Y_Origin);
+    p->ImageWidth = m_ntohs(p->ImageWidth);
+    p->ImageHeight = m_ntohs(p->ImageHeight);
 }
 ////////////////////////////////////////////////////////////////////////////////
 #endif 	// CXIMAGE_SUPPORT_TGA
-

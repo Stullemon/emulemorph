@@ -2,7 +2,7 @@
  * File:	ximajbg.cpp
  * Purpose:	Platform Independent JBG Image Class Loader and Writer
  * 18/Aug/2002 Davide Pizzolato - www.xdp.it
- * CxImage version 6.0.0 02/Feb/2008
+ * CxImage version 7.0.3 08/Feb/2019
  */
 
 #include "ximajbg.h"
@@ -21,20 +21,19 @@ bool CxImageJBG::Decode(CxFile *hFile)
 	if (hFile == NULL) return false;
 
 	struct jbg_dec_state jbig_state;
-	unsigned long xmax = 4294967295UL, ymax = 4294967295UL;
-	unsigned int len, cnt;
-	BYTE *buffer,*p;
-	int result;
+	uint32_t xmax = 4294967295UL, ymax = 4294967295UL;
+	uint32_t len, cnt;
+	uint8_t *buffer=0,*p;
 
   cx_try
   {
 	jbg_dec_init(&jbig_state);
 	jbg_dec_maxsize(&jbig_state, xmax, ymax);
 
-	buffer = (BYTE*)malloc(JBIG_BUFSIZE);
+	buffer = (uint8_t*)malloc(JBIG_BUFSIZE);
 	if (!buffer) cx_throw("Sorry, not enough memory available!");
 
-	result = JBG_EAGAIN;
+	int32_t result = JBG_EAGAIN;
 	do {
 		len = hFile->Read(buffer, 1, JBIG_BUFSIZE);
 		if (!len) break;
@@ -52,7 +51,7 @@ bool CxImageJBG::Decode(CxFile *hFile)
 	if (result != JBG_EOK && result != JBG_EOK_INTR)
 		cx_throw("Problem with input file"); 
 
-	int w, h, bpp, planes, ew;
+	int32_t w, h, bpp, planes, ew;
 
 	w = jbg_dec_getwidth(&jbig_state);
 	h = jbg_dec_getheight(&jbig_state);
@@ -70,7 +69,7 @@ bool CxImageJBG::Decode(CxFile *hFile)
 	switch (planes){
 	case 1:
 		{
-			BYTE* binary_image = jbg_dec_getimage(&jbig_state, 0);
+			uint8_t* binary_image = jbg_dec_getimage(&jbig_state, 0);
 
 			if (!Create(w,h,1,CXIMAGE_FORMAT_JBG))
 				cx_throw("");
@@ -80,7 +79,7 @@ bool CxImageJBG::Decode(CxFile *hFile)
 
 			CImageIterator iter(this);
 			iter.Upset();
-			for (int i=0;i<h;i++){
+			for (int32_t i=0;i<h;i++){
 				iter.SetRow(binary_image+i*ew,ew);
 				iter.PrevRow();
 			}
@@ -96,7 +95,7 @@ bool CxImageJBG::Decode(CxFile *hFile)
 
   } cx_catch {
 	jbg_dec_free(&jbig_state);
-	if (buffer) free(buffer);
+	free(buffer);
 	if (strcmp(message,"")) strncpy(info.szLastError,message,255);
 	if (info.nEscape == -1 && info.dwType == CXIMAGE_FORMAT_JBG) return true;
 	return false;
@@ -115,27 +114,27 @@ bool CxImageJBG::Encode(CxFile * hFile)
 		return false;
 	}
 
-	int w, h, bpp, planes, ew, i, j, x, y;
+	int32_t w, h, planes, ew, x, y;
 
 	w = head.biWidth;
 	h = head.biHeight;
 	planes = 1;
-	bpp = (planes+7)>>3;
+//	int32_t bpp = (planes+7)>>3;
 	ew = (w + 7)>>3;
 
-	BYTE mask;
+	uint8_t mask;
 	RGBQUAD *rgb = GetPalette();
 	if (CompareColors(&rgb[0],&rgb[1])<0) mask=255; else mask=0;
 
-	BYTE *buffer = (BYTE*)malloc(ew*h*2);
+	uint8_t *buffer = (uint8_t*)malloc(ew*h*2);
 	if (!buffer) {
 		strcpy(info.szLastError,"Sorry, not enough memory available!");
 		return false;
 	}
 
 	for (y=0; y<h; y++){
-		i= y*ew;
-		j= (h-y-1)*info.dwEffWidth;
+		int i= y*ew;
+		int j= (h-y-1)*info.dwEffWidth;
 		for (x=0; x<ew; x++){
 			buffer[i + x]=info.pImage[j + x]^mask;
 		}
@@ -148,9 +147,9 @@ bool CxImageJBG::Encode(CxFile * hFile)
     //jbg_enc_lrlmax(&jbig_state, 800, 600);
 
 	// Specify a few other options (each is ignored if negative)
-	int dl = -1, dh = -1, d = -1, l0 = -1, mx = -1;
-	int options = JBG_TPDON | JBG_TPBON | JBG_DPON;
-	int order = JBG_ILEAVE | JBG_SMID;
+	int32_t dl = -1, dh = -1, /*d = -1,*/ l0 = -1, mx = -1;
+	int32_t options = JBG_TPDON | JBG_TPBON | JBG_DPON;
+	int32_t order = JBG_ILEAVE | JBG_SMID;
 	jbg_enc_lrange(&jbig_state, dl, dh);
 	jbg_enc_options(&jbig_state, order, options, l0, mx, -1);
 

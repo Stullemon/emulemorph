@@ -35,7 +35,7 @@ public:
 	bool Encode(FILE *hFile) { CxIOFile file(hFile); return Encode(&file); }
 #endif // CXIMAGE_SUPPORT_ENCODE
 protected:
-	static void jbig_data_out(BYTE *buffer, unsigned int len, void *file)
+	static void jbig_data_out(uint8_t *buffer, uint32_t len, void *file)
 							{((CxFile*)file)->Write(buffer,len,1);}
 };
 

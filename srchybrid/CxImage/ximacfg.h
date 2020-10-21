@@ -13,6 +13,7 @@
 #define CXIMAGE_SUPPORT_DECODE	1
 #define CXIMAGE_SUPPORT_ENCODE	1		//<vho><T.Peck>
 #define	CXIMAGE_SUPPORT_WINDOWS 1
+#define	CXIMAGE_SUPPORT_EXIF    0
 
 /////////////////////////////////////////////////////////////////////////////
 // CxImage supported formats
@@ -38,6 +39,7 @@
 #define CXIMAGE_SUPPORT_MNG 0
 #define CXIMAGE_SUPPORT_SKA 0
 #define CXIMAGE_SUPPORT_RAW 0
+#define CXIMAGE_SUPPORT_PSD 0
 
 /////////////////////////////////////////////////////////////////////////////
 #define	CXIMAGE_MAX_MEMORY 268435456

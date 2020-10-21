@@ -21,20 +21,20 @@ class CxImageTGA: public CxImage
 #pragma pack(1)
 typedef struct tagTgaHeader
 {
-    BYTE   IdLength;            // Image ID Field Length
-    BYTE   CmapType;            // Color Map Type
-    BYTE   ImageType;           // Image Type
+    uint8_t   IdLength;            // Image ID Field Length
+    uint8_t   CmapType;            // Color Map Type
+    uint8_t   ImageType;           // Image Type
 
-    WORD   CmapIndex;           // First Entry Index
-    WORD   CmapLength;          // Color Map Length
-    BYTE   CmapEntrySize;       // Color Map Entry Size
+    uint16_t   CmapIndex;           // First Entry Index
+    uint16_t   CmapLength;          // Color Map Length
+    uint8_t   CmapEntrySize;       // Color Map Entry Size
 
-    WORD   X_Origin;            // X-origin of Image
-    WORD   Y_Origin;            // Y-origin of Image
-    WORD   ImageWidth;          // Image Width
-    WORD   ImageHeight;         // Image Height
-    BYTE   PixelDepth;          // Pixel Depth
-    BYTE   ImagDesc;            // Image Descriptor
+    uint16_t   X_Origin;            // X-origin of Image
+    uint16_t   Y_Origin;            // Y-origin of Image
+    uint16_t   ImageWidth;          // Image Width
+    uint16_t   ImageHeight;         // Image Height
+    uint8_t   PixelDepth;          // Pixel Depth
+    uint8_t   ImagDesc;            // Image Descriptor
 } TGAHEADER;
 #pragma pack()
 
@@ -51,8 +51,8 @@ public:
 	bool Encode(FILE *hFile) { CxIOFile file(hFile); return Encode(&file); }
 #endif // CXIMAGE_SUPPORT_ENCODE
 protected:
-	BYTE ExpandCompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *hFile,int width, int y, BYTE rleLeftover);
-	void ExpandUncompressedLine(BYTE* pDest,TGAHEADER* ptgaHead,CxFile *hFile,int width, int y, int xoffset);
+	uint8_t ExpandCompressedLine(uint8_t* pDest,TGAHEADER* ptgaHead,CxFile *hFile,int32_t width, int32_t y, uint8_t rleLeftover);
+	void ExpandUncompressedLine(uint8_t* pDest,TGAHEADER* ptgaHead,CxFile *hFile,int32_t width, int32_t y, int32_t xoffset);
 	void tga_toh(TGAHEADER* p);
 };
 

@@ -104,6 +104,9 @@
     <ClCompile Include="xmemfile.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ximapsd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="xfile.h">
@@ -173,6 +176,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="xmemfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stdint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ximapsd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

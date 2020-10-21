@@ -1,9 +1,13 @@
 // ximainfo.cpp : main attributes
 /* 03/10/2004 v1.00 - Davide Pizzolato - www.xdp.it
- * CxImage version 6.0.0 02/Feb/2008
+ * CxImage version 7.0.3 08/Feb/2019
  */
 
 #include "ximage.h"
+
+#if defined(_LINUX) || defined(__APPLE__)
+ #define _tcsnicmp(a,b,c) strcasecmp(a,b)
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 /**
@@ -11,14 +15,14 @@
  */
 RGBQUAD	CxImage::GetTransColor()
 {
-	if (head.biBitCount<24 && info.nBkgndIndex>=0) return GetPaletteColor((BYTE)info.nBkgndIndex);
+	if (head.biBitCount<24 && info.nBkgndIndex>=0) return GetPaletteColor((uint8_t)info.nBkgndIndex);
 	return info.nBkgndColor;
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
- * Gets the index used for transparency. Returns -1 for no transparancy.
+ * Gets the index used for transparency. Returns -1 for no transparency.
  */
-long CxImage::GetTransIndex() const
+int32_t CxImage::GetTransIndex() const
 {
 	return info.nBkgndIndex;
 }
@@ -26,11 +30,11 @@ long CxImage::GetTransIndex() const
 /**
  * Sets the index used for transparency with 1, 4 and 8 bpp images. Set to -1 to remove the effect.
  */
-void CxImage::SetTransIndex(long idx)
+void CxImage::SetTransIndex(int32_t idx)
 {
-	if (idx<(long)head.biClrUsed)
+	if (idx<(int32_t)head.biClrUsed)
 		info.nBkgndIndex = idx;
-	else 
+	else
 		info.nBkgndIndex = 0;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -60,9 +64,9 @@ bool CxImage::IsIndexed() const
 /**
  * \return 1 = indexed, 2 = RGB, 4 = RGBA
  */
-BYTE CxImage::GetColorType()
+uint8_t CxImage::GetColorType() const
 {
-	BYTE b = (BYTE)((head.biBitCount>8) ? 2 /*COLORTYPE_COLOR*/ : 1 /*COLORTYPE_PALETTE*/);
+	uint8_t b = (uint8_t)((head.biBitCount>8) ? 2 /*COLORTYPE_COLOR*/ : 1 /*COLORTYPE_PALETTE*/);
 #if CXIMAGE_SUPPORT_ALPHA
 	if (AlphaIsValid()) b = 4 /*COLORTYPE_ALPHA*/;
 #endif //CXIMAGE_SUPPORT_ALPHA
@@ -72,7 +76,7 @@ BYTE CxImage::GetColorType()
 /**
  * \return Resolution for TIFF, JPEG, PNG and BMP formats.
  */
-long CxImage::GetXDPI() const
+int32_t CxImage::GetXDPI() const
 {
 	return info.xDPI;
 }
@@ -80,7 +84,7 @@ long CxImage::GetXDPI() const
 /**
  * \return Resolution for TIFF, JPEG, PNG and BMP formats.
  */
-long CxImage::GetYDPI() const
+int32_t CxImage::GetYDPI() const
 {
 	return info.yDPI;
 }
@@ -88,29 +92,29 @@ long CxImage::GetYDPI() const
 /**
  * Set resolution for TIFF, JPEG, PNG and BMP formats.
  */
-void CxImage::SetXDPI(long dpi)
+void CxImage::SetXDPI(int32_t dpi)
 {
 	if (dpi<=0) dpi = CXIMAGE_DEFAULT_DPI;
 	info.xDPI = dpi;
-	head.biXPelsPerMeter = (long) floor(dpi * 10000.0 / 254.0 + 0.5);
+	head.biXPelsPerMeter = (int32_t) floor(dpi * 10000.0 / 254.0 + 0.5);
 	if (pDib) ((BITMAPINFOHEADER*)pDib)->biXPelsPerMeter = head.biXPelsPerMeter;
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
  * Set resolution for TIFF, JPEG, PNG and BMP formats.
  */
-void CxImage::SetYDPI(long dpi)
+void CxImage::SetYDPI(int32_t dpi)
 {
 	if (dpi<=0) dpi = CXIMAGE_DEFAULT_DPI;
 	info.yDPI = dpi;
-	head.biYPelsPerMeter = (long) floor(dpi * 10000.0 / 254.0 + 0.5);
+	head.biYPelsPerMeter = (int32_t) floor(dpi * 10000.0 / 254.0 + 0.5);
 	if (pDib) ((BITMAPINFOHEADER*)pDib)->biYPelsPerMeter = head.biYPelsPerMeter;
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
  * \sa SetFlags
  */
-DWORD CxImage::GetFlags() const
+uint32_t CxImage::GetFlags() const
 {
 	return info.dwFlags;
 }
@@ -122,9 +126,9 @@ DWORD CxImage::GetFlags() const
  *  - 0x00??0000 = blend modes
  *  - 0x0000???? = layer id or user flags
  *
- * \param bLockReservedFlags protects the "reserved" and "blend modes" flags 
+ * \param bLockReservedFlags protects the "reserved" and "blend modes" flags
  */
-void CxImage::SetFlags(DWORD flags, bool bLockReservedFlags)
+void CxImage::SetFlags(uint32_t flags, bool bLockReservedFlags)
 {
 	if (bLockReservedFlags) info.dwFlags = flags & 0x0000ffff;
 	else info.dwFlags = flags;
@@ -133,7 +137,7 @@ void CxImage::SetFlags(DWORD flags, bool bLockReservedFlags)
 /**
  * \sa SetCodecOption
  */
-DWORD CxImage::GetCodecOption(DWORD imagetype)
+uint32_t CxImage::GetCodecOption(uint32_t imagetype) const
 {
 	imagetype = GetTypeIndexFromId(imagetype);
 	if (imagetype==0){
@@ -143,15 +147,20 @@ DWORD CxImage::GetCodecOption(DWORD imagetype)
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
- * Encode option for GIF, TIF and JPG.
+ * Encode option for GIF, TIF, JPG, PNG and RAW
  * - GIF : 0 = LZW (default), 1 = none, 2 = RLE.
  * - TIF : 0 = automatic (default), or a valid compression code as defined in "tiff.h" (COMPRESSION_NONE = 1, COMPRESSION_CCITTRLE = 2, ...)
  * - JPG : valid values stored in enum CODEC_OPTION ( ENCODE_BASELINE = 0x01, ENCODE_PROGRESSIVE = 0x10, ...)
+ * - PNG : combination of interlace option and compression option
+ *         interlace option :  1 = interlace, 0 = no interlace
+ *         compression option : 2 = no compression, 4 = best speed, 6 = best compression, 8 = default compression
+ *         default is no interlace and default compression
+ *         example : 5 = 1+4 = interlace + best speed
  * - RAW : valid values stored in enum CODEC_OPTION ( DECODE_QUALITY_LIN = 0x00, DECODE_QUALITY_VNG = 0x01, ...)
  *
- * \return true if everything is ok
+ * \return true if everything is OK
  */
-bool CxImage::SetCodecOption(DWORD opt, DWORD imagetype)
+bool CxImage::SetCodecOption(uint32_t opt, uint32_t imagetype)
 {
 	imagetype = GetTypeIndexFromId(imagetype);
 	if (imagetype==0){
@@ -169,28 +178,28 @@ void* CxImage::GetDIB() const
 	return pDib;
 }
 ////////////////////////////////////////////////////////////////////////////////
-DWORD CxImage::GetHeight() const
+uint32_t CxImage::GetHeight() const
 {
 	return head.biHeight;
 }
 ////////////////////////////////////////////////////////////////////////////////
-DWORD CxImage::GetWidth() const
+uint32_t CxImage::GetWidth() const
 {
 	return head.biWidth;
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
- * \return DWORD aligned width of the image.
+ * \return size_t aligned width of the image.
  */
-DWORD CxImage::GetEffWidth() const
+size_t CxImage::GetEffWidth() const
 {
-	return info.dwEffWidth;
+	return (size_t)info.dwEffWidth;
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
  * \return 2, 16, 256; 0 for RGB images.
  */
-DWORD CxImage::GetNumColors() const
+uint32_t CxImage::GetNumColors() const
 {
 	return head.biClrUsed;
 }
@@ -198,7 +207,7 @@ DWORD CxImage::GetNumColors() const
 /**
  * \return: 1, 4, 8, 24.
  */
-WORD CxImage::GetBpp() const
+uint16_t CxImage::GetBpp() const
 {
 	return head.biBitCount;
 }
@@ -207,7 +216,7 @@ WORD CxImage::GetBpp() const
  * \return original image format
  * \sa ENUM_CXIMAGE_FORMATS.
  */
-DWORD CxImage::GetType() const
+uint32_t CxImage::GetType() const
 {
 	return info.dwType;
 }
@@ -216,7 +225,7 @@ DWORD CxImage::GetType() const
  * change image format identifier
  * \sa ENUM_CXIMAGE_FORMATS.
  */
-bool CxImage::SetType(DWORD type)
+bool CxImage::SetType(uint32_t type)
 {
 	switch (type){
 #if CXIMAGE_SUPPORT_BMP
@@ -276,19 +285,24 @@ bool CxImage::SetType(DWORD type)
 #if CXIMAGE_SUPPORT_RAW
 	case CXIMAGE_FORMAT_RAW:
 #endif
+#if CXIMAGE_SUPPORT_PSD
+	case CXIMAGE_FORMAT_PSD:
+#endif
 		info.dwType = type;
 		return true;
+	case CXIMAGE_FORMAT_UNKNOWN:
+	default:
+		info.dwType = CXIMAGE_FORMAT_UNKNOWN;
 	}
-	info.dwType = CXIMAGE_FORMAT_UNKNOWN;
 	return false;
 }
 ////////////////////////////////////////////////////////////////////////////////
-DWORD CxImage::GetNumTypes()
+uint32_t CxImage::GetNumTypes()
 {
 	return CMAX_IMAGE_FORMATS-1;
 }
 ////////////////////////////////////////////////////////////////////////////////
-DWORD CxImage::GetTypeIdFromName(const TCHAR* ext)
+uint32_t CxImage::GetTypeIdFromName(const TCHAR* ext)
 {
 #if CXIMAGE_SUPPORT_BMP
 	if (_tcsnicmp(ext,_T("bmp"),3)==0 )		return CXIMAGE_FORMAT_BMP;
@@ -353,6 +367,9 @@ DWORD CxImage::GetTypeIdFromName(const TCHAR* ext)
 #if CXIMAGE_SUPPORT_SKA
 	if (_tcsnicmp(ext,_T("ska"),3)==0 )		return CXIMAGE_FORMAT_SKA;
 #endif
+#if CXIMAGE_SUPPORT_PSD
+	if (_tcsnicmp(ext,_T("psd"),3)==0 )		return CXIMAGE_FORMAT_PSD;
+#endif
 #if CXIMAGE_SUPPORT_RAW
 	if (_tcsnicmp(ext,_T("nef"),3)==0 ||
 		_tcsnicmp(ext,_T("crw"),3)==0 ||
@@ -375,9 +392,9 @@ DWORD CxImage::GetTypeIdFromName(const TCHAR* ext)
 	return CXIMAGE_FORMAT_UNKNOWN;
 }
 ////////////////////////////////////////////////////////////////////////////////
-DWORD CxImage::GetTypeIdFromIndex(const DWORD index)
+uint32_t CxImage::GetTypeIdFromIndex(const uint32_t index)
 {
-	DWORD n;
+	uint32_t n;
 
 	n=0; if (index == n) return CXIMAGE_FORMAT_UNKNOWN;
 #if CXIMAGE_SUPPORT_BMP
@@ -437,13 +454,16 @@ DWORD CxImage::GetTypeIdFromIndex(const DWORD index)
 #if CXIMAGE_SUPPORT_RAW
 	n++; if (index == n) return CXIMAGE_FORMAT_RAW;
 #endif
+#if CXIMAGE_SUPPORT_PSD
+	n++; if (index == n) return CXIMAGE_FORMAT_PSD;
+#endif
 
 	return CXIMAGE_FORMAT_UNKNOWN;
 }
 ////////////////////////////////////////////////////////////////////////////////
-DWORD CxImage::GetTypeIndexFromId(const DWORD id)
+uint32_t CxImage::GetTypeIndexFromId(const uint32_t id)
 {
-	DWORD n;
+	uint32_t n;
 
 	n=0; if (id == CXIMAGE_FORMAT_UNKNOWN) return n;
 #if CXIMAGE_SUPPORT_BMP
@@ -503,6 +523,9 @@ DWORD CxImage::GetTypeIndexFromId(const DWORD id)
 #if CXIMAGE_SUPPORT_RAW
 	n++; if (id == CXIMAGE_FORMAT_RAW) return n;
 #endif
+#if CXIMAGE_SUPPORT_PSD
+	n++; if (id == CXIMAGE_FORMAT_PSD) return n;
+#endif
 
 	return 0;
 }
@@ -510,7 +533,7 @@ DWORD CxImage::GetTypeIndexFromId(const DWORD id)
 /**
  * \return current frame delay in milliseconds. Only for GIF and MNG formats.
  */
-DWORD CxImage::GetFrameDelay() const
+uint32_t CxImage::GetFrameDelay() const
 {
 	return info.dwFrameDelay;
 }
@@ -519,18 +542,18 @@ DWORD CxImage::GetFrameDelay() const
  * Sets current frame delay. Only for GIF format.
  * \param d = delay in milliseconds
  */
-void CxImage::SetFrameDelay(DWORD d)
+void CxImage::SetFrameDelay(uint32_t d)
 {
 	info.dwFrameDelay=d;
 }
 ////////////////////////////////////////////////////////////////////////////////
-void CxImage::GetOffset(long *x,long *y)
+void CxImage::GetOffset(int32_t *x,int32_t *y) const
 {
 	*x=info.xOffset;
 	*y=info.yOffset;
 }
 ////////////////////////////////////////////////////////////////////////////////
-void CxImage::SetOffset(long x,long y)
+void CxImage::SetOffset(int32_t x,int32_t y)
 {
 	info.xOffset=x;
 	info.yOffset=y;
@@ -540,9 +563,9 @@ void CxImage::SetOffset(long x,long y)
  * \sa SetJpegQuality, GetJpegQualityF
  * \author [DP]; changes [Stefan Schürmans]
  */
-BYTE CxImage::GetJpegQuality() const
+uint8_t CxImage::GetJpegQuality() const
 {
-	return (BYTE)(info.fQuality + 0.5f);
+	return (uint8_t)(info.fQuality + 0.5f);
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
@@ -559,7 +582,7 @@ float CxImage::GetJpegQualityF() const
  * \param q: can be from 0 to 100
  * \author [DP]; changes [Stefan Schürmans]
  */
-void CxImage::SetJpegQuality(BYTE q){
+void CxImage::SetJpegQuality(uint8_t q){
 	info.fQuality = (float)q;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -577,7 +600,7 @@ void CxImage::SetJpegQualityF(float q){
 /**
  * \sa SetJpegScale
  */
-BYTE CxImage::GetJpegScale() const
+uint8_t CxImage::GetJpegScale() const
 {
 	return info.nJpegScale;
 }
@@ -586,7 +609,7 @@ BYTE CxImage::GetJpegScale() const
  * scaling down during JPEG decoding valid numbers are 1, 2, 4, 8
  * \author [ignacio]
  */
-void CxImage::SetJpegScale(BYTE q){
+void CxImage::SetJpegScale(uint8_t q){
 	info.nJpegScale = q;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -595,7 +618,7 @@ void CxImage::SetJpegScale(BYTE q){
  * \return value is from 0 to 100.
  * \sa SetProgress
  */
-long CxImage::GetProgress() const
+int32_t CxImage::GetProgress() const
 {
 	return info.nProgress;
 }
@@ -604,7 +627,7 @@ long CxImage::GetProgress() const
  * \return the escape code.
  * \sa SetEscape
  */
-long CxImage::GetEscape() const
+int32_t CxImage::GetEscape() const
 {
 	return info.nEscape;
 }
@@ -614,23 +637,23 @@ long CxImage::GetEscape() const
  * \param p should be from 0 to 100.
  * \sa GetProgress
  */
-void CxImage::SetProgress(long p)
+void CxImage::SetProgress(int32_t p)
 {
 	info.nProgress = p;
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
  * Used to quit the slow loops or the codecs.
- * - SetEscape(-1) before Decode forces the function to exit, right after  
+ * - SetEscape(-1) before Decode forces the function to exit, right after
  *   the image width and height are available ( for bmp, jpg, gif, tif )
  */
-void CxImage::SetEscape(long i)
+void CxImage::SetEscape(int32_t i)
 {
 	info.nEscape = i;
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
- * Checks if the image is correctly initializated.
+ * Checks if the image is correctly initialized.
  */
 bool CxImage::IsValid() const
 {
@@ -659,7 +682,7 @@ void CxImage::Enable(bool enable)
  * to get the number of images without loading the first image.
  * \return the number of images in the file.
  */
-long CxImage::GetNumFrames() const
+int32_t CxImage::GetNumFrames() const
 {
 	return info.nNumFrames;
 }
@@ -667,7 +690,7 @@ long CxImage::GetNumFrames() const
 /**
  * \return the current selected image (zero-based index).
  */
-long CxImage::GetFrame() const
+int32_t CxImage::GetFrame() const
 {
 	return info.nFrame;
 }
@@ -675,7 +698,7 @@ long CxImage::GetFrame() const
 /**
  * Sets the image number that the next Decode() / Load() call will load
  */
-void CxImage::SetFrame(long nFrame){
+void CxImage::SetFrame(int32_t nFrame){
 	info.nFrame=nFrame;
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -683,7 +706,7 @@ void CxImage::SetFrame(long nFrame){
  * Sets the method for drawing the frame related to others
  * \sa GetDisposalMethod
  */
-void CxImage::SetDisposalMethod(BYTE dm)
+void CxImage::SetDisposalMethod(uint8_t dm)
 {	info.dispmeth=dm; }
 ////////////////////////////////////////////////////////////////////////////////
 /**
@@ -699,7 +722,7 @@ void CxImage::SetDisposalMethod(BYTE dm)
  *                   what was there prior to rendering the graphic.
  *             4-7 -    To be defined.
  */
-BYTE CxImage::GetDisposalMethod() const
+uint8_t CxImage::GetDisposalMethod() const
 {	return info.dispmeth; }
 ////////////////////////////////////////////////////////////////////////////////
 bool CxImage::GetRetreiveAllFrames() const
@@ -708,7 +731,7 @@ bool CxImage::GetRetreiveAllFrames() const
 void CxImage::SetRetreiveAllFrames(bool flag)
 {	info.bGetAllFrames = flag; }
 ////////////////////////////////////////////////////////////////////////////////
-CxImage * CxImage::GetFrame(long nFrame) const
+CxImage * CxImage::GetFrame(int32_t nFrame) const
 {
 	if ( ppFrames == NULL) return NULL;
 	if ( info.nNumFrames == 0) return NULL;
@@ -717,76 +740,82 @@ CxImage * CxImage::GetFrame(long nFrame) const
 	return ppFrames[nFrame];
 }
 ////////////////////////////////////////////////////////////////////////////////
-short CxImage::ntohs(const short word)
+int16_t CxImage::m_ntohs(const int16_t word) const
 {
 	if (info.bLittleEndianHost) return word;
 	return ( (word & 0xff) << 8 ) | ( (word >> 8) & 0xff );
 }
 ////////////////////////////////////////////////////////////////////////////////
-long CxImage::ntohl(const long dword)
+int32_t CxImage::m_ntohl(const int32_t dword) const
 {
 	if (info.bLittleEndianHost) return dword;
 	return  ((dword & 0xff) << 24 ) | ((dword & 0xff00) << 8 ) |
 			((dword >> 8) & 0xff00) | ((dword >> 24) & 0xff);
 }
 ////////////////////////////////////////////////////////////////////////////////
-void CxImage::bihtoh(BITMAPINFOHEADER* bih)
+void CxImage::bihtoh(BITMAPINFOHEADER* bih) const
 {
-	bih->biSize = ntohl(bih->biSize);
-	bih->biWidth = ntohl(bih->biWidth);
-	bih->biHeight = ntohl(bih->biHeight);
-	bih->biPlanes = ntohs(bih->biPlanes);
-	bih->biBitCount = ntohs(bih->biBitCount);
-	bih->biCompression = ntohl(bih->biCompression);
-	bih->biSizeImage = ntohl(bih->biSizeImage);
-	bih->biXPelsPerMeter = ntohl(bih->biXPelsPerMeter);
-	bih->biYPelsPerMeter = ntohl(bih->biYPelsPerMeter);
-	bih->biClrUsed = ntohl(bih->biClrUsed);
-	bih->biClrImportant = ntohl(bih->biClrImportant);
+	bih->biSize = m_ntohl(bih->biSize);
+	bih->biWidth = m_ntohl(bih->biWidth);
+	bih->biHeight = m_ntohl(bih->biHeight);
+	bih->biPlanes = m_ntohs(bih->biPlanes);
+	bih->biBitCount = m_ntohs(bih->biBitCount);
+	bih->biCompression = m_ntohl(bih->biCompression);
+	bih->biSizeImage = m_ntohl(bih->biSizeImage);
+	bih->biXPelsPerMeter = m_ntohl(bih->biXPelsPerMeter);
+	bih->biYPelsPerMeter = m_ntohl(bih->biYPelsPerMeter);
+	bih->biClrUsed = m_ntohl(bih->biClrUsed);
+	bih->biClrImportant = m_ntohl(bih->biClrImportant);
 }
 ////////////////////////////////////////////////////////////////////////////////
 /**
  * Returns the last reported error.
  */
-const char* CxImage::GetLastError()
+const char* CxImage::GetLastError() const
 {
 	return info.szLastError;
 }
 ////////////////////////////////////////////////////////////////////////////////
-#if CXIMAGE_SUPPORT_LAYERS
-DWORD CxImage::DumpSize()
+size_t CxImage::DumpSize() const
 {
-	DWORD n;
-	n = sizeof(BITMAPINFOHEADER) + sizeof(CXIMAGEINFO) + GetSize();
+	size_t n = sizeof(BITMAPINFOHEADER) + sizeof(CXIMAGEINFO) + GetSize();
 
-	if (pAlpha){
+#if CXIMAGE_SUPPORT_ALPHA
+	if (pAlpha)
 		n += 1 + head.biWidth * head.biHeight;
-	} else n++;
+	else
+		++n;
+#endif
 
-	if (pSelection){
+#if CXIMAGE_SUPPORT_SELECTION
+	if (pSelection)
 		n += 1 + head.biWidth * head.biHeight;
-	} else n++;
+	else
+		++n;
+#endif
 
+#if CXIMAGE_SUPPORT_LAYERS
 	if (ppLayers){
-		for (long m=0; m<GetNumLayers(); m++){
+		for (int32_t m=0; m<GetNumLayers(); m++){
 			if (GetLayer(m)){
 				n += 1 + GetLayer(m)->DumpSize();
 			}
 		}
-	} else n++;
+	} else
+		++n;
+#endif
 
-	if (ppFrames){
-		for (long m=0; m<GetNumFrames(); m++){
-			if (GetFrame(m)){
+	if (ppFrames) {
+		for (int32_t m=0; m<GetNumFrames(); m++)
+			if (GetFrame(m))
 				n += 1 + GetFrame(m)->DumpSize();
-			}
-		}
-	} else n++;
+	} else
+		++n;
 
 	return n;
 }
 ////////////////////////////////////////////////////////////////////////////////
-DWORD CxImage::Dump(BYTE * dst)
+size_t CxImage::Dump(uint8_t * dst)
 {
 	if (!dst) return 0;
 
@@ -799,6 +828,7 @@ DWORD CxImage::Dump(BYTE * dst)
 	memcpy(dst,pDib,GetSize());
 	dst += GetSize();
 
+#if CXIMAGE_SUPPORT_ALPHA
 	if (pAlpha){
 		memset(dst++, 1, 1);
 		memcpy(dst,pAlpha,head.biWidth * head.biHeight);
@@ -806,7 +836,9 @@ DWORD CxImage::Dump(BYTE * dst)
 	} else {
 		memset(dst++, 0, 1);
 	}
+#endif
 
+#if CXIMAGE_SUPPORT_SELECTION
 	if (pSelection){
 		memset(dst++, 1, 1);
 		memcpy(dst,pSelection,head.biWidth * head.biHeight);
@@ -814,10 +846,12 @@ DWORD CxImage::Dump(BYTE * dst)
 	} else {
 		memset(dst++, 0, 1);
 	}
+#endif
 
+#if CXIMAGE_SUPPORT_LAYERS
 	if (ppLayers){
 		memset(dst++, 1, 1);
-		for (long m=0; m<GetNumLayers(); m++){
+		for (int32_t m=0; m<GetNumLayers(); m++){
 			if (GetLayer(m)){
 				dst += GetLayer(m)->Dump(dst);
 			}
@@ -825,10 +859,11 @@ DWORD CxImage::Dump(BYTE * dst)
 	} else {
 		memset(dst++, 0, 1);
 	}
+#endif
 
 	if (ppFrames){
 		memset(dst++, 1, 1);
-		for (long m=0; m<GetNumFrames(); m++){
+		for (int32_t m=0; m<GetNumFrames(); m++){
 			if (GetFrame(m)){
 				dst += GetFrame(m)->Dump(dst);
 			}
@@ -840,7 +875,7 @@ DWORD CxImage::Dump(BYTE * dst)
 	return DumpSize();
 }
 ////////////////////////////////////////////////////////////////////////////////
-DWORD CxImage::UnDump(const BYTE * src)
+size_t CxImage::UnDump(const uint8_t * src)
 {
 	if (!src)
 		return 0;
@@ -849,7 +884,7 @@ DWORD CxImage::UnDump(const BYTE * src)
 	if (!DestroyFrames())
 		return 0;
 
-	DWORD n = 0;
+	size_t n = 0;
 
 	memcpy(&head,src,sizeof(BITMAPINFOHEADER));
 	n += sizeof(BITMAPINFOHEADER);
@@ -863,13 +898,16 @@ DWORD CxImage::UnDump(const BYTE * src)
 	memcpy(pDib,&src[n],GetSize());
 	n += GetSize();
 
+#if CXIMAGE_SUPPORT_ALPHA
 	if (src[n++]){
 		if (AlphaCreate()){
 			memcpy(pAlpha, &src[n], head.biWidth * head.biHeight);
 		}
 		n += head.biWidth * head.biHeight;
 	}
+#endif
 
+#if CXIMAGE_SUPPORT_SELECTION
 	if (src[n++]){
 		RECT box = info.rSelectionBox;
 		if (SelectionCreate()){
@@ -878,18 +916,21 @@ DWORD CxImage::UnDump(const BYTE * src)
 		}
 		n += head.biWidth * head.biHeight;
 	}
+#endif
 
+#if CXIMAGE_SUPPORT_LAYERS
 	if (src[n++]){
 		ppLayers = new CxImage*[info.nNumLayers];
-		for (long m=0; m<GetNumLayers(); m++){
+		for (int32_t m=0; m<GetNumLayers(); m++){
 			ppLayers[m] = new CxImage();
 			n += ppLayers[m]->UnDump(&src[n]);
 		}
 	}
+#endif
 
 	if (src[n++]){
-		ppFrames = new CxImage*[info.nNumFrames];
-		for (long m=0; m<GetNumFrames(); m++){
+		ppFrames = (CxImage **)new CxImage*[info.nNumFrames];
+		for (int32_t m=0; m<GetNumFrames(); m++){
 			ppFrames[m] = new CxImage();
 			n += ppFrames[m]->UnDump(&src[n]);
 		}
@@ -897,7 +938,6 @@ DWORD CxImage::UnDump(const BYTE * src)
 
 	return n;
 }
-#endif
 ////////////////////////////////////////////////////////////////////////////////
 /**
  * \return A.BBCCCDDDD
@@ -908,12 +948,12 @@ DWORD CxImage::UnDump(const BYTE * src)
  */
 const float CxImage::GetVersionNumber()
 {
-	return 6.000000015f;
+	return 7.000030000f;
 }
 ////////////////////////////////////////////////////////////////////////////////
 const TCHAR* CxImage::GetVersion()
 {
-	static const TCHAR CxImageVersion[] = _T("CxImage 6.0.0");
+	static const TCHAR CxImageVersion[] = _T("CxImage 7.0.3");
 	return (CxImageVersion);
 }
 ////////////////////////////////////////////////////////////////////////////////

@@ -2,7 +2,7 @@
  * File:	ximaska.cpp
  * Purpose:	Platform Independent SKA Image Class Loader and Writer
  * 25/Sep/2007 Davide Pizzolato - www.xdp.it
- * CxImage version 6.0.0 02/Feb/2008
+ * CxImage version 7.0.3 08/Feb/2019
  */
 
 #include "ximaska.h"
@@ -21,9 +21,9 @@ bool CxImageSKA::Decode(CxFile *hFile)
 	SKAHEADER ska_header;
 	hFile->Read(&ska_header,sizeof(SKAHEADER),1);
 
-    ska_header.Width = ntohs(ska_header.Width);
-    ska_header.Height = ntohs(ska_header.Height);
-    ska_header.dwUnknown = ntohl(ska_header.dwUnknown);
+    ska_header.Width = m_ntohs(ska_header.Width);
+    ska_header.Height = m_ntohs(ska_header.Height);
+    ska_header.dwUnknown = m_ntohl(ska_header.dwUnknown);
 
 	// check header
 	if (ska_header.dwUnknown != 0x01000000 ||
@@ -38,14 +38,14 @@ bool CxImageSKA::Decode(CxFile *hFile)
 		return true;
 	}
 
-	int bpp = 1<<ska_header.BppExp;
+	int32_t bpp = 1<<ska_header.BppExp;
 
 	Create(ska_header.Width,ska_header.Height,bpp,CXIMAGE_FORMAT_SKA);
 	if (!IsValid())
 		return false;
 
 	// read the palette
-	int nColors = 1<<bpp;
+	int32_t nColors = 1<<bpp;
 	rgb_color* ppal = (rgb_color*)malloc(nColors*sizeof(rgb_color));
 	if (!ppal) return false;
 	hFile->Read(ppal,nColors*sizeof(rgb_color),1);
@@ -57,10 +57,10 @@ bool CxImageSKA::Decode(CxFile *hFile)
 
 	//reorder rows
 	if (GetEffWidth() != ska_header.Width){
-		BYTE *src,*dst;
+		uint8_t *src,*dst;
 		src = GetBits() + ska_header.Width*(ska_header.Height-1);
 		dst = GetBits(ska_header.Height-1);
-		for(int y=0;y<ska_header.Height;y++){
+		for(int32_t y=0;y<ska_header.Height;y++){
 			memcpy(dst,src,ska_header.Width);
 			src -= ska_header.Width;
 			dst -= GetEffWidth();
@@ -87,32 +87,32 @@ bool CxImageSKA::Encode(CxFile * hFile)
 
 	SKAHEADER ska_header;
 
-	ska_header.Width = (unsigned short)GetWidth();
-	ska_header.Height = (unsigned short)GetHeight();
+	ska_header.Width = (uint16_t)GetWidth();
+	ska_header.Height = (uint16_t)GetHeight();
 	ska_header.BppExp = 3;
 	ska_header.dwUnknown = 0x01000000;
 
-    ska_header.Width = ntohs(ska_header.Width);
-    ska_header.Height = ntohs(ska_header.Height);
-    ska_header.dwUnknown = ntohl(ska_header.dwUnknown);
+    ska_header.Width = m_ntohs(ska_header.Width);
+    ska_header.Height = m_ntohs(ska_header.Height);
+    ska_header.dwUnknown = m_ntohl(ska_header.dwUnknown);
 
 	hFile->Write(&ska_header,sizeof(SKAHEADER),1);
 
-    ska_header.Width = ntohs(ska_header.Width);
-    ska_header.Height = ntohs(ska_header.Height);
-    ska_header.dwUnknown = ntohl(ska_header.dwUnknown);
+    ska_header.Width = m_ntohs(ska_header.Width);
+    ska_header.Height = m_ntohs(ska_header.Height);
+    ska_header.dwUnknown = m_ntohl(ska_header.dwUnknown);
 
 	if (head.biBitCount<8) IncreaseBpp(8);
 
 	rgb_color pal[256];
-	for(int idx=0; idx<256; idx++){
+	for(int32_t idx=0; idx<256; idx++){
 		GetPaletteColor(idx,&(pal[idx].r),&(pal[idx].g),&(pal[idx].b));
 	}
 
 	hFile->Write(pal,256*sizeof(rgb_color),1);
 
-	BYTE* src = GetBits(ska_header.Height-1);
-	for(int y=0;y<ska_header.Height;y++){
+	uint8_t* src = GetBits(ska_header.Height-1);
+	for(int32_t y=0;y<ska_header.Height;y++){
 		hFile->Write(src,ska_header.Width,1);
 		src -= GetEffWidth();
 	}

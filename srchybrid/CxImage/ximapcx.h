@@ -26,14 +26,14 @@ typedef struct tagPCXHEADER
   char Version;			// version number
   char Encoding;		// always 1
   char BitsPerPixel;	// color bits
-  WORD Xmin, Ymin;		// image origin
-  WORD Xmax, Ymax;		// image dimensions
-  WORD Hres, Vres;		// resolution values
-  BYTE ColorMap[16][3];	// color palette
+  uint16_t Xmin, Ymin;		// image origin
+  uint16_t Xmax, Ymax;		// image dimensions
+  uint16_t Hres, Vres;		// resolution values
+  uint8_t ColorMap[16][3];	// color palette
   char Reserved;
   char ColorPlanes;		// color planes
-  WORD BytesPerLine;	// line buffer size
-  WORD PaletteType;		// grey or color palette
+  uint16_t BytesPerLine;	// line buffer size
+  uint16_t PaletteType;		// grey or color palette
   char Filter[58];
 } PCXHEADER;
 #pragma pack()
@@ -51,11 +51,11 @@ public:
 	bool Encode(FILE *hFile) { CxIOFile file(hFile); return Encode(&file); }
 #endif // CXIMAGE_SUPPORT_ENCODE
 protected:
-	bool PCX_PlanesToPixels(BYTE * pixels, BYTE * bitplanes, short bytesperline, short planes, short bitsperpixel);
-	bool PCX_UnpackPixels(BYTE * pixels, BYTE * bitplanes, short bytesperline, short planes, short bitsperpixel);
-	void PCX_PackPixels(const long p,BYTE &c, BYTE &n, CxFile &f);
-	void PCX_PackPlanes(BYTE* buff, const long size, CxFile &f);
-	void PCX_PixelsToPlanes(BYTE* raw, long width, BYTE* buf, long plane);
+	bool PCX_PlanesToPixels(uint8_t * pixels, uint8_t * bitplanes, int16_t bytesperline, int16_t planes, int16_t bitsperpixel);
+	bool PCX_UnpackPixels(uint8_t * pixels, uint8_t * bitplanes, int16_t bytesperline, int16_t planes, int16_t bitsperpixel);
+	void PCX_PackPixels(const int32_t p,uint8_t &c, uint8_t &n, CxFile &f);
+	void PCX_PackPlanes(uint8_t* buff, const int32_t size, CxFile &f);
+	void PCX_PixelsToPlanes(uint8_t* raw, int32_t width, uint8_t* buf, int32_t plane);
 	void PCX_toh(PCXHEADER* p);
 };
 

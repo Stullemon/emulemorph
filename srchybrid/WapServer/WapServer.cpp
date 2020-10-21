@@ -4059,7 +4059,7 @@ void CWapServer::SendImageFile(WapThreadData Data, CString filename){
 			if(cImage && cImage->Load(wbmpFile,CXIMAGE_FORMAT_WBMP)){
 				BYTE * bufferPNG = NULL;
 				BYTE * bufferGIF = NULL;
-				long sizePNG = 0, sizeGIF = 0, sizeWBMP = 0;
+				int32_t sizePNG = 0, sizeGIF = 0, sizeWBMP = 0;
 
 				if(png) cImage->Encode(bufferPNG, sizePNG, CXIMAGE_FORMAT_PNG);
 				
@@ -4356,7 +4356,7 @@ void CWapServer::SendSmallestCxImage(WapThreadData Data, CxImage *cImage){
 		cImage->DecreaseBpp(4,true);
 	}
 	
-	long sizePNG = 0, sizeGIF = 0, sizeWBMP = 0;
+	int32_t sizePNG = 0, sizeGIF = 0, sizeWBMP = 0;
 	BYTE * bufferPNG = NULL;
 	BYTE * bufferGIF = NULL;
 	BYTE * bufferWBMP = NULL;

@@ -41,20 +41,20 @@ public:
 
 #if CXIMAGE_SUPPORT_ENCODE
 	bool Encode(CxFile * hFile, bool bAppend=false);
-	bool Encode(CxFile * hFile, CxImage ** pImages, int pagecount);
+	bool Encode(CxFile * hFile, CxImage ** pImages, int32_t pagecount);
 	bool Encode(FILE *hFile, bool bAppend=false) { CxIOFile file(hFile); return Encode(&file,bAppend); }
-	bool Encode(FILE *hFile, CxImage ** pImages, int pagecount)
+	bool Encode(FILE *hFile, CxImage ** pImages, int32_t pagecount)
 				{ CxIOFile file(hFile); return Encode(&file, pImages, pagecount); }
 #endif // CXIMAGE_SUPPORT_ENCODE
 
 protected:
-	void TileToStrip(uint8* out, uint8* in,	uint32 rows, uint32 cols, int outskew, int inskew);
-	bool EncodeBody(TIFF *m_tif, bool multipage=false, int page=0, int pagecount=0);
+	void TileToStrip(uint8* out, uint8* in,	uint32 rows, uint32 cols, int32_t outskew, int32_t inskew);
+	bool EncodeBody(TIFF *m_tif, bool multipage=false, int32_t page=0, int32_t pagecount=0);
 	TIFF *m_tif2;
 	bool m_multipage;
-	int  m_pages;
-	void MoveBits( BYTE* dest, BYTE* from, int count, int bpp );
-	void MoveBitsPal( BYTE* dest, BYTE*from, int count, int bpp, RGBQUAD* pal );
+	int32_t  m_pages;
+	void MoveBits( uint8_t* dest, uint8_t* from, int32_t count, int32_t bpp );
+	void MoveBitsPal( uint8_t* dest, uint8_t*from, int32_t count, int32_t bpp, RGBQUAD* pal );
 };
 
 #endif

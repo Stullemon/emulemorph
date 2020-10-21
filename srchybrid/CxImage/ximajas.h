@@ -16,21 +16,25 @@
 
 #if CXIMAGE_SUPPORT_JASPER
 
-#include "../jasper/include/jasper/jasper.h"
+#ifdef _LINUX
+ #include <jasper/jasper.h>
+#else
+ #include "../jasper/include/jasper/jasper.h"
+#endif
 
 class CxImageJAS: public CxImage
 {
 public:
-	CxImageJAS(): CxImage((DWORD)0) {}	// <vho> cast to DWORD
+	CxImageJAS(): CxImage((uint32_t)0) {}	// <vho> cast to uint32_t
 
 //	bool Load(const TCHAR * imageFileName){ return CxImage::Load(imageFileName,0);}
 //	bool Save(const TCHAR * imageFileName){ return CxImage::Save(imageFileName,0);}
-	bool Decode(CxFile * hFile, DWORD imagetype = 0);
-	bool Decode(FILE *hFile, DWORD imagetype = 0) { CxIOFile file(hFile); return Decode(&file,imagetype); }
+	bool Decode(CxFile * hFile, uint32_t imagetype = 0);
+	bool Decode(FILE *hFile, uint32_t imagetype = 0) { CxIOFile file(hFile); return Decode(&file,imagetype); }
 
 #if CXIMAGE_SUPPORT_ENCODE
-	bool Encode(CxFile * hFile, DWORD imagetype = 0);
-	bool Encode(FILE *hFile, DWORD imagetype = 0) { CxIOFile file(hFile); return Encode(&file,imagetype); }
+	bool Encode(CxFile * hFile, uint32_t imagetype = 0);
+	bool Encode(FILE *hFile, uint32_t imagetype = 0) { CxIOFile file(hFile); return Encode(&file,imagetype); }
 #endif // CXIMAGE_SUPPORT_ENCODE
 protected:
 
@@ -61,13 +65,13 @@ protected:
 
 			// <vho> - end
 		}
-		static int JasRead(jas_stream_obj_t *obj, char *buf, int cnt)
+		static int32_t JasRead(jas_stream_obj_t *obj, char *buf, int32_t cnt)
 		{		return ((CxFile*)obj)->Read(buf,1,cnt); }
-		static int JasWrite(jas_stream_obj_t *obj, char *buf, int cnt)
+		static int32_t JasWrite(jas_stream_obj_t *obj, char *buf, int32_t cnt)
 		{		return ((CxFile*)obj)->Write(buf,1,cnt); }
-		static long JasSeek(jas_stream_obj_t *obj, long offset, int origin)
+		static long JasSeek(jas_stream_obj_t *obj, long offset, int32_t origin)
 		{		return ((CxFile*)obj)->Seek(offset,origin); }
-		static int JasClose(jas_stream_obj_t * /*obj*/)
+		static int32_t JasClose(jas_stream_obj_t * /*obj*/)
 		{		return 1; }
 
 	// <vho>

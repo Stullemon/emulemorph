@@ -1,17 +1,18 @@
 #include "xmemfile.h"
 
 //////////////////////////////////////////////////////////
-CxMemFile::CxMemFile(BYTE* pBuffer, DWORD size)
+CxMemFile::CxMemFile(uint8_t* pBuffer, uint32_t size)
 {
 	m_pBuffer = pBuffer;
 	m_Position = 0;
 	m_Size = m_Edge = size;
 	m_bFreeOnClose = (bool)(pBuffer==0);
+	m_bEOF = false;
 }
 //////////////////////////////////////////////////////////
 CxMemFile::~CxMemFile()
 {
-	Close();
+	CxMemFile::Close();
 }
 //////////////////////////////////////////////////////////
 bool CxMemFile::Close()
@@ -29,15 +30,15 @@ bool CxMemFile::Open()
 	if (m_pBuffer) return false;	// Can't re-open without closing first
 
 	m_Position = m_Size = m_Edge = 0;
-	m_pBuffer=(BYTE*)malloc(1);
+	m_pBuffer=(uint8_t*)malloc(1);
 	m_bFreeOnClose = true;
 
 	return (m_pBuffer!=0);
 }
 //////////////////////////////////////////////////////////
-BYTE* CxMemFile::GetBuffer(bool bDetachBuffer)
+uint8_t* CxMemFile::GetBuffer(bool bDetachBuffer)
 {
-	//can only detach, avoid inadvertantly attaching to
+	//can only detach, avoid inadvertently attaching to
 	// memory that may not be ours [Jason De Arte]
 	if( bDetachBuffer )
 		m_bFreeOnClose = false;
@@ -49,15 +50,19 @@ size_t CxMemFile::Read(void *buffer, size_t size, size_t count)
 	if (buffer==NULL) return 0;
 
 	if (m_pBuffer==NULL) return 0;
-	if (m_Position >= (long)m_Size) return 0;
+	if (m_Position >= (int32_t)m_Size){
+		m_bEOF = true;
+		return 0;
+	}
 
-	long nCount = (long)(count*size);
+	int32_t nCount = (int32_t)(count*size);
 	if (nCount == 0) return 0;
 
-	long nRead;
-	if (m_Position + nCount > (long)m_Size)
+	int32_t nRead;
+	if (m_Position + nCount > (int32_t)m_Size){
+		m_bEOF = true;
 		nRead = (m_Size - m_Position);
-	else
+	} else
 		nRead = nCount;
 
 	memcpy(buffer, m_pBuffer + m_Position, nRead);
@@ -68,15 +73,16 @@ size_t CxMemFile::Read(void *buffer, size_t size, size_t count)
 //////////////////////////////////////////////////////////
 size_t CxMemFile::Write(const void *buffer, size_t size, size_t count)
 {
+	m_bEOF = false;
 	if (m_pBuffer==NULL) return 0;
 	if (buffer==NULL) return 0;
 
-	long nCount = (long)(count*size);
+	int32_t nCount = (int32_t)(count*size);
 	if (nCount == 0) return 0;
 
 	if (m_Position + nCount > m_Edge){
 		if (!Alloc(m_Position + nCount)){
-			return false;
+			return 0;
 		}
 	}
 
@@ -84,15 +90,16 @@ size_t CxMemFile::Write(const void *buffer, size_t size, size_t count)
 
 	m_Position += nCount;
 
-	if (m_Position > (long)m_Size) m_Size = m_Position;
-	
+	if (m_Position > (int32_t)m_Size) m_Size = m_Position;
+
 	return count;
 }
 //////////////////////////////////////////////////////////
-bool CxMemFile::Seek(long offset, int origin)
+bool CxMemFile::Seek(int32_t offset, int32_t origin)
 {
+	m_bEOF = false;
 	if (m_pBuffer==NULL) return false;
-	long lNewPos = m_Position;
+	int32_t lNewPos = m_Position;
 
 	if (origin == SEEK_SET)		 lNewPos = offset;
 	else if (origin == SEEK_CUR) lNewPos += offset;
@@ -105,13 +112,13 @@ bool CxMemFile::Seek(long offset, int origin)
 	return true;
 }
 //////////////////////////////////////////////////////////
-long CxMemFile::Tell()
+int32_t CxMemFile::Tell()
 {
 	if (m_pBuffer==NULL) return -1;
 	return m_Position;
 }
 //////////////////////////////////////////////////////////
-long CxMemFile::Size()
+int32_t CxMemFile::Size()
 {
 	if (m_pBuffer==NULL) return -1;
 	return m_Size;
@@ -126,17 +133,18 @@ bool CxMemFile::Flush()
 bool CxMemFile::Eof()
 {
 	if (m_pBuffer==NULL) return true;
-	return (m_Position >= (long)m_Size);
+	return m_bEOF;
 }
 //////////////////////////////////////////////////////////
-long CxMemFile::Error()
+int32_t CxMemFile::Error()
 {
 	if (m_pBuffer==NULL) return -1;
-	return (m_Position > (long)m_Size);
+	return (m_Position > (int32_t)m_Size);
 }
 //////////////////////////////////////////////////////////
-bool CxMemFile::PutC(unsigned char c)
+bool CxMemFile::PutC(uint8_t c)
 {
+	m_bEOF = false;
 	if (m_pBuffer==NULL) return false;
 
 	if (m_Position >= m_Edge){
@@ -147,23 +155,26 @@ bool CxMemFile::PutC(unsigned char c)
 
 	m_pBuffer[m_Position++] = c;
 
-	if (m_Position > (long)m_Size) m_Size = m_Position;
-	
+	if (m_Position > (int32_t)m_Size) m_Size = m_Position;
+
 	return true;
 }
 //////////////////////////////////////////////////////////
-long CxMemFile::GetC()
+int32_t CxMemFile::GetC()
 {
-	if (Eof()) return EOF;
-	return *(BYTE*)((BYTE*)m_pBuffer + m_Position++);
+	if (m_pBuffer==NULL || m_Position >= (int32_t)m_Size){
+		m_bEOF = true;
+		return EOF;
+	}
+	return *(uint8_t*)((uint8_t*)m_pBuffer + m_Position++);
 }
 //////////////////////////////////////////////////////////
-char * CxMemFile::GetS(char *string, int n)
+char * CxMemFile::GetS(char *string, int32_t n)
 {
 	n--;
-	long c,i=0;
+	int32_t i=0;
 	while (i<n){
-		c = GetC();
+		int32_t c = GetC();
 		if (c == EOF) return 0;
 		string[i++] = (char)c;
 		if (c == '\n') break;
@@ -172,25 +183,28 @@ char * CxMemFile::GetS(char *string, int n)
 	return string;
 }
 //////////////////////////////////////////////////////////
-long	CxMemFile::Scanf(const char *format, void* output)
+int32_t	CxMemFile::Scanf(const char *format, void* output)
 {
 	return 0;
 }
 //////////////////////////////////////////////////////////
-bool CxMemFile::Alloc(DWORD dwNewLen)
+bool CxMemFile::Alloc(uint32_t dwNewLen)
 {
-	if (dwNewLen > (DWORD)m_Edge)
+	if (dwNewLen > (uint32_t)m_Edge)
 	{
 		// find new buffer size
-		DWORD dwNewBufferSize = (DWORD)(((dwNewLen>>16)+1)<<16);
+		uint32_t dwNewBufferSize = (uint32_t)(((dwNewLen>>16)+1)<<16);
 
 		// allocate new buffer
-		if (m_pBuffer == NULL) m_pBuffer = (BYTE*)malloc(dwNewBufferSize);
-		else	m_pBuffer = (BYTE*)realloc(m_pBuffer, dwNewBufferSize);
+		uint8_t* n_pBuffer = (uint8_t*)realloc(m_pBuffer, dwNewBufferSize);
+		if (!n_pBuffer) {
+			free(m_pBuffer);
+			m_Edge = 0;
+		} else
+			m_Edge = dwNewBufferSize;
+		m_pBuffer = n_pBuffer;
 		// I own this buffer now (caller knows nothing about it)
 		m_bFreeOnClose = true;
-
-		m_Edge = dwNewBufferSize;
 	}
 	return (m_pBuffer!=0);
 }

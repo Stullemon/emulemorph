@@ -1,6 +1,6 @@
 // xImaLyr.cpp : Layers functions
 /* 21/04/2003 v1.00 - Davide Pizzolato - www.xdp.it
- * CxImage version 6.0.0 02/Feb/2008
+ * CxImage version 7.0.3 08/Feb/2019
  */
 
 #include "ximage.h"
@@ -19,7 +19,7 @@ CxImage* CxImage::GetParent() const
 /**
  * Number of layers allocated directly by the object.
  */
-long CxImage::GetNumLayers() const
+int32_t CxImage::GetNumLayers() const
 {
 	return info.nNumLayers;
 }
@@ -27,15 +27,15 @@ long CxImage::GetNumLayers() const
 /**
  * Creates an empty layer. If position is less than 0, the new layer will be placed in the last position
  */
-bool CxImage::LayerCreate(long position)
+bool CxImage::LayerCreate(int32_t position)
 {
 	if ( position < 0 || position > info.nNumLayers ) position = info.nNumLayers;
 
 	CxImage** ptmp = new CxImage*[info.nNumLayers + 1];
 	if (ptmp==0) return false;
 
-	int i=0;
-	for (int n=0; n<info.nNumLayers; n++){
+	int32_t i=0;
+	for (int32_t n=0; n<info.nNumLayers; n++){
 		if (position == n){
 			ptmp[n] = new CxImage();
 			i=1;
@@ -47,7 +47,7 @@ bool CxImage::LayerCreate(long position)
 	if (ptmp[position]){
 		ptmp[position]->info.pParent = this;
 	} else {
-		free(ptmp);
+		delete [] ptmp;
 		return false;
 	}
 
@@ -60,7 +60,7 @@ bool CxImage::LayerCreate(long position)
 /**
  * Deletes a layer. If position is less than 0, the last layer will be deleted
  */
-bool CxImage::LayerDelete(long position)
+bool CxImage::LayerDelete(int32_t position)
 {
 	if ( position >= info.nNumLayers ) return false;
 	if ( position < 0) position = info.nNumLayers - 1;
@@ -71,8 +71,8 @@ bool CxImage::LayerDelete(long position)
 		CxImage** ptmp = new CxImage*[info.nNumLayers - 1];
 		if (ptmp==0) return false;
 
-		int i=0;
-		for (int n=0; n<info.nNumLayers; n++){
+		int32_t i=0;
+		for (int32_t n=0; n<info.nNumLayers; n++){
 			if (position == n){
 				delete ppLayers[n];
 				i=1;
@@ -96,7 +96,7 @@ bool CxImage::LayerDelete(long position)
 void CxImage::LayerDeleteAll()
 {
 	if (ppLayers) { 
-		for(long n=0; n<info.nNumLayers;n++){ delete ppLayers[n]; }
+		for(int32_t n=0; n<info.nNumLayers;n++){ delete ppLayers[n]; }
 		delete [] ppLayers; ppLayers=0; info.nNumLayers = 0;
 	}
 }
@@ -104,7 +104,7 @@ void CxImage::LayerDeleteAll()
 /**
  * Returns a pointer to a layer. If position is less than 0, the last layer will be returned
  */
-CxImage* CxImage::GetLayer(long position)
+CxImage* CxImage::GetLayer(int32_t position)
 {
 	if ( ppLayers == NULL) return NULL;
 	if ( info.nNumLayers == 0) return NULL;

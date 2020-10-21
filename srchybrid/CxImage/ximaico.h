@@ -17,20 +17,20 @@
 class CxImageICO: public CxImage
 {
 typedef struct tagIconDirectoryEntry {
-    BYTE  bWidth;
-    BYTE  bHeight;
-    BYTE  bColorCount;
-    BYTE  bReserved;
-    WORD  wPlanes;
-    WORD  wBitCount;
-    DWORD dwBytesInRes;
-    DWORD dwImageOffset;
+    uint8_t  bWidth;
+    uint8_t  bHeight;
+    uint8_t  bColorCount;
+    uint8_t  bReserved;
+    uint16_t  wPlanes;
+    uint16_t  wBitCount;
+    uint32_t dwBytesInRes;
+    uint32_t dwImageOffset;
 } ICONDIRENTRY;
 
 typedef struct tagIconDir {
-    WORD          idReserved;
-    WORD          idType;
-    WORD          idCount;
+    uint16_t          idReserved;
+    uint16_t          idType;
+    uint16_t          idCount;
 } ICONHEADER;
 
 public:
@@ -42,15 +42,15 @@ public:
 	bool Decode(FILE *hFile) { CxIOFile file(hFile); return Decode(&file); }
 
 #if CXIMAGE_SUPPORT_ENCODE
-	bool Encode(CxFile * hFile, bool bAppend=false, int nPageCount=0);
-	bool Encode(CxFile * hFile, CxImage ** pImages, int nPageCount);
-	bool Encode(FILE *hFile, bool bAppend=false, int nPageCount=0)
+	bool Encode(CxFile * hFile, bool bAppend=false, int32_t nPageCount=0);
+	bool Encode(CxFile * hFile, CxImage ** pImages, int32_t nPageCount);
+	bool Encode(FILE *hFile, bool bAppend=false, int32_t nPageCount=0)
 				{ CxIOFile file(hFile); return Encode(&file,bAppend,nPageCount); }
-	bool Encode(FILE *hFile, CxImage ** pImages, int nPageCount)
+	bool Encode(FILE *hFile, CxImage ** pImages, int32_t nPageCount)
 				{ CxIOFile file(hFile); return Encode(&file, pImages, nPageCount); }
 #endif // CXIMAGE_SUPPORT_ENCODE
 protected:
-	DWORD m_dwImageOffset;
+	uint32_t m_dwImageOffset;
 };
 
 #endif

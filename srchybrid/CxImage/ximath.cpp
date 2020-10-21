@@ -1,6 +1,5 @@
 #include "ximage.h"
 #include "ximath.h"
-#include <math.h>
 
 //this module should contain some classes for geometrical transformations
 //usable with selections, etc... once it's done, that is. :)
@@ -22,12 +21,21 @@ CxPoint2::CxPoint2(CxPoint2 const &p)
   y=p.y;
 }
 
-float CxPoint2::Distance(CxPoint2 const p2)
+CxPoint2& CxPoint2::operator=(const CxPoint2& p)
+{
+	if (this != &p) {
+		x = p.x;
+		y = p.y;
+	}
+	return *this;
+}
+
+float CxPoint2::Distance(const CxPoint2& p2) const
 {
   return (float)sqrt((x-p2.x)*(x-p2.x)+(y-p2.y)*(y-p2.y));
 }
 
-float CxPoint2::Distance(float const x_, float const y_)
+float CxPoint2::Distance(const float x_, const float y_) const
 {
   return (float)sqrt((x-x_)*(x-x_)+(y-y_)*(y-y_));
 }
@@ -44,10 +52,22 @@ CxRect2::CxRect2(float const x1_, float const y1_, float const x2_, float const 
   topRight.y=y2_;
 }
 
+CxRect2::CxRect2(CxPoint2 const &bl, CxPoint2 const &tr)
+	: botLeft(bl), topRight(tr)
+{}
+
 CxRect2::CxRect2(CxRect2 const &p)
+	: botLeft(p.botLeft), topRight(p.topRight)
 {
-  botLeft=p.botLeft;
-  topRight=p.topRight;
+}
+
+CxRect2& CxRect2::operator=(const CxRect2& r)
+{
+	if (this != &r) {
+		botLeft = r.botLeft;
+		topRight = r.topRight;
+	}
+	return *this;
 }
 
 float CxRect2::Surface() const
