@@ -10,3 +10,7 @@
 	path = png
 	url = https://github.com/Stullemon/libpng.git
 	branch = emule
+[submodule "id3lib"]
+	path = id3lib
+	url = https://github.com/Stullemon/id3lib-devel.git
+	branch = emule

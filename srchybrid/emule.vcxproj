@@ -1260,7 +1260,7 @@ del $(IntDir)emule.obj
     <ProjectReference Include="..\cryptopp\cryptlib.vcxproj">
       <Project>{3423ec9a-52e4-4a4d-9753-edebc38785ef}</Project>
     </ProjectReference>
-    <ProjectReference Include="..\id3lib\id3lib.vcxproj">
+    <ProjectReference Include="..\id3lib\libprj\id3lib.vcxproj">
       <Project>{119fb498-e3ac-49a5-a310-20e8b466b413}</Project>
     </ProjectReference>
     <ProjectReference Include="..\png\projects\vstudio\libpng\libpng.vcxproj">
