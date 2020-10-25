@@ -25,7 +25,9 @@
 #include "FirewallOpener.h"
 #include "otherfunctions.h"
 #include "upnp_igdcontrolpoint.h"
-#include "upnplib\upnp\inc\upnptools.h"
+#include <upnptools.h>
+#include <ixmlparser.h>
+#include <iphlpapi.h>
 #include "Log.h"
 
 #include "emuleDlg.h" // for WEBGUIIA_UPDATEMYINFO
@@ -131,21 +133,8 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 
 	// Init UPnP
 	int rc;
-	//MORPH START leuk_he upnp bindaddr
-	StatusString=L"Starting";
-    LPCSTR HostIp=NULL;
-	if (   (thePrefs.GetBindAddrA()!=NULL)
-		&& IsLANIP((char *) thePrefs.GetBindAddrA()) )
-		HostIp=thePrefs.GetBindAddrA();
-	else if  ( thePrefs.GetUpnpBindAddr()!= 0 )
-		HostIp=_strdup(ipstrA(htonl(thePrefs.GetUpnpBindAddr()))); //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
-	if ((HostIp!= NULL) && (inet_addr(HostIp)==INADDR_NONE))
-		HostIp=NULL; // prevent failing if in prev version there was no valid interface. 
-	rc = UpnpInit( HostIp, thePrefs.GetUPnPPort() );
-    /*
-	rc = UpnpInit( NULL, thePrefs.GetUPnPPort() );
-	*/
-	// MORPH END leuk_he upnp bindaddr 
+	StatusString = L"Starting";
+	rc = UpnpInit2(CT2A(GetGatewayAdapter()), thePrefs.GetUPnPPort());
 	if (UPNP_E_SUCCESS != rc) {
 		AddLogLine(false, GetResString(IDS_UPNP_FAILEDINIT), thePrefs.GetUPnPPort(), GetErrDescription(rc) );
 		StatusString.Format(GetResString(IDS_UPNP_FAILEDINIT), thePrefs.GetUPnPPort(), GetErrDescription(rc) );
@@ -210,6 +199,115 @@ bool CUPnP_IGDControlPoint::Init(bool bStopAtFirstConnFound){
 	return m_bInit;
 }
 
+// This function was introduced to determine the preferred networkadapter to be used for UPnP.
+// It became necessary due to the changes in the UPnP API, which deprecated UpnpInit and introduced UpnpInit2.
+CString CUPnP_IGDControlPoint::GetGatewayAdapter()
+{
+	// Set the flags to pass to GetAdaptersAddresses
+	const ULONG flags = GAA_FLAG_SKIP_ANYCAST | GAA_FLAG_SKIP_DNS_SERVER | GAA_FLAG_INCLUDE_GATEWAYS;
+
+	// default to unspecified address family (both)
+	const ULONG family = AF_INET;
+
+	DWORD dwRetVal = 0;
+	PIP_ADAPTER_ADDRESSES pAddresses = NULL;
+	PIP_ADAPTER_ADDRESSES pAddress;
+	ULONG outBufLen = 0;
+	ULONG Iterations = 0;
+	CString strRet = NULL;
+
+	// Allocate a 15 KB buffer to start with.
+	outBufLen = 15000;
+
+	// Get adapter information
+	do {
+		pAddresses = (IP_ADAPTER_ADDRESSES*)malloc(outBufLen);
+		if (pAddresses == NULL) {
+			printf
+			("Memory allocation failed for IP_ADAPTER_ADDRESSES struct\n");
+			exit(1);
+		}
+
+		dwRetVal =
+			GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen);
+
+		if (dwRetVal == ERROR_BUFFER_OVERFLOW) {
+			free(pAddresses);
+			pAddresses = NULL;
+		}
+		else {
+			break;
+		}
+
+		Iterations++;
+
+	} while ((dwRetVal == ERROR_BUFFER_OVERFLOW) && (Iterations < 3)); // max 3 attempts
+
+	// Find the correct adapter
+	if (dwRetVal == NO_ERROR) {
+		//MORPH START leuk_he upnp bindaddr
+		// Check for and retrieve possible binding address
+		uint32 HostIp = NULL;
+		if ((thePrefs.GetBindAddrA() != NULL)
+			&& IsLANIP((char*)thePrefs.GetBindAddrA()))
+			HostIp = inet_addr(thePrefs.GetBindAddrA());
+		else if (thePrefs.GetUpnpBindAddr() != 0)
+			HostIp = thePrefs.GetUpnpBindAddr(); //Fafner: avoid C4996 (as in 0.49b vanilla) - 080731
+		if ((HostIp != NULL) && (HostIp == INADDR_NONE))
+			HostIp = NULL; // prevent failing if in prev version there was no valid interface. 
+		// MORPH END leuk_he upnp bindaddr 
+
+		// Loop through adapters and filter those that are also filtered by pupnp lib
+		for (pAddress = pAddresses; pAddress != NULL;
+			pAddress = pAddress->Next) {
+			if (pAddress->Flags & IP_ADAPTER_NO_MULTICAST ||
+				pAddress->OperStatus != IfOperStatusUp) {
+				continue;
+			}
+
+			//MORPH START leuk_he upnp bindaddr
+			/*
+			if (pAddress->FirstGatewayAddress != NULL)
+			{
+				strRet = pAddress->FriendlyName;
+				break;
+			}
+			*/
+			// If we do not have a binding we use the first adapter with a gateway address
+			if (HostIp == NULL) {
+				if (pAddress->FirstGatewayAddress != NULL)
+				{
+					strRet = pAddress->FriendlyName;
+					break;
+				}
+			}
+			else {
+				// Otherwise we check the current IP against the binding IP
+				PIP_ADAPTER_UNICAST_ADDRESS pUniCastAddr = pAddress->FirstUnicastAddress;
+				while (pUniCastAddr != NULL)
+				{
+					const sockaddr_in* address = (sockaddr_in*)pUniCastAddr->Address.lpSockaddr;
+					const uint32 ipv4 = address->sin_addr.S_un.S_addr;
+					if (HostIp == ipv4)
+					{
+						strRet = pAddress->FriendlyName;
+						break;
+					}
+					pUniCastAddr = pUniCastAddr->Next;
+				}
+				if (!strRet.IsEmpty()) // found something, stopping here
+					break;
+			}
+			// MORPH END leuk_he upnp bindaddr 
+		}
+	}
+
+	// Free memory
+	free(pAddresses);
+
+	// and return string
+	return strRet;
+}
 
 // Give upnp a little bit of time to startup before doing outbound connections
 // giving a unintend lowid:
@@ -222,7 +320,7 @@ if(thePrefs.GetUPnPVerboseLog())
 	AddDebugLogLine(false, _T("Waiting short for upnp to complete registration.") );
 
 if (InitializingEvent) 
-       return (InitializingEvent->Lock((MINIMUM_DELAY*1000)+1)==S_OK) ; // 10 secs...  (should be UPNPTIMEOUT, btu 40 seconds is too long....)
+       return (InitializingEvent->Lock((10*1000)+1)==S_OK) ; // 10 secs...  (should be UPNPTIMEOUT, btu 40 seconds is too long....)
 
 return 0;
 }
@@ -245,20 +343,20 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 		case UPNP_DISCOVERY_SEARCH_RESULT:
 		{
 			//New UPnP Device found
-			struct Upnp_Discovery *d_event = ( struct Upnp_Discovery * )Event;
+			UpnpDiscovery *d_event = ( UpnpDiscovery* )Event;
 			IXML_Document *DescDoc = NULL;
 			int ret;
 
-			if( d_event->ErrCode != UPNP_E_SUCCESS ) {
+			if( UpnpDiscovery_get_ErrCode(d_event) != UPNP_E_SUCCESS ) {
 				if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: Error in Discovery Callback [%s]"), GetErrDescription(d_event->ErrCode) );
+					theApp.QueueDebugLogLine(false, _T("UPnP: Error in Discovery Callback [%s]"), GetErrDescription(UpnpDiscovery_get_ErrCode(d_event)) );
 			}
 
 			CString devType;
-			CString location = CA2CT(d_event->Location);
+			CString location = CA2CT(UpnpDiscovery_get_Location_cstr(d_event));
 			
 			// Download Device description
-			if( ( ret = UpnpDownloadXmlDoc( d_event->Location, &DescDoc ) ) != UPNP_E_SUCCESS ) {
+			if( ( ret = UpnpDownloadXmlDoc(UpnpDiscovery_get_Location_cstr(d_event), &DescDoc ) ) != UPNP_E_SUCCESS ) {
 				if(thePrefs.GetUPnPVerboseLog())
 					theApp.QueueDebugLogLine(false, _T("UPnP: Error obtaining device description from %s [%s]"), location, GetErrDescription(ret));
 			}
@@ -268,7 +366,7 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 				devType = GetFirstDocumentItem(DescDoc, _T("deviceType"));
 				if(devType.CompareNoCase(IGD_DEVICE_TYPE) == 0){
 					thePrefs.SetUpnpDetect(UPNP_DETECTED);//leuk_he autodetect upnp in wizard
-					AddDevice(DescDoc, location, d_event->Expires);
+					AddDevice(DescDoc, location, UpnpDiscovery_get_Expires(d_event));
 				}
 
 				ixmlDocument_free( DescDoc );
@@ -286,19 +384,19 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 		case UPNP_DISCOVERY_ADVERTISEMENT_BYEBYE:
 		{
 			// UPnP Device Removed
-			struct Upnp_Discovery *d_event = ( struct Upnp_Discovery * )Event;
+			struct s_UpnpDiscovery*d_event = ( struct s_UpnpDiscovery* )Event;
 
-			if( d_event->ErrCode != UPNP_E_SUCCESS ) {
+			if(UpnpDiscovery_get_ErrCode(d_event) != UPNP_E_SUCCESS ) {
 				if(thePrefs.GetUPnPVerboseLog())
-					theApp.QueueDebugLogLine(false, _T("UPnP: Error in Discovery ByeBye Callback [%s]"), GetErrDescription(d_event->ErrCode) );
+					theApp.QueueDebugLogLine(false, _T("UPnP: Error in Discovery ByeBye Callback [%s]"), GetErrDescription(UpnpDiscovery_get_ErrCode(d_event)) );
 			}
 
-			CString devType = CA2CT(d_event->DeviceType);
+			CString devType = CA2CT(UpnpDiscovery_get_DeviceType_cstr(d_event));
 			devType.Trim();
 
 			//Checks if is a InternetGatewayDevice and removes it from our list
 			if(devType.CompareNoCase(IGD_DEVICE_TYPE) == 0){
-				RemoveDevice( CString(CA2CT(d_event->DeviceId)));
+				RemoveDevice( CString(CA2CT(UpnpDiscovery_get_DeviceID_cstr(d_event))));
 			}
 
 			break;
@@ -306,10 +404,10 @@ int CUPnP_IGDControlPoint::IGD_Callback( Upnp_EventType EventType, void* Event, 
 		case UPNP_EVENT_RECEIVED:
 		{
 			// Event reveived
-			struct Upnp_Event *e_event = ( struct Upnp_Event * )Event;
+			UpnpEvent *e_event = ( UpnpEvent* )Event;
 
 			// Parses the event
-			OnEventReceived( e_event->Sid, e_event->EventKey, e_event->ChangedVariables );
+			OnEventReceived(UpnpEvent_get_SID_cstr(e_event), UpnpEvent_get_EventKey(e_event), UpnpEvent_get_ChangedVariables(e_event));
 
 			break;
 		}
@@ -620,6 +718,20 @@ CString CUPnP_IGDControlPoint::GetFirstNodeItem( IXML_Node * root_node, CString 
 	return CString(_T(""));
 }
 
+IXML_NodeList* CUPnP_IGDControlPoint::GetElementsByName(IXML_Document* doc, CString name) {
+	return ixmlDocument_getElementsByTagName(doc, CT2A(name));
+}
+
+IXML_NodeList* CUPnP_IGDControlPoint::GetElementsByName(IXML_Element* element, CString name) {
+	return GetElementsByName((IXML_Document*)element, name);
+}
+
+IXML_NodeList* CUPnP_IGDControlPoint::GetElementsByName(IXML_Node* root_node, CString name) {
+	return GetElementsByName((IXML_Document*)root_node, name);
+}
+
+// Removed by Stulle to be replaced by pupnp exposed function ixmlDocument_getElementsByTagName
+/*
 IXML_NodeList *CUPnP_IGDControlPoint::GetElementsByName(IXML_Document *doc, CString name){
 	return GetElementsByName((IXML_Node*)doc, name);
 }
@@ -667,6 +779,7 @@ IXML_NodeList *CUPnP_IGDControlPoint::GetElementsByName(IXML_Node *root_node, CS
 
 	return *nodelist;
 }
+*/
 
 IXML_NodeList * CUPnP_IGDControlPoint::GetDeviceList( IXML_Document * doc ){
 	return GetDeviceList((IXML_Node*)doc);
@@ -1474,7 +1587,7 @@ bool CUPnP_IGDControlPoint::IsServiceEnabled(CUPnP_IGDControlPoint::UPNP_SERVICE
 	return status;
 }
 
-void CUPnP_IGDControlPoint::OnEventReceived(Upnp_SID sid, int /* evntkey */, IXML_Document * changes ){
+void CUPnP_IGDControlPoint::OnEventReceived(const char* sid, int /* evntkey */, IXML_Document * changes ){
 	bool update = false;
 	
 	m_devListLock.Lock();
@@ -1492,7 +1605,7 @@ void CUPnP_IGDControlPoint::OnEventReceived(Upnp_SID sid, int /* evntkey */, IXM
 				//Parse Event
 				IXML_NodeList *properties = NULL;
 
-				properties = GetElementsByName( changes, _T("property") );
+				properties = GetElementsByName( changes, _T("e:property") );
 				if(properties != NULL){
 					int length = ixmlNodeList_length( properties );
 					for( int i = 0; i < length; i++ ) {

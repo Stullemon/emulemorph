@@ -1,4 +1,27 @@
 --------------------------------------
+Changelog for eMule 0.50a MorphXT v1X.X
+--------------------------------------
+XX-XX-2020
+
+ADD: New function to identify network adapter with default gateway for UPnP use [Stulle]
+CHANGE: Prepared solution for Visual Studio 2019 and removed old version files [Stulle]
+CHANGE: Revised git repository to use forked submodules of relevant libraries [Stulle]
+CHANGE: Updated cryptopp to version 8.2 [Stulle]
+CHANGE: Updated ID3LIB based on old SourceForge CVS id3lib-devel repository [Stulle]
+	+ Merged some changes unique to CVS id3lib-stable repository back
+	+ Merged changes from eMule Community's branch
+CHANGE: Updated libpng to version 1.6.37 [Stulle]
+CHANGE: Updated pthreads to pthreads4w 3.0.0 [Stulle]
+CHANGE: Updated zlib to version 1.2.11 [Stulle]
+CHANGE: Replaced old version of upnplib with pupnp version 1.14.0 [Stulle]
+REMOVED: Custom XML parsing from UPnP code to use mostly unmodified pupnp [Stulle]
+
+Note:	The updates to the UPnP code might cause regressions. Please enable the respective
+	verbose logging and report back if you experience any trouble.
+Note:	MorphXT has been built with the latest Windows 10 SDK. It may no longer work with
+	older versions of Windows. Please report back any incompatibilities.
+
+--------------------------------------
 Changelog for eMule 0.50a MorphXT v12.7
 --------------------------------------
 21-11-2012

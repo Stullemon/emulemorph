@@ -24,7 +24,7 @@
 #ifndef __CUPNP_IGDCONTROLPOINT_H__
 #define __CUPNP_IGDCONTROLPOINT_H__
 
-#include "upnplib\upnp\inc\upnp.h"
+#include <upnp.h>
 
 #define IGD_DEVICE_TYPE			_T("urn:schemas-upnp-org:device:InternetGatewayDevice:1")
 #define WAN_DEVICE_TYPE			_T("urn:schemas-upnp-org:device:WANDevice:1")
@@ -219,7 +219,7 @@ private:
 	static IXML_NodeList*	GetElementsByName(IXML_Document *doc, CString name);
 	static IXML_NodeList*	GetElementsByName(IXML_Element *element, CString name);
 	static IXML_NodeList*	GetElementsByName(IXML_Node *root_node, CString name);
-	static IXML_NodeList*	GetElementsByName(IXML_Node *root_node, CString name, IXML_NodeList **nodelist);
+//	static IXML_NodeList*	GetElementsByName(IXML_Node *root_node, CString name, IXML_NodeList **nodelist);
 	static IXML_NodeList*	GetDeviceList( IXML_Document * doc );
 	static IXML_NodeList*	GetDeviceList( IXML_Element * doc );
 	static IXML_NodeList*	GetDeviceList( IXML_Node * doc );
@@ -237,7 +237,7 @@ private:
 	static UPNPNAT_RETURN	DeletePortMappingFromService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping);
 	static UPNPNAT_RETURN	GetSpecificPortMappingEntryFromService(UPNP_SERVICE *srv, UPNPNAT_MAPPING *mapping, UPNPNAT_FULLMAPPING *fullMapping, bool bLog = true);
 	static bool				IsServiceEnabled(UPNP_SERVICE *srv);
-	static void				OnEventReceived(Upnp_SID sid, int evntkey, IXML_Document * changes );
+	static void				OnEventReceived(const char* sid, int evntkey, IXML_Document * changes );
 	static bool				UpdateAllMappings( bool bLockDeviceList = true, bool bUpdating = true );
 
 	//Error functions
@@ -245,6 +245,7 @@ private:
 	static CString			GetErrDescription(IXML_Document* errDoc, int err);
 
 	//IP
+	static CString			GetGatewayAdapter();
 	static CString			GetLocalIPStr();
 	static bool				IsLANIP(unsigned long nIP);
 	static bool				IsLANIP(char *cIP);

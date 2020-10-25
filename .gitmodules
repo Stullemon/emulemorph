@@ -14,3 +14,11 @@
 	path = id3lib
 	url = https://github.com/Stullemon/id3lib-devel.git
 	branch = emule
+[submodule "pupnp"]
+	path = pupnp
+	url = https://github.com/Stullemon/pupnp.git
+	branch = emule
+[submodule "pthreads"]
+	path = pthreads
+	url = https://github.com/Stullemon/pthreads4w.git
+	branch = emule

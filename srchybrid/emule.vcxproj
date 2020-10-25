@@ -96,8 +96,8 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;PNG_DEBUG=1;PNG_USE_PNGVCRD;PNG_LIBPNG_SPECIALBUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;..\pthreads;..\pupnp\ixml\inc;..\pupnp\ixml\src\inc;..\pupnp\upnp\inc;..\pupnp\upnp\src\inc;..\pupnp\upnp\src\threadutil;DirectX\Include;DirectX\Extras\DirectShow\Include;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;UPNP_STATIC_LIB;UPNP_USE_MSVCPP;_WIN32;PNG_DEBUG=1;PNG_USE_PNGVCRD;PNG_LIBPNG_SPECIALBUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -153,7 +153,7 @@
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <OmitFramePointers>false</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc;DirectX\Include;DirectX\Extras\DirectShow\Include;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;..\pthreads;..\pupnp\ixml\inc;..\pupnp\ixml\src\inc;..\pupnp\upnp\inc;..\pupnp\upnp\src\inc;..\pupnp\upnp\src\threadutil;DirectX\Include;DirectX\Extras\DirectShow\Include;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_RELEASE;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -212,7 +212,7 @@
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <OmitFramePointers>false</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;upnplib\ixml\src\inc;upnplib\upnp\src\inc;upnplib\upnp\inc;upnplib\build\inc;upnplib\threadutil\inc;upnplib\ixml\inc;pthreads\pthreads\inc;DirectX\Include;DirectX\Extras\DirectShow\Include;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;..\pthreads;..\pupnp\ixml\inc;..\pupnp\ixml\src\inc;..\pupnp\upnp\inc;..\pupnp\upnp\src\inc;..\pupnp\upnp\src\threadutil;DirectX\Include;DirectX\Extras\DirectShow\Include;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -1266,6 +1266,12 @@ del $(IntDir)emule.obj
     <ProjectReference Include="..\png\projects\vstudio\libpng\libpng.vcxproj">
       <Project>{d6973076-9317-4ef2-a0b8-b7a18ac0713e}</Project>
     </ProjectReference>
+    <ProjectReference Include="..\pupnp\build\vc10\ixml.vcxproj">
+      <Project>{9c2c266d-35a3-465f-a297-0e21d54e5c89}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\pupnp\build\vc10\libupnp.vcxproj">
+      <Project>{6227f51a-1498-4c4a-b213-f6fded605125}</Project>
+    </ProjectReference>
     <ProjectReference Include="..\ReplaceVistaIcon\ReplaceVistaIcon.vcxproj">
       <Project>{58a54f98-ff3f-472f-9282-da411ee850a2}</Project>
     </ProjectReference>
@@ -1277,9 +1283,6 @@ del $(IntDir)emule.obj
     </ProjectReference>
     <ProjectReference Include="CxImage\cximage.vcxproj">
       <Project>{8fec2660-7f95-4c2e-8747-36176e1fcf82}</Project>
-    </ProjectReference>
-    <ProjectReference Include="upnplib\win32project\upnpLib.vcxproj">
-      <Project>{313eda74-70f6-481b-8f05-c49a16481905}</Project>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
