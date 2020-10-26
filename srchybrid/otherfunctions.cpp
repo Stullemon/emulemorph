@@ -19,13 +19,7 @@
 #include <share.h>
 #include <io.h>
 #include <fcntl.h>
-#if _MSC_VER>=1400
-#pragma warning(disable:6385 6011)
-#endif
-#include <atlrx.h>
-#if _MSC_VER>=1400
-#pragma warning(default:6385 6011)
-#endif
+#include <regex>
 #include "emule.h"
 #include "OtherFunctions.h"
 #include "DownloadQueue.h"
@@ -3527,27 +3521,15 @@ bool IsUnicodeFile(LPCTSTR pszFilePath)
 	return bResult;
 }
 
-bool RegularExpressionMatch(CString regexpr, CString teststring) {
-	
-	CAtlRegExp<> reFN;
-
-	REParseError status = reFN.Parse( regexpr );
-	if (REPARSE_ERROR_OK != status)
-	{
-		// Unexpected error.
-		return false;
-	}
-
-	CAtlREMatchContext<> mcUrl;
-	if (!reFN.Match(
-		teststring,
-		&mcUrl))
-	{
-		// Unexpected error.
-		return false;
-	} else {
-		return true;
-	}
+bool RegularExpressionMatch(const CString &regexpr, const CString &teststring)
+{
+	std::basic_regex<TCHAR> reFN(regexpr);
+#ifdef UNICODE
+	std::wcmatch mcUrl;
+#else
+	std::cmatch mcUrl;
+#endif
+	return std::regex_match((LPCTSTR)teststring, mcUrl, reFN);
 }
 
 ULONGLONG GetModuleVersion(LPCTSTR pszFilePath)

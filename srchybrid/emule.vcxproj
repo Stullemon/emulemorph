@@ -96,7 +96,7 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;..\pthreads;..\pupnp\ixml\inc;..\pupnp\ixml\src\inc;..\pupnp\upnp\inc;..\pupnp\upnp\src\inc;..\pupnp\upnp\src\threadutil;DirectX\Include;DirectX\Extras\DirectShow\Include;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;..\pthreads;..\pupnp\ixml\inc;..\pupnp\ixml\src\inc;..\pupnp\upnp\inc;..\pupnp\upnp\src\inc;..\pupnp\upnp\src\threadutil;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;ID3LIB_LINKOPTION=1;UPNP_STATIC_LIB;UPNP_USE_MSVCPP;_WIN32;PNG_DEBUG=1;PNG_USE_PNGVCRD;PNG_LIBPNG_SPECIALBUILD;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -153,7 +153,7 @@
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <OmitFramePointers>false</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;..\pthreads;..\pupnp\ixml\inc;..\pupnp\ixml\src\inc;..\pupnp\upnp\inc;..\pupnp\upnp\src\inc;..\pupnp\upnp\src\threadutil;DirectX\Include;DirectX\Extras\DirectShow\Include;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;..\pthreads;..\pupnp\ixml\inc;..\pupnp\ixml\src\inc;..\pupnp\upnp\inc;..\pupnp\upnp\src\inc;..\pupnp\upnp\src\threadutil;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_RELEASE;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Async</ExceptionHandling>
@@ -212,7 +212,7 @@
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <OmitFramePointers>false</OmitFramePointers>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;..\pthreads;..\pupnp\ixml\inc;..\pupnp\ixml\src\inc;..\pupnp\upnp\inc;..\pupnp\upnp\src\inc;..\pupnp\upnp\src\threadutil;DirectX\Include;DirectX\Extras\DirectShow\Include;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\site_config;.;..;..\id3lib\include;..\pthreads;..\pupnp\ixml\inc;..\pupnp\ixml\src\inc;..\pupnp\upnp\inc;..\pupnp\upnp\src\inc;..\pupnp\upnp\src\threadutil;ATLServer\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;ID3LIB_LINKOPTION=1;_BETA;SUPPORT_LARGE_FILES;UPNP_STATIC_LIB;_WIN32;PTW32_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Async</ExceptionHandling>

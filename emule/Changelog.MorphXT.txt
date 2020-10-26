@@ -7,6 +7,7 @@ ADD: New function to identify network adapter with default gateway for UPnP use 
 CHANGE: Prepared solution for Visual Studio 2019 and removed old version files [Stulle]
 CHANGE: Revised git repository to use forked submodules of relevant libraries [Stulle]
 CHANGE: Updated cryptopp to version 8.2 [Stulle]
+CHANGE: Updated CxImage library to version 7.0.3 [Stulle]
 CHANGE: Updated ID3LIB based on old SourceForge CVS id3lib-devel repository [Stulle]
 	+ Merged some changes unique to CVS id3lib-stable repository back
 	+ Merged changes from eMule Community's branch
