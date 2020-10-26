@@ -263,7 +263,9 @@ BEGIN_MESSAGE_MAP(CemuleDlg, CTrayDialog)
 	ON_MESSAGE(TM_PARTHASHEDOKAICHRECOVER, OnPartHashedOKAICHRecover)
 	ON_MESSAGE(TM_PARTHASHEDCORRUPTAICHRECOVER, OnPartHashedCorruptAICHRecover)
 	// SLUGFILLER: SafeHash
+#ifdef USE_MORPH_READ_THREAD
 	ON_MESSAGE(TM_READBLOCKFROMFILEDONE, OnReadBlockFromFileDone) //MORPH - Added by SiRoB, ReadBlockFromFileThread
+#endif
 	ON_MESSAGE(TM_FLUSHDONE, OnFlushDone) //MORPH - Added by SiRoB, Flush Thread
 	ON_MESSAGE(TM_IMPORTPART, OnImportPart) //MORPH START - Added by SiRoB, Import Part
 	ON_MESSAGE(TM_FRAMEGRABFINISHED, OnFrameGrabFinished)
@@ -2020,6 +2022,7 @@ LRESULT CemuleDlg::OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam)
 // SLUGFILLER: SafeHash
 
 //MORPH START - Added by SiRoB, ReadBlockFromFileThread
+#ifdef USE_MORPH_READ_THREAD
 LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 {
 	CUpDownClient* client = (CUpDownClient*) lParam;
@@ -2031,6 +2034,7 @@ LRESULT CemuleDlg::OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam)
 		delete[] (byte*)wParam;
 	return 0;
 }
+#endif
 //MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 //MORPH START - Added by SiRoB, Flush Thread
 LRESULT CemuleDlg::OnFlushDone(WPARAM /*wParam*/ ,LPARAM lParam)

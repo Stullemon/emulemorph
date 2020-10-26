@@ -299,7 +299,9 @@ protected:
 	afx_msg LRESULT OnPartHashedCorruptAICHRecover(WPARAM wParam,LPARAM lParam);
 	// SLUGFILLER: SafeHash
 	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
+#ifdef USE_MORPH_READ_THREAD
 	afx_msg LRESULT OnReadBlockFromFileDone(WPARAM wParam,LPARAM lParam);
+#endif
 	//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 	//MORPH START - Added by SiRoB, Flush Thread
 	afx_msg LRESULT OnFlushDone(WPARAM wParam,LPARAM lParam);
@@ -408,7 +410,9 @@ enum EEMuleAppMsgs
 	TM_PARTHASHEDOKAICHRECOVER,
 	TM_PARTHASHEDCORRUPTAICHRECOVER,
 	// SLUGFILLER: SafeHash
+#ifdef USE_MORPH_READ_THREAD
 	TM_READBLOCKFROMFILEDONE, //MORPH - Added by SiRoB, ReadBlockFromFileThread
+#endif
 	TM_FLUSHDONE, //MORPH - Added by SiRoB, Flush Thread
 	TM_IMPORTPART, //MORPH START - Added by SiRoB, Import Part
 	TM_FRAMEGRABFINISHED,

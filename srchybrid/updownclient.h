@@ -75,6 +75,7 @@ struct PartFileStamp{
 
 //#pragma pack(2)
 //MORPH START - Added by SiRoB, ReadBlockFromFileThread
+#ifdef USE_MORPH_READ_THREAD
 class CUpDownClient;
 class CReadBlockFromFileThread : public CWinThread
 {
@@ -96,6 +97,7 @@ private:
 	CEvent			pauseEvent;
 	volatile bool	doRun;
 };
+#endif
 //MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 
 class CUpDownClient : public CObject
@@ -298,7 +300,13 @@ public:
 	UINT			GetDatarateAVG() const								{ return m_nUpDatarateAVG; } //MORPH - Determine Remote Speed
 	UINT			GetScore(bool sysvalue, bool isdownloading = false, bool onlybasevalue = false) const;
 	void			AddReqBlock(Requested_Block_Struct* reqblock);
+	//MORPH START - Changed by SiRoB, ReadBlockFromFileThread
+#ifndef USE_MORPH_READ_THREAD
+	void			CreateNextBlockPackage(bool bBigBuffer = false);
+#else
 	void			CreateNextBlockPackage();
+#endif
+	//MORPH END    - Changed by SiRoB, ReadBlockFromFileThread
 	uint32			GetUpStartTimeDelay() const						{ return ::GetTickCount() - m_dwUploadTime; }
 	void 			SetUpStartTime()								{ m_dwUploadTime = ::GetTickCount(); }
 	void			SendHashsetPacket(const uchar* pData, uint32 nSize, bool bFileIdentifiers);
@@ -698,7 +706,9 @@ public:
 	//wistily stop
 	void	SetPartCount(uint16 parts) { m_nUpPartCount = parts;}
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
+#ifdef USE_MORPH_READ_THREAD
 	void	SetReadBlockFromFileBuffer(byte* pdata) {m_abyfiledata = pdata;};
+#endif
 	//MORPH - Added by SiRoB, ReadBlockFromFileThread
 
 	//MORPH START - Added by Stulle, Improved upload state sorting for additional information
@@ -851,9 +861,11 @@ protected:
 	CTypedPtrList<CPtrList, Requested_File_Struct*>	 m_RequestedFiles_list;
 
 	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
+#ifdef USE_MORPH_READ_THREAD
 	byte* m_abyfiledata;
 	uint32 m_utogo;
 	CReadBlockFromFileThread* m_readblockthread;
+#endif
 	//MORPH END   - Added by SiRoB, ReadBlockFromFileThread
 	//////////////////////////////////////////////////////////
 	// Download

@@ -328,18 +328,22 @@ void CUpDownClient::Init()
 	m_incompletepartVer = 0; //MORPH - Added By SiRoB, ICS merged into partstatus
 
 	//MORPH START - ReadBlockFromFileThread
+#ifdef USE_MORPH_READ_THREAD
 	m_abyfiledata = NULL;
 	m_readblockthread =NULL;
+#endif
 	//MORPH END   - ReadBlockFromFileThread
 	m_fSupportsFileIdent = 0;
 }
 
 CUpDownClient::~CUpDownClient(){
 	//MORPH START - ReadBlockFromFileThread //Fafner: for safety (got mem leaks) - 071127
+#ifdef USE_MORPH_READ_THREAD
 	if (m_readblockthread) {
 		m_readblockthread->StopReadBlock();
 		m_readblockthread = NULL;
 	}
+#endif
 	//MORPH END   - ReadBlockFromFileThread
 	if (IsAICHReqPending()){
 		m_fAICHRequested = FALSE;
