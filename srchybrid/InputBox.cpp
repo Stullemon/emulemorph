@@ -94,6 +94,9 @@ BOOL InputBox::OnInitDialog()
 
 	GetDlgItem(IDC_IBLABEL)->SetWindowText(m_label);
 	// khaos::categorymod+
+	/*
+	GetDlgItem(IDC_TEXT)->SetWindowText(m_default);
+	*/
 	if (!isNumber)
 		GetDlgItem(IDC_TEXT)->SetWindowText(m_default);
 	else {

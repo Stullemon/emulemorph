@@ -4,7 +4,7 @@
 #include "PPGtooltipped.h" 
 
 /*
-class CPPgGeneral : public CPropertyPage 
+class CPPgGeneral : public CPropertyPage
 */
 class CPPgGeneral : public CPPgtooltipped  
 // MORPH END leuk_he tooltipped

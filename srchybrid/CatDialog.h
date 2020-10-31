@@ -34,7 +34,7 @@ public:
 protected:
 	Category_Struct* m_myCat;
 	DWORD newcolor;
-  CColorButton m_ctlColor;
+	CColorButton m_ctlColor;
   
 
 	// khaos::kmod+ Category Advanced A4AF Mode
@@ -54,9 +54,9 @@ protected:
 	virtual BOOL OnInitDialog();
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 
-DECLARE_MESSAGE_MAP()
+	DECLARE_MESSAGE_MAP()
 	afx_msg LONG OnSelChange(UINT lParam, LONG wParam);
-
 	afx_msg void OnBnClickedBrowse();
 	afx_msg void OnBnClickedOk();
+	//afx_msg void OnDDBnClicked(); // MORPH
 };

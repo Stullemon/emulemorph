@@ -27,7 +27,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -435,7 +435,7 @@ bool CLogFile::Log(LPCTSTR pszMsg, int iLen)
 	{
 		// don't use 'fputs' + '_filelength' -- gives poor performance
 		size_t uToWrite = ((iLen == -1) ? _tcslen(pszMsg) : (size_t)iLen)*sizeof(TCHAR);
-			uWritten = fwrite(pszMsg, 1, uToWrite, m_fp);
+		uWritten = fwrite(pszMsg, 1, uToWrite, m_fp);
 	}
 	else
 	{

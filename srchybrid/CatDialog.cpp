@@ -24,16 +24,16 @@
 #include "TransferDlg.h"
 #include "CatDialog.h"
 #include "UserMsgs.h"
-#include "SharedFilesWnd.h"
+#include "SharedFilesWnd.h" // MORPH
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 /* Morph delete: no regexp
 #define	REGULAREXPRESSIONS_STRINGS_PROFILE	_T("AC_VF_RegExpr.dat")
-emd ,ooprm*/
+END MORPH*/
 
 // CCatDialog dialog
 
@@ -42,14 +42,15 @@ IMPLEMENT_DYNAMIC(CCatDialog, CDialog)
 BEGIN_MESSAGE_MAP(CCatDialog, CDialog)
 	ON_BN_CLICKED(IDC_BROWSE, OnBnClickedBrowse)
 	ON_BN_CLICKED(IDOK, OnBnClickedOk)
+	//ON_BN_CLICKED(IDC_REB, OnDDBnClicked) //MORPH
 	ON_MESSAGE(UM_CPN_SELENDOK, OnSelChange) //UM_CPN_SELCHANGE
 END_MESSAGE_MAP()
 
 CCatDialog::CCatDialog(int index)
-	: CDialog(CCatDialog::IDD, 0)
+	: CDialog(CCatDialog::IDD, 0) // MORPH
 {
-	m_myCat=thePrefs.GetCategory(index);
-	if (m_myCat==NULL) return;
+	m_myCat = thePrefs.GetCategory(index);
+	if (m_myCat==NULL) return; // Khaos Categorie
 /* morph delete: no regexp
 	if (m_myCat == NULL)
 		return;
@@ -73,7 +74,7 @@ BOOL CCatDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 	InitWindowStyles(this);
-	SetIcon(theApp.LoadIcon(_T("CATEGORY"),16,16),FALSE);
+	SetIcon(theApp.LoadIcon(_T("CATEGORY"),16,16),FALSE); // MORPH
 	Localize();
 	m_ctlColor.SetDefaultColor(GetSysColor(COLOR_BTNTEXT));
 	UpdateData();
@@ -96,7 +97,8 @@ BOOL CCatDialog::OnInitDialog()
 		GetDlgItem(IDC_REB)->SetWindowText(_T("6")); // show a down-arrow
 	}
  */ //end morph
-	return true;
+
+	return TRUE;
 }
 
 void CCatDialog::UpdateData()
@@ -113,7 +115,7 @@ void CCatDialog::UpdateData()
 
 	newcolor = m_myCat->color;
 	m_ctlColor.SetColor(m_myCat->color == -1 ? m_ctlColor.GetDefaultColor() : m_myCat->color);
-
+	
 	// HoaX_69: AutoCat
 	//MORPH START - Changed by SiRoB, Due to Khaos Categorie
 	/*
@@ -281,10 +283,10 @@ void CCatDialog::OnBnClickedOk()
 	}
 
 	if (m_myCat->strIncomingPath.CompareNoCase(oldpath)!=0)
-		theApp.emuledlg->sharedfileswnd->Reload();
+		theApp.emuledlg->sharedfileswnd->Reload(); // MORPH
 
 	m_myCat->color=newcolor;
-	m_myCat->prio=m_prio.GetCurSel();
+    m_myCat->prio=m_prio.GetCurSel();
 	//MORPH STRAT - Changed by SiRoB, Due to Khoas categorie
 	/*
 	GetDlgItem(IDC_AUTOCATEXT)->GetWindowText(m_myCat->autocat);

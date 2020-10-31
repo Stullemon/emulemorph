@@ -82,7 +82,7 @@ public:
 	void		 StoreToFile(CFileDataIO& rFile) const;
 
 	struct SClient {
-	public:
+	public: // MORPH
 		SClient() {
 			m_nIP = 0;
 			m_nPort = 0;

@@ -50,8 +50,12 @@ BEGIN_MESSAGE_MAP(CPPgDirectories, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgDirectories::CPPgDirectories()
-	: CPPgtooltipped (CPPgDirectories::IDD) //leuk_he  tooltipped 
-		//: CPropertyPage(CPPgServer::IDD) leuk_he  tooltipped 
+//leuk_he  tooltipped 
+/*
+	: CPropertyPage(CPPgDirectories::IDD)
+*/
+	: CPPgtooltipped (CPPgDirectories::IDD) 
+//leuk_he  tooltipped 
 {
 	m_icoBrowse = NULL;
 }
@@ -82,7 +86,7 @@ BOOL CPPgDirectories::OnInitDialog()
 	InitAttachedBrowseButton(::GetDlgItem(m_hWnd, IDC_SELTEMPDIR), m_icoBrowse);
 
 /* old version: on column
-	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCFOLDERS), LVCFMT_LEFT, 280); 
+	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCFOLDERS), LVCFMT_LEFT, 280);
 */
 	m_ctlUncPaths.InsertColumn(0, GetResString(IDS_UNCLIST_INACTIVE  ), LVCFMT_LEFT, 250);  // sharesubdir ==> this can be better
 	m_ctlUncPaths.InsertColumn(1,GetResString(IDS_SUBDIRS), LVCFMT_LEFT,30); // sharesubdir + column for inactive shares
@@ -409,6 +413,7 @@ void CPPgDirectories::Localize(void)
 void CPPgDirectories::FillUncList(void)
 {
 	m_ctlUncPaths.DeleteAllItems();
+
 	// SLUGFILLER START: shareSubdir remove - don't refill list, use it only for adding
 /* old code
 	for (POSITION pos = thePrefs.shareddir_list.GetHeadPosition(); pos != 0; )
@@ -418,7 +423,7 @@ void CPPgDirectories::FillUncList(void)
 			m_ctlUncPaths.InsertItem(0, folder);
 	}
  end old code */
-	//inactive sharelist	 HIER WAS IK
+	//inactive sharelist
 	for (POSITION pos = thePrefs.inactive_shareddir_list.GetHeadPosition(); pos != 0; )
 	{
 		CString folder = thePrefs.inactive_shareddir_list.GetNext(pos);

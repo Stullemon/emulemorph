@@ -8,9 +8,9 @@
 * Redistribution is appreciated.
 *
 * $Workfile:$
-* $Revision: 1.3 $
+* $Revision:$
 * $Modtime:$
-* $Author: sirob $
+* $Author:$
 *
 * Revision History:
 *	$History:$

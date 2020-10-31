@@ -71,9 +71,9 @@ END_MESSAGE_MAP()
 CPPgGeneral::CPPgGeneral()
 // MORPH START leuk_he tooltipped
 /*
-: CPropertyPage(CPPgGeneral::IDD)
+	: CPropertyPage(CPPgGeneral::IDD)
 */
-: CPPgtooltipped(CPPgGeneral::IDD)
+	: CPPgtooltipped(CPPgGeneral::IDD)
 // MORRPH END leuk_he tooltipped
 {
 }

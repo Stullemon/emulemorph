@@ -151,9 +151,9 @@ void CFileDetailDialogName::OnDestroy()
 
 void CFileDetailDialogName::Localize()
 {
-	    GetDlgItem(IDC_TAKEOVER)->SetWindowText(GetResString(IDS_TAKEOVER));
-	    GetDlgItem(IDC_BUTTONSTRIP)->SetWindowText(GetResString(IDS_CLEANUP));
-	    GetDlgItem(IDC_FD_SN)->SetWindowText(GetResString(IDS_SOURCENAMES));
+    GetDlgItem(IDC_TAKEOVER)->SetWindowText(GetResString(IDS_TAKEOVER));
+    GetDlgItem(IDC_BUTTONSTRIP)->SetWindowText(GetResString(IDS_CLEANUP));
+    GetDlgItem(IDC_FD_SN)->SetWindowText(GetResString(IDS_SOURCENAMES));
 }
 
 void CFileDetailDialogName::FillSourcenameList()
@@ -193,7 +193,7 @@ void CFileDetailDialogName::FillSourcenameList()
 				m_bAppliedSystemImageList = true;
 			}
 
-			int ix=m_listFileNames.InsertItem(LVIF_TEXT|LVIF_PARAM|LVIF_IMAGE, m_listFileNames.GetItemCount() ,cur_src->GetClientFilename(),0,0,iSystemIconIdx,(LPARAM)newitem);
+			int ix = m_listFileNames.InsertItem(LVIF_TEXT | LVIF_PARAM | LVIF_IMAGE, m_listFileNames.GetItemCount() ,cur_src->GetClientFilename(), 0, 0, iSystemIconIdx, (LPARAM)newitem);
 			m_listFileNames.SetItemText(ix, 1, _T("1")); 
 		}
 		else

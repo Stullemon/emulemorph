@@ -1745,9 +1745,9 @@ void CHyperTextCtrl::SetColors() {
 	m_HoverColor = RGB(255,0,0);
 }
 
-void CHyperTextCtrl::LoadHandCursor() 
+void CHyperTextCtrl::LoadHandCursor()
 {
-	CString windir; 
+	CString windir;
 	(void)GetWindowsDirectory(windir.GetBuffer(MAX_PATH), MAX_PATH);
 	windir.ReleaseBuffer();
 	windir += _T("\\winhlp32.exe");

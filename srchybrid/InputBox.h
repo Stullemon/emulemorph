@@ -34,6 +34,7 @@ public:
 	void	SetNumber(bool isNum = false) { isNumber = isNum; }
 	const int	GetInputInt() const { return _tstoi(m_return); };
 	// khaos::categorymod-
+
 protected:
 	CString m_label;
 	CString m_title;
@@ -45,6 +46,7 @@ protected:
 	// khaos::categorymod+
 	bool	isNumber;
 	// khaos::categorymod-
+
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnInitDialog();
 

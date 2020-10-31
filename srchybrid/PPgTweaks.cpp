@@ -119,6 +119,11 @@ CPPgTweaks::CPPgTweaks()
     m_bA4AFSaveCpu = false;
 	m_iExtractMetaData = 0;
 	m_bAutoArchDisable = true;
+#ifdef USE_OFFICIAL_UPNP
+	m_bCloseUPnPOnExit = true;
+	m_bSkipWANIPSetup = false;
+	m_bSkipWANPPPSetup = false;
+#endif
 	m_iShareeMule = 0;
 	m_bResolveShellLinks = false;
 
@@ -182,6 +187,12 @@ CPPgTweaks::CPPgTweaks()
 	m_htiLogA4AF = NULL;
 	m_htiExtractMetaData = NULL;
 	m_htiAutoArch = NULL;
+#ifdef USE_OFFICIAL_UPNP
+	m_htiUPnP = NULL;
+	m_htiCloseUPnPPorts = NULL;
+	m_htiSkipWANIPSetup = NULL;
+	m_htiSkipWANPPPSetup = NULL;
+#endif
 	m_htiShareeMule = NULL;
 	m_htiShareeMuleMultiUser = NULL;
 	m_htiShareeMulePublicUser = NULL;
@@ -320,6 +331,9 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		int iImgConnection = 8;
 		int iImgA4AF = 8;
 		int iImgMetaData = 8;
+#ifdef USE_OFFICIAL_UPNP
+		int iImgUPnP = 8;
+#endif
 		int iImgShareeMule = 8;
 		//MORPH START leuk_he Advanced official preferences.
 		int iImgTweaks = 8;
@@ -338,6 +352,9 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 			iImgConnection=	piml->Add(CTempIconLoader(_T("connection")));
             iImgA4AF =		piml->Add(CTempIconLoader(_T("Download")));
             iImgMetaData =	piml->Add(CTempIconLoader(_T("MediaInfo")));
+#ifdef USE_OFFICIAL_UPNP
+			iImgUPnP =		piml->Add(CTempIconLoader(_T("connectedhighhigh")));
+#endif
 			iImgShareeMule =piml->Add(CTempIconLoader(_T("viewfiles")));
 			//MORPH START leuk_he Advanced official preferences.
 			iImgTweaks = piml->Add(CTempIconLoader(_T("Tweak")));
@@ -450,6 +467,16 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_ctrlTreeOptions.AddEditBox(m_htiDynUpNumberOfPings, RUNTIME_CLASS(CNumTreeOptionsEdit));
 		*/
 		//MORPH END   - Removed by Stulle, Removed dupe USS settings
+
+		/////////////////////////////////////////////////////////////////////////////
+		// UPnP group
+		//
+#ifdef USE_OFFICIAL_UPNP
+        m_htiUPnP = m_ctrlTreeOptions.InsertGroup(GetResString(IDS_UPNP), iImgUPnP, TVI_ROOT);
+		m_htiCloseUPnPPorts = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNPCLOSEONEXIT), m_htiUPnP, m_bCloseUPnPOnExit);
+		m_htiSkipWANIPSetup = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNPSKIPWANIP), m_htiUPnP, m_bSkipWANIPSetup);
+		m_htiSkipWANPPPSetup = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNPSKIPWANPPP), m_htiUPnP, m_bSkipWANPPPSetup);
+#endif
 
 		/////////////////////////////////////////////////////////////////////////////
 		// eMule Shared User
@@ -575,6 +602,9 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		*/
 		//MORPH END   - Removed by Stulle, Removed dupe USS settings
 		m_ctrlTreeOptions.Expand(m_htiExtractMetaData, TVE_EXPAND);
+#ifdef USE_OFFICIAL_UPNP
+		m_ctrlTreeOptions.Expand(m_htiUPnP, TVE_EXPAND);
+#endif
 		m_ctrlTreeOptions.Expand(m_htiShareeMule, TVE_EXPAND);
         m_ctrlTreeOptions.SendMessage(WM_VSCROLL, SB_TOP);
         m_bInitializedTreeOpts = true;
@@ -767,6 +797,15 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
     // MORPH END  leuk_he Advanced official preferences.
 
 	/////////////////////////////////////////////////////////////////////////////
+	// UPnP group
+	//
+#ifdef USE_OFFICIAL_UPNP
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiCloseUPnPPorts, m_bCloseUPnPOnExit);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiSkipWANIPSetup, m_bSkipWANIPSetup);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiSkipWANPPPSetup, m_bSkipWANPPPSetup);
+#endif
+
+	/////////////////////////////////////////////////////////////////////////////
 	// eMule Shared User
 	//
 	DDX_TreeRadio(pDX, IDC_EXT_OPTS, m_htiShareeMule, m_iShareeMule);
@@ -840,6 +879,11 @@ BOOL CPPgTweaks::OnInitDialog()
     */
     //MORPH END   - Removed by Stulle, Removed dupe USS settings
 
+#ifdef USE_OFFICIAL_UPNP
+	m_bCloseUPnPOnExit = thePrefs.CloseUPnPOnExit();
+	m_bSkipWANIPSetup = thePrefs.GetSkipWANIPSetup();
+	m_bSkipWANPPPSetup = thePrefs.GetSkipWANPPPSetup();
+#endif
 
 	m_iShareeMule = thePrefs.m_nCurrentUserDirMode;
 
@@ -942,6 +986,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_ctlQueueSize.SetTicFreq(10);
 	m_ctlQueueSize.SetPageSize(10);
     InitTooltips(&m_ctrlTreeOptions); // MORPH leuk_he tooltipped
+
 	Localize();
 
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -1044,7 +1089,11 @@ BOOL CPPgTweaks::OnApply()
 		thePrefs.m_bVerbose = m_bVerbose; // store after related options were stored!
 	}
 
-	thePrefs.m_bCreditSystem = true/*m_bCreditSystem*/;
+	//MORPH - Changed by SiRoB, Hot fix to show correct disabled checkbox
+	/*
+	thePrefs.m_bCreditSystem = m_bCreditSystem;
+	*/
+	thePrefs.m_bCreditSystem = true;
 	thePrefs.m_iCommitFiles = m_iCommitFiles;
 	thePrefs.m_iExtractMetaData = m_iExtractMetaData;
 	thePrefs.filterLANIPs = m_bFilterLANIPs;
@@ -1100,6 +1149,11 @@ BOOL CPPgTweaks::OnApply()
 	//MORPH END   - Removed by Stulle, Removed dupe USS settings
 	thePrefs.m_bAutomaticArcPreviewStart = !m_bAutoArchDisable;
 
+#ifdef USE_OFFICIAL_UPNP
+	thePrefs.m_bCloseUPnPOnExit = m_bCloseUPnPOnExit;
+	thePrefs.SetSkipWANIPSetup(m_bSkipWANIPSetup);
+	thePrefs.SetSkipWANPPPSetup(m_bSkipWANPPPSetup);
+#endif
 
 	thePrefs.ChangeUserDirMode(m_iShareeMule);
 
@@ -1289,6 +1343,12 @@ void CPPgTweaks::Localize(void)
         if (m_htiA4AFSaveCpu) m_ctrlTreeOptions.SetItemText(m_htiA4AFSaveCpu, GetResString(IDS_A4AF_SAVE_CPU));
         if (m_htiFullAlloc) m_ctrlTreeOptions.SetItemText(m_htiFullAlloc, GetResString(IDS_FULLALLOC));
 		if (m_htiAutoArch) m_ctrlTreeOptions.SetItemText(m_htiAutoArch, GetResString(IDS_DISABLE_AUTOARCHPREV));
+#ifdef USE_OFFICIAL_UPNP
+        if (m_htiUPnP) m_ctrlTreeOptions.SetItemText(m_htiUPnP, GetResString(IDS_UPNP));
+		if (m_htiCloseUPnPPorts) m_ctrlTreeOptions.SetItemText(m_htiCloseUPnPPorts, GetResString(IDS_UPNPCLOSEONEXIT));
+		if (m_htiSkipWANIPSetup) m_ctrlTreeOptions.SetItemText(m_htiSkipWANIPSetup, GetResString(IDS_UPNPSKIPWANIP));
+		if (m_htiSkipWANPPPSetup) m_ctrlTreeOptions.SetItemText(m_htiSkipWANPPPSetup, GetResString(IDS_UPNPSKIPWANPPP));
+#endif
 		if (m_htiShareeMule) m_ctrlTreeOptions.SetItemText(m_htiShareeMule, GetResString(IDS_SHAREEMULELABEL));
 		if (m_htiShareeMuleMultiUser) m_ctrlTreeOptions.SetItemText(m_htiShareeMuleMultiUser, GetResString(IDS_SHAREEMULEMULTI));
 		if (m_htiShareeMulePublicUser) m_ctrlTreeOptions.SetItemText(m_htiShareeMulePublicUser, GetResString(IDS_SHAREEMULEPUBLIC));
@@ -1548,6 +1608,12 @@ void CPPgTweaks::OnDestroy()
 	m_htiExtractMetaDataNever = NULL;
 	m_htiExtractMetaDataID3Lib = NULL;
 	m_htiAutoArch = NULL;
+#ifdef USE_OFFICIAL_UPNP
+	m_htiUPnP = NULL;
+	m_htiCloseUPnPPorts = NULL;
+	m_htiSkipWANIPSetup = NULL;
+	m_htiSkipWANPPPSetup = NULL;
+#endif
 	m_htiShareeMule = NULL;
 	m_htiShareeMuleMultiUser = NULL;
 	m_htiShareeMulePublicUser = NULL;
@@ -1662,9 +1728,9 @@ LRESULT CPPgTweaks::OnTreeOptsCtrlNotify(WPARAM wParam, LPARAM lParam)
 				//MORPH END   - Added by SiRoB, WebCache 1.2f
 			}
 		}
-		else if ((m_htiShareeMuleMultiUser && pton->hItem == m_htiShareeMuleMultiUser)
-			|| (m_htiShareeMulePublicUser && pton->hItem == m_htiShareeMulePublicUser)
-			|| (m_htiShareeMuleOldStyle && pton->hItem == m_htiShareeMuleOldStyle))
+		else if (   (m_htiShareeMuleMultiUser  && pton->hItem == m_htiShareeMuleMultiUser)
+			     || (m_htiShareeMulePublicUser && pton->hItem == m_htiShareeMulePublicUser)
+			     || (m_htiShareeMuleOldStyle   && pton->hItem == m_htiShareeMuleOldStyle))
 		{
 			if (m_htiShareeMule && !bShowedWarning){
 				HTREEITEM tmp;

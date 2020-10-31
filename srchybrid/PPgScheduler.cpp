@@ -32,7 +32,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -200,6 +200,7 @@ void CPPgScheduler::OnNmClickList(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 // MORPH END leuk_he: Remove 2nd apply in scheduler 
 
 void CPPgScheduler::LoadSchedule(int index) {
+
 // MORPH START  leuk_he: Remove 2nd apply in scheduler
   bSuppressModifications=true;	
   GetDlgItem(IDC_S_TITLE)->SetWindowText(_T("")); // clear
@@ -304,12 +305,12 @@ void CPPgScheduler::OnBnClickedAdd()
 	index=theApp.scheduler->AddSchedule(newschedule);
 	m_list.InsertItem(index , newschedule->title );
 // MORPH START  leuk_he: Remove 2nd apply in scheduler
-	miActiveSelection  =index;
+	miActiveSelection = index;
 	GetDlgItem(IDC_S_TITLE)->SetWindowText(newschedule->title);
-  miActiveSelection  =index;
+	miActiveSelection = index;
 	SetModified();
 // MORPH END leuk_he: Remove 2nd apply in scheduler
- 	m_list.SetSelectionMark(index);
+	m_list.SetSelectionMark(index);
 
 	RecheckSchedules();
 }
@@ -576,7 +577,7 @@ void CPPgScheduler::OnNmRClickActionlist(NMHDR* /*pNMHDR*/, LRESULT* pResult)
 
 BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 { 
-   int item= m_actions.GetSelectionMark(); 
+	int item= m_actions.GetSelectionMark(); 
 	// add
 	if (wParam>=MP_SCHACTIONS && wParam<MP_SCHACTIONS+20 && m_actions.GetItemCount()<16)
 	{
@@ -638,14 +639,14 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 		// MORPH START  leuk_he: Remove 2nd apply in scheduler
 		SetModified();
 		// lhane
-   }
+	}
 	else if (wParam == ID_HELP)
 	{
 		OnHelp();
 		return TRUE;
 	}
 
-   switch (wParam){ 
+	switch (wParam){ 
 		case MP_CAT_EDIT: 
         { 
 			if (item!=-1) {
@@ -683,8 +684,8 @@ BOOL CPPgScheduler::OnCommand(WPARAM wParam, LPARAM lParam)
 			}
 			break;
 		}
-   } 
-   return CPropertyPage::OnCommand(wParam, lParam);
+	} 
+	return CPropertyPage::OnCommand(wParam, lParam);
 }
 
 void CPPgScheduler::RecheckSchedules() {

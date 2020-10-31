@@ -108,10 +108,10 @@ struct CreditStruct{
 	uchar		abySecureIdent[MAXPUBKEYSIZE];
 };
 */
-
 //Morph End - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 
 #pragma pack()
+
 //Morph Start - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 typedef CreditStruct_30c_SUQWTv2	CreditStruct;	// Moonlight: Standard name for the credit structure.
 //Morph End - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -122,6 +122,7 @@ enum EIdentState{
 	IS_IDFAILED,
 	IS_IDBADGUY,
 };
+
 //EastShare Start - added by AndCycle, creditsystem integration
 enum CreditSystemSelection {
 	//becareful the sort order for the damn radio button in PPgEastShare.cpp and the check on creditSystemMode in preferences.cpp
@@ -141,9 +142,9 @@ public:
 	~CClientCredits();
 
 	const uchar* GetKey() const					{return m_pCredits->abyKey;}
-	uchar*	GetSecureIdent()				{return m_abyPublicKey;}
+	uchar*	GetSecureIdent()					{return m_abyPublicKey;}
 	uint8	GetSecIDKeyLen() const				{return m_nPublicKeyLen;}
-	CreditStruct* GetDataStruct() const		{return m_pCredits;}
+	CreditStruct* GetDataStruct() const			{return m_pCredits;}
 	void	ClearWaitStartTime();
 	//MORPH START - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	void    SaveUploadQueueWaitTime(int iKeepPct = 100);		// Moonlight: SUQWT
@@ -208,12 +209,10 @@ private:
 	bool			m_bCheckScoreRatio;
 	float			m_fLastScoreRatio;
 	//Morph End - Added by AndCycle, reduce a little CPU usage for ratio count
-
 	//EastShare Start - added by AndCycle, Pay Back First
 	bool			m_bPayBackFirst;
 	void			TestPayBackFirstStatus();
 	//EastShare End - added by AndCycle, Pay Back First
-
 };
 
 class CClientCreditsList
@@ -226,7 +225,7 @@ public:
 	uint8	CreateSignature(CClientCredits* pTarget, uchar* pachOutput, uint8 nMaxSize, uint32 ChallengeIP, uint8 byChaIPKind, CryptoPP::RSASSA_PKCS1v15_SHA_Signer* sigkey = NULL);
 	bool	VerifyIdent(CClientCredits* pTarget, const uchar* pachSignature, uint8 nInputSize, uint32 dwForIP, uint8 byChaIPKind);
 
-	CClientCredits* GetCredit(const uchar* key);
+	CClientCredits* GetCredit(const uchar* key) ;
 	void	Process();
 	uint8	GetPubKeyLen() const			{return m_nMyPublicKeyLen;}
 	byte*	GetPublicKey()					{return m_abyMyPublicKey;}

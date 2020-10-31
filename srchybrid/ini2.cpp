@@ -783,6 +783,23 @@ int CIni::Parse(const CString &strIn, int nOffset, CString &strOut)
 
 		// Mighty Knife: Parse-routine rewritten because of unproper
 		// behaviour in case of a set of empty parameters (",,,,,,,,")
+		/*
+		if (nOffset != 0 && strIn[nOffset] == _T(','))
+			nOffset++;
+
+		while (nOffset < nLength) {
+			if (!_istspace((_TUCHAR)strIn[nOffset]))
+				break;
+			nOffset++;
+		}
+
+		while (nOffset < nLength) {
+			strOut += strIn[nOffset];
+			if (strIn[++nOffset] == _T(','))
+				break;
+		}
+		strOut.Trim();
+		*/
 
 		// Delete leading whitespaces
 		while((nOffset < nLength) && _istspace((_TUCHAR)strIn[nOffset])) {

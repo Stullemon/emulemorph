@@ -24,7 +24,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -173,9 +173,9 @@ bool CMMSocket::SendPacket(CMMPacket* packet, bool bQueueFirst){
 		char szBuf[0x1000];
 		int nLen;
 		if (!packet->m_bSpecialHeader)
-			nLen = _snprintf(szBuf, _countof(szBuf), "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: %s\r\nContent-Length: %ld\r\n\r\n",m_pOwner->GetContentType(), packet->m_pBuffer->GetLength());
+			nLen = _snprintf(szBuf, _countof(szBuf), "HTTP/1.1 200 OK\r\nConnection: close\r\nContent-Type: %s\r\nContent-Length: %ld\r\n\r\n",m_pOwner->GetContentType(), (uint32)packet->m_pBuffer->GetLength());
 		else
-			nLen = _snprintf(szBuf, _countof(szBuf), "Content-Length: %ld\r\n\r\n", packet->m_pBuffer->GetLength());
+			nLen = _snprintf(szBuf, _countof(szBuf), "Content-Length: %ld\r\n\r\n", (uint32)packet->m_pBuffer->GetLength());
 		m_nSendLen = nLen + (UINT)packet->m_pBuffer->GetLength();
 		m_pSendBuffer =	new char[m_nSendLen];
 		memcpy(m_pSendBuffer,szBuf,nLen);

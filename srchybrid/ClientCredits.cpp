@@ -45,7 +45,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 #define CLIENTS_MET_FILENAME	_T("clients.met")
@@ -78,8 +78,10 @@ CClientCredits::CClientCredits(const uchar* key)
 	InitalizeIdent();
 
 	// EastShare START - Modified by TAHO, modified SUQWT
-	//m_dwUnSecureWaitTime = ::GetTickCount();
-	//m_dwSecureWaitTime = ::GetTickCount();
+	/*
+	m_dwUnSecureWaitTime = ::GetTickCount();
+	m_dwSecureWaitTime = ::GetTickCount();
+	*/
 	m_dwUnSecureWaitTime = 0;
 	m_dwSecureWaitTime = 0;
 	// EastShare END - Modified by TAHO, modified SUQWT
@@ -106,7 +108,7 @@ CClientCredits::~CClientCredits()
 void CClientCredits::AddDownloaded(uint32 bytes, uint32 dwForIP) {
 	//MORPH START - Changed by SIRoB, Code Optimization 
 	/*
-	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+	if ((GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable()) {
 	*/
 	if ( GetCurrentIdentState(dwForIP) != IS_IDENTIFIED  && GetCurrentIdentState(dwForIP) != IS_NOTAVAILABLE && theApp.clientcredits->CryptoAvailable() ){
 	//MORPH END   - Changed by SIRoB, Code Optimization 
@@ -117,8 +119,8 @@ void CClientCredits::AddDownloaded(uint32 bytes, uint32 dwForIP) {
 	uint64 current = (((uint64)m_pCredits->nDownloadedHi << 32) | m_pCredits->nDownloadedLo) + bytes;
 
 	//recode
-	m_pCredits->nDownloadedLo=(uint32)current;
-	m_pCredits->nDownloadedHi=(uint32)(current>>32);
+	m_pCredits->nDownloadedLo = (uint32)current;
+	m_pCredits->nDownloadedHi = (uint32)(current >> 32);
 
 	//is it good to refresh PayBackFirst status here?
 	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
@@ -129,7 +131,7 @@ void CClientCredits::AddDownloaded(uint32 bytes, uint32 dwForIP) {
 void CClientCredits::AddUploaded(uint32 bytes, uint32 dwForIP) {
 	//MORPH START - Changed by SIRoB, Code Optimization 
 	/*
-	if ( ( GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable() ){
+	if ((GetCurrentIdentState(dwForIP) == IS_IDFAILED || GetCurrentIdentState(dwForIP) == IS_IDBADGUY || GetCurrentIdentState(dwForIP) == IS_IDNEEDED) && theApp.clientcredits->CryptoAvailable()) {
 	*/
 	if ( GetCurrentIdentState(dwForIP) != IS_IDENTIFIED  && GetCurrentIdentState(dwForIP) != IS_NOTAVAILABLE && theApp.clientcredits->CryptoAvailable() ){
 	//MORPH END   - Changed by SIRoB, Code Optimization 
@@ -140,8 +142,8 @@ void CClientCredits::AddUploaded(uint32 bytes, uint32 dwForIP) {
 	uint64 current = (((uint64)m_pCredits->nUploadedHi << 32) | m_pCredits->nUploadedLo) + bytes;
 
 	//recode
-	m_pCredits->nUploadedLo=(uint32)current;
-	m_pCredits->nUploadedHi=(uint32)(current>>32);
+	m_pCredits->nUploadedLo = (uint32)current;
+	m_pCredits->nUploadedHi = (uint32)(current >> 32);
 
 	//is it good to refresh PayBackFirst status here?
 	TestPayBackFirstStatus();//EastShare - added by AndCycle, Pay Back First
@@ -149,11 +151,11 @@ void CClientCredits::AddUploaded(uint32 bytes, uint32 dwForIP) {
 	m_bCheckScoreRatio = true;//Morph - Added by AndCycle, reduce a little CPU usage for ratio count
 }
 
-uint64	CClientCredits::GetUploadedTotal() const{
+uint64 CClientCredits::GetUploadedTotal() const {
 	return ((uint64)m_pCredits->nUploadedHi << 32) | m_pCredits->nUploadedLo;
 }
 
-uint64	CClientCredits::GetDownloadedTotal() const{
+uint64 CClientCredits::GetDownloadedTotal() const {
 	return ((uint64)m_pCredits->nDownloadedHi << 32) | m_pCredits->nDownloadedLo;
 }
 
@@ -399,7 +401,7 @@ CClientCreditsList::~CClientCreditsList()
 		m_mapClients.GetNextAssoc(pos, tmpkey, cur_credit);
 		delete cur_credit;
 	}
-		delete m_pSignkey;
+	delete m_pSignkey;
 }
 
 // Moonlight: SUQWT: Change the file import 0.30c format.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
@@ -877,7 +879,7 @@ void CClientCreditsList::InitalizeCrypting()
 	// check if keyfile is there
 	bool bCreateNewKey = false;
 	HANDLE hKeyFile = ::CreateFile(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("cryptkey.dat"), GENERIC_READ, FILE_SHARE_READ, NULL,
-										OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+								   OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hKeyFile != INVALID_HANDLE_VALUE)
 	{
 		if (::GetFileSize(hKeyFile, NULL) == 0)
@@ -917,7 +919,7 @@ bool CClientCreditsList::CreateKeyPair()
 		AutoSeededRandomPool rng;
 		InvertibleRSAFunction privkey;
 		privkey.Initialize(rng,RSAKEYSIZE);
- 
+
 		Base64Encoder privkeysink(new FileSink(CStringA(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + _T("cryptkey.dat"))));
 		privkey.DEREncode(privkeysink);
 		privkeysink.MessageEnd();
@@ -1179,8 +1181,6 @@ void CClientCredits::SetSecWaitStartTime(uint32 dwForIP)
 	//Morph Start - modified by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
 	if(theApp.clientcredits->IsSaveUploadQueueWaitTime()){
 		//EastShare START - Added by TAHO, modified SUQWT
-		//m_dwUnSecureWaitTime = ::GetTickCount() - m_pCredits->nUnSecuredWaitTime - 1;	// Moonlight: SUQWT
-		//m_dwSecureWaitTime = ::GetTickCount() - m_pCredits->nSecuredWaitTime - 1;		// Moonlight: SUQWT
 		m_dwUnSecureWaitTime = ::GetTickCount() - ((sint64) m_pCredits->nUnSecuredWaitTime) - 1;
 		m_dwSecureWaitTime = ::GetTickCount() - ((sint64) m_pCredits->nSecuredWaitTime) - 1;
 		//EastShare END - Added by TAHO, modified SUQWT

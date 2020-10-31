@@ -43,13 +43,19 @@
 //#include "PPgIonixWebServer.h"
 CRBMap<uint32, WebServDef>	CWebServer::AdvLogins; //unlimited logs
 //MORPH END [ionix] - iONiX::Advanced WebInterface Account Management
+
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
 static char THIS_FILE[] = __FILE__;
 #endif
 
+
 // morph start  obfuscated server string if obfuscation is enable
+/*
+#define HTTPInit _T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\n")
+#define HTTPInitGZ _T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Encoding: gzip\r\n")
+*/
 #define HTTPInit thePrefs.IsClientCryptLayerRequested()?_T("Server: embedded\r\nConnection: close\r\nContent-Type: text/html\r\n"):_T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\n")
 #define HTTPInitGZ thePrefs.IsClientCryptLayerRequested()?_T("Server: embedded\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Encoding: gzip\r\n"):_T("Server: eMule\r\nConnection: close\r\nContent-Type: text/html\r\nContent-Encoding: gzip\r\n")
 // morph end obfuscated server string if obfuscation is enable

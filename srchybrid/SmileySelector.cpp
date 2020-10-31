@@ -140,7 +140,7 @@ BOOL CSmileySelector::Create(CWnd *pWndParent, const RECT *pRect, CEdit *pwndEdi
 	for (int i = 0; i < _countof(g_aSmileys); i++)
 	{
 		iml.Add(CTempIconLoader(g_aSmileys[i].pszResource, sizSmiley.cx, sizSmiley.cy));
-			m_iBitmaps++;
+		m_iBitmaps++;
 	}
 	CImageList *pimlOld = m_tb.SetImageList(&iml);
 	iml.Detach();

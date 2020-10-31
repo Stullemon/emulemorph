@@ -17,7 +17,6 @@
 #pragma once
 #include "ResizableLib\ResizableFormView.h"
 #include "SplitterControl.h"
-#include "BtnST.h"
 #include "TabCtrl.hpp"
 #include "UploadListCtrl.h"
 #include "DownloadListCtrl.h"
@@ -70,7 +69,13 @@ public:
 	void UpdateFilesCount(int iCount);
 	void Localize();
 	void UpdateCatTabTitles(bool force = true);
+	//MORPH START - Added by SiRoB, Show/Hide dlTab
+	// MightyKnife: Forcing of the verification added
+	/*
+	void VerifyCatTabSize();
+	*/
 	void VerifyCatTabSize(bool _forceverify=false);
+	//MORPH END   - Added by SiRoB, Show/Hide dlTab
 	//MOPRH - Moved by SiRoB, Due to Khaos Cat moved in public area
 	/*
 	int	 AddCategory(CString newtitle,CString newincoming,CString newcomment,CString newautocat,bool addTab=true);

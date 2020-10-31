@@ -42,6 +42,7 @@ typedef struct
 	bool RightsToStats;
 	bool RightsToTransfered;
 //<<< [ionix] - iONiX::Advanced WebInterface Account Management
+
 } Session;
 
 struct BadLogin {
@@ -365,7 +366,12 @@ private:
 	static CString	_GetStats(ThreadData);
 	static CString  _GetKadDlg(ThreadData);
 	static CString	_GetPreferences(ThreadData);
-	static CString	_GetLoginScreen(ThreadData, bool bLogout = false); // [ionix] - Aireoreion: Cookie settings - added , bool bLogout = false
+	//>>> [ionix] - Aireoreion: Cookie settings - added , bool bLogout = false
+	/*
+	static CString	_GetLoginScreen(ThreadData);
+	*/
+	static CString	_GetLoginScreen(ThreadData, bool bLogout = false);
+	//<<< [ionix] - Aireoreion: Cookie settings - added , bool bLogout = false
 	//MORPH START - Added by SiRoB, Login Failed from eMule+
 	static CString  _GetFailedLoginScreen(ThreadData);
 	//MORPH END   - Added by SiRoB, Login Failed from eMule+
@@ -393,17 +399,22 @@ private:
 	static int		_GzipCompress(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen, int level);
 	CString			_LoadTemplate(CString sAll, CString sTemplateName);
 	static Session	GetSessionByID(ThreadData Data,long sessionID);
-//>>> [ionix] - iONiX::Advanced WebInterface Account Management - added bHiLvlFunc
+	//>>> [ionix] - iONiX::Advanced WebInterface Account Management - added bHiLvlFunc
+	/*
+	static bool		IsSessionAdmin(ThreadData Data, const CString &strSsessionID);
+	*/
 	static bool		IsSessionAdmin(ThreadData Data, const CString &strSsessionID, const uint8 bMinAdminLvl = 1); // 0 is user
-//<<< [ionix] - iONiX::Advanced WebInterface Account Management - added bHiLvlFunc
+	//<<< [ionix] - iONiX::Advanced WebInterface Account Management - added bHiLvlFunc
 	static CString	GetPermissionDenied();
 	static CString	_GetDownloadGraph(ThreadData Data,CString filehash);
-//>>> Advanced WebInterface Account Management
-//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
-	//static void		InsertCatBox(CString &Out,int preselect,CString boxlabel, bool jump,bool extraCats,CString sSession,CString sFileHash,bool ed2kbox=false); 
+	//>>> Advanced WebInterface Account Management
+	//MORPH START - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+	/*
+	static void		InsertCatBox(CString &Out,int preselect,CString boxlabel, bool jump,bool extraCats,CString sSession,CString sFileHash,bool ed2kbox=false);
+	*/
 	static void		InsertCatBox(CString &Out,int preselect,CString boxlabel, bool jump,bool extraCats,CString sSession,CString sFileHash,bool ed2kbox, const Session& Rights,bool all = true); 
-//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
-//<<< Advanced WebInterface Account Management
+	//MORPH END   - Changed by Stulle, Allow to show Default tab seperately on Multi User Web Interface
+	//<<< Advanced WebInterface Account Management
 	static CString	GetSubCatLabel(int iCat);
 	static CString  _GetRemoteLinkAddedOk(ThreadData Data);
 	static CString  _GetRemoteLinkAddedFailed(ThreadData Data);
@@ -414,10 +425,12 @@ private:
 private:
 	static void		SaveWIConfigArray(BOOL array[], int size, LPCTSTR key);
 	static CString	GetWebImageNameForFileType(CString filename);
-//>>> Advanced WebInterface Account Management
-	//static CString  GetClientSummary(CUpDownClient* client);
+	//>>> Advanced WebInterface Account Management
+	/*
+	static CString  GetClientSummary(CUpDownClient* client);
+	*/
 	static CString  GetClientSummary(CUpDownClient* client, bool bShowFilename);
-//<<< Advanced WebInterface Account Management
+	//<<< Advanced WebInterface Account Management
 	static CString	_GetMyInfo(ThreadData Data);
 	static CString	GetClientversionImage(CUpDownClient* client);
 	// MORPH start badloging fix dreamwalker [leuk_he]
@@ -425,6 +438,7 @@ private:
 	static void		UpdateFailedLoginsList(ThreadData Data);
 	static BadLogin * FindBadLoginByIp(ThreadData Data,CString ip);
 	// MORPH end badloging fix dreamwalker [leuk_he]
+
 
 // Common data
 	GlobalParams	m_Params;

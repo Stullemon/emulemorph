@@ -25,7 +25,6 @@
 #include "HelpIDs.h"
 #include "Opcodes.h"
 
-
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
@@ -51,9 +50,12 @@ BEGIN_MESSAGE_MAP(CPPgServer, CPropertyPage)
 END_MESSAGE_MAP()
 
 CPPgServer::CPPgServer()
-	//: CPropertyPage(CPPgServer::IDD) leuk_he  tooltipped 
-: CPPgtooltipped(CPPgServer::IDD) // leuk_he  tooltipped 
-
+//leuk_he  tooltipped 
+/*
+	: CPropertyPage(CPPgServer::IDD)
+*/
+	: CPPgtooltipped(CPPgServer::IDD) 
+//leuk_he  tooltipped 
 {
 }
 
@@ -115,6 +117,7 @@ BOOL CPPgServer::OnApply()
 	thePrefs.m_bAutoConnectToStaticServersOnly = IsDlgButtonChecked(IDC_AUTOCONNECTSTATICONLY)!=0;
 	thePrefs.m_bManualAddedServersHighPriority = IsDlgButtonChecked(IDC_MANUALSERVERHIGHPRIO)!=0;
     thePrefs.m_bCryptLayerRequiredStrictServer= IsDlgButtonChecked(IDC_SERVER_REQUIREOBFUSCATION)!=0; // MORPH lh require obfuscated server connection 
+
 	LoadSettings();
 
 	SetModified();

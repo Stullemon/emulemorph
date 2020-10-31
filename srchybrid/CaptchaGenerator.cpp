@@ -62,7 +62,7 @@ void CCaptchaGenerator::ReGenerateCaptcha(uint32 nLetterCount)
 		
 		CString strLetter(schCaptchaContent[GetRandomUInt16() % ARRSIZE(schCaptchaContent)]);
 		m_strCaptchaText += strLetter;
-
+		
 		uint16 nRandomSize = GetRandomUInt16() % 10;
 		uint16 nRandomOffset = 3 + GetRandomUInt16() % 11;
 		imgLetter.DrawString(NULL, nRandomOffset, 32, strLetter, imgLetter.RGBtoRGBQUAD(RGB(0, 0, 0)), _T("Arial"), 40 - nRandomSize, 1000);

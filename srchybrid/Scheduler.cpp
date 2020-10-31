@@ -36,7 +36,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -338,11 +338,9 @@ void CScheduler::ActivateSchedule(int index,bool makedefault) {
 					theApp.emuledlg->sharedfileswnd->SendMessage(WM_COMMAND, IDC_RELOADSHAREDFILES);
 				} break;
 			// [end] Mighty Knife
-
 		}
 	}
 }
-
 
 // MORPH START leuk_he automatic weekly ipfilter/fakefilter update. 
 bool CScheduler::HasWeekly(int par_action) // MORPH 

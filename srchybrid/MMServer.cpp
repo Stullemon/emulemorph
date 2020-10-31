@@ -477,8 +477,8 @@ void  CMMServer::ProcessChangeLimitRequest(CMMData* data, CMMSocket* sender){
 	theApp.scheduler->SaveOriginals(); //MORPH - Added by Stulle, Don't reset Connection Settings without reason
 
 	CMMPacket* packet = new CMMPacket(MMP_CHANGELIMITANS);
-	packet->WriteShort((uint16)((thePrefs.GetMaxUpload() >= UNLIMITED) ? 0 : thePrefs.GetMaxUpload())); //MORPH uint16 is not enough
-	packet->WriteShort((uint16)((thePrefs.GetMaxDownload() >=UNLIMITED) ? 0 : thePrefs.GetMaxDownload())); //MORPH uint16 is not enough
+	packet->WriteShort((uint16)((thePrefs.GetMaxUpload() >= UNLIMITED) ? 0 : thePrefs.GetMaxUpload()));
+	packet->WriteShort((uint16)((thePrefs.GetMaxDownload() >= UNLIMITED) ? 0 : thePrefs.GetMaxDownload()));
 	sender->SendPacket(packet);
 }
 

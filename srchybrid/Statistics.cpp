@@ -371,6 +371,24 @@ float CStatistics::GetAvgUploadRate(int averageType)
 void CStatistics::CompDownDatarateOverhead()
 {
 	//MORPH START - Changed by SiRoB, Better datarate measurement for low and high speed
+	/*
+	TransferredData newitem = {m_nDownDataRateMSOverhead, GetTickCount()};
+	m_AvarageDDRO_list.AddTail(newitem);
+	m_sumavgDDRO += m_nDownDataRateMSOverhead;
+	m_nDownDataRateMSOverhead = 0;
+
+	while (m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp > MAXAVERAGETIME)
+		m_sumavgDDRO -= m_AvarageDDRO_list.RemoveHead().datalen;
+
+	if (m_AvarageDDRO_list.GetCount() > 10)
+	{
+		DWORD dwDuration = m_AvarageDDRO_list.GetTail().timestamp - m_AvarageDDRO_list.GetHead().timestamp;
+		if (dwDuration)
+			m_nDownDatarateOverhead = 1000 * (m_sumavgDDRO - m_AvarageDDRO_list.GetHead().datalen) / dwDuration;
+	}
+	else
+		m_nDownDatarateOverhead = 0;
+	*/
 	DWORD curTick = GetTickCount();
 	if (m_nDownDataRateMSOverhead > 0) {
 		TransferredData newitem = {m_nDownDataRateMSOverhead, curTick};
@@ -404,6 +422,24 @@ void CStatistics::CompDownDatarateOverhead()
 void CStatistics::CompUpDatarateOverhead()
 {
 	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
+	/*
+	TransferredData newitem = {m_nUpDataRateMSOverhead, GetTickCount()};
+	m_AvarageUDRO_list.AddTail(newitem);
+	m_sumavgUDRO += m_nUpDataRateMSOverhead;
+	m_nUpDataRateMSOverhead = 0;
+
+	while (m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp > MAXAVERAGETIME)
+		m_sumavgUDRO -= m_AvarageUDRO_list.RemoveHead().datalen;
+
+	if (m_AvarageUDRO_list.GetCount() > 10)
+	{
+		DWORD dwDuration = m_AvarageUDRO_list.GetTail().timestamp - m_AvarageUDRO_list.GetHead().timestamp;
+		if (dwDuration)
+			m_nUpDatarateOverhead = 1000 * (m_sumavgUDRO - m_AvarageUDRO_list.GetHead().datalen) / dwDuration;
+	}
+	else
+		m_nUpDatarateOverhead = 0;
+	*/
 	DWORD curTick = GetTickCount();
 	if (m_nUpDataRateMSOverhead > 0) {
 		TransferredData newitem = {m_nUpDataRateMSOverhead, curTick};

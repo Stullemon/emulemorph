@@ -318,8 +318,8 @@ public:
 	}
 
 
-// morph  start
-CString Inform(void* Handle,size_t format)
+	// morph  start
+	CString Inform(void* Handle,size_t format)
 	{
 		if (m_pfnMediaInfo_inform) 
 			if (m_ullVersion >= MAKEDLLVERULL(0, 7, 0, 0)) {
@@ -327,7 +327,7 @@ CString Inform(void* Handle,size_t format)
 		}
 		return _T("");
 	}
-		//morph end
+	//morph end
 
 
 

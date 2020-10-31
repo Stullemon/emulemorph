@@ -72,6 +72,11 @@ protected:
     bool m_bA4AFSaveCpu;
 	bool m_bAutoArchDisable;
 	int m_iExtractMetaData;
+#ifdef USE_OFFICIAL_UPNP
+	bool m_bCloseUPnPOnExit;
+	bool m_bSkipWANIPSetup;
+	bool m_bSkipWANPPPSetup;
+#endif
 	int m_iShareeMule;
 	bool bShowedWarning;
 	bool m_bResolveShellLinks;
@@ -296,6 +301,12 @@ protected: //MORPH leuk_he:run as ntservice v1..
 	HTREEITEM m_htiExtractMetaDataNever;
 	HTREEITEM m_htiExtractMetaDataID3Lib;
 	HTREEITEM m_htiAutoArch;
+#ifdef USE_OFFICIAL_UPNP
+	HTREEITEM m_htiUPnP;
+	HTREEITEM m_htiCloseUPnPPorts;
+	HTREEITEM m_htiSkipWANIPSetup;
+	HTREEITEM m_htiSkipWANPPPSetup;
+#endif
 	HTREEITEM m_htiShareeMule;
 	HTREEITEM m_htiShareeMuleMultiUser;
 	HTREEITEM m_htiShareeMulePublicUser;

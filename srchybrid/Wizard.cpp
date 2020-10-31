@@ -304,8 +304,12 @@ BOOL CConnectionWizardDlg::OnInitDialog()
 	m_provider.InsertColumn(1, GetResString(IDS_WIZ_DOWN),		LVCFMT_LEFT,  85);
 	m_provider.InsertColumn(2, GetResString(IDS_WIZ_UP),		LVCFMT_LEFT,  85);
 	m_provider.SetExtendedStyle(LVS_EX_FULLROWSELECT | LVS_EX_INFOTIP);
-     
+
 	// MORPH START: leuk_he: swith 1 and 0 since morph works much better with limits set correct
+	/*
+	m_provider.InsertItem(0, GetResString(IDS_UNKNOWN));m_provider.SetItemText(0,1,_T(""));m_provider.SetItemText(0,2,_T(""));
+	m_provider.InsertItem(1, GetResString(IDS_WIZARD_CUSTOM));m_provider.SetItemText(1,1,GetResString(IDS_WIZARD_ENTERBELOW));m_provider.SetItemText(1,2,GetResString(IDS_WIZARD_ENTERBELOW));
+	*/
 	m_provider.InsertItem(0, GetResString(IDS_WIZARD_CUSTOM));m_provider.SetItemText(1,1,GetResString(IDS_WIZARD_ENTERBELOW));m_provider.SetItemText(1,2,GetResString(IDS_WIZARD_ENTERBELOW));
 	m_provider.InsertItem(1, GetResString(IDS_UNKNOWN));m_provider.SetItemText(0,1,_T(""));m_provider.SetItemText(0,2,_T(""));
 	// MORPH END : leuk_he: swith 1 and 0 since morph works much better with limits set correct
@@ -347,6 +351,10 @@ void CConnectionWizardDlg::OnNmClickProviders(NMHDR* /*pNMHDR*/, LRESULT* /*pRes
 	switch (m_provider.GetSelectionMark())
 	{
 		// MORPH START: leuk_he: swith 1 and 0 since morph works much better with limits set correct
+		/*
+		case  0: down=   0;up=   0; break;
+		case  1: down= ((thePrefs.maxGraphDownloadRate * 1024) + 500) / 1000 * 8; up= ((thePrefs.GetMaxGraphUploadRate(true) * 1024) + 500) / 1000 * 8; break;
+		*/
 		case  1: down=   0;up=   0; break;
 		case  0: down= ((thePrefs.maxGraphDownloadRate * 1024) + 500) / 1000 * 8; up= ((thePrefs.GetMaxGraphUploadRate(true) * 1024) + 500) / 1000 * 8; break;
 		// MORPH END: leuk_he: swith 1 and 0 since morph works much better with limits set correct

@@ -280,10 +280,11 @@ public:
 	void	OnOK();
 	void	OnCancel();
 #endif
+
 	void OnPortChange();
 
 	CString m_sTestURL,m_sUDP,m_sTCP;
-	int   uPnPNAT;
+	int   uPnPNAT; // leuk_he add upnp to startupwizard
 	uint16 GetTCPPort();
 	uint16 GetUDPPort();
 
@@ -293,14 +294,14 @@ public:
 	enum { IDD = IDD_WIZ1_PORTS };
 
 protected:
-	CString lastudp;
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	CString			lastudp;
+	virtual void	DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 #ifdef USE_OFFICIAL_UPNP
 	void			ResetUPnPProgress();
 #endif
 
 	DECLARE_MESSAGE_MAP()
-	
+
 #ifdef USE_OFFICIAL_UPNP
 	int m_nUPnPTicks;
 #endif
@@ -354,7 +355,7 @@ uint16 CPPgWiz1Ports::GetTCPPort() {
 }
 
 uint16 CPPgWiz1Ports::GetUDPPort() {
-	uint16 udp=0;
+	uint16 udp = 0;
 	if (IsDlgButtonChecked(IDC_UDPDISABLE)==0) {
 		CString buffer;
 		GetDlgItem(IDC_UDP)->GetWindowText(buffer);
@@ -471,6 +472,9 @@ BOOL CPPgWiz1Ports::OnInitDialog()
 	CDlgPageWizard::OnInitDialog();
 	CheckDlgButton(IDC_UDPDISABLE, m_sUDP.IsEmpty() || m_sUDP == _T("0"));
 	GetDlgItem(IDC_UDP)->EnableWindow(IsDlgButtonChecked(IDC_UDPDISABLE) == 0);
+#ifdef USE_OFFICIAL_UPNP
+	((CProgressCtrl*)GetDlgItem(IDC_UPNPPROGRESS))->SetRange(0, 40);
+#endif
 	InitWindowStyles(this);
 	
 	lastudp = m_sUDP;
@@ -481,6 +485,10 @@ BOOL CPPgWiz1Ports::OnInitDialog()
 	SetDlgItemText(IDC_TESTINFO , GetResString(IDS_TESTINFO) );
 	SetDlgItemText(IDC_STARTTEST, GetResString(IDS_STARTTEST) );
 	SetDlgItemText(IDC_UDPDISABLE, GetResString(IDS_UDPDISABLED));
+#ifdef USE_OFFICIAL_UPNP
+	SetDlgItemText(IDC_UPNPSTART, GetResString(IDS_UPNPSTART));
+	SetDlgItemText(IDC_UPNPSTATUS, _T(""));
+#endif
 // MORPH START leuk_he add upnp to startup wizard 
 	SetDlgItemText(IDC_ENABLE_PNP, GetResString(IDS_UPNP_ENABLE)); // enable upnp
 
@@ -728,8 +736,7 @@ BOOL CPPgWiz1Server::OnSetActive(){
 			// MORPH START
 			m_iReqObfus = 0;
 			CheckDlgButton(IDC_WIZARDREQUIREOBFUSCATED,BST_UNCHECKED); // if udp is disabled obfuscated server is not a good default because crptping will fail.
-			// MORPH END
-		
+			// MORPH END	
 		}
 		else{
 			CheckDlgButton(IDC_SHOWOVERHEAD, m_iKademlia);
@@ -832,12 +839,6 @@ void CPPgWiz7Morph::OnShowLessClicked()
 		CheckDlgButton(IDC_MORPHWIZ_SHOWMORE,BST_UNCHECKED);
 }
 // MORPH END startup wizard
-  
-
-
-
-
-
 
 ///////////////////////////////////////////////////////////////////////////////
 // CPPgWiz1End dialog
@@ -967,7 +968,7 @@ UINT FirstTimeWizard()
 	CPPgWiz1UlPrio page4(IDD_WIZ1_ULDL_PRIO, GetResString(IDS_WIZ1), GetResString(IDS_PW_CON_DOWNLBL) + _T(" / ") + GetResString(IDS_PW_CON_UPLBL), GetResString(IDS_PRIORITY));
 	sheet.AddPage(&page4);
 	*/
-
+	
 	CPPgWiz1Upload page5(IDD_WIZ1_UPLOAD, GetResString(IDS_WIZ1), GetResString(IDS_SECURITY), GetResString(IDS_OBFUSCATION));
 	sheet.AddPage(&page5);
 	
@@ -997,8 +998,8 @@ UINT FirstTimeWizard()
 	page3.m_sUDP.Format(_T("%u"), thePrefs.GetUDPPort());
 // MORPH less is more
 /*	
-  page4.m_iDAP = 1;
-  page4.m_iUAP = 1;
+	page4.m_iDAP = 1;
+	page4.m_iUAP = 1;
 */
 // MORPH less is more
 	page5.m_iObfuscation = thePrefs.IsClientCryptLayerRequested() ? 1 : 0;
@@ -1013,10 +1014,14 @@ UINT FirstTimeWizard()
 	page6b.m_iShowLessControls = thePrefs.IsLessControls(); // MORPH START show less controls
   page6b.m_iShowMoreControls = thePrefs.IsExtControlsEnabled(); // MORPH startup wizard
 
-	/* MORPH only when changed. (RANDOMIZE PORTS) */
+	//MORPH START - only when changed. (RANDOMIZE PORTS)
+	/*
+	uint16 oldtcpport=thePrefs.GetPort();
+	uint16 oldudpport=thePrefs.GetUDPPort();
+	*/
 	uint16 oldtcpport=thePrefs.GetPort(false,true);
 	uint16 oldudpport=thePrefs.GetUDPPort(false,true);
-	/* MORPH only when changed. or the sockets are rest when the first time wiz is stated again */
+	//MORPH END   - only when changed. or the sockets are rest when the first time wiz is stated again */
 
 	int iResult = sheet.DoModal();
 	if (iResult == IDCANCEL) {
@@ -1047,8 +1052,8 @@ UINT FirstTimeWizard()
 		RemAutoStart();
 //MORPH START - Removed, Less is more
 /*
- 	thePrefs.SetNewAutoDown(page4.m_iDAP!=0); 
-  thePrefs.SetNewAutoUp(page4.m_iUAP!=0);
+	thePrefs.SetNewAutoDown(page4.m_iDAP!=0);
+	thePrefs.SetNewAutoUp(page4.m_iUAP!=0);
 */
 //MORPH END   - Removed, Less is more 
 	thePrefs.m_bCryptLayerRequested = page5.m_iObfuscation != 0;
@@ -1080,7 +1085,7 @@ UINT FirstTimeWizard()
 		}
 	
 	/* MORPH
-    return TRUE;
+	return TRUE;
 	*/
 	UINT FirstTimeWizardAction = 0;
 	if (page6b.m_iRunNetworkWizard)

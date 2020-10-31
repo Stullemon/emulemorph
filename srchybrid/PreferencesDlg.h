@@ -85,7 +85,7 @@ public:
 	CPPgBackup		m_wndBackup; //EastShare - Added by Pretender, TBH-AutoBackup
 	CPPgEastShare	m_wndEastShare; //EastShare - Added by Pretender, ES Prefs
 	CPPgEmulespana	m_wndEmulespana; //MORPH - Added by SiRoB, emulEspaña preferency
-	
+
 	void Localize();
 	void SetStartPage(UINT uStartPageID);
 

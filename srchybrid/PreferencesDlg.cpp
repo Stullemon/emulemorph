@@ -21,7 +21,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -88,15 +88,13 @@ CPreferencesDlg::CPreferencesDlg()
 	CTreePropSheet::SetPageIcon(&m_wndWebServer, _T("WEB"));
 	CTreePropSheet::SetPageIcon(&m_wndTweaks, _T("TWEAK"));
 	CTreePropSheet::SetPageIcon(&m_wndMessages, _T("MESSAGES"));
-	#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 	CTreePropSheet::SetPageIcon(&m_wndDebug, _T("Preferences"));
-    #endif
+#endif
 */
     m_wndIonixWebServer.m_psp.dwFlags &= ~PSH_HASHELP;  //ionix advanced webserver
     m_wndNTService.m_psp.dwFlags &= ~PSH_HASHELP; 
 //MORPH END   - Preferences groups [ePlus/Sirob]
-
-
 
 	AddPage(&m_wndGeneral);
 	AddPage(&m_wndDisplay);
@@ -187,7 +185,7 @@ void CPreferencesDlg::OnDestroy()
 }
 
 BOOL CPreferencesDlg::OnInitDialog()
-{		
+{
 	ASSERT( !m_bSaveIniFile );
 //MORPH START - Preferences groups [ePlus/Sirob]
 /*
@@ -233,10 +231,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 			// MORPH end tabbed options [leuk_he]
 			break;
 		}
-		
-			
 	}
-
 
 	//MORPH START - Added by SiRoB, Load a jpg
 	CBitmap bmp;
@@ -253,7 +248,7 @@ BOOL CPreferencesDlg::OnInitDialog()
 		m_banner.Attach(this, KCSB_ATTACH_RIGHT);
 		//Commander - Added: Preferences Banner [TPT] - End
 	}
-	Localize();			  // Morph: move after load jpg.  (xman) 
+	Localize();	
 	m_slideBar.SetFocus(); //MORPH - Preferences groups [ePlus/Sirob]
 
 	return bResult;
@@ -341,9 +336,9 @@ void CPreferencesDlg::Localize()
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_SCHEDULER)));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_WS)));
 		pTree->SetItemText(GetPageTreeItem(c++), RemoveAmbersand(GetResString(IDS_PW_TWEAK)));
-    	#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
+	#if defined(_DEBUG) || defined(USE_DEBUG_DEVICE)
 		pTree->SetItemText(GetPageTreeItem(c++), _T("Debug"));
-	     #endif
+	#endif
 	}
 
 	UpdateCaption();
@@ -492,7 +487,6 @@ void CPreferencesDlg::SetStartPage(UINT uStartPageID)
 {
 	m_pPshStartPage = MAKEINTRESOURCE(uStartPageID);
 }
-
 
 // MORPH start tabbed option [leuk_he]
 void CPreferencesDlg::SwitchTab(int Page)

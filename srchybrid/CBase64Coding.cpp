@@ -34,7 +34,7 @@
 ** Copyright, 2000, Samuel R. Blackburn
 **
 ** $Workfile: CBase64Coding.cpp $
-** $Revision: 1.14 $
+** $Revision: 14 $
 ** $Modtime: 5/12/00 3:39p $
 ** $Reuse Tracing Code: 1 $
 */
@@ -43,7 +43,7 @@
 
 #if defined( _DEBUG ) && ! defined( WFC_STL )
 #undef THIS_FILE
-static char THIS_FILE[] = __FILE__;
+static char THIS_FILE[]=__FILE__;
 #define new DEBUG_NEW
 #endif
 
@@ -228,7 +228,7 @@ BOOL CBase64Coding::Encode( const char * source, int len, char * destination_str
 
 <H1>CBase64Coding</H1>
 
-$Revision: 1.14 $<BR><HR>
+$Revision: 14 $<BR><HR>
 
 <H2>Description</H2>
 

@@ -1541,7 +1541,8 @@ int CTransferWnd::AddCategory(CString newtitle,CString newincoming,CString newco
 	/*
 	newcat->regexp.Empty();
 	newcat->ac_regexpeval=false;
-	newcat->autocat=newautocat;//replaced by viewfilters.sAdvancedFilterMask
+	newcat->autocat=newautocat;
+    newcat->downloadInAlphabeticalOrder = FALSE;
 	newcat->filter=0;
 	newcat->filterNeg=false;
 	newcat->care4all=false;
@@ -1811,11 +1812,16 @@ void CTransferWnd::OnTabMovement(NMHDR* /*pNMHDR*/, LRESULT* /*pResult*/)
 // routine, the download window is not visible, but the resizing must
 // be done. In such a case if _forceverify==true, the resizing is
 // forced, even if the download window is not visible!
-
+/*
+void CTransferWnd::VerifyCatTabSize()
+*/
 void CTransferWnd::VerifyCatTabSize(bool _forceverify)
 {
 	//MORPH - Added by SiRoB, Show/Hide dlTab
 	// MightyKnife: Forcing of the verification added
+	/*
+	if (m_dwShowListIDC != IDC_DOWNLOADLIST && m_dwShowListIDC != IDC_UPLOADLIST + IDC_DOWNLOADLIST)
+	*/
 	if ((m_dwShowListIDC != IDC_DOWNLOADLIST && m_dwShowListIDC != IDC_UPLOADLIST + IDC_DOWNLOADLIST) && (!_forceverify))
 		return;
 	// [end] Mighty Knife

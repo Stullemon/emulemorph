@@ -38,7 +38,7 @@ IMPLEMENT_DYNAMIC(CCommentDialogLst, CResizablePage)
 
 BEGIN_MESSAGE_MAP(CCommentDialogLst, CResizablePage) 
    	ON_BN_CLICKED(IDOK, OnBnClickedApply) 
-   	ON_BN_CLICKED(IDC_SEARCHKAD, OnBnClickedSearchKad) 
+   	ON_BN_CLICKED(IDC_SEARCHKAD, OnBnClickedSearchKad)
 	ON_BN_CLICKED(IDC_EDITCOMMENTFILTER, OnBnClickedFilter) 
 	ON_MESSAGE(UM_DATA_CHANGED, OnDataChanged)
 	ON_WM_TIMER()

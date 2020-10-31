@@ -55,13 +55,13 @@ public:
 	int GetMessageType();
 	void Hide();
 
-	BOOL SetBitmap(UINT nBitmapID, int red=-1, int green=-1, int blue=-1);
+	BOOL SetBitmap(UINT nBitmapID, int red = -1, int green = -1, int blue = -1);
 	BOOL SetBitmap(LPCTSTR pszFileName,int red = -1, int green = -1, int blue = -1);
 	BOOL SetBitmap(CBitmap* pBitmap, int red, int green, int blue);
 	
 	void SetTextFont(LPCTSTR pszFont, int nSize, int nNormalStyle, int nSelectedStyle);
 	void SetTextDefaultFont();
-	void SetTextColor(COLORREF crNormalTextColor,COLORREF crSelectedTextColor);
+	void SetTextColor(COLORREF crNormalTextColor, COLORREF crSelectedTextColor);
 	void SetTextRect(RECT rcText);
 	void SetCloseBtnRect(RECT rcCloseBtn);
 	void SetHistoryBtnRect(RECT rcHistoryBtn);
@@ -84,9 +84,9 @@ protected:
 	bool m_bBitmapAlpha;
 	CString m_strCaption;
 	CString m_strLink;
-	CRect  m_rcText;
-	CRect  m_rcCloseBtn;
-	CRect  m_rcHistoryBtn;
+	CRect m_rcText;
+	CRect m_rcCloseBtn;
+	CRect m_rcHistoryBtn;
 	CPoint m_ptMousePosition;
 	UINT m_uTextFormat;
 	BOOL m_bMouseIsOver;

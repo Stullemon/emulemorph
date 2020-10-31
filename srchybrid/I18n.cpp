@@ -101,7 +101,7 @@ static SLanguage s_aLanguages[] =
 	{LANGID_ES_ES_T,_T("spanish"),		FALSE,	_T("es_ES_T"),	1252,	_T("windows-1252")},	// Spanish (Castilian)
 	{LANGID_ES_AS,  _T("spanish"),		FALSE,	_T("es_AS"),	1252,	_T("windows-1252")},	// Asturian
 	{LANGID_VA_ES,  _T(""),				FALSE,	_T("va_ES"),	1252,	_T("windows-1252")},	// Valencian AVL
-	{LANGID_VA_ES_RACV,  _T(""),				FALSE,	_T("va_ES_RACV"),	1252,	_T("windows-1252")},	// Valencian RACV
+	{LANGID_VA_ES_RACV,  _T(""),		FALSE,	_T("va_ES_RACV"),	1252,	_T("windows-1252")},// Valencian RACV
 	{LANGID_ET_EE,	_T(""),				FALSE,	_T("et_EE"),	1257,	_T("windows-1257")},	// Estonian
 	{LANGID_FA_IR,	_T("farsi"),		FALSE,	_T("fa_IR"),	1256,	_T("windows-1256")},	// Farsi
 	{LANGID_FI_FI,	_T("finnish"),		FALSE,	_T("fi_FI"),	1252,	_T("windows-1252")},	// Finnish

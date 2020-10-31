@@ -145,7 +145,7 @@ void CIrcSocket::OnReceive(int iErrorCode)
 				m_pIrcMain->PreParseMessage(cBuffer);
 			}
 		}
-		while( iLength > 1022 );
+		while (iLength > 1022);
 	}
 	CATCH_DFLT_EXCEPTIONS(_T(__FUNCTION__))
 	CATCH_DFLT_ALL(_T(__FUNCTION__))
@@ -217,21 +217,21 @@ int CIrcSocket::OnLayerCallback(const CAsyncSocketExLayer* pLayer, int nType, in
 				case PROXYERROR_NOCONN:
 				case PROXYERROR_REQUESTFAILED:
 					{
-					CString strError(GetProxyError(nCode));
+						CString strError(GetProxyError(nCode));
 						if (lParam)
 						{
-						strError += _T(" - ");
-						strError += (LPCSTR)lParam;
-					}
+							strError += _T(" - ");
+							strError += (LPCSTR)lParam;
+						}
 						if (wParam)
 						{
-						CString strErrInf;
-						if (GetErrorMessage(wParam, strErrInf, 1))
-							strError += _T(" - ") + strErrInf;
+							CString strErrInf;
+							if (GetErrorMessage(wParam, strErrInf, 1))
+								strError += _T(" - ") + strErrInf;
+						}
+						LogWarning(LOG_STATUSBAR, _T("IRC socket: %s"), strError);
+						break;
 					}
-					LogWarning(LOG_STATUSBAR, _T("IRC socket: %s"), strError);
-					break;
-				}
 				default:
 					LogWarning(LOG_STATUSBAR, _T("IRC socket: %s"), GetProxyError(nCode));
 			}

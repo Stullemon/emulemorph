@@ -32,13 +32,13 @@ void CInputBox::OnContextMenu(CWnd* /*pWnd*/, CPoint /*point*/)
 // CMuleSystrayDlg dialog
 
 CMuleSystrayDlg::CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxDown, int iCurUp, int iCurDown)
-: CDialog(CMuleSystrayDlg::IDD, pParent)
+	: CDialog(CMuleSystrayDlg::IDD, pParent)
 {
 	if(iCurDown == UNLIMITED)
 		iCurDown = 0;
 	if(iCurUp == UNLIMITED)
 		iCurUp = 0;
-	
+
 	//{{AFX_DATA_INIT(CMuleSystrayDlg)
 	m_nDownSpeedTxt = iMaxDown < iCurDown ? iMaxDown : iCurDown;
 	m_nUpSpeedTxt = iMaxUp < iCurUp ? iMaxUp : iCurUp;
@@ -47,7 +47,6 @@ CMuleSystrayDlg::CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxD
 
 	m_iMaxUp = iMaxUp;
 	m_iMaxDown = iMaxDown;
-	
 	m_ptInitialPosition = pt;
 
 	m_hUpArrow = NULL;
@@ -108,7 +107,7 @@ END_MESSAGE_MAP()
 /////////////////////////////////////////////////////////////////////////////
 // CMuleSystrayDlg message handlers
 
-void CMuleSystrayDlg::OnMouseMove(UINT nFlags, CPoint point) 
+void CMuleSystrayDlg::OnMouseMove(UINT nFlags, CPoint point)
 {	
 	CWnd *pWnd = ChildWindowFromPoint(point, CWP_SKIPINVISIBLE|CWP_SKIPDISABLED);
 	if(pWnd)
@@ -137,10 +136,10 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 	m_hUpArrow = theApp.LoadIcon(_T("UPLOAD"));
 	m_hDownArrow = theApp.LoadIcon(_T("DOWNLOAD"));
 	m_hSUCIcon = theApp.LoadIcon(_T("SUC"));
-	m_ctrlUpArrow.SetIcon(m_hUpArrow);
-	m_ctrlDownArrow.SetIcon(m_hDownArrow);
+	m_ctrlUpArrow.SetIcon(m_hUpArrow); 
+	m_ctrlDownArrow.SetIcon(m_hDownArrow); 
 	m_ctrlMinUpIcon.SetIcon(m_hSUCIcon); 
-	
+    		
 	bool	bValidFont = false;
 	LOGFONT lfStaticFont = {0};
 
@@ -185,7 +184,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 			lfFont.lfWeight += 200;			// make it bold
 			m_ctrlSpeed.m_cfFont.CreateFontIndirect(&lfFont);
 		}
-
+		
 		m_ctrlSpeed.m_bNoHover = true;
 	}
 
@@ -252,7 +251,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 			m_ctrlRestore.m_cfFont.CreateFontIndirect(&lfFont);
 		}	
 	}
-
+	
 	p = GetDlgItem(IDC_CONNECT);
 	if(p)
 	{
@@ -312,6 +311,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		if(bValidFont)
 			m_ctrlPreferences.m_cfFont.CreateFontIndirect(&lfStaticFont);
 	}
+
 	p = GetDlgItem(IDC_TRAYRELOADSHARE);
 	if(p)
 	{
@@ -331,6 +331,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		if(bValidFont)
 			m_ctrlReloadShares.m_cfFont.CreateFontIndirect(&lfStaticFont);
 	}
+
 	p = GetDlgItem(IDC_TRAY_EXIT);
 	if(p)
 	{
@@ -348,13 +349,13 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		m_ctrlExit.m_hIcon = theApp.LoadIcon(_T("EXIT"), m_ctrlExit.m_sIcon.cx, m_ctrlExit.m_sIcon.cy);
 		m_ctrlExit.m_bParentCapture = true;
 		if(bValidFont)
-		{	
+		{
 			LOGFONT lfFont = lfStaticFont;
 			lfFont.lfWeight += 200;			// make it bold
 			m_ctrlExit.m_cfFont.CreateFontIndirect(&lfFont);
-		}	
+		}
 	}
-	
+
 	if((p = GetDlgItem(IDC_DOWNLBL)) != NULL)
 		p->SetWindowText(GetResString(IDS_PW_CON_DOWNLBL));
 	if((p = GetDlgItem(IDC_UPLBL)) != NULL)
@@ -372,6 +373,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		p->EnableWindow(thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled());
 	}
 	GetDlgItem(IDC_MINUPTXT)->EnableWindow(thePrefs.IsSUCEnabled() || thePrefs.IsDynUpEnabled());
+
 	m_ctrlDownSpeedSld.SetRange(0,m_iMaxDown);
 	m_ctrlDownSpeedSld.SetPos(m_nDownSpeedTxt);
 
@@ -385,16 +387,16 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 	Font.CreateFont(-16,0,900,0,700,0,0,0,0,3,2,1,34,_T("Arial"));
 
 	UINT winver = thePrefs.GetWindowsVersion();
-	if(winver == _WINVER_95_ || winver == _WINVER_NT4_)
+	if (winver == _WINVER_95_ || winver == _WINVER_NT4_ || g_bLowColorDesktop)
 	{
 		m_ctrlSidebar.SetColors(GetSysColor(COLOR_CAPTIONTEXT), 
-			GetSysColor(COLOR_ACTIVECAPTION), 
-			GetSysColor(COLOR_ACTIVECAPTION));
+								GetSysColor(COLOR_ACTIVECAPTION), 
+								GetSysColor(COLOR_ACTIVECAPTION));
 	}
 	else
 	{
 		m_ctrlSidebar.SetColors(GetSysColor(COLOR_CAPTIONTEXT), 
-			GetSysColor(COLOR_ACTIVECAPTION), 
+								GetSysColor(COLOR_ACTIVECAPTION), 
 								GetSysColor(COLOR_GRADIENTACTIVECAPTION));
 	}
 
@@ -405,7 +407,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 	CRect rDesktop;
 	CWnd *pDesktopWnd = GetDesktopWindow();
 	pDesktopWnd->GetClientRect(rDesktop);
-
+	
 	CPoint pt = m_ptInitialPosition;
 	pDesktopWnd->ScreenToClient(&pt);
 	int xpos, ypos;
@@ -419,7 +421,7 @@ BOOL CMuleSystrayDlg::OnInitDialog()
 		ypos = pt.y;
 	else
 		ypos = pt.y - r.Height();
-
+	
 	MoveWindow(xpos, ypos, r.Width(), r.Height());
 	SetCapture();
 	return TRUE;  // return TRUE unless you set the focus to a control
@@ -489,12 +491,13 @@ void CMuleSystrayDlg::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 		thePrefs.SetMinUpload(m_nMinUpSpeedTxt);
 	}
 	theApp.scheduler->SaveOriginals(); //Added by SiRoB, Fix for Param used in scheduler
+	
 	CDialog::OnHScroll(nSBCode, nPos, pScrollBar);
 }
 
 void CMuleSystrayDlg::OnLButtonUp(UINT nFlags, CPoint point) 
 {
-	ReleaseCapture();	
+	ReleaseCapture();
 	EndDialog(m_nExitCode);
 	m_bClosingDown = true;
 
@@ -520,7 +523,7 @@ void CMuleSystrayDlg::OnRButtonDown(UINT nFlags, CPoint point)
 void CMuleSystrayDlg::OnKillFocus(CWnd* pNewWnd) 
 {
 	CDialog::OnKillFocus(pNewWnd);
-
+	
 	if(!m_bClosingDown)
 	{
 		ReleaseCapture();

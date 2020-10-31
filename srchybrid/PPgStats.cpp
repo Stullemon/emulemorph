@@ -27,7 +27,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 
@@ -122,7 +122,7 @@ BOOL CPPgStats::OnInitDialog()
 	m_cratio.AddString(_T("1:10"));
 	m_cratio.AddString(_T("1:20"));
 	int n = thePrefs.GetStatsConnectionsGraphRatio();
-	m_cratio.SetCurSel((n==10)?5:((n==20)?6:n-1));
+	m_cratio.SetCurSel((n == 10) ? 5: ((n == 20) ? 6 : n - 1));
 
 	m_iStatsColors = thePrefs.GetNumStatsColors();
 	m_pdwStatsColors = new DWORD[m_iStatsColors];
@@ -192,7 +192,7 @@ BOOL CPPgStats::OnApply()
 			thePrefs.SetFillGraphs(!thePrefs.GetFillGraphs());
 			bInvalidateGraphs = true;
 		}
-	
+
 		if (bInvalidateGraphs){
 			theApp.emuledlg->statisticswnd->UpdateConnectionsGraph(); // Set new Y upper bound and Y ratio for active connections.
 			theApp.emuledlg->statisticswnd->Localize();
@@ -207,7 +207,7 @@ BOOL CPPgStats::OnApply()
 
 void CPPgStats::Localize(void)
 {
-	if(m_hWnd)
+	if (m_hWnd)
 	{
 		GetDlgItem(IDC_GRAPHS)->SetWindowText(GetResString(IDS_GRAPHS));
 		GetDlgItem(IDC_STREE)->SetWindowText(GetResString(IDS_STREE));

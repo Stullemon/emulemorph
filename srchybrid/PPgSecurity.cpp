@@ -36,7 +36,7 @@
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
 
 bool GetMimeType(LPCTSTR pszFilePath, CString& rstrMimeType);
@@ -91,7 +91,7 @@ void CPPgSecurity::LoadSettings(void)
 {
 	CString strBuffer;
 	
-	strBuffer.Format(_T("%i"),thePrefs.filterlevel);
+	strBuffer.Format(_T("%i"), thePrefs.filterlevel);
 	GetDlgItem(IDC_FILTERLEVEL)->SetWindowText(strBuffer);
 	CheckDlgButton(IDC_FILTERSERVERBYIPFILTER, thePrefs.filterserverbyip);
 
@@ -145,7 +145,7 @@ BOOL CPPgSecurity::OnInitDialog()
 	InitTooltips();  //MORPH leuk_he tooltipped;
 	Localize();
 
-	if (thePrefs.GetUseAutocompletion()){
+	if (thePrefs.GetUseAutocompletion()) {
 		if (!m_pacIPFilterURL) {
 			m_pacIPFilterURL = new CCustomAutoComplete();
 			m_pacIPFilterURL->AddRef();
@@ -153,7 +153,7 @@ BOOL CPPgSecurity::OnInitDialog()
 				m_pacIPFilterURL->LoadList(thePrefs.GetMuleDirectory(EMULE_CONFIGDIR) + IPFILTERUPDATEURL_STRINGS_PROFILE);
 		}
 		SetDlgItemText(IDC_UPDATEURL,m_pacIPFilterURL->GetItem(0));
-		if (theApp.m_fontSymbol.m_hObject){
+		if (theApp.m_fontSymbol.m_hObject) {
 			GetDlgItem(IDC_DD)->SetFont(&theApp.m_fontSymbol);
 			GetDlgItem(IDC_DD)->SetWindowText(_T("6")); // show a down-arrow
 		}
@@ -162,7 +162,7 @@ BOOL CPPgSecurity::OnInitDialog()
 		GetDlgItem(IDC_DD)->ShowWindow(SW_HIDE);
 
 	return TRUE;  // return TRUE unless you set the focus to a control
-	// EXCEPTION: OCX Property Pages should return FALSE
+				  // EXCEPTION: OCX Property Pages should return FALSE
 }
 
 BOOL CPPgSecurity::OnApply()
@@ -171,7 +171,7 @@ BOOL CPPgSecurity::OnApply()
 
 	TCHAR buffer[510];
 	if (GetDlgItem(IDC_FILTERLEVEL)->GetWindowTextLength()) {
-		GetDlgItem(IDC_FILTERLEVEL)->GetWindowText(buffer,4);
+		GetDlgItem(IDC_FILTERLEVEL)->GetWindowText(buffer, 4);
 		int iNewFilterLevel = _tstoi(buffer);
 		if (iNewFilterLevel >= 0 && (UINT)iNewFilterLevel != thePrefs.filterlevel) {
 			thePrefs.filterlevel = iNewFilterLevel;
@@ -208,7 +208,7 @@ BOOL CPPgSecurity::OnApply()
 
 void CPPgSecurity::Localize(void)
 {
-	if(m_hWnd)
+	if (m_hWnd)
 	{
 		SetWindowText(GetResString(IDS_SECURITY));
 		GetDlgItem(IDC_STATIC_IPFILTER)->SetWindowText(GetResString(IDS_IPFILTER));
@@ -224,7 +224,7 @@ void CPPgSecurity::Localize(void)
 		SetDlgItemText(IDC_STATIC_UPDATEFROM,GetResString(IDS_UPDATEFROM));
 		SetDlgItemText(IDC_LOADURL,GetResString(IDS_LOADURL));
 
-        GetDlgItem(IDC_SEEMYSHARE_FRM)->SetWindowText(GetResString(IDS_PW_SHARE));
+		GetDlgItem(IDC_SEEMYSHARE_FRM)->SetWindowText(GetResString(IDS_PW_SHARE));
 		GetDlgItem(IDC_SEESHARE1)->SetWindowText(GetResString(IDS_PW_EVER));
 		GetDlgItem(IDC_SEESHARE2)->SetWindowText(GetResString(IDS_FSTATUS_FRIENDSONLY));
 		GetDlgItem(IDC_SEESHARE3)->SetWindowText(GetResString(IDS_PW_NOONE));
@@ -301,7 +301,7 @@ void CPPgSecurity::OnLoadIPFFromURL()
 		if (dlgDownload.DoModal() != IDOK)
 		{
 			(void)_tremove(strTempFilePath);
-			CString strError=GetResString(IDS_DWLIPFILTERFAILED);
+			CString strError = GetResString(IDS_DWLIPFILTERFAILED);
 			if (!dlgDownload.GetError().IsEmpty())
 				strError += _T("\r\n\r\n") + dlgDownload.GetError();
 			AfxMessageBox(strError, MB_ICONERROR);
@@ -351,7 +351,7 @@ void CPPgSecurity::OnLoadIPFFromURL()
 			}
 			else {
 				CString strError;
-				strError.Format( GetResString(IDS_ERR_IPFILTERCONTENTERR), strTempFilePath);
+				strError.Format(GetResString(IDS_ERR_IPFILTERCONTENTERR), strTempFilePath);
 				AfxMessageBox(strError, MB_ICONERROR);
 			}
 
@@ -478,7 +478,7 @@ void CPPgSecurity::OnLoadIPFFromURL()
 			}
 
 			if (bValidIPFilterFile)
-		{
+			{
 				(void)_tremove(theApp.ipfilter->GetDefaultFilePath());
 				VERIFY( _trename(strTempFilePath, theApp.ipfilter->GetDefaultFilePath()) == 0 );
 				bHaveNewFilterFile = true;
@@ -532,7 +532,7 @@ BOOL CPPgSecurity::PreTranslateMessage(MSG* pMsg)
 		if (pMsg->wParam == VK_DELETE && m_pacIPFilterURL && m_pacIPFilterURL->IsBound() && pMsg->hwnd == GetDlgItem(IDC_UPDATEURL)->m_hWnd)
 		{
 			if (GetAsyncKeyState(VK_MENU)<0 || GetAsyncKeyState(VK_CONTROL)<0)
-			m_pacIPFilterURL->Clear();
+				m_pacIPFilterURL->Clear();
 			else
 				m_pacIPFilterURL->RemoveSelectedItem();
 		}
@@ -552,7 +552,7 @@ BOOL CPPgSecurity::PreTranslateMessage(MSG* pMsg)
 			}
 		}
 	}
-
+   
     //MORPH START leuk_he tooltipped
 	/*
 	return CPropertyPage::PreTranslateMessage(pMsg);
@@ -590,7 +590,7 @@ BOOL CPPgSecurity::OnCommand(WPARAM wParam, LPARAM lParam)
 	}
 	return __super::OnCommand(wParam, lParam);
 }
-	
+
 BOOL CPPgSecurity::OnHelpInfo(HELPINFO* /*pHelpInfo*/)
 {
 	OnHelp();

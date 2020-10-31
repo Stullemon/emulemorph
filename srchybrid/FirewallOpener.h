@@ -117,7 +117,7 @@ protected:
 	bool			DoAction(const EFOCAction eAction, const CICSRuleInfo& riPortRule);			
 	bool			FindRule(const EFOCAction eAction, const CICSRuleInfo& riPortRule, const INetSharingConfigurationPtr pNSC, INetSharingPortMappingPropsPtr* outNSPMP);
 
-	CArray<CICSRuleInfo>	m_liAddedRules;
+	CArray<CICSRuleInfo> m_liAddedRules;
 
 private:
 	INetSharingManager*		m_pINetSM;
