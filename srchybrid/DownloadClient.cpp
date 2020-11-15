@@ -1307,6 +1307,9 @@ void CUpDownClient::CreateBlockRequests(int iMinBlocks, int iMaxBlocks)
 		return;
 
 	//MORPH START - Proper number of needed requested block
+	// Note: When we are downloading fast we always request 3 blocks which
+	// may cause us to exceed the max number of blocks to be requested.
+	// This code behaviour mimics the behaviour of the code before 0.50b.
 	if (iMaxBlocks > 3)
 		count = (count / 3 + 1) * 3;
 	//MORPH END   - Proper number of needed requested block
@@ -1317,7 +1320,12 @@ void CUpDownClient::CreateBlockRequests(int iMinBlocks, int iMaxBlocks)
 			Pending_Block_Struct* pblock = new Pending_Block_Struct;
 			pblock->block = toadd[i];
 			m_PendingBlocks_list.AddTail(pblock);
+			//MORPH START - Proper number of needed requested block
+			/*
 			ASSERT( m_PendingBlocks_list.GetCount() <= iMaxBlocks );
+			*/
+			ASSERT(m_PendingBlocks_list.GetCount() <= iMaxBlocks || iMaxBlocks > 3);
+			//MORPH END   - Proper number of needed requested block
 		}
 	}
 	delete[] toadd;
@@ -1346,7 +1354,11 @@ void CUpDownClient::SendBlockRequests()
 	*/
 	int blockCount = GetDownloadDatarateAVG()/(3*EMBLOCKSIZE)+2;
 	int maxBlockDelta = 1; // blockcount - maxBlockDelta = minPendingBlockRequests
-	// MORPH END
+	if (!IsEmuleClient())
+		blockCount = max(blockCount, 3); // for non eMule clients we ensure only 3 blocks are requested at a time
+	else if (blockCount > 3)
+		maxBlockDelta = 2; // We allow more of a difference if the download is from an eMule client and rather fast
+	//MORPH END
         // if there's less than two chunks left, request fewer blocks for
         // slow downloads, so they don't lock blocks from faster clients.
         // Only trust eMule clients to be able to handle less blocks than three
@@ -1370,7 +1382,6 @@ void CUpDownClient::SendBlockRequests()
 		blockCount = 1;
 		maxBlockDelta = 0;
 	}
-
 	// MORPH END
 
 	CreateBlockRequests(blockCount - maxBlockDelta, blockCount);
@@ -1414,8 +1425,12 @@ void CUpDownClient::SendBlockRequests()
 			}
 		}
 		listToRequest.AddTail(pending);
+		//MORPH START
+		/*
 		if (listToRequest.GetCount() >= 3)
 			break;
+		*/
+		//MORPH END
 	}
 	if (!IsEmuleClient() && listToRequest.GetCount() < 3)
 	{
@@ -1451,7 +1466,7 @@ void CUpDownClient::SendBlockRequests()
 	Packet* packet;
 	//MORPH START
 	uint32 npacket = 0;
-	const UINT nbpackettosend = (queued+2)/3;
+	const UINT nbpackettosend = (listToRequest.GetCount()+2)/3;
 	//MORPH END
 	if (bI64Offsets){
 		//MORPH START
