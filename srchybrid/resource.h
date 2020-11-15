@@ -3920,6 +3920,8 @@
 #define IDS_FILEINFO_TIP                31438
 #define IDS_ADV_DISPLAY_TIP             31439
 #define IDS_SV_LOG_TIP                  31440
+#define IDS_OVERLAPPEDSOCKETS           31441
+#define IDS_OVERLAPPEDSOCKETS_TIP       31442
 
 // Next default values for new objects
 // 

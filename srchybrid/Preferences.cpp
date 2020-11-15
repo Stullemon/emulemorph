@@ -96,6 +96,7 @@ uint16	CPreferences::nServerUDPPort;
 UINT	CPreferences::maxconnections;
 UINT	CPreferences::maxhalfconnections;
 bool	CPreferences::m_bOverlappedSockets;
+bool	CPreferences::m_bOverlappedSocketsAfterRestart; //MORPH - Added by Stulle, Expose overlapped sockets settings
 bool	CPreferences::m_bConditionalTCPAccept;
 bool	CPreferences::reconnect;
 bool	CPreferences::m_bUseServerPriorities;
@@ -2416,6 +2417,7 @@ void CPreferences::SavePreferences()
 	//MORPH START - Added by SiRoB, Upload Splitting Class
 	ini.WriteColRef(L"LogUploadSplittingClassColor",m_crLogUSC);
 	//MORPH END   - Added by SiRoB, Upload Splitting Class
+	ini.WriteBool(L"OverlappedSockets", m_bOverlappedSocketsAfterRestart); //MORPH - Added by Stulle, Expose overlapped sockets settings
 
 	ini.WriteInt(L"MaxFileUploadSizeMB",m_iWebFileUploadSizeLimitMB, L"WebServer" );//section WEBSERVER start
 	CString WriteAllowedIPs ;
@@ -2944,6 +2946,7 @@ void CPreferences::LoadPreferences()
 	maxconnections=ini.GetInt(L"MaxConnections",GetRecommendedMaxConnections());
 	maxhalfconnections=ini.GetInt(L"MaxHalfConnections",9);
 	m_bOverlappedSockets = ini.GetBool(L"OverlappedSockets", false); // Overlapped sockets are under investigations for buggyness (heap corruption), disable by default until fixed
+	m_bOverlappedSocketsAfterRestart = m_bOverlappedSockets; //MORPH - Added by Stulle, Expose overlapped sockets settings
 	m_bConditionalTCPAccept = ini.GetBool(L"ConditionalTCPAccept", false);
 
 	// reset max halfopen to a default if OS changed to SP2 (or higher) or away

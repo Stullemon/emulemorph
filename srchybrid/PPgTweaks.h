@@ -149,6 +149,7 @@ protected: //MORPH leuk_he:run as ntservice v1..
 	bool m_bExtraPreviewWithMenu;
 	bool m_bShowUpDownIconInTaskbar;
 	bool m_bKeepUnavailableFixedSharedDirs;
+	bool m_bOverlappedSockets; //MORPH - Added by Stulle, Expose overlapped sockets settings
 	bool m_bForceSpeedsToKB;
 
     // continue extra official preferences....
@@ -230,6 +231,7 @@ protected: //MORPH leuk_he:run as ntservice v1..
 	HTREEITEM m_htiMsgOnlySec;
 	HTREEITEM m_htiDisablePeerCache;
 	HTREEITEM m_htiKeepUnavailableFixedSharedDirs;
+	HTREEITEM m_htiOverlappedSockets; //MORPH - Added by Stulle, Expose overlapped sockets settings
 	// MORPH END  leuk_he Advanced official preferences. 
 	
 

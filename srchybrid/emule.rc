@@ -6138,6 +6138,8 @@ BEGIN
     IDS_FILEINFO_TIP        "Additional settings concerning mediainfo.dll and the inspection of known files."
     IDS_ADV_DISPLAY_TIP     "Additional settings for the look and feel of the eMule GUI."
     IDS_SV_LOG_TIP          "Additional settings for customizing the logging."
+    IDS_OVERLAPPEDSOCKETS   "Use overlapped sockets (requires restart)"
+    IDS_OVERLAPPEDSOCKETS_TIP "Use new overlapped sockets approach for sending data.\nThis code showed errors in testing (heap corruptions) so use with care.\nOption requires eMule to be restarted to take effect.\n\nDefault=disabled"
 END
 
 #endif    // English (U.S.) resources

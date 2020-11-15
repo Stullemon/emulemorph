@@ -174,6 +174,7 @@ public:
 	static	UINT	maxconnections;
 	static	UINT	maxhalfconnections;
 	static	bool	m_bOverlappedSockets;
+	static	bool	m_bOverlappedSocketsAfterRestart; //MORPH - Added by Stulle, Expose overlapped sockets settings
 	static	bool	m_bConditionalTCPAccept;
 	static	bool	reconnect;
 	static	bool	m_bUseServerPriorities;

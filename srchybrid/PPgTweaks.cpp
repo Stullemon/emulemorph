@@ -306,6 +306,7 @@ CPPgTweaks::CPPgTweaks()
 	m_htiMsgOnlySec = NULL;
 	m_htiDisablePeerCache = NULL;
 	m_htiKeepUnavailableFixedSharedDirs = NULL;
+	m_htiOverlappedSockets = NULL; //MORPH - Added by Stulle, Expose overlapped sockets settings
 	//MORPH END  leuk_he Advanced official preferences.
 }
 
@@ -585,6 +586,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 		m_htiMsgOnlySec = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_MSGONLYSEC), m_hti_advanced, m_bMsgOnlySec);
 		m_htiDisablePeerCache = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_DISABLEPEERACHE), m_hti_advanced, m_bDisablePeerCache);
 		m_htiKeepUnavailableFixedSharedDirs = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS), m_hti_advanced, m_bKeepUnavailableFixedSharedDirs);
+		m_htiOverlappedSockets = m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_OVERLAPPEDSOCKETS), m_hti_advanced, m_bOverlappedSockets); //MORPH - Added by Stulle, Expose overlapped sockets settings
 
 		if (m_bExtControls) // show more controls --> still possible to manully expand. 
 			m_ctrlTreeOptions.Expand(m_hti_advanced, TVE_EXPAND);
@@ -794,6 +796,7 @@ void CPPgTweaks::DoDataExchange(CDataExchange* pDX)
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiMsgOnlySec, m_bMsgOnlySec);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiDisablePeerCache, m_bDisablePeerCache);
 	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiKeepUnavailableFixedSharedDirs, m_bKeepUnavailableFixedSharedDirs);
+	DDX_TreeCheck(pDX, IDC_EXT_OPTS, m_htiOverlappedSockets, m_bOverlappedSockets); //MORPH - Added by Stulle, Expose overlapped sockets settings
     // MORPH END  leuk_he Advanced official preferences.
 
 	/////////////////////////////////////////////////////////////////////////////
@@ -963,6 +966,7 @@ BOOL CPPgTweaks::OnInitDialog()
 	m_bMsgOnlySec = thePrefs.msgsecure;
 	m_bDisablePeerCache = !thePrefs.m_bPeerCacheEnabled;
 	m_bKeepUnavailableFixedSharedDirs = thePrefs.m_bKeepUnavailableFixedSharedDirs;
+	m_bOverlappedSockets = thePrefs.m_bOverlappedSocketsAfterRestart; //MORPH - Added by Stulle, Expose overlapped sockets settings
 	// MORPH END  leuk_he Advanced official preferences.
 
 	m_ctrlTreeOptions.SetImageListColorFlags(theApp.m_iDfltImageListColorFlags);
@@ -1240,6 +1244,7 @@ BOOL CPPgTweaks::OnApply()
 	thePrefs.msgsecure = m_bMsgOnlySec;
 	thePrefs.m_bPeerCacheEnabled = !m_bDisablePeerCache;
 	thePrefs.m_bKeepUnavailableFixedSharedDirs = m_bKeepUnavailableFixedSharedDirs;
+	thePrefs.m_bOverlappedSocketsAfterRestart = m_bOverlappedSockets; //MORPH - Added by Stulle, Expose overlapped sockets settings
 	//MORPH END  leuk_he Advanced official preferences.
 
 	if (thePrefs.GetEnableVerboseOptions())
@@ -1538,6 +1543,10 @@ void CPPgTweaks::Localize(void)
 		SetTool(m_htiDisablePeerCache,IDS_DISABLEPEERACHE_TIP);
 		if (m_htiKeepUnavailableFixedSharedDirs) m_ctrlTreeOptions.SetItemText(m_htiKeepUnavailableFixedSharedDirs, GetResString(IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS));
 		SetTool(m_htiKeepUnavailableFixedSharedDirs,IDS_KEEPUNAVAILABLEFIXEDSHAREDDIRS_TIP);
+		//MORPH START - Added by Stulle, Expose overlapped sockets settings
+		if (m_htiOverlappedSockets) m_ctrlTreeOptions.SetItemText(m_htiOverlappedSockets, GetResString(IDS_OVERLAPPEDSOCKETS));
+		SetTool(m_htiOverlappedSockets, IDS_OVERLAPPEDSOCKETS_TIP);
+		//MORPH END   - Added by Stulle, Expose overlapped sockets settings
 		//MORPH END leuk_he tooltipped
 	}
 }
@@ -1699,6 +1708,7 @@ void CPPgTweaks::OnDestroy()
 	m_htiMsgOnlySec = NULL;
 	m_htiDisablePeerCache = NULL;
 	m_htiKeepUnavailableFixedSharedDirs = NULL;
+	m_htiOverlappedSockets = NULL; //MORPH - Added by Stulle, Expose overlapped sockets settings
 	//MORPH END  leuk_he Advanced official preferences.
 
     CPropertyPage::OnDestroy();

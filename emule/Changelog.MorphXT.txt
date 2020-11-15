@@ -5,6 +5,7 @@ XX-XX-2020
 
 Merged to 0.50b [Stulle]
 ADD: New function to identify network adapter with default gateway for UPnP use [Stulle]
+ADD: Added option for use of overlapped sockets to Advanced Preferences [Stulle]
 CHANGE: Prepared solution for Visual Studio 2019 and removed old version files [Stulle]
 CHANGE: Revised git repository to use forked submodules of relevant libraries [Stulle]
 CHANGE: Updated cryptopp to version 8.2 [Stulle]
