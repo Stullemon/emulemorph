@@ -1355,7 +1355,7 @@ void CUpDownClient::SendBlockRequests()
 	int blockCount = GetDownloadDatarateAVG()/(3*EMBLOCKSIZE)+2;
 	int maxBlockDelta = 1; // blockcount - maxBlockDelta = minPendingBlockRequests
 	if (!IsEmuleClient())
-		blockCount = max(blockCount, 3); // for non eMule clients we ensure only 3 blocks are requested at a time
+		blockCount = min(blockCount, 3); // for non eMule clients we ensure only 3 blocks are requested at a time
 	else if (blockCount > 3)
 		maxBlockDelta = 2; // We allow more of a difference if the download is from an eMule client and rather fast
 	//MORPH END
