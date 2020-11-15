@@ -221,7 +221,7 @@ void CSearchResultsWnd::StartSearch(SSearchParams* pParams)
 			StartNewSearch(pParams);
 			break;
 
-		case SearchTypeFileDonkey:
+		case SearchTypeContentDB:
 			ShellOpenFile(CreateWebQuery(pParams));
 			delete pParams;
 			return;
@@ -545,23 +545,18 @@ CString	CSearchResultsWnd::CreateWebQuery(SSearchParams* pParams)
 	CString query;
 	switch (pParams->eType)
 	{
-	case SearchTypeFileDonkey:
-		query = _T("http://www.filedonkey.com/search.html?");
-		query += _T("pattern=") + EncodeURLQueryParam(pParams->strExpression);
+	case SearchTypeContentDB:
+		query = _T("http://contentdb.emule-project.net/search.php?");
+		query += _T("s=") + EncodeURLQueryParam(pParams->strExpression);
 		if (pParams->strFileType == ED2KFTSTR_AUDIO)
-			query += _T("&media=Audio");
+			query += _T("&cat=2");
 		else if (pParams->strFileType == ED2KFTSTR_VIDEO)
-			query += _T("&media=Video");
+			query += _T("&cat=3");
 		else if (pParams->strFileType == ED2KFTSTR_PROGRAM)
-			query += _T("&media=Pro");
-		query += _T("&requestby=emule");
-
-		if (pParams->ullMinSize > 0)
-			query.AppendFormat(_T("&min_size=%I64u"),pParams->ullMinSize);
-		
-		if (pParams->ullMaxSize > 0)
-			query.AppendFormat(_T("&max_size=%I64u"),pParams->ullMaxSize);
-
+			query += _T("&cat=1");
+		else
+			query += _T("&cat=all");
+		query += _T("&rel=1&search_option=simple&network=edonkey&go=Search");
 		break;
 	default:
 		return _T("");

@@ -83,7 +83,7 @@ void CIndexed::ReadFile(void)
 CIndexed::~CIndexed()
 { 
 	if (!m_bDataLoaded){
-		// the user clicked on disconnect/close just after he started kad (on probably just before posting in the forum the emule doenst works :P )
+		// the user clicked on disconnect/close just after he started kad (and probably just before posting in the forum that emule doesnt works :P )
 		// while the loading thread is still busy. First tell the thread to abort its loading, afterwards wait for it to terminate
 		// and then delete all loaded items without writing them to the files (as they are incomplete and unchanged)
 		DebugLogWarning(_T("Kad stopping while still loading CIndexed data, waiting for abort"));
@@ -115,6 +115,15 @@ CIndexed::~CIndexed()
 			delete pCurrSrcHash;
 		}
 
+		pos1 = m_mapLoad.GetStartPosition();
+		while (pos1 != NULL)
+		{
+			CCKey key1;
+			Load* pLoad;
+			m_mapLoad.GetNextAssoc(pos1, key1, pLoad);
+			delete pLoad;
+		}
+
 		pos1 = m_mapKeyword.GetStartPosition();
 		while( pos1 != NULL )
 		{
@@ -143,7 +152,7 @@ CIndexed::~CIndexed()
 		CKeyEntry::ResetGlobalTrackingMap();
 	}
 	else {
-		// standart cleanup with sotring
+		// standard cleanup with sotring
 		try
 		{
 			uint32 uTotalSource = 0;
@@ -395,8 +404,8 @@ void CIndexed::Clean(void)
 			}
 		}
 
-		m_uTotalIndexSource = uTotalSource;
-		m_uTotalIndexKeyword = uTotalKey;
+		m_uTotalIndexSource = uTotalSource - uRemovedSource;;
+		m_uTotalIndexKeyword = uTotalKey - uRemovedKey;;
 		AddDebugLogLine( false, _T("Removed %u keyword out of %u and %u source out of %u"), uRemovedKey, uTotalKey, uRemovedSource, uTotalSource);
 		m_tLastClean = time(NULL) + MIN2S(30);
 	}
@@ -641,7 +650,7 @@ bool CIndexed::AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kadem
 				pCurrNote->ptrlEntryList.AddHead(pEntry);
 				ASSERT(0);
 				uLoad = (uint8)((uSize*100)/KADEMLIAMAXNOTESPERFILE);
-				m_uTotalIndexKeyword++;
+				m_uTotalIndexNotes++;
 				return true;
 			}
 		}
@@ -662,7 +671,7 @@ bool CIndexed::AddNotes(const CUInt128& uKeyID, const CUInt128& uSourceID, Kadem
 			pCurrNote->ptrlEntryList.AddHead(pEntry);
 			pCurrNoteHash->ptrlistSource.AddHead(pCurrNote);
 			uLoad = (uint8)((uSize*100)/KADEMLIAMAXNOTESPERFILE);
-			m_uTotalIndexKeyword++;
+			m_uTotalIndexNotes++;
 			return true;
 		}
 	}

@@ -36,7 +36,7 @@ Example tree:
 					/		\	       \
                    X(9,28)  x(9,28)   X (0,05MB)						   PartHashs
 			   /      \    /       \        \
-		X(4,75)   X(4,57) X(4,57)  X(4,75)   \
+		X(4,75)   X(4,53) X(4,53)  X(4,75)   \
 
 						[...............]
 X(180KB)   X(180KB)  [...] X(140KB) | X(180KB) X(180KB [...]			   BlockHashs
@@ -227,14 +227,14 @@ public:
 	static void		RemoveClientAICHRequest(const CUpDownClient* pClient);
 	static bool		IsClientRequestPending(const CPartFile* pForFile, uint16 nPart);
 	static CAICHRequestedData GetAICHReqDetails(const  CUpDownClient* pClient);
-	static void		AddStoredAICHHash(CAICHHash Hash);
+	static void		AddStoredAICHHash(CAICHHash Hash, ULONGLONG nFilePos);
 	void			DbgTest();
 
 	CAICHHashTree	m_pHashTree;
 	static CList<CAICHRequestedData>	m_liRequestedData;
 	static CMutex						m_mutKnown2File;
 private:
-	static CList<CAICHHash>				m_liAICHHashsStored; // contains all AICH hahses stored in known2*.met
+	static CMap<CAICHHash, const CAICHHash&, ULONGLONG, ULONGLONG>	m_mapAICHHashsStored; // contains all AICH hahses stored in known2*.met
 	CKnownFile*		m_pOwner;
 	EAICHStatus		m_eStatus;
 	CArray<CAICHUntrustedHash> m_aUntrustedHashs;

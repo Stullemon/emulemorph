@@ -1991,7 +1991,7 @@ BEGIN
     IDS_POPULARITY          "Popularidad"
     IDS_SHOWWIN7TASKBARGOODIES "Activar efectos de la barra de tareas de Windows 7"
     IDS_LANMODE             "Modo LAN"
-    IDS_OPENPREFINI         "Open preferences.ini"
+    IDS_OPENPREFINI         "Abrir preferences.ini"
 END
 
 STRINGTABLE 

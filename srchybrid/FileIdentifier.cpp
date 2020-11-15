@@ -107,7 +107,7 @@ void CFileIdentifierBase::WriteIdentifier(CFileDataIO* pFile, bool bKadExcludeMD
 				(uIncludesAICH			<<  2) |
 				(uIncludesSize			<<  1) |
 				(uIncludesMD4			<<  0));
-	DebugLog(_T("Write IdentifierDesc: %u"), byIdentifierDesc);
+	//DebugLog(_T("Write IdentifierDesc: %u"), byIdentifierDesc);
 	pFile->WriteUInt8(byIdentifierDesc);
 	if (!bKadExcludeMD4)
 		pFile->WriteHash16(m_abyMD4Hash);
@@ -498,7 +498,7 @@ CFileIdentifierSA::CFileIdentifierSA(const uchar* pucFileHash, EMFileSize nFileS
 bool CFileIdentifierSA::ReadIdentifier(CFileDataIO* pFile, bool bKadValidWithoutMd4)
 {
 	uint8 byIdentifierDesc = pFile->ReadUInt8();
-	DebugLog(_T("Read IdentifierDesc: %u"), byIdentifierDesc);
+	//DebugLog(_T("Read IdentifierDesc: %u"), byIdentifierDesc);
 	bool bMD4	= ((byIdentifierDesc >>  0) & 0x01) > 0;
 	bool bSize	= ((byIdentifierDesc >>  1) & 0x01) > 0;
 	bool bAICH	= ((byIdentifierDesc >>  2) & 0x01) > 0;

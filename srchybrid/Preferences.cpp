@@ -95,6 +95,7 @@ uint16	CPreferences::udpport;
 uint16	CPreferences::nServerUDPPort;
 UINT	CPreferences::maxconnections;
 UINT	CPreferences::maxhalfconnections;
+bool	CPreferences::m_bOverlappedSockets;
 bool	CPreferences::m_bConditionalTCPAccept;
 bool	CPreferences::reconnect;
 bool	CPreferences::m_bUseServerPriorities;
@@ -372,6 +373,7 @@ bool	CPreferences::indicateratings;
 bool	CPreferences::watchclipboard;
 bool	CPreferences::filterserverbyip;
 bool	CPreferences::m_bFirstStart;
+bool	CPreferences::m_bBetaNaggingDone;
 bool	CPreferences::m_bCreditSystem;
 bool	CPreferences::log2disk;
 bool	CPreferences::debug2disk;
@@ -1044,7 +1046,7 @@ void CPreferences::Init()
 				toadd.Trim(L" \t\r\n"); // need to trim '\r' in binary mode
 				if (toadd.IsEmpty())
 					continue;
-				addresses_list.AddHead(toadd);
+				addresses_list.AddTail(toadd);
 			}
 		}
 		catch (CFileException* ex) {
@@ -1184,8 +1186,14 @@ uint8 CPreferences::IsZZRatioDoesWork(){
 }
 //MORPH - Added by SiRoB, ZZ ratio
 
-UINT CPreferences::GetMaxDownload(){	 //MORPH  uint16 is not enough
-    return ((UINT)GetMaxDownloadInBytesPerSec()/1024); //MORPH  uint16 is not enough
+//MORPH  uint16 is not enough
+/*
+uint16 CPreferences::GetMaxDownload(){
+    return (uint16)(GetMaxDownloadInBytesPerSec()/1024);
+*/
+UINT CPreferences::GetMaxDownload(){
+    return ((UINT)GetMaxDownloadInBytesPerSec()/1024);
+//MORPH  uint16 is not enough
 }
 
 //MORPH START - Removed by Stulle, Official ul/dl ratio restrictions
@@ -2063,7 +2071,10 @@ void CPreferences::SavePreferences()
 	ini.WriteString(L"AppVersion", theApp.m_strCurVersionLong + L" [" + theApp.m_strModLongVersion + L"]");
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 	//---
-
+#ifdef _BETA
+	if (m_bBetaNaggingDone)
+		ini.WriteString(L"BetaVersionNotified", theApp.m_strCurVersionLong);
+#endif
 #ifdef _DEBUG
 	ini.WriteInt(L"DebugHeap", m_iDbgHeap);
 #endif
@@ -2841,6 +2852,10 @@ void CPreferences::LoadPreferences()
 	if (strPrefsVersion.IsEmpty()){
 		m_bFirstStart = true;
 	}
+#ifdef _BETA
+	CString strBetaNotified = ini.GetString(L"BetaVersionNotified", L"");
+	m_bBetaNaggingDone = strBetaNotified.Compare(strCurrVersion) == 0;
+#endif
 
 #ifdef _DEBUG
 	m_iDbgHeap = ini.GetInt(L"DebugHeap", 1);
@@ -2928,6 +2943,7 @@ void CPreferences::LoadPreferences()
 		maxdownload = (maxGraphDownloadRate /5 * 4); //MORPH uint16 is not enoug
 	maxconnections=ini.GetInt(L"MaxConnections",GetRecommendedMaxConnections());
 	maxhalfconnections=ini.GetInt(L"MaxHalfConnections",9);
+	m_bOverlappedSockets = ini.GetBool(L"OverlappedSockets", false); // Overlapped sockets are under investigations for buggyness (heap corruption), disable by default until fixed
 	m_bConditionalTCPAccept = ini.GetBool(L"ConditionalTCPAccept", false);
 
 	// reset max halfopen to a default if OS changed to SP2 (or higher) or away
@@ -3210,6 +3226,7 @@ void CPreferences::LoadPreferences()
 //	resumeSameCat=ini.GetBool(L"ResumeNextFromSameCat",false);
 	dontRecreateGraphs =ini.GetBool(L"DontRecreateStatGraphsOnResize",false);
 	m_bExtControls =ini.GetBool(L"ShowExtControls",false);
+
 	// MORPH START show less controls
 	m_bShowLessControls =ini.GetBool(L"ShowLessControls",false);
     // MORPH END  show less controls
@@ -3522,7 +3539,7 @@ void CPreferences::LoadPreferences()
 
 	// ZZ:UploadSpeedSense -->
 	if (!m_bSUCEnabled) 	//MORPH START - Added by SiRoB,  Morph parameter transfer (USS)
-	m_bDynUpEnabled = ini.GetBool(L"USSEnabled", false);
+    m_bDynUpEnabled = ini.GetBool(L"USSEnabled", false);
     m_bDynUpUseMillisecondPingTolerance = ini.GetBool(L"USSUseMillisecondPingTolerance", false);
     m_iDynUpPingTolerance = ini.GetInt(L"USSPingTolerance", 500);
 	m_iDynUpPingToleranceMilliseconds = ini.GetInt(L"USSPingToleranceMilliseconds", 200);
@@ -3538,7 +3555,7 @@ void CPreferences::LoadPreferences()
 	//MORPH END   - Added by SiRoB,  USS log flag
 	m_bUSSUDP = ini.GetBool(L"USSUDP_FORCE", false); //MORPH - Added by SiRoB, USS UDP preferency
     m_sPingDataSize = (short)ini.GetInt(L"USSPingDataSize", 0); //MORPH leuk_he ICMP ping datasize <> 0 setting
-	m_bA4AFSaveCpu = ini.GetBool(L"A4AFSaveCpu", false); // ZZ:DownloadManager
+    m_bA4AFSaveCpu = ini.GetBool(L"A4AFSaveCpu", false); // ZZ:DownloadManager
     m_bHighresTimer = ini.GetBool(L"HighresTimer", false);
 	m_bRunAsUser = ini.GetBool(L"RunAsUnprivilegedUser", false);
 	m_bPreferRestrictedOverUser = ini.GetBool(L"PreferRestrictedOverUser", false);
@@ -3911,7 +3928,10 @@ void CPreferences::SaveCats()
 		ini.WriteBool(L"FilterNegator", catMap.GetAt(i)->filterNeg);
 		ini.WriteBool(L"AutoCatAsRegularExpression", catMap.GetAt(i)->ac_regexpeval);
 		*/
-		ini.WriteBool(L"downloadInAlphabeticalOrder", catMap.GetAt(i)->downloadInAlphabeticalOrder!=FALSE);
+        ini.WriteBool(L"downloadInAlphabeticalOrder", catMap.GetAt(i)->downloadInAlphabeticalOrder!=FALSE);
+/*
+		ini.WriteBool(L"Care4All", catMap.GetAt(i)->care4all);
+*/
 		// removed care4all
 		// khaos::categorymod+ Save View Filters
 		ini.WriteInt(L"vfFromCats", catMap.GetAt(i)->viewfilters.nFromCats);
@@ -3946,6 +3966,7 @@ void CPreferences::SaveCats()
 		ini.WriteBool(L"ResumeFileOnlyInSameCat", catMap.GetAt(i)->bResumeFileOnlyInSameCat!=FALSE); //MORPH - Added by SiRoB, Resume file only in the same category
 	}
 }
+
 // khaos::categorymod+
 void CPreferences::LoadCats()
 {

@@ -539,7 +539,7 @@ UINT CUpDownClient::ProcessPeerCacheUpHttpRequest(const CStringAArray& astrHeade
 	reqblock->EndOffset = ui64RangeEnd + 1;
 	md4cpy(reqblock->FileID, aucUploadFileID);
 	reqblock->transferred = 0;
-	AddReqBlock(reqblock);
+	AddReqBlock(reqblock, true);
 
 	return HTTP_STATUS_OK;
 }
@@ -579,7 +579,7 @@ bool CUpDownClient::SendHttpBlockRequests()
 	if (reqfile == NULL)
 		throw CString(_T("Failed to send block requests - No 'reqfile' attached"));
 
-	CreateBlockRequests(1);
+	CreateBlockRequests(1, 1);
 	if (m_PendingBlocks_list.IsEmpty()){
 		if (m_pPCDownSocket != NULL){
 			m_pPCDownSocket->Safe_Delete();

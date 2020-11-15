@@ -382,6 +382,7 @@ del $(IntDir)emule.obj
     <ClCompile Include="UDPSocket.cpp" />
     <ClCompile Include="UploadBandwidthThrottler.cpp" />
     <ClCompile Include="UploadClient.cpp" />
+    <ClCompile Include="UploadDiskIOThread.cpp" />
     <ClCompile Include="UploadQueue.cpp" />
     <ClCompile Include="UPnP_IGDControlPoint.cpp" />
     <ClCompile Include="URLClient.cpp" />
@@ -1047,6 +1048,7 @@ del $(IntDir)emule.obj
     <ClInclude Include="UDPSocket.h" />
     <ClInclude Include="UpdownClient.h" />
     <ClInclude Include="UploadBandwidthThrottler.h" />
+    <ClInclude Include="UploadDiskIOThread.h" />
     <ClInclude Include="UploadQueue.h" />
     <ClInclude Include="UPnP_IGDControlPoint.h" />
     <ClInclude Include="URLClient.h" />

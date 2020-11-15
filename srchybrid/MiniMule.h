@@ -35,11 +35,16 @@ public:
 	bool GetAutoClose() const { return m_bAutoClose; }
 	void SetAutoClose(bool bAutoClose) { m_bAutoClose = bAutoClose; }
 	bool IsInCallback() const { return m_iInCallback != 0; }
+	bool IsInInitDialog() const { return m_iInInitDialog != 0; }
+	bool GetDestroyAfterInitDialog() const { return m_bDestroyAfterInitDialog; }
+	void SetDestroyAfterInitDialog() { m_bDestroyAfterInitDialog = true; }
 	void UpdateContent(UINT uUpDatarate = (UINT)-1, UINT uDownDatarate = (UINT)-1);
 	void Localize();
 
 protected:
+	int m_iInInitDialog;
 	int m_iInCallback;
+	bool m_bDestroyAfterInitDialog;
 	bool m_bResolveImages;
 	bool m_bRestoreMainWnd;
 	UINT m_uWndTransparency;

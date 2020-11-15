@@ -1093,8 +1093,8 @@ void CServerListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 		crOldTextColor = dc.SetTextColor(RGB(192,192,192)); //todo set color in template.
 	else if (server->GetFailedCount() >= 2)
 		crOldTextColor = dc.SetTextColor(RGB(128,128,128)); //todo set color in template.
-//	else // default:  
-//		crOldTextColor= dc.SetTextColor(m_crWindowText);
+	else // default:  
+		crOldTextColor= dc.SetTextColor(m_crWindowText);
 	 // leuke_he  ipfilter servers . 
 
 	CRect cur_rec(lpDrawItemStruct->rcItem);

@@ -24,6 +24,10 @@
 #include "Preferences.h"
 #include "ServerWnd.h"
 #include "HelpIDs.h"
+#ifdef USE_OFFICIAL_UPNP
+#include "UPnPImplWrapper.h"
+#include "UPnPImpl.h"
+#endif
 #include "PreferencesDlg.h" //>>> [ionix] - iONiX::Advanced WebInterface Account Management
 
 #ifdef _DEBUG
@@ -42,13 +46,10 @@ BEGIN_MESSAGE_MAP(CPPgWebServer, CPropertyPage)
 	ON_EN_CHANGE(IDC_WSPASS, OnDataChange)
 	ON_EN_CHANGE(IDC_WSPASSLOW, OnDataChange)
 	ON_EN_CHANGE(IDC_WSPORT, OnDataChange)
-	ON_EN_CHANGE(IDC_MMPASSWORDFIELD, OnDataChange)
 	ON_EN_CHANGE(IDC_TMPLPATH, OnDataChange)
-	ON_EN_CHANGE(IDC_MMPORT_FIELD, OnDataChange)
 	ON_EN_CHANGE(IDC_WSTIMEOUT, OnDataChange)
 	ON_BN_CLICKED(IDC_WSENABLED, OnEnChangeWSEnabled)
 	ON_BN_CLICKED(IDC_WSENABLEDLOW, OnEnChangeWSEnabled)
-	ON_BN_CLICKED(IDC_MMENABLED, OnEnChangeMMEnabled)
 	ON_BN_CLICKED(IDC_WSRELOADTMPL, OnReloadTemplates)
 	ON_BN_CLICKED(IDC_TMPLBROWSE, OnBnClickedTmplbrowse)
 	ON_BN_CLICKED(IDC_WS_GZIP, OnDataChange)
@@ -64,7 +65,7 @@ END_MESSAGE_MAP()
 CPPgWebServer::CPPgWebServer()
 // MORPH START leuk_he tooltipped
 /*
-    : CPropertyPage(CPPgWebServer::IDD)
+	: CPropertyPage(CPPgWebServer::IDD)
 */
 	: CPPgtooltipped(CPPgWebServer::IDD)
 // MORPH END leuk_he tooltipped
@@ -84,7 +85,7 @@ CPPgWebServer::~CPPgWebServer()
 
 void CPPgWebServer::DoDataExchange(CDataExchange* pDX)
 {
-  	CPropertyPage::DoDataExchange(pDX);
+	CPropertyPage::DoDataExchange(pDX);
   // MORPH start tabbed options [leuk_he]
     DDX_Control(pDX, IDC_TAB_WEBSERVER1 , m_tabCtr);
   // MORPH end tabbed options [leuk_he]
@@ -107,19 +108,6 @@ BOOL CPPgWebServer::OnInitDialog()
 
 	OnEnChangeWSEnabled();
 
-	// note: there are better classes to create a pure hyperlink, however since it is only needed here
-	//		 we rather use an already existing class
-	CRect rect;
-	GetDlgItem(IDC_GUIDELINK)->GetWindowRect(rect);
-	::MapWindowPoints(NULL, m_hWnd, (LPPOINT)&rect, 2);
-	m_wndMobileLink.CreateEx(NULL,0,_T("MsgWnd"),WS_BORDER | WS_VISIBLE | WS_CHILD | HTC_WORDWRAP | HTC_UNDERLINE_HOVER,rect.left,rect.top,rect.Width(),rect.Height(),m_hWnd,0);
-	m_wndMobileLink.SetBkColor(::GetSysColor(COLOR_3DFACE)); // still not the right color, will fix this later (need to merge the .rc file before it changes ;) )
-	m_wndMobileLink.SetFont(GetFont());
-	if (!bCreated){
-		bCreated = true;
-		m_wndMobileLink.AppendText(_T("Link: "));
-		m_wndMobileLink.AppendHyperLink(GetResString(IDS_MMGUIDELINK),0,CString(_T("http://mobil.emule-project.net")),0,0);
-	}
 	return TRUE;
 }
 
@@ -129,13 +117,9 @@ void CPPgWebServer::LoadSettings(void)
 
 	GetDlgItem(IDC_WSPASS)->SetWindowText(HIDDEN_PASSWORD);
 	GetDlgItem(IDC_WSPASSLOW)->SetWindowText(HIDDEN_PASSWORD);
-	GetDlgItem(IDC_MMPASSWORDFIELD)->SetWindowText(HIDDEN_PASSWORD);
 
 	strBuffer.Format(_T("%d"), thePrefs.GetWSPort());
 	GetDlgItem(IDC_WSPORT)->SetWindowText(strBuffer);
-
-	strBuffer.Format(_T("%d"), thePrefs.GetMMPort());
-	GetDlgItem(IDC_MMPORT_FIELD)->SetWindowText(strBuffer);
 
 	GetDlgItem(IDC_TMPLPATH)->SetWindowText(thePrefs.GetTemplate());
 
@@ -152,14 +136,10 @@ void CPPgWebServer::LoadSettings(void)
 	else
 		CheckDlgButton(IDC_WSENABLEDLOW,0);
 
-	if(thePrefs.IsMMServerEnabled())
-		CheckDlgButton(IDC_MMENABLED,1);
-	else
-		CheckDlgButton(IDC_MMENABLED,0);
 
-	CheckDlgButton(IDC_WS_GZIP,(thePrefs.GetWebUseGzip())?1:0 );
-	CheckDlgButton(IDC_WS_ALLOWHILEVFUNC,(thePrefs.GetWebAdminAllowedHiLevFunc())?1:0 );
-	
+	CheckDlgButton(IDC_WS_GZIP,(thePrefs.GetWebUseGzip())? 1 : 0);
+	CheckDlgButton(IDC_WS_ALLOWHILEVFUNC,(thePrefs.GetWebAdminAllowedHiLevFunc())? 1 : 0);
+
 	//MORPH START - UPnP
 #ifdef USE_OFFICIAL_UPNP
 	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPEnabled() && thePrefs.GetWSIsEnabled());
@@ -169,8 +149,6 @@ void CPPgWebServer::LoadSettings(void)
 	CheckDlgButton(IDC_WSUPNP, (thePrefs.IsUPnPNat() && thePrefs.GetUPnPNatWeb()) ? TRUE : FALSE);
 #endif
 	//MORPH END   - UPnP
-	
-	OnEnChangeMMEnabled();
 
 	SetModified(FALSE);	// FoRcHa
 }
@@ -217,24 +195,8 @@ BOOL CPPgWebServer::OnApply()
 		thePrefs.SetWebUseGzip(IsDlgButtonChecked(IDC_WS_GZIP)!=0);
 		theApp.webserver->StartServer();
 		thePrefs.m_bAllowAdminHiLevFunc= (IsDlgButtonChecked(IDC_WS_ALLOWHILEVFUNC)!=0);
-
-		// mobilemule
-		GetDlgItem(IDC_MMPORT_FIELD)->GetWindowText(sBuf);
-		if (_tstoi(sBuf)!= thePrefs.GetMMPort() ) {
-			thePrefs.SetMMPort((uint16)_tstoi(sBuf));
-			theApp.mmserver->StopServer();
-			theApp.mmserver->Init();
-		}
-		thePrefs.SetMMIsEnabled(IsDlgButtonChecked(IDC_MMENABLED)!=0);
-		if (IsDlgButtonChecked(IDC_MMENABLED))
-			theApp.mmserver->Init();
-		else
-			theApp.mmserver->StopServer();
-		GetDlgItem(IDC_MMPASSWORDFIELD)->GetWindowText(sBuf);
-		if(sBuf != HIDDEN_PASSWORD)
-			thePrefs.SetMMPass(sBuf);
-
-	//MORPH START - UPnP
+		
+		//MORPH START - UPnP
 #ifdef USE_OFFICIAL_UPNP
 		if (IsDlgButtonChecked(IDC_WSUPNP))
 		{
@@ -252,7 +214,7 @@ BOOL CPPgWebServer::OnApply()
 			thePrefs.SetUPnPNatWeb(IsDlgButtonChecked(IDC_WSUPNP)!=0);
 		}
 #endif
-	//MORPH END   - UPnP
+		//MORPH END   - UPnP
 
 		theApp.emuledlg->serverwnd->UpdateMyInfo();
 		SetModified(FALSE);
@@ -292,28 +254,24 @@ void CPPgWebServer::Localize(void)
 		SetDlgItemText(IDC_WSTIMEOUTLABEL,GetResString(IDS_WEB_SESSIONTIMEOUT)+_T(":"));
 		SetDlgItemText(IDC_MINS,GetResString(IDS_LONGMINS) );
 
-		GetDlgItem(IDC_MMENABLED)->SetWindowText(GetResString(IDS_ENABLEMM));
-		GetDlgItem(IDC_STATIC_MOBILEMULE)->SetWindowText(GetResString(IDS_MOBILEMULE));
-		GetDlgItem(IDC_MMPASSWORD)->SetWindowText(GetResString(IDS_WS_PASS));
-		GetDlgItem(IDC_MMPORT_LBL)->SetWindowText(GetResString(IDS_PORT));
-
 		GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->SetWindowText(GetResString(IDS_WEB_ALLOWHILEVFUNC));
 		//MORPH START leuk_he tooltipped
+		//TODO: Remove obsolete tips strings etc.
 		SetTool(IDC_WSPASS,IDC_WSPASS_TIP);
 		SetTool(IDC_WSPASSLOW,IDC_WSPASSLOW_TIP);
-		SetTool(IDC_MMPASSWORDFIELD,IDC_MMPASSWORDFIELD_TIP);
+		//SetTool(IDC_MMPASSWORDFIELD,IDC_MMPASSWORDFIELD_TIP);
 		SetTool(IDC_WSPORT,IDC_WSPORT_TIP);
-		SetTool(IDC_MMPORT_FIELD,IDC_MMPORT_FIELD_TIP);
+		//SetTool(IDC_MMPORT_FIELD,IDC_MMPORT_FIELD_TIP);
 		SetTool(IDC_TMPLPATH,IDC_TMPLPATH_TIP);
 		SetTool(IDC_WSTIMEOUT,IDC_WSTIMEOUT_TIP);
 		SetTool(IDC_WSENABLED,IDC_WSENABLED_TIP);
 		SetTool(IDC_WSENABLEDLOW,IDC_WSENABLEDLOW_TIP);
-		SetTool(IDC_MMENABLED,IDC_MMENABLED_TIP);
+		//SetTool(IDC_MMENABLED,IDC_MMENABLED_TIP);
 		SetTool(IDC_WS_GZIP,IDC_WS_GZIP_TIP);
 		SetTool(IDC_WS_ALLOWHILEVFUNC,IDC_WS_ALLOWHILEVFUNC_TIP);
 		SetTool(IDC_WSRELOADTMPL,IDC_WSRELOADTMPL_TIP);
 	    SetTool(IDC_TMPLBROWSE,IDC_TMPLBROWSE_TIP);
-		SetTool(IDC_GUIDELINK,IDC_GUIDELINK_TIP);
+		//SetTool(IDC_GUIDELINK,IDC_GUIDELINK_TIP);
 		SetTool(IDC_WSUPNP,IDS_WSUPNP_TIP);
 		//MORPH END leuk_he tooltipped
 	}
@@ -333,13 +291,6 @@ void CPPgWebServer::OnEnChangeWSEnabled()
 	GetDlgItem(IDC_WS_ALLOWHILEVFUNC)->EnableWindow(bIsWIEnabled);
 	GetDlgItem(IDC_WSTIMEOUT)->EnableWindow(bIsWIEnabled);
 	GetDlgItem(IDC_WSPASSLOW)->EnableWindow(bIsWIEnabled && IsDlgButtonChecked(IDC_WSENABLEDLOW));
-	//MORPH START - UPnP
-#ifdef USE_OFFICIAL_UPNP
-	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPEnabled() && bIsWIEnabled);
-#else
-	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPNat() && bIsWIEnabled);
-#endif
-	//MORPH END   - UPnP
 */
 	bool bSingleWSEnalbed = IsDlgButtonChecked(IDC_WSENABLED) && theApp.webserver->iMultiUserversion <= 0;
 
@@ -364,6 +315,7 @@ void CPPgWebServer::OnEnChangeWSEnabled()
 	GetDlgItem(IDC_TMPLBROWSE)->EnableWindow(bIsWIEnabled);
 	GetDlgItem(IDC_WS_GZIP)->EnableWindow(bIsWIEnabled);
 	GetDlgItem(IDC_WSTIMEOUT)->EnableWindow(bIsWIEnabled);
+//<<< [ionix] - iONiX::Advanced WebInterface Account Management
 	//MORPH START - UPnP
 #ifdef USE_OFFICIAL_UPNP
 	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPEnabled() && bIsWIEnabled);
@@ -371,19 +323,10 @@ void CPPgWebServer::OnEnChangeWSEnabled()
 	GetDlgItem(IDC_WSUPNP)->EnableWindow(thePrefs.IsUPnPNat() && bIsWIEnabled);
 #endif
 	//MORPH END   - UPnP
-//<<< [ionix] - iONiX::Advanced WebInterface Account Management
-
+	
 	//GetDlgItem(IDC_WSRELOADTMPL)->EnableWindow(bIsWIEnabled);
 	SetTmplButtonState();
 
-
-	SetModified();
-}
-
-void CPPgWebServer::OnEnChangeMMEnabled()
-{
-	GetDlgItem(IDC_MMPASSWORDFIELD)->EnableWindow(IsDlgButtonChecked(IDC_MMENABLED));	
-	GetDlgItem(IDC_MMPORT_FIELD)->EnableWindow(IsDlgButtonChecked(IDC_MMENABLED));
 
 	SetModified();
 }

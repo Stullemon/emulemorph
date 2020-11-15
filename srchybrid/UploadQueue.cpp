@@ -64,6 +64,9 @@ static uint32 counter, sec, statsave;
 static UINT s_uSaveStatistics = 0;
 static uint32 igraph, istats, i2Secs;
 
+#define HIGHSPEED_UPLOADRATE_START 500*1024
+#define HIGHSPEED_UPLOADRATE_END   300*1024
+
 
 CUploadQueue::CUploadQueue()
 {
@@ -114,6 +117,7 @@ CUploadQueue::CUploadQueue()
 	m_avarage_powershare_dr_sum = 0; //MORPH - Added by SiRoB, Upload powershare from uploadbandwidththrottler
 
     m_dwLastResortedUploadSlots = 0;
+	m_bStatisticsWaitingListDirty = true;
 	//MORPH START - Added by SiRoB, ZZUL_20040904
 	m_dwLastCheckedForHighPrioClient = 0;
 
@@ -141,7 +145,7 @@ CUploadQueue::~CUploadQueue(){
  *
  * @return true if the client was removed. false if it is still in upload list
  */
-bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemove) {
+bool CUploadQueue::RemoveOrMoveDown(UploadingToClient_Struct* clientStruct, bool onlyCheckForRemove) {
     //if(onlyCheckForRemove == false) {
     //    CheckForHighPrioClient();
     //}
@@ -152,7 +156,7 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	//CUpDownClient* newclient = FindBestClientInQueue(true, client);
 	*/
 	//CUpDownClient* newclient = FindBestClientInQueue(true, client, onlyCheckForRemove);
-	m_abAddClientOfThisClass[client->GetClassID()] = true; //MORPH - special case to force to find client to replace from same class or other class with already needed slot
+	m_abAddClientOfThisClass[clientStruct->m_pClient->GetClassID()] = true; //MORPH - special case to force to find client to replace from same class or other class with already needed slot
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
 //-
@@ -165,29 +169,29 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
 	CUpDownClient* queueNewclient = FindBestClientInQueue(false, NULL, true);
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
-        if(queueNewclient &&
-           (
-            !newclient ||
-             !newclient->GetScheduledUploadShouldKeepWaitingTime() && RightClientIsSuperior(newclient, queueNewclient) >= 0
-           )
-          ) {
-            // didn't find a scheduled client, or the one we found
-            // wasn't pre-empted, and is not special class client, so shouldn't be unscheduled from removal
-            newclient = queueNewclient;
-        }
+	if(queueNewclient &&
+		(
+			!newclient ||
+			!newclient->GetScheduledUploadShouldKeepWaitingTime() && RightClientIsSuperior(newclient, queueNewclient) >= 0
+		)
+	) {
+        // didn't find a scheduled client, or the one we found
+        // wasn't pre-empted, and is not special class client, so shouldn't be unscheduled from removal
+        newclient = queueNewclient;
+    }
 
 //-
 
     if(newclient != NULL && // Only remove the client if there's someone to replace it
-		RightClientIsSuperior(client, newclient) >= 0
+		RightClientIsSuperior(clientStruct->m_pClient, newclient) >= 0
       ){
 
         // Remove client from ul list to make room for higher/same prio client
-	    theApp.uploadqueue->ScheduleRemovalFromUploadQueue(client, _T("Successful completion of upload."), GetResString(IDS_UPLOAD_COMPLETED));
+	    theApp.uploadqueue->ScheduleRemovalFromUploadQueue(clientStruct, _T("Successful completion of upload."), GetResString(IDS_UPLOAD_COMPLETED));
 
         return true;
     } else if(onlyCheckForRemove == false) {
-    	MoveDownInUploadQueue(client);
+    	MoveDownInUploadQueue(clientStruct);
 
         return false;
     } else {
@@ -195,36 +199,38 @@ bool CUploadQueue::RemoveOrMoveDown(CUpDownClient* client, bool onlyCheckForRemo
     }
 }
 
-void CUploadQueue::MoveDownInUploadQueue(CUpDownClient* client) {
+void CUploadQueue::MoveDownInUploadQueue(UploadingToClient_Struct* clientStruct) {
     // first find the client in the uploadinglist
-    POSITION foundPos = uploadinglist.Find(client);
+	m_csUploadListMainThrdWriteOtherThrdsRead.Lock();
+	POSITION foundPos = uploadinglist.Find(clientStruct);
 	if(foundPos != NULL) {
         //MORPH START -  Renumber slot -Fix-
 		POSITION renumberPosition = uploadinglist.GetTailPosition();
 		while(renumberPosition != foundPos) {
-			CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition);
-			renumberClient->SetSlotNumber(renumberClient->GetSlotNumber()-1);
+			UploadingToClient_Struct* renumberClientStruct = uploadinglist.GetAt(renumberPosition);
+			renumberClientStruct->m_pClient->SetSlotNumber(renumberClientStruct->m_pClient->GetSlotNumber()-1);
 			uploadinglist.GetPrev(renumberPosition);
 		}
 		//MORPH END   -  Renumber slot -Fix-
 
 
         //MORPH START - Added by SiRoB, Upload Splitting Class
-		uint32 classID = client->GetClassID();
+		uint32 classID = clientStruct->m_pClient->GetClassID();
 		--m_aiSlotCounter[classID];
 		//MORPH END - Added by SiRoB, Upload Splitting Class
 		
 		// Remove the found Client
 		uploadinglist.RemoveAt(foundPos);
-            
-		theApp.uploadBandwidthThrottler->RemoveFromStandardList(client->socket,true);
+
+		theApp.uploadBandwidthThrottler->RemoveFromStandardList(clientStruct->m_pClient->socket,true);
 		//MORPH START - Added by SiRoB, due to zz upload system PeerCache
-		theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)client->m_pPCUpSocket,true);
+		theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)clientStruct->m_pClient->m_pPCUpSocket,true);
 		//MORPH END   - Added by SiRoB, due to zz upload system PeerCache
     	   
 		// then add it last in it's class
-        InsertInUploadingList(client);
+        InsertInUploadingList(clientStruct);
     }
+	m_csUploadListMainThrdWriteOtherThrdsRead.Unlock();
 }
 
 /**
@@ -394,6 +400,20 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 //Morph End - added by AndCycle, separate special prio compare
 
 /**
+ * Find the highest ranking client in the waiting queue, and return it.
+ *
+ * Low id client are ranked as lowest possible, unless they are currently connected.
+ * A low id client that is not connected, but would have been ranked highest if it
+ * had been connected, gets a flag set. This flag means that the client should be
+ * allowed to get an upload slot immediately once it connects.
+ *
+ * @return address of the highest ranking client.
+ */
+//MORPH START - Changed by SiRoB, Upload Splitting Class
+/*
+CUpDownClient* CUploadQueue::FindBestClientInQueue()
+*/
+/**
 * Find the highest ranking client in the waiting queue, and return it.
 * Clients are ranked in the following classes:
 *    1: Friends (friends are internally ranked by which file they want; if it is powershared; upload priority of file)
@@ -414,14 +434,15 @@ int CUploadQueue::RightClientIsSuperior(CUpDownClient* leftClient, CUpDownClient
 *
 * @return address of the highest ranking client.
 */
-CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet, CUpDownClient* /*lowIdClientMustBeInSameOrBetterClassAsThisClient*/, bool checkforaddinuploadinglist) //MORPH - Changed by SiRoB, Upload Splitting Class
+CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnectToBeSet, CUpDownClient* /*lowIdClientMustBeInSameOrBetterClassAsThisClient*/, bool checkforaddinuploadinglist)
+//MORPH END   - Changed by SiRoB, Upload Splitting Class
 {
 	POSITION toadd = 0;
 	POSITION toaddlow = 0;
 	uint32	bestscore = 0;
 	uint32  bestlowscore = 0;
-	CUpDownClient* newclient = NULL;
-	CUpDownClient* lowclient = NULL;
+    CUpDownClient* newclient = NULL;
+    CUpDownClient* lowclient = NULL;
 
 	POSITION pos1, pos2;
 	for (pos1 = waitinglist.GetHeadPosition();( pos2 = pos1 ) != NULL;)
@@ -432,7 +453,7 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 		ASSERT ( cur_client->GetLastUpRequest() );
 		//MORPH START - Changed by SiRoB, Optimization requpfile
 		/*
-		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID()))
+		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !theApp.sharedfiles->GetFileByID(cur_client->GetUploadFileID()) )
 		*/
 
 		if ((::GetTickCount() - cur_client->GetLastUpRequest() > MAX_PURGEQUEUETIME) || !cur_client->CheckAndGetReqUpFile())
@@ -443,10 +464,10 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 			RemoveFromWaitingQueue(pos2,true);
 			continue;
 		}
-		else
-		{
+        else
+        {
 		    // finished clearing
-			uint32 cur_score = cur_client->GetScore(false);
+		    uint32 cur_score = cur_client->GetScore(false);
 
 			//MORPH START - Changed by SiRoB, Upload Splitting Class
 			/*
@@ -454,15 +475,15 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 			*/
 			if (RightClientIsBetter(newclient, bestscore, cur_client, cur_score, checkforaddinuploadinglist))
 			//MORPH END   - Changed by SiRoB, Upload Splitting Class
-			{
+		    {
                 // cur_client is more worthy than current best client that is ready to go (connected).
-				if(!cur_client->HasLowID() || (cur_client->socket && cur_client->socket->IsConnected())) {
+                if(!cur_client->HasLowID() || (cur_client->socket && cur_client->socket->IsConnected())) {
                     // this client is a HighID or a lowID client that is ready to go (connected)
                     // and it is more worthy
-					bestscore = cur_score;
-					toadd = pos2;
+			        bestscore = cur_score;
+			        toadd = pos2;
                     newclient = waitinglist.GetAt(toadd);
-                }
+                } 
 				//MORPH START - Changed by SiRoB, Upload Splitting Class
 				/*
 				else if(!cur_client->m_bAddNextConnect) 
@@ -475,23 +496,23 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
                     // now that we know this client is not ready to go, compare it to the best not ready client
                     // the best not ready client may be better than the best ready client, so we need to check
                     // against that client
-					//MORPH START - Changed by SiRoB, Upload Splitting Class
-					/*
-				        if (cur_score > bestlowscore)
-					*/
-					if (RightClientIsBetter(lowclient, bestlowscore, cur_client, cur_score, checkforaddinuploadinglist)) //MORPH - Changed by SiRoB, Upload Splitting Class
-					//MORPH END   - Changed by SiRoB, Upload Splitting Class
-					{
+				//MORPH START - Changed by SiRoB, Upload Splitting Class
+				/*
+			        if (cur_score > bestlowscore)
+				*/
+				if (RightClientIsBetter(lowclient, bestlowscore, cur_client, cur_score, checkforaddinuploadinglist)) //MORPH - Changed by SiRoB, Upload Splitting Class
+				//MORPH END   - Changed by SiRoB, Upload Splitting Class
+			        {
                         // it is more worthy, keep it
-						bestlowscore = cur_score;
-						toaddlow = pos2;
+				        bestlowscore = cur_score;
+				        toaddlow = pos2;
                         lowclient = waitinglist.GetAt(toaddlow);
-					}
-				}
-			}
+			        }
+                }
+            } 
 		}
 	}
-		
+	
 	//MORPH START - Changed by SiRoB, Upload Splitting Class
 	/*
 	if (bestlowscore > bestscore && lowclient)
@@ -515,10 +536,17 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
 	}
 	//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
-	if (!toadd)
+    if (!toadd)
 		return NULL;
-	else
-		return waitinglist.GetAt(toadd);
+    else
+	    return waitinglist.GetAt(toadd);
+}
+
+void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient, bool bNoLocking) 
+{	
+	UploadingToClient_Struct* pNewClientUploadStruct = new UploadingToClient_Struct;
+	pNewClientUploadStruct->m_pClient = newclient;
+	InsertInUploadingList(pNewClientUploadStruct, bNoLocking);
 }
 
 /**
@@ -553,18 +581,26 @@ CUpDownClient* CUploadQueue::FindBestClientInQueue(bool allowLowIdAddNextConnect
  *
  * @param newclient address of the client that should be inserted in the uploading list
  */
-void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
-/*
+void CUploadQueue::InsertInUploadingList(UploadingToClient_Struct* pNewClientUploadStruct, bool bNoLocking)
 {
+/*
 	//Lets make sure any client that is added to the list has this flag reset!
-	newclient->m_bAddNextConnect = false;
+	pNewClientUploadStruct->m_pClient->m_bAddNextConnect = false;
     // Add it last
-    theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket());
-	uploadinglist.AddTail(newclient);
-    newclient->SetSlotNumber(uploadinglist.GetCount());
+    theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), pNewClientUploadStruct->m_pClient->GetFileUploadSocket());
+	
+	if (bNoLocking)
+		uploadinglist.AddTail(pNewClientUploadStruct);
+	else
+	{
+		m_csUploadListMainThrdWriteOtherThrdsRead.Lock();
+		uploadinglist.AddTail(pNewClientUploadStruct);
+		m_csUploadListMainThrdWriteOtherThrdsRead.Unlock();
+	}
+	pNewClientUploadStruct->m_pClient->SetSlotNumber(uploadinglist.GetCount());
 }
-
 */
+	CUpDownClient* newclient = pNewClientUploadStruct->m_pClient;
 	POSITION insertPosition = NULL;
 	uint32 posCounter = uploadinglist.GetCount();
 	
@@ -581,15 +617,15 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 	bool foundposition = false;
 	POSITION pos = uploadinglist.GetTailPosition();
 	while(pos != NULL && foundposition == false) {
-		CUpDownClient* uploadingClient = uploadinglist.GetAt(pos);
+		UploadingToClient_Struct* uploadingClientStruct = uploadinglist.GetAt(pos);
 
-		if( uploadingClient->GetClassID() < classID || //to work arround scheduled slot put at the wrong place in ps class that use sub class (internal priority)
-			uploadingClient->GetClassID() == classID &&
-			(uploadingClient->IsScheduledForRemoval() == false ||
-			 uploadingClient->IsScheduledForRemoval() == newclient->IsScheduledForRemoval() &&
-			 (uploadingClient->GetScheduledUploadShouldKeepWaitingTime() ||
-		      uploadingClient->GetScheduledUploadShouldKeepWaitingTime() == newclient->GetScheduledUploadShouldKeepWaitingTime() &&
-			  uploadingClient->GetScheduledForRemovalAtTick() <= newclient->GetScheduledForRemovalAtTick() //Keep Order For completing scheduled slot
+		if(uploadingClientStruct->m_pClient->GetClassID() < classID || //to work arround scheduled slot put at the wrong place in ps class that use sub class (internal priority)
+			uploadingClientStruct->m_pClient->GetClassID() == classID &&
+			(uploadingClientStruct->m_pClient->IsScheduledForRemoval() == false ||
+				uploadingClientStruct->m_pClient->IsScheduledForRemoval() == newclient->IsScheduledForRemoval() &&
+			 (uploadingClientStruct->m_pClient->GetScheduledUploadShouldKeepWaitingTime() ||
+				 uploadingClientStruct->m_pClient->GetScheduledUploadShouldKeepWaitingTime() == newclient->GetScheduledUploadShouldKeepWaitingTime() &&
+				 uploadingClientStruct->m_pClient->GetScheduledForRemovalAtTick() <= newclient->GetScheduledForRemovalAtTick() //Keep Order For completing scheduled slot
 			 )
 			)
 		   )
@@ -607,16 +643,24 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		uint32 renumberSlotNumber = posCounter+1; //MORPH - Changed by SiRoB, Fix
 	    
 		while(renumberPosition != NULL) {
-			CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition);
+			UploadingToClient_Struct* renumberClientStruct = uploadinglist.GetAt(renumberPosition);
 
-			renumberClient->SetSlotNumber(++renumberSlotNumber);
-			renumberClient->UpdateDisplayedInfo(true);
+			renumberClientStruct->m_pClient->SetSlotNumber(++renumberSlotNumber);
+			renumberClientStruct->m_pClient->UpdateDisplayedInfo(true);
 			uploadinglist.GetNext(renumberPosition);
 		}
 
 		// add it at found pos
 		newclient->SetSlotNumber(posCounter+1);
-		uploadinglist.InsertBefore(insertPosition, newclient);
+		if (bNoLocking)
+			uploadinglist.InsertBefore(insertPosition, pNewClientUploadStruct);
+		else
+		{
+			m_csUploadListMainThrdWriteOtherThrdsRead.Lock();
+			uploadinglist.InsertBefore(insertPosition, pNewClientUploadStruct);
+			m_csUploadListMainThrdWriteOtherThrdsRead.Unlock();
+		}
+
 		//MORPH START - Changed by SiRoB, Upload Splitting Class
 		/*
 		theApp.uploadBandwidthThrottler->AddToStandardList(posCounter, newclient->GetFileUploadSocket());
@@ -631,7 +675,14 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 		*/
 		theApp.uploadBandwidthThrottler->AddToStandardList(uploadinglist.GetCount(), newclient->GetFileUploadSocket(),classID,newclient->IsScheduledForRemoval());
 		//MORPH END   - Changed by SiRoB, Upload Splitting Class
-		uploadinglist.AddTail(newclient);
+		if (bNoLocking)
+			uploadinglist.AddTail(pNewClientUploadStruct);
+		else
+		{
+			m_csUploadListMainThrdWriteOtherThrdsRead.Lock();
+			uploadinglist.AddTail(pNewClientUploadStruct);
+			m_csUploadListMainThrdWriteOtherThrdsRead.Unlock();
+		}
 		newclient->SetSlotNumber(uploadinglist.GetCount());
 	}
 	//MORPH START - Added by SiRoB, Upload Splitting Class
@@ -644,25 +695,25 @@ void CUploadQueue::InsertInUploadingList(CUpDownClient* newclient) {
 /*
 CUpDownClient* CUploadQueue::FindLastUnScheduledForRemovalClientInUploadList() {
 */
-CUpDownClient* CUploadQueue::FindLastUnScheduledForRemovalClientInUploadList(uint32 classID) {
+UploadingToClient_Struct* CUploadQueue::FindLastUnScheduledForRemovalClientInUploadList(uint32 classID) {
 //MORPH END   - Upload Splitting Class
 	
 	POSITION pos = uploadinglist.GetTailPosition();
 	while(pos != NULL){
         // Get the client. Note! Also updates pos as a side effect.
-		CUpDownClient* cur_client = uploadinglist.GetPrev(pos);
+		UploadingToClient_Struct* curClientStruct = uploadinglist.GetPrev(pos);
 
 		//MORPH START - Changed by , Upload Splitting Class
 		/*
 		if(!cur_client->IsScheduledForRemoval()) {
 		*/
-		uint32 cur_classID = cur_client->GetClassID();
+		uint32 cur_classID = curClientStruct->m_pClient->GetClassID();
 		if(cur_classID > classID //We found a client in a lower prio class
 		   &&
-		   !cur_client->IsScheduledForRemoval() //And cur client is not scheduled
+		   !curClientStruct->m_pClient->IsScheduledForRemoval() //And cur client is not scheduled
 		  ) {
 		//MORPH END   - Changed by , Upload Splitting Class
-			return cur_client;
+			return curClientStruct;
 		}
 	}
 
@@ -673,19 +724,19 @@ CUpDownClient* CUploadQueue::FindBestScheduledForRemovalClientInUploadListThatCa
     POSITION pos = uploadinglist.GetHeadPosition();
 	while(pos != NULL){
         // Get the client. Note! Also updates pos as a side effect.
-		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
+		UploadingToClient_Struct* curClientStruct = uploadinglist.GetNext(pos);
 
 		//MORPH START - Changed by SiRoB, Upload Splitting Class
 		//if(cur_client->IsScheduledForRemoval() && /*&& cur_client->GetScheduledUploadShouldKeepWaitingTime()*/) {
-		if(cur_client->IsScheduledForRemoval() &&
+		if(curClientStruct->m_pClient->IsScheduledForRemoval() &&
 			(!checkforaddinuploadinglist ||
-			 m_abAddClientOfThisClass[LAST_CLASS] && !(cur_client->IsFriend() && cur_client->GetFriendSlot()) && !cur_client->IsPBForPS() ||
-			 m_abAddClientOfThisClass[1] && cur_client->IsPBForPS() ||
-			 m_abAddClientOfThisClass[0] && cur_client->IsFriend() && cur_client->GetFriendSlot()
+			 m_abAddClientOfThisClass[LAST_CLASS] && !(curClientStruct->m_pClient->IsFriend() && curClientStruct->m_pClient->GetFriendSlot()) && !curClientStruct->m_pClient->IsPBForPS() ||
+			 m_abAddClientOfThisClass[1] && curClientStruct->m_pClient->IsPBForPS() ||
+			 m_abAddClientOfThisClass[0] && curClientStruct->m_pClient->IsFriend() && curClientStruct->m_pClient->GetFriendSlot()
 			)
 		   ){
 		//MORPH END - Changed by SiRoB, Upload Splitting Class
-			return cur_client;
+			return curClientStruct->m_pClient;
 		}
 	}
 
@@ -702,7 +753,7 @@ uint32 CUploadQueue::GetEffectiveUploadListCount(uint32 classID) {
 	POSITION pos = uploadinglist.GetTailPosition();
 	while(pos != NULL){
         // Get the client. Note! Also updates pos as a side effect.
-		CUpDownClient* cur_client = uploadinglist.GetPrev(pos);
+		CUpDownClient* cur_client = uploadinglist.GetPrev(pos)->m_pClient;
 
 		//we need to remove all slot that are not in our desired class or are scheduledslot
 		/*MORPH*/if(cur_client->GetClassID() != classID || cur_client->IsScheduledForRemoval()) { 
@@ -714,14 +765,24 @@ uint32 CUploadQueue::GetEffectiveUploadListCount(uint32 classID) {
 }
 //MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
+//MORPH START - Changed by SiRoB, Upload Splitting Class
+/*
+bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd){
+*/
 bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, bool highPrioCheck) {
+//MORPH END   - Changed by SiRoB, Upload Splitting Class
 	CUpDownClient* newclient = NULL;
 	// select next client or use given client
 	if (!directadd)
 	{
+		//MORPH START - Changed by SiRoB, Upload Splitting Class
+		/*
+        newclient = FindBestClientInQueue();
+		*/
         if(!highPrioCheck) {
             newclient = FindBestScheduledForRemovalClientInUploadListThatCanBeReinstated(true);
         }
+		//MORPH END   - Changed by SiRoB, Upload Splitting Class
 
 		//MORPH START - Changed by SiRoB, Upload Splitting Class
 		/*
@@ -741,20 +802,21 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
             // wasn't pre-empted, and is not special class client, so shouldn't be unscheduled from removal
             newclient = queueNewclient;
         }
-		if(newclient) {
+        if(newclient)
+		{
             //MORPH START - Changed by , Upload Splitting Class
 			bool wanttoaddanewfriendslot = newclient->IsFriend() && newclient->GetFriendSlot();
 			if(wanttoaddanewfriendslot || newclient->IsPBForPS()) {
-				CUpDownClient* lastClient = FindLastUnScheduledForRemovalClientInUploadList(wanttoaddanewfriendslot?0:1);
+				UploadingToClient_Struct* lastClientStruct = FindLastUnScheduledForRemovalClientInUploadList(wanttoaddanewfriendslot?0:1);
 			//MORPH END   - Changed by , Upload Splitting Class
 
-				if(lastClient != NULL) {
+				if(lastClientStruct != NULL) {
 					//MORPH START - Upload Splitting Class, We don't need to make the check it's done into FindLastUnScheduledForRemovalClientInUploadList
 					/*
 					if (RightClientIsSuperior(lastClient, newclient) > 0)
 					*/
 						// Remove last client from ul list to make room for higher prio client
-		                ScheduleRemovalFromUploadQueue(lastClient, _T("Ended upload to make room for higher prio client."), GetResString(IDS_UPLOAD_PREEMPTED), true);
+		                ScheduleRemovalFromUploadQueue(lastClientStruct, _T("Ended upload to make room for higher prio client."), GetResString(IDS_UPLOAD_PREEMPTED), true);
                     /*
                     } else {
                         return false;
@@ -766,24 +828,26 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
             }
 
             if(!IsDownloading(newclient) && !newclient->IsScheduledForRemoval()) {
-            RemoveFromWaitingQueue(newclient, true);
-			theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
+		    RemoveFromWaitingQueue(newclient, true);
+		    theApp.emuledlg->transferwnd->ShowQueueCount(waitinglist.GetCount());
             //} else {
             //    newclient->UnscheduleForRemoval();
             //    MoveDownInUploadQueue(newclient);
             }
-		}
+        }
 	}
-	else
+	else 
 		newclient = directadd;
 
-	if(newclient == NULL)
-		return false;
+    if(newclient == NULL) 
+        return false;
 
 	//Fafner: copying lets clients stuck in CReadBlockFromFileThread::Run because file is locked - 080421
+#ifdef USE_MORPH_READ_THREAD
 	if (newclient->CheckAndGetReqUpFile()->IsPartFile()
 		&& ((CPartFile*)(newclient->CheckAndGetReqUpFile()))->GetFileOp() == PFOP_COPYING)
 		return false;
+#endif
 	//Removed by SiRoB, Not used due to zz Upload system
 	/*
 	if (!thePrefs.TransferFullChunks())
@@ -791,31 +855,27 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	*/
 	if (IsDownloading(newclient))
 	{
-        if(newclient->IsScheduledForRemoval()) {
-            newclient->UnscheduleForRemoval();
+		UploadingToClient_Struct* newClientStruct = GetUploadingClientStructByClient(newclient);
+		if(newClientStruct != NULL && newclient->IsScheduledForRemoval())
+		{
+			newclient->UnscheduleForRemoval();
 			m_nLastStartUpload = ::GetTickCount();
     
-            MoveDownInUploadQueue(newclient);
+			MoveDownInUploadQueue(newClientStruct);
 
-            if(pszReason && thePrefs.GetLogUlDlEvents())
-                //MORPH START - Changed by SiRoB, Optimization requpfile
+			if(pszReason && thePrefs.GetLogUlDlEvents())
+				//MORPH START - Changed by SiRoB, Optimization requpfile
 				/*
 				AddDebugLogLine(false, _T("Unscheduling client from being removed from upload list: %s Client: %s File: %s"), pszReason, newclient->DbgGetClientInfo(), (theApp.sharedfiles->GetFileByID(newclient->GetUploadFileID())?theApp.sharedfiles->GetFileByID(newclient->GetUploadFileID())->GetFileName():_T("")));
 				*/
 				{
-				CKnownFile* reqfile = newclient->CheckAndGetReqUpFile();
-				AddDebugLogLine(false, _T("Unscheduling client from being removed from upload list: %s Client: %s File: %s"), pszReason, newclient->DbgGetClientInfo(), (reqfile)?reqfile->GetFileName():_T(""));
+					CKnownFile* reqfile = newclient->CheckAndGetReqUpFile();
+					AddDebugLogLine(false, _T("Unscheduling client from being removed from upload list: %s Client: %s File: %s"), pszReason, newclient->DbgGetClientInfo(), (reqfile)?reqfile->GetFileName():_T(""));
 				}
 				//MORPH END   - Changed by SiRoB, Optimization requpfile
-            return true;
-        }
-
+			return true;
+		}
 		return false;
-	}
-
-	if (newclient->HasCollectionUploadSlot() && directadd == NULL){
-		ASSERT( false );
-		newclient->SetCollectionUploadSlot(false);
 	}
 
     //MORPH START - Upload Splitting Class
@@ -824,6 +884,11 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
         AddDebugLogLine(false, _T("Adding client to upload list: %s Client: %s"), pszReason, newclient->DbgGetClientInfo());
 	*/
 	//MORPH END   - Upload Splitting Class
+
+	if (newclient->HasCollectionUploadSlot() && directadd == NULL){
+		ASSERT( false );
+		newclient->SetCollectionUploadSlot(false);
+	}
 
 	// tell the client that we are now ready to upload
 	if (!newclient->socket || !newclient->socket->IsConnected())
@@ -856,7 +921,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 		newclient->m_nSelectedChunk = 0;
 	// SLUGFILLER: hideOS
 	
-	InsertInUploadingList(newclient);
+    InsertInUploadingList(newclient, false);
     //MORPH START - Upload Splitting Class
 	if(thePrefs.GetLogUlDlEvents()) {
         uint32 newclientClassID = newclient->GetClassID();
@@ -869,8 +934,8 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	}
 	//MORPH END   - Upload Splitting Class
 
-	m_nLastStartUpload = ::GetTickCount();
-
+    m_nLastStartUpload = ::GetTickCount();
+	
     if(newclient->GetQueueSessionUp() > 0) {
         // This client has already gotten a successfullupcount++ when it was early removed.
         // Negate that successfullupcount++ so we can give it a new one when this session ends
@@ -889,7 +954,7 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 	//MORPH END   - Adde by SiRoB, Optimization requpfile
 	if (reqfile)
 		reqfile->statistic.AddAccepted();
-
+		
 	theApp.emuledlg->transferwnd->GetUploadList()->AddClient(newclient);
 
 	return true;
@@ -898,26 +963,35 @@ bool CUploadQueue::AddUpNextClient(LPCTSTR pszReason, CUpDownClient* directadd, 
 //MORPH - Upload Splitting Class
 void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
     // Save number of active clients for statistics
+    /*
+    uint32 tempHighest = theApp.uploadBandwidthThrottler->GetHighestNumberOfFullyActivatedSlotsSinceLastCallAndReset();
+
+    if(thePrefs.GetLogUlDlEvents() && theApp.uploadBandwidthThrottler->GetStandardListSize() > (uint32)uploadinglist.GetSize()) {
+    */
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
 		if(thePrefs.GetLogUlDlEvents() && m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID] > m_aiSlotCounter[classID]+1) {
         // debug info, will remove this when I'm done.
         AddDebugLogLine(false, _T("UploadQueue: Error! Throttler has more slots in class %i than UploadQueue! Throttler: %i UploadQueue: %i Tick: %i"), classID, m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID], m_aiSlotCounter[classID], ::GetTickCount());
-
-			//if(tempHighest > (uint32)uploadinglist.GetSize()+1) {
-        	//	tempHighest = uploadinglist.GetSize()+1;
-			//}
-		}
+    }
 	
+	/*
+	if(tempHighest > (uint32)uploadinglist.GetSize()+1) {
+        tempHighest = uploadinglist.GetSize()+1;
+	}
+
+    m_iHighestNumberOfFullyActivatedSlotsSinceLastCall = tempHighest;
+	*/
+
     // save some data about number of fully active clients
     uint32 tempMaxRemoved = 0;
 		while(!activeClients_tick_listClass[classID].IsEmpty() && !activeClients_listClass[classID].IsEmpty() && curTick-activeClients_tick_listClass[classID].GetHead() > 2*60*1000) {
 				activeClients_tick_listClass[classID].RemoveHead();
 				uint32 removed = activeClients_listClass[classID].RemoveHead();
 
-            if(removed > tempMaxRemoved) {
-                tempMaxRemoved = removed;
-            }
+        if(removed > tempMaxRemoved) {
+            tempMaxRemoved = removed;
         }
+    }
 
 		activeClients_listClass[classID].AddTail(m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass[classID]);
 		activeClients_tick_listClass[classID].AddTail(curTick);
@@ -965,10 +1039,15 @@ void CUploadQueue::UpdateActiveClientsInfo(DWORD curTick) {
 void CUploadQueue::Process() {
 
     DWORD curTick = ::GetTickCount();
-	m_lastproccesstick =curTick;
-	UpdateActiveClientsInfo(curTick);
+
+    UpdateActiveClientsInfo(curTick);
 
 	//MORPH START - Upload Splitting Class
+	/*
+	if (ForceNewClient()){
+	*/
+	m_lastproccesstick =curTick;
+
 	DWORD waitingtimebeforeopeningnewslot = 1000;
 	if  (GetDatarate() >  1000000) waitingtimebeforeopeningnewslot = 100;	 // we need to open slots quicker on very high speed lines
 	if  (GetDatarate() >  10000000) waitingtimebeforeopeningnewslot = 10;
@@ -976,8 +1055,8 @@ void CUploadQueue::Process() {
 	POSITION Pos = uploadinglist.GetHeadPosition();
 	while(Pos != NULL){
         // Get the client. Note! Also updates pos as a side effect.
-		CUpDownClient* cur_client = uploadinglist.GetNext(Pos);
-		if (cur_client->GetUploadState() != US_UPLOADING)
+		UploadingToClient_Struct* curClientStruct = uploadinglist.GetNext(Pos);
+		if (curClientStruct->m_pClient->GetUploadState() != US_UPLOADING)
 			waitingtimebeforeopeningnewslot *= 2; // still initiating slots. 
 	}
 	bool bCanAddNewSlot = (theApp.listensocket->GetTotalHalfCon() < thePrefs.GetMaxHalfConnections()) && (GetTickCount() - m_nLastStartUpload > waitingtimebeforeopeningnewslot);
@@ -991,72 +1070,147 @@ void CUploadQueue::Process() {
 	//MORPH START - Upload Splitting Class
 	uint32 needToaddmoreslot = false;
 	for (uint32 classID = 0; classID < NB_SPLITTING_CLASS; classID++) {
-	//Morph Start - changed by AndCycle, Dont Remove Spare Trickle Slot
-	/*
-	if(::GetTickCount()-m_nLastStartUpload > SEC2MS(20) && GetEffectiveUploadListCount() > 0 && GetEffectiveUploadListCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(GetEffectiveUploadListCount()-1) == false) {
-	*/
+		//Morph Start - changed by AndCycle, Dont Remove Spare Trickle Slot
+		/*
+		if(::GetTickCount()-m_nLastStartUpload > SEC2MS(20) && GetEffectiveUploadListCount() > 0 && GetEffectiveUploadListCount() > m_MaxActiveClientsShortTime+GetWantedNumberOfTrickleUploads() && AcceptNewClient(GetEffectiveUploadListCount()-1) == false) {
+		*/
 		if(thePrefs.DoRemoveSpareTrickleSlot() && ::GetTickCount()-m_nLastStartUpload > SEC2MS(20) && GetEffectiveUploadListCount(classID) > 0 && GetEffectiveUploadListCount(classID) > m_MaxActiveClientsShortTimeClass[classID]+GetWantedNumberOfTrickleUploads(classID) && AcceptNewClient(GetEffectiveUploadListCount(classID)-1, classID) == false) {
-	//Morph End - changed by AndCycle, Dont Remove Spare Trickle Slot
-        // we need to close a trickle slot and put it back first on the queue
+		//Morph End - changed by AndCycle, Dont Remove Spare Trickle Slot
+			// we need to close a trickle slot and put it back first on the queue
 
-        POSITION lastpos = uploadinglist.GetTailPosition();
+			POSITION lastpos = uploadinglist.GetTailPosition();
 
-        CUpDownClient* lastClient = NULL;
+			UploadingToClient_Struct* lastClientStruct = NULL;
 			//Loop to find the last trickle slot of the desired class
 			while (lastpos != NULL) {
-            lastClient = uploadinglist.GetPrev(lastpos);
-				if (lastClient->GetClassID()==classID)
-					break;
-				else
-					lastClient = NULL;
-        }
-        if(lastClient != NULL && !lastClient->IsScheduledForRemoval() /*lastClient->GetUpStartTimeDelay() > 3*1000*/) {
-            // There's too many open uploads (propably due to the user changing
-            // the upload limit to a lower value). Remove the last opened upload and put
-            // it back on the waitinglist. When it is put back, it get
-            // to keep its waiting time. This means it is likely to soon be
-            // choosen for upload again.
+				lastClientStruct = uploadinglist.GetPrev(lastpos);
+					if (lastClientStruct->m_pClient->GetClassID()==classID)
+						break;
+					else
+						lastClientStruct = NULL;
+			}
+			if(lastClientStruct != NULL && !lastClientStruct->m_pClient->IsScheduledForRemoval() /*lastClient->GetUpStartTimeDelay() > 3*1000*/) {
+				// There's too many open uploads (propably due to the user changing
+				// the upload limit to a lower value). Remove the last opened upload and put
+				// it back on the waitinglist. When it is put back, it get
+				// to keep its waiting time. This means it is likely to soon be
+				// choosen for upload again.
 
-            // Remove from upload list.
-            ScheduleRemovalFromUploadQueue(lastClient, _T("Too many upload slots opened for current ul speed"), GetResString(IDS_UPLOAD_TOO_MANY_SLOTS), true /*, true*/);
+				// Remove from upload list.
+				ScheduleRemovalFromUploadQueue(lastClientStruct, _T("Too many upload slots opened for current ul speed"), GetResString(IDS_UPLOAD_TOO_MANY_SLOTS), true /*, true*/);
 
-		    // add to queue again.
-            // the client is allowed to keep its waiting position in the queue, since it was pre-empted
-            //AddClientToQueue(lastClient,true, true);
-        }
+				// add to queue again.
+				// the client is allowed to keep its waiting position in the queue, since it was pre-empted
+				//AddClientToQueue(lastClient,true, true);
+			}
 		} else if (ForceNewClient(false, classID) && bCanAddNewSlot){
 			// There's not enough open uploads. Open another one.
 			needToaddmoreslot = true;
 		}
 	}
 	
-    if (needToaddmoreslot){
+	if (needToaddmoreslot){
+        // There's not enough open uploads. Open another one.
         AddUpNextClient(_T("Not enough open upload slots for current ul speed"));
 	}
 	//MORPH END   - Upload Splitting Class
 
-	// The loop that feeds the upload slots with data.
+    // The loop that feeds the upload slots with data.
 	POSITION pos = uploadinglist.GetHeadPosition();
-	while(pos != NULL){
+	while(pos != NULL)
+	{
         // Get the client. Note! Also updates pos as a side effect.
-		CUpDownClient* cur_client = uploadinglist.GetNext(pos);
-
+		UploadingToClient_Struct* pCurClientStruct = uploadinglist.GetNext(pos);
+		CUpDownClient* cur_client = pCurClientStruct->m_pClient;
 		if (thePrefs.m_iDbgHeap >= 2)
 			ASSERT_VALID(cur_client);
 		//It seems chatting or friend slots can get stuck at times in upload.. This needs looked into..
-		if (!cur_client->socket)
+		if (cur_client->socket == NULL)
 		{
 			RemoveFromUploadQueue(cur_client, _T("Uploading to client without socket? (CUploadQueue::Process)"));
 			if(cur_client->Disconnected(_T("CUploadQueue::Process"))){
 				delete cur_client;
 			}
-		} else {
+		}
+		else
+		{
 			//MORPH -  Changed by SiRoB, Fix scheduled slot keep for too long time
 			/*
 			if(!cur_client->IsScheduledForRemoval() || ::GetTickCount()-m_nLastStartUpload <= SEC2MS(11) || !cur_client->GetScheduledRemovalLimboComplete() || pos != NULL || cur_client->GetSlotNumber() <= GetActiveUploadsCount() || ForceNewClient(true)) {
 			*/
 			if(!cur_client->IsScheduledForRemoval() || !cur_client->GetScheduledRemovalLimboComplete() || cur_client->GetSlotNumber() <= GetActiveUploadsCount(cur_client->GetClassID()) || ForceNewClient(true, cur_client->GetClassID())) {
-				cur_client->SendBlockData();
+			cur_client->UpdateUploadingStatisticsData();
+			if (pCurClientStruct->m_bIOError)
+			{
+				RemoveFromUploadQueue(cur_client, _T("IO/Other Error while creating datapacket (see earlier log entries)"), true);
+				continue;
+			}
+			//MORPH START - ZZUL
+			/*
+			if (CheckForTimeOver(cur_client))
+			{
+				RemoveFromUploadQueue(cur_client, _T("Completed transfer"), true);
+				cur_client->SendOutOfPartReqsAndAddToWaitingQueue();
+				continue;
+			}
+			*/
+			if (cur_client->GetUploadState() == US_UPLOADING) {
+				bool wasRemoved = false;
+				//if(!IsScheduledForRemoval() && GetQueueSessionPayloadUp() > SESSIONMAXTRANS+1*1024 && curTick-m_dwLastCheckedForEvictTick >= 5*1000) {
+				//    m_dwLastCheckedForEvictTick = curTick;
+				//    wasRemoved = theApp.uploadqueue->RemoveOrMoveDown(this, true);
+				//}
+
+				if (!cur_client->IsScheduledForRemoval() && /*wasRemoved == false &&*/ cur_client->GetQueueSessionPayloadUp() + 3072 > cur_client->GetCurrentSessionLimit()) {//MORPH - Schedule before the limit, slot will be removed when limit is passed
+					// Should we end this upload?
+
+					//EastShare Start - added by AndCycle, Pay Back First
+					//check again does client satisfy the conditions
+					cur_client->credits->InitPayBackFirstStatus();
+					//EastShare End - added by AndCycle, Pay Back First
+
+					// Give clients in queue a chance to kick this client out.
+					// It will be kicked out only if queue contains a client
+					// of same/higher class as this client, and that new
+					// client must either be a high ID client, or a low ID
+					// client that is currently connected.
+					// Note 0.50b merge: It will not be removed in this loop
+					// but will be marked for removal so next loop may act.
+					wasRemoved = RemoveOrMoveDown(pCurClientStruct);
+
+					if (!wasRemoved) {
+						// It wasn't removed, so it is allowed to pass into the next amount.
+						cur_client->m_curSessionAmountNumber++;
+					}
+				}
+			}
+			//MORPH END   - ZZUL
+
+			// check if the fileid of the topmost blockrequest matches with out current uploadfile, otherwise the IO thread will
+			// wait for us (only for this client of course) to fix it for crossthread sync reasons
+			CSingleLock lockBlockLists(&pCurClientStruct->m_csBlockListsLock, TRUE);
+			ASSERT( lockBlockLists.IsLocked() );
+			// be careful what functions to call while having locks, RemoveFromUploadQueue could for example lead to a deadlock here
+			// because it tries to get the uploadlistlock, while the IO thread tries to fetch the uploadlistlock and then the blocklistlock
+			if (!pCurClientStruct->m_BlockRequests_queue.IsEmpty())
+			{
+				//MORPH - removed doublecheck here from previous if
+				const Requested_Block_Struct* pHeadBlock = pCurClientStruct->m_BlockRequests_queue.GetHead();
+				if (md4cmp(pHeadBlock->FileID, cur_client->GetUploadFileID()) != 0)
+				{
+					uchar aucNewID[16];
+					md4cpy(aucNewID, pHeadBlock->FileID);
+					
+					lockBlockLists.Unlock();
+					
+					CKnownFile* pCurrentUploadFile = theApp.sharedfiles->GetFileByID(aucNewID);
+					if (pCurrentUploadFile != NULL)
+						cur_client->SetUploadFileID(pCurrentUploadFile);
+					else
+						RemoveFromUploadQueue(cur_client, _T("Requested FileID in blockrequest not found in sharedfiles"), true);
+				}
+			}
+			lockBlockLists.Unlock();
 			} else {
 				bool keepWaitingTime = cur_client->GetScheduledUploadShouldKeepWaitingTime();
 				RemoveFromUploadQueue(cur_client, (CString)_T("Scheduled for removal: ") + cur_client->GetScheduledRemovalDebugReason(), true, keepWaitingTime);
@@ -1065,27 +1219,71 @@ void CUploadQueue::Process() {
 			}
 		}
 	}
+
+	//MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
+	/*
+    // Save used bandwidth for speed calculations
+	uint64 sentBytes = theApp.uploadBandwidthThrottler->GetNumberOfSentBytesSinceLastCallAndReset();
+	avarage_dr_list.AddTail(sentBytes);
+    m_avarage_dr_sum += sentBytes;
+
+    (void)theApp.uploadBandwidthThrottler->GetNumberOfSentBytesOverheadSinceLastCallAndReset();
+
+    avarage_friend_dr_list.AddTail(theStats.sessionSentBytesToFriend);
+
+    // Save time beetween each speed snapshot
+    avarage_tick_list.AddTail(curTick);
+
+    // don't save more than 30 secs of data
+    while(avarage_tick_list.GetCount() > 3 && !avarage_friend_dr_list.IsEmpty() && ::GetTickCount()-avarage_tick_list.GetHead() > 30*1000) {
+   	    m_avarage_dr_sum -= avarage_dr_list.RemoveHead();
+        avarage_friend_dr_list.RemoveHead();
+        avarage_tick_list.RemoveHead();
+    }
+	*/
+	//MORPH END   - Changed by SiRoB, Better datarate mesurement for low and high speed
 };
 
 //MORPH - Upload Splitting Class
+/*
+
+bool CUploadQueue::AcceptNewClient(bool addOnNextConnect)
+{
+	uint32 curUploadSlots = (uint32)uploadinglist.GetCount();
+
+	//We allow ONE extra slot to be created to accommodate lowID users.
+	//This is because we skip these users when it was actually their turn
+	//to get an upload slot..
+	if(addOnNextConnect && curUploadSlots > 0)
+		curUploadSlots--;		
+
+    return AcceptNewClient(curUploadSlots);
+}
+*/
 bool CUploadQueue::AcceptNewClient(uint32 classID)
 {
 	uint32 curUploadSlots = (uint32)GetEffectiveUploadListCount(classID);
     return AcceptNewClient(curUploadSlots, classID);
 }
-bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
-/*
-bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
-*/
-// check if we can allow a new client to start downloading from us
 
+//MORPH - Upload Splitting Class
+/*
+bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots){
+*/
+bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
+	// check if we can allow a new client to start downloading from us
+
+	//MORPH - Upload Splitting Class
+	/*
+	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
+	*/
 	if (uploadinglist.GetCount() < MIN_UP_CLIENTS_ALLOWED) // alwasy 2 or 3 slots per class. 
 		return true;
 
-    uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads(classID); 
-    if(curUploadSlots > m_MaxActiveClientsClass[classID]+wantedNumberOfTrickles) { 
-        return false;
-     }
+	uint32 wantedNumberOfTrickles = GetWantedNumberOfTrickleUploads(classID); 
+	if(curUploadSlots > m_MaxActiveClientsClass[classID]+wantedNumberOfTrickles) { 
+		return false;
+	}
     
 	//MORPH - Upload Splitting Class
 	/*
@@ -1094,6 +1292,19 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
         MaxSpeed = (uint16)(theApp.lastCommonRouteFinder->GetUpload()/1024);
     else
 		MaxSpeed = thePrefs.GetMaxUpload();
+	
+	if (curUploadSlots >= MAX_UP_CLIENTS_ALLOWED ||
+        curUploadSlots >= 4 &&
+        (
+         curUploadSlots >= (datarate/UPLOAD_CHECK_CLIENT_DR) ||
+         curUploadSlots >= ((uint32)MaxSpeed)*1024/UPLOAD_CLIENT_DATARATE ||
+         (
+          thePrefs.GetMaxUpload() == UNLIMITED &&
+          !thePrefs.IsDynUpEnabled() &&
+          thePrefs.GetMaxGraphUploadRate(true) > 0 &&
+          curUploadSlots >= ((uint32)thePrefs.GetMaxGraphUploadRate(false))*1024/UPLOAD_CLIENT_DATARATE
+         )
+        )
 	*/
 	uint32 AllowedDatarate[NB_SPLITTING_CLASS];
 	uint32 AllowedClientDatarate[NB_SPLITTING_CLASS];
@@ -1123,13 +1334,83 @@ bool CUploadQueue::AcceptNewClient(uint32 curUploadSlots, uint32 classID){
 		 ) ||
 		 
 		  (thePrefs.GetSlotLimitNumB() && GetUploadQueueLength() >= thePrefs.GetSlotLimitNum())
-       ) // max number of clients to allow for all circumstances
-	   return false;
+	//MORPH - Upload Splitting Class
+    ) // max number of clients to allow for all circumstances
+	    return false;
 
 	return true;
 }
 
 //MORPH START - Upload Splitting Class
+/*
+bool CUploadQueue::ForceNewClient(bool allowEmptyWaitingQueue) {
+    if(!allowEmptyWaitingQueue && waitinglist.GetSize() <= 0)
+        return false;
+
+	if (::GetTickCount() - m_nLastStartUpload < 1000 && datarate < 102400 )
+		return false;
+
+	uint32 curUploadSlots = (uint32)uploadinglist.GetCount();
+
+	if (curUploadSlots < MIN_UP_CLIENTS_ALLOWED)
+		return true;
+
+    if(!AcceptNewClient(curUploadSlots) || !theApp.lastCommonRouteFinder->AcceptNewClient()) { // UploadSpeedSense can veto a new slot if USS enabled
+		return false;
+    }
+
+	uint16 MaxSpeed;
+    if (thePrefs.IsDynUpEnabled())
+        MaxSpeed = (uint16)(theApp.lastCommonRouteFinder->GetUpload()/1024);
+    else
+		MaxSpeed = thePrefs.GetMaxUpload();
+
+	uint32 upPerClient = UPLOAD_CLIENT_DATARATE;
+
+    // if throttler doesn't require another slot, go with a slightly more restrictive method
+	if( MaxSpeed > 20 || MaxSpeed == UNLIMITED)
+		upPerClient += datarate/43;
+
+	if( upPerClient > 7680 )
+		upPerClient = 7680;
+
+	//now the final check
+
+	if ( MaxSpeed == UNLIMITED )
+	{
+		if (curUploadSlots < (datarate/upPerClient))
+			return true;
+	}
+	else{
+		uint16 nMaxSlots;
+		if (MaxSpeed > 12)
+			nMaxSlots = (uint16)(((float)(MaxSpeed*1024)) / upPerClient);
+		else if (MaxSpeed > 7)
+			nMaxSlots = MIN_UP_CLIENTS_ALLOWED + 2;
+		else if (MaxSpeed > 3)
+			nMaxSlots = MIN_UP_CLIENTS_ALLOWED + 1;
+		else
+			nMaxSlots = MIN_UP_CLIENTS_ALLOWED;
+//		AddLogLine(true,"maxslots=%u, upPerClient=%u, datarateslot=%u|%u|%u",nMaxSlots,upPerClient,datarate/UPLOAD_CHECK_CLIENT_DR, datarate, UPLOAD_CHECK_CLIENT_DR);
+
+		if ( curUploadSlots < nMaxSlots )
+		{
+			return true;
+		}
+	}
+
+    if(m_iHighestNumberOfFullyActivatedSlotsSinceLastCall > (uint32)uploadinglist.GetSize()) {
+        // uploadThrottler requests another slot. If throttler says it needs another slot, we will allow more slots
+        // than what we require ourself. Never allow more slots than to give each slot high enough average transfer speed, though (checked above).
+        //if(thePrefs.GetLogUlDlEvents() && waitinglist.GetSize() > 0)
+        //    AddDebugLogLine(false, _T("UploadQueue: Added new slot since throttler needs it. m_iHighestNumberOfFullyActivatedSlotsSinceLastCall: %i uploadinglist.GetSize(): %i tick: %i"), m_iHighestNumberOfFullyActivatedSlotsSinceLastCall, uploadinglist.GetSize(), ::GetTickCount());
+        return true;
+    }
+
+    //nope
+	return false;
+}
+*/
 bool CUploadQueue::ForceNewClient(bool simulateScheduledClosingOfSlot, uint32 classID) {
 	//Get number of slot from above class and cur class
 	uint32 curUploadSlotsReal = m_aiSlotCounter[classID];
@@ -1195,6 +1476,17 @@ CUpDownClient* CUploadQueue::GetWaitingClientByIP(uint32 dwIP){
 }
 
 /**
+ * Add a client to the waiting queue for uploads.
+ *
+ * @param client address of the client that should be added to the waiting queue
+ *
+ * @param bIgnoreTimelimit don't check time limit to possibly ban the client.
+ */
+//MORPH START - ZZ
+/*
+void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit)
+*/
+/**
 * Add a client to the waiting queue for uploads.
 *
 * @param client address of the client that should be added to the waiting queue
@@ -1256,12 +1548,15 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	for (pos1 = waitinglist.GetHeadPosition();( pos2 = pos1 ) != NULL;)
 	{
 		waitinglist.GetNext(pos1);
-		CUpDownClient* cur_client = waitinglist.GetAt(pos2);
+		CUpDownClient* cur_client= waitinglist.GetAt(pos2);
 		if (cur_client == client)
 		{	
 			//already on queue
-            // VQB LowID Slot Patch, enhanced in ZZUL
-            if (addInFirstPlace == false && client->HasLowID() &&
+			// VQB LowID Slot Patch, enhanced in ZZUL
+			/*
+			if (client->m_bAddNextConnect && AcceptNewClient(client->m_bAddNextConnect))
+			*/
+			if (addInFirstPlace == false && client->HasLowID() &&
 				client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick && /*AcceptNewClient() &&*/
 				(AcceptNewClient(LAST_CLASS) && !(client->IsFriend() && client->GetFriendSlot()) && !client->IsPBForPS() ||
 				 AcceptNewClient(1) && client->IsPBForPS() ||
@@ -1269,8 +1564,8 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 			{
 				//Special care is given to lowID clients that missed their upload slot
 				//due to the saving bandwidth on callbacks.
-                CUpDownClient* bestQueuedClient = FindBestClientInQueue(false);
-                if(bestQueuedClient == client) {
+				CUpDownClient* bestQueuedClient = FindBestClientInQueue(false);
+				if(bestQueuedClient == client) {
 					RemoveFromWaitingQueue(client, true);
 				// statistic values // TODO: Maybe we should change this to count each request for a file only once and ignore reasks
 				CKnownFile* reqfile = theApp.sharedfiles->GetFileByID((uchar*)client->GetUploadFileID());
@@ -1278,8 +1573,8 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 					reqfile->statistic.AddRequest();
 				    AddUpNextClient(_T("Adding ****lowid when reconnecting."), client);
 				    return;
-                //} else {
-                //client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
+				//} else {
+				//client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
 				}
 			}
 			client->SendRankingInfo();
@@ -1322,7 +1617,7 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 				// EastShare - Added by TAHO, modified SUQWT
 				waitinglist.GetAt(pos2)->ClearWaitStartTime(); 
 				// EastShare - Added by TAHO, modified SUQWT
-				RemoveFromWaitingQueue(pos2,true);
+				RemoveFromWaitingQueue(pos2,true);	
 				if (!cur_client->socket)
 				{
 					if(cur_client->Disconnected(_T("AddClientToQueue - same userhash 2")))
@@ -1428,53 +1723,78 @@ void CUploadQueue::AddClientToQueue(CUpDownClient* client, bool bIgnoreTimelimit
 	client->SendRankingInfo();
 }
 
+//MORPH START - Equal Chance For Each File
+/*
+float CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
+*/
 double CUploadQueue::GetAverageCombinedFilePrioAndCredit() {
-	DWORD curTick = ::GetTickCount();
+//MORPH END   - Equal Chance For Each File
+    DWORD curTick = ::GetTickCount();
 
-	if (curTick - m_dwLastCalculatedAverageCombinedFilePrioAndCredit > 5*1000) {
-		m_dwLastCalculatedAverageCombinedFilePrioAndCredit = curTick;
+    if (curTick - m_dwLastCalculatedAverageCombinedFilePrioAndCredit > 5*1000) {
+        m_dwLastCalculatedAverageCombinedFilePrioAndCredit = curTick;
 
 		//Morph - partial changed by AndCycle, Equal Chance For Each File - the equal chance have a risk of overflow ... so I use double
-		double sum = 0;
-		for (POSITION pos = waitinglist.GetHeadPosition(); pos != NULL;/**/){
+        double sum = 0;
+	    for (POSITION pos = waitinglist.GetHeadPosition(); pos != NULL; /**/){
 		    CUpDownClient* cur_client =	waitinglist.GetNext(pos);
-			sum += cur_client->GetCombinedFilePrioAndCredit();
-		}
+            sum += cur_client->GetCombinedFilePrioAndCredit();
+        }
         m_fAverageCombinedFilePrioAndCredit = (float)(sum/waitinglist.GetSize());
-	}
+    }
 
-	return m_fAverageCombinedFilePrioAndCredit;
+    return m_fAverageCombinedFilePrioAndCredit;
 }
+
 // Moonlight: SUQWT: Reset wait time on session success, save it on failure.//Morph - added by AndCycle, Moonlight's Save Upload Queue Wait Time (MSUQWT)
-
 //MORPH START - Added By AndCycle, ZZUL_20050212-0200
-void CUploadQueue::ScheduleRemovalFromUploadQueue(CUpDownClient* client, LPCTSTR pszDebugReason, CString strDisplayReason, bool earlyabort) {
+void CUploadQueue::ScheduleRemovalFromUploadQueue(UploadingToClient_Struct* clientStruct, LPCTSTR pszDebugReason, CString strDisplayReason, bool earlyabort) {
 	if (thePrefs.GetLogUlDlEvents())
-        //MORPH START - Changed by SiRoB, Optimization requpfile
-		/*
-		AddDebugLogLine(DLP_VERYLOW, true,_T("Scheduling to remove client from upload list: %s Client: %s Transfered: %s SessionUp: %s QueueSessionUp: %s QueueSessionPayload: %s File: %s"), pszDebugReason==NULL ? _T("") : pszDebugReason, client->DbgGetClientInfo(), CastSecondsToHM( client->GetUpStartTimeDelay()/1000), CastItoXBytes(client->GetSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), (theApp.sharedfiles->GetFileByID(client->GetUploadFileID())?theApp.sharedfiles->GetFileByID(client->GetUploadFileID())->GetFileName():_T("")));
-		*/
-		{
-			CKnownFile* reqfile = client->CheckAndGetReqUpFile();
-			AddDebugLogLine(DLP_VERYLOW, true,_T("Scheduling to remove client from upload list: %s Client: %s Transfered: %s SessionUp: %s QueueSessionUp: %s QueueSessionPayload: %s File: %s"), pszDebugReason==NULL ? _T("") : pszDebugReason, client->DbgGetClientInfo(), CastSecondsToHM( client->GetUpStartTimeDelay()/1000), CastItoXBytes(client->GetSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), (reqfile)?reqfile->GetFileName():_T(""));
-		}
 		//MORPH START - Changed by SiRoB, Optimization requpfile
+		/*
+		AddDebugLogLine(DLP_VERYLOW, true,_T("Scheduling to remove client from upload list: %s Client: %s Transfered: %s SessionUp: %s QueueSessionUp: %s QueueSessionPayload: %s File: %s"), 
+			pszDebugReason==NULL ? _T("") : pszDebugReason, clientStruct->m_pClient->DbgGetClientInfo(), CastSecondsToHM( clientStruct->m_pClient->GetUpStartTimeDelay()/1000), 
+			CastItoXBytes(clientStruct->m_pClient->GetSessionUp(), false, false), CastItoXBytes(clientStruct->m_pClient->GetQueueSessionUp(), false, false), 
+			CastItoXBytes(clientStruct->m_pClient->GetQueueSessionPayloadUp(), false, false), (theApp.sharedfiles->GetFileByID(client->GetUploadFileID())?theApp.sharedfiles->GetFileByID(client->GetUploadFileID())->GetFileName():_T("")));
+		*/
+	{
+		CKnownFile* reqfile = clientStruct->m_pClient->CheckAndGetReqUpFile();
+		AddDebugLogLine(DLP_VERYLOW, true,_T("Scheduling to remove client from upload list: %s Client: %s Transfered: %s SessionUp: %s QueueSessionUp: %s QueueSessionPayload: %s File: %s"), 
+			pszDebugReason==NULL ? _T("") : pszDebugReason, clientStruct->m_pClient->DbgGetClientInfo(), CastSecondsToHM(clientStruct->m_pClient->GetUpStartTimeDelay()/1000), 
+			CastItoXBytes(clientStruct->m_pClient->GetSessionUp(), false, false), CastItoXBytes(clientStruct->m_pClient->GetQueueSessionUp(), false, false), 
+			CastItoXBytes(clientStruct->m_pClient->GetQueueSessionPayloadUp(), false, false), (reqfile)?reqfile->GetFileName():_T(""));
+	}
+		//MORPH END   - Changed by SiRoB, Optimization requpfile
 
-    client->ScheduleRemovalFromUploadQueue(pszDebugReason, strDisplayReason, earlyabort);
-	MoveDownInUploadQueue(client);
+	clientStruct->m_pClient->ScheduleRemovalFromUploadQueue(pszDebugReason, strDisplayReason, earlyabort);
+	MoveDownInUploadQueue(clientStruct);
 
-    //m_nLastStartUpload = ::GetTickCount(); //MORPH - To avoid waiting 10" before opening a new slot due to completing
+	//m_nLastStartUpload = ::GetTickCount(); //MORPH - To avoid waiting 10" before opening a new slot due to completing
 }
 //MORPH END   - Added By AndCycle, ZZUL_20050212-0200
 
+// This function is rewritten for MorphXT ZZUL and USC code
 bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReason, bool updatewindow, bool earlyabort){
-    POSITION foundPos = uploadinglist.Find(client);
+	// We need the position in the list here so we cannot
+	// rely on GetUploadingClientStructByClient here.
+	UploadingToClient_Struct* curClientStruct = NULL;
+	POSITION foundPos = NULL;
+	for (POSITION pos = uploadinglist.GetHeadPosition(); pos != NULL; ) {
+		POSITION currPos = pos;
+		curClientStruct = uploadinglist.GetNext(pos);
+		if (curClientStruct->m_pClient == client)
+		{
+			foundPos = currPos;
+			break;
+		}
+		curClientStruct = NULL;
+	}
 	if(foundPos != NULL) {
 		client->m_uiLastChunk = (UINT)-1; //Fafner: client percentage - 080325
 		POSITION renumberPosition = uploadinglist.GetTailPosition();
 		uint32 classID = client->GetClassID(); //MORPH - Upload Splitting Class
 		while(renumberPosition != foundPos) {
-			CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition);
+			CUpDownClient* renumberClient = uploadinglist.GetAt(renumberPosition)->m_pClient;
 			renumberClient->SetSlotNumber(renumberClient->GetSlotNumber()-1);
 			uploadinglist.GetPrev(renumberPosition);
 		}
@@ -1494,13 +1814,26 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 		CKnownFile* requestedFile = client->CheckAndGetReqUpFile();
 		//MORPH END   - Adde by SiRoB, Optimization requpfile
 		if (thePrefs.GetLogUlDlEvents())
-             AddDebugLogLine(DLP_DEFAULT, true,_T("Removing client from upload list: %s Client: %s Transferred: %s SessionUp: %s QueueSessionPayload: %s In buffer: %s Req blocks: %i File: %s"), pszReason==NULL ? _T("") : pszReason, client->DbgGetClientInfo(), CastSecondsToHM( client->GetUpStartTimeDelay()/1000), CastItoXBytes(client->GetSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetPayloadInBuffer()), client->GetNumberOfRequestedBlocksInQueue(), (theApp.sharedfiles->GetFileByID(client->GetUploadFileID())?theApp.sharedfiles->GetFileByID(client->GetUploadFileID())->GetFileName():_T("")));
-       	client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
+#ifndef USE_MORPH_READ_THREAD
+			AddDebugLogLine(DLP_DEFAULT, true, _T("Removing client from upload list: %s Client: %s Transferred: %s SessionUp: %s QueueSessionPayload: %s In buffer: %s Req blocks: %i File: %s")
+				, pszReason == NULL ? _T("") : pszReason, client->DbgGetClientInfo(), CastSecondsToHM(client->GetUpStartTimeDelay() / 1000)
+				, CastItoXBytes(client->GetSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetPayloadInBuffer()), curClientStruct->m_BlockRequests_queue.GetCount()
+				, (theApp.sharedfiles->GetFileByID(client->GetUploadFileID()) ? theApp.sharedfiles->GetFileByID(client->GetUploadFileID())->GetFileName() : _T("")));
+#else
+			AddDebugLogLine(DLP_DEFAULT, true,_T("Removing client from upload list: %s Client: %s Transferred: %s SessionUp: %s QueueSessionPayload: %s In buffer: %s Req blocks: %i File: %s"),
+					pszReason==NULL ? _T("") : pszReason, client->DbgGetClientInfo(), CastSecondsToHM( client->GetUpStartTimeDelay()/1000)
+					, CastItoXBytes(client->GetSessionUp(), false, false), CastItoXBytes(client->GetQueueSessionPayloadUp(), false, false), CastItoXBytes(client->GetPayloadInBuffer()), client->GetNumberOfRequestedBlocksInQueue(), 
+					(theApp.sharedfiles->GetFileByID(client->GetUploadFileID())?theApp.sharedfiles->GetFileByID(client->GetUploadFileID())->GetFileName():_T("")));
+#endif
+		client->m_dwWouldHaveGottenUploadSlotIfNotLowIdTick = 0;
 		client->UnscheduleForRemoval();
 		//MORPH START - Added by SiRoB, Upload Splitting Class
 		--m_aiSlotCounter[classID];
 		//MORPH END   - Added by SiRoB, Upload Splitting Class
+		m_csUploadListMainThrdWriteOtherThrdsRead.Lock();
 		uploadinglist.RemoveAt(foundPos);
+		m_csUploadListMainThrdWriteOtherThrdsRead.Unlock();
+		delete curClientStruct; // m_csBlockListsLock.Lock();
 
 		/* Morph - been take care later
         if(!earlyabort)
@@ -1556,7 +1889,9 @@ bool CUploadQueue::RemoveFromUploadQueue(CUpDownClient* client, LPCTSTR pszReaso
 			//MORPH START - Moved by SiRoB, du to ShareOnlyTheNeed hide Uploaded and uploading part
 			theApp.clientlist->AddTrackClient(client); // Keep track of this client
 			client->SetUploadState(US_NONE);
+#ifdef USE_MORPH_READ_THREAD
 			client->ClearUploadBlockRequests();
+#endif
 			client->SetCollectionUploadSlot(false);
 			//MORPH END   - Moved by SiRoB, du to ShareOnlyTheNeed hide Uploaded and uploading part
 
@@ -1661,7 +1996,8 @@ void CUploadQueue::UpdateMaxClientScore()
 
 //Removed by SiRoB, not used due to zz way
 /*
-bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
+bool CUploadQueue::CheckForTimeOver(const CUpDownClient* client)
+{
 	//If we have nobody in the queue, do NOT remove the current uploads..
 	//This will save some bandwidth and some unneeded swapping from upload/queue/upload..
 	if ( waitinglist.IsEmpty() || client->GetFriendSlot() )
@@ -1712,10 +2048,14 @@ bool CUploadQueue::CheckForTimeOver(CUpDownClient* client){
 	return false;
 }
 */
+
 void CUploadQueue::DeleteAll(){
 	waitinglist.RemoveAll();
-	uploadinglist.RemoveAll();
-	// PENDING: Remove from UploadBandwidthThrottler as well!
+	m_csUploadListMainThrdWriteOtherThrdsRead.Lock();
+	while (!uploadinglist.IsEmpty())
+		delete uploadinglist.RemoveHead();
+	m_csUploadListMainThrdWriteOtherThrdsRead.Unlock();
+    // PENDING: Remove from UploadBandwidthThrottler as well!
 }
 
 UINT CUploadQueue::GetWaitingPosition(CUpDownClient* client)
@@ -1756,9 +2096,9 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 			return;
 		// SLUGFILLER: SafeHash
 		
-		// Elandal:ThreadSafeLogging -->
+        // Elandal:ThreadSafeLogging -->
         // other threads may have queued up log lines. This prints them.
-		theApp.HandleDebugLogQueue();
+        theApp.HandleDebugLogQueue();
         theApp.HandleLogQueue();
         // Elandal: ThreadSafeLogging <--
 
@@ -1790,7 +2130,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 			thePrefs.GetMaxClientDataRate());
 		//MOPRH END   - Modified by SiRoB, Upload Splitting Class
 
-		theApp.uploadqueue->Process();
+        theApp.uploadqueue->Process();
 		theApp.downloadqueue->Process();
 		if (thePrefs.ShowOverhead()){
 			theStats.CompUpDatarateOverhead();
@@ -1888,30 +2228,32 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 					}
 				}
 			}
+
 			//MORPH - Removed By SiRoB, moved on top
 			/*
             theApp.uploadqueue->UpdateDatarates();
 			*/
-			//save rates every second
+            
+            //save rates every second
 			theStats.RecordRate();
 			// mobilemule sockets
 			theApp.mmserver->Process();
 
-			//MORPH START - Added by SiRoB, ZZ Upload system (USS)
-			theApp.emuledlg->ShowPing();
+			// ZZ:UploadSpeedSense -->
+            theApp.emuledlg->ShowPing();
 
-			bool gotEnoughHosts = theApp.clientlist->GiveClientsForTraceRoute();
-			if(gotEnoughHosts == false) {
-					theApp.serverlist->GiveServersForTraceRoute();
-			}
-			//MORPH END   - Added by SiRoB, ZZ Upload system (USS)
+            bool gotEnoughHosts = theApp.clientlist->GiveClientsForTraceRoute();
+            if(gotEnoughHosts == false) {
+                theApp.serverlist->GiveServersForTraceRoute();
+            }
+			// ZZ:UploadSpeedSense <--
 
 			if (theApp.emuledlg->IsTrayIconToFlash())
 				theApp.emuledlg->ShowTransferRate(true);
 
-			sec++;
+            sec++;
 			// *** 5 seconds **********************************************
-			if (sec>=5) {
+			if (sec >= 5) {
 #ifdef _DEBUG
 				if (thePrefs.m_iDbgHeap > 0 && !AfxCheckMemory())
 					AfxDebugBreak();
@@ -1924,8 +2266,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 					theApp.emuledlg->ShowTransferRate();
 
 				thePrefs.EstimateMaxUploadCap(theApp.uploadqueue->GetDatarate()/1024);
-
-
+				
                 //Commander - Removed: Blinking Tray Icon On Message Recieve [emulEspaña] - Start
 				// Update every second
 				/*
@@ -1936,6 +2277,7 @@ VOID CALLBACK CUploadQueue::UploadTimer(HWND /*hwnd*/, UINT /*uMsg*/, UINT_PTR /
 				if (!thePrefs.TransferFullChunks())
 					theApp.uploadqueue->UpdateMaxClientScore();
 				*/
+
 				// update cat-titles with downloadinfos only when needed
 				if (thePrefs.ShowCatTabInfos() && 
 					theApp.emuledlg->activewnd == theApp.emuledlg->transferwnd && 
@@ -1999,15 +2341,17 @@ CUpDownClient* CUploadQueue::GetNextClient(const CUpDownClient* lastclient){
 }
 //MORPH START - Changed by SiRoB, Better datarate mesurement for low and high speed
 void CUploadQueue::UpdateDatarates() {
-	// Calculate average datarate
-	/*if(::GetTickCount()-m_lastCalculatedDataRateTick > 500) {
-		m_lastCalculatedDataRateTick = ::GetTickCount();
+    // Calculate average datarate
+	/*
+    if(::GetTickCount()-m_lastCalculatedDataRateTick > 500) {
+        m_lastCalculatedDataRateTick = ::GetTickCount();
 
-		if(avarage_dr_list.GetSize() >= 2 && (avarage_tick_list.GetTail() > avarage_tick_list.GetHead())) {
+        if(avarage_dr_list.GetSize() >= 2 && (avarage_tick_list.GetTail() > avarage_tick_list.GetHead())) {
 	        datarate = (UINT)(((m_avarage_dr_sum - avarage_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()));
             friendDatarate = (UINT)(((avarage_friend_dr_list.GetTail() - avarage_friend_dr_list.GetHead())*1000) / (avarage_tick_list.GetTail() - avarage_tick_list.GetHead()));
-		}
-	}*/
+        }
+    }
+	*/
 	uint64 sentBytesClass[NB_SPLITTING_CLASS];
 	uint64 sentBytesOverheadClass[NB_SPLITTING_CLASS];
 	theApp.uploadBandwidthThrottler->GetStats(sentBytesClass,sentBytesOverheadClass,m_iHighestNumberOfFullyActivatedSlotsSinceLastCallClass);
@@ -2103,14 +2447,16 @@ void CUploadQueue::UpdateDatarates() {
 
 //MORPH - Changed by SiRoB, Keep An average datarate value for USS system
 /*
-uint32 CUploadQueue::GetDatarate() {
+uint32 CUploadQueue::GetDatarate() const
 */
-uint32 CUploadQueue::GetDatarate(bool bLive) {
+uint32 CUploadQueue::GetDatarate(bool bLive) const
+{
 	if (bLive)
 		return datarate;
 	else
 		return datarate_USS;
 }
+
 //MORPH START - Added by SiRoB, Upload OverHead from uploadbandwidththrottler
 uint32 CUploadQueue::GetDatarateOverHead() {
 	return datarateoverhead;
@@ -2128,11 +2474,11 @@ uint32 CUploadQueue::GetDatarateExcludingPowershare() {
 //MORPH END   - Added by SiRoB, Upload powershare from uploadbandwidththrottler
 
 uint32 CUploadQueue::GetToNetworkDatarate() {
-	if(datarate > friendDatarate) {
-		return datarate - friendDatarate;
-	} else {
-		return 0;
-	}
+    if(datarate > friendDatarate) {
+        return datarate - friendDatarate;
+    } else {
+        return 0;
+    }
 }
 
 //MORPH START - Added By AndCycle, ZZUL_20050727-0030
@@ -2152,52 +2498,52 @@ uint32 CUploadQueue::GetWantedNumberOfTrickleUploads(uint32 classID) {
  * are changed by the user, friend slot is turned on/off, etc
  */
 void CUploadQueue::ReSortUploadSlots(bool force) {
-	DWORD curtick = ::GetTickCount();
-	if(force ||  curtick - m_dwLastResortedUploadSlots >= 10*1000) {
-		m_dwLastResortedUploadSlots = curtick;
+    DWORD curtick = ::GetTickCount();
+    if(force ||  curtick - m_dwLastResortedUploadSlots >= 10*1000) {
+        m_dwLastResortedUploadSlots = curtick;
 
-		theApp.uploadBandwidthThrottler->Pause(true);
+        theApp.uploadBandwidthThrottler->Pause(true);
 
-		CTypedPtrList<CPtrList, CUpDownClient*> tempUploadinglist;
-		//MORPH START - Added by SiRoB, Upload SPlitting Class
-		memset(m_aiSlotCounter,0,sizeof(m_aiSlotCounter));
-		memset(m_abAddClientOfThisClass, 0, sizeof(m_abAddClientOfThisClass));
-		//MORPH END - Added by SiROB, Upload SPlitting Class
-			
-		// Remove all clients from uploading list and store in tempList
-        POSITION ulpos = uploadinglist.GetHeadPosition();
+    	CUploadingPtrList tempUploadinglist;
+    	//MORPH START - Added by SiRoB, Upload SPlitting Class
+    	memset(m_aiSlotCounter,0,sizeof(m_aiSlotCounter));
+    	memset(m_abAddClientOfThisClass, 0, sizeof(m_abAddClientOfThisClass));
+    	//MORPH END - Added by SiROB, Upload SPlitting Class
+
+        // Remove all clients from uploading list and store in tempList
+        m_csUploadListMainThrdWriteOtherThrdsRead.Lock();
+		POSITION ulpos = uploadinglist.GetHeadPosition();
         while (ulpos != NULL) {
             POSITION curpos = ulpos;
             uploadinglist.GetNext(ulpos);
-  
+
             // Get and remove the client from upload list.
-		    CUpDownClient* cur_client = uploadinglist.GetAt(curpos);
-  
-			uploadinglist.RemoveAt(curpos);
-				
-			// Remove the found Client from UploadBandwidthThrottler
-   			theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket,true);
-			theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket,true);
-			tempUploadinglist.AddTail(cur_client);
-		}
+			UploadingToClient_Struct* pCurClientStruct = uploadinglist.GetAt(curpos);
+			CUpDownClient* cur_client = pCurClientStruct->m_pClient;
 
-		// Remove one at a time from temp list and reinsert in correct position in uploading list
-		POSITION tempPos = tempUploadinglist.GetHeadPosition();
-		while(tempPos != NULL) {
-			POSITION curpos = tempPos;
-			tempUploadinglist.GetNext(tempPos);
+            uploadinglist.RemoveAt(curpos);
 
-			// Get and remove the client from upload list.
-			CUpDownClient* cur_client = tempUploadinglist.GetAt(curpos);
+            // Remove the found Client from UploadBandwidthThrottler
+            //MORPH START - Upload Splitting Classes
+            /*
+            theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket);
+            theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket);
+            */
+            theApp.uploadBandwidthThrottler->RemoveFromStandardList(cur_client->socket,true);
+            theApp.uploadBandwidthThrottler->RemoveFromStandardList((CClientReqSocket*)cur_client->m_pPCUpSocket,true);
+            //MORPH END   - Upload Splitting Classes
 
-			tempUploadinglist.RemoveAt(curpos);
+            tempUploadinglist.AddTail(pCurClientStruct);
+        }
 
-			// This will insert in correct place
-   			InsertInUploadingList(cur_client);
-		}
+        // Remove one at a time from temp list and reinsert in correct position in uploading list
+		while (!tempUploadinglist.IsEmpty())
+			 InsertInUploadingList(tempUploadinglist.RemoveHead(), true);
 
-		theApp.uploadBandwidthThrottler->Pause(false);
-	}
+		m_csUploadListMainThrdWriteOtherThrdsRead.Unlock();
+
+        theApp.uploadBandwidthThrottler->Pause(false);
+    }
 }
 
 void CUploadQueue::CheckForHighPrioClient() {
@@ -2239,7 +2585,7 @@ uint32 CUploadQueue::GetDatarateForFile(const CSimpleArray<CObject*>& raFiles) c
 	uint32 nResult = 0;
 	for (POSITION pos = uploadinglist.GetHeadPosition(); pos != 0; )
 	{
-		const CUpDownClient* cur_client = uploadinglist.GetNext(pos);
+		const CUpDownClient* cur_client = ((UploadingToClient_Struct*)uploadinglist.GetNext(pos))->m_pClient;
 		for (int i = 0; i < raFiles.GetSize(); i++)
 		{
 			if (md4cmp(((CKnownFile*)raFiles[i])->GetFileHash(), cur_client->GetUploadFileID()) == 0)
@@ -2247,6 +2593,41 @@ uint32 CUploadQueue::GetDatarateForFile(const CSimpleArray<CObject*>& raFiles) c
 		}
 	}
 	return nResult;
+}
+
+const CUploadingPtrList& CUploadQueue::GetUploadListTS(CCriticalSection** outUploadListReadLock)
+{
+	ASSERT( *outUploadListReadLock == NULL );
+	*outUploadListReadLock = &m_csUploadListMainThrdWriteOtherThrdsRead;
+	return uploadinglist;
+}
+
+UploadingToClient_Struct* CUploadQueue::GetUploadingClientStructByClient(const CUpDownClient* pClient) const
+{
+	//TODO: Check if this function is too slow for its usage (esp. when rendering the GUI bars)
+	//		if necessary we will have to speed it up with an additonal map
+	for (POSITION pos = uploadinglist.GetHeadPosition(); pos != 0; )
+	{
+		UploadingToClient_Struct* pCurClientStruct = uploadinglist.GetNext(pos);
+		if (pCurClientStruct->m_pClient == pClient)
+			return pCurClientStruct;
+	}
+	return NULL;	
+}
+
+UploadingToClient_Struct::~UploadingToClient_Struct()
+{
+	m_pClient->FlushSendBlocks();
+
+	m_csBlockListsLock.Lock();
+	for (POSITION pos = m_BlockRequests_queue.GetHeadPosition();pos != 0;)
+		delete m_BlockRequests_queue.GetNext(pos);
+	m_BlockRequests_queue.RemoveAll();
+	
+	for (POSITION pos = m_DoneBlocks_list.GetHeadPosition();pos != 0;)
+		delete m_DoneBlocks_list.GetNext(pos);
+	m_DoneBlocks_list.RemoveAll();
+	m_csBlockListsLock.Unlock();
 }
 
 //MORPH START - Added & Modified by SiRoB, Smart Upload Control v2 (SUC) [lovelace]

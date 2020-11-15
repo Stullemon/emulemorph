@@ -26,14 +26,16 @@
 #include "emuledlg.h"
 #include "uploadqueue.h"
 #include "preferences.h"
+#include "UploadDiskIOThread.h"
 #include "Statistics.h" // add download ack
 
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
 #undef THIS_FILE
-static char THIS_FILE[]=__FILE__;
+static char THIS_FILE[] = __FILE__;
 #endif
+
 
 /**
  * The constructor starts the thread.
@@ -50,20 +52,20 @@ UploadBandwidthThrottler::UploadBandwidthThrottler(void) {
 	memset(m_highestNumberOfFullyActivatedSlotsClass,0,sizeof(m_highestNumberOfFullyActivatedSlotsClass));
 	memset(slotCounterClass,0,sizeof(slotCounterClass));
 	m_nUpDataOverheadFromDownload=0;
-		
-	threadEndedEvent = new CEvent(0, 1);
-    pauseEvent = new CEvent(TRUE, TRUE);
 
-    doRun = true;
-    AfxBeginThread(RunProc, (LPVOID)this);
+	threadEndedEvent = new CEvent(0, 1);
+	pauseEvent = new CEvent(TRUE, TRUE);
+
+	doRun = true;
+	AfxBeginThread(RunProc, (LPVOID)this);
 }
 
 /**
  * The destructor stops the thread. If the thread has already stoppped, destructor does nothing.
  */
 UploadBandwidthThrottler::~UploadBandwidthThrottler(void) {
-    EndThread();
-    delete threadEndedEvent;
+	EndThread();
+	delete threadEndedEvent;
 	delete pauseEvent;
 }
 
@@ -511,6 +513,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		DWORD  cBusyTime = 0;
 		DWORD timeSinceLastLoop = timeGetTime() - lastLoopTick;
 		sendLocker.Lock();
+#ifndef USE_MORPH_READ_THREAD
+		m_eventNewDataAvailable.ResetEvent();
+		m_eventSocketAvailable.ResetEvent();
+#endif
 		/*
 		for (int i = 0; i < m_StandardOrder_list.GetSize() && (i < 3 || (UINT)i < GetSlotLimit(theApp.uploadqueue->GetDatarate())); i++){
 		*/
@@ -681,13 +687,26 @@ UINT UploadBandwidthThrottler::RunInternal() {
 		timeSinceLastLoop = timeGetTime() - lastLoopTick;
 		
         if(timeSinceLastLoop < sleepTime) {
-            //DWORD tickBeforeSleep = ::GetTickCount();
-            //DWORD tickBeforeSleep2 = timeGetTime();
-            Sleep(sleepTime-timeSinceLastLoop);
-            //DWORD tickAfterSleep = ::GetTickCount();
-            //DWORD tickAfterSleep2 = timeGetTime();
+#ifndef USE_MORPH_READ_THREAD
+			if (nCanSend == 0)
+			{
+				if (theApp.m_pUploadDiskIOThread != NULL)
+					theApp.m_pUploadDiskIOThread->SocketNeedsMoreData();
+				WaitForSingleObject(m_eventNewDataAvailable, sleepTime-timeSinceLastLoop);
+			}
+			else if (cBusy == nCanSend)
+				WaitForSingleObject(m_eventSocketAvailable, sleepTime-timeSinceLastLoop);
+			else
+				Sleep(sleepTime-timeSinceLastLoop);
+#else
+			//DWORD tickBeforeSleep = ::GetTickCount();
+			//DWORD tickBeforeSleep2 = timeGetTime();
+			Sleep(sleepTime-timeSinceLastLoop);
+			//DWORD tickAfterSleep = ::GetTickCount();
+			//DWORD tickAfterSleep2 = timeGetTime();
 
-            //theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler: Requested sleep time = %i ms. Actual sleep time %i/%i ms."), sleepTime-timeSinceLastLoop, tickAfterSleep-tickBeforeSleep, tickAfterSleep2-tickBeforeSleep2);
+			//theApp.QueueDebugLogLine(false,_T("UploadBandwidthThrottler: Requested sleep time = %i ms. Actual sleep time %i/%i ms."), sleepTime-timeSinceLastLoop, tickAfterSleep-tickBeforeSleep, tickAfterSleep2-tickBeforeSleep2);
+#endif
         }
 
 		const DWORD thisLoopTick = timeGetTime();
@@ -722,6 +741,7 @@ UINT UploadBandwidthThrottler::RunInternal() {
 
 			sendLocker.Lock();
         	tempQueueLocker.Lock();
+			bool bNeedMoreData = false;
 			
 			// are there any sockets in m_TempControlQueue_list? Move them to normal m_ControlQueue_list;
 			while(!m_TempControlQueueFirst_list.IsEmpty()) {
@@ -805,6 +825,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 								if(BytesToSpend > 0 && ControlspentBytes < (uint64)BytesToSpend && stat->realBytesToSpend > 999) {
 									SocketSentBytes socketSentBytes = socket->SendFileAndControlData(0, minFragSize);
 									uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
+#ifndef USE_MORPH_READ_THREAD
+									if (socketSentBytes.sentBytesStandardPackets > 0 && !socket->IsEnoughFileDataQueued(EMBLOCKSIZE))
+										bNeedMoreData = true;
+#endif
 									if (lastSpentBytes) {
 										stat->dwLastBytesSent = thisLoopTick;
 										stat->realBytesToSpend -= 1000*lastSpentBytes;
@@ -881,13 +905,17 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									if (m_stat_list.Lookup(socket,stat)) {
 										//Try to send client allowed data for a client but not more than class allowed data
 										if (stat->realBytesToSpend > 999 && stat->scheduled == false) {
-	#if !defined DONT_USE_SOCKET_BUFFERING
+#if !defined DONT_USE_SOCKET_BUFFERING
 											uint32 BytesToSend = (uint32) min((BytesToSpend - (sint64) spentBytes),stat->realBytesToSpend/1000);
 											SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
-	#else
+#else
 											SocketSentBytes socketSentBytes = socket->SendFileAndControlData(doubleSendSize, doubleSendSize);
-	#endif
+#endif
 											uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
+#ifndef USE_MORPH_READ_THREAD
+											if (socketSentBytes.sentBytesStandardPackets > 0 && !socket->IsEnoughFileDataQueued(EMBLOCKSIZE))
+												bNeedMoreData = true;
+#endif
 											if (lastSpentBytes) {
 												stat->dwLastBytesSent = thisLoopTick;
 												stat->realBytesToSpend -= 1000*lastSpentBytes;
@@ -910,13 +938,17 @@ UINT UploadBandwidthThrottler::RunInternal() {
 									Socket_stat* stat = NULL;
 									if (m_stat_list.Lookup(socket,stat)) {
 										if (stat->realBytesToSpend > 999) {
-	#if !defined DONT_USE_SOCKET_BUFFERING
+#if !defined DONT_USE_SOCKET_BUFFERING
 											uint32 BytesToSend = (uint32)min(((sint64)BytesToSpend - (sint64)spentBytes),stat->realBytesToSpend/1000);
 											SocketSentBytes socketSentBytes = socket->SendFileAndControlData(BytesToSend, doubleSendSize);
-	#else
+#else
 											SocketSentBytes socketSentBytes = socket->SendFileAndControlData((UINT)(BytesToSpend - spentBytes), doubleSendSize);
-	#endif
+#endif
 											uint32 lastSpentBytes = socketSentBytes.sentBytesControlPackets + socketSentBytes.sentBytesStandardPackets;
+#ifndef USE_MORPH_READ_THREAD
+											if (socketSentBytes.sentBytesStandardPackets > 0 && !socket->IsEnoughFileDataQueued(EMBLOCKSIZE))
+												bNeedMoreData = true;
+#endif
 											if (lastSpentBytes) {
 												stat->dwLastBytesSent = thisLoopTick;
 												stat->realBytesToSpend -= 1000*lastSpentBytes;
@@ -971,6 +1003,10 @@ UINT UploadBandwidthThrottler::RunInternal() {
 	//		} // if suc or uss
 			sendLocker.Unlock();
 			lastLoopTickTryTosend = thisLoopTick;
+#ifndef USE_MORPH_READ_THREAD
+			if (bNeedMoreData && theApp.m_pUploadDiskIOThread != NULL)
+				theApp.m_pUploadDiskIOThread->SocketNeedsMoreData();
+#endif
 		}
 	}
 													 
@@ -999,3 +1035,14 @@ UINT UploadBandwidthThrottler::RunInternal() {
     return 0;
 }
 
+void UploadBandwidthThrottler::NewUploadDataAvailable()
+{
+	if (doRun)
+		m_eventNewDataAvailable.SetEvent();
+}
+
+void UploadBandwidthThrottler::SocketAvailable()
+{
+	if (doRun)
+		m_eventSocketAvailable.SetEvent();
+}

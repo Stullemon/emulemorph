@@ -37,6 +37,7 @@ public:
 	virtual bool TryToConnect(bool bIgnoreMaxCon, bool bNoCallbacks = false, CRuntimeClass* pClassSocket = NULL);
 	virtual void Connect();
 	virtual void OnSocketConnected(int nErrorCode);
+	virtual void ConnectionEstablished();
 	virtual bool Disconnected(LPCTSTR pszReason, bool bFromSocket = false);
 
 	virtual void SendHelloPacket();

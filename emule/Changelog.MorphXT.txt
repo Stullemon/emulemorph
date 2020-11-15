@@ -3,6 +3,7 @@ Changelog for eMule 0.50a MorphXT v1X.X
 --------------------------------------
 XX-XX-2020
 
+Merged to 0.50b [Stulle]
 ADD: New function to identify network adapter with default gateway for UPnP use [Stulle]
 CHANGE: Prepared solution for Visual Studio 2019 and removed old version files [Stulle]
 CHANGE: Revised git repository to use forked submodules of relevant libraries [Stulle]
@@ -15,7 +16,13 @@ CHANGE: Updated libpng to version 1.6.37 [Stulle]
 CHANGE: Updated pthreads to pthreads4w 3.0.0 [Stulle]
 CHANGE: Updated zlib to version 1.2.11 [Stulle]
 CHANGE: Replaced old version of upnplib with pupnp version 1.14.0 [Stulle]
+CHANGE: Improved upload state sorting doesn't reflect "stalled, waiting for disk" anymore [Stulle]
+	+ New upload IO threading obstructs necessary information
+CHANGE: Reintroduced error loggin in CClientReqSocket [Stulle]
+	+ Please report any verbose logs starting with CClientReqSocket::Send...
 REMOVED: Custom XML parsing from UPnP code to use mostly unmodified pupnp [Stulle]
+REMOVED: Leecher checks for client versions 0.60 and 0.69 were removed (old evildoers) [Stulle]
+REMOVED: ReadBlockFromFileThread due to introduction of official threading and Overlapped IO [Stulle]
 
 Note:	The updates to the UPnP code might cause regressions. Please enable the respective
 	verbose logging and report back if you experience any trouble.

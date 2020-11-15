@@ -377,6 +377,7 @@ void CSearch::ProcessResponse(uint32 uFromIP, uint16 uFromPort, ContactList *pli
 	if (plistResults->size() > GetRequestContactCount() && !(pRequestedMoreNodesContact == pFromContact && plistResults->size() <= KADEMLIA_FIND_VALUE_MORE) )
 	{
 		DebugLogWarning(_T("Node %s sent more contacts than requested on a routing query, ignoring response"), ipstr(ntohl(uFromIP)));
+		delete plistResults;
 		return;
 	}
 

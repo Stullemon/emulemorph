@@ -243,7 +243,11 @@ public:
 	void			ResetCompressionGain() {compressiongain = 0; notcompressed=1;} // Add show compression
 	uint32			GetAskTime()	{return AskTime;} //MORPH - Added by SiRoB - Smart Upload Control v2 (SUC) [lovelace]
 	void			DrawCompletedPercent(CDC* dc, RECT* cur_rec) const;		//Fafner: client percentage - 080325
-	float			GetCompletedPercent() const;
+	UINT			GetLastChunk() const { return m_uiLastChunk; } //Fafner: client percentage - 080325
+	void			SetLastChunk(UINT chunk) { m_uiLastChunk = chunk; } //Fafner: client percentage - 080325
+	void			IncCurrentChunks() { ++m_uiCurrentChunks; } //Fafner: client percentage - 080325
+
+	float			GetCompletedPercent() const; //Fafner: client percentage - 080325
 	void			DrawUpStatusBarChunkText(CDC* dc, RECT* cur_rec) const;	//Fafner: part number - 080317
 
 	// secure ident
@@ -294,17 +298,14 @@ public:
 	void 			ClearWaitStartTime();
 	uint32			GetWaitTime() const								{ return (uint32)(m_dwUploadTime - GetWaitStartTime()); }
 	bool			IsDownloading() const							{ return (m_nUploadState == US_UPLOADING); }
-	bool			HasBlocks() const								{ return !m_BlockRequests_queue.IsEmpty(); }
-    UINT            GetNumberOfRequestedBlocksInQueue() const       { return m_BlockRequests_queue.GetCount(); }
 	UINT			GetDatarate() const								{ return m_nUpDatarate; }	
 	UINT			GetDatarateAVG() const								{ return m_nUpDatarateAVG; } //MORPH - Determine Remote Speed
 	UINT			GetScore(bool sysvalue, bool isdownloading = false, bool onlybasevalue = false) const;
-	void			AddReqBlock(Requested_Block_Struct* reqblock);
 	//MORPH START - Changed by SiRoB, ReadBlockFromFileThread
 #ifndef USE_MORPH_READ_THREAD
-	void			CreateNextBlockPackage(bool bBigBuffer = false);
+	void			AddReqBlock(Requested_Block_Struct* reqblock, bool bSignalIOThread);
 #else
-	void			CreateNextBlockPackage();
+	void			AddReqBlock(Requested_Block_Struct* reqblock);
 #endif
 	//MORPH END    - Changed by SiRoB, ReadBlockFromFileThread
 	uint32			GetUpStartTimeDelay() const						{ return ::GetTickCount() - m_dwUploadTime; }
@@ -315,8 +316,7 @@ public:
 	//MORPH START - Added by SiRoB, Optimization requpfile
 	CKnownFile*		CheckAndGetReqUpFile() const;
 	//MORPH END   - Added by SiRoB, Optimization requpfile
-	UINT			SendBlockData();
-	void			ClearUploadBlockRequests();
+	uint32			UpdateUploadingStatisticsData();
 	void			SendRankingInfo();
 	void			SendCommentInfo(/*const*/ CKnownFile *file);
 	void			AddRequestCount(const uchar* fileid);
@@ -334,7 +334,7 @@ public:
 
 	UINT			GetSessionUp() const							{ return m_nTransferredUp - m_nCurSessionUp; }
 /*MORPH - FIX for zz code*/UINT			GetSessionPayloadUp() const						{ return GetQueueSessionPayloadUp() - m_nCurSessionPayloadUp; }
-	void			ResetSessionUp(){
+	void			ResetSessionUp() {
 						m_nCurSessionUp = m_nTransferredUp;
 						m_addedPayloadQueueSession = GetQueueSessionPayloadUp(); 
 			   /*MORPH - FIX for zz code*/m_nCurSessionPayloadUp = m_addedPayloadQueueSession;
@@ -351,7 +351,7 @@ public:
                         m_nCurQueueSessionUp = m_nTransferredUp;
 						m_nCurQueueSessionPayloadUp = 0;
                         m_curSessionAmountNumber = 0;
-					} 
+					}
 
 	UINT			GetSessionDown() const							{ return m_nTransferredDown - m_nCurSessionDown; }
     UINT            GetSessionPayloadDown() const                   { return m_nCurSessionPayloadDown; }
@@ -359,13 +359,17 @@ public:
 						m_nCurSessionDown = m_nTransferredDown;
                         //m_nCurSessionPayloadDown = 0;
 					}
-	UINT			GetQueueSessionPayloadUp() const				{ return m_nCurQueueSessionPayloadUp; }
-    UINT			GetPayloadInBuffer() const						{ return m_addedPayloadQueueSession - GetQueueSessionPayloadUp(); }
+	UINT			GetQueueSessionPayloadUp() const				{ return m_nCurQueueSessionPayloadUp; } // Data uploaded/transmitted
+	UINT			GetQueueSessionUploadAdded() const				{ return m_addedPayloadQueueSession; } // Data put into uploadbuffers
+    UINT			GetPayloadInBuffer() const						{ return m_addedPayloadQueueSession - m_nCurQueueSessionPayloadUp; }
+	void			SetQueueSessionUploadAdded(UINT uVal)			{ m_addedPayloadQueueSession = uVal; }
 
+    //MORPH START - ZZ
     uint64          GetCurrentSessionLimit() const
                     {
                         return (uint64)SESSIONMAXTRANS*(m_curSessionAmountNumber+1);
                     }
+    //MORPH END   - ZZ
 
 	bool			ProcessExtendedInfo(CSafeMemFile* packet, CKnownFile* tempreqfile);
 	uint16			GetUpPartCount() const							{ return m_nUpPartCount; }
@@ -384,9 +388,10 @@ public:
 					}
 	uint8*			GetUpPartStatus() const							{ return m_abyUpPartStatus; }
     /*
-	float           GetCombinedFilePrioAndCredit();
+    float           GetCombinedFilePrioAndCredit();
 	*/
 	double			GetCombinedFilePrioAndCredit();
+	uint8			GetDataCompressionVersion() const				{ return m_byDataCompVer; }
 	
 	//MORPH START - Added By AndCycle, ZZUL_20050212-0200
 	void			ScheduleRemovalFromUploadQueue(LPCTSTR pszDebugReason, CString strDisplayReason, bool keepWaitingTimeIntact = false) {
@@ -478,7 +483,7 @@ public:
 	//uint64			GetRemainingReservedDataToDownload() const;
 	uint64			GetRemainingAvailableData(const CPartFile* file) const;
 	//MORPH END   - Enhanced DBR
-	void			CreateBlockRequests(int iMaxBlocks);
+	void			CreateBlockRequests(int iMinBlocks, int iMaxBlocks);
 	virtual void	SendBlockRequests();
 	virtual bool	SendHttpBlockRequests();
 	virtual void	ProcessBlockPacket(const uchar* packet, UINT size, bool packed, bool bI64Offsets);
@@ -729,8 +734,6 @@ protected:
 	void	Init();
 	bool	ProcessHelloTypePacket(CSafeMemFile* data);
 	void	SendHelloTypePacket(CSafeMemFile* data);
-	void	CreateStandartPackets(byte* data, UINT togo, Requested_Block_Struct* currentblock, bool bFromPF = true);
-	void	CreatePackedPackets(byte* data, UINT togo, Requested_Block_Struct* currentblock, bool bFromPF = true);
 	void	SendFirewallCheckUDPRequest();
 	void	SendHashSetRequest();
 
@@ -856,8 +859,6 @@ protected:
 		UINT	datalen;
 		DWORD	timestamp;
 	};
-	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_BlockRequests_queue;
-	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DoneBlocks_list;
 	CTypedPtrList<CPtrList, Requested_File_Struct*>	 m_RequestedFiles_list;
 
 	//MORPH START - Added by SiRoB, ReadBlockFromFileThread
@@ -978,7 +979,6 @@ protected:
 		 m_fSupportsFileIdent : 1; // 0 bits left
 	UINT m_fHashsetRequestingAICH : 1; // 31 bits left
 	CTypedPtrList<CPtrList, Pending_Block_Struct*>	 m_PendingBlocks_list;
-	CTypedPtrList<CPtrList, Requested_Block_Struct*> m_DownloadBlocks_list;
 
     bool    m_bSourceExchangeSwapped; // ZZ:DownloadManager
     DWORD   lastSwapForSourceExchangeTick; // ZZ:DownloadManaager

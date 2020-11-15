@@ -136,6 +136,9 @@
 #pragma warning(disable:6255) // _alloca indicates failure by raising a stack overflow exception.
 #endif
 
+#if _MSC_VER>=1600
+#pragma warning(disable:4987) //  nonstandard extension used: 'throw (...)'
+#endif
 #if _MSC_VER>=1400
 
 // _CRT_SECURE_NO_DEPRECATE - Disable all warnings for not using "_s" functions.
@@ -246,7 +249,7 @@
 
 // Enable warnings which were disabled for Windows/MFC/ATL headers
 #pragma warning(default:4505) // unreferenced local function has been removed
-//#pragma warning(default:4127) // conditional expression is constant
+#pragma warning(default:4127) // conditional expression is constant
 #if _MSC_VER<=1310
 #pragma warning(default:4548) // expression before comma has no effect; expected expression with side-effect
 #endif
@@ -266,7 +269,7 @@
 #define ARRSIZE(x)	(sizeof(x)/sizeof(x[0]))
 
 //RM => OMG
-#pragma warning (disable:4996)
+//#pragma warning (disable:4996) // Removed by Stulle 20201030
 //#pragma warning (disable:4238)
 //RM <= OMG
 

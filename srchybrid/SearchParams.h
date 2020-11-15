@@ -12,7 +12,7 @@ enum ESearchType
 	SearchTypeEd2kServer,
 	SearchTypeEd2kGlobal,
 	SearchTypeKademlia,
-	SearchTypeFileDonkey
+	SearchTypeContentDB
 };
 
 

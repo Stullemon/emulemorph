@@ -191,6 +191,37 @@ int CEncryptedStreamSocket::Send(const void* lpBuf, int nBufLen, int nFlags){
 	return CAsyncSocketEx::Send(lpBuf, nBufLen, nFlags);
 }
 
+int CEncryptedStreamSocket::SendOv(CArray<WSABUF>& raBuffer, DWORD& dwBytesSent, LPWSAOVERLAPPED lpOverlapped)
+{
+	if (!IsEncryptionLayerReady()){
+		ASSERT( false ); // must be a bug
+		return -1;
+	}
+	else if (m_bServerCrypt && m_StreamCryptState == ECS_ENCRYPTING && m_pfiSendBuffer != NULL){
+		ASSERT( m_NegotiatingState == ONS_BASIC_SERVER_DELAYEDSENDING );
+		// handshakedata was delayed to put it into one frame with the first paypload to the server
+		// attach it now to the sendbuffer
+		WSABUF pCurBuf;
+		pCurBuf.len = (ULONG)m_pfiSendBuffer->GetLength();
+		pCurBuf.buf = reinterpret_cast<CHAR*>(m_pfiSendBuffer->Detach());
+		raBuffer.InsertAt(0, pCurBuf);
+		m_NegotiatingState = ONS_COMPLETE;
+		delete m_pfiSendBuffer;
+		m_pfiSendBuffer = NULL;
+	}
+	else if (m_NegotiatingState == ONS_BASIC_SERVER_DELAYEDSENDING)
+		ASSERT( false );
+
+	if (m_StreamCryptState == ECS_UNKNOWN){
+		//this happens when the encryption option was not set on a outgoing connection
+		//or if we try to send before receiving on a incoming connection - both shouldn't happen
+		m_StreamCryptState = ECS_NONE;
+		DebugLogError(_T("CEncryptedStreamSocket: Overwriting State ECS_UNKNOWN with ECS_NONE because of premature Send() (%s)"), DbgGetIPString());
+	}
+	return WSASend(GetSocketHandle(), raBuffer.GetData(), raBuffer.GetCount(), &dwBytesSent, 0, lpOverlapped, NULL);
+}
+
+
 bool CEncryptedStreamSocket::IsEncryptionLayerReady(){
 	return ( (m_StreamCryptState == ECS_NONE || m_StreamCryptState == ECS_ENCRYPTING || m_StreamCryptState == ECS_UNKNOWN )
 		&& (m_pfiSendBuffer == NULL || (m_bServerCrypt && m_NegotiatingState == ONS_BASIC_SERVER_DELAYEDSENDING)) );
@@ -258,7 +289,7 @@ int CEncryptedStreamSocket::Receive(void* lpBuf, int nBufLen, int nFlags){
 					if (thePrefs.IsClientCryptLayerRequiredStrict() || (!theApp.serverconnect->AwaitingTestFromIP(sockAddr.sin_addr.S_un.S_addr)
 						&& !theApp.clientlist->IsKadFirewallCheckIP(sockAddr.sin_addr.S_un.S_addr)) )
 					{
-#if defined(_DEBUG) || defined(_BETA)
+#if defined(_DEBUG) || defined(_BETA) || defined(_DEVBUILD)
 					// TODO: Remove after testing
 					AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected incoming connection because Obfuscation was required but not used %s"), DbgGetIPString() );
 #endif

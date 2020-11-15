@@ -337,9 +337,9 @@ void CUpDownClient::Init()
 }
 
 CUpDownClient::~CUpDownClient(){
-	//MORPH START - ReadBlockFromFileThread //Fafner: for safety (got mem leaks) - 071127
+	//MORPH START - ReadBlockFromFileThread
 #ifdef USE_MORPH_READ_THREAD
-	if (m_readblockthread) {
+	if (m_readblockthread) { //Fafner: for safety (got mem leaks) - 071127
 		m_readblockthread->StopReadBlock();
 		m_readblockthread = NULL;
 	}
@@ -393,22 +393,28 @@ CUpDownClient::~CUpDownClient(){
 		m_pszFunnyNick = NULL;
 	}
 	//MORPH END  - Added by SiRoB, Dynamic FunnyNick
-	if (m_abyPartStatus){
+	
+	if (m_abyPartStatus){ // MORPH - possible crashfix
 		delete[] m_abyPartStatus;
 		m_abyPartStatus = NULL;
-	}
-	if (m_abyUpPartStatus){
+	} // MORPH - possible crashfix
+	
+	if (m_abyUpPartStatus){ // MORPH - possible crashfix
 		delete[] m_abyUpPartStatus;
 		m_abyUpPartStatus = NULL;
-	}
+	} // MORPH - possible crashfix
+		
+	//MORPH START - ReadBlockFromFileThread
+#ifndef USE_MORPH_READ_THREAD
+	FlushSendBlocks();
+#else
 	ClearUploadBlockRequests();
-
-	for (POSITION pos = m_DownloadBlocks_list.GetHeadPosition();pos != 0;)
-		delete m_DownloadBlocks_list.GetNext(pos);
-
+#endif
+	//MORPH END   - ReadBlockFromFileThread
+	
 	for (POSITION pos = m_RequestedFiles_list.GetHeadPosition();pos != 0;)
 		delete m_RequestedFiles_list.GetNext(pos);
-
+	
 	for (POSITION pos = m_PendingBlocks_list.GetHeadPosition();pos != 0;){
 		Pending_Block_Struct *pending = m_PendingBlocks_list.GetNext(pos);
 		delete pending->block;
@@ -488,8 +494,8 @@ LPCTSTR CUpDownClient::TestLeecher(){
 //			StrStrI(m_strModVersion,_T("§¯Å]"))||
 			StrStrI(m_strModVersion,_T("rappi"))|| //20040522
 			StrStrI(m_strModVersion,_T("EastShare")) && StrStrI(m_strClientSoftware,_T("0.29"))||
-			StrStrI(m_strClientSoftware,_T("0.60"))|| //20040330
-			StrStrI(m_strClientSoftware,_T("0.69"))|| //20040402
+			//StrStrI(m_strClientSoftware,_T("0.60"))|| //20040330
+			//StrStrI(m_strClientSoftware,_T("0.69"))|| //20040402
 			(StrStrI(m_strModVersion,_T("EastShare")) && StrStrI(m_strClientSoftware,_T("0.29")))||
 //			(StrStrI(m_strModVersion,_T("EastShare")) && (m_strClientSoftware.GetLength() == 28))|| //20041128
 				// EastShare - Added by Pretender, TAHO
@@ -955,7 +961,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 	m_strModVersion.Empty();
 	//MORPH END   - Added by SiRoB, ET_MOD_VERSION 0x55
 	m_uModClient = MOD_NONE; //MOPPH - Added by Stulle, Mod Icons
-	
+
 	data->ReadHash16(m_achUserHash);
 	if (bDbgInfo)
 		m_strHelloInfo.AppendFormat(_T("Hash=%s (%s)"), md4str(m_achUserHash), DbgGetHashTypeString(m_achUserHash));
@@ -988,8 +994,8 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				if (temptag.IsStr()) {
 					free(m_pszUsername);
 					m_pszUsername = _tcsdup(temptag.GetStr());
-					if (bDbgInfo){
-						if (m_pszUsername){//filter username for bad chars
+					if (bDbgInfo) {
+						if (m_pszUsername) {//filter username for bad chars
 							TCHAR* psz = m_pszUsername;
 							while (*psz != _T('\0')) {
 								if (*psz == _T('\n') || *psz == _T('\r'))
@@ -1012,7 +1018,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 
 			case CT_VERSION:
-				if (temptag.IsInt()){
+				if (temptag.IsInt()) {
 					if (bDbgInfo)
 						m_strHelloInfo.AppendFormat(_T("\n  Version=%u"), temptag.GetInt());
 					m_nClientVersion = temptag.GetInt();
@@ -1029,7 +1035,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				break;
 
 			case CT_PORT:
-				if (temptag.IsInt()){
+				if (temptag.IsInt()) {
 					if (bDbgInfo)
 						m_strHelloInfo.AppendFormat(_T("\n  Port=%u"), temptag.GetInt());
 					nUserPort = (uint16)temptag.GetInt();
@@ -1129,7 +1135,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				if (temptag.IsInt()) {
 					m_nBuddyPort = (uint16)temptag.GetInt();
 					if (bDbgInfo)
-					m_strHelloInfo.AppendFormat(_T("\n  BuddyPort=%u"), m_nBuddyPort);
+						m_strHelloInfo.AppendFormat(_T("\n  BuddyPort=%u"), m_nBuddyPort);
 				}
 				else if (bDbgInfo)
 					m_strHelloInfo.AppendFormat(_T("\n  ***UnkType=%s"), temptag.GetFullInfo());
@@ -1187,11 +1193,11 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 					m_bMultiPacket			= (temptag.GetInt() >>  1) & 0x01;
 					m_fSupportsPreview		= (temptag.GetInt() >>  0) & 0x01;
 					dwEmuleTags |= 2;
-					if (bDbgInfo){
+					if (bDbgInfo) {
 						m_strHelloInfo.AppendFormat(_T("\n  PeerCache=%u  UDPVer=%u  DataComp=%u  SecIdent=%u  SrcExchg=%u")
-												_T("  ExtReq=%u  Commnt=%u  Preview=%u  NoViewFiles=%u  Unicode=%u"), 
+													_T("  ExtReq=%u  Commnt=%u  Preview=%u  NoViewFiles=%u  Unicode=%u"), 
 													m_fPeerCache, m_byUDPVer, m_byDataCompVer, m_bySupportSecIdent, m_bySourceExchange1Ver, 
-												m_byExtendedRequestsVer, m_byAcceptCommentVer, m_fSupportsPreview, m_fNoViewSharedFiles, m_bUnicodeSupport);
+													m_byExtendedRequestsVer, m_byAcceptCommentVer, m_fSupportsPreview, m_fNoViewSharedFiles, m_bUnicodeSupport);
 					}
 				}
 				else if (bDbgInfo)
@@ -1281,6 +1287,7 @@ bool CUpDownClient::ProcessHelloTypePacket(CSafeMemFile* data)
 				}
 				//MOPRH END - Added by SiRoB,  Control Mod Tag
 				break;
+
 			//Morph Start - added by AndCycle, ICS
 			// enkeyDEV: ICS
 			case ET_INCOMPLETEPARTS:
@@ -1501,7 +1508,7 @@ void CUpDownClient::SendHelloPacket(){
 	if (thePrefs.GetDebugClientTCPLevel() > 0)
 		DebugSend("OP__Hello", this);
 	theStats.AddUpDataOverheadOther(packet->size);
-	SendPacket(packet,true);
+	SendPacket(packet, true);
 	AskTime=::GetTickCount(); //MORPH - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 
 	m_bHelloAnswerPending = true;
@@ -1542,6 +1549,7 @@ void CUpDownClient::SendMuleInfoPacket(bool bAnswer){
 		dwTagValue |= 128;
 	CTag tag7(ET_FEATURES, dwTagValue);
 	tag7.WriteTagToFile(&data);
+
 	if (bSendModVersion){ //MORPH - Added by SiRoB, Don't send MOD_VERSION to client that don't support it to reduce overhead
 		CTag tag8(ET_MOD_VERSION, theApp.m_strModVersion);
 		tag8.WriteTagToFile(&data);
@@ -2144,6 +2152,8 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
 		theApp.uploadqueue->RemoveFromUploadQueue(this, CString(_T("CUpDownClient::Disconnected: ")) + pszReason);
 	}
 
+	//MORPH START - ReadBlockFromFileThread
+#ifdef USE_MORPH_READ_THREAD
 	// 28-Jun-2004 [bc]: re-applied this patch which was in 0.30b-0.30e. it does not seem to solve the bug but
 	// it does not hurt either...
 	if (m_BlockRequests_queue.GetCount() > 0 || m_DoneBlocks_list.GetCount()){
@@ -2160,6 +2170,8 @@ bool CUpDownClient::Disconnected(LPCTSTR pszReason, bool bFromSocket)
         DebugLogWarning(_T("Disconnected client with non empty block send queue; %s reqs: %s doneblocks: %s"), DbgGetClientInfo(), m_BlockRequests_queue.GetCount() > 0 ? _T("true") : _T("false"), m_DoneBlocks_list.GetCount() ? _T("true") : _T("false"));
 		ClearUploadBlockRequests();
 	}
+#endif
+	//MORPH END   - ReadBlockFromFileThread
 
 	if (GetDownloadState() == DS_DOWNLOADING){
 		ASSERT( m_nConnectingState == CCS_NONE );
@@ -2450,7 +2462,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, bool bNoCallbacks, CRuntime
 
 		// Is any callback available?
 		if (!( (SupportsDirectUDPCallback() && thePrefs.GetUDPPort() != 0 && GetConnectIP() != 0) // Direct Callback
-			|| (HasValidBuddyID() && Kademlia::CKademlia::IsConnected()) // Kad Callback
+			|| (HasValidBuddyID() && Kademlia::CKademlia::IsConnected() && ((GetBuddyIP() && GetBuddyPort()) || reqfile != NULL)) // Kad Callback
 			|| theApp.serverconnect->IsLocalServer(GetServerIP(), GetServerPort()) )) // Server Callback
 		{
 			// Nope
@@ -2528,7 +2540,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, bool bNoCallbacks, CRuntime
 		theApp.serverconnect->SendPacket(packet);
 		return true;
 	}
-	else if (HasValidBuddyID() && Kademlia::CKademlia::IsConnected())
+	else if (HasValidBuddyID() && Kademlia::CKademlia::IsConnected() && ((GetBuddyIP() && GetBuddyPort()) || reqfile != NULL))
 	{
 		m_nConnectingState = CCS_KADCALLBACK;
 		if( GetBuddyIP() && GetBuddyPort())
@@ -2546,7 +2558,7 @@ bool CUpDownClient::TryToConnect(bool bIgnoreMaxCon, bool bNoCallbacks, CRuntime
 			theApp.clientudp->SendPacket(packet, GetBuddyIP(), GetBuddyPort(), false, NULL, true, 0);
 			SetDownloadState(DS_WAITCALLBACKKAD);
 		}
-		else
+		else if (reqfile != NULL)
 		{
 			// I don't think we should ever have a buddy without its IP (anymore), but nevertheless let the functionality in
 			//Create search to find buddy.
@@ -3502,8 +3514,12 @@ void CUpDownClient::AssertValid() const
 	(void)requpfileid;
     (void)m_lastRefreshedULDisplay;
 	m_AvarageUDR_list.AssertValid();
+	//MORPH START - ReadBlockFromFileThread
+#ifdef USE_MORPH_READ_THREAD
 	m_BlockRequests_queue.AssertValid();
 	m_DoneBlocks_list.AssertValid();
+#endif
+	//MORPH END   - ReadBlockFromFileThread
 	m_RequestedFiles_list.AssertValid();
 	ASSERT( m_nDownloadState >= DS_DOWNLOADING && m_nDownloadState <= DS_NONE );
 	(void)m_cDownAsked;
@@ -3520,7 +3536,12 @@ void CUpDownClient::AssertValid() const
 	(void)m_nRemoteQueueRank;
 	(void)m_dwLastBlockReceived;
 	(void)m_nPartCount;
-	ASSERT( m_nSourceFrom >= SF_SERVER && m_nSourceFrom <= SF_SLS );
+	//MORPH START - Added by SiRoB, Save Load Sources (SLS)
+	/*
+	ASSERT( m_nSourceFrom >= SF_SERVER && m_nSourceFrom <= SF_LINK );
+	*/
+	ASSERT( m_nSourceFrom >= SF_SERVER && m_nSourceFrom <= SF_SLS ); 
+	//MORPH END - Added by SiRoB, Save Load Sources (SLS)
 	CHECK_BOOL(m_bRemoteQueueFull);
 	CHECK_BOOL(m_bCompleteSource);
 	CHECK_BOOL(m_bReaskPending);
@@ -3531,7 +3552,6 @@ void CUpDownClient::AssertValid() const
 	m_AvarageDDR_list.AssertValid();
 	(void)m_nSumForAvgUpDataRate;
 	m_PendingBlocks_list.AssertValid();
-	m_DownloadBlocks_list.AssertValid();
 	(void)s_StatusBar;
 	ASSERT( m_nChatstate >= MS_NONE && m_nChatstate <= MS_UNABLETOCONNECT );
 	(void)m_strFileComment;
@@ -3687,10 +3707,15 @@ void CUpDownClient::CheckForGPLEvilDoer()
 			pszModVersion++;
 
 		// check for known major gpl breaker
+		//MORPH START - Changed, Also checking for WAREZFAW.COM 2.0
+		/*
+		if (_tcsnicmp(pszModVersion, _T("LH"), 2)==0 || _tcsnicmp(pszModVersion, _T("LIO"), 3)==0 || _tcsnicmp(pszModVersion, _T("PLUS PLUS"), 9)==0)
+		*/
 		if (_tcsnicmp(pszModVersion, _T("LH"), 2)==0 ||
 			_tcsnicmp(pszModVersion, _T("LIO"), 3)==0 ||
 			_tcsnicmp(pszModVersion, _T("PLUS PLUS"), 9)==0 ||
 			_tcsnicmp(pszModVersion, _T("WAREZFAW.COM 2.0"),16)==0)
+		//MORPH END   - Changed, Also checking for WAREZFAW.COM 2.0
 			m_bGPLEvildoer = true;
 	}
 }
@@ -3718,9 +3743,9 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 				strState = GetResString(IDS_QUEUEFULL);
 			else
 			// EastShare START - Modified by TAHO, moved and moddified from Priority column
-            /*
-			strState = GetResString(IDS_ONQUEUE);
-            */
+			/*
+				strState = GetResString(IDS_ONQUEUE);
+			*/
 			{
 				if (GetRemoteQueueRank()){
 					//MORPH - RemoteQueueRank Estimated Time
@@ -3783,7 +3808,7 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 		}
 		if (m_ePeerCacheDownState != PCDS_NONE && m_bPeerCacheDownHit)
 			strState += _T(" Peer Hit");
-/*
+/* MORPH
 	}
 */
 #if !defined DONT_USE_SOCKET_BUFFERING
@@ -3796,6 +3821,7 @@ CString CUpDownClient::GetDownloadStateDisplayString() const
 #endif 
 	}
 #endif
+
 	return strState;
 }
 
@@ -3813,23 +3839,41 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 			strState = GetResString(IDS_CONNECTING);
 			break;
 		case US_UPLOADING:
-            if(IsScheduledForRemoval()) {
+			//MORPH START - Changed, USC and ReadBlockFromFileThread
+			if(IsScheduledForRemoval()) {
 				strState = GetScheduledRemovalDisplayReason();
-			} else if(GetPayloadInBuffer() == 0 && GetNumberOfRequestedBlocksInQueue() == 0 && thePrefs.IsExtControlsEnabled()) {
+			} else 
+#ifndef USE_MORPH_READ_THREAD
+			// GetNumberOfRequestedBlocksInQueue is no longer available and retrieving it would cause quite some extra load
+			// (either due to thread syncing or due to adding redunant extra varts just for this function), so given that
+			// "stalled, waiting for disk" should happen like never, it is removed for now
+            if(GetPayloadInBuffer() == 0 && /*GetNumberOfRequestedBlocksInQueue() == 0 &&*/ thePrefs.IsExtControlsEnabled()) {
 				strState = GetResString(IDS_US_STALLEDW4BR);
-            } else if(GetPayloadInBuffer() == 0 && thePrefs.IsExtControlsEnabled()) {
+            /*} else if(GetPayloadInBuffer() == 0 && thePrefs.IsExtControlsEnabled()) {
+				strState = GetResString(IDS_US_STALLEDREADINGFDISK);*/
+#else
+			if(GetPayloadInBuffer() == 0 && GetNumberOfRequestedBlocksInQueue() == 0 && thePrefs.IsExtControlsEnabled()) {
+				strState = GetResString(IDS_US_STALLEDW4BR);
+			} else if(GetPayloadInBuffer() == 0 && thePrefs.IsExtControlsEnabled()) {
 				strState = GetResString(IDS_US_STALLEDREADINGFDISK);
-            } else if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount(m_classID)) {
+#endif
+/*
+            } else if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount()) {
+*/
+			} else if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount(m_classID)) {
+			//MORPH END   - Changed, USC and ReadBlockFromFileThread
 				strState = GetResString(IDS_TRANSFERRING);
             } else {
                 strState = GetResString(IDS_TRICKLING);
             }
-            break;
+			break;
 	}
-/*
+
+/* MORPH
 	if (thePrefs.GetPeerCacheShow())
 	{
-*/		switch (m_ePeerCacheUpState)
+MORPH END */
+		switch (m_ePeerCacheUpState)
 		{
 		case PCUS_WAIT_CACHE_REPLY:
 			strState += _T(" PeerCacheWait");
@@ -3862,6 +3906,7 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 
 		}
 	}
+
 	return strState;
 }
 
@@ -3869,18 +3914,16 @@ CString CUpDownClient::GetUploadStateDisplayString() const
 uint32	CUpDownClient::GetUploadStateExtended() const
 {
 	if(GetUploadState() != US_UPLOADING)
-		return (uint32)GetUploadState() + 4;
+		return (uint32)GetUploadState() + 3;
 
     if(IsScheduledForRemoval()) {
-		return 4;
-	} else if(GetPayloadInBuffer() == 0 && GetNumberOfRequestedBlocksInQueue() == 0 && thePrefs.IsExtControlsEnabled()) {
-		return 1;
+		return 3;
     } else if(GetPayloadInBuffer() == 0 && thePrefs.IsExtControlsEnabled()) {
-		return 2;
+		return 1;
     } else if(GetSlotNumber() <= theApp.uploadqueue->GetActiveUploadsCount(m_classID)) {
 		return 0;
     } else {
-        return 3;
+        return 2;
     }
 }
 //MORPH END   - Added by Stulle, Improved upload state sorting for additional information
@@ -4354,11 +4397,11 @@ void CUpDownClient::SendSharedDirectories()
 		if (theApp.sharedfiles->ProbablyHaveSingleSharedFiles())
 		{
 			bool bSingleShared = false;
-			for (POSITION pos = liSingleSharedFiles.GetHeadPosition(); pos != NULL; liSingleSharedFiles.GetNext(pos) )
+			for (POSITION pos2 = liSingleSharedFiles.GetHeadPosition(); pos2 != NULL; liSingleSharedFiles.GetNext(pos2) )
 			{
-				if (cur_file->GetFilePath().CompareNoCase(liSingleSharedFiles.GetAt(pos)) == 0)
+				if (cur_file->GetFilePath().CompareNoCase(liSingleSharedFiles.GetAt(pos2)) == 0)
 				{
-					liSingleSharedFiles.RemoveAt(pos); // remove this item so we do not check it again
+					liSingleSharedFiles.RemoveAt(pos2); // remove this item so we do not check it again
 					bSingleShared = true;
 					break;
 				}

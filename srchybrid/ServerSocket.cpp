@@ -105,8 +105,7 @@ BOOL CServerSocket::OnHostNameResolved(const SOCKADDR_IN *pSockAddr)
 
 void CServerSocket::OnConnect(int nErrorCode)
 {
-	//CEMSocket::OnConnect(nErrorCode);
-	//CAsyncSocketEx::OnConnect(nErrorCode);
+	CAsyncSocketEx::OnConnect(nErrorCode);
 
 	switch (nErrorCode)
 	{
@@ -255,14 +254,12 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 								theApp.emuledlg->AddServerMessageLine(LOG_SUCCESS, strMsg);
 							}
 						}
-
 						// MORPH START filter gpl violating advertising server message: [leuk_he]
-					    CString address;
-	                    address = pServer->GetAddress();
-                        if (address.Left(11).Compare(_T("80.239.200.")))
-  	                    // MORPH END filter gpl violating adverting server message: [leuk_he]
+						CString address;
+						address = pServer->GetAddress();
+						if (address.Left(11).Compare(_T("80.239.200.")))
+						// MORPH END filter gpl violating adverting server message: [leuk_he]
    							theApp.emuledlg->AddServerMessageLine(LOG_INFO, message);
-
 					}
 
 					message = strMessages.Tokenize(_T("\r\n"), iPos);
@@ -408,6 +405,7 @@ bool CServerSocket::ProcessPacket(const BYTE* packet, uint32 size, uint8 opcode)
 					}
 				}
 				//MORPH END - Added by SiRoB, SLUGFILLER: lowIdRetry
+				
 				// we need to know our client's HighID when sending our shared files (done indirectly on SetConnectionState)
 				serverconnect->clientid = la->clientid;
 
@@ -743,7 +741,6 @@ void CServerSocket::ConnectTo(CServer* server, bool bNoCrypt)
 
 	uint16 nPort = 0;
 	cur_server = new CServer(server);
-	 
 	if ( !bNoCrypt && thePrefs.IsServerCryptLayerTCPRequested() && server->GetObfuscationPortTCP() != 0 && server->SupportsObfuscationTCP()){
 		Log(GetResString(IDS_CONNECTINGTOOBFUSCATED), cur_server->GetListName(), cur_server->GetAddress(), cur_server->GetObfuscationPortTCP());
 		nPort = cur_server->GetObfuscationPortTCP();
@@ -793,8 +790,7 @@ bool CServerSocket::PacketReceived(Packet* packet)
 {
 #ifndef _DEBUG
 	try {
-#endif	
-		
+#endif
 		theStats.AddDownDataOverheadServer(packet->size);
 		// START // MORPH lh require obfuscated server connection
 		if	(thePrefs.IsServerCryptLayerRequiredStrict()&&!IsServerCryptEnabledConnection()){
@@ -814,6 +810,7 @@ bool CServerSocket::PacketReceived(Packet* packet)
 			if (thePrefs.GetDebugServerTCPLevel() > 1)
 				Debug(_T("Received compressed server TCP packet; opcode=0x%02x  size=%u  uncompr size=%u\n"), packet->opcode, uComprSize, packet->size);
 		}
+
 		if (packet->prot == OP_EDONKEYPROT)
 		{
 			ProcessPacket((const BYTE*)packet->pBuffer, packet->size, packet->opcode);

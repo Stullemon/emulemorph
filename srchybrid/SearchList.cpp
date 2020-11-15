@@ -213,6 +213,7 @@ UINT CSearchList::ProcessSearchAnswer(const uchar* in_packet, uint32 size,
 		CSearchFile* toadd = new CSearchFile(&packet, Sender ? Sender->GetUnicodeSupport()!=utf8strNone : false, nSearchID, 0, 0, pszDirectory);
 		if (toadd->IsLargeFile() && (Sender == NULL || !Sender->SupportsLargeFiles())){
 			DebugLogWarning(_T("Client offers large file (%s) but doesn't announced support for it - ignoring file"), toadd->GetFileName());
+			delete toadd;
 			continue;
 		}
 		if (Sender){
@@ -1766,11 +1767,11 @@ void CSearchList::LoadSearches(){
 				pParams->eType = SearchTypeKademlia;
 			
 			if (pParams->eType == SearchTypeKademlia && (nHighestKadSearchID == 0xFFFFFFFF || nHighestKadSearchID < pParams->dwSearchID)){
-				ASSERT( pParams->dwSearchID < 0x80000000 );
+				//ASSERT( pParams->dwSearchID < 0x80000000 );
 				nHighestKadSearchID = pParams->dwSearchID;
 			}
 			else if (pParams->eType != SearchTypeKademlia && (nHighestEd2kSearchID == 0xFFFFFFFF || nHighestEd2kSearchID < pParams->dwSearchID)){
-				ASSERT( pParams->dwSearchID >= 0x80000000 );
+				//ASSERT( pParams->dwSearchID >= 0x80000000 );
 				nHighestEd2kSearchID = pParams->dwSearchID;
 			}
 

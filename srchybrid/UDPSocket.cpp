@@ -759,13 +759,11 @@ SocketSentBytes CUDPSocket::SendControlData(uint32 maxNumberOfBytesToSend, uint3
 		{
             if (sendSuccess > 0) {
                 //MORPH - Changed by SiRoB, Take into account IP+TCP Header
-				/*
+                /*
                 sentBytes += packet->size; // ZZ:UploadBandWithThrottler (UDP)
-				*/
-				sentBytes += packet->size  + ((packet->size/1480)+(packet->size<1480)?1:0) * 20; // ZZ:UploadBandWithThrottler (UDP)
-
+                */
+                sentBytes += packet->size  + ((packet->size/1480)+(packet->size<1480)?1:0) * 20; // ZZ:UploadBandWithThrottler (UDP)
             }
-
 			controlpacket_queue.RemoveHead();
 			delete[] packet->packet;
 			delete packet;

@@ -152,7 +152,6 @@ void CServerConnect::ConnectToServer(CServer* server, bool multiconnect, bool bN
 	}
 	//END MORPH lh require obfuscated server connection 
 
-
 	if (!multiconnect) {
 		StopConnectionTry();
 		Disconnect();
@@ -583,31 +582,24 @@ void CServerConnect::DestroySocket(CServerSocket* pSck){
 		pSck->Close();
 	}
 
-	 // netfinity START : Remove from connection attempt list if not already done
-    DWORD tmpkey;
+	// netfinity START : Remove from connection attempt list if not already done
+	DWORD tmpkey;
 	CServerSocket* tmpsock;
 	POSITION pos2 = connectionattemps.GetStartPosition();
 	while (pos2) {
-
-    connectionattemps.GetNextAssoc(pos2, tmpkey, tmpsock);
-    if (tmpsock == pSck) {
-		//ASSERT(0); // TEST THAT THE CODE IS WORKING. 
-        connectionattemps.RemoveKey(tmpkey);
-        break;
-
+		connectionattemps.GetNextAssoc(pos2, tmpkey, tmpsock);
+		if (tmpsock == pSck) {
+			//ASSERT(0); // TEST THAT THE CODE IS WORKING. 
+			connectionattemps.RemoveKey(tmpkey);
+			break;
+		}
 	}
-
+	if (connectedsocket == pSck)
+	{
+		connectedsocket = NULL;
+		connected = false;
 	}
 	// netfinity END : Make sure socket isn't used after deletion if it's the connected one
-if (connectedsocket == pSck)
-{
-
-    connectedsocket = NULL;
-    connected = false;
-
-}
-
-
 	delete pSck;
 }
 

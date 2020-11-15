@@ -67,6 +67,11 @@ public:
     void QueueForSendingControlPacket(ThrottledControlSocket* socket, bool hasSent = false); // ZZ:UploadBandWithThrottler (UDP)
     void RemoveFromAllQueues(ThrottledControlSocket* socket) { RemoveFromAllQueues(socket, true); }; // ZZ:UploadBandWithThrottler (UDP)
     void RemoveFromAllQueues(ThrottledFileSocket* socket);
+#ifndef USE_MORPH_READ_THREAD
+	void NewUploadDataAvailable();
+	void SocketAvailable();
+	HANDLE GetSocketAvailableEvent()			{ return m_eventSocketAvailable; }
+#endif
 
     void EndThread();
 
@@ -101,6 +106,10 @@ private:
 
     CEvent* threadEndedEvent;
     CEvent* pauseEvent;
+#ifndef USE_MORPH_READ_THREAD
+	CEvent m_eventNewDataAvailable;
+	CEvent m_eventSocketAvailable;
+#endif
 
     uint64 m_SentBytesSinceLastCallClass[NB_SPLITTING_CLASS];
     uint64 m_SentBytesSinceLastCallOverheadClass[NB_SPLITTING_CLASS];

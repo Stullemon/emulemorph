@@ -1,15 +1,15 @@
 /////////////////////////////////////////////////////////////////////////////
 // Copyright (C) 2001-2002 by David Yuheng Zhao
 //
-// Distribute and change freely, except: don't remove my name from the source 
+// Distribute and change freely, except: don't remove my name from the source
 //
-// No warrantee of any kind, express or implied, is included with this
+// No guarantee of any kind, express or implied, is included with this
 // software; use at your own risk, responsibility for damages (if any) to
 // anyone resulting from the use of this software rests entirely with the
 // user.
 //
-// Partly based on the _ThemeHelper struct in MFC7.0 source code (winctrl3.cpp), 
-// and the difference is that this implementation wraps the full set of 
+// Partly based on the _ThemeHelper struct in MFC7.0 source code (winctrl3.cpp),
+// and the difference is that this implementation wraps the full set of
 // visual style APIs from the platform SDK August 2001
 //
 // If you have any questions, I can be reached as follows:
@@ -17,7 +17,7 @@
 //
 //
 // How to use:
-// Instead of calling the API directly, 
+// Instead of calling the API directly,
 //    OpenThemeData(...);
 // use the global variable
 //    g_xpStyle.OpenThemeData(...);
@@ -37,27 +37,27 @@ CVisualStylesXP g_xpStyle;
 
 HMODULE CVisualStylesXP::m_hThemeDll = NULL;
 
-CVisualStylesXP::CVisualStylesXP(void)
+CVisualStylesXP::CVisualStylesXP()
 {
 	m_hThemeDll = LoadLibrary(_T("UxTheme.dll"));
 }
 
-CVisualStylesXP::~CVisualStylesXP(void)
+CVisualStylesXP::~CVisualStylesXP()
 {
-	if (m_hThemeDll != NULL)
-		VERIFY( FreeLibrary(m_hThemeDll) );
-	m_hThemeDll = NULL;
+	if (m_hThemeDll != NULL) {
+		VERIFY(FreeLibrary(m_hThemeDll));
+		m_hThemeDll = NULL;
+	}
 }
 
-void* CVisualStylesXP::GetProc(LPCSTR szProc, void* pfnFail)
+void* CVisualStylesXP::GetProc(LPCSTR szProc, void *pfnFail)
 {
-	void* pRes = pfnFail;
-	if (m_hThemeDll != NULL){
-		void* pRet = GetProcAddress(m_hThemeDll, szProc);
+	if (m_hThemeDll != NULL) {
+		void *pRet = GetProcAddress(m_hThemeDll, szProc);
 		if (pRet != NULL)
-			pRes = pRet;
+			return pRet;
 	}
-	return pRes;
+	return pfnFail;
 }
 
 HTHEME CVisualStylesXP::OpenThemeData(HWND hwnd, LPCWSTR pszClassList)
@@ -76,8 +76,8 @@ HRESULT CVisualStylesXP::CloseThemeData(HTHEME hTheme)
 	return (*pfn)(hTheme);
 }
 
-HRESULT CVisualStylesXP::DrawThemeBackground(HTHEME hTheme, HDC hdc, 
-											 int iPartId, int iStateId, const RECT *pRect, const RECT *pClipRect)
+HRESULT CVisualStylesXP::DrawThemeBackground(HTHEME hTheme, HDC hdc,
+											 int iPartId, int iStateId, LPCRECT pRect, LPCRECT pClipRect)
 {
 	static PFNDRAWTHEMEBACKGROUND pfn = NULL;
 	if (pfn == NULL)
@@ -85,18 +85,18 @@ HRESULT CVisualStylesXP::DrawThemeBackground(HTHEME hTheme, HDC hdc,
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, pRect, pClipRect);
 }
 
-HRESULT CVisualStylesXP::DrawThemeText(HTHEME hTheme, HDC hdc, int iPartId, 
-									   int iStateId, LPCWSTR pszText, int iCharCount, DWORD dwTextFlags, 
-									   DWORD dwTextFlags2, const RECT *pRect)
+HRESULT CVisualStylesXP::DrawThemeText(HTHEME hTheme, HDC hdc, int iPartId,
+									   int iStateId, LPCWSTR pszText, int iCharCount, DWORD dwTextFlags,
+									   DWORD dwTextFlags2, LPCRECT pRect)
 {
 	static PFNDRAWTHEMETEXT pfn = NULL;
 	if (pfn == NULL)
 		pfn = (PFNDRAWTHEMETEXT)GetProc("DrawThemeText", (void*)DrawThemeTextFail);
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, dwTextFlags2, pRect);
 }
-HRESULT CVisualStylesXP::GetThemeBackgroundContentRect(HTHEME hTheme, HDC hdc, 
-													   int iPartId, int iStateId, const RECT *pBoundingRect, 
-													   RECT *pContentRect)
+HRESULT CVisualStylesXP::GetThemeBackgroundContentRect(HTHEME hTheme, HDC hdc,
+													   int iPartId, int iStateId, LPCRECT pBoundingRect,
+													   LPRECT pContentRect)
 {
 	static PFNGETTHEMEBACKGROUNDCONTENTRECT pfn = NULL;
 	if (pfn == NULL)
@@ -105,8 +105,8 @@ HRESULT CVisualStylesXP::GetThemeBackgroundContentRect(HTHEME hTheme, HDC hdc,
 }
 
 HRESULT CVisualStylesXP::GetThemeBackgroundExtent(HTHEME hTheme, HDC hdc,
-												  int iPartId, int iStateId, const RECT *pContentRect, 
-												  RECT *pExtentRect)
+												  int iPartId, int iStateId, LPCRECT pContentRect,
+												  LPRECT pExtentRect)
 {
 	static PFNGETTHEMEBACKGROUNDEXTENT pfn = NULL;
 	if (pfn == NULL)
@@ -114,8 +114,8 @@ HRESULT CVisualStylesXP::GetThemeBackgroundExtent(HTHEME hTheme, HDC hdc,
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, pContentRect, pExtentRect);
 }
 
-HRESULT CVisualStylesXP::GetThemePartSize(HTHEME hTheme, HDC hdc, 
-										  int iPartId, int iStateId, RECT * pRect, enum THEMESIZE eSize, SIZE *psz)
+HRESULT CVisualStylesXP::GetThemePartSize(HTHEME hTheme, HDC hdc,
+										  int iPartId, int iStateId, LPRECT  pRect, enum THEMESIZE eSize, SIZE *psz)
 {
 	static PFNGETTHEMEPARTSIZE pfn = NULL;
 	if (pfn == NULL)
@@ -123,9 +123,9 @@ HRESULT CVisualStylesXP::GetThemePartSize(HTHEME hTheme, HDC hdc,
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, pRect, eSize, psz);
 }
 
-HRESULT CVisualStylesXP::GetThemeTextExtent(HTHEME hTheme, HDC hdc, 
-											int iPartId, int iStateId, LPCWSTR pszText, int iCharCount, 
-											DWORD dwTextFlags, const RECT *pBoundingRect, RECT *pExtentRect)
+HRESULT CVisualStylesXP::GetThemeTextExtent(HTHEME hTheme, HDC hdc,
+											int iPartId, int iStateId, LPCWSTR pszText, int iCharCount,
+											DWORD dwTextFlags, LPCRECT pBoundingRect, LPRECT pExtentRect)
 {
 	static PFNGETTHEMETEXTEXTENT pfn = NULL;
 	if (pfn == NULL)
@@ -133,7 +133,7 @@ HRESULT CVisualStylesXP::GetThemeTextExtent(HTHEME hTheme, HDC hdc,
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, pszText, iCharCount, dwTextFlags, pBoundingRect, pExtentRect);
 }
 
-HRESULT CVisualStylesXP::GetThemeTextMetrics(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, TEXTMETRIC* ptm)
+HRESULT CVisualStylesXP::GetThemeTextMetrics(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, TEXTMETRIC *ptm)
 {
 	static PFNGETTHEMETEXTMETRICS pfn = NULL;
 	if (pfn == NULL)
@@ -141,8 +141,8 @@ HRESULT CVisualStylesXP::GetThemeTextMetrics(HTHEME hTheme, HDC hdc, int iPartId
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, ptm);
 }
 
-HRESULT CVisualStylesXP::GetThemeBackgroundRegion(HTHEME hTheme, HDC hdc, 
-												  int iPartId, int iStateId, const RECT *pRect, HRGN *pRegion)
+HRESULT CVisualStylesXP::GetThemeBackgroundRegion(HTHEME hTheme, HDC hdc,
+												  int iPartId, int iStateId, LPCRECT pRect, HRGN *pRegion)
 {
 	static PFNGETTHEMEBACKGROUNDREGION pfn = NULL;
 	if (pfn == NULL)
@@ -150,8 +150,8 @@ HRESULT CVisualStylesXP::GetThemeBackgroundRegion(HTHEME hTheme, HDC hdc,
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, pRect, pRegion);
 }
 
-HRESULT CVisualStylesXP::HitTestThemeBackground(HTHEME hTheme, HDC hdc, int iPartId, 
-												int iStateId, DWORD dwOptions, const RECT *pRect, HRGN hrgn, 
+HRESULT CVisualStylesXP::HitTestThemeBackground(HTHEME hTheme, HDC hdc, int iPartId,
+												int iStateId, DWORD dwOptions, LPCRECT pRect, HRGN hrgn,
 												POINT ptTest, WORD *pwHitTestCode)
 {
 	static PFNHITTESTTHEMEBACKGROUND pfn = NULL;
@@ -160,8 +160,8 @@ HRESULT CVisualStylesXP::HitTestThemeBackground(HTHEME hTheme, HDC hdc, int iPar
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, dwOptions, pRect, hrgn, ptTest, pwHitTestCode);
 }
 
-HRESULT CVisualStylesXP::DrawThemeEdge(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, 
-									   const RECT *pDestRect, UINT uEdge, UINT uFlags, RECT *pContentRect)
+HRESULT CVisualStylesXP::DrawThemeEdge(HTHEME hTheme, HDC hdc, int iPartId, int iStateId,
+									   LPCRECT pDestRect, UINT uEdge, UINT uFlags, LPRECT pContentRect)
 {
 	static PFNDRAWTHEMEEDGE pfn = NULL;
 	if (pfn == NULL)
@@ -169,8 +169,8 @@ HRESULT CVisualStylesXP::DrawThemeEdge(HTHEME hTheme, HDC hdc, int iPartId, int 
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, pDestRect, uEdge, uFlags, pContentRect);
 }
 
-HRESULT CVisualStylesXP::DrawThemeIcon(HTHEME hTheme, HDC hdc, int iPartId, 
-									   int iStateId, const RECT *pRect, HIMAGELIST himl, int iImageIndex)
+HRESULT CVisualStylesXP::DrawThemeIcon(HTHEME hTheme, HDC hdc, int iPartId,
+									   int iStateId, LPCRECT pRect, HIMAGELIST himl, int iImageIndex)
 {
 	static PFNDRAWTHEMEICON pfn = NULL;
 	if (pfn == NULL)
@@ -210,7 +210,7 @@ HRESULT CVisualStylesXP::GetThemeMetric(HTHEME hTheme, HDC hdc, int iPartId, int
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, iPropId, piVal);
 }
 
-HRESULT CVisualStylesXP::GetThemeString(HTHEME hTheme, int iPartId, int iStateId, int iPropId, 
+HRESULT CVisualStylesXP::GetThemeString(HTHEME hTheme, int iPartId, int iStateId, int iPropId,
 										LPWSTR pszBuff, int cchMaxBuffChars)
 {
 	static PFNGETTHEMESTRING pfn = NULL;
@@ -259,7 +259,7 @@ HRESULT CVisualStylesXP::GetThemeFont(HTHEME hTheme, HDC hdc, int iPartId, int i
 	return (*pfn)(hTheme, hdc, iPartId, iStateId, iPropId, pFont);
 }
 
-HRESULT CVisualStylesXP::GetThemeRect(HTHEME hTheme, int iPartId, int iStateId, int iPropId, RECT *pRect)
+HRESULT CVisualStylesXP::GetThemeRect(HTHEME hTheme, int iPartId, int iStateId, int iPropId, LPRECT pRect)
 {
 	static PFNGETTHEMERECT pfn = NULL;
 	if (pfn == NULL)
@@ -267,7 +267,7 @@ HRESULT CVisualStylesXP::GetThemeRect(HTHEME hTheme, int iPartId, int iStateId, 
 	return (*pfn)(hTheme, iPartId, iStateId, iPropId, pRect);
 }
 
-HRESULT CVisualStylesXP::GetThemeMargins(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, int iPropId, RECT *prc, 
+HRESULT CVisualStylesXP::GetThemeMargins(HTHEME hTheme, HDC hdc, int iPartId, int iStateId, int iPropId, LPRECT prc,
 										 MARGINS *pMargins)
 {
 	static PFNGETTHEMEMARGINS pfn = NULL;
@@ -301,7 +301,7 @@ HRESULT CVisualStylesXP::SetWindowTheme(HWND hwnd, LPCWSTR pszSubAppName, LPCWST
 	return (*pfn)(hwnd, pszSubAppName, pszSubIdList);
 }
 
-HRESULT CVisualStylesXP::GetThemeFilename(HTHEME hTheme, int iPartId, int iStateId, int iPropId, 
+HRESULT CVisualStylesXP::GetThemeFilename(HTHEME hTheme, int iPartId, int iStateId, int iPropId,
 										  LPWSTR pszThemeFileName, int cchMaxBuffChars)
 {
 	static PFNGETTHEMEFILENAME pfn = NULL;
@@ -422,7 +422,7 @@ void CVisualStylesXP::SetThemeAppProperties(DWORD dwFlags)
 	(*pfn)(dwFlags);
 }
 
-HRESULT CVisualStylesXP::GetCurrentThemeName(LPWSTR pszThemeFileName, int cchMaxNameChars, 
+HRESULT CVisualStylesXP::GetCurrentThemeName(LPWSTR pszThemeFileName, int cchMaxNameChars,
 											 LPWSTR pszColorBuff, int cchMaxColorChars,
 											 LPWSTR pszSizeBuff, int cchMaxSizeChars)
 {
@@ -432,7 +432,7 @@ HRESULT CVisualStylesXP::GetCurrentThemeName(LPWSTR pszThemeFileName, int cchMax
 	return (*pfn)(pszThemeFileName, cchMaxNameChars, pszColorBuff, cchMaxColorChars, pszSizeBuff, cchMaxSizeChars);
 }
 
-HRESULT CVisualStylesXP::GetThemeDocumentationProperty(LPCWSTR pszThemeName, LPCWSTR pszPropertyName, 
+HRESULT CVisualStylesXP::GetThemeDocumentationProperty(LPCWSTR pszThemeName, LPCWSTR pszPropertyName,
 													   LPWSTR pszValueBuff, int cchMaxValChars)
 {
 	static PFNGETTHEMEDOCUMENTATIONPROPERTY pfn = NULL;
@@ -441,7 +441,7 @@ HRESULT CVisualStylesXP::GetThemeDocumentationProperty(LPCWSTR pszThemeName, LPC
 	return (*pfn)(pszThemeName, pszPropertyName, pszValueBuff, cchMaxValChars);
 }
 
-HRESULT CVisualStylesXP::DrawThemeParentBackground(HWND hwnd, HDC hdc, RECT* prc)
+HRESULT CVisualStylesXP::DrawThemeParentBackground(HWND hwnd, HDC hdc, LPRECT prc)
 {
 	static PFNDRAWTHEMEPARENTBACKGROUND pfn = NULL;
 	if (pfn == NULL)

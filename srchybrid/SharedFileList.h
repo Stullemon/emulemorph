@@ -74,7 +74,9 @@ public:
 	
 	CKnownFile* GetFileByID(const uchar* filehash) const;
 	CKnownFile* GetFileByIdentifier(const CFileIdentifierBase& rFileIdent, bool bStrict = false) const;
-	CKnownFile*	GetFileByIndex(int index);
+	CKnownFile*	GetFileByIndex(int index) const; // slow
+	CKnownFile* GetFileByAICH(const CAICHHash& rHash) const; // slow
+
 	bool	IsFilePtrInList(const CKnownFile* file) const; // slow
 	bool	IsUnsharedFile(const uchar* auFileHash) const;
 	bool	ShouldBeShared(CString strPath, CString strFilePath, bool bMustBeShared) const;
@@ -95,7 +97,7 @@ public:
 	void	UpdatePartsInfo(); //MORPH - Added by SiRoB, POWERSHARE Limit
 	DWORD	GetLastTimeFileMapUpdated() { return m_dwFile_map_updated; }; //MORPH - Added by SiRoB, Optimization requpfile
 
-	CMutex	m_mutWriteList;
+	CCriticalSection	m_mutWriteList; // don't acquire other locks while having this one in the main thread or make sure deadlocks are impossible
 
 protected:
 	bool	AddFile(CKnownFile* pFile);

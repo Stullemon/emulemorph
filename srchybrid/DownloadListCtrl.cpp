@@ -2059,6 +2059,8 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 				m_PreviewMenu.EnableMenuItem(MP_PREVIEW, (iSelectedItems == 1 && iFilesToPreview == 1) ? MF_ENABLED : MF_GRAYED);
 				m_PreviewMenu.EnableMenuItem(MP_PAUSEONPREVIEW, iFilesCanPauseOnPreview > 0 ? MF_ENABLED : MF_GRAYED);
 				m_PreviewMenu.CheckMenuItem(MP_PAUSEONPREVIEW, (iSelectedItems > 0 && iFilesDoPauseOnPreview == iSelectedItems) ? MF_CHECKED : MF_UNCHECKED);
+				m_FileMenu.EnableMenuItem((UINT_PTR)m_PreviewMenu.m_hMenu, m_PreviewMenu.HasEnabledItems() ? MF_ENABLED : MF_GRAYED);
+				
 				if (iPreviewMenuEntries > 0 && !thePrefs.GetExtraPreviewWithMenu())
 					m_PreviewMenu.InsertMenu(1, MF_POPUP | MF_BYPOSITION | (iSelectedItems == 1 ? MF_ENABLED : MF_GRAYED), (UINT_PTR)PreviewWithMenu.m_hMenu, GetResString(IDS_PREVIEWWITH));
 				else if (iPreviewMenuEntries > 0)
@@ -2203,8 +2205,9 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			VERIFY( CatsMenu.DestroyMenu() );
 			VERIFY( PreviewWithMenu.DestroyMenu() );
 		}
-		else{
-			const CUpDownClient* client = (CUpDownClient*)content->value;
+		else
+		{
+			const CUpDownClient* client = content != NULL ? (CUpDownClient*)content->value : NULL;
 			CTitleMenu ClientMenu;
 			ClientMenu.CreatePopupMenu();
 			ClientMenu.AddMenuTitle(GetResString(IDS_CLIENTS), true);
@@ -2228,7 +2231,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 			if (thePrefs.IsExtControlsEnabled()) {
 // ZZ:DownloadManager -->
 #ifdef _DEBUG
-                if (content->type == UNAVAILABLE_SOURCE) {
+                if (content!=NULL && content->type == UNAVAILABLE_SOURCE) {
                     A4AFMenu.AppendMenu(MF_STRING,MP_A4AF_CHECK_THIS_NOW,GetResString(IDS_A4AF_CHECK_THIS_NOW));
                 }
 # endif
@@ -2264,6 +2267,7 @@ void CDownloadListCtrl::OnContextMenu(CWnd* /*pWnd*/, CPoint point)
 		m_FileMenu.EnableMenuItem(MP_OPEN, MF_GRAYED);
 
 		if (thePrefs.IsExtControlsEnabled()) {
+			m_FileMenu.EnableMenuItem((UINT_PTR)m_PreviewMenu.m_hMenu, MF_GRAYED);
 			if (!thePrefs.GetPreviewPrio())
 			{
 				m_PreviewMenu.EnableMenuItem(MP_TRY_TO_GET_PREVIEW_PARTS, MF_GRAYED);
@@ -2804,6 +2808,11 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					if (file->CanOpenFile())
 						file->OpenFile();
 					break;
+				case MP_OPENFOLDER:
+					if (selectedCount != 1)
+						break;
+					ShellOpenFile(file->GetPath(), _T("open"));
+					break;
 				case MP_TRY_TO_GET_PREVIEW_PARTS:
 					if (selectedCount > 1)
 						break;
@@ -3100,7 +3109,8 @@ BOOL CDownloadListCtrl::OnCommand(WPARAM wParam, LPARAM /*lParam*/)
 					break;
 			}
 		}
-		else{
+		else if (content != NULL)
+		{
 			CUpDownClient* client = (CUpDownClient*)content->value;
 
 			switch (wParam){
@@ -4614,6 +4624,8 @@ bool CDownloadListCtrl::ReportAvailableCommands(CList<int>& liAvailableCommands)
 				liAvailableCommands.AddTail(MP_OPEN);
 			if (iSelectedItems == 1 && iFilesToPreview == 1)
 				liAvailableCommands.AddTail(MP_PREVIEW);
+			if (iSelectedItems == 1)
+				liAvailableCommands.AddTail(MP_OPENFOLDER);
 			if (iSelectedItems > 0)
 			{
 				liAvailableCommands.AddTail(MP_METINFO);

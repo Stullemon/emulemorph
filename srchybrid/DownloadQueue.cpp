@@ -1167,7 +1167,7 @@ bool CDownloadQueue::CheckAndAddSource(CPartFile* sender,CUpDownClient* source){
 			return false;
 		}
 	}
-	// filter sources which are known to be dead/useless
+	// filter sources which are known to be temporarily dead/useless
 	if (theApp.clientlist->m_globDeadSourceList.IsDeadSource(source) || sender->m_DeadSourceList.IsDeadSource(source)){
 		//if (thePrefs.GetLogFilteredIPs())
 		//	AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because it was found on the DeadSourcesList (%s) for file %s : %s")
@@ -1179,7 +1179,7 @@ bool CDownloadQueue::CheckAndAddSource(CPartFile* sender,CUpDownClient* source){
 	// filter sources which are incompatible with our encryption setting (one requires it, and the other one doesn't supports it)
 	if ( (source->RequiresCryptLayer() && (!thePrefs.IsClientCryptLayerSupported() || !source->HasValidHash())) || (thePrefs.IsClientCryptLayerRequired() && (!source->SupportsCryptLayer() || !source->HasValidHash())))
 	{
-#if defined(_DEBUG) || defined(_BETA)
+#if defined(_DEBUG) || defined(_BETA) || defined(_DEVBUILD)
 		//if (thePrefs.GetDebugSourceExchange()) // TODO: Uncomment after testing
 			AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because CryptLayer-Setting (Obfuscation) was incompatible for file %s : %s"), sender->GetFileName(), source->DbgGetClientInfo() );
 #endif
@@ -1250,33 +1250,25 @@ bool CDownloadQueue::CheckAndAddSource(CPartFile* sender,CUpDownClient* source){
 	return true;
 }
 
-bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source, bool bIgnoreGlobDeadList, bool doThrow){
+bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source, bool bIgnoreGlobDeadList){
 	if (sender->IsStopped())
-	{
-		if (doThrow)
-			throw CString(_T("file stopped"));
 		return false;
-	}
-
+	
 	// filter sources which are known to be temporarily dead/useless
 	if ( (theApp.clientlist->m_globDeadSourceList.IsDeadSource(source) && !bIgnoreGlobDeadList) || sender->m_DeadSourceList.IsDeadSource(source)){
 		//if (thePrefs.GetLogFilteredIPs())
 		//	AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because it was found on the DeadSourcesList (%s) for file %s : %s")
 		//	,sender->m_DeadSourceList.IsDeadSource(source)? _T("Local") : _T("Global"), sender->GetFileName(), source->DbgGetClientInfo() );
-		if (doThrow)
-			throw CString(_T("found on the dead source list"));
 		return false;
 	}
 
 	// filter sources which are incompatible with our encryption setting (one requires it, and the other one doesn't supports it)
 	if ( (source->RequiresCryptLayer() && (!thePrefs.IsClientCryptLayerSupported() || !source->HasValidHash())) || (thePrefs.IsClientCryptLayerRequired() && (!source->SupportsCryptLayer() || !source->HasValidHash())))
 	{
-#if defined(_DEBUG) || defined(_BETA)
+#if defined(_DEBUG) || defined(_BETA) || defined(_DEVBUILD)
 		//if (thePrefs.GetDebugSourceExchange()) // TODO: Uncomment after testing
 			AddDebugLogLine(DLP_DEFAULT, false, _T("Rejected source because CryptLayer-Setting (Obfuscation) was incompatible for file %s : %s"), sender->GetFileName(), source->DbgGetClientInfo() );
 #endif
-		if (doThrow)
-			throw CString(_T("found as incompatible with our emcryption settingon"));
 		return false;
 	}
 
@@ -1291,8 +1283,6 @@ bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* sou
 		if (!IsGoodIP(nClientIP)){ // check for 0-IP, localhost and LAN addresses
 			//if (thePrefs.GetLogFilteredIPs())
 			//	AddDebugLogLine(false, _T("Ignored already known source with IP=%s"), ipstr(nClientIP));
-			if (doThrow)
-				throw CString(_T("source already known (IsGoodIP(nClientIP) is false)"));
 			return false;
 		}
 	}
@@ -1302,19 +1292,12 @@ bool CDownloadQueue::CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* sou
 		CPartFile* cur_file = filelist.GetNext(pos);
 		if (cur_file->srclist.Find(source)){
 			if (cur_file == sender)
-			{
-				if (doThrow)
-					throw CString(_T("source already known (already in the srclist)"));
 				return false;
-			}
-			bool addedA4AF = source->AddRequestForAnotherFile(sender);
-			if (addedA4AF)
+			if (source->AddRequestForAnotherFile(sender))
 				theApp.emuledlg->transferwnd->GetDownloadList()->AddSource(sender,source,true);
                 if(source->GetDownloadState() != DS_CONNECTED) {
                     source->SwapToAnotherFile(_T("New A4AF source found. CDownloadQueue::CheckAndAddKnownSource()"), false, false, false, NULL, true, false); // ZZ:DownloadManager
                 }
-			if (doThrow && addedA4AF)
-				return true;
 			return false;
 		}
 	}
@@ -1373,6 +1356,15 @@ bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate)
 	{
 		toremove->m_OtherRequests_list.GetNext(pos3);				
 		//MORPH START - Change by SiRoB, fix updating stat for a4af
+		/*
+		POSITION pos5 = toremove->m_OtherRequests_list.GetAt(pos4)->A4AFsrclist.Find(toremove); 
+		if(pos5)
+		{ 
+			toremove->m_OtherRequests_list.GetAt(pos4)->A4AFsrclist.RemoveAt(pos5);
+			theApp.emuledlg->transferwnd->GetDownloadList()->RemoveSource(toremove,toremove->m_OtherRequests_list.GetAt(pos4));
+			toremove->m_OtherRequests_list.RemoveAt(pos4);
+		}
+		*/
 		CPartFile* cur_file = toremove->m_OtherRequests_list.GetAt(pos4);
 		toremove->m_OtherRequests_list.RemoveAt(pos4);
 		POSITION pos5 = cur_file->A4AFsrclist.Find(toremove); 
@@ -1389,6 +1381,15 @@ bool CDownloadQueue::RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate)
 	{
 		toremove->m_OtherNoNeeded_list.GetNext(pos3);				
 		//MORPH START - Change by SiRoB, fix updating stat for a4af
+		/*
+		POSITION pos5 = toremove->m_OtherNoNeeded_list.GetAt(pos4)->A4AFsrclist.Find(toremove); 
+		if(pos5)
+		{ 
+			toremove->m_OtherNoNeeded_list.GetAt(pos4)->A4AFsrclist.RemoveAt(pos5);
+			theApp.emuledlg->transferwnd->GetDownloadList()->RemoveSource(toremove,toremove->m_OtherNoNeeded_list.GetAt(pos4));
+			toremove->m_OtherNoNeeded_list.RemoveAt(pos4);
+		}
+		*/
 		CPartFile* cur_file = toremove->m_OtherNoNeeded_list.GetAt(pos4);
 		toremove->m_OtherNoNeeded_list.RemoveAt(pos4);
 		POSITION pos5 = cur_file->A4AFsrclist.Find(toremove); 
@@ -1943,10 +1944,11 @@ void CDownloadQueue::ResetCatParts(UINT cat, UINT useCat)
 {
 	int useOrder = GetMaxCatResumeOrder(useCat);
 	CPartFile* cur_file;
+
 	for (POSITION pos = filelist.GetHeadPosition(); pos != 0; ){
 		cur_file = filelist.GetNext(pos);
 
-		if (cur_file->GetCategory()==cat)
+		if (cur_file->GetCategory() == cat)
 		{
 			useOrder++;
 			cur_file->SetCategory(useCat);
@@ -2001,7 +2003,7 @@ void CDownloadQueue::SetCatStatus(UINT cat, int newstatus)
 	POSITION pos= filelist.GetHeadPosition();
 	while (pos != 0)
 	{
-		CPartFile* cur_file = filelist.GetAt(pos);
+		CPartFile* cur_file = filelist.GetNext(pos);
 		if (!cur_file)
 			continue;
 
@@ -2035,7 +2037,6 @@ void CDownloadQueue::SetCatStatus(UINT cat, int newstatus)
 					break;
 			}
 		}
-		filelist.GetNext(pos);
 		if (reset)
 		{
 			reset = false;
@@ -2057,7 +2058,7 @@ void CDownloadQueue::MoveCat(UINT from, UINT to)
 	POSITION pos= filelist.GetHeadPosition();
 	while (pos != 0)
 	{
-		CPartFile* cur_file = filelist.GetAt(pos);
+		CPartFile* cur_file = filelist.GetNext(pos);
 		if (!cur_file)
 			continue;
 
@@ -2075,7 +2076,6 @@ void CDownloadQueue::MoveCat(UINT from, UINT to)
 					cur_file->SetCategory(mycat + 1);
 			}
 		}
-		filelist.GetNext(pos);
 	}
 }
 
@@ -2531,7 +2531,7 @@ void CDownloadQueue::ExportPartMetFilesOverview() const
 			strError += _T(" - ");
 			strError += szError;
 		}
-		LogError(_T("Failed to create %s  file list%s"),strTmpFileListPath, strError);
+		LogError(_T("Failed to create part.met file list%s"), strError);
 		return;
 	}
 

@@ -138,7 +138,11 @@ CRoutingZone::~CRoutingZone()
 	{
 		// Hide contacts in the GUI
 		theApp.emuledlg->kademliawnd->StopUpdateContacts();
+#ifndef _BOOTSTRAPNODESDAT
 		WriteFile();
+#else
+		DbgWriteBootstrapFile();
+#endif
 	}
 	// If this zone is a leaf, delete our contact bin.
 	if (IsLeaf())
@@ -393,7 +397,7 @@ void CRoutingZone::WriteFile()
 	}
 }
 
-#ifdef _DEBUG
+#ifdef _BOOTSTRAPNODESDAT
 void CRoutingZone::DbgWriteBootstrapFile()
 {
 	DebugLogWarning(_T("Writing special bootstrap nodes.dat - not intended for normal use"));
@@ -456,6 +460,7 @@ void CRoutingZone::DbgWriteBootstrapFile() {}
 #endif
 
 
+#ifndef _BOOTSTRAPNODESDAT
 bool CRoutingZone::CanSplit() const
 {
 	// Max levels allowed.
@@ -467,6 +472,23 @@ bool CRoutingZone::CanSplit() const
 		return true;
 	return false;
 }
+#else
+bool CRoutingZone::CanSplit() const
+{
+	if (Kademlia::CKademlia::GetRoutingZone()->GetNumContacts() < 2000)
+		return true;
+
+	// Max levels allowed.
+	if (m_uLevel >= 127)
+		return false;
+
+	// Check if this zone is allowed to split.
+	if ( (m_uZoneIndex < KK || m_uLevel < KBASE) && m_pBin->GetSize() == K)
+		return true;
+	return false;
+}
+#endif
+
 
 // Returns true if a contact was added or updated, false if the routing table was not touched
 bool CRoutingZone::Add(const CUInt128 &uID, uint32 uIP, uint16 uUDPPort, uint16 uTCPPort, uint8 uVersion, CKadUDPKey cUDPKey, bool& bIPVerified, bool bUpdate, bool bFromNodesDat, bool bFromHello)

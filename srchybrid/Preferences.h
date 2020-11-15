@@ -173,6 +173,7 @@ public:
 	static	uint16	nServerUDPPort;
 	static	UINT	maxconnections;
 	static	UINT	maxhalfconnections;
+	static	bool	m_bOverlappedSockets;
 	static	bool	m_bConditionalTCPAccept;
 	static	bool	reconnect;
 	static	bool	m_bUseServerPriorities;
@@ -508,6 +509,7 @@ public:
 	static	bool	watchclipboard;
 	static	bool	filterserverbyip;
 	static	bool	m_bFirstStart;
+	static	bool	m_bBetaNaggingDone;
 	static	bool	m_bCreditSystem;
 
 	static	bool	log2disk;
@@ -804,6 +806,7 @@ public:
 	//MORPH END - Added by SiRoB, Smart Upload Control v2 (SUC) [lovelace]
 
 	//MORPH START - Added by SiRoB, ZZ Upload system (USS)
+	// ZZ:UploadSpeedSense -->
 	static	bool	m_bDynUpEnabled;
 	static	int		m_iDynUpPingTolerance;
 	static	int		m_iDynUpGoingUpDivider;
@@ -811,6 +814,7 @@ public:
 	static	int		m_iDynUpNumberOfPings;
 	static  int		m_iDynUpPingToleranceMilliseconds;
 	static  bool	m_bDynUpUseMillisecondPingTolerance;
+	// ZZ:UploadSpeedSense <--
 	static bool		m_bDynUpLog;
     static bool		m_bUSSUDP; //MORPH - Added by SiRoB, USS UDP preferency
 	static short    m_sPingDataSize;  //MORPH leuk_he ICMP ping datasize <> 0 setting
@@ -1368,6 +1372,7 @@ public:
 	static	uint64	GetMaxDownloadInBytesPerSec(bool dynamic = false);
 	static	UINT	GetMaxConnections()					{return maxconnections;}
 	static	UINT	GetMaxHalfConnections()				{return maxhalfconnections;}
+	static	bool	GetUseOverlappedSockets()			{return m_bOverlappedSockets; }
 	static	UINT	GetMaxSourcePerFileDefault()		{return maxsourceperfile;}
 	static	UINT	GetDeadServerRetries()				{return m_uDeadServerRetries;}
 	static	DWORD	GetServerKeepAliveTimeout()			{return m_dwServerKeepAliveTimeout;}
@@ -1875,6 +1880,12 @@ public:
 	static uint16	GetRandomTCPPort();
 	static uint16	GetRandomUDPPort();
 
+	// Beta related
+#ifdef _BETA
+	static bool		ShouldBetaNag()						{return !m_bBetaNaggingDone;}
+	static void		SetDidBetaNagging()					{m_bBetaNaggingDone = true;}
+#endif
+
 	static	bool	IsUSSLog() {return m_bDynUpLog;} //MORPH - Added by SiRoB, ZZ Upload system (USS)
 	static	bool	IsUSSUDP() {return m_bUSSUDP;} //MORPH - Added by SiRoB, USS UDP preferency
 
@@ -2102,6 +2113,7 @@ protected:
 	static	bool	m_abDefaultDirsCreated[EMULE_FEEDSDIR+1];
 	static	int		m_nCurrentUserDirMode; // Only for PPgTweaks
     // Morph END More dirs
+
 	static void	CreateUserHash();
 	static void	SetStandartValues();
 	static int	GetRecommendedMaxConnections();

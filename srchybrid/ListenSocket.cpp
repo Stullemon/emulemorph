@@ -231,6 +231,7 @@ void CClientReqSocket::Disconnect(LPCTSTR pszReason){
 void CClientReqSocket::Delete_Timed(){
 // it seems that MFC Sockets call socketfunctions after they are deleted, even if the socket is closed
 // and select(0) is set. So we need to wait some time to make sure this doesn't happens
+// we currently also trust on this for multithreading, rework snychronization if this ever changes
 	if (::GetTickCount() - deltimer > 10000)
 		delete this;
 }
@@ -751,7 +752,7 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 							reqblock->EndOffset = auEndOffsets[i];
 							md4cpy(reqblock->FileID, reqfilehash);
 							reqblock->transferred = 0;
-							client->AddReqBlock(reqblock);
+							client->AddReqBlock(reqblock, false);
 						}
 						else
 						{
@@ -762,10 +763,14 @@ bool CClientReqSocket::ProcessPacket(const BYTE* packet, uint32 size, UINT opcod
 							}
 						}
 					}
+#ifndef USE_MORPH_READ_THREAD
+					client->AddReqBlock(NULL, true);
+#else
 					//MORPH START -  Used to not wait uploadqueue timer (110ms) capping upload to 1ReadBlock/110ms~1.6MB/s
 					if (client->GetUploadState() == US_UPLOADING)
 						client->CreateNextBlockPackage();
 					//MORPH END
+#endif
 					break;
 				}
 				case OP_CANCELTRANSFER:
@@ -2251,7 +2256,7 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							reqblock->EndOffset = auEndOffsets[i];
 							md4cpy(reqblock->FileID, reqfilehash);
 							reqblock->transferred = 0;
-							client->AddReqBlock(reqblock);
+							client->AddReqBlock(reqblock, false);
 						}
 						else
 						{
@@ -2262,10 +2267,14 @@ bool CClientReqSocket::ProcessExtPacket(const BYTE* packet, uint32 size, UINT op
 							}
 						}
 					}
+#ifndef USE_MORPH_READ_THREAD
+					client->AddReqBlock(NULL, true);
+#else
 					//MORPH START -  Used to not wait uploadqueue timer (110ms) capping upload to 1ReadBlock/110ms~1.6MB/s
 					if (client->GetUploadState() == US_UPLOADING)
 						client->CreateNextBlockPackage();
 					//MORPH END
+#endif
 					break;
 				}
 				case OP_COMPRESSEDPART:
@@ -2647,7 +2656,12 @@ SocketSentBytes CClientReqSocket::SendControlData(uint32 maxNumberOfBytesToSend,
     /*zz*/if (returnStatus.success) {
         if(returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)
         ResetTimeOutTimer();
-    } else if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
+    } 
+	// Revisited by Stulle: The return value for success from SendStd (original implementation)
+	// has been set to true since the introduction of Socket Buffering etc. Some time in May 2007
+	// a commit from leuk_he added an else before the next if. These together would prevent any 
+	// warning from making it out. I have reinstated the separate if clause here to fix that.
+	if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
         CString pstrReason = GetErrorMessage(returnStatus.errorThatOccured, 1);
         theApp.QueueDebugLogLine(false,_T("CClientReqSocket::SendControlData: An error has occured: %s Client: %s"), pstrReason, DbgGetClientInfo());
     }
@@ -2660,7 +2674,9 @@ SocketSentBytes CClientReqSocket::SendFileAndControlData(uint32 maxNumberOfBytes
 	/*zz*/if (returnStatus.success) {
         if(returnStatus.sentBytesControlPackets > 0 || returnStatus.sentBytesStandardPackets > 0)
         ResetTimeOutTimer();
-    } else if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
+    } 
+	// Revisited by Stulle: See comment in function SendControlData
+	if (returnStatus.errorThatOccured != 0 && thePrefs.GetVerbose()){
         CString pstrReason = GetErrorMessage(returnStatus.errorThatOccured, 1);
         theApp.QueueDebugLogLine(false,_T("CClientReqSocket::SendFileAndControlData: An error has occured: %s Client: %s"), pstrReason, DbgGetClientInfo());
     }
@@ -2681,7 +2697,7 @@ void CClientReqSocket::SendPacket(Packet* packet[], uint32 npacket, bool delpack
 	CEMSocket::SendPacket(packet, npacket, delpacket,controlpacket, actualPayloadSize, bForceImmediateSend);
 }
 #endif
-//MORPH START - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
+//MORPH END   - Added by SiRoB, Send Array Packet to prevent uploadbandwiththrottler lock
 
 bool CListenSocket::SendPortTestReply(char result, bool disconnect)
 {
@@ -2764,10 +2780,8 @@ bool CListenSocket::StartListening()
 	//
 	//MORPH START - Modified by SiRoB, [MoNKi: -UPnPNAT Support-]
 	//MORPH START - Modified by SiRoB, [MoNKi: -Random Ports-]
-	//
 	//if (!Create(thePrefs.GetPort(), SOCK_STREAM, FD_ACCEPT, thePrefs.GetBindAddrA(), FALSE/*bReuseAddr*/))
 	//	return false;
-
 	bool ret = false;
 	WORD rndPort;
 	int retries=0;

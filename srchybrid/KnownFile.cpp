@@ -344,7 +344,7 @@ void CKnownFile::UpdatePartsInfo()
 				if (srcstatus[i]&SC_AVAILABLE)
 					++m_AvailPartFrequency[i];
 			}
-			if ( flag )
+			if (flag)
 				count.Add(cur_src->GetUpCompleteSourcesCount());
 			//MORPH START - Added by SiRoB, Avoid misusing of powersharing
 			if (cur_src->GetUpCompleteSourcesCount()>0)
@@ -1562,7 +1562,7 @@ Packet*	CKnownFile::CreateSrcInfoPacket(const CUpDownClient* forClient, uint8 by
 		// TODO: remove check next version, as it uses ressources and shouldn't be necessary
 		if (!theApp.clientlist->IsValidClient(cur_src))
 		{
-#ifdef _BETA
+#if defined(_BETA) || defined(_DEVBUILD)
 			throw new CUserException();
 #endif
 			ASSERT( false );

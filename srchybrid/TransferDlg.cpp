@@ -123,8 +123,6 @@ void CTransferDlg::OnShowWindow(BOOL bShow, UINT nStatus)
 void CTransferDlg::OnSetFocus(CWnd* pOldWnd)
 {
 	CFrameWnd::OnSetFocus(pOldWnd);
-	if (m_pwndToolbar->m_hWnd)
-		m_pwndToolbar->SetFocus();
 }
 
 void CTransferDlg::DockToolbarWnd()

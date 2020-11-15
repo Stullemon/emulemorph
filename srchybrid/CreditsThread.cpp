@@ -446,7 +446,7 @@ void CCreditsThread::InitText()
 	//MORPH END   - Added by SiRoB, [itsonlyme: -modname-]
 
 	m_arCredits.Add(sTmp);
-	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2009 Merkur"));
+	m_arCredits.Add(_T("01:06:Copyright (C) 2002-2015 Merkur"));
 	m_arCredits.Add(_T("S:20"));
 	m_arCredits.Add(_T("01:06:MorphXT includes GeoLite data created by MaxMind,")); 
 	m_arCredits.Add(_T("S:5"));
@@ -481,14 +481,12 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("01:06:Stulle"));
 	m_arCredits.Add(_T("S:5"));
 			// as required by the upnp library licence:
-	m_arCredits.Add(_T("01:06:morph contains some code that is "));
+	m_arCredits.Add(_T("01:06:MorphXT contains some code that is "));
 	m_arCredits.Add(_T("01:06:(c) 2000-2003 Intel Corporation "));
 	m_arCredits.Add(_T("S:50"));
     //Commander - Added: MorphTeam - End
 
 	m_arCredits.Add(_T("02:04:Official Developers")); //Commander - Modified: Make clear who belongs to the official Developers and who to the Mod ones
-	m_arCredits.Add(_T("S:5"));
-	m_arCredits.Add(_T("01:06:Unknown1"));
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Ornis"));
 
@@ -533,6 +531,8 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("01:06:Barry"));
 	m_arCredits.Add(_T("S:5"));
 	m_arCredits.Add(_T("01:06:Dirus"));
+	m_arCredits.Add(_T("S:5"));
+	m_arCredits.Add(_T("01:06:Unknown1"));
 	
 
 	m_arCredits.Add(_T("S:50"));
@@ -561,7 +561,7 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("02:07:into different languages:"));
 	m_arCredits.Add(_T("S:20"));
 	
-	
+
 	m_arCredits.Add(_T("01:06:Arabic: Dody"));
 	m_arCredits.Add(_T("S:05"));	
 	m_arCredits.Add(_T("01:06:Albanian: Besmir"));
@@ -618,7 +618,7 @@ void CCreditsThread::InitText()
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Portugese: Filipe, Luís Claro"));
 	m_arCredits.Add(_T("S:05"));
-	m_arCredits.Add(_T("01:06:Portugese Brasilian: DarthMaul,Brasco"));
+	m_arCredits.Add(_T("01:06:Portugese Brasilian: DarthMaul,Brasco,Ducho"));
 	m_arCredits.Add(_T("S:05"));
 	m_arCredits.Add(_T("01:06:Romanian: Dragos"));
 	m_arCredits.Add(_T("S:05"));

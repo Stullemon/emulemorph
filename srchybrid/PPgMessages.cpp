@@ -202,7 +202,7 @@ BOOL CPPgMessages::PreTranslateMessage(MSG* pMsg)
 
 void CPPgMessages::OnHelp()
 {
-	theApp.ShowHelp(eMule_FAQ_Preferences_Security);
+	theApp.ShowHelp(eMule_FAQ_Preferences_Messages);
 }
 
 BOOL CPPgMessages::OnCommand(WPARAM wParam, LPARAM lParam)

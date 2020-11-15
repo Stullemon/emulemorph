@@ -17,6 +17,7 @@
 #include "stdafx.h"
 #include <wininet.h>
 #include "UrlClient.h"
+#include "emule.h"
 #include "PartFile.h"
 #include "Packets.h"
 #include "ListenSocket.h"
@@ -25,6 +26,7 @@
 #include "OtherFunctions.h"
 #include "Statistics.h"
 #include "ClientCredits.h"
+#include "Clientlist.h"
 #include "log.h" //MORPH - Work arround I.C.H and other recovering processing responsible of stalled download 
 
 #ifdef _DEBUG
@@ -156,7 +158,7 @@ bool CUrlClient::SendHttpBlockRequests()
 	if (reqfile == NULL)
 		throw CString(_T("Failed to send block requests - No 'reqfile' attached"));
 
-	CreateBlockRequests(PARTSIZE / EMBLOCKSIZE);
+	CreateBlockRequests(PARTSIZE / EMBLOCKSIZE, PARTSIZE / EMBLOCKSIZE);
 	if (m_PendingBlocks_list.IsEmpty()){
 		SetDownloadState(DS_NONEEDEDPARTS);
         SwapToAnotherFile(_T("A4AF for NNP file. UrlClient::SendHttpBlockRequests()"), true, false, false, NULL, true, true);
@@ -200,7 +202,7 @@ bool CUrlClient::SendHttpBlockRequests()
 	strHttpRequest.AppendFormat("\r\n");
 
 	//MORPH START - Added, Extra logging
-	AddDebugLogLine(false, _T("http trsnasfer from SendHttpBlockRequests %s"),(CString) strHttpRequest);
+	AddDebugLogLine(false, _T("http transfer from SendHttpBlockRequests %s"),(CString) strHttpRequest);
 
 		if (thePrefs.GetDebugSourceExchange())
 			AddDebugLogLine(false, _T("SXSend (%s): Client source request; %s, File=\"%s\""),SupportsSourceExchange2() ? _T("Version 2") : _T("Version 1"), DbgGetClientInfo(), reqfile->GetFileName());
@@ -234,9 +236,16 @@ void CUrlClient::Connect()
 
 void CUrlClient::OnSocketConnected(int nErrorCode)
 {
-	ConnectionEstablished(); //MORPH - Added by Stulle, Fix for aborting HTTP downloads [WiZaRd]
 	if (nErrorCode == 0)
-		SendHttpBlockRequests();
+		ConnectionEstablished();
+}
+
+void CUrlClient::ConnectionEstablished()
+{
+	m_nConnectingState = CCS_NONE;
+	theApp.clientlist->RemoveConnectingClient(this);
+	SendHttpBlockRequests();
+	SetDownStartTime();
 }
 
 void CUrlClient::SendHelloPacket()

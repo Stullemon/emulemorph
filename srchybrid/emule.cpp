@@ -75,6 +75,9 @@
 #include "UPnPImplWrapper.h"
 #endif
 #include "VisualStylesXP.h"
+#ifndef USE_MORPH_READ_THREAD
+#include "UploadDiskIOThread.h"
+#endif
 #include "ed2kLink.h" // morph - CATEGORY SELECTION CLIPNOARD
 #include "fakecheck.h" //MORPH - Added by SiRoB
 // Commander - Added: Custom incoming folder icon [emulEspaña] - Start
@@ -406,7 +409,7 @@ CemuleApp::CemuleApp(LPCTSTR lpszAppName)
 	// create a string version (e.g. "0.30a")
 	ASSERT( CemuleApp::m_nVersionUpd + 'a' <= 'f' );
 	m_strCurVersionLongDbg.Format(_T("%u.%u%c.%u"), CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, _T('a') + CemuleApp::m_nVersionUpd, CemuleApp::m_nVersionBld);
-#ifdef _DEBUG
+#if defined( _DEBUG) || defined(_DEVBUILD)
 	m_strCurVersionLong = m_strCurVersionLongDbg;
 #else
 	m_strCurVersionLong.Format(_T("%u.%u%c"), CemuleApp::m_nVersionMjr, CemuleApp::m_nVersionMin, _T('a') + CemuleApp::m_nVersionUpd);
@@ -484,7 +487,6 @@ void __cdecl __AfxSocketTerm()
 #error "You are using an MFC version which may require a special version of the above function!"
 #endif
 
-//MORPH START - Added by SiRoB, eWombat [WINSOCK2]
 BOOL InitWinsock2(WSADATA *lpwsaData) 
 {  
 _AFX_SOCK_STATE* pState = _afxSockState.GetData();
@@ -520,7 +522,6 @@ if (pState->m_pfnSockTerm == NULL)
 #endif
 return TRUE;
 }
-//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
 
 // CemuleApp Initialisierung
 
@@ -550,7 +551,7 @@ BOOL CemuleApp::InitInstance()
 	///////////////////////////////////////////////////////////////////////////
 	// Install crash dump creation
 	//
-#ifndef _BETA
+#if !(defined(_BETA) && defined(_DEVBUILD))
 	if (GetProfileInt(_T("eMule"), _T("CreateCrashDump"), 0))
 #endif
 		//MORPH - Changed by SiRoB, [-modname-]
@@ -652,21 +653,16 @@ BOOL CemuleApp::InitInstance()
 
 	CWinApp::InitInstance();
 
-	//MORPH START - Added by SiRoB, eWombat [WINSOCK2]
-	/*
-	if (!AfxSocketInit())
-	*/
 	memset(&m_wsaData,0,sizeof(WSADATA));
-	if (!InitWinsock2(&m_wsaData)) // <<< eWombat first try it with winsock2
-		{
-		memset(&m_wsaData,0,sizeof(WSADATA));
-		if (!AfxSocketInit(&m_wsaData)) // <<< eWombat then try it with old winsock
+	if (!InitWinsock2(&m_wsaData))
 	{
-		AfxMessageBox(GetResString(IDS_SOCKETS_INIT_FAILED));
-		return FALSE;
-	}
+		memset(&m_wsaData,0,sizeof(WSADATA));
+		if (!AfxSocketInit(&m_wsaData))
+		{
+			AfxMessageBox(GetResString(IDS_SOCKETS_INIT_FAILED));
+			return FALSE;
 		}
-	//MORPH END   - Added by SiRoB, eWombat [WINSOCK2]
+	}
 //MORPH START - Changed by Stulle, Visual Studio 2010 Compatibility
 /*
 #if _MFC_VER==0x0700 || _MFC_VER==0x0710 || _MFC_VER==0x0800 || _MFC_VER==0x0900
@@ -870,6 +866,9 @@ BOOL CemuleApp::InitInstance()
 	mmserver = new CMMServer();
 	scheduler = new CScheduler();
 	m_pPeerCache = new CPeerCacheFinder();
+#ifndef USE_MORPH_READ_THREAD
+	m_pUploadDiskIOThread = new CUploadDiskIOThread();
+#endif
 	
 	thePerfLog.Startup();
 	dlg.DoModal();
@@ -975,6 +974,7 @@ bool CemuleApp::ProcessCommandline()
 
 			if (_tcsicmp(pszParam, _T("AutoStart")) == 0)
 				m_bAutoStart = true;
+		//} // MORPH leuk_he:run as ntservice v1..
 	}
 
 	CCommandLineInfo cmdInfo;
@@ -1957,7 +1957,12 @@ CTempIconLoader::~CTempIconLoader()
 		VERIFY( DestroyIcon(m_hIcon) );
 }
 
+//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+/*
+void CemuleApp::AddEd2kLinksToDownload(CString strLinks, int cat)
+*/
 void CemuleApp::AddEd2kLinksToDownload(CString strLinks, int cat,bool fromclipboard)
+//MORPH END  - Changed by SiRoB, Selection category support khaos::categorymod+
 {
 	int curPos = 0;
 	CString strTok = strLinks.Tokenize(_T(" \t\r\n"), curPos); // tokenize by whitespaces
@@ -2525,6 +2530,11 @@ bool CemuleApp::IsVistaThemeActive() const
 {
 	// TRUE: If a Vista (or better) style is active
 	return theApp.m_ullComCtrlVer >= MAKEDLLVERULL(6,16,0,0) && g_xpStyle.IsThemeActive() && g_xpStyle.IsAppThemed();
+}
+
+bool CemuleApp::IsWinSock2Available() const
+{
+	return LOBYTE(m_wsaData.wVersion) == 2 && HIBYTE(m_wsaData.wVersion ) == 2;
 }
 
 // Commander - Added: Custom incoming / temp folder icon [emulEspaña] - Start

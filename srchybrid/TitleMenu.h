@@ -58,6 +58,8 @@ public:
 	long GetEdge() { return m_uEdgeFlags; }
 	void SetEdge(bool shown, UINT remove = 0, UINT add = 0)	{ m_bDrawEdge = shown; (m_uEdgeFlags ^= remove) |= add; }
 
+	bool HasEnabledItems() const;
+
 	virtual void MeasureItem(LPMEASUREITEMSTRUCT lpMIS);
 	virtual void DrawItem(LPDRAWITEMSTRUCT lpDIS);
 

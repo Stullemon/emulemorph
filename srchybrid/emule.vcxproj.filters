@@ -906,6 +906,9 @@
     <ClCompile Include="ButtonVE.cpp">
       <Filter>Interface Source</Filter>
     </ClCompile>
+    <ClCompile Include="UploadDiskIOThread.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Flex.skl">
@@ -2865,6 +2868,9 @@
     </ClInclude>
     <ClInclude Include="ButtonVE.h">
       <Filter>Interface Header</Filter>
+    </ClInclude>
+    <ClInclude Include="UploadDiskIOThread.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

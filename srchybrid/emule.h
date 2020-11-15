@@ -55,6 +55,9 @@ class CFirewallOpener;
 #ifdef USE_OFFICIAL_UPNP
 class CUPnPImplWrapper;
 #endif
+#ifndef USE_MORPH_READ_THREAD
+class CUploadDiskIOThread;
+#endif
 
 struct SLogItem;
 class CFakecheck; //MORPH - Added by milobac, FakeCheck, FakeReport, Auto-updating
@@ -97,6 +100,9 @@ public:
 	CFirewallOpener*	m_pFirewallOpener;
 #ifdef USE_OFFICIAL_UPNP
 	CUPnPImplWrapper*	m_pUPnPFinder;
+#endif
+#ifndef USE_MORPH_READ_THREAD
+	CUploadDiskIOThread* m_pUploadDiskIOThread;
 #endif
         //MORPH START - Added by schnulli900, dynamic IP-Filters [Xman]
 	bool				m_bIsIPDlgOpen;
@@ -157,7 +163,12 @@ public:
 	virtual BOOL OnIdle(LONG lCount); // MORPH
 
 	// ed2k link functions
+	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
+	/*
+	void		AddEd2kLinksToDownload(CString strLinks, int cat);
+	*/
 	void		AddEd2kLinksToDownload(CString strLinks, int cat, bool fromclipboard=false);
+	//MORPH END   - Changed by SiRoB, Selection category support khaos::categorymod+
 	void		SearchClipboard();
 	void		IgnoreClipboardLinks(CString strLinks) {m_strLastClipboardContents = strLinks;}
 	//MORPH START - Changed by SiRoB, Selection category support khaos::categorymod+
@@ -212,6 +223,7 @@ public:
 	void		UpdateLargeIconSize();
 	bool		IsXPThemeActive() const;
 	bool		IsVistaThemeActive() const;
+	bool		IsWinSock2Available() const;
 
 	bool		GetLangHelpFilePath(CString& strResult);
 	void		SetHelpFilePath(LPCTSTR pszHelpFilePath);
@@ -260,9 +272,9 @@ protected:
     CTypedPtrList<CPtrList, SLogItem*> m_QueueLog;
     // Elandal:ThreadSafeLogging <--
 
-	uint32 m_dwPublicIP;
-	bool m_bAutoStart;
-	WSADATA				m_wsaData; //MORPH - Added by SiRoB, eWombat [WINSOCK2]
+	uint32				m_dwPublicIP;
+	bool				m_bAutoStart;
+	WSADATA				m_wsaData;
 
 private:
     UINT     m_wTimerRes;

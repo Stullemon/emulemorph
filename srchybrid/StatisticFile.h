@@ -54,11 +54,8 @@ public:
 	void	MergeFileStats( CStatisticFile* toMerge );
 	void	AddRequest();
 	void	AddAccepted();
-	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
-	/*
 	void	AddTransferred(uint64 bytes);
-	*/
-	void	AddTransferred(uint64 start, uint64 bytes);
+	//MORPH START - Added by IceCream SLUGFILLER: Spreadbars
 	void	AddBlockTransferred(uint64 start, uint64 end, uint64 count);
 	void	DrawSpreadBar(CDC* dc, RECT* rect, bool bFlat) /*const*/;
 	float	GetSpreadSortValue() /*const*/;

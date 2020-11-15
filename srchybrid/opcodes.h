@@ -286,10 +286,10 @@
 #define	OP_PUBLICIP_ANSWER		0x98
 #define OP_CALLBACK				0x99	// <HASH 16><HASH 16><uint 16>
 #define OP_REASKCALLBACKTCP		0x9A
-#define OP_AICHREQUEST			0x9B	// *DEPRECATED* <HASH 16><uint16><HASH aichhashlen>
-#define OP_AICHANSWER			0x9C	// *DEPRECATED* <HASH 16><uint16><HASH aichhashlen> <data>
-#define OP_AICHFILEHASHANS		0x9D	  
-#define OP_AICHFILEHASHREQ		0x9E
+#define OP_AICHREQUEST			0x9B	// <HASH 16><uint16><HASH aichhashlen>
+#define OP_AICHANSWER			0x9C	// <HASH 16><uint16><HASH aichhashlen> <data>
+#define OP_AICHFILEHASHANS		0x9D	// *DEPRECATED*   
+#define OP_AICHFILEHASHREQ		0x9E	// *DEPRECATED* 
 #define OP_BUDDYPING			0x9F
 #define OP_BUDDYPONG			0xA0
 #define OP_COMPRESSEDPART_I64	0xA1	// <HASH 16><von 8><size 4><Daten len:size>

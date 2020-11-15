@@ -117,7 +117,7 @@ public:
 	bool	IsInList(const CUpDownClient* client) const;
 
 	bool    CheckAndAddSource(CPartFile* sender,CUpDownClient* source);
-	bool    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source, bool bIgnoreGlobDeadList = false, bool doThrow = false);
+	bool    CheckAndAddKnownSource(CPartFile* sender,CUpDownClient* source, bool bIgnoreGlobDeadList = false);
 	bool	RemoveSource(CUpDownClient* toremove, bool bDoStatsUpdate = true);
 
 	// statistics

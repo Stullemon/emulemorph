@@ -377,16 +377,7 @@ void CQueueListCtrl::DrawItem(LPDRAWITEMSTRUCT lpDrawItemStruct)
 							cur_rec.bottom--;
 							cur_rec.top++;
 							client->DrawUpStatusBar(dc, &cur_rec, false, thePrefs.UseFlatBar());
-							// MORPH START
-							//MORPH START - Adde by SiRoB, Optimization requpfile
-							/*
-							const CKnownFile *file = theApp.sharedfiles->GetFileByID(client->GetUploadFileID());
-							*/
-							const CKnownFile* file = client->CheckAndGetReqUpFile();
-							//MORPH END   - Adde by SiRoB, Optimization requpfile
-							if (file)  // protect against deleted file
-								client->DrawCompletedPercent(dc,&cur_rec); //Fafner: client percentage - 080325
-							// MORPH END
+							client->DrawCompletedPercent(dc,&cur_rec); //Fafner: client percentage - 080325
 							cur_rec.bottom++;
 							cur_rec.top--;
 						}

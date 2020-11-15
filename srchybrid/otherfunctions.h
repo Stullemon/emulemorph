@@ -44,6 +44,8 @@ enum EFileType {
 
 
 #define ROUND(x) (floor((float)x+0.5f))
+#define LODWORD(l)           ((DWORD)(((DWORD64)(l)) & 0xffffffff))
+#define HIDWORD(l)           ((DWORD)((((DWORD64)(l)) >> 32) & 0xffffffff))
 
 ///////////////////////////////////////////////////////////////////////////////
 // Low level str

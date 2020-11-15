@@ -38,7 +38,7 @@ public:
 
 protected:
 	DECLARE_MESSAGE_MAP()
-	afx_msg LRESULT OnDNSLookupDone(WPARAM wParam,LPARAM lParam);
+	afx_msg LRESULT OnDNSLookupDone(WPARAM wParam, LPARAM lParam);
 };
 
 
@@ -53,10 +53,10 @@ public:
 	CUDPSocket();
 	virtual ~CUDPSocket();
 
-	bool	Create();
-	SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
+	bool Create();
+    SocketSentBytes SendControlData(uint32 maxNumberOfBytesToSend, uint32 minFragSize); // ZZ:UploadBandWithThrottler (UDP)
 	void SendPacket(Packet* packet, CServer* pServer, uint16 nSpecialPort = 0, BYTE* pRawPacket = 0, uint32 nRawLen = 0);
-	void	DnsLookupDone(WPARAM wp, LPARAM lp);
+	void DnsLookupDone(WPARAM wp, LPARAM lp);
 
 protected:
 	virtual void OnSend(int nErrorCode);
@@ -68,12 +68,12 @@ private:
 	CTypedPtrList<CPtrList, SServerDNSRequest*> m_aDNSReqs;
 
 	void SendBuffer(uint32 nIP, uint16 nPort, BYTE* pPacket, UINT uSize);
-	bool	ProcessPacket(const BYTE* packet, UINT size, UINT opcode, uint32 nIP, uint16 nUDPPort);
+	bool ProcessPacket(const BYTE* packet, UINT size, UINT opcode, uint32 nIP, uint16 nUDPPort);
 	void ProcessPacketError(UINT size, UINT opcode, uint32 nIP, uint16 nUDPPort, LPCTSTR pszError);
 	bool IsBusy() const { return m_bWouldBlock; }
 	int SendTo(BYTE* lpBuf, int nBufLen, uint32 dwIP, uint16 nPort);
 
-	bool	m_bWouldBlock;
+	bool m_bWouldBlock;
 	CTypedPtrList<CPtrList, SServerUDPPacket*> controlpacket_queue;
-	CCriticalSection sendLocker; // ZZ:UploadBandWithThrottler (UDP)
+    CCriticalSection sendLocker; // ZZ:UploadBandWithThrottler (UDP)
 };

@@ -18,12 +18,12 @@ protected:
 
 class CMuleSystrayDlg : public CDialog
 {
-	// Construction
+// Construction
 public:
 	CMuleSystrayDlg(CWnd* pParent, CPoint pt, int iMaxUp, int iMaxDown, int iCurUp, int iCurDown);
 	~CMuleSystrayDlg();
-
-	// Dialog Data
+    
+// Dialog Data
 	//{{AFX_DATA(CMuleSystrayDlg)
 	enum { IDD = IDD_MULETRAYDLG };
 	CStatic	m_ctrlUpArrow;
@@ -42,15 +42,15 @@ public:
 	//}}AFX_DATA
 
 
-	// Overrides
+// Overrides
 	// ClassWizard generated virtual function overrides
 	//{{AFX_VIRTUAL(CMuleSystrayDlg)
-protected:
+	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	virtual BOOL OnCommand(WPARAM wParam, LPARAM lParam);
 	//}}AFX_VIRTUAL
 
-	// Implementation
+// Implementation
 protected:
 	CTrayMenuBtn m_ctrlSpeed;
 	CTrayMenuBtn m_ctrlAllToMax;
@@ -63,7 +63,7 @@ protected:
 	CTrayMenuBtn m_ctrlReloadShares;
 
 	bool m_bClosingDown;
-
+	
 	int m_iMaxUp;
 	int m_iMaxDown;
 	CPoint m_ptInitialPosition;

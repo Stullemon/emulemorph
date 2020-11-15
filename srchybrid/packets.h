@@ -48,6 +48,7 @@ public:
 	uint32	size;
 	uint8	opcode;
 	uint8	prot;
+	uint32	uStatsPayLoad; // only for statistics and co., not used within the class itself
 
 protected:
 	bool	m_bSplitted;
@@ -159,5 +160,3 @@ __inline int CmpED2KTagName(LPCSTR pszTagName1, LPCSTR pszTagName2){
 	return __ascii_stricmp(pszTagName1, pszTagName2);
 }
 void ConvertED2KTag(CTag*& pTag);
-
-bool WriteOptED2KUTF8Tag(CFileDataIO* data, LPCWSTR pwsz, uint8 uTagName);

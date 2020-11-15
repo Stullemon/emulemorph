@@ -592,6 +592,22 @@ void CSearchManager::ProcessResponse(const CUInt128 &uTarget, uint32 uFromIP, ui
 		pSearch->ProcessResponse(uFromIP, uFromPort, plistResults);
 }
 
+uint8 CSearchManager::GetExpectedResponseContactCount(const CUInt128 &uTarget)
+{
+	CSearch *pSearch = NULL;
+	SearchMap::const_iterator itSearchMap= m_mapSearches.find(uTarget);
+	if (itSearchMap != m_mapSearches.end())
+		pSearch = itSearchMap->second;
+
+	// If this search was deleted before this response, delete contacts and abort, otherwise process them.
+	if (pSearch == NULL)
+	{
+		return 0;
+	}
+	else
+		return pSearch->GetRequestContactCount();
+}
+
 void CSearchManager::ProcessResult(const CUInt128 &uTarget, const CUInt128 &uAnswer, TagList *plistInfo, uint32 uFromIP, uint16 uFromPort)
 {
 	// We have results for a request for info.

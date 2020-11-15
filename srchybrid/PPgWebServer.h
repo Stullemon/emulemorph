@@ -1,5 +1,6 @@
 #pragma once
 #include "HypertextCtrl.h"
+
 // MORPH START leuk_he tooltipped
 #include "PPGtooltipped.h" 
 class CPPgWebServer : public CPPgtooltipped  
@@ -37,7 +38,6 @@ protected:
 	/* Moved to public 
 	bool bCreated;
 	*/
-	CHyperTextCtrl m_wndMobileLink;
 	HICON m_icoBrowse;
 
 	void LoadSettings(void);
@@ -55,7 +55,6 @@ protected:
 public: //MORPH [ionix] - iONiX::Advanced WebInterface Account Management
 	afx_msg void OnEnChangeWSEnabled();
 protected: //MORPH [ionix] - iONiX::Advanced WebInterface Account Management
-	afx_msg void OnEnChangeMMEnabled();
 	afx_msg void OnReloadTemplates();
 	afx_msg void OnBnClickedTmplbrowse();
 	afx_msg void OnHelp();

@@ -6,6 +6,7 @@ enum EStatusBarPane
 	SBarUsers,
 	SBarUpDown,
 	SBarConnected,
+	SBarUSS,
 	SBarChatMsg
 };
 
@@ -24,7 +25,7 @@ protected:
 	CString GetPaneToolTipText(EStatusBarPane iPane) const;
 
 	virtual int OnToolHitTest(CPoint point, TOOLINFO* pTI) const;
-	
+
 	DECLARE_MESSAGE_MAP()
 	afx_msg void OnLButtonDblClk(UINT nFlags,CPoint point);
 	//MORPH START - Added by SiRoB, Show zz ratio activation reason
