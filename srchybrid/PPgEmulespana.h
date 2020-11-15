@@ -42,7 +42,7 @@ protected:
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	HTREEITEM	m_htiUPnPGroup;
-	HTREEITEM	m_htiUPnP;
+//	HTREEITEM	m_htiUPnP;
 //	HTREEITEM	m_htiUPnPWeb;
 	//HTREEITEM	m_htiUPnPTryRandom;
 	//bool		m_bUPnP;

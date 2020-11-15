@@ -453,7 +453,7 @@ void CPPgEmulespana::Localize()
 
 		// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 		if (m_htiUPnPGroup) m_ctrlTreeOptions.SetItemText(m_htiUPnPGroup, GetResString(IDS_UPNP));
-		if (m_htiUPnP) m_ctrlTreeOptions.SetItemText(m_htiUPnP, GetResString(IDS_UPNP_ENABLE));
+		//if (m_htiUPnP) m_ctrlTreeOptions.SetItemText(m_htiUPnP, GetResString(IDS_UPNP_ENABLE));
 //		if (m_htiUPnPWeb) m_ctrlTreeOptions.SetItemText(m_htiUPnPWeb, GetResString(IDS_UPNP_ENABLEWEB));
          //MORPH START leuk_he upnp bindaddr
 		if (m_htiUpnpBinaddr) m_ctrlTreeOptions.SetEditLabel(m_htiUpnpBinaddr, GetResString(IDS_UPNPBINDADDR));
@@ -642,7 +642,7 @@ void CPPgEmulespana::OnDestroy()
 */
 	// Added by MoNKi [MoNKi: -UPnPNAT Support-]
 	m_htiUPnPGroup = NULL;
-	m_htiUPnP = NULL;
+	//m_htiUPnP = NULL;
 //	m_htiUPnPWeb = NULL;
 	//m_htiUPnPTryRandom = NULL;
 	// End MoNKi
