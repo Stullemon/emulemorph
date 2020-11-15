@@ -4616,6 +4616,7 @@ void CUpDownClient::UpdateFunnyNick()
 	if(m_pszUsername == NULL || 
 		!IsEd2kClient() || //MORPH - Changed by Stulle, no FunnyNick for http DL
 		_tcsnicmp(m_pszUsername, _T("http://"),7) != 0 &&
+		_tcsnicmp(m_pszUsername, _T("https://"), 8) != 0 &&
 		_tcsnicmp(m_pszUsername, _T("0."),2) != 0 &&
 		_tcsicmp(m_pszUsername, _T("")) != 0)
 		return;
