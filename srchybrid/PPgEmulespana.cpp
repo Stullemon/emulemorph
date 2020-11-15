@@ -233,7 +233,7 @@ void CPPgEmulespana::DoDataExchange(CDataExchange* pDX)
 		m_htiUPnPForceUpdate= m_ctrlTreeOptions.InsertCheckBox(GetResString(IDS_UPNFORCEUPDATE), m_htiUPnPGroup, m_bUPnPForceUpdate);
 
 		m_ctrlTreeOptions.Expand(m_htiUPnPGroup, TVE_EXPAND);
-		m_ctrlTreeOptions.Expand(m_htiUPnP, TVE_EXPAND);
+		//m_ctrlTreeOptions.Expand(m_htiUPnP, TVE_EXPAND);
 		// End MoNKi
 
 		// Added by MoNKi [MoNKi: -Wap server-]
