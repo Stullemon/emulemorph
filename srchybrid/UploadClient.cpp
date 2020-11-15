@@ -1174,8 +1174,12 @@ uint32 CUpDownClient::UpdateUploadingStatisticsData()
 		CKnownFile* pCurrentUploadFile = CheckAndGetReqUpFile();
 		if (pCurrentUploadFile != NULL)
 			pCurrentUploadFile->statistic.AddTransferred(sentBytesPayload);
+		//MORPH - Removed by Stulle, The file might be removed (e.g. PartFile cancelled), nothing serious
+		/*
 		else
 			ASSERT( false );
+		*/
+		//MORPH - Removed by Stulle, The file might be removed (e.g. PartFile cancelled), nothing serious
 
 		// increase the sockets buffer on fast uploads. Even though this check should rather be in the throttler thread,
 		// its better to do it here because we can access the clients downloadrate which the trottler cant

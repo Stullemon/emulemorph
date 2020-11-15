@@ -98,10 +98,9 @@ public:
 	// Last busy time divided by time since blocking started last or
 	// current busy time divided by time since blocking ended last
 	virtual float	GetBusyRatioTime() const { 
-		return float(
-			(m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)) /
-			(1+m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)+m_dwNotBusyDelta+(m_dwNotBusy?GetTickCount()-m_dwNotBusy:0))
-		); 
+		return
+			float((m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0))) /
+			float((1+m_dwBusyDelta+(m_dwBusy?GetTickCount()-m_dwBusy:0)+m_dwNotBusyDelta+(m_dwNotBusy?GetTickCount()-m_dwNotBusy:0)));
 	};
 	//MORPH END   - Added by SiRoB, Show busyTime
 #if !defined DONT_USE_SOCKET_BUFFERING
