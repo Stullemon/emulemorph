@@ -760,6 +760,7 @@ void CEMSocket::OnSend(int nErrorCode){
     m_bBusy = false;
 	*/
 
+
     // stopped sending here.
     //StoppedSendSoUpdateStats();
 
@@ -781,9 +782,12 @@ void CEMSocket::OnSend(int nErrorCode){
 	}
 	busyLocker.Unlock();
 	//MORPH END   - Changed by SiRoB, Show BusyTime
+
 	//!onlyAllowedToSendControlPacket means we still got the socket in Standardlist
 #if !defined DONT_USE_SOCKET_BUFFERING
-	if(sendblenWithoutControlPacket != sendblen - sent/*m_currentPacket_is_controlpacket == true*/ || !controlpacket_queue.IsEmpty()) {
+	bool gotControlPacket = !m_bOverlappedSending && sendblenWithoutControlPacket != sendblen - sent /*&& m_currentPacket_is_controlpacket*/ ||
+		m_bOverlappedSending && m_currentPacket_is_controlpacketOverlapped;
+	if(gotControlPacket || !controlpacket_queue.IsEmpty()) {
 #else
     /*
     if(m_currentPacket_is_controlpacket) {
@@ -795,13 +799,19 @@ void CEMSocket::OnSend(int nErrorCode){
     }
 
 #ifndef USE_MORPH_READ_THREAD
+#if !defined DONT_USE_SOCKET_BUFFERING
+	if (!m_bOverlappedSending && (!standartpacket_queue.IsEmpty() || sendblen/*sendbuffer*/ != NULL))
+#else
 	if (!m_bOverlappedSending && (!standartpacket_queue.IsEmpty() || sendbuffer != NULL))
+#endif
 		theApp.uploadBandwidthThrottler->SocketAvailable();
 #endif
 
-    bool signalNotBusy = (standartpacket_queue.GetCount() > 0 || sendblenWithoutControlPacket != sendblen - sent /*&& m_currentPacket_is_controlpacket*/);
-
-	if(signalNotBusy) {
+#if !defined DONT_USE_SOCKET_BUFFERING
+	if(standartpacket_queue.GetCount() > 0 || gotControlPacket)
+#else
+	if (standartpacket_queue.GetCount() > 0 || m_currentPacket_is_controlpacket)
+#endif
 	        theApp.uploadBandwidthThrottler->SignalNoLongerBusy();
 }
 
@@ -1399,7 +1409,6 @@ SocketSentBytes CEMSocket::SendOv(uint32 maxNumberOfBytesToSend, uint32 minFragS
 
 		if (maxNumberOfBytesToSend == 0) { //MORPH - ZZUL
 #if !defined DONT_USE_SOCKET_BUFFERING
-			ASSERT(sendblenWithoutControlPacket <= sendblen - sent);
 			maxNumberOfBytesToSend = GetNeededBytes(sendblen, 0, m_currentPacket_is_controlpacketOverlapped, lastCalledSend);
 		}
 #else

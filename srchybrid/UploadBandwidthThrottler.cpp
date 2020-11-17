@@ -526,14 +526,17 @@ UINT UploadBandwidthThrottler::RunInternal() {
 				if (m_StandardOrder_list[i] != NULL && m_StandardOrder_list[i]->HasQueues() && stat->scheduled == false && m_StandardOrder_list[i]->GetBusyRatioTime()) {
 					nCanSend++;
 				
-					DWORD newBusySince = m_StandardOrder_list[i]->GetBusyTimeSince();
-					if(newBusySince > 0) {
+					if(m_StandardOrder_list[i]->IsBusyExtensiveCheck()) {
 						cBusy++;
-						if (newBusySince == stat->dwLastBusySince)
-							cBusyTime += timeSinceLastLoop;
-						else
-							cBusyTime += timeGetTime() - newBusySince;
-						stat->dwLastBusySince = newBusySince;
+						DWORD newBusySince = m_StandardOrder_list[i]->GetBusyTimeSince();
+						if (newBusySince > 0)
+						{
+							if (newBusySince == stat->dwLastBusySince)
+								cBusyTime += timeSinceLastLoop;
+							else
+								cBusyTime += timeGetTime() - newBusySince;
+							stat->dwLastBusySince = newBusySince;
+						}
 					}
 				}
 			}
