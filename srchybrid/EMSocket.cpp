@@ -1554,7 +1554,6 @@ SocketSentBytes CEMSocket::SendOv(uint32 maxNumberOfBytesToSend, uint32 minFragS
 					// Note: Since we use overlapped sockets here the buffer will hold a multiple
 					// of the buffer, regardless. Thus we just enlarge it to the max package size
 					// we encounter and leave it there.
-					theApp.QueueDebugLogLineEx(ERROR, _T("SendOv() increasing buffer curBuf %u newBuf %u"), m_uCurrentSendBufferSize, sendbufferlimit);
 					if (m_uCurrentSendBufferSize != 0)
 					{
 						SetSockOpt(SO_SNDBUF, &sendbufferlimit, sizeof(sendbufferlimit), SOL_SOCKET);

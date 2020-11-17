@@ -1117,7 +1117,11 @@ void CUpDownClient::AddReqBlock(Requested_Block_Struct* reqblock, bool bSignalIO
 	}
 	//MORPH START - Determine Remote Speed
 	DWORD curTick = GetTickCount();
-	if (curTick - m_dwUpDatarateAVG > SEC2MS(1)) {
+	// If we use overlapped sockets we use the official 10 seconds average instead of the established
+	// 1 second average. We do it like this because in this case we actually only always increase the 
+	// buffer and never decrease it again. Overlapped sockets appear to cause a spike in the datarate
+	// upon opening so we want to smooth that out, hence the 10 seconds.
+	if (curTick - m_dwUpDatarateAVG > SEC2MS(thePrefs.GetUseOverlappedSockets()?10:1)) {
 		m_nUpDatarateAVG = 1000*(m_nTransferredUp-m_nTransferredUpDatarateAVG)/(curTick+1 - m_dwUpDatarateAVG);
 		m_nTransferredUpDatarateAVG = m_nTransferredUp;
 		m_dwUpDatarateAVG = curTick;
