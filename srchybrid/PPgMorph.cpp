@@ -859,7 +859,7 @@ void CPPgMorph::Localize(void)
 			m_ctrlTreeOptions.SetEditLabel(m_htiUSSPingLimit, Buffer);
 		}
 		if (m_htiUSSPingTolerance){
-			Buffer.Format(GetResString(IDS_USS_PINGTOLERANCE),800);
+			Buffer.Format(GetResString(IDS_USS_PINGTOLERANCE),500);
 			m_ctrlTreeOptions.SetEditLabel(m_htiUSSPingTolerance, Buffer);
 			SetTool(m_htiUSSPingTolerance,IDS_USS_PINGTOLERANCE_TIP);
 		}
