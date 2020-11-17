@@ -2303,13 +2303,16 @@ bool CPartFile::IsAlreadyRequested(uint64 start, uint64 end, bool bCheckBuffers)
 	}
 	// check our buffers
 	if (bCheckBuffers){
+		((CPartFile*)this)->m_BufferedData_list_Locker.Lock(); //MORPH - Flush Thread
 		for (POSITION pos =  m_BufferedData_list.GetHeadPosition();pos != 0; ){
 			const PartFileBufferedData* cur_block =  m_BufferedData_list.GetNext(pos);
 			if ((start <= cur_block->end) && (end >= cur_block->start)){
+				((CPartFile*)this)->m_BufferedData_list_Locker.Unlock(); //MORPH - Flush Thread
 				DebugLogWarning(_T("CPartFile::IsAlreadyRequested, collision with buffered data found"));
 				return true;
 			}
 		}
+		((CPartFile*)this)->m_BufferedData_list_Locker.Unlock(); //MORPH - Flush Thread
 	}
 	return false;
 }
@@ -2342,24 +2345,35 @@ bool CPartFile::ShrinkToAvoidAlreadyRequested(uint64& start, uint64& end) const
 
 	// has been shrunk to fit requested, if needed shrink it further to not collidate with buffered data
 	// check our buffers
+	((CPartFile*)this)->m_BufferedData_list_Locker.Lock(); //MORPH - Flush Thread
 	for (POSITION pos =  m_BufferedData_list.GetHeadPosition();pos != 0; ){
 		const PartFileBufferedData* cur_block =  m_BufferedData_list.GetNext(pos);
 		if ((start <= cur_block->end) && (end >= cur_block->start)) {
             if(start < cur_block->start) {
                 end = cur_block->end - 1;
                 if(start == end)
-                    return false;
+				{ //MORPH - Flush Thread
+					((CPartFile*)this)->m_BufferedData_list_Locker.Unlock(); //MORPH - Flush Thread
+					return false;
+				} //MORPH - Flush Thread
             }
 			else if(end > cur_block->end) {
                 start = cur_block->end + 1;
                 if(start == end) {
-                    return false;
+				{ //MORPH - Flush Thread
+					((CPartFile*)this)->m_BufferedData_list_Locker.Unlock(); //MORPH - Flush Thread
+					return false;
+				} //MORPH - Flush Thread
                 }
             }
 			else 
-                return false;
+			{ //MORPH - Flush Thread
+				((CPartFile*)this)->m_BufferedData_list_Locker.Unlock(); //MORPH - Flush Thread
+				return false;
+			} //MORPH - Flush Thread
         }
 	}
+	((CPartFile*)this)->m_BufferedData_list_Locker.Unlock(); //MORPH - Flush Thread
 
     ASSERT(start >= startOrig && start <= endOrig);
     ASSERT(end >= startOrig && end <= endOrig);
@@ -6207,7 +6221,8 @@ void CPartFile::FlushBuffer(bool forcewait, bool bForceICH, bool /*bNoAICH*/)
 				return;
 			}
 		}
-	
+		// Note: We don't need to be threadsafe for m_BufferedData_list hereafter because we don't
+		// run the flush thread if we make it past here.
 		//MORPH END   - Flush Thread
 		bool bCheckDiskspace = thePrefs.IsCheckDiskspaceEnabled() && thePrefs.GetMinFreeDiskSpace() > 0;
 		ULONGLONG uFreeDiskSpace = bCheckDiskspace ? GetFreeDiskSpaceX(GetTempPath()) : 0;
