@@ -771,6 +771,16 @@ void CEMSocket::OnSend(int nErrorCode){
 	}
 	m_bConnectionIsReadyForSend = true;
 
+	//MORPH START - Changed by SiRoB, Show BusyTime
+	busyLocker.Lock();
+	DWORD curTick = ::GetTickCount();
+	if (m_dwBusy) {
+		m_dwBusyDelta = curTick - m_dwBusy;
+		m_dwNotBusy = curTick;
+		m_dwBusy = 0;
+	}
+	busyLocker.Unlock();
+	//MORPH END   - Changed by SiRoB, Show BusyTime
 	//!onlyAllowedToSendControlPacket means we still got the socket in Standardlist
 #if !defined DONT_USE_SOCKET_BUFFERING
 	if(sendblenWithoutControlPacket != sendblen - sent/*m_currentPacket_is_controlpacket == true*/ || !controlpacket_queue.IsEmpty()) {
@@ -791,19 +801,8 @@ void CEMSocket::OnSend(int nErrorCode){
 
     bool signalNotBusy = (standartpacket_queue.GetCount() > 0 || sendblenWithoutControlPacket != sendblen - sent /*&& m_currentPacket_is_controlpacket*/);
 
-	//MORPH START - Changed by SiRoB, Show BusyTime
-	busyLocker.Lock();
-	DWORD curTick = ::GetTickCount();
-	if (m_dwBusy) {
-		m_dwBusyDelta = curTick-m_dwBusy;
-		m_dwNotBusy = curTick;
-		m_dwBusy = 0;
-	}
-	busyLocker.Unlock();
 	if(signalNotBusy) {
 	        theApp.uploadBandwidthThrottler->SignalNoLongerBusy();
-	}
-	//MORPH END   - Changed by SiRoB, Show BusyTime
 }
 
 //void CEMSocket::StoppedSendSoUpdateStats() {
@@ -1545,6 +1544,16 @@ SocketSentBytes CEMSocket::SendOv(uint32 maxNumberOfBytesToSend, uint32 minFragS
 			if (CEncryptedStreamSocket::SendOv(m_aBufferSend, dwBytesSent, m_pPendingSendOperation) == 0)
 			{
 				ASSERT( dwBytesSent > 0 );
+				//MORPH START - Changed by SiRoB, Show BusyTime
+				busyLocker.Lock();
+				DWORD curTick = ::GetTickCount();
+				if (m_dwBusy) {
+					m_dwBusyDelta = curTick - m_dwBusy;
+					m_dwNotBusy = curTick;
+					m_dwBusy = 0;
+				}
+				busyLocker.Unlock();
+				//MORPH END   - Changed by SiRoB, Show BusyTime
 				CleanUpOverlappedSendOperation(false);
 			}
 			else
@@ -1557,6 +1566,19 @@ SocketSentBytes CEMSocket::SendOv(uint32 maxNumberOfBytesToSend, uint32 minFragS
 					errorThatOccured = uint32(nError); //MORPH - ZZUL
 					theApp.QueueDebugLogLineEx(ERROR, _T("WSASend() Error: %u, %s"), nError, GetErrorMessage(nError));
 				}
+				//MORPH START - Changed by SiRoB, Show BusyTime
+				else
+				{
+					DWORD curTick = GetTickCount();
+					if (m_dwBusy == 0) {
+						m_dwNotBusyDelta = curTick - m_dwNotBusy;
+						m_dwBusy = curTick;
+					}
+					m_dwNotBusy = 0;
+					busyLocker.Unlock();
+				}
+				//MORPH END   - Changed by SiRoB, Show BusyTime
+
 			}
 			lastCalledSend = ::GetTickCount(); //MORPH - ZZUL
 		}
@@ -1991,7 +2013,19 @@ bool CEMSocket::IsBusyExtensiveCheck()
 		{
 			int nError = WSAGetLastError();
 			if (nError == WSA_IO_INCOMPLETE)
+				//MORPH START - Changed by SiRoB, Show BusyTime
+			{
+				busyLocker.Lock();
+				DWORD curTick = GetTickCount();
+				if (m_dwBusy == 0) {
+					m_dwNotBusyDelta = curTick - m_dwNotBusy;
+					m_dwBusy = curTick;
+				}
+				m_dwNotBusy = 0;
+				busyLocker.Unlock();
+				//MORPH END   - Changed by SiRoB, Show BusyTime
 				return true;
+			} //MORPH - Changed by SiRoB, Show BusyTime
 			else
 			{
 				CleanUpOverlappedSendOperation(false);
