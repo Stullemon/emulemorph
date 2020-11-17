@@ -1491,6 +1491,7 @@ SocketSentBytes CEMSocket::SendOv(uint32 maxNumberOfBytesToSend, uint32 minFragS
 				WSABUF pCurBuf;
 				Packet* curPacket = queueEntry.packet;
 #if !defined DONT_USE_SOCKET_BUFFERING
+				uint32 sendbufferlimit = curPacket->GetRealPacketSize();
 				m_currentPackageIsFromPartFileOverlapped = curPacket->IsFromPF();
 #else
 				m_currentPackageIsFromPartFile = curPacket->IsFromPF();
@@ -1544,6 +1545,25 @@ SocketSentBytes CEMSocket::SendOv(uint32 maxNumberOfBytesToSend, uint32 minFragS
 				else
 					m_numberOfSentBytesCompleteFile += pCurBuf.len;
 				statsLocker.Unlock(); //MORPH - ZZUL
+#if !defined DONT_USE_SOCKET_BUFFERING
+				if (sendbufferlimit > 10 * 1024 * 1024)
+					sendbufferlimit = 10 * 1024 * 1024;
+				else if (sendbufferlimit < 8192)
+					sendbufferlimit = 8192;
+				if (m_uCurrentSendBufferSize < sendbufferlimit) {
+					// Note: Since we use overlapped sockets here the buffer will hold a multiple
+					// of the buffer, regardless. Thus we just enlarge it to the max package size
+					// we encounter and leave it there.
+					theApp.QueueDebugLogLineEx(ERROR, _T("SendOv() increasing buffer curBuf %u newBuf %u"), m_uCurrentSendBufferSize, sendbufferlimit);
+					if (m_uCurrentSendBufferSize != 0)
+					{
+						SetSockOpt(SO_SNDBUF, &sendbufferlimit, sizeof(sendbufferlimit), SOL_SOCKET);
+					}
+					int ilen = sizeof(int);
+					GetSockOpt(SO_SNDBUF, &sendbufferlimit, &ilen, SOL_SOCKET);
+					m_uCurrentSendBufferSize = sendbufferlimit;
+				}
+#endif
 			}
 			// allright, prepare to send our collected buffers
 			m_pPendingSendOperation = new WSAOVERLAPPED;

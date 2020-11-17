@@ -22,6 +22,7 @@ CHANGE: Improved upload state sorting doesn't reflect "stalled, waiting for disk
 CHANGE: Reintroduced error logging in CClientReqSocket [Stulle]
 	+ Please report any verbose logs starting with CClientReqSocket::Send...
 CHANGE: Also use FunnyNick for nicks starting with https:// [Stulle]
+CHANGE: Use max packet size for buffer limit instead of hard coded value for overlapped sockets [Stulle]
 FIX: Unsafe access to m_BufferedData_list due to Flush Thread (prevent crash/failing download) [Stulle]
 REMOVED: Custom XML parsing from UPnP code to use mostly unmodified pupnp [Stulle]
 REMOVED: Leecher checks for client versions 0.60 and 0.69 were removed (old evildoers) [Stulle]
