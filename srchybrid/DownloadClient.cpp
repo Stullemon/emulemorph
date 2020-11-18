@@ -1473,14 +1473,18 @@ void CUpDownClient::SendBlockRequests()
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];
 #endif
-		//POSITION pos = listToRequest.GetHeadPosition();
+		POSITION pos = listToRequest.GetHeadPosition();
 		while (npacket<nbpackettosend) {
 		//MORPH END
 		const int iPacketSize = 16+(3*8)+(3*8); // 64
 		packet = new Packet(OP_REQUESTPARTS_I64, iPacketSize, OP_EMULEPROT);
 		CSafeMemFile data((const BYTE*)packet->pBuffer, iPacketSize);
 		data.WriteHash16(reqfile->GetFileHash());
+		//MORPH START
+		/*
 		POSITION pos = listToRequest.GetHeadPosition();
+		*/
+		//MORPH END
 		for (uint32 i = 0; i != 3; i++){
 			if (pos){
 				Pending_Block_Struct* pending = listToRequest.GetNext(pos);
@@ -1540,14 +1544,18 @@ void CUpDownClient::SendBlockRequests()
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];
 #endif
-		//pos = m_PendingBlocks_list.GetHeadPosition();
+		POSITION pos = m_PendingBlocks_list.GetHeadPosition();
 		while (npacket<nbpackettosend) {
 		//MORPH END
 		const int iPacketSize = 16+(3*4)+(3*4); // 40
 		packet = new Packet(OP_REQUESTPARTS,iPacketSize);
 		CSafeMemFile data((const BYTE*)packet->pBuffer, iPacketSize);
 		data.WriteHash16(reqfile->GetFileHash());
+		//MORPH START
+		/*
 		POSITION pos = listToRequest.GetHeadPosition();
+		*/
+		//MORPH END
 		for (uint32 i = 0; i != 3; i++){
 			if (pos){
 				Pending_Block_Struct* pending = listToRequest.GetNext(pos);
