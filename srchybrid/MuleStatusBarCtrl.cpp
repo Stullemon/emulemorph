@@ -81,7 +81,12 @@ void CMuleStatusBarCtrl::OnLButtonDblClk(UINT /*nFlags*/, CPoint point)
 			break;
 
         case SBarUSS:           
+			//MORPH START - Changed by Stulle, USS settings are placed in Morph settings
+			/*
             theApp.emuledlg->ShowPreferences(IDD_PPG_TWEAKS);               
+			*/
+			theApp.emuledlg->ShowPreferences(IDD_PPG_MORPH);
+			//MORPH END   - Changed by Stulle, USS settings are placed in Morph settings
             break;
 	}
 }

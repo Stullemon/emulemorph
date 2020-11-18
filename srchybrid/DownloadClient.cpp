@@ -1473,7 +1473,7 @@ void CUpDownClient::SendBlockRequests()
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];
 #endif
-		POSITION pos = listToRequest.GetHeadPosition();
+		//POSITION pos = listToRequest.GetHeadPosition();
 		while (npacket<nbpackettosend) {
 		//MORPH END
 		const int iPacketSize = 16+(3*8)+(3*8); // 64
@@ -1540,7 +1540,7 @@ void CUpDownClient::SendBlockRequests()
 #if !defined DONT_USE_SEND_ARRAY_PACKET
 		Packet** apacket = new Packet*[nbpackettosend];
 #endif
-		pos = m_PendingBlocks_list.GetHeadPosition();
+		//pos = m_PendingBlocks_list.GetHeadPosition();
 		while (npacket<nbpackettosend) {
 		//MORPH END
 		const int iPacketSize = 16+(3*4)+(3*4); // 40
